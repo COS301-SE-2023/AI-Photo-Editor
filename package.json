@@ -1,0 +1,145 @@
+{
+  "name": "electron-svelte-typescript",
+  "description": "Template for desktop apps written with Electron, Svelte and Typescript.",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fuzzc0re/electron-svelte-typescript.git"
+  },
+  "author": {
+    "name": "fuzzc0re",
+    "email": "fuzzc0re@protonmail.com",
+    "url": "https://github.com/fuzzc0re"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fuzzc0re/electron-svelte-typescript/issues"
+  },
+  "keywords": [
+    "electron",
+    "svelte",
+    "typescript",
+    "electron-builder",
+    "electron-log",
+    "tslint",
+    "ts-jest",
+    "electron-settings",
+    "electron-updater",
+    "rollup"
+  ],
+  "homepage": "https://github.com/fuzzc0re/electron-svelte-typescript#readme",
+  "main": "build/index.js",
+  "scripts": {
+    "prestart": "cross-env NODE_ENV=development node scripts/preBuild.js",
+    "start": "cross-env NODE_ENV=development npm-run-all -p -r build:frontend:dev start:electron",
+    "prebuild": "cross-env NODE_ENV=production node scripts/preBuild.js",
+    "build": "cross-env NODE_ENV=production npm-run-all -s build:frontend:prod build:electron:prod",
+    "postbuild": "cross-env NODE_ENV=production node scripts/postBuild.js",
+    "build:frontend:dev": "cross-env NODE_ENV=development rollup -c -w",
+    "build:frontend:prod": "cross-env NODE_ENV=production rollup -c",
+    "build:electron:dev": "tsc --p ./tsconfig.electron.json",
+    "build:electron:dev:watch": "tsc -w --p ./tsconfig.electron.json",
+    "build:electron:prod": "cross-env NODE_ENV=production tsc --p ./tsconfig.electron.prod.json",
+    "validate:svelte": "svelte-check",
+    "start:electron:run": "electron .",
+    "start:electron:nodemon": "nodemon",
+    "start:electron:dev": "npm-run-all -s build:electron:dev start:electron:nodemon",
+    "start:electron": "npm-run-all -p build:electron:dev:watch start:electron:dev",
+    "test": "jest --config jest.config.json",
+    "postinstall": "electron-builder install-app-deps",
+    "prepack": "npm run build",
+    "pack": "electron-builder --dir",
+    "predist": "npm run build",
+    "dist": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder",
+    "postdist": "node scripts/cleanBuilds.js",
+    "format": "prettier --write \"src/**/**/*\" --write \"scripts/**/**/*\"",
+    "lint:electron": "eslint -c eslint.electron.json --ext .js,.ts src/electron",
+    "lint:svelte": "eslint -c eslint.svelte.json --ext .js,.ts src/frontend",
+    "lint": "npm-run-all -s lint:electron lint:svelte",
+    "prepublishOnly": "npm-run-all -s test lint",
+    "preversion": "npm-run-all -s lint format"
+  },
+  "dependencies": {
+    "electron-log": "^4.3.5",
+    "electron-store": "^8.0.0",
+    "electron-updater": "^5.2.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "@rollup/plugin-typescript": "^8.2.1",
+    "@tsconfig/svelte": "^3.0.0",
+    "@types/clean-css": "^4.2.4",
+    "@types/html-minifier": "^4.0.0",
+    "@types/node": "^18.7.14",
+    "@typescript-eslint/eslint-plugin": "^5.9.0",
+    "@typescript-eslint/parser": "^5.9.0",
+    "clean-css": "^5.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^20.1.1",
+    "electron-builder": "^23.3.3",
+    "eslint": "^8.6.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jsdoc": "^39.3.6",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "html-minifier": "^4.0.0",
+    "jest": "^29.0.1",
+    "nodemon": "^2.0.7",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.3.1",
+    "prettier-plugin-svelte": "^2.3.1",
+    "rollup": "^2.52.2",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-serve": "^1.1.0",
+    "rollup-plugin-svelte": "^7.1.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "svelte": "^3.49.0",
+    "svelte-check": "^2.2.0",
+    "svelte-preprocess": "^4.7.3",
+    "terser": "^5.14.2",
+    "ts-jest": "^29.0.0-next.1",
+    "tslib": "^2.3.0",
+    "typescript": "^4.3.4"
+  },
+  "build": {
+    "productName": "Electron Svelte Typescript",
+    "appId": "electron.svelte.typescript",
+    "copyright": "Copyright © 2021 ${author}",
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "productivity",
+      "type": "distribution",
+      "hardenedRuntime": "true"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "snap"
+      ],
+      "category": "productivity"
+    },
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      "assets/**"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "fuzzc0re",
+        "repo": "electron-svelte-typescript"
+      }
+    ]
+  }
+}
