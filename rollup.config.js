@@ -44,7 +44,10 @@ export default {
       preprocess: sveltePreprocess({
           typescript: {
             tsconfigFile: production ? "./tsconfig.svelte.prod.json" : "./tsconfig.svelte.json",
-          }
+          },
+          postcss: {
+            plugins: [require('tailwindcss'), require('autoprefixer')],
+          },
         }),
       compilerOptions: {
         // enable run-time checks when not in production
