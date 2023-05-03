@@ -38,6 +38,7 @@ export default {
     format: "iife",
     name: "fluide",
     file: "public/build/bundle.js",
+    inlineDynamicImports: true
   },
   plugins: [
     svelte({
