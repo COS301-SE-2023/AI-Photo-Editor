@@ -29,6 +29,8 @@ const createWindow = () => {
       devTools: isProd ? false : true,
       contextIsolation: true,
     },
+    icon: 'public/images/icon.png'
+
   });
 
   const url =
