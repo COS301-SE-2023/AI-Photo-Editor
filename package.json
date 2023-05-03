@@ -1,33 +1,32 @@
 {
-  "name": "electron-svelte-typescript",
-  "description": "Template for desktop apps written with Electron, Svelte and Typescript.",
-  "version": "0.1.0",
+  "name": "photo-editor",
+  "description": "COS 301 Capstone Project - AI Photo Editor",
+  "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fuzzc0re/electron-svelte-typescript.git"
+    "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor"
   },
   "author": {
-    "name": "fuzzc0re",
-    "email": "fuzzc0re@protonmail.com",
-    "url": "https://github.com/fuzzc0re"
+    "name": "",
+    "email": "",
+    "url": ""
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/fuzzc0re/electron-svelte-typescript/issues"
+    "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor/issues"
   },
   "keywords": [
     "electron",
     "svelte",
     "typescript",
     "electron-builder",
-    "electron-log",
     "tslint",
     "ts-jest",
     "electron-settings",
     "electron-updater",
     "rollup"
   ],
-  "homepage": "https://github.com/fuzzc0re/electron-svelte-typescript#readme",
+  "homepage": "https://github.com/COS301-SE-2023/AI-Photo-Editor#readme",
   "main": "build/index.js",
   "scripts": {
     "prestart": "cross-env NODE_ENV=development node scripts/preBuild.js",
@@ -106,8 +105,8 @@
     "typescript": "^5.0.4"
   },
   "build": {
-    "productName": "Electron Svelte Typescript",
-    "appId": "electron.svelte.typescript",
+    "productName": "AI Photo Editor",
+    "appId": "ai.photo.editor",
     "copyright": "Copyright © 2021 ${author}",
     "win": {
       "target": [

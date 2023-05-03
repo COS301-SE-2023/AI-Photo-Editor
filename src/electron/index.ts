@@ -44,7 +44,7 @@ const createWindow = () => {
     app.quit();
   });
 
-  if (!isProd) mainWindow.webContents.openDevTools();
+  // if (!isProd) mainWindow.webContents.openDevTools();
 
   mainWindow.on("closed", () => {
     mainWindow = null;
