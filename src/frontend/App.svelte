@@ -18,9 +18,11 @@
 </style>
 
 <script lang="ts">
-  import Layout from "./Layout.svelte";
+  import Layout from "./layout/Layout.svelte";
+  import Navbar from "./layout/Navbar.svelte";
 </script>
 
+<Navbar />
 <Layout />
 
 <main>
