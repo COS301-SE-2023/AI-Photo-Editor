@@ -9,6 +9,20 @@
     export let layout: PanelNode;
     export let height: string;
 
+    function handleBlipDrag(e: any, index: number) {
+        let dir = e.detail.dir;
+        console.log(dir + " " + index);
+        if (dir == "d") {
+            addPanel();
+        }
+        else if (dir == "u") {
+            removePanel();
+        }
+        else if (dir == "r") {
+            addPanelGroup();
+        }
+    }
+
     // Split the current pane into two
     function addPanel() {
         if (layout instanceof PanelGroup) {
@@ -33,12 +47,15 @@
     }
 </script>
 
-{#if layout instanceof PanelGroup}
+<style>
+    .full {
+        width: 100%;
+        height: 100%;
+        padding: 0.4em 1.2em;
+    }
+</style>
 
-    <!-- <span><button on:click={addPanel}>+</button></span>
-    <span><button on:click={removePanel}>&MediumSpace;-&MediumSpace;</button></span>
-    <span><button on:click={addPanelGroup}>+g</button></span>
-    <span>{layout.name}</span> -->
+{#if layout instanceof PanelGroup}
     <Splitpanes
         class="default-theme"
         {horizontal}
@@ -48,11 +65,8 @@
         <Pane {minSize}>
             <!-- Subpanels alternate horiz/vert -->
             {#if panel instanceof PanelLeaf}
-                {i}
-                <PanelBlip on:click={addPanel}/>
-                <!-- <button on:click={addPanel}>+</button> -->
-                <button on:click={removePanel}>&MediumSpace;-&MediumSpace;</button>
-                <button on:click={addPanelGroup}>+g</button>
+                <!-- {i} -->
+                <PanelBlip on:blipDragged={e => handleBlipDrag(e, i)}/>
             {/if}
             <svelte:self layout={panel} horizontal={!horizontal} height="100px" />
         </Pane>
@@ -60,7 +74,7 @@
     </Splitpanes>
 
 {:else if layout instanceof PanelLeaf}
-    <!-- Actual pane content goes here -->
+    <!-- Actual panel content goes here -->
     <div class="full">
         {layout.content}
     </div>

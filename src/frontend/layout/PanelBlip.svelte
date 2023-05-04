@@ -1,6 +1,10 @@
 <!-- The little panel edit dot at the top left of each panel, -->
 <!-- tracks mouse movement on drag and returns a direction -->
 <script lang="ts">
+    import { createEventDispatcher } from "svelte";
+
+    const dispatch = createEventDispatcher();
+
     let startPos: [number, number]|null = null;
     let dir = "";
 
@@ -25,18 +29,17 @@
     }
 
     function tryStartTrack(e: MouseEvent) {
-        console.log("TRY START");
         startPos = [e.screenX, e.screenY];
     }
 
     function tryEndTrack(e: MouseEvent) {
-        console.log("TRY END");
         if (startPos !== null) {
             let endPos: [number, number] = [e.screenX, e.screenY];
-
             let dir = getDirection(endPos);
 
-            console.log(dir + "\n" + startPos + "\n" + endPos);
+            if (dir !== null) {
+                dispatch("blipDragged", { dir: dir });
+            }
         }
         startPos = null;
     }
@@ -54,15 +57,17 @@
     function winMouseMove(e: MouseEvent) {
         if (startPos !== null) {
             let endPos: [number, number] = [e.screenX, e.screenY];
-
-            // Update UI
             let d = getDirection(endPos);
 
+            // Update UI
             dir = (d === null ? "" : mapToCaret(d));
+
+            // Dispatch event
+            if (d !== null) {
+                dispatch("blipDragging", { dir: d });
+            }
         }
-        else { //Reset UI
-            dir = "";
-        }
+        else { dir = ""; } // Reset UI
     }
 </script>
 
