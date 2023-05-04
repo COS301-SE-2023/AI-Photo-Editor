@@ -11,7 +11,7 @@
 
 <main>
   <div class="flex flex-col h-screen">
-      <div class="h-14 bg-zinc-700 col-span-12 border-b-2 border-gray-500">
+      <div class="h-14 bg-zinc-700 border-b-2 border-gray-500 flex items-center">
       </div>
       <div class="flex grow">
           <div class="w-48 grow-0 bg-zinc-700 border-r-2 border-gray-500 flex flex-col items-center">
@@ -19,9 +19,9 @@
           </div>
           <div class="flex flex-col grow">
             <div class="grow">
-              <Graph></Graph>
+              <Graph />
             </div>
-            <PromptBox></PromptBox>
+            <PromptBox />
           </div>
       </div>
   </div>
