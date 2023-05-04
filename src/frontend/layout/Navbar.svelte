@@ -6,7 +6,6 @@
 </div>
 
 <style>
-
     .logo {
         color: white;
         width: fit-content;

@@ -14,6 +14,19 @@
   display: flex;
   position: relative;
 }
+  :root {
+    --navbar-height: 1.5em;
+  }
+
+  div.navbar {
+    width: 100%;
+    height: var(--navbar-height);
+  }
+
+  div.layout {
+    width: 100%;
+    height: calc(100% - var(--navbar-height));
+  }
 
 </style>
 
@@ -22,8 +35,8 @@
   import Navbar from "./layout/Navbar.svelte";
 </script>
 
-<Navbar />
-<Layout />
+<div class="navbar"><Navbar /></div>
+<div class="layout"><Layout /></div>
 
 <main>
 </main>

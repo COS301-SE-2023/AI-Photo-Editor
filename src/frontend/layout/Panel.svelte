@@ -2,6 +2,7 @@
 <script lang="ts">
     import { Pane, Splitpanes } from "svelte-splitpanes";
     import { PanelNode, PanelGroup, PanelLeaf } from "./PanelNode";
+    import PanelBlip from "./PanelBlip.svelte";
     const minSize = 10;
 
     export let horizontal: boolean = false;
@@ -14,50 +15,45 @@
             layout.addPanel(Math.random().toString());
             layout = layout; // Force update
         }
-        else if (layout instanceof PanelLeaf) {
-            layout.parent.addPanel(Math.random().toString());
-            layout.parent = layout.parent; // Force update
-        }
     }
     function removePanel() {
         if (layout instanceof PanelGroup) {
             layout.removePanel(1);
             layout = layout; // Force update
         }
-        else if (layout instanceof PanelLeaf) {
-            layout.parent.removePanel(0);
-            layout.parent = layout.parent; // Force update
-        }
     }
     function addPanelGroup() {
         if (layout instanceof PanelGroup) {
-            layout.addPanelGroup(new PanelGroup("new"));
+            let group = new PanelGroup("new");
+            group.addPanel("asdf");
+            layout.addPanelGroup(group);
+
             layout = layout; // Force update
-        }
-        else if (layout instanceof PanelLeaf) {
-            layout.parent.addPanelGroup(new PanelGroup("new"));
-            layout.parent = layout.parent; // Force update
         }
     }
 </script>
 
-<style>
-</style>
-
 {#if layout instanceof PanelGroup}
 
-    <span><button on:click={addPanel}>+</button></span>
+    <!-- <span><button on:click={addPanel}>+</button></span>
     <span><button on:click={removePanel}>&MediumSpace;-&MediumSpace;</button></span>
     <span><button on:click={addPanelGroup}>+g</button></span>
-    <span>{layout.name}</span>
+    <span>{layout.name}</span> -->
     <Splitpanes
         class="default-theme"
         {horizontal}
         style={height=="" ? "" : "height: {height}"}
     >
-    {#each layout.panels as panel}
+    {#each layout.panels as panel, i}
         <Pane {minSize}>
             <!-- Subpanels alternate horiz/vert -->
+            {#if panel instanceof PanelLeaf}
+                {i}
+                <PanelBlip on:click={addPanel}/>
+                <!-- <button on:click={addPanel}>+</button> -->
+                <button on:click={removePanel}>&MediumSpace;-&MediumSpace;</button>
+                <button on:click={addPanelGroup}>+g</button>
+            {/if}
             <svelte:self layout={panel} horizontal={!horizontal} height="100px" />
         </Pane>
     {/each}
@@ -66,7 +62,6 @@
 {:else if layout instanceof PanelLeaf}
     <!-- Actual pane content goes here -->
     <div class="full">
-        <!-- <button on:click={split}>Split</button> -->
         {layout.content}
     </div>
 {/if}
