@@ -17,13 +17,13 @@
     enum dockV { "t", "b" };
     enum dockH { "l", "r" };
 
+    // Hail Mary for when local assignment does not correctly update svelte components
     function bubbleToRoot() {
         if (!isRoot) {
             dispatch("bubbleToRoot");
         }
         else {
             layout=layout;
-            console.log("AT ROOT");
         }
     }
 
@@ -63,7 +63,6 @@
 
         // Transform u/d/l/r direction to local direction within PaneGroup
         let slide: localDir = localize(dir, dock);
-        // console.log(["|| in", "|| out", "_|_ in", "_|_ out"][slide]);
 
         let iDir: indexDir = horizontal ?
             ( dir == "d" ? indexDir.f : indexDir.b) :
@@ -80,14 +79,12 @@
 
                 // Check which index to remove based on index direction
                 let toRem = index + (iDir == indexDir.f ? 1 : -1);
-                //when toRem is 0 it doesn't dissolve the group for some reason
-                console.log("REMOVE " + toRem);
 
                 if (toRem >= 0 && toRem < layout.panels.length) {
                     layout.removePanel(toRem);
                     layout = layout;
 
-                    bubbleToRoot();
+                    // bubbleToRoot(); //REMOVED: New solution seems to be working fine without it
                 }
 
                 break;
@@ -116,7 +113,6 @@
 </script>
 
 {#if layout instanceof PanelGroup}
-    <div class="bord">
     <Splitpanes
         class="modern-theme"
         {horizontal}
@@ -125,12 +121,13 @@
     >
     {#each layout.panels as panel, i}
         <Pane {minSize}>
-            <!-- Subpanels alternate horiz/vert -->
             {#if panel instanceof PanelLeaf}
-                {i}
                 <PanelBlip dock="tl" on:blipDragged={e => handleBlipDrag(e, i, [dockV.t, dockH.l])}/>
+                <PanelBlip dock="tr" on:blipDragged={e => handleBlipDrag(e, i, [dockV.t, dockH.r])}/>
+                <PanelBlip dock="bl" on:blipDragged={e => handleBlipDrag(e, i, [dockV.b, dockH.l])}/>
                 <PanelBlip dock="br" on:blipDragged={e => handleBlipDrag(e, i, [dockV.b, dockH.r])}/>
             {/if}
+            <!-- Subpanels alternate horiz/vert -->
             <svelte:self
                 on:bubbleToRoot={bubbleToRoot}
                 layout={panel}
@@ -141,7 +138,6 @@
         </Pane>
     {/each}
     </Splitpanes>
-    </div>
 
 {:else if layout instanceof PanelLeaf}
     <!-- Actual panel content goes here -->
@@ -155,10 +151,5 @@
         width: 100%;
         height: 100%;
         padding: 0.4em 1.2em;
-    }
-    .bord {
-        border: 3px solid green;
-        width: 100%;
-        height: 100%;
     }
 </style>

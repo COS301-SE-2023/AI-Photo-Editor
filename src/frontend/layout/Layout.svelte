@@ -13,15 +13,4 @@
     layout.recurseParent();
 </script>
 
-<table style="height: 100%; width: 100%">
-<tr>
-<td>
-<button on:click={() => console.log(layout.print())}>Print</button>
-<button on:click={() => layout=layout}>Reset</button>
 <Panel {layout} horizontal={true} height="100%"/>
-</td>
-<td style="width: 30%">
-    <textarea style="height: 100%; font-family: monospace">{layout.print()}</textarea>
-</td>
-</tr>
-</table>
