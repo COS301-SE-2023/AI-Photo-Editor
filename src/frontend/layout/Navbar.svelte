@@ -1,13 +1,17 @@
 <!-- The navbar at the top of the page -->
-<div class="w-full navbar bg-slate-600 max-h-8">
-    <div class="logo font-mono bg-slate-500">
+<div class="navbar w-full navbar">
+    <div class="logo font-mono">
         AI Photo Editor
     </div>
 </div>
 
 <style>
+    .navbar {
+        background-color: #11111b;
+    }
     .logo {
-        color: white;
+        color: #11111b;
+        background-color: #94e2d5;
         width: fit-content;
         padding: 0em 1em 0em;
     }

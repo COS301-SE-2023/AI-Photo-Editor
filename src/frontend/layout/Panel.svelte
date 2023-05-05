@@ -1,4 +1,9 @@
 <!-- A recursive splittable box for UI  -->
+
+<!-- TODO:
+    - Double click blip should maximize panel within its group
+-->
+
 <script lang="ts">
     import { Pane, Splitpanes } from "svelte-splitpanes";
     import { PanelNode, PanelGroup, PanelLeaf } from "./PanelNode";
@@ -84,7 +89,7 @@
                     layout.removePanel(toRem);
                     layout = layout;
 
-                    // bubbleToRoot(); //REMOVED: New solution seems to be working fine without it
+                    bubbleToRoot();
                 }
 
                 break;
@@ -113,10 +118,10 @@
 
 {#if layout instanceof PanelGroup}
     <Splitpanes
-        class="modern-theme"
+        class="main-theme"
         {horizontal}
         style={height=="" ? "" : "height: {height}"}
-        dblClickSplitter={true}
+        dblClickSplitter={false}
     >
     {#each layout.panels as panel, i}
         <Pane {minSize}>
@@ -140,15 +145,29 @@
 
 {:else if layout instanceof PanelLeaf}
     <!-- Actual panel content goes here -->
-    <div class="full">
+    <div class="fullPanel">
         {layout.content}
     </div>
 {/if}
 
-<style>
-    .full {
+<style global>
+    .fullPanel {
         width: 100%;
         height: 100%;
         padding: 0.4em 1.2em;
+    }
+
+    .splitpanes.main-theme .splitpanes__splitter {
+        background-color: #11111b;
+        border: none;
+    }
+
+    .splitpanes.main-theme .splitpanes__pane {
+        color: #cdd6f4;
+        background-color: #181825;
+    }
+
+    .main-theme {
+        background-color: #11111b;
     }
 </style>

@@ -1,4 +1,4 @@
-<!-- The little panel edit dot at the corner of each panel, -->
+<!-- The little panel edit dot at the corners of each panel, -->
 <!-- tracks mouse movement on drag and returns a direction -->
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
@@ -107,7 +107,7 @@
         height: var(--width);
 
         background-color: transparent;
-        color: black;
+        color: #f38ba8;
         text-align: center;
         font-size: 0.8em;
 
@@ -115,7 +115,7 @@
         user-select: none;
     }
     .blip:hover {
-        background-color: lightgray;
+        background-color: #f38ba8;
         cursor: crosshair;
     }
 </style>
