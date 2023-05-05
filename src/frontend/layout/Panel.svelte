@@ -3,14 +3,29 @@
     import { Pane, Splitpanes } from "svelte-splitpanes";
     import { PanelNode, PanelGroup, PanelLeaf } from "./PanelNode";
     import PanelBlip from "./PanelBlip.svelte";
+    import { createEventDispatcher } from "svelte";
+
+    const dispatch = createEventDispatcher();
+
     const minSize = 10;
 
     export let horizontal: boolean = false;
     export let layout: PanelNode;
     export let height: string;
+    export let isRoot = true;
 
     enum dockV { "t", "b" };
     enum dockH { "l", "r" };
+
+    function bubbleToRoot() {
+        if (!isRoot) {
+            dispatch("bubbleToRoot");
+        }
+        else {
+            layout=layout;
+            console.log("AT ROOT");
+        }
+    }
 
     // (Parallel/Perpendicular)_(in/out)
     enum localDir { "pl_i", "pl_o", "pp_i", "pp_o", null }
@@ -48,7 +63,7 @@
 
         // Transform u/d/l/r direction to local direction within PaneGroup
         let slide: localDir = localize(dir, dock);
-        console.log(["|| in", "|| out", "_|_ in", "_|_ out"][slide]);
+        // console.log(["|| in", "|| out", "_|_ in", "_|_ out"][slide]);
 
         let iDir: indexDir = horizontal ?
             ( dir == "d" ? indexDir.f : indexDir.b) :
@@ -65,30 +80,30 @@
 
                 // Check which index to remove based on index direction
                 let toRem = index + (iDir == indexDir.f ? 1 : -1);
+                //when toRem is 0 it doesn't dissolve the group for some reason
                 console.log("REMOVE " + toRem);
 
                 if (toRem >= 0 && toRem < layout.panels.length) {
                     layout.removePanel(toRem);
                     layout = layout;
 
-                    // if we are the last panel in the group, dissolve the group
-                    if ((layout as PanelGroup).panels.length == 1) {
-                        layout = (layout as PanelGroup).getPanel(0) as PanelLeaf;
-
-                        //TODO: Fix blips disappearing when dissolving the group
-                        layout.parent = layout.parent;
-                        layout = layout;
-                    }
+                    bubbleToRoot();
                 }
+
                 break;
 
             case localDir.pp_i: // encapsulate panel within panelgroup, add another panel to group
-                    let group = new PanelGroup("new");
+                    let group = new PanelGroup(Math.floor(1000*Math.random()).toString());
+                    console.log("new group " + group.name)
+
                     //TODO: Pass actual panel content instead of just string
+
+                    //Add this panel
                     group.addPanel((layout.panels[index] as PanelLeaf).content, 0);
-                    group.addPanel("new2", 1);
-                    layout.removePanel(index);
-                    layout.addPanelGroup(group, index);
+                    //Add new panel
+                    group.addPanel(Math.floor(1000*Math.random()).toString(), 1);
+                    // Replace this panel with new group
+                    layout.setPanel(group, index);
 
                     layout = layout; // Force update
                 break;
@@ -106,6 +121,7 @@
         class="modern-theme"
         {horizontal}
         style={height=="" ? "" : "height: {height}"}
+        dblClickSplitter={true}
     >
     {#each layout.panels as panel, i}
         <Pane {minSize}>
@@ -115,7 +131,13 @@
                 <PanelBlip dock="tl" on:blipDragged={e => handleBlipDrag(e, i, [dockV.t, dockH.l])}/>
                 <PanelBlip dock="br" on:blipDragged={e => handleBlipDrag(e, i, [dockV.b, dockH.r])}/>
             {/if}
-            <svelte:self layout={panel} horizontal={!horizontal} height="100px" />
+            <svelte:self
+                on:bubbleToRoot={bubbleToRoot}
+                layout={panel}
+                isRoot={false}
+                horizontal={!horizontal}
+                height="100px"
+            />
         </Pane>
     {/each}
     </Splitpanes>
