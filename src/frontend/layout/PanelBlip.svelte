@@ -106,13 +106,17 @@
         width: var(--width);
         height: var(--width);
 
-        background-color: lightgray;
-        color: white;
+        background-color: transparent;
+        color: black;
         text-align: center;
         font-size: 0.8em;
 
         /* Prevent mouse selecting neighbouring elements when dragging */
         user-select: none;
+    }
+    .blip:hover {
+        background-color: lightgray;
+        cursor: crosshair;
     }
 </style>
 

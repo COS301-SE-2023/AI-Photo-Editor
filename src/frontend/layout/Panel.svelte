@@ -91,7 +91,6 @@
 
             case localDir.pp_i: // encapsulate panel within panelgroup, add another panel to group
                     let group = new PanelGroup(Math.floor(1000*Math.random()).toString());
-                    console.log("new group " + group.name)
 
                     //TODO: Pass actual panel content instead of just string
 
