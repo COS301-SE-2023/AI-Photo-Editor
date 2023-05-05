@@ -16,15 +16,17 @@ const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 logger.info("App starting...");
 settings.set("check", true);
 logger.info("Checking if settings store works correctly.");
-logger.info(settings.get("check") ? "Settings store works correctly." : "Settings store has a problem.");
+logger.info(
+  settings.get("check") ? "Settings store works correctly." : "Settings store has a problem."
+);
 
 let mainWindow: BrowserWindow | null;
 let notification: Notification | null;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 900,
-    height: 680,
+    width: 1300,
+    height: 1000,
     webPreferences: {
       devTools: isProd ? false : true,
       contextIsolation: true,
@@ -46,7 +48,7 @@ const createWindow = () => {
     app.quit();
   });
 
-  if (!isProd) mainWindow.webContents.openDevTools();
+  // if (!isProd) mainWindow.webContents.openDevTools();
 
   mainWindow.on("closed", () => {
     mainWindow = null;

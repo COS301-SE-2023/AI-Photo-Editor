@@ -3,7 +3,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 import sveltePreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
 import css from "rollup-plugin-css-only";
@@ -38,6 +38,7 @@ export default {
     format: "iife",
     name: "fluide",
     file: "public/build/bundle.js",
+    inlineDynamicImports: true
   },
   plugins: [
     svelte({

@@ -1,4 +1,12 @@
-const { readdirSync, readFileSync, writeFileSync, existsSync, lstatSync, unlinkSync, rmdirSync } = require("fs");
+const {
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  lstatSync,
+  unlinkSync,
+  rmdirSync,
+} = require("fs");
 const { join } = require("path");
 
 const deleteFolderRecursive = (folderPath) => {
