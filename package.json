@@ -7,7 +7,7 @@
     "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor"
   },
   "author": {
-    "name": "TopG",
+    "name": "The Spanish Inquisition",
     "email": "cos301.spanish.inquisition@gmail.com",
     "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor"
   },
@@ -91,6 +91,7 @@
     "postcss": "^8.4.23",
     "prettier": "^2.8.8",
     "prettier-plugin-svelte": "^2.10.0",
+    "prettier-plugin-tailwindcss": "^0.2.8",
     "rollup": "^3.21.5",
     "rollup-plugin-css-only": "^4.3.0",
     "rollup-plugin-livereload": "^2.0.5",
