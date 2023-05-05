@@ -9,6 +9,7 @@
     import { PanelNode, PanelGroup, PanelLeaf } from "./PanelNode";
     import PanelBlip from "./PanelBlip.svelte";
     import { createEventDispatcher } from "svelte";
+    import Graph from "./tiles/Graph.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -146,7 +147,8 @@
 {:else if layout instanceof PanelLeaf}
     <!-- Actual panel content goes here -->
     <div class="fullPanel">
-        {layout.content}
+        <Graph />
+        <!-- {layout.content} -->
     </div>
 {/if}
 
@@ -154,7 +156,7 @@
     .fullPanel {
         width: 100%;
         height: 100%;
-        padding: 0.4em 1.2em;
+        /* padding: 0.4em 1.2em; */
     }
 
     .splitpanes.main-theme .splitpanes__splitter {

@@ -1,3 +1,4 @@
+<!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script>
   import { Svelvet, ThemeToggle, Node, Background } from "svelvet";
 </script>
@@ -9,7 +10,7 @@
 
 <style>
   :root[svelvet-theme="custom-dark"] {
-    --background-color: #27272a;
+    --background-color: #181825;
     --dot-color: hsl(225, 10%, 50%);
 
     --minimap-background-color: #52525b;

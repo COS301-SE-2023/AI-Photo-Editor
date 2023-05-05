@@ -5,6 +5,7 @@
     let subLayout = new PanelGroup("2");
     subLayout.addPanel("qwer", 0);
     subLayout.addPanel("rewq", 0);
+    subLayout.addPanel("rewq", 0);
 
     let layout = new PanelGroup("1");
     layout.addPanel("asdf", 0);

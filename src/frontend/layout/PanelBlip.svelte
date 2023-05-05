@@ -113,6 +113,8 @@
 
         /* Prevent mouse selecting neighbouring elements when dragging */
         user-select: none;
+
+        z-index: 10000;
     }
     .blip:hover {
         background-color: #f38ba8;
