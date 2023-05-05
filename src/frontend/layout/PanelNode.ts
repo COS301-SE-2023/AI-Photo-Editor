@@ -9,11 +9,14 @@ export class PanelGroup extends PanelNode {
     removePanel(index: number) {
         this.panels.splice(index, 1);
     }
-    addPanel(content: string) {
-        this.panels.push(new PanelLeaf(content, this));
+    addPanel(content: string, index: number) {
+        this.panels.splice(index, 0, new PanelLeaf(content, this));
     }
-    addPanelGroup(panelGroup: PanelGroup) {
-        this.panels.push(panelGroup);
+    addPanelGroup(panelGroup: PanelGroup, index: number) {
+        this.panels.splice(index, 0, panelGroup);
+    }
+    getPanel(index: number): PanelNode {
+        return this.panels[index];
     }
     getPanels(): PanelNode[] {
         return this.panels;

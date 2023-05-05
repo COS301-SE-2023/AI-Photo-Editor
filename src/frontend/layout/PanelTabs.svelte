@@ -1,4 +1,4 @@
-<!-- Allows multiple panels to occupy the same space and accessed using a tabbed ribbon -->
+<!-- Allows multiple tiles to occupy the same space and accessed using a tabbed ribbon -->
 <script>
     import { SvelteComponent } from "svelte";
 

@@ -1,4 +1,4 @@
-<!-- The little panel edit dot at the top left of each panel, -->
+<!-- The little panel edit dot at the corner of each panel, -->
 <!-- tracks mouse movement on drag and returns a direction -->
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
@@ -69,22 +69,44 @@
         }
         else { dir = ""; } // Reset UI
     }
+
+    // The corner to dock the blip to
+    export let dock = "tl";
 </script>
 
 <style>
     :root {
         --width: 1em;
+        --halfW: calc(var(--width)/2);
     }
-    .blip {
-        position: absolute;
+    .tl {
         top: 0px;
         left: 0px;
+        border-radius: 0px 0px var(--halfW) 0px;
+    }
+    .tr {
+        top: 0px;
+        right: 0px;
+        border-radius: 0px 0px 0px var(--halfW);
+    }
+    .bl {
+        bottom: 0px;
+        left: 0px;
+        border-radius: 0px var(--halfW) 0px 0px;
+    }
+    .br {
+        bottom: 0px;
+        right: 0px;
+        border-radius: var(--halfW) 0px 0px 0px;
+    }
+
+    .blip {
+        position: absolute;
 
         width: var(--width);
         height: var(--width);
-        border-radius: 0px 0px calc(var(--width)/2) 0px;
 
-        background-color: grey;
+        background-color: lightgray;
         color: white;
         text-align: center;
         font-size: 0.8em;
@@ -95,7 +117,7 @@
 </style>
 
 <div
-    class="blip"
+    class={"blip " + (["tl", "tr", "bl", "br"].includes(dock)?dock:"tl")}
     on:mousedown={tryStartTrack}
 >
     {dir}
