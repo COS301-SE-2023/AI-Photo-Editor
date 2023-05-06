@@ -142,8 +142,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "fuzzc0re",
-        "repo": "electron-svelte-typescript"
+        "owner": "COS301-SE-2023",
+        "repo": "AI-Photo-Editor"
       }
     ]
   }
