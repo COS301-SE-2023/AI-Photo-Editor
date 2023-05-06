@@ -1,92 +1,130 @@
-# electron-svelte-typescript
+<h1 align="center" style="font-family: 'Merriweather', sans-serif;"> AI Photo Editor </h1>
 
-Template for apps written with [Electron](https://github.com/electron/electron), [Svelte](https://github.com/sveltejs/svelte) and [Typescript](https://github.com/microsoft/TypeScript).
+<!---------------------------------- TABLE OF CONTENTS ---------------------------------->
+<h2 id="table-of-contents"> :book: Table of Contents</h2>
 
-The template does hot module replacement and reloads electron on main process file changes out of the box.
-It also follows some good security practices, such as Content-Security-Policy meta tags in html,
-context isolation set to true, remote modules set to false etc.
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ol style="list-style: none">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#documentation">Documentation</a></li>
+    <li><a href="#demos">Demos</a></li>
+    <li><a href="#technologies">Technologies</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
 
-## Get started
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
-To create a new project based on this template you must first clone the repo and then delete the folder .git:
+<!--------------------------------------- OVERVIEW -------------------------------------->
+<h2 id="overview"> :cloud: Overview</h2>
 
-```bash
-git clone https://github.com/fuzzc0re/electron-svelte-typescript MyAppName
-cd MyAppName
-rm -rf .git
-```
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
-_Note that you will need to have [Node.js](https://nodejs.org) installed._
+<!------------------------------------ DOCUMENTATION ------------------------------------>
+<h2 id="documentation"> :blue_book: Documentation</h2>
 
-Install the dependencies...
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
-```bash
-npm i
-```
+<!---------------------------------------- DEMOS ---------------------------------------->
+<h2 id="demos"> :clapper: Demos</h2>
 
-...then start coding in dev mode:
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
-```bash
-npm start
-```
+<!------------------------------------- TECHNOLOGIES ------------------------------------>
+<h2 id="technologies"> :gear: Technologies</h2>
 
-The start script spins up [Rollup](https://github.com/rollup/rollup)
-in watch mode with a [Rollup-Plugin-Serve](https://github.com/thgh/rollup-plugin-serve) instance
-serving the frontend static files on [localhost:5000](http://localhost:5000) and a
-nodemon server to watch for file changes related to the main electron process.
+<div>
+<img alt="" src="https://img.shields.io/badge/Electron-2B2E3A?style=for-the-badge&logo=electron&logoColor=9FEAF9">
+<img alt="" src="https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00">
+<img alt="" src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white">
+<img alt="" src="https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black ">
+</div>
 
-Electron loads its html content from [localhost:5000](https://github.com/fuzzc0re/electron-svelte-typescript-boilerplate/src/electron/index.ts#L40)
-in dev mode and from [build/public/index.html](https://github.com/fuzzc0re/electron-svelte-typescript-boilerplate/src/electron/index.ts#L38)
-in production mode.
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
-The Svelte development happens in [src/frontend](https://github.com/fuzzc0re/electron-svelte-typescript-boilerplate/src/frontend) and the Electron development in [src/electron](https://github.com/fuzzc0re/electron-svelte-typescript-boilerplate/src/electron).
+<!----------------------------------------- TEAM ---------------------------------------->
+<h2 id="team"> :handshake: Team</h2>
 
-Edit a file in `src`, save it, and see the changes in the app.
+<table>
+	<tr>
+		<th style="text-align:center">Armand Krynauw</th>
+		<th style="text-align:center">Jake Mileham</th>
+		<th style="text-align:center">Dino Gironi</th>
+		<th style="text-align:center">Karel Olwage</th>
+		<th style="text-align:center">Francois Combrinck </th>
+	</tr>
+	<tr>
+		<td>
+			<img src="https://media.licdn.com/dms/image/C5603AQGolr-2x_C60Q/profile-displayphoto-shrink_400_400/0/1622237375570?e=1688601600&v=beta&t=_YwM-8OA2NBe4t-FpPsYkgdxsIr1kRWlH2YUSbJ8jvI" width="140" height="130">
+		</td>
+		<td>
+			<img src="https://avatars.githubusercontent.com/u/104788496?v=4" width="140" height="130">
+		</td>
+		<td>
+			<img src="https://avatars.githubusercontent.com/u/79510505?v=4" width="140" height="130">
+		</td>
+		<td>
+			<img src="https://media.licdn.com/dms/image/C5603AQF4qbUwzHCD6w/profile-displayphoto-shrink_400_400/0/1645976107855?e=1688601600&v=beta&t=tJPTJPLuaaLLoz98hrrjM1HQASkFXHlYG7b0Byqxv1M" width="140" height="130">
+		</td>
+		<td>
+			<img src="https://avatars.githubusercontent.com/u/100900058?v=4" width="140" height="130">
+		</td>
+	</tr>
+		<td align="center">
+			<a href="https://github.com/ArmandKrynauw">
+				<img alt="" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white">
+			</a>
+      <br>
+			<a href="https://www.linkedin.com/in/armandkrynauw/">
+				<img alt="" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white">
+			</a>
+		</td>
+		<td align="center">
+			<a href="https://github.com/SharkmanZA">
+				<img alt="" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white">
+			</a>
+      <br>
+			<a href="https://www.linkedin.com/in/jake-mileham/">
+				<img alt="" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white">
+			</a>
+		</td>
+		<td align="center">
+			<a href="https://github.com/Rec1dite">
+				<img alt="" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white">
+			</a>
+      <br>
+			<a href="https://www.linkedin.com/in/dino-g/">
+				<img alt="" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white">
+			</a>
+		</td>
+		<td align="center">
+			<a href="https://github.com/Klairgo">
+				<img alt="" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white">
+			</a>
+      <br>
+			<a href="https://www.linkedin.com/in/karel-olwage-92804b214/">
+				<img alt="" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white">
+			</a>
+		</td>
+		<td align="center">
+			<a href="https://github.com/CenturionLC">
+				<img alt="" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white">
+			</a>
+      <br>
+			<a href="https://www.linkedin.com/in/francois-combrinck-324762272/">
+				<img alt="" src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white">
+			</a>
+		</td>
+	</tr>
+</table>
 
-## Building and running in production mode
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
-To create an optimized build of the app:
+<!--------------------------------------- CONTACT --------------------------------------->
+<h2 id="contact"> :mailbox: Contact</h2>
 
-```bash
-npm run build
-```
+* Team Email: cos301.spanish.inquisition@gmail.com
 
-To create a distributable version of the app with [electron-builder](https://github.com/electron-userland/electron-builder):
-
-```bash
-npm run dist
-```
-
-In production mode, sourcemaps are [disabled](https://github.com/fuzzc0re/electron-svelte-typescript-boilerplate/scripts/preBuild.js#L30),
-[html](https://github.com/fuzzc0re/electron-svelte-typescript-boilerplate/scripts/postBuild.js#L77)
-[css](https://github.com/fuzzc0re/electron-svelte-typescript-boilerplate/scripts/postBuild.js#L104) and
-[js](https://github.com/fuzzc0re/electron-svelte-typescript-boilerplate/rollup.config.js#L83) files are compressed and mangled, devTools are [disabled](https://github.com/fuzzc0re/electron-svelte-typescript-boilerplate/src/electron/index.ts#L28) and
-[CSP](https://github.com/fuzzc0re/electron-svelte-typescript-boilerplate/scripts/postBuild.js#L82) allows only same origin scripts to load.
-
-## Contributing
-
-In order to lint the code you run:
-
-```bash
-npm run lint
-```
-
-In order to prettify the code you run:
-
-```bash
-npm run format
-```
-
-You should run the following command, which runs lint and then format, on your contributed code:
-
-```bash
-npm run preversion
-```
-
-before creating a pull request.
-
-All suggestions are welcome!
-
-## Licence
-
-This project is licensed under the terms described in [LICENSE](https://github.com/fuzzc0re/electron-svelte-typescript/blob/master/LICENSE).
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
