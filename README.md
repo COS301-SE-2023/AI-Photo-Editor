@@ -1,5 +1,10 @@
 <h1 align="center" style="font-family: 'Merriweather', sans-serif;"> AI Photo Editor </h1>
 
+[![codecov](https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor/branch/dev/graph/badge.svg?token=7T6WCYXEIO)](https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor)
+
+[![Lint Codebase](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/lint.yml/badge.svg)](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/lint.yml)
+[![Test Codebase](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/coverage.yml/badge.svg)](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/coverage.yml)
+
 <!---------------------------------- TABLE OF CONTENTS ---------------------------------->
 <h2 id="table-of-contents"> :book: Table of Contents</h2>
 
@@ -15,12 +20,12 @@
   </ol>
 </details>
 
-<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/redev/assets/lines/aqua.png">
 
 <!--------------------------------------- OVERVIEW -------------------------------------->
 <h2 id="overview"> :cloud: Overview</h2>
 
-<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/redev/assets/lines/aqua.png">
 
 <!------------------------------------ DOCUMENTATION ------------------------------------>
 <h2 id="documentation"> :blue_book: Documentation</h2>
