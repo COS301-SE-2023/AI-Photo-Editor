@@ -1,7 +1,5 @@
 name: Lint Codebase
 on:
-  push:
-    branches: [ master, dev]
   pull_request:
     branches: [ master, dev ]
     types: [opened, synchronize, reopened, ready_for_review]
