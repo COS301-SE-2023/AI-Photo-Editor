@@ -23,13 +23,13 @@ export class PanelGroup extends PanelNode {
     this.panels.splice(i, 1);
 
     // If length 1, dissolve and replace with child
-    if (this.panels.length == 1) {
+    if (this.panels.length === 1) {
       if (this.parent != null) {
         this.parent.setPanel(this.panels[0], this.index);
       }
     }
     // If empty, dissolve (Shouldn't ever happen anyway)
-    if (this.panels.length == 0) {
+    if (this.panels.length === 0) {
       if (this.parent != null) {
         this.parent.removePanel(this.index);
       }
@@ -56,14 +56,23 @@ export class PanelGroup extends PanelNode {
   }
 
   // Print tree for debug
-  print(indent: number = 0): string {
-    let res = this.name + "[" + this.parent?.name + "](" + this.index + ")\n";
-    for (let p of this.panels) {
+  print(indent = 0): string {
+    let res;
+    if(this.parent){
+      res = `${this.name}[${this.parent?.name}](${this.index})\n`; }
+    else{ 
+      res = `${this.name}[NULL](${this.index})\n`; }
+    for (const p of this.panels) {
       res += " ".repeat(indent);
       if (p instanceof PanelGroup) {
-        res += "- " + p.print(indent + 2);
+        res += `- ${p.print(indent + 2)}`;
       } else if (p instanceof PanelLeaf) {
-        res += "+ " + p.content + "[" + p.parent?.name + "](" + p.index + ")\n";
+        if(p.parent){
+          res += `+ ${p.content}[${p.parent?.name}](${p.index})\n`;
+        }
+        else{
+          res += `+ ${p.content}[NULL](${p.index})\n`;
+        }
       }
     }
     return res;
@@ -71,7 +80,7 @@ export class PanelGroup extends PanelNode {
 
   recurseParent() {
     for (let p = 0; p < this.panels.length; p++) {
-      let panel = this.panels[p];
+      const panel = this.panels[p];
       panel.parent = this;
       panel.index = p;
 
