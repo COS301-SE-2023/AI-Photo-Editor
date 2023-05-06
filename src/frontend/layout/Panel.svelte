@@ -2,6 +2,8 @@
 
 <!-- TODO:
     - Double click blip should maximize panel within its group
+    - Left click _|_
+    - Right click outward drag blip should swap panels
 -->
 
 <script lang="ts">
@@ -9,7 +11,6 @@
   import { PanelNode, PanelGroup, PanelLeaf } from "./PanelNode";
   import PanelBlip from "./PanelBlip.svelte";
   import { createEventDispatcher } from "svelte";
-  import Graph from "./tiles/Graph.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -103,10 +104,13 @@
       ? indexDir.f
       : indexDir.b;
 
+      // Get the content in this panel leaf
+      const thisLeafContent = (layout.panels[index] as PanelLeaf).content;
+
     // Perform panel operation
     switch (slide) {
       case localDir.pl_i: // add panel at index
-        layout.addPanel("newPanel", index);
+        layout.addPanel(thisLeafContent, index);
         layout = layout; // Force update
         break;
 
@@ -124,14 +128,12 @@
         break;
 
       case localDir.pp_i: // encapsulate panel within panelgroup, add another panel to group
-        let group = new PanelGroup(Math.floor(1000 * Math.random()).toString());
-
-        //TODO: Pass actual panel content instead of just string
+        let group = new PanelGroup();
 
         //Add this panel
-        group.addPanel((layout.panels[index] as PanelLeaf).content, 0);
+        group.addPanel(thisLeafContent, 0);
         //Add new panel
-        group.addPanel(Math.floor(1000 * Math.random()).toString(), 1);
+        group.addPanel(thisLeafContent, 1);
         // Replace this panel with new group
         layout.setPanel(group, index);
 
@@ -175,8 +177,7 @@
 {:else if layout instanceof PanelLeaf}
   <!-- Actual panel content goes here -->
   <div class="fullPanel">
-    <Graph />
-    <!-- {layout.content} -->
+    <svelte:component this={layout.content} />
   </div>
 {/if}
 

@@ -1,4 +1,7 @@
 // N-way tree of panels
+
+import type { ComponentType } from "svelte";
+
 export class PanelNode {
   constructor() {
     this.parent = null;
@@ -11,11 +14,21 @@ export class PanelNode {
 
 // Always has a minimum of two children, or self-destructs
 export class PanelGroup extends PanelNode {
-  constructor(public name: string) {
+  static groupCounter = 0;
+
+  // A custom name can optionally be provided
+  constructor(name = "") {
     super();
     this.parent = null;
+    if (name !== "") {
+      this.name = name;
+    }
+    else {
+      this.name = `pg_${PanelGroup.groupCounter}`;
+    }
+    PanelGroup.groupCounter++;
   }
-
+  name: string;
   panels: PanelNode[] = [];
 
   // Nukes the current panelgroup and replaces it with its first child if possible
@@ -40,7 +53,7 @@ export class PanelGroup extends PanelNode {
     panel.parent = this;
     panel.index = i;
   }
-  addPanel(content: string, i: number) {
+  addPanel(content: ComponentType, i: number) {
     const newLeaf = new PanelLeaf(content);
     this.panels.splice(i, 0, newLeaf);
     newLeaf.parent = this;
@@ -68,10 +81,10 @@ export class PanelGroup extends PanelNode {
         res += `- ${p.print(indent + 2)}`;
       } else if (p instanceof PanelLeaf) {
         if(p.parent){
-          res += `+ ${p.content}[${p.parent?.name}](${p.index})\n`;
+          res += `+ ${p.content.name}[${p.parent?.name}](${p.index})\n`;
         }
         else{
-          res += `+ ${p.content}[NULL](${p.index})\n`;
+          res += `+ ${p.content.name}[NULL](${p.index})\n`;
         }
       }
     }
@@ -92,7 +105,7 @@ export class PanelGroup extends PanelNode {
 }
 
 export class PanelLeaf extends PanelNode {
-  constructor(public content: string) {
+  constructor(public content: ComponentType) {
     super();
     this.parent = null;
   }
