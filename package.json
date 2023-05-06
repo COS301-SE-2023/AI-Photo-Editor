@@ -1,0 +1,150 @@
+{
+  "name": "photo-editor",
+  "description": "COS 301 Capstone Project - AI Photo Editor",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor"
+  },
+  "author": {
+    "name": "The Spanish Inquisition",
+    "email": "cos301.spanish.inquisition@gmail.com",
+    "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor/issues"
+  },
+  "keywords": [
+    "electron",
+    "svelte",
+    "typescript",
+    "electron-builder",
+    "tslint",
+    "ts-jest",
+    "electron-settings",
+    "electron-updater",
+    "rollup"
+  ],
+  "homepage": "https://github.com/COS301-SE-2023/AI-Photo-Editor#readme",
+  "main": "build/index.js",
+  "scripts": {
+    "prestart": "cross-env NODE_ENV=development node scripts/preBuild.js",
+    "start": "cross-env NODE_ENV=development npm-run-all -p -r build:frontend:dev start:electron",
+    "prebuild": "cross-env NODE_ENV=production node scripts/preBuild.js",
+    "build": "cross-env NODE_ENV=production npm-run-all -s build:frontend:prod build:electron:prod",
+    "postbuild": "cross-env NODE_ENV=production node scripts/postBuild.js",
+    "build:frontend:dev": "cross-env NODE_ENV=development rollup -c -w --bundleConfigAsCjs",
+    "build:frontend:prod": "cross-env NODE_ENV=production rollup -c --bundleConfigAsCjs",
+    "build:electron:dev": "tsc --p ./tsconfig.electron.json",
+    "build:electron:dev:watch": "tsc -w --p ./tsconfig.electron.json",
+    "build:electron:prod": "cross-env NODE_ENV=production tsc --p ./tsconfig.electron.prod.json",
+    "validate:svelte": "svelte-check",
+    "start:electron:run": "electron .",
+    "start:electron:nodemon": "nodemon",
+    "start:electron:dev": "npm-run-all -s build:electron:dev start:electron:nodemon",
+    "start:electron": "npm-run-all -p build:electron:dev:watch start:electron:dev",
+    "test": "jest --config jest.config.json",
+    "postinstall": "electron-builder install-app-deps",
+    "prepack": "npm run build",
+    "pack": "electron-builder --dir",
+    "predist": "npm run build",
+    "dist": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder",
+    "postdist": "node scripts/cleanBuilds.js",
+    "format": "prettier --write \"src/**/**/*\" --write \"scripts/**/**/*\"",
+    "lint:electron": "eslint -c eslint.electron.json --ext .js,.ts src/electron",
+    "lint:svelte": "eslint -c eslint.svelte.json --ext .js,.ts src/frontend",
+    "lint": "npm-run-all -s lint:electron lint:svelte",
+    "prepublishOnly": "npm-run-all -s test lint",
+    "preversion": "npm-run-all -s lint format"
+  },
+  "dependencies": {
+    "electron-log": "^4.4.8",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^5.3.0",
+    "svelvet": "^7.0.42"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.1.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-terser": "^0.4.1",
+    "@rollup/plugin-typescript": "^11.1.0",
+    "@tsconfig/svelte": "^4.0.1",
+    "@types/clean-css": "^4.2.6",
+    "@types/html-minifier": "^4.0.2",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "@typescript-eslint/parser": "^5.59.2",
+    "autoprefixer": "^10.4.14",
+    "clean-css": "^5.3.2",
+    "cross-env": "^7.0.3",
+    "electron": "^24.2.0",
+    "electron-builder": "^24.3.0",
+    "eslint": "^8.39.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-jsdoc": "^43.2.0",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "html-minifier": "^4.0.0",
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.4.23",
+    "prettier": "^2.8.8",
+    "prettier-plugin-svelte": "^2.10.0",
+    "prettier-plugin-tailwindcss": "^0.2.8",
+    "rollup": "^3.21.5",
+    "rollup-plugin-css-only": "^4.3.0",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-serve": "^2.0.2",
+    "rollup-plugin-svelte": "^7.1.4",
+    "svelte": "^3.59.0",
+    "svelte-check": "^3.3.1",
+    "svelte-preprocess": "^5.0.3",
+    "svelte-splitpanes": "^0.7.13",
+    "tailwindcss": "^3.3.2",
+    "terser": "^5.17.1",
+    "ts-jest": "^29.1.0",
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.4"
+  },
+  "build": {
+    "productName": "AI Photo Editor",
+    "appId": "ai.photo.editor",
+    "copyright": "Copyright © 2021 ${author}",
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "productivity",
+      "type": "distribution",
+      "hardenedRuntime": "true"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "snap"
+      ],
+      "category": "productivity"
+    },
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      "assets/**"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "COS301-SE-2023",
+        "repo": "AI-Photo-Editor"
+      }
+    ]
+  }
+}
