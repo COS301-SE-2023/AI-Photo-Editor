@@ -1,11 +1,41 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script>
   import { Svelvet, ThemeToggle, Node, Background } from "svelvet";
+  export let panelId = 0;
+
+  let nodeCounter = 0;
+
+  let nodes = [
+    {
+      id: `Node-${panelId}-${nodeCounter++}`,
+      position: { x: 0, y: 0 },
+      height: 100
+    },
+    {
+      id: `Node-${panelId}-${nodeCounter++}`,
+      position: { x: 200, y: 200 },
+      height: 200
+    }
+  ]
 </script>
 
-<Svelvet id="my-canvas" zoom="{0.5}" minimap theme="custom-theme">
-  <Node bgColor="#ec4899" height="{200}" position="{{ x: 100, y: 100 }}" />
-  <ThemeToggle main="custom-dark" alt="light" slot="toggle" mainIcon="light_mode" />
+<Svelvet
+  zoom="{0.5}"
+  minimap
+  theme="custom-dark"
+  id="Graph-{panelId}"
+  title="Svelvet-{panelId}"
+  fitView="resize"
+>
+  
+  {#each nodes as node}
+    <Node
+      bgColor="#ec4899"
+      height="{node.height}"
+      position={node.position}
+      id="{node.id}"
+      />
+  {/each}
 </Svelvet>
 
 <style>

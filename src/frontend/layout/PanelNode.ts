@@ -3,13 +3,19 @@
 import type { ComponentType } from "svelte";
 
 export class PanelNode {
-  constructor() {
+  static panelCounter = 0;
+
+  constructor(id = -1) {
     this.parent = null;
     this.index = -1;
+    if (id !== -1) { this.id = id; }
+    else { this.id = PanelNode.panelCounter++; }
   }
 
   parent: PanelGroup | null;
   index: number;
+  id: number; // Unique ID for each panel, helps Svelte with keying
+  size?: number;
 }
 
 // Always has a minimum of two children, or self-destructs
@@ -17,8 +23,8 @@ export class PanelGroup extends PanelNode {
   static groupCounter = 0;
 
   // A custom name can optionally be provided
-  constructor(name = "") {
-    super();
+  constructor(name = "", id = -1) {
+    super(id);
     this.parent = null;
     if (name !== "") {
       this.name = name;
@@ -49,9 +55,11 @@ export class PanelGroup extends PanelNode {
     }
   }
   setPanel(panel: PanelNode, i: number) {
+    let tempId = this.panels[i].id;
     this.panels[i] = panel;
     panel.parent = this;
     panel.index = i;
+    panel.id = tempId;
   }
   addPanel(content: ComponentType, i: number) {
     const newLeaf = new PanelLeaf(content);

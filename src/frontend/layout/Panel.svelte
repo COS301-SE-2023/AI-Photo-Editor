@@ -11,6 +11,9 @@
   import { PanelNode, PanelGroup, PanelLeaf } from "./PanelNode";
   import PanelBlip from "./PanelBlip.svelte";
   import { createEventDispatcher } from "svelte";
+  import TileSelector from "./TileSelector.svelte";
+
+  // import { scale } from "svelte/transition";
 
   const dispatch = createEventDispatcher();
 
@@ -20,6 +23,10 @@
   export let layout: PanelNode;
   export let height: string;
   export let isRoot = true;
+
+  let tileProps = {
+    panelId: layout.id
+  };
 
   enum dockV {
     "t",
@@ -119,8 +126,10 @@
         let toRem = index + (iDir == indexDir.f ? 1 : -1);
 
         if (toRem >= 0 && toRem < layout.panels.length) {
-          layout.removePanel(toRem);
-          layout = layout;
+          layout.getPanel(toRem).size = -1;
+
+          // layout.removePanel(toRem);
+          // layout = layout;
 
           bubbleToRoot();
         }
@@ -128,7 +137,7 @@
         break;
 
       case localDir.pp_i: // encapsulate panel within panelgroup, add another panel to group
-        let group = new PanelGroup();
+        let group = new PanelGroup(undefined, layout.getPanel(index).id);
 
         //Add this panel
         group.addPanel(thisLeafContent, 0);
@@ -146,38 +155,55 @@
         return;
     }
   }
+
+  function triggerWindowResize() { 
+    // For now this is necessary to force Svelvet
+    // to update the positions of objects on it's canvas
+    // TODO: Hopefully find a more elegant solution
+    window.dispatchEvent(new Event('resize'));
+  }
+
 </script>
 
 {#if layout instanceof PanelGroup}
+  <!-- <div class="container"> -->
   <Splitpanes
     class="main-theme"
     horizontal="{horizontal}"
     style="{height == '' ? '' : 'height: {height}'}"
     dblClickSplitter="{false}"
+    on:pane-remove="{e => e.stopPropagation()}"
+    on:resize="{triggerWindowResize}"
   >
-    {#each layout.panels as panel, i}
-      <Pane minSize="{minSize}">
+    {layout.id}
+    {#each layout.panels as panel, i (panel.id)} <!-- TODO: Fix; look into using svelte animations -->
+      {#key layout} <!-- Look into using #key instead of bubbleToRoot + transition: scale -->
+      {/key}
+      <Pane minSize="{panel.size==-1?0:minSize}" bind:size={panel.size}>
         {#if panel instanceof PanelLeaf}
           <PanelBlip dock="tl" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.t, dockH.l])}" />
           <PanelBlip dock="tr" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.t, dockH.r])}" />
           <PanelBlip dock="bl" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.l])}" />
           <PanelBlip dock="br" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.r])}" />
+            <TileSelector />
+        <!-- {:else} -->
         {/if}
         <!-- Subpanels alternate horiz/vert -->
-        <svelte:self
-          on:bubbleToRoot="{bubbleToRoot}"
-          layout="{panel}"
-          isRoot="{false}"
-          horizontal="{!horizontal}"
-          height="100px"
-        />
+          <svelte:self
+            on:bubbleToRoot="{bubbleToRoot}"
+            layout="{panel}"
+            isRoot="{false}"
+            horizontal="{!horizontal}"
+            height="100px"
+          />
       </Pane>
     {/each}
   </Splitpanes>
+  <!-- </div> -->
 {:else if layout instanceof PanelLeaf}
   <!-- Actual panel content goes here -->
   <div class="fullPanel">
-    <svelte:component this={layout.content} />
+    <svelte:component this={layout.content} {...tileProps}/>
   </div>
 {/if}
 
@@ -186,6 +212,13 @@
     width: 100%;
     height: 100%;
     /* padding: 0.4em 1.2em; */
+  }
+
+  .container {
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    margin: 0px;
   }
 
   .splitpanes.main-theme .splitpanes__splitter {

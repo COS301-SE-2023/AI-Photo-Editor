@@ -65,6 +65,8 @@
     "svelvet": "^7.0.42"
   },
   "devDependencies": {
+    "@fortawesome/free-regular-svg-icons": "^6.4.0",
+    "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-terser": "^0.4.1",
@@ -100,6 +102,7 @@
     "rollup-plugin-svelte": "^7.1.4",
     "svelte": "^3.59.0",
     "svelte-check": "^3.3.1",
+    "svelte-fa": "^3.0.4",
     "svelte-preprocess": "^5.0.3",
     "svelte-splitpanes": "^0.7.13",
     "tailwindcss": "^3.3.2",
