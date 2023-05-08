@@ -4,13 +4,14 @@
 </script>
 
 <Svelvet id="my-canvas" zoom="{0.5}" minimap theme="custom-theme">
-  <Node bgColor="#ec4899" height="{200}" position="{{ x: 100, y: 100 }}" />
+  <Node bgColor="#ec4899" height="{200}" position="{{ x: 600, y: 600 }}" />
   <ThemeToggle main="custom-dark" alt="light" slot="toggle" mainIcon="light_mode" />
 </Svelvet>
 
 <style>
   :root[svelvet-theme="custom-dark"] {
-    --background-color: #181825;
+    /* --background-color: #181825; */
+    --background-color: theme(colors.ctp-lavender);
     --dot-color: hsl(225, 10%, 50%);
 
     --minimap-background-color: #52525b;

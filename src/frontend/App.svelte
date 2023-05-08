@@ -4,9 +4,11 @@
   import CommandPalette from "./components/CommandPalette.svelte";
 </script>
 
-<div class="navbar"><Navbar /></div>
-<div class="layout"><Layout /></div>
-<CommandPalette />
+<div class="ctp-mocha h-full">
+  <div class="navbar"><Navbar /></div>
+  <div class="layout"><Layout /></div>
+  <CommandPalette />
+</div>
 
 <style lang="postcss" global>
   @tailwind base;
