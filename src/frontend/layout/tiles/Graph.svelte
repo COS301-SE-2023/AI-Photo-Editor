@@ -3,9 +3,8 @@
   import { Svelvet, ThemeToggle, Node, Background } from "svelvet";
 </script>
 
-<Svelvet id="my-canvas" zoom="{0.5}" minimap theme="custom-theme">
+<Svelvet id="my-canvas" zoom="{0.5}" minimap theme="custom-dark">
   <Node bgColor="#ec4899" height="{200}" position="{{ x: 100, y: 100 }}" />
-  <ThemeToggle main="custom-dark" alt="light" slot="toggle" mainIcon="light_mode" />
 </Svelvet>
 
 <style>

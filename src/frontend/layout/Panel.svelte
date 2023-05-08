@@ -11,6 +11,7 @@
   import { PanelNode, PanelGroup, PanelLeaf } from "./PanelNode";
   import PanelBlip from "./PanelBlip.svelte";
   import { createEventDispatcher } from "svelte";
+  import TileSelector from "./TileSelector.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -162,6 +163,7 @@
           <PanelBlip dock="tr" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.t, dockH.r])}" />
           <PanelBlip dock="bl" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.l])}" />
           <PanelBlip dock="br" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.r])}" />
+            <TileSelector />
         {/if}
         <!-- Subpanels alternate horiz/vert -->
         <svelte:self
