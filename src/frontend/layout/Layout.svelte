@@ -8,10 +8,10 @@
   // subLayout.addPanel("rewq", 0);
 
   let layout = new PanelGroup("1");
-  layout.addPanel("asdf", 0);
+  layout.addPanel("graph", 1);
   // layout.addPanelGroup(subLayout, 1);
-  // layout.addPanel("fdsa", 2);
+  layout.addPanel("image", 0);
   // layout.recurseParent();
 </script>
 
-<Panel layout="{layout}" horizontal="{true}" height="100%" />
+<Panel layout="{layout}" horizontal="{false}" height="100%" />
