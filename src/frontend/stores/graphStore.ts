@@ -3,10 +3,10 @@ import { writable } from "svelte/store";
 const createBrightness = () => {
   const { subscribe, set } = writable(0);
 
-  let previousValue = 0;
+  // let previousValue = 0;
 
   const update = (newValue: number) => {
-    previousValue = newValue;
+    // previousValue = newValue;
     set(newValue);
   };
 

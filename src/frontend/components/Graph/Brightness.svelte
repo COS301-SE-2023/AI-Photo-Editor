@@ -1,7 +1,7 @@
 <script lang="ts">
   // import NodeWrapper from
   import { Node, Slider, generateInput, generateOutput } from "svelvet";
-  import { brightness } from "../../stores/graphStore";
+  // import { brightness } from "../../stores/graphStore";
 
   type Inputs = {
     brightness: number;
@@ -16,7 +16,7 @@
   export const processor = (inputs: Inputs) => {
     console.log(inputs.brightness);
     //Increase brightness
-    brightness.update(inputs.brightness);
+    // brightness.update(inputs.brightness);
     return inputs.brightness;
   };
   const output = generateOutput(inputs, processor);
