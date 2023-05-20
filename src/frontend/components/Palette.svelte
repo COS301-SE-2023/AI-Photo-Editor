@@ -1,18 +1,19 @@
 <script lang="ts">
+  import tinykeys from "tinykeys";
+  import Item from "./Item.svelte";
+
   let showPalette = false;
   let expanded = true;
   let inputElement: HTMLInputElement;
   let searchTerm = "";
 
-  // type Item = {
-  //   title: string;
-  //   icon: string;
-  // };
-
   type Category = {
     title: string;
     items: string[];
   };
+
+  let categoryIndex = 0;
+  let itemIndex = 0;
 
   const categoriesOriginals: Category[] = [
     {
@@ -45,17 +46,47 @@
     console.log(categories);
   }
 
-  function handleKeyDown(event: KeyboardEvent) {
-    if (event.metaKey && event.key === "p") {
-      showPalette = !showPalette;
-    }
-    if (event.key === "Escape" && showPalette) {
-      showPalette = false;
-    }
-    if (event.key === "ArrowDown" && !expanded) {
-      expanded = true;
+  function handleMoveDown() {
+    if (itemIndex === categories[categoryIndex].items.length - 1) {
+      if (categoryIndex !== categories.length - 1) {
+        categoryIndex++;
+        itemIndex = 0;
+      }
+    } else {
+      itemIndex++;
     }
   }
+
+  function handleMoveUp() {
+    if (itemIndex === 0) {
+      if (categoryIndex !== 0) {
+        categoryIndex--;
+        itemIndex = categories[categoryIndex].items.length - 1;
+      }
+    } else {
+      itemIndex--;
+    }
+  }
+
+  tinykeys(window, {
+    "$mod+p": (event) => {
+      event.preventDefault();
+      showPalette = !showPalette;
+    },
+    Escape: () => {
+      if (showPalette) showPalette = false;
+    },
+    ArrowDown: () => {
+      if (!expanded) expanded = true;
+    },
+    ArrowUp: () => {
+      if (!expanded) expanded = true;
+    },
+    "Sift+Tab": handleMoveDown,
+    Tab: handleMoveDown,
+    "Control+J": handleMoveDown,
+    "Control+K": handleMoveUp,
+  });
 
   $: if (showPalette && inputElement) {
     inputElement.focus();
@@ -63,13 +94,15 @@
 
   $: if (showPalette) {
     searchTerm = "";
-    expanded = false;
+    expanded = true;
+    categoryIndex = 0;
+    itemIndex = 0;
   }
 </script>
 
 {#if showPalette}
   <div
-    class="fixed inset-x-0 top-48 z-50 m-auto flex w-[40%] min-w-[400px] flex-col items-center overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80 backdrop-blur"
+    class="fixed inset-x-0 top-48 z-50 m-auto flex w-[40%] min-w-[400px] flex-col items-center overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
   >
     <!-- Header -->
     <header class="flex w-full items-center px-3">
@@ -83,18 +116,16 @@
       />
     </header>
     <!-- Results -->
-    {#if expanded}
+    {#if expanded && categories.length > 0}
       <div
         class="hide-scrollbar container max-h-[400px] w-full overflow-x-auto border-t border-zinc-600 p-2"
       >
         <nav>
-          {#each categories as category}
+          {#each categories as category, i}
             <div class="p4 m-1 text-xs font-semibold text-zinc-400">{category.title}</div>
             <ul>
-              {#each category.items as item}
-                <li class="text-md my-2 rounded-md bg-pink-200/10 p-2 text-zinc-100">
-                  <span>{item}</span>
-                </li>
+              {#each category.items as item, j}
+                <Item title="{item}" selected="{i == categoryIndex && j == itemIndex}" />
               {/each}
             </ul>
           {/each}
@@ -103,7 +134,7 @@
     {/if}
     <!-- Footer -->
     <footer
-      class="bg-zinc-800/85 flex h-10 w-full items-center space-x-2 border-t border-zinc-600 px-3 backdrop-blur"
+      class="flex h-10 w-full items-center space-x-2 border-t border-zinc-600 bg-zinc-800/90 px-3"
     >
       {#if expanded}
         <p class="mr-auto font-light text-zinc-100">
@@ -145,8 +176,6 @@
     </footer>
   </div>
 {/if}
-
-<svelte:window on:keydown="{handleKeyDown}" />
 
 <style lang="postcss">
   /* Chrome, Edge, and Safari */
