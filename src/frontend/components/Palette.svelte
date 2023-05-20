@@ -46,7 +46,7 @@
   }
 
   function handleKeyDown(event: KeyboardEvent) {
-    if (event.metaKey && event.key === "p") {
+    if ((event.metaKey || event.ctrlKey) && event.key === "p") {
       showPalette = !showPalette;
     }
     if (event.key === "Escape" && showPalette) {
