@@ -3,6 +3,14 @@
   import { Node, Slider, generateInput, generateOutput } from "svelvet";
   // import { brightness } from "../../stores/graphStore";
 
+  window.api.receive("pong", (value: number) => {
+    console.log(value);
+  });
+
+  const changeBrightness = async (value: number) => {
+    window.api.changeBrightness(value);
+  };
+
   type Inputs = {
     brightness: number;
   };
@@ -14,7 +22,7 @@
   const inputs = generateInput(initialData);
 
   export const processor = (inputs: Inputs) => {
-    console.log(inputs.brightness);
+    changeBrightness(inputs.brightness);
     //Increase brightness
     // brightness.update(inputs.brightness);
     return inputs.brightness;

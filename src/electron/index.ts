@@ -1,6 +1,7 @@
 import {
   app,
   BrowserWindow,
+  ipcMain,
   Notification,
   // nativeImage
 } from "electron";
@@ -30,10 +31,15 @@ const createWindow = () => {
     webPreferences: {
       devTools: isProd ? false : true,
       contextIsolation: true,
+      preload: join(__dirname, "preload.js"),
     },
     icon: "public/images/icon.png",
   });
 
+  ipcMain.on("ping", (event, message) => {
+    logger.info(message);
+    mainWindow?.webContents.send("pong", message);
+  });
   const url =
     // process.env.NODE_ENV === "production"
     isProd
