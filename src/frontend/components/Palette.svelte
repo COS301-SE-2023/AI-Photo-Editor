@@ -1,6 +1,8 @@
 <script lang="ts">
   import tinykeys from "tinykeys";
   import Item from "./Item.svelte";
+  import type { GraphNode } from "../types";
+  import { graphStore } from "../stores/GraphStore";
 
   let showPalette = false;
   let expanded = true;
@@ -18,12 +20,13 @@
   const categoriesOriginals: Category[] = [
     {
       title: "Nodes",
-      items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
+      // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
+      items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows"],
     },
-    {
-      title: "Commands",
-      items: ["Import", "Export"],
-    },
+    // {
+    //   title: "Commands",
+    //   items: ["Import", "Export"],
+    // },
   ];
 
   let categories = categoriesOriginals;
@@ -68,6 +71,27 @@
     }
   }
 
+  function addNode() {
+    if (!showPalette) return;
+
+    const item = categories[categoryIndex].items[itemIndex];
+
+    const graphNode: GraphNode = {
+      id: item.toLocaleLowerCase().replaceAll(" ", "-"),
+      name: item,
+      slider: { min: 0, max: 2, step: 0.1, fixed: 1, value: 1 },
+    };
+
+    let found = false;
+    $graphStore.nodes.forEach((n) => {
+      if (n.id === graphNode.id) found = true;
+    });
+
+    if (!found) {
+      graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
+    }
+  }
+
   tinykeys(window, {
     "$mod+p": (event) => {
       event.preventDefault();
@@ -86,6 +110,10 @@
     Tab: handleMoveDown,
     "Control+J": handleMoveDown,
     "Control+K": handleMoveUp,
+    Enter: () => {
+      addNode();
+      showPalette = false;
+    },
   });
 
   $: if (showPalette && inputElement) {

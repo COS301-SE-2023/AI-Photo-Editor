@@ -9,7 +9,7 @@
   import { PanelNode, PanelGroup, PanelLeaf } from "./PanelNode";
   import PanelBlip from "./PanelBlip.svelte";
   import { createEventDispatcher } from "svelte";
-  import Graph from "./tiles/Graph.svelte";
+  import Graph from "../components/Graph/Graph.svelte";
 
   const dispatch = createEventDispatcher();
 
