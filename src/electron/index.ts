@@ -1,13 +1,9 @@
-import {
-  app,
-  BrowserWindow,
-  Notification,
-  // nativeImage
-} from "electron";
+import { app, BrowserWindow, Notification } from "electron";
 import { join } from "path";
 import { parse } from "url";
 import { autoUpdater } from "electron-updater";
 
+import Handlers from "./lib/handlers";
 import logger from "./utils/logger";
 import settings from "./utils/settings";
 
@@ -30,6 +26,7 @@ const createWindow = () => {
     webPreferences: {
       devTools: isProd ? false : true,
       contextIsolation: true,
+      preload: join(__dirname, "preload.js"),
     },
     icon: "public/images/icon.png",
   });
@@ -54,7 +51,15 @@ const createWindow = () => {
   });
 };
 
-app.on("ready", createWindow);
+app.on("ready", () => {
+  createWindow();
+  new Handlers(mainWindow);
+});
+
+// app.whenReady((event) => {
+//   ipcMain.handle('test', test)
+//   createWindow();
+// })
 
 // those two events are completely optional to subscrbe to, but that's a common way to get the
 // user experience people expect to have on macOS: do not quit the application directly
