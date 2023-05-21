@@ -20,12 +20,18 @@
   </ol>
 </details>
 
-<img alt="" src="https://raw.githubusercontent.com/andreasbm/redev/assets/lines/aqua.png">
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
 <!--------------------------------------- OVERVIEW -------------------------------------->
 <h2 id="overview"> :cloud: Overview</h2>
+<p>
+  Blix is a cross-platform desktop application designed to give users a
+  powerful and intuitive photo editing experience. It provides a composable
+  node-based system that provides a common ground to facilitate collaborative
+  human/AI photo editing workflow.
+<p>
 
-<img alt="" src="https://raw.githubusercontent.com/andreasbm/redev/assets/lines/aqua.png">
+<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
 <!------------------------------------ DOCUMENTATION ------------------------------------>
 <h2 id="documentation"> :blue_book: Documentation</h2>
