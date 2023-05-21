@@ -23,10 +23,10 @@
       // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
       items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows"],
     },
-    // {
-    //   title: "Commands",
-    //   items: ["Import", "Export"],
-    // },
+    {
+      title: "Commands",
+      items: ["Import", "Export"],
+    },
   ];
 
   let categories = categoriesOriginals;
@@ -71,11 +71,20 @@
     }
   }
 
-  function addNode() {
+  function handleAction() {
     if (!showPalette) return;
 
     const item = categories[categoryIndex].items[itemIndex];
     const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
+
+    if (itemId === "import") {
+      window.api.send("open-file-dialog");
+      return;
+    }
+    if (itemId === "export") {
+      window.api.send("export-image");
+      return;
+    }
 
     const graphNode: GraphNode = {
       id: itemId,
@@ -130,7 +139,7 @@
     "Control+J": handleMoveDown,
     "Control+K": handleMoveUp,
     Enter: () => {
-      addNode();
+      handleAction();
       showPalette = false;
     },
   });

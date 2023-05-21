@@ -9,12 +9,21 @@
     src = `data:image/jpg;base64,${base64}`;
   });
 
+  window.api.receive("selected-file", (base64) => {
+    graphStore.set({ nodes: [] });
+    src = `data:image/jpg;base64,${base64}`;
+  });
+
   window.api.receive("pong", (value) => {
     console.log(value);
   });
 
   function chooseFile() {
     window.api.chooseFile();
+  }
+
+  function importImage() {
+    window.api.send("open-file-dialog");
   }
 
   function handleFileInput(event) {
@@ -46,7 +55,9 @@
 {/if} -->
 
 {#if src}
-  <img src="{src}" alt="Selected image" class="max-h-[600px]" />
+  <img src="{src}" alt="" class="max-h-[600px]" />
 {:else}
-  <button on:click="{chooseFile}">Click Me</button>
+  <button on:click="{importImage}" class="h-10 w-24 rounded bg-zinc-600 hover:border-white"
+    >Import</button
+  >
 {/if}

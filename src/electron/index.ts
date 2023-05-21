@@ -53,7 +53,7 @@ const createWindow = () => {
 
 app.on("ready", () => {
   createWindow();
-  new Handlers(mainWindow);
+  if (mainWindow) new Handlers(mainWindow);
 });
 
 // app.whenReady((event) => {
