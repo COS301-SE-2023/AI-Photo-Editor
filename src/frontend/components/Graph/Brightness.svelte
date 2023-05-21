@@ -23,15 +23,19 @@
   const inputs = generateInput(initialData);
 
   let data = {
-    brightness: 0,
-    saturation: undefined,
+    brightness: 1.0,
+    saturation: 1,
     hue: 0,
-    rotate: 0,
-    shadows: 0,
+    rotate: 20,
+    shadow: {
+      multiplier: 0.2,
+      offset: 2
+    }
   };
 
   export const processor = (inputs: Inputs) => {
     data.brightness = inputs.brightness;
+    //data.saturation = inputs.brightness;
     changeBrightness(data);
     //Increase brightness
     // brightness.update(inputs.brightness);
