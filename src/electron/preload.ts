@@ -1,14 +1,18 @@
 import { contextBridge, ipcRenderer } from "electron";
+import { IEditPhoto } from "./lib/interfaces";
 
 contextBridge.exposeInMainWorld("api", {
-  changeBrightness: (data: number) => {
-    ipcRenderer.send("change-brightness", data);
+  send: (channel: string, data: IEditPhoto) => {
+    const validChannels = ["fromMain", "editPhoto", "chosenFile"];
+    if (validChannels.includes(channel)) {
+      ipcRenderer.send(channel, data);
+    }
   },
-  chooseFile: () => ipcRenderer.send('chooseFile'),
   receive: (channel: string, func: (arg0: any) => void) => {
-    const validChannels = ["fromMain", "pong", "chosenFile"];
+    const validChannels = ["fromMain", "editPhoto", "chosenFile"];
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, (event, args) => func(args));
     }
   },
+  chooseFile: () => ipcRenderer.send("chooseFile"),
 });

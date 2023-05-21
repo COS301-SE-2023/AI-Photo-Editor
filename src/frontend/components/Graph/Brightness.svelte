@@ -1,20 +1,15 @@
 <script lang="ts">
   // import NodeWrapper from
   import { Node, Slider, generateInput, generateOutput } from "svelvet";
-  // import { ipcRenderer } from "electron";
 
   // import { brightness } from "../../stores/graphStore";
 
-  // async function test() {
-  //   return await ipcRenderer.invoke('test', 1);
-  // }
-
-  window.api.receive("pong", (value: number) => {
+  window.api.receive("editPhoto", (value: number) => {
     console.log(value);
   });
 
-  const changeBrightness = async (value: number) => {
-    window.api.changeBrightness(value);
+  const changeBrightness = async (value: any) => {
+    window.api.send("editPhoto", value);
   };
 
   type Inputs = {
@@ -27,8 +22,17 @@
 
   const inputs = generateInput(initialData);
 
+  let data = {
+    brightness: 0,
+    saturation: undefined,
+    hue: 0,
+    rotate: 0,
+    shadows: 0,
+  };
+
   export const processor = (inputs: Inputs) => {
-    changeBrightness(inputs.brightness);
+    data.brightness = inputs.brightness;
+    changeBrightness(data);
     //Increase brightness
     // brightness.update(inputs.brightness);
     return inputs.brightness;
