@@ -1,7 +1,7 @@
 <script lang="ts">
   import tinykeys from "tinykeys";
   import Item from "./Item.svelte";
-  import type { GraphNode } from "../types";
+  import type { GraphNode, GraphSlider } from "../types";
   import { graphStore } from "../stores/GraphStore";
 
   let showPalette = false;
@@ -75,11 +75,12 @@
     if (!showPalette) return;
 
     const item = categories[categoryIndex].items[itemIndex];
+    const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
 
     const graphNode: GraphNode = {
-      id: item.toLocaleLowerCase().replaceAll(" ", "-"),
+      id: itemId,
       name: item,
-      slider: { min: 0, max: 2, step: 0.1, fixed: 1, value: 1 },
+      slider: generateSlider(itemId),
     };
 
     let found = false;
@@ -90,6 +91,24 @@
     if (!found) {
       graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
     }
+  }
+
+  function generateSlider(id: string) {
+    const slider: GraphSlider = { min: 0, max: 2, step: 0.1, fixed: 1, value: 1 };
+
+    if (id === "rotate") {
+      slider.max = 360;
+      slider.step = 5;
+      slider.value = 0;
+      slider.fixed = 0;
+    } else if (id === "hue") {
+      slider.max = 360;
+      slider.step = 10;
+      slider.value = 0;
+      slider.fixed = 0;
+    }
+
+    return slider;
   }
 
   tinykeys(window, {
@@ -125,6 +144,7 @@
     expanded = true;
     categoryIndex = 0;
     itemIndex = 0;
+    categories = categoriesOriginals;
   }
 </script>
 

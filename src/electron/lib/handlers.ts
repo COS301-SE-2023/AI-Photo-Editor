@@ -8,9 +8,8 @@ const edit = new Edit();
 
 export default class Handlers {
   private editFileHandler(mainWindow: BrowserWindow | null) {
-
     ipcMain.on("editPhoto", async (event, data: IEditPhoto) => {
-        mainWindow?.webContents.send("chosenFile", await edit.editPhoto(data));
+      mainWindow?.webContents.send("chosenFile", await edit.editPhoto(data));
     });
   }
 

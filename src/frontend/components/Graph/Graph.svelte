@@ -3,22 +3,6 @@
   import { Svelvet, Node } from "svelvet";
   import { graphStore } from "../../stores/GraphStore";
   import NodeWrapper from "./NodeWrapper.svelte";
-  import type { GraphNode } from "../../types";
-
-  const nodes: GraphNode[] = [
-    {
-      id: "brightness",
-      name: "Brightness",
-      slider: { min: 0, max: 2, step: 0.1, fixed: 1, value: 1 },
-    },
-    {
-      id: "saturation",
-      name: "Saturation",
-      slider: { min: 0, max: 2, step: 0.1, fixed: 1, value: 1 },
-    },
-  ];
-
-  graphStore.set({ nodes });
 
   graphStore.subscribe((store) => {
     console.log(store.nodes);

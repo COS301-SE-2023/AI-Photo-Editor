@@ -29,8 +29,8 @@
     rotate: 20,
     shadow: {
       multiplier: 0.2,
-      offset: 2
-    }
+      offset: 2,
+    },
   };
 
   export const processor = (inputs: Inputs) => {

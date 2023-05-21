@@ -180,7 +180,7 @@
     {#if layout.content === "graph"}
       <Graph />
     {:else if layout.content === "image"}
-      <div class="flex justify-center items-center w-full h-full p-5">
+      <div class="flex h-full w-full items-center justify-center p-5">
         <!-- <Image src="images/svelte-so-hot.jpg"/> -->
         <!-- <Image src="images/image.png"/> -->
         <Test />
