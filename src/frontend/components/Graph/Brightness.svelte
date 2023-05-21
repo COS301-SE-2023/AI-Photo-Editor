@@ -1,7 +1,13 @@
 <script lang="ts">
   // import NodeWrapper from
   import { Node, Slider, generateInput, generateOutput } from "svelvet";
+  // import { ipcRenderer } from "electron";
+
   // import { brightness } from "../../stores/graphStore";
+
+  // async function test() {
+  //   return await ipcRenderer.invoke('test', 1);
+  // }
 
   window.api.receive("pong", (value: number) => {
     console.log(value);
@@ -39,7 +45,7 @@
     <div class="justify-centre flex flex-col items-center">
       <Slider
         min="{0}"
-        max="{1}"
+        max="{2}"
         fixed="{1}"
         step="{0.1}"
         parameterStore="{$inputs.brightness}"

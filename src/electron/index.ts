@@ -3,14 +3,18 @@ import {
   BrowserWindow,
   ipcMain,
   Notification,
+  // dialog
   // nativeImage
 } from "electron";
 import { join } from "path";
 import { parse } from "url";
+import fs from "fs";
 import { autoUpdater } from "electron-updater";
 
 import logger from "./utils/logger";
 import settings from "./utils/settings";
+
+import { test } from "./lib/exposed-functions"
 
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 
@@ -60,7 +64,35 @@ const createWindow = () => {
   });
 };
 
-app.on("ready", createWindow);
+app.on("ready", () => {
+  // ipcMain.handle("test", (event, args) => test(args));
+  ipcMain.on("change-brightness", (event, args) => {
+      mainWindow?.webContents.send("chosenFile", test(args))
+  });
+
+  ipcMain.on("chooseFile", (event, args) => {
+    // const result = dialog.showOpenDialog({
+    //   properties: ["openFile"],
+    //   filters: [{ name: "Images", extensions: ["png","jpg","jpeg"] }]
+    // });
+  
+    // result.then(({canceled, filePaths, bookmarks}) => {
+    //   console.log(filePaths)
+    //   const base64 = fs.readFileSync(filePaths[0]).toString('base64');
+    //   // event.reply("chosenFile", base64);
+    //   mainWindow?.webContents.send("chosenFile", base64)
+    // });
+
+      const base64 = fs.readFileSync("./assets/image.png").toString('base64');
+      mainWindow?.webContents.send("chosenFile", base64)
+  });
+  createWindow()
+});
+
+// app.whenReady((event) => {
+//   ipcMain.handle('test', test)
+//   createWindow();
+// })
 
 // those two events are completely optional to subscrbe to, but that's a common way to get the
 // user experience people expect to have on macOS: do not quit the application directly
