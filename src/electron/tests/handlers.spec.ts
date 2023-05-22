@@ -1,46 +1,134 @@
-import Handlers from "../lib/handlers";
-import { ipcMain, BrowserWindow } from "electron";
-
-jest.mock("electron", () => ({
-  ipcMain: {
-    on: jest.fn((channel: string, func: any) => channel),
-  },
-  BrowserWindow: jest.fn().mockImplementation(() => {}),
+import expect from "expect";
+import  Handlers  from "../lib/handlers"
+import { BrowserWindow, ipcMain, IpcMainEvent} from "electron";
+jest.mock('fs', () => ({
+    readFileSync: jest.fn().mockReturnValue('mocked_base64_string'),
+    readFile: jest.fn((filePath, callback) => callback(null, 'mocked_file_data')),
+    existsSync: jest.fn()
 }));
 
-describe("Test Handlers", () => {
-  let handlers: Handlers;
-  let browser: BrowserWindow;
+jest.mock('../lib/exposed-functions')
+//jest.mock("fs");
 
-  beforeAll(async () => {
-    browser = new BrowserWindow();
-    handlers = new Handlers(browser);
-  });
 
-  test("Should attatch eventListeners", () => {
-    expect(ipcMain.on).toBeCalledTimes(4);
-  });
+const IpcMainEventMock: IpcMainEvent = {
+    sender: {
+        send: jest.fn((channel, callback) => {
+            return channel;
+        })
+    }
+} as any;
 
-  test("Should send response to frontend", () => {
-    expect(BrowserWindow).toBeCalledTimes(1);
-  });
+jest.mock('electron', () => ({
+    ipcMain: {
+        on: jest.fn((event, callback) => {
+            if(event == "open-file-dialog"){
+                callback(IpcMainEventMock);
+            }
+            callback();
+            return event;
+        })
+    },
+    dialog: {
+        showOpenDialog: jest.fn(() => {
+            return {
+                canceled: true,
+                filePaths: "hello"
+            }
+        }),
+        showSaveDialog: jest.fn(() => {
+            return {
+                canceled: true,
+                filePaths: "hello"
+            }
+        }),
+    },
+    IpcMainEvent: {
+        sender: {
+            send: jest.fn()
+        }
+    }
+}));
 
-  test("chooseFileHandler should attatch to correct channel", () => {
-    expect(ipcMain.on).lastReturnedWith("export-image");
-  });
+const mainWindow: BrowserWindow = {
+    webContents: {
+        send: jest.fn((channel, callback) => {
+            return channel;
+        })
+    }
+} as any;
 
-  test("editFileHandler should attatch to correct channel", () => {
-    handlers.editFileHandler();
-    expect(ipcMain.on).lastReturnedWith("editPhoto");
-  });
 
-  test("editFileHandler should attatch to correct channel", () => {
-    handlers.chooseFileHandler();
-    expect(ipcMain.on).lastReturnedWith("chooseFile");
-  });
+describe('Test Handlers', () => {
+    let handlers: Handlers;
 
-  test("editFileHandler should attatch to correct channel", () => {
-    handlers.openFileDialogHandler();
-    expect(ipcMain.on).lastReturnedWith("open-file-dialog");
+    beforeEach(async () => {
+        jest.clearAllMocks();
+        handlers = new Handlers(mainWindow);
+    })
+
+    test("Should attatch eventListeners", () => {
+        expect(ipcMain.on).toBeCalledTimes(5);
+    })
+
+    // Check editFileHandler
+    test("editFileHandler should attach to correct channel", () => {
+        handlers.editFileHandler();
+        expect(ipcMain.on).toBeCalledWith("editPhoto", expect.anything());
+    })
+
+    test("editFileHandler should send to correct channel", () => {
+        handlers.selectedFilePath = "/test/path"
+        handlers.editFileHandler();
+        expect(mainWindow.webContents.send).toHaveBeenLastCalledWith("chosenFile", "mocked_base64_string")
+    })
+
+    test("editFileHandler should not send to channel", () => {
+        handlers.selectedFilePath = ""
+        handlers.editFileHandler();
+        expect(mainWindow.webContents.send).toHaveBeenCalledTimes(1);
+    })
+     
+
+    // Check chooseFileHandler
+    test("chooseFileHandler should attach to correct channel", () => {
+        handlers.chooseFileHandler();
+        expect(ipcMain.on).toBeCalledWith("chooseFile", expect.anything());
+    })
+
+    test("chooseFileHandler should send to correct channel", () => {
+        handlers.selectedFilePath = "/test/path"
+        handlers.chooseFileHandler();
+        expect(mainWindow.webContents.send).toHaveBeenLastCalledWith("chosenFile", "mocked_base64_string");
+        expect(mainWindow.webContents.send).toHaveBeenCalledTimes(2);
+    })
+
+
+    // Check clearFileHandler
+    test("clearFileHandler should attach to correct channel", () => {
+        handlers.clearFileHandler();
+        expect(ipcMain.on).toBeCalledWith("clear-file", expect.anything());
+    })
+
+    test("clearFileHandler should clear selectedPath", () => {
+        handlers.selectedFilePath = "/test/path"
+        handlers.clearFileHandler();
+        expect(handlers.selectedFilePath).toBe("");
+
+    })
+
+    // Check openFileDialogHandler
+    test("openFileDialogHandler should attach to correct channel", () => {
+        handlers.openFileDialogHandler();
+        expect(ipcMain.on).lastReturnedWith("open-file-dialog");
+    })
+
+
+    //Check exportSavedEditedImageHandler
+
+    test("exportSaveEditedImageHandler should attach to correct channel", () => {
+        handlers.exportSaveEditedImageHandler();
+        expect(ipcMain.on).lastReturnedWith("export-image");
+    })
+
   });
-});

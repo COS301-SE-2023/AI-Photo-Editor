@@ -1,7 +1,6 @@
 import { dialog, ipcMain, BrowserWindow } from "electron";
 import { IEditPhoto } from "./interfaces";
-
-import fs from "fs";
+import * as Fs from "fs";
 import { Edit } from "./exposed-functions";
 import logger from "../utils/logger";
 
@@ -9,7 +8,7 @@ const edit = new Edit();
 
 export default class Handlers {
   private mainWindow: BrowserWindow;
-  private selectedFilePath: string;
+  public selectedFilePath: string;
 
   public editFileHandler() {
     ipcMain.on("editPhoto", async (event, data: IEditPhoto) => {
@@ -23,7 +22,7 @@ export default class Handlers {
 
   public chooseFileHandler() {
     ipcMain.on("chooseFile", () => {
-      const base64 = fs.readFileSync("./assets/image.png").toString("base64");
+      const base64 = Fs.readFileSync("./assets/image.png").toString("base64");
       this.mainWindow.webContents.send("chosenFile", base64);
     });
   }
@@ -43,7 +42,7 @@ export default class Handlers {
 
       if (!result.canceled && result.filePaths.length > 0) {
         this.selectedFilePath = result.filePaths[0];
-        fs.readFile(this.selectedFilePath, (err, data) => {
+        Fs.readFile(this.selectedFilePath, (err, data) => {
           if (err) {
             event.sender.send("selected-file", { error: err.message });
           } else {
@@ -65,8 +64,8 @@ export default class Handlers {
       });
 
       if (!result.canceled && result.filePath) {
-        const readStream = fs.createReadStream("./assets/edited-image.png");
-        const writeStream = fs.createWriteStream(result.filePath);
+        const readStream = Fs.createReadStream("./assets/edited-image.png");
+        const writeStream = Fs.createWriteStream(result.filePath);
         readStream.pipe(writeStream);
         writeStream.on("error", (err) => {
           logger.error(err);
