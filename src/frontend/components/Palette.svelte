@@ -3,6 +3,7 @@
   import Item from "./Item.svelte";
   import type { GraphNode, GraphSlider } from "../types";
   import { graphStore } from "../stores/GraphStore";
+  import { paletteStore } from "../stores/PaletteStore";
 
   let showPalette = false;
   let expanded = true;
@@ -25,7 +26,7 @@
     },
     {
       title: "Commands",
-      items: ["Import", "Export"],
+      items: ["Import", "Export", "Clear"],
     },
   ];
 
@@ -87,11 +88,18 @@
       window.api.send("export-image");
       return;
     }
+    if (itemId === "clear") {
+      graphStore.set({ nodes: [] });
+      paletteStore.update((store) => ({ ...store, src: "" }));
+      window.api.send("clear-file");
+      return;
+    }
 
     const graphNode: GraphNode = {
       id: itemId,
       name: item,
       slider: generateSlider(itemId),
+      connection: "",
     };
 
     let found = false;

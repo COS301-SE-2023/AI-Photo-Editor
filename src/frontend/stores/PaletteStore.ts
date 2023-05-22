@@ -8,4 +8,5 @@ export const paletteStore = writable<PaletteStore>({
   selectedItemIndex: 0,
   categories: [],
   results: [],
+  src: "",
 });

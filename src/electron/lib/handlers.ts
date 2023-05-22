@@ -28,6 +28,13 @@ export default class Handlers {
     });
   }
 
+  public clearFileHandler() {
+    ipcMain.on("clear-file", () => {
+      console.log("here");
+      this.selectedFilePath = "";
+    });
+  }
+
   public openFileDialogHandler() {
     ipcMain.on("open-file-dialog", async (event: Electron.IpcMainEvent) => {
       const result = await dialog.showOpenDialog(this.mainWindow, {
@@ -79,5 +86,6 @@ export default class Handlers {
     this.chooseFileHandler();
     this.openFileDialogHandler();
     this.exportSaveEditedImageHandler();
+    this.clearFileHandler();
   }
 }

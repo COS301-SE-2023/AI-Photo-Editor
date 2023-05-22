@@ -6,6 +6,7 @@ export interface GraphNode {
   id: string;
   name: string;
   slider: GraphSlider | null;
+  connection: string;
 }
 
 export interface GraphSlider {
@@ -22,6 +23,7 @@ export interface PaletteStore {
   selectedItemIndex: number;
   categories: PaletteCategory[];
   results: PaletteCategory[];
+  src: "";
 }
 
 export type PaletteItem = {

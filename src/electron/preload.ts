@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("api", {
       "open-file-dialog",
       "selected-file",
       "export-image",
+      "clear-file",
     ];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
@@ -23,6 +24,7 @@ contextBridge.exposeInMainWorld("api", {
       "open-file-dialog",
       "selected-file",
       "export-image",
+      "clear-file",
     ];
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, (event, args) => func(args));

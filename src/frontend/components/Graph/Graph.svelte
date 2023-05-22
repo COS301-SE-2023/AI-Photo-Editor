@@ -7,7 +7,7 @@
 
 <Svelvet id="my-canvas" zoom="{0.7}" minimap theme="custom-dark">
   {#each $graphStore.nodes as node (node.id)}
-    <Node>
+    <Node id="{node.name}">
       <NodeWrapper node="{node}" />
     </Node>
   {/each}
