@@ -22,7 +22,7 @@
     {
       title: "Nodes",
       // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
-      items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows"],
+      items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows", "Output"],
     },
     {
       title: "Commands",
@@ -156,7 +156,7 @@
     ArrowUp: () => {
       if (!expanded) expanded = true;
     },
-    "Sift+Tab": handleMoveDown,
+    "Shift+Tab": handleMoveUp,
     Tab: handleMoveDown,
     "Control+J": handleMoveDown,
     "Control+K": handleMoveUp,

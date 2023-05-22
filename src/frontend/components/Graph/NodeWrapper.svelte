@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Slider, generateInput, generateOutput } from "svelvet";
+  import { Slider, generateInput, generateOutput, Anchor } from "svelvet";
   import type { GraphNode } from "../../types";
   import { graphStore } from "../../stores/GraphStore";
 
@@ -40,6 +40,8 @@
   }
 </script>
 
+<Anchor input />
+
 <div class="flex w-56 flex-col rounded-lg border-2 border-zinc-500 bg-zinc-700 p-2">
   <div class="mb-4 flex border-b-2 border-zinc-500">
     <p class="mb-1 font-sans text-base text-white">{node.name}</p>
@@ -60,16 +62,22 @@
       ></path>
     </svg>
   </div>
-  <div class="justify-centre flex flex-col items-center">
-    <Slider
-      min="{node.slider?.min}"
-      max="{node.slider?.max}"
-      fixed="{node.slider?.fixed}"
-      step="{node.slider?.step}"
-      parameterStore="{$inputs.value}"
-      fontColor="white"
-      barColor="grey"
-      bgColor="black"
-    />
-  </div>
+  {#if node.name !== "Output"}
+    <div class="justify-centre flex flex-col items-center">
+      <Slider
+        min="{node.slider?.min}"
+        max="{node.slider?.max}"
+        fixed="{node.slider?.fixed}"
+        step="{node.slider?.step}"
+        parameterStore="{$inputs.value}"
+        fontColor="white"
+        barColor="grey"
+        bgColor="black"
+      />
+    </div>
+  {/if}
 </div>
+
+{#if node.name !== "Output"}
+  <Anchor output />
+{/if}
