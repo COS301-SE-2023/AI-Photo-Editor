@@ -11,7 +11,7 @@ export default class Handlers {
   private mainWindow: BrowserWindow;
   private selectedFilePath: string;
 
-  private editFileHandler() {
+  public editFileHandler() {
     ipcMain.on("editPhoto", async (event, data: IEditPhoto) => {
       if (!this.selectedFilePath) return;
       this.mainWindow.webContents.send(
@@ -21,14 +21,14 @@ export default class Handlers {
     });
   }
 
-  private chooseFileHandler() {
+  public chooseFileHandler() {
     ipcMain.on("chooseFile", () => {
       const base64 = fs.readFileSync("./assets/image.png").toString("base64");
       this.mainWindow.webContents.send("chosenFile", base64);
     });
   }
 
-  private openFileDialogHandler() {
+  public openFileDialogHandler() {
     ipcMain.on("open-file-dialog", async (event: Electron.IpcMainEvent) => {
       const result = await dialog.showOpenDialog(this.mainWindow, {
         properties: ["openFile"],
@@ -49,7 +49,7 @@ export default class Handlers {
     });
   }
 
-  private exportSaveEditedImageHandler() {
+  public exportSaveEditedImageHandler() {
     ipcMain.on("export-image", async () => {
       if (!this.selectedFilePath) return;
 

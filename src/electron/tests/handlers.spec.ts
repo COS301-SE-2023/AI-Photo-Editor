@@ -6,8 +6,7 @@ jest.mock('electron', () => ({
     ipcMain: {
         on: jest.fn((channel: string, func: any) => channel)
     },
-    BrowserWindow: jest.fn().mockImplementation((data) => {
-        console.log(data)
+    BrowserWindow: jest.fn().mockImplementation(() => {
     }),
 }));
 
@@ -22,7 +21,7 @@ describe('Test Handlers', () => {
     })
 
     test("Should attatch eventListeners", () => {
-        expect(ipcMain.on).toBeCalledTimes(2);
+        expect(ipcMain.on).toBeCalledTimes(4);
     })
 
     test("Should send response to frontend", () => {
@@ -30,12 +29,22 @@ describe('Test Handlers', () => {
     })
 
     test("chooseFileHandler should attatch to correct channel", () => {
-        expect(ipcMain.on).lastReturnedWith("chooseFile")
+        expect(ipcMain.on).lastReturnedWith("export-image")
     })
 
     test("editFileHandler should attatch to correct channel", () => {
-        handlers.editFileHandler(browser);
+        handlers.editFileHandler();
         expect(ipcMain.on).lastReturnedWith("editPhoto");
+    })
+
+    test("editFileHandler should attatch to correct channel", () => {
+        handlers.chooseFileHandler();
+        expect(ipcMain.on).lastReturnedWith("chooseFile");
+    })
+
+    test("editFileHandler should attatch to correct channel", () => {
+        handlers.openFileDialogHandler();
+        expect(ipcMain.on).lastReturnedWith("open-file-dialog");
     })
 
   });
