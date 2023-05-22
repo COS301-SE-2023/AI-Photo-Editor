@@ -30,7 +30,6 @@ export default class Handlers {
 
   public clearFileHandler() {
     ipcMain.on("clear-file", () => {
-      console.log("here");
       this.selectedFilePath = "";
     });
   }

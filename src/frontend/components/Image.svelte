@@ -47,14 +47,6 @@
 {#if $paletteStore.src}
   <img src="{$paletteStore.src}" alt="" class="max-h-[600px]" />
 {:else}
-  <!-- <div
-    on:click="{importImage}"
-    on:keydown="{importImage}"
-    class="flex h-10 w-24 items-center justify-center rounded border border-zinc-500 bg-zinc-600 text-zinc-100 hover:cursor-pointer hover:border-zinc-300 focus:bg-zinc-700"
-  >
-    Import
-  </div> -->
-
   <div
     class="flex w-full items-center justify-center"
     on:click="{importImage}"
@@ -81,7 +73,6 @@
         >
         <p class="mb-2 text-sm text-gray-400"><span class="font-semibold">Click to import</span></p>
       </div>
-      <input id="dropzone-file" type="file" class="hidden" />
     </label>
   </div>
 {/if}
