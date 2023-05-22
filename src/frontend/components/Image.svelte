@@ -1,24 +1,33 @@
-<script lang="ts">
-  import { onMount } from "svelte";
+<script>
   import { graphStore } from "../stores/GraphStore";
 
-  let ref: HTMLInputElement;
   let src = "";
 
-  let loadState = "failed";
-
-  onMount(() => {
-    const img = new Image();
-    img.src = src;
-    loadState = "loading";
-
-    img.onload = () => {
-      loadState = "loaded";
-    };
-    img.onerror = () => {
-      loadState = "failed";
-    };
+  window.api.receive("chosenFile", (base64) => {
+    src = `data:image/jpg;base64,${base64}`;
   });
+
+  window.api.receive("selected-file", (base64) => {
+    graphStore.set({ nodes: [] });
+    src = `data:image/jpg;base64,${base64}`;
+  });
+
+  function chooseFile() {
+    window.api.chooseFile();
+  }
+
+  function importImage() {
+    window.api.send("open-file-dialog");
+  }
+
+  function handleFileInput(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      selectedImage = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
 
   graphStore.subscribe((store) => {
     let data = {};
@@ -28,44 +37,18 @@
       data[n.id] = n.slider?.value || 0;
     });
 
-    console.log(data);
     window.api.send("editPhoto", data);
   });
 </script>
 
-{#if loadState == "failed"}
-  <div class="flex w-full items-center justify-center">
-    <label
-      for="dropzone-file"
-      class="hover:bg-bray-800 flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-zinc-600 bg-zinc-700 hover:border-zinc-500 hover:bg-zinc-600"
-    >
-      <div class="flex flex-col items-center justify-center pb-6 pt-5">
-        <svg
-          aria-hidden="true"
-          class="mb-3 h-10 w-10 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-          ><path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-          ></path></svg
-        >
-        <p class="mb-2 text-sm text-zinc-400">
-          <span class="font-semibold">Click to upload</span> or drag and drop
-        </p>
-        <p class="text-xs text-zinc-400">SVG, PNG, JPG</p>
-      </div>
-      <input id="dropzone-file" type="file" class="hidden" bind:this="{ref}" />
-    </label>
+{#if src}
+  <img src="{src}" alt="" class="max-h-[600px]" />
+{:else}
+  <div
+    on:click="{importImage}"
+    on:keydown="{importImage}"
+    class="flex h-10 w-24 items-center justify-center rounded border border-zinc-500 bg-zinc-600 text-zinc-100 hover:cursor-pointer hover:border-zinc-300 focus:bg-zinc-700"
+  >
+    Import
   </div>
-{:else if loadState == "loaded"}
-  <img src="{src}" alt="Document" class="test" style="filter: brightness(0.8);" />
-{:else if loadState == "failed"}
-  <img src="" alt="Not Found" />
-{:else if loadState == "loading"}
-  <img src="" alt="Loading..." />
 {/if}

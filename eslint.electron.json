@@ -159,6 +159,7 @@
       }
     ],
     "use-isnan": "error",
-    "valid-typeof": "off"
+    "valid-typeof": "off",
+    "@typescript-eslint/no-misused-promises": "off"
   }
 }

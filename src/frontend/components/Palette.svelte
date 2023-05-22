@@ -40,13 +40,14 @@
 
   function onSearch(): void {
     expanded = true;
+    categoryIndex = 0;
+    itemIndex = 0;
     let categoriesDeepCopy = JSON.parse(JSON.stringify(categoriesOriginals));
     categories = categoriesDeepCopy.filter((category: Category) => {
       category.items = filterList(category.items);
       if (category.items.length) return category;
       return;
     });
-    console.log(categories);
   }
 
   function handleMoveDown() {
@@ -74,6 +75,7 @@
   function handleAction() {
     if (!showPalette) return;
 
+    showPalette = false;
     const item = categories[categoryIndex].items[itemIndex];
     const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
 
@@ -99,6 +101,18 @@
 
     if (!found) {
       graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
+    }
+  }
+
+  function handleItemClick(event: CustomEvent<{ id: string }>) {
+    for (let i = 0; i < categories.length; i++) {
+      for (let j = 0; j < categories[i].items.length; j++) {
+        if (categories[i].items[j] === event.detail.id) {
+          categoryIndex = i;
+          itemIndex = j;
+          handleAction();
+        }
+      }
     }
   }
 
@@ -138,10 +152,7 @@
     Tab: handleMoveDown,
     "Control+J": handleMoveDown,
     "Control+K": handleMoveUp,
-    Enter: () => {
-      handleAction();
-      showPalette = false;
-    },
+    Enter: handleAction,
   });
 
   $: if (showPalette && inputElement) {
@@ -182,7 +193,11 @@
             <div class="p4 m-1 text-xs font-semibold text-zinc-400">{category.title}</div>
             <ul>
               {#each category.items as item, j}
-                <Item title="{item}" selected="{i == categoryIndex && j == itemIndex}" />
+                <Item
+                  title="{item}"
+                  selected="{i == categoryIndex && j == itemIndex}"
+                  on:itemClicked="{handleItemClick}"
+                />
               {/each}
             </ul>
           {/each}

@@ -6,6 +6,8 @@ import { IEditPhoto } from "./interfaces";
 
 export class Edit {
   public async editPhoto(data: IEditPhoto, filePath: string) {
+    if (!filePath) return;
+
     const image = sharp(filePath);
     image.modulate({
       brightness: data.brightness ? data.brightness : 1,

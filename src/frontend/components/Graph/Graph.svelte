@@ -3,13 +3,9 @@
   import { Svelvet, Node } from "svelvet";
   import { graphStore } from "../../stores/GraphStore";
   import NodeWrapper from "./NodeWrapper.svelte";
-
-  graphStore.subscribe((store) => {
-    console.log(store.nodes);
-  });
 </script>
 
-<Svelvet id="my-canvas" zoom="{0.5}" minimap theme="custom-dark">
+<Svelvet id="my-canvas" zoom="{0.7}" minimap theme="custom-dark">
   {#each $graphStore.nodes as node}
     <Node>
       <NodeWrapper node="{node}" />

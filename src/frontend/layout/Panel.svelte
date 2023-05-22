@@ -11,7 +11,6 @@
   import { createEventDispatcher } from "svelte";
   import Graph from "../components/Graph/Graph.svelte";
   import Image from "../components/Image.svelte";
-  import Test from "../components/Test.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -181,9 +180,7 @@
       <Graph />
     {:else if layout.content === "image"}
       <div class="flex h-full w-full items-center justify-center p-5">
-        <!-- <Image src="images/svelte-so-hot.jpg"/> -->
-        <!-- <Image src="images/image.png"/> -->
-        <Test />
+        <Image />
       </div>
     {/if}
     <!-- {layout.content} -->
