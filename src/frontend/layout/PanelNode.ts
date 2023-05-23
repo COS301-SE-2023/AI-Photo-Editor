@@ -58,19 +58,19 @@ export class PanelGroup extends PanelNode {
   // Print tree for debug
   print(indent = 0): string {
     let res;
-    if(this.parent){
-      res = `${this.name}[${this.parent?.name}](${this.index})\n`; }
-    else{ 
-      res = `${this.name}[NULL](${this.index})\n`; }
+    if (this.parent) {
+      res = `${this.name}[${this.parent?.name}](${this.index})\n`;
+    } else {
+      res = `${this.name}[NULL](${this.index})\n`;
+    }
     for (const p of this.panels) {
       res += " ".repeat(indent);
       if (p instanceof PanelGroup) {
         res += `- ${p.print(indent + 2)}`;
       } else if (p instanceof PanelLeaf) {
-        if(p.parent){
+        if (p.parent) {
           res += `+ ${p.content}[${p.parent?.name}](${p.index})\n`;
-        }
-        else{
+        } else {
           res += `+ ${p.content}[NULL](${p.index})\n`;
         }
       }

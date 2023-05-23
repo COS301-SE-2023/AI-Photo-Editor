@@ -1,10 +1,12 @@
 <script lang="ts">
   import Layout from "./layout/Layout.svelte";
   import Navbar from "./layout/Navbar.svelte";
+  import Palette from "./components/Palette.svelte";
 </script>
 
 <div class="navbar"><Navbar /></div>
 <div class="layout"><Layout /></div>
+<Palette />
 
 <style lang="postcss" global>
   @tailwind base;

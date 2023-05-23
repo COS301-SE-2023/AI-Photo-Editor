@@ -56,15 +56,25 @@
     "lint:svelte": "eslint -c eslint.svelte.json --ext .js,.ts src/frontend",
     "lint": "npm-run-all -s lint:electron lint:svelte",
     "prepublishOnly": "npm-run-all -s test lint",
-    "preversion": "npm-run-all -s lint format"
+    "preversion": "npm-run-all -s lint format",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "src/electron/**/*.{js,ts}": "eslint -c eslint.electron.json",
+    "src/frontend/**/*.{js,ts}": "eslint -c eslint.svelte.json",
+    "(src|scripts)/**": "prettier --write --ignore-unknown"
   },
   "dependencies": {
+    "electron-ipc-mock": "^0.0.3",
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",
     "electron-updater": "^5.3.0",
-    "svelvet": "^7.0.42"
+    "sharp": "^0.32.1",
+    "svelvet": "^7.0.42",
+    "tinykeys": "^1.4.0"
   },
   "devDependencies": {
+    "@catppuccin/tailwindcss": "^0.1.1",
     "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-terser": "^0.4.1",
@@ -86,7 +96,9 @@
     "eslint-plugin-jsdoc": "^43.2.0",
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "html-minifier": "^4.0.0",
+    "husky": "^8.0.3",
     "jest": "^29.5.0",
+    "lint-staged": "^13.2.2",
     "nodemon": "^2.0.22",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.23",
