@@ -36,6 +36,15 @@
 <!------------------------------------ DOCUMENTATION ------------------------------------>
 <h2 id="documentation"> :blue_book: Documentation</h2>
 
+<h3>Software Requirement Specification</h3>
+<a href="https://drive.google.com/file/d/1ATjzOak-0K-Q_kudSD9OEBIK9wS2q4Gy/view?usp=sharing">SRSv1</a>
+
+<h3>Contributions</h3>
+<a href="https://drive.google.com/file/d/1ewItSWd0Ag0mQbVnYTd4y8H6PclSpRNi/view?usp=sharing">Documentation Contributions</a>
+
+<h3>Project Management</h3>
+<a href="https://github.com/orgs/COS301-SE-2023/projects/15">Project Board</a>
+
 <img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
 <!---------------------------------------- DEMOS ---------------------------------------->
@@ -68,19 +77,19 @@
 	</tr>
 	<tr>
 		<td>
-			<img src="https://media.licdn.com/dms/image/C5603AQGolr-2x_C60Q/profile-displayphoto-shrink_400_400/0/1622237375570?e=1688601600&v=beta&t=_YwM-8OA2NBe4t-FpPsYkgdxsIr1kRWlH2YUSbJ8jvI" width="140" height="130">
+			<img src="https://media.licdn.com/dms/image/C5603AQGolr-2x_C60Q/profile-displayphoto-shrink_400_400/0/1622237375570?e=1688601600&v=beta&t=_YwM-8OA2NBe4t-FpPsYkgdxsIr1kRWlH2YUSbJ8jvI" width="140" height="auto">
 		</td>
 		<td>
-			<img src="https://avatars.githubusercontent.com/u/104788496?v=4" width="140" height="130">
+			<img src="https://drive.google.com/uc?id=1RdIZmY1P4AK-YaDoww1Zwc1O66Wu3_03" width="140" height="auto">
 		</td>
 		<td>
-			<img src="https://avatars.githubusercontent.com/u/79510505?v=4" width="140" height="130">
+			<img src="https://avatars.githubusercontent.com/u/79510505?v=4" width="140" height="auto">
 		</td>
 		<td>
-			<img src="https://media.licdn.com/dms/image/C5603AQF4qbUwzHCD6w/profile-displayphoto-shrink_400_400/0/1645976107855?e=1688601600&v=beta&t=tJPTJPLuaaLLoz98hrrjM1HQASkFXHlYG7b0Byqxv1M" width="140" height="130">
+			<img src="https://media.licdn.com/dms/image/C5603AQF4qbUwzHCD6w/profile-displayphoto-shrink_400_400/0/1645976107855?e=1688601600&v=beta&t=tJPTJPLuaaLLoz98hrrjM1HQASkFXHlYG7b0Byqxv1M" width="140" height="auto">
 		</td>
 		<td>
-			<img src="https://avatars.githubusercontent.com/u/100900058?v=4" width="140" height="130">
+			<img src="https://drive.google.com/uc?id=1WHSB6AdZ5t4_5uempkB3uJRvs-K8b01M" width="140" height="auto">
 		</td>
 	</tr>
 		<td align="center">
