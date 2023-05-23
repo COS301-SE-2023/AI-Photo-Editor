@@ -1,5 +1,6 @@
 <!-- The navbar at the top of the page -->
-<div class="navbar navbar w-full">
+<!-- <div class="navbar navbar w-full"> -->
+<div class="w-full bg-ctp-base">
   <div class="logo font-mono">AI Photo Editor</div>
 </div>
 

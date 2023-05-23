@@ -1,11 +1,16 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
-<script>
-  import { Svelvet, ThemeToggle, Node, Background } from "svelvet";
+<script lang="ts">
+  import { Svelvet, Node, Anchor } from "svelvet";
+  import { graphStore } from "../../stores/GraphStore";
+  import NodeWrapper from "./NodeWrapper.svelte";
 </script>
 
-<Svelvet id="my-canvas" zoom="{0.5}" minimap theme="custom-theme">
-  <Node bgColor="#ec4899" height="{200}" position="{{ x: 100, y: 100 }}" />
-  <ThemeToggle main="custom-dark" alt="light" slot="toggle" mainIcon="light_mode" />
+<Svelvet id="my-canvas" zoom="{0.7}" minimap theme="custom-dark">
+  {#each $graphStore.nodes as node (node.id)}
+    <Node id="{node.name}">
+      <NodeWrapper node="{node}" />
+    </Node>
+  {/each}
 </Svelvet>
 
 <style>
