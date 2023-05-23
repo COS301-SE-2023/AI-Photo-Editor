@@ -80,19 +80,19 @@
 	</tr>
 	<tr>
 		<td>
-			<img src="https://media.licdn.com/dms/image/C5603AQGolr-2x_C60Q/profile-displayphoto-shrink_400_400/0/1622237375570?e=1688601600&v=beta&t=_YwM-8OA2NBe4t-FpPsYkgdxsIr1kRWlH2YUSbJ8jvI" width="140" height="auto">
+			<img src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/armand.png" width="140" height="auto" alt="Armand">
 		</td>
 		<td>
-			<img src="https://drive.google.com/uc?id=1RdIZmY1P4AK-YaDoww1Zwc1O66Wu3_03" width="140" height="auto">
+			<img src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/jake.png" width="140" height="auto" alt="Jake">
 		</td>
 		<td>
-			<img src="https://avatars.githubusercontent.com/u/79510505?v=4" width="140" height="auto">
+			<img src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/dino.png" width="140" height="auto" alt="Dino">
 		</td>
 		<td>
-			<img src="https://media.licdn.com/dms/image/C5603AQF4qbUwzHCD6w/profile-displayphoto-shrink_400_400/0/1645976107855?e=1688601600&v=beta&t=tJPTJPLuaaLLoz98hrrjM1HQASkFXHlYG7b0Byqxv1M" width="140" height="auto">
+			<img src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/karel.png" width="140" height="auto" alt="Karel">
 		</td>
 		<td>
-			<img src="https://drive.google.com/uc?id=1WHSB6AdZ5t4_5uempkB3uJRvs-K8b01M" width="140" height="auto">
+			<img src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/francois.png" width="140" height="auto" alt="Francois">
 		</td>
 	</tr>
 		<td align="center">
