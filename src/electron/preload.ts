@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { IEditPhoto } from "./lib/interfaces";
 
-const Api = {
+const api = {
   send: (channel: string, data: IEditPhoto) => {
     const validChannels = [
       "fromMain",
@@ -31,8 +31,8 @@ const Api = {
     }
   },
   chooseFile: () => ipcRenderer.send("chooseFile"),
-}
+};
 
-contextBridge.exposeInMainWorld("api", Api);
+contextBridge.exposeInMainWorld("api", api);
 
-export { Api }
+export { api };
