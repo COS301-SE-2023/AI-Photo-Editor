@@ -45,6 +45,9 @@
 <h3>Project Management</h3>
 <a href="https://github.com/orgs/COS301-SE-2023/projects/15">Project Board</a>
 
+<h3>Demos</h3>
+<a href="https://docs.google.com/presentation/d/1Msz-CQ9KcR42K1iKLYVXL1sr01fHjMhBYeAO6cgmMoE/edit?usp=sharing">Demo 1 Presentation</a>
+
 <img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
 <!---------------------------------------- DEMOS ---------------------------------------->
