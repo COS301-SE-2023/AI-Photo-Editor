@@ -28,7 +28,7 @@ const createWindow = () => {
       contextIsolation: true,
       preload: join(__dirname, "preload.js"),
     },
-    icon: "public/images/icon.png",
+    icon: "public/images/blix.png",
   });
 
   const url =
