@@ -29,7 +29,8 @@ const createWindow = () => {
       contextIsolation: true,
       preload: join(__dirname, "preload.js"),
     },
-    icon: "public/images/blix.png",
+    // Set icon for Windows and Linux
+    icon: "public/images/blix_64x64.png",
   });
 
   const url =
@@ -54,7 +55,14 @@ const createWindow = () => {
 
 app.on("ready", () => {
   createWindow();
-  if (mainWindow) new Handlers(mainWindow);
+  if (mainWindow) {
+    new Handlers(mainWindow);
+
+    // Set icon for macOS
+    if (process.platform === "darwin") {
+      app.dock.setIcon("public/images/blix_64x64.png");
+    }
+  }
 });
 
 // app.whenReady((event) => {
