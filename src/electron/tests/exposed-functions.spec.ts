@@ -31,6 +31,14 @@ jest.mock("sharp", () => () => ({
   }),
 }));
 
+jest.mock("electron", () => ({
+  app: {
+    getPath: jest.fn().mockReturnValue(""),
+    getName: jest.fn(),
+    getVersion: jest.fn(),
+  },
+}));
+
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
   readFile: jest.fn((filePath, callback) => callback(null, "mocked_file_data")),
