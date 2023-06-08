@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Notification } from "electron";
 import { join } from "path";
+import fs from "fs";
 import { parse } from "url";
 import { autoUpdater } from "electron-updater";
 
@@ -155,3 +156,9 @@ autoUpdater.on("error", (err) => {
   });
   notification.show();
 });
+
+const tempDirPath = join(app.getPath("userData"), "temp");
+
+if (!fs.existsSync(tempDirPath)) {
+  fs.mkdirSync(tempDirPath);
+}

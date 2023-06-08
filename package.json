@@ -123,7 +123,6 @@
   "optionalDependencies": {
     "dmg-license": "^1.0.11"
   },
-  
   "build": {
     "productName": "AI Photo Editor",
     "appId": "ai.photo.editor",

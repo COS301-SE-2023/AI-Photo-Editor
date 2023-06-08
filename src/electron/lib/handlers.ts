@@ -3,6 +3,8 @@ import { IEditPhoto } from "./interfaces";
 import * as Fs from "fs";
 import { Edit } from "./exposed-functions";
 import logger from "../utils/logger";
+import { app } from "electron";
+import { join } from "path";
 
 const edit = new Edit();
 
@@ -64,7 +66,9 @@ export default class Handlers {
       });
 
       if (!result.canceled && result.filePath) {
-        const readStream = Fs.createReadStream("./assets/edited-image.png");
+        const readStream = Fs.createReadStream(
+          join(app.getPath("userData"), "temp/edited-image.png")
+        );
         const writeStream = Fs.createWriteStream(result.filePath);
         readStream.pipe(writeStream);
         writeStream.on("error", (err) => {
