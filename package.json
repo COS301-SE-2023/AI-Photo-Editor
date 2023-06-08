@@ -89,7 +89,6 @@
     "autoprefixer": "^10.4.14",
     "clean-css": "^5.3.2",
     "cross-env": "^7.0.3",
-    "dmg-license": "^1.0.11",
     "electron": "^24.2.0",
     "electron-builder": "^24.3.0",
     "eslint": "^8.39.0",
@@ -121,6 +120,10 @@
     "tslib": "^2.5.0",
     "typescript": "^5.0.4"
   },
+  "optionalDependencies": {
+    "dmg-license": "^1.0.11"
+  },
+  
   "build": {
     "productName": "AI Photo Editor",
     "appId": "ai.photo.editor",
