@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Notification } from "electron";
+import { app, BrowserWindow, Notification, Menu } from "electron";
 import { join } from "path";
 import fs from "fs";
 import { parse } from "url";
@@ -31,7 +31,10 @@ const createWindow = () => {
     },
     // Set icon for Windows and Linux
     icon: "public/images/blix_64x64.png",
+    frame: false
   });
+
+ Menu.setApplicationMenu(null);
 
   const url =
     // process.env.NODE_ENV === "production"
