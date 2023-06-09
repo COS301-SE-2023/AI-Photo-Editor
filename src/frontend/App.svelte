@@ -25,7 +25,7 @@
     position: relative;
   }
   :root {
-    --navbar-height: 1.5em;
+    --navbar-height: 2em;
   }
 
   div.navbar {

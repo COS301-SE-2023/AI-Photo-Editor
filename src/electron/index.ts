@@ -31,10 +31,10 @@ const createWindow = () => {
     },
     // Set icon for Windows and Linux
     icon: "public/images/blix_64x64.png",
-    frame: false
+    titleBarStyle: "hidden",
   });
 
- Menu.setApplicationMenu(null);
+  Menu.setApplicationMenu(null);
 
   const url =
     // process.env.NODE_ENV === "production"

@@ -1,23 +1,15 @@
+<script lang="ts">
+  import ProjectBar from "../components/ProjectBar.svelte";
+</script>
+
 <!-- The navbar at the top of the page -->
-<div id="navbar" class="w-full bg-sky-600 pl-20 h-36">
-  <div class="logo font-mono w-fit">
-    <div>
-      <p>AI Photo Editor</p>
-      <p>Hello</p>
-    </div>
-  </div>
-  <!-- <div class="flex gap-2">
-    <div>
-      <p>Project 1</p>
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
-      </svg>
-    </div>
-  </div> -->
+<div id="navbar" class="flex h-full w-full select-none items-center gap-2 bg-zinc-800 pl-20">
+  <ProjectBar />
+  <div class="draggable-region z-40 h-full grow"></div>
 </div>
 
-<style>
-  #navbar {
+<style lang="postcss">
+  .draggable-region {
     -webkit-app-region: drag;
   }
 
@@ -26,5 +18,4 @@
     background-color: #94e2d5;
     padding: 0em 1em 0em;
   }
-
 </style>
