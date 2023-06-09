@@ -1,10 +1,17 @@
 {
   "collectCoverage" : true,
   "transform": {
-    "^.+\\.(t|j)sx?$": "ts-jest"
+    "^.+\\.svelte$": [
+      "svelte-jester",
+      {
+        "preprocess": true
+      }
+    ],
+    "^.+\\.ts$": "ts-jest",
+    "^.+\\.js$": "babel-jest"
   },
   "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node", "svelte"],
   "coverageDirectory": "coverage",
   "testPathIgnorePatterns": ["build"]
 }
