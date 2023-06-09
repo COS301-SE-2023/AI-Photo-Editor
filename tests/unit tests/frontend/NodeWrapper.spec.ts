@@ -3,18 +3,14 @@
  */
 
 import { render, fireEvent } from '@testing-library/svelte';
-import Image from "../../../src/frontend/components/Image.svelte";
+import Item  from "../../../src/frontend/components/Item.svelte";
 
 describe("Component test", () => {
 
-  Object.defineProperty(window, 'api', {
-    value: {
-      receive: jest.fn(),
-    }
-  });
 
+// jest.mock("svelvet");
   it("should render properly", () => {
-    const result = render(Image);
+    const result = render(Item);
     expect(() => result).not.toThrow();
   })
 });

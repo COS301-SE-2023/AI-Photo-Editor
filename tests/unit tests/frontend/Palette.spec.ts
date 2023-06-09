@@ -3,18 +3,12 @@
  */
 
 import { render, fireEvent } from '@testing-library/svelte';
-import Image from "../../../src/frontend/components/Image.svelte";
+import Palette from "../../../src/frontend/components/Palette.svelte";
 
 describe("Component test", () => {
 
-  Object.defineProperty(window, 'api', {
-    value: {
-      receive: jest.fn(),
-    }
-  });
-
   it("should render properly", () => {
-    const result = render(Image);
+    const result = render(Palette);
     expect(() => result).not.toThrow();
   })
 });
