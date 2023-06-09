@@ -8,6 +8,8 @@ import Handlers from "./lib/handlers";
 import logger from "./utils/logger";
 import settings from "./utils/settings";
 
+import { PluginManager } from "./lib/plugins/PluginManager";
+
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 
 logger.info("App starting...");
@@ -16,6 +18,8 @@ logger.info("Checking if settings store works correctly.");
 logger.info(
   settings.get("check") ? "Settings store works correctly." : "Settings store has a problem."
 );
+
+// ========== MAIN PROCESS ========== //
 
 let mainWindow: BrowserWindow | null;
 let notification: Notification | null;
@@ -191,6 +195,8 @@ app.on("web-contents-created", (e, contents) => {
   });
 });
 
+// ========== AUTO UPDATER ==========//
+
 if (isProd)
   autoUpdater.checkForUpdates().catch((err) => {
     logger.error(JSON.stringify(err));
@@ -244,6 +250,13 @@ autoUpdater.on("error", (err) => {
   });
   notification.show();
 });
+
+// ========== LOAD PLUGINS ========== //
+// This must be done before creating the main window
+const pluginManager = new PluginManager([]);
+setTimeout(() => {
+  pluginManager.loadPlugins();
+}, 1000);
 
 const tempDirPath = join(app.getPath("userData"), "temp");
 
