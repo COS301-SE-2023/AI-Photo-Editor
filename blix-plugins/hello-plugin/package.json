@@ -18,7 +18,14 @@
             {
                 "id": "hello",
                 "name": "Hello",
-                "icon": "fa fa-globe"
+                "interface" : {
+                    "inputs": {
+                    "numA": "int"
+                    },
+                    "outputs": {
+                        "numOut": "int"
+                    }
+                }
             }
         ]
     },

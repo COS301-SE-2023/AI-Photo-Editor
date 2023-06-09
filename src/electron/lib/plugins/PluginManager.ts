@@ -3,10 +3,10 @@ import { PathLike, readFile } from "fs";
 import { readdirSync } from "fs";
 import logger from "../../utils/logger";
 import { join } from "path";
+import { Plugin, PluginContext } from "./Plugin";
+import { Toolbox } from "../core-graph/Toolbox";
 
 export class PluginManager {
-  constructor(private plugins: Plugin[]) {}
-
   private loadedPlugins: Plugin[] = [];
 
   get pluginPaths() {
@@ -78,16 +78,12 @@ export class PluginManager {
       logger.warn("Failed to require plugin: " + plugin.name);
     }
   }
-}
 
-class PluginContext {
-  // TODO: Add more stuff here
-  get blixVersion() {
-    return "0.0.1";
+  public generateToolbox(): Toolbox {
+    return new Toolbox();
   }
 }
-
-interface PackageData {
+export interface PackageData {
   name: string;
   displayName: string;
   description: string;
@@ -95,53 +91,17 @@ interface PackageData {
   author: string;
   repository: string;
 
-  // contributes: {
-  //     commands: [
-  //         {
-  //             "command": "hello-plugin.hello",
-  //             "title": "Hello"
-  //         }
-  //     ],
-  //     nodes: [
-  //         {
-  //             "id": "hello",
-  //             "name": "Hello",
-  //             "icon": "fa fa-globe"
-  //         }
-  //     ]
-  // },
+  contributes: {
+    commands: [{ command: string; title: string }];
+    nodes: [{ id: string; name: string; icon: string }];
+  };
 
   main: PathLike;
   renderer: PathLike;
 
-  // devDependencies: {
-  //     "@types/node": "^12.0.0",
-  //     "typescript": "^3.4.5"
-  // },
+  devDependencies: {
+    [key: string]: string;
+  };
 
   // comments: [ "This property will be completely ignored" ]
-}
-
-export class Plugin {
-  constructor(
-    private packageData: PackageData,
-    private pluginDir: PathLike,
-    private main: PathLike
-  ) {}
-
-  get name() {
-    return this.packageData.name;
-  }
-
-  get displayName() {
-    return this.packageData.displayName;
-  }
-
-  get mainPath() {
-    return this.main.toString();
-  }
-
-  get pluginPath() {
-    return this.pluginDir.toString();
-  }
 }

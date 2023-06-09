@@ -1,75 +1,109 @@
-// class CoreGraphStore {  //Stores Graphs
-//     constructor(
-//         private graphs: CoreGraph[]
-//     ) {}
-// }
+import crypto from "crypto";
 
-// class CoreGraph {
-// 	private subscribers: []
+type UUID = string;
 
-//     constructor(
-//         private nodes: { UUID: Node },
-//         private edges: { UUID: Edge }
-//     ) {}
+class UniqueEntity {
+  private uuid: UUID;
 
-// 	public createNode(node: Node) {
-//         // TODO
-// 	}
+  constructor() {
+    this.uuid = UniqueEntity.genUUID();
+  }
+  get getUUID() {
+    return this.uuid;
+  }
 
-//     public removeNode(node: Node) {
-//         // TODO
-//     }
+  // 64-bit hex string (length 32 chars)
+  private static genUUID(): UUID {
+    // 1% chance of collision after 83 million years at 1 hash/ms 🫨
+    return crypto.randomBytes(32).toString("hex");
+  }
+}
 
-//     public addEdge(anchorFrom: Node, anchorTo: Node) {
-//         // TODO
-//     }
+// Stores all the core graph representations in the current project
+export class CoreGraphStore extends UniqueEntity {
+  constructor(private graphs: { [key: UUID]: CoreGraph }) {
+    super();
+  }
 
-//     public removeEdge(id : string) { //nodeFrom: Node, nodeTo: Node switched this for edge id, since we have a handle to all edges
-//         // TODO
-//     }
+  public createGraph(): UUID {
+    const newGraph: CoreGraph = new CoreGraph();
+    this.graphs[newGraph.getUUID] = newGraph;
 
-//     public copy() {
-//         // TODO
-//     }
+    return newGraph.getUUID;
+  }
+}
 
-// 	public subscribe() {
-//         // TODO
-// 	}
+// Effectively the "database" that we query to
+// Acts as a 'publisher' for each 'subscriber' module
+class CoreGraph extends UniqueEntity {
+  private nodes: { [key: UUID]: Node };
+  private anchors: { [key: UUID]: Anchor };
+  private edges: { [key: UUID]: Edge };
 
-// 	public unsubscribe() {
-//         // TODO
-// 	}
-// }
+  constructor() {
+    super();
+  }
 
-// type UUID = string;
+  public createNode(node: Node) {
+    // TODO
+  }
 
-// class Node {
-//     constructor (
-//         private id : UUID,
-//         private anchors: Anchor[]
-//     ) {}
-// }
+  public removeNode(node: Node) {
+    // TODO
+  }
 
-// class Anchor {
-//     constructor (
-//         private uuid : UUID,
-//         private parent : Node,
-//         private type : string //Maybe some enumeration?
-//     ){
-//         // GENERATE UUID
-//         // 32-bit hex string
-//     }
+  public addEdge(anchorFrom: Node, anchorTo: Node) {
+    // TODO
+  }
 
-//     public execute() {
-//         //Some generic execution function, that will be handled by extensions
-//     }
-// }
+  public removeEdge(id: string) {
+    // nodeFrom: Node, nodeTo: Node switched this for edge id, since we have a handle to all edges
+    // TODO
+  }
 
-// class Edge {
-//     constructor (
-//         private id : UUID,
+  public copy() {
+    // TODO
+  }
 
-//         private anchorFrom: UUID,
-//         private anchorTo: UUID
-//     ) {}
-// }
+  public subscribe() {
+    // TODO
+  }
+
+  public unsubscribe() {
+    // TODO
+  }
+}
+
+class Node extends UniqueEntity {
+  private anchors: { [key: string]: Anchor };
+  private styling: NodeStyling;
+
+  constructor(
+    private name: string, // The name id of the node in the plugin
+    private plugin: string // The name id of the plugin that defined the node
+  ) {
+    super();
+  }
+}
+
+type AnchorType = string; // This uses MIME types E.g. "int", "text/json"
+enum AnchorIO {
+  input,
+  output,
+}
+
+class Anchor extends UniqueEntity {
+  constructor(private parent: Node, private ioType: AnchorIO, private type: AnchorType) {
+    super();
+  }
+}
+
+class Edge extends UniqueEntity {
+  constructor(private anchorFrom: UUID, private anchorTo: UUID) {
+    super();
+  }
+}
+
+class NodeStyling {
+  constructor(private position: { x: number; y: number }, private size: { w: number; h: number }) {}
+}
