@@ -164,7 +164,6 @@ autoUpdater.on("error", (err) => {
 
 // ========== LOAD PLUGINS ========== //
 // This must be done before creating the main window
-const pluginManager = new PluginManager([]);
-setTimeout(() => {
-  pluginManager.loadPlugins();
-}, 1000);
+const pluginManager = new PluginManager();
+pluginManager.loadPlugins();
+pluginManager.generateToolbox();
