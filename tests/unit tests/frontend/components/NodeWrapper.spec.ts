@@ -3,8 +3,8 @@
  */
 
 import { render } from '@testing-library/svelte';
-import NodeWrapper from "../../../src/frontend/components/Graph/NodeWrapper.svelte";
-import Item from "../../../src/frontend/components/Item.svelte";
+import NodeWrapper from "../../../../src/frontend/components/Graph/NodeWrapper.svelte";
+import Item from "../../../../src/frontend/components/Item.svelte";
 
 jest.mock('svelvet');
 

@@ -3,7 +3,7 @@
  */
 
 import { render, fireEvent } from '@testing-library/svelte';
-import Item from "../../../src/frontend/components/Item.svelte";
+import Item from "../../../../src/frontend/components/Item.svelte";
 
 describe("Component test", () => {
   const props = {
