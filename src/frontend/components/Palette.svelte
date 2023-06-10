@@ -4,6 +4,7 @@
   import type { GraphNode, GraphSlider } from "../types";
   import { graphStore } from "../stores/GraphStore";
   import { paletteStore } from "../stores/PaletteStore";
+  import { commandStore } from "../stores/CommandStore";
 
   let showPalette = false;
   let expanded = true;
@@ -18,6 +19,10 @@
   let categoryIndex = 0;
   let itemIndex = 0;
 
+  // TODO: Change items to use the command store values directly:
+  $commandStore; // Use the shorthand like this
+
+  // TODO: Get rid of this
   const categoriesOriginals: Category[] = [
     {
       title: "Nodes",
@@ -81,17 +86,17 @@
     const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
 
     if (itemId === "import") {
-      window.api.send("open-file-dialog");
+      // window.api.send("open-file-dialog");
       return;
     }
     if (itemId === "export") {
-      window.api.send("export-image");
+      // window.api.send("export-image");
       return;
     }
     if (itemId === "clear") {
       graphStore.set({ nodes: [] });
       paletteStore.update((store) => ({ ...store, src: "" }));
-      window.api.send("clear-file");
+      // window.api.send("clear-file");
       return;
     }
 

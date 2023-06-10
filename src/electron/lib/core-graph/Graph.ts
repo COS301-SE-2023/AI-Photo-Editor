@@ -1,6 +1,7 @@
 import crypto from "crypto";
+import { CoreGraphSubscriber } from "./GraphSubscriber";
 
-type UUID = string;
+export type UUID = string;
 
 class UniqueEntity {
   private uuid: UUID;
@@ -35,33 +36,34 @@ export class CoreGraphStore extends UniqueEntity {
 
 // Effectively the "database" that we query to
 // Acts as a 'publisher' for each 'subscriber' module
-class CoreGraph extends UniqueEntity {
+export class CoreGraph extends UniqueEntity {
   private nodes: { [key: UUID]: Node };
   private anchors: { [key: UUID]: Anchor };
   private edges: { [key: UUID]: Edge };
+
+  private subscribers: CoreGraphSubscriber[];
 
   constructor() {
     super();
   }
 
-  public createNode(node: Node) {
+  private createNode() {
     // TODO
   }
 
-  public removeNode(node: Node) {
+  private addEdge(anchorFrom: UUID, anchorTo: UUID) {
     // TODO
   }
 
-  public addEdge(anchorFrom: Node, anchorTo: Node) {
+  private removeNode() {
     // TODO
   }
 
-  public removeEdge(id: string) {
-    // nodeFrom: Node, nodeTo: Node switched this for edge id, since we have a handle to all edges
+  private removeEdge(edge: UUID) {
     // TODO
   }
 
-  public copy() {
+  private copy() {
     // TODO
   }
 
@@ -74,6 +76,9 @@ class CoreGraph extends UniqueEntity {
   }
 }
 
+// This Node representation effectively 'stands-in'
+// as a reference to the plugin's functional implementation.
+// When we interpret the graph we dereference back to the plugin
 class Node extends UniqueEntity {
   private anchors: { [key: string]: Anchor };
   private styling: NodeStyling;

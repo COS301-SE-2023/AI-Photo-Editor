@@ -3,11 +3,15 @@ import { PathLike, readFile } from "fs";
 import { readdirSync } from "fs";
 import logger from "../../utils/logger";
 import { join } from "path";
-import { Plugin, PluginContext } from "./Plugin";
-import { Toolbox } from "../core-graph/Toolbox";
+import { Plugin } from "./Plugin";
+import { Blix } from "../Blix";
 
 export class PluginManager {
+  // Stores plugins that have been loaded from disk
+  // The plugins have not necessarily been required/activated
   private loadedPlugins: Plugin[] = [];
+
+  constructor(private blix: Blix) {}
 
   get pluginPaths() {
     const appPath = app.getAppPath();
@@ -52,35 +56,12 @@ export class PluginManager {
           join(pluginPath, packageData.main.toString())
         );
 
-        this.requirePlugin(plugin);
+        this.loadedPlugins.push(plugin);
+        plugin.requireSelf(this.blix); // The plugin tries to require its corresponding npm module
       });
     } catch (err) {
       logger.warn("Failed to load plugin: " + plugin);
     }
-  }
-
-  // Load a plugin as a Node module
-  // See: [https://rollupjs.org/es-module-syntax/#dynamic-import]
-  private requirePlugin(plugin: Plugin) {
-    try {
-      // This uses Node.js require() to load the plugin as a module
-      // TODO: ISOLATION + LIMITED API
-      // @ts-ignore: no-var-requires
-      const pluginModule = require(plugin.mainPath);
-      const val = pluginModule.activate(new PluginContext());
-
-      if (typeof pluginModule === "function") {
-        pluginModule.activate();
-      }
-
-      this.loadedPlugins.push(plugin);
-    } catch (err) {
-      logger.warn("Failed to require plugin: " + plugin.name);
-    }
-  }
-
-  public generateToolbox(): Toolbox {
-    return new Toolbox();
   }
 }
 export interface PackageData {
