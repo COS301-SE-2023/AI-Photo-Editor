@@ -38,6 +38,7 @@
   div.navbar {
     width: 100%;
     height: var(--navbar-height);
+    -webkit-app-region: drag;
   }
 
   div.layout {
