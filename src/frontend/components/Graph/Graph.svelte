@@ -1,6 +1,6 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Svelvet, Node, Anchor } from "svelvet";
+  import { Svelvet, Node } from "svelvet";
   import { graphStore } from "../../stores/GraphStore";
   import NodeWrapper from "./NodeWrapper.svelte";
 </script>
