@@ -31,6 +31,7 @@ const api = {
     }
   },
   chooseFile: () => ipcRenderer.send("chooseFile"),
+  getPlatform: () => ipcRenderer.invoke("getPlatform"),
 };
 
 contextBridge.exposeInMainWorld("api", api);

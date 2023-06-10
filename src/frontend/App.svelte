@@ -2,9 +2,16 @@
   import Layout from "./layout/Layout.svelte";
   import Navbar from "./layout/Navbar.svelte";
   import Palette from "./components/Palette.svelte";
+  import { beforeUpdate } from "svelte";
+
+  let platform = "";
+
+  beforeUpdate(async () => {
+    platform = await window.api.getPlatform();
+  });
 </script>
 
-<div class="navbar"><Navbar /></div>
+<div class="navbar {platform === 'darwin' ? 'pl-20' : ''}"><Navbar /></div>
 <div class="layout"><Layout /></div>
 <Palette />
 
@@ -25,7 +32,7 @@
     position: relative;
   }
   :root {
-    --navbar-height: 2em;
+    --navbar-height: 2rem;
   }
 
   div.navbar {
