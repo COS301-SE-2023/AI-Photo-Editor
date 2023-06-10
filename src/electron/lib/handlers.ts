@@ -81,6 +81,12 @@ export default class Handlers {
     });
   }
 
+  public getPlatform() {
+    ipcMain.handle("getPlatform", () => {
+      return process.platform;
+    });
+  }
+
   constructor(mainWindow: BrowserWindow) {
     this.mainWindow = mainWindow;
 
@@ -89,5 +95,6 @@ export default class Handlers {
     this.openFileDialogHandler();
     this.exportSaveEditedImageHandler();
     this.clearFileHandler();
+    this.getPlatform();
   }
 }

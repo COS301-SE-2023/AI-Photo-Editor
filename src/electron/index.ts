@@ -32,6 +32,7 @@ const createWindow = () => {
     // Set icon for Windows and Linux
     icon: "public/images/blix_64x64.png",
     titleBarStyle: "hidden",
+    trafficLightPosition: { x: 10, y: 10 },
   });
 
   Menu.setApplicationMenu(null);
@@ -54,6 +55,13 @@ const createWindow = () => {
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
+
+  // mainWindow.on('ready-to-show', () => {
+  //   if (process.platform === 'darwin' && mainWindow) {
+  //     const padding = mainWindow.getTrafficLightPosition().x;
+  //     mainWindow.setSheetOffset(padding);
+  //   }
+  // });
 };
 
 app.on("ready", () => {
