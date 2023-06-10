@@ -4,14 +4,14 @@
 
   let src = "";
 
-  window.api.receive("chosenFile", (base64) => {
-    paletteStore.update((store) => ({ ...store, src: `data:image/jpg;base64,${base64}` }));
-  });
+  // window.api.receive("chosenFile", (base64) => {
+  //   paletteStore.update((store) => ({ ...store, src: `data:image/jpg;base64,${base64}` }));
+  // });
 
-  window.api.receive("selected-file", (base64) => {
-    graphStore.set({ nodes: [] });
-    paletteStore.update((store) => ({ ...store, src: `data:image/jpg;base64,${base64}` }));
-  });
+  // window.api.receive("selected-file", (base64) => {
+  //   graphStore.set({ nodes: [] });
+  //   paletteStore.update((store) => ({ ...store, src: `data:image/jpg;base64,${base64}` }));
+  // });
 
   function chooseFile() {
     window.api.chooseFile();

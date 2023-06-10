@@ -4,11 +4,12 @@ import fs from "fs";
 import { parse } from "url";
 import { autoUpdater } from "electron-updater";
 
-import Handlers from "./lib/handlers";
 import logger from "./utils/logger";
 import settings from "./utils/settings";
 
 import { PluginManager } from "./lib/plugins/PluginManager";
+import Handlers from "./lib/handlers";
+import { Blix } from "./lib/Blix";
 
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 
@@ -97,7 +98,7 @@ const createWindow = () => {
     width: 1300,
     height: 1000,
     webPreferences: {
-      devTools: isProd ? false : true,
+      devTools: !isProd,
       contextIsolation: true,
       preload: join(__dirname, "preload.js"),
     },
@@ -148,11 +149,6 @@ app.on("ready", () => {
     }
   }
 });
-
-// app.whenReady((event) => {
-//   ipcMain.handle('test', test)
-//   createWindow();
-// })
 
 // those two events are completely optional to subscrbe to, but that's a common way to get the
 // user experience people expect to have on macOS: do not quit the application directly
@@ -251,8 +247,10 @@ autoUpdater.on("error", (err) => {
   notification.show();
 });
 
+// ========== CREATE APPLICATION STATE ========== //
+const blix: Blix = new Blix();
+
 // ========== LOAD PLUGINS ========== //
 // This must be done before creating the main window
-const pluginManager = new PluginManager();
+const pluginManager = new PluginManager(blix);
 pluginManager.loadPlugins();
-pluginManager.generateToolbox();

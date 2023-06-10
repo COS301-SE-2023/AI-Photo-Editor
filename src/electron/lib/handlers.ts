@@ -1,100 +1,80 @@
 import { dialog, ipcMain, BrowserWindow } from "electron";
-import { IEditPhoto } from "./interfaces";
-import * as Fs from "fs";
-import { Edit } from "./exposed-functions";
-import logger from "../utils/logger";
-import { app } from "electron";
-import { join } from "path";
 
-const edit = new Edit();
+type QueryInterface = {
+  interfaceId: string;
+  queries: { [key: string]: () => void };
+  subscriptions: { [key: string]: () => void };
+};
 
+// Handles IPC calls from the frontend
 export default class Handlers {
-  private mainWindow: BrowserWindow;
-  public selectedFilePath: string;
+  constructor(private mainWindow: BrowserWindow) {
+    const queryInterface: QueryInterface[] = [
+      {
+        interfaceId: "commandRegistry",
+        queries: {
+          getCommands: () => {
+            return;
+          },
+          addCommands: () => {
+            return;
+          },
+          runCommand: () => {
+            return;
+          },
+        },
+        subscriptions: {
+          registryChanged: () => {
+            return;
+          },
+        },
+      },
+      {
+        interfaceId: "tileRegistry",
+        queries: {
+          getTiles: () => {
+            return;
+          },
+        },
+        subscriptions: {
+          registryChanged: () => {
+            return;
+          },
+        },
+      },
+      {
+        interfaceId: "toolboxRegistry",
+        queries: {
+          getNodes: () => {
+            return;
+          },
+        },
+        subscriptions: {
+          registryChanged: () => {
+            return;
+          },
+        },
+      },
+    ];
 
-  public editFileHandler() {
-    ipcMain.on("editPhoto", async (event, data: IEditPhoto) => {
-      if (!this.selectedFilePath) return;
-      this.mainWindow.webContents.send(
-        "chosenFile",
-        await edit.editPhoto(data, this.selectedFilePath)
-      );
-    });
-  }
+    for (const iface of queryInterface) {
+      // Deploy handlers for each query
+      for (const query in iface.queries) {
+        if (!iface.queries.hasOwnProperty(query)) continue;
 
-  public chooseFileHandler() {
-    ipcMain.on("chooseFile", () => {
-      const base64 = Fs.readFileSync("./assets/image.png").toString("base64");
-      this.mainWindow.webContents.send("chosenFile", base64);
-    });
-  }
-
-  public clearFileHandler() {
-    ipcMain.on("clear-file", () => {
-      this.selectedFilePath = "";
-    });
-  }
-
-  public openFileDialogHandler() {
-    ipcMain.on("open-file-dialog", async (event: Electron.IpcMainEvent) => {
-      const result = await dialog.showOpenDialog(this.mainWindow, {
-        properties: ["openFile"],
-        filters: [{ name: "Images", extensions: ["png"] }],
-      });
-
-      if (!result.canceled && result.filePaths.length > 0) {
-        this.selectedFilePath = result.filePaths[0];
-        Fs.readFile(this.selectedFilePath, (err, data) => {
-          if (err) {
-            event.sender.send("selected-file", { error: err.message });
-          } else {
-            const base64Image = data.toString("base64");
-            event.sender.send("selected-file", base64Image);
-          }
-        });
+        ipcMain.handle(`${iface.interfaceId}/${query}`, iface.queries[query]);
       }
-    });
-  }
 
-  public exportSaveEditedImageHandler() {
-    ipcMain.on("export-image", async () => {
-      if (!this.selectedFilePath) return;
+      // Deploy listeners for each subscription
+      for (const subscription in iface.subscriptions) {
+        if (!iface.subscriptions.hasOwnProperty(subscription)) continue;
 
-      const result = await dialog.showSaveDialog(this.mainWindow, {
-        buttonLabel: "Save",
-        filters: [{ name: "All Files", extensions: ["*"] }],
-      });
+        // If a query and a subscription have the same name,
+        // the query will take precedence
+        if (subscription in iface.queries) continue;
 
-      if (!result.canceled && result.filePath) {
-        const readStream = Fs.createReadStream(
-          join(app.getPath("userData"), "temp/edited-image.png")
-        );
-        const writeStream = Fs.createWriteStream(result.filePath);
-        readStream.pipe(writeStream);
-        writeStream.on("error", (err) => {
-          logger.error(err);
-        });
-        writeStream.on("finish", () => {
-          logger.log(`File saved to ${result.filePath || ""}`);
-        });
+        ipcMain.on(`${iface.interfaceId}/${subscription}`, iface.subscriptions[subscription]);
       }
-    });
-  }
-
-  public getPlatform() {
-    ipcMain.handle("getPlatform", () => {
-      return process.platform;
-    });
-  }
-
-  constructor(mainWindow: BrowserWindow) {
-    this.mainWindow = mainWindow;
-
-    this.editFileHandler();
-    this.chooseFileHandler();
-    this.openFileDialogHandler();
-    this.exportSaveEditedImageHandler();
-    this.clearFileHandler();
-    this.getPlatform();
+    }
   }
 }
