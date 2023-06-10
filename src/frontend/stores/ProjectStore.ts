@@ -2,6 +2,10 @@ import { writable } from "svelte/store";
 import type { Writable } from "svelte/store";
 import type { Project } from "../components/Projects/Project";
 
+// Struggling a bit to add write types for custom stores
+// Also not sure where the best place is to define these types
+// Should they just be defined at the top of store files?
+// Or should they maybe be defined in the types directory to organize things a bit better?
 interface ProjectStore {
   projects: Project[];
   activeProject: Project | null;
