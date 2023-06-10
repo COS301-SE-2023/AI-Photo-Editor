@@ -1,6 +1,7 @@
 <script lang="ts">
   import Panel from "./Panel.svelte";
   import { PanelGroup } from "./PanelNode";
+  import { projectStore } from "../stores/ProjectStore";
 
   // let subLayout = new PanelGroup("2");
   // subLayout.addPanel("qwer", 0);
@@ -14,4 +15,6 @@
   // layout.recurseParent();
 </script>
 
-<Panel layout="{layout}" horizontal="{false}" height="100%" />
+{#if $projectStore.activeProject}
+  <Panel layout="{$projectStore.activeProject.layout}" horizontal="{false}" height="100%" />
+{/if}
