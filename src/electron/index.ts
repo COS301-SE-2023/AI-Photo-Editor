@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Notification, Menu } from "electron";
+import { app, BrowserWindow, Notification, Menu, MenuItem, dialog } from "electron";
 import { join } from "path";
 import fs from "fs";
 import { parse } from "url";
@@ -19,6 +19,74 @@ logger.info(
 
 let mainWindow: BrowserWindow | null;
 let notification: Notification | null;
+
+// Menu
+const menuBar = new Menu();
+
+// Onyl for macOS
+if (process.platform === "darwin") {
+  menuBar.append(
+    new MenuItem({
+      label: app.name,
+      submenu: [
+        { role: "about" },
+        { type: "separator" },
+        { role: "services" },
+        { type: "separator" },
+        { role: "hide" },
+        { role: "hideOthers" },
+        { role: "unhide" },
+        { type: "separator" },
+        { role: "quit" },
+      ],
+    })
+  );
+}
+
+const menu: { [key: string]: Menu } = {};
+
+// File
+menu.File = addItems([
+  new MenuItem({ label: "New Project" }),
+  new MenuItem({ type: "separator" }),
+  new MenuItem({ label: "Open Project" }),
+  new MenuItem({ type: "separator" }),
+  new MenuItem({ label: "Save Project" }),
+]);
+
+// Help
+menu.Help = addItems([
+  new MenuItem({
+    label: "Help",
+    click: async () => {
+      // const { shell } = require('electron');
+      // await shell.openExternal('https://youtu.be/dQw4w9WgXcQ');
+      // Show a dialog box
+      await dialog.showMessageBox({
+        type: "info",
+        title: "Dialog Box",
+        message: "Hello, world!",
+        buttons: ["Ok"],
+      });
+    },
+  }),
+]);
+
+// Add Items to Menu Bar
+for (const key in menu) {
+  if (Object.hasOwn(menu, key)) menuBar.append(new MenuItem({ label: key, submenu: menu[key] }));
+}
+
+// Set new Menu Bar
+Menu.setApplicationMenu(menuBar);
+
+function addItems(items: MenuItem[]): Menu {
+  const menu = new Menu();
+  items.forEach((item) => {
+    menu.append(item);
+  });
+  return menu;
+}
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -65,6 +133,7 @@ const createWindow = () => {
 };
 
 app.on("ready", () => {
+  // app.dock.setMenu(menuBar);
   createWindow();
   if (mainWindow) {
     new Handlers(mainWindow);
