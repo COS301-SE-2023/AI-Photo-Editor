@@ -1,7 +1,16 @@
 import crypto from "crypto";
 import { CoreGraphSubscriber } from "./GraphSubscriber";
+import logger from "../../utils/logger";
+import {
+  AnchorType,
+  InputAnchorInstance,
+  NodeInstance,
+  OutputAnchorInstance,
+} from "./ToolboxRegistry";
+import { Output } from "clean-css";
 
 export type UUID = string;
+export type AnchorUUID = UUID;
 
 class UniqueEntity {
   private uuid: UUID;
@@ -9,7 +18,7 @@ class UniqueEntity {
   constructor() {
     this.uuid = UniqueEntity.genUUID();
   }
-  get getUUID() {
+  public get getUUID() {
     return this.uuid;
   }
 
@@ -36,27 +45,92 @@ export class CoreGraphStore extends UniqueEntity {
 
 // Effectively the "database" that we query to
 // Acts as a 'publisher' for each 'subscriber' module
+
+// Testting done in index.ts
 export class CoreGraph extends UniqueEntity {
   private nodes: { [key: UUID]: Node };
   private anchors: { [key: UUID]: Anchor };
-  private edges: { [key: UUID]: Edge };
+  private edges: { [key: AnchorUUID]: Edge };
 
   private subscribers: CoreGraphSubscriber[];
 
   constructor() {
     super();
+    this.nodes = {};
+    this.anchors = {};
+    this.edges = {};
   }
 
-  private createNode() {
-    // TODO
+  public get getNodes() {
+    return this.nodes;
   }
 
-  private addEdge(anchorFrom: UUID, anchorTo: UUID) {
-    // TODO
+  public get getAnchors() {
+    return this.anchors;
   }
 
-  private removeNode() {
+  // We need to pass in node name and plugin name
+  public addNode(node: NodeInstance) {
+    // Create New Node
+    const n: Node = new Node(
+      node.getSignature.split("/")[1],
+      node.getSignature.split("/")[0],
+      node.getInputAnchorInstances,
+      node.getOutputAnchorInstances
+    );
+    // Add Node to Graph
+    this.nodes[n.getUUID] = n;
+    // Add Nodes's Anchors to Graph
+    for (const anchor in n.getAnchors) {
+      if (!n.getAnchors.hasOwnProperty(anchor)) continue;
+      this.anchors[anchor] = n.getAnchors[anchor];
+    }
+  }
+
+  public addEdge(anchorFrom: UUID, anchorTo: UUID) {
+    const ancFrom = this.anchors[anchorFrom];
+    const ancTo = this.anchors[anchorTo];
+
+    // Edge must flow from output anchor to input anchor
+    if (ancFrom.getIOType !== AnchorIO.output || ancTo.getIOType !== AnchorIO.input) {
+      return false;
+    }
+
+    // Data flowing through edge must be of same type for both anchors
+    if (ancFrom.getType !== ancTo.getType) {
+      return false;
+    }
+
+    // Check for cycles
+    if (this.checkForCycles(ancFrom, ancTo)) {
+      return false;
+    }
+
+    // Check for duplicate edges
+    if (this.checkForDuplicateEdges(ancFrom, ancTo)) {
+      return false;
+    }
+
+    // Add edge to graph
+    // Store edge at UUID of anchor it flows into
+    const edge: Edge = new Edge(anchorFrom, anchorTo);
+    this.edges[ancTo.getUUID] = edge;
+
+    return true;
+  }
+
+  private checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
     // TODO
+    return false;
+  }
+
+  private checkForCycles(ancFrom: Anchor, ancTo: Anchor): boolean {
+    // TODO
+    return false;
+  }
+
+  public removeNode(node: Node) {
+    delete this.nodes[node.getUUID];
   }
 
   private removeEdge(edge: UUID) {
@@ -74,6 +148,19 @@ export class CoreGraph extends UniqueEntity {
   public unsubscribe() {
     // TODO
   }
+
+  public printGraph() {
+    for (const edge in this.edges) {
+      if (!this.edges.hasOwnProperty(edge)) continue;
+      logger.info(edge);
+      logger.info(
+        this.anchors[this.edges[edge].getAnchorFrom].getUUID +
+          " -> " +
+          this.anchors[this.edges[edge].getAnchorTo].getUUID +
+          "\n"
+      );
+    }
+  }
 }
 
 // This Node representation effectively 'stands-in'
@@ -85,27 +172,75 @@ class Node extends UniqueEntity {
 
   constructor(
     private name: string, // The name id of the node in the plugin
-    private plugin: string // The name id of the plugin that defined the node
+    private plugin: string, // The name id of the plugin that defined the node
+    private inputAnchors: InputAnchorInstance[], // Input anchors attatched to node
+    private outputAnchors: OutputAnchorInstance[] // Output anchors attatched to node
   ) {
     super();
+    this.anchors = {};
+
+    inputAnchors.forEach((anchor) => {
+      const anc = new Anchor(this, AnchorIO.input, anchor.type, anchor.displayName);
+      this.anchors[anc.getUUID] = anc;
+    });
+    outputAnchors.forEach((anchor) => {
+      const anc = new Anchor(this, AnchorIO.output, anchor.type, anchor.displayName);
+      this.anchors[anc.getUUID] = anc;
+    });
   }
+
+  public get getAnchors() {
+    return this.anchors;
+  }
+
+  // public printNode() {
+  //   logger.info(`${this.inputAnchors.length} :${this.name}: ${this.outputAnchors.length}\n`)
+  // }
 }
 
-type AnchorType = string; // This uses MIME types E.g. "int", "text/json"
 enum AnchorIO {
   input,
   output,
 }
 
 class Anchor extends UniqueEntity {
-  constructor(private parent: Node, private ioType: AnchorIO, private type: AnchorType) {
+  constructor(
+    private parent: Node,
+    private ioType: AnchorIO,
+    private type: AnchorType,
+    private displayName: string
+  ) {
     super();
+  }
+
+  get getParent() {
+    return this.parent;
+  }
+
+  get getIOType() {
+    return this.ioType;
+  }
+
+  get getType() {
+    return this.type;
+  }
+
+  get getDisplayName() {
+    return this.displayName;
   }
 }
 
 class Edge extends UniqueEntity {
   constructor(private anchorFrom: UUID, private anchorTo: UUID) {
     super();
+  }
+
+  get getAnchorFrom() {
+    return this.anchorFrom;
+  }
+
+  get getAnchorTo() {
+    return this.anchorTo;
   }
 }
 
