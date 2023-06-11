@@ -1,4 +1,8 @@
-<h1 align="center" style="font-family: 'Merriweather', sans-serif;"> AI Photo Editor </h1>
+<p align="center">
+<img alt="" src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/blix.svg" width="180px">
+<br />
+<i>(AKA. AI Photo Editor)</i>
+</p>
 
 [![codecov](https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor/branch/dev/graph/badge.svg?token=7T6WCYXEIO)](https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor)
 [![Build Codebase](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/build.yml/badge.svg)](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/build.yml)
