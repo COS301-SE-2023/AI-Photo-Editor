@@ -19,6 +19,9 @@ export class Blix {
 
   constructor() {
     this.startTime = new Date();
+    this._toolbox = new ToolboxRegistry();
+    this._commandRegistry = new CommandRegistry();
+    this._tileRegistry = new TileRegistry();
   }
 
   get toolbox(): ToolboxRegistry {

@@ -2,7 +2,11 @@ import { PathLike } from "fs";
 import { PackageData } from "./PluginManager";
 import logger from "../../utils/logger";
 import { Blix } from "../Blix";
-import { NodeInstance } from "../core-graph/ToolboxRegistry";
+import {
+  InputAnchorInstance,
+  NodeInstance,
+  OutputAnchorInstance,
+} from "../core-graph/ToolboxRegistry";
 import { CommandInstance } from "../commands/CommandRegistry";
 import { TileInstance } from "../tiles/TileRegistry";
 
@@ -44,7 +48,6 @@ export class Plugin {
       // TODO: ISOLATION + LIMITED API
       // @ts-ignore: no-var-requires
       const pluginModule = require(this.mainPath);
-      // console.log(pluginModule);
 
       if ("nodes" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to toolbox
@@ -93,7 +96,21 @@ class PluginContext {
   }
 }
 
-class NodePluginContext extends PluginContext {}
+class NodePluginContext extends PluginContext {
+  public nodeBuilder = {
+    reset() {
+      return;
+    },
+
+    addTitle() {
+      return;
+    },
+
+    compile() {
+      return;
+    },
+  };
+}
 
 class CommandPluginContext extends PluginContext {}
 

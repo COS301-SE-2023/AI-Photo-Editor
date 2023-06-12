@@ -4,6 +4,7 @@ const nodes = {
         // Use context.nodeBuilder to construct the node UI
         context.nodeBuilder.reset();
         context.nodeBuilder.addTitle();
+        //context.compile();
     }
 }
 
@@ -13,7 +14,7 @@ const commands = {
         // TODO: Work this out
         // E.g. Could get context.command.inputs for instance for additional values
         console.log("Hello from command!");
-        console.log("Blix version reported as " + inputs.context.blixVersion);
+        console.log("Blix version reported as " + context.blixVersion);
         return {
             "signature": "sayHello",
         }
