@@ -1,6 +1,6 @@
 <script lang="ts">
   import tinykeys from "tinykeys";
-  import Item from "./Item.svelte";
+  import PaletteItem from "./PaletteItem.svelte";
   import type { GraphNode, GraphSlider } from "../types";
   import { graphStore } from "../stores/GraphStore";
   import { paletteStore } from "../stores/PaletteStore";
@@ -201,7 +201,7 @@
             <div class="p4 m-1 text-xs font-semibold text-zinc-400">{category.title}</div>
             <ul>
               {#each category.items as item, j}
-                <Item
+                <PaletteItem
                   title="{item}"
                   selected="{i == categoryIndex && j == itemIndex}"
                   on:itemClicked="{handleItemClick}"

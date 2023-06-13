@@ -1,7 +1,7 @@
 <script lang="ts">
   import Layout from "./layout/Layout.svelte";
   import Navbar from "./layout/Navbar.svelte";
-  import Palette from "./components/Palette.svelte";
+  import Palette from "./palette/Palette.svelte";
 </script>
 
 <div class="navbar"><Navbar /></div>
