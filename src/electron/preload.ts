@@ -1,73 +1,89 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge } from "electron";
+import { ipcRenderer } from "electron";
 
-type Api = { [key: string]: QueryInterface };
-
-type QueryInterface = (query: string, args: any, callback: (result: any) => void) => void;
-
-type QueryInterfaceConfig = {
-  interfaceId: string;
-  queries: string[];
-  subscriptions: string[];
-};
-
-// Constructs a lambda function that uses IPC to enable backend/frontend comms.
-// `queries[]` are for performing operations / specific one-time requests
-// `subscriptions[]` are for obtaining reactive callbacks on backend events
-function constructQueryInterface(
-  interfaceId: string,
-  queries: string[],
-  subscriptions: string[]
-): QueryInterface {
-  if (interfaceId.includes("/")) {
-    throw new Error(`Interface '${interfaceId}' cannot contain '/'`);
-  }
-
-  return (query: string, args: any, callback: (result: any) => void) => {
-    const queryId = `${interfaceId}/${query}`;
-    if (queries.includes(query)) {
-      ipcRenderer.invoke(queryId, args).then(callback);
-    } else if (subscriptions.includes(query)) {
-      ipcRenderer.on(queryId, (_, args) => callback(args));
-    }
-  };
-}
-
-// Construct api
-//  `queries[]` and `subscriptions[]` should be mutually disjoint
-const queryInterfaceConfigs: QueryInterfaceConfig[] = [
-  {
-    interfaceId: "commandRegistry",
-    queries: [
-      "getCommands", // Return a list of all current commands
-      "addCommands", // Add a custom command to the registry
-      "runCommand", // Run a command from the registry
-    ],
-    subscriptions: [
-      "registryChanged", // Triggers when a command is added/removed/modified
-    ],
+contextBridge.exposeInMainWorld("_affinity_ipc", {
+  invoke: (channel: string, data: any) => {
+    return ipcRenderer.invoke(channel, data);
   },
-  {
-    interfaceId: "tileRegistry",
-    queries: ["getTiles"],
-    subscriptions: ["registryChanged"],
+  send: (channel: string, data: any) => {
+    ipcRenderer.send(channel, data);
   },
-  {
-    interfaceId: "toolboxRegistry",
-    queries: ["getNodes"],
-    subscriptions: ["registryChanged"],
+  on: (channel: string, func: (data: any) => void) => {
+    // Don't pass along event as it includes `sender`
+    ipcRenderer.on(channel, (_event, args) => func(args));
   },
-];
+});
 
-const api: Api = {};
+// import { contextBridge, ipcRenderer } from "electron";
 
-for (const iface of queryInterfaceConfigs) {
-  api[iface.interfaceId] = constructQueryInterface(
-    iface.interfaceId,
-    iface.queries,
-    iface.subscriptions
-  );
-}
+// type Api = { [key: string]: QueryInterface };
 
-contextBridge.exposeInMainWorld("api", api);
+// type QueryInterface = (query: string, args: any, callback: (result: any) => void) => void;
 
-export { api };
+// type QueryInterfaceConfig = {
+//   interfaceId: string;
+//   queries: string[];
+//   subscriptions: string[];
+// };
+
+// // Constructs a lambda function that uses IPC to enable backend/frontend comms.
+// // `queries[]` are for performing operations / specific one-time requests
+// // `subscriptions[]` are for obtaining reactive callbacks on backend events
+// function constructQueryInterface(
+//   interfaceId: string,
+//   queries: string[],
+//   subscriptions: string[]
+// ): QueryInterface {
+//   if (interfaceId.includes("/")) {
+//     throw new Error(`Interface '${interfaceId}' cannot contain '/'`);
+//   }
+
+//   return (query: string, args: any, callback: (result: any) => void) => {
+//     const queryId = `${interfaceId}/${query}`;
+//     if (queries.includes(query)) {
+//       ipcRenderer.invoke(queryId, args).then(callback);
+//     } else if (subscriptions.includes(query)) {
+//       ipcRenderer.on(queryId, (_, args) => callback(args));
+//     }
+//   };
+// }
+
+// // Construct api
+// //  `queries[]` and `subscriptions[]` should be mutually disjoint
+// const queryInterfaceConfigs: QueryInterfaceConfig[] = [
+//   {
+//     interfaceId: "commandRegistry",
+//     queries: [
+//       "getCommands", // Return a list of all current commands
+//       "addCommands", // Add a custom command to the registry
+//       "runCommand", // Run a command from the registry
+//     ],
+//     subscriptions: [
+//       "registryChanged", // Triggers when a command is added/removed/modified
+//     ],
+//   },
+//   {
+//     interfaceId: "tileRegistry",
+//     queries: ["getTiles"],
+//     subscriptions: ["registryChanged"],
+//   },
+//   {
+//     interfaceId: "toolboxRegistry",
+//     queries: ["getNodes"],
+//     subscriptions: ["registryChanged"],
+//   },
+// ];
+
+// const api: Api = {};
+
+// for (const iface of queryInterfaceConfigs) {
+//   api[iface.interfaceId] = constructQueryInterface(
+//     iface.interfaceId,
+//     iface.queries,
+//     iface.subscriptions
+//   );
+// }
+
+// contextBridge.exposeInMainWorld("api", api);
+
+// export { api };
