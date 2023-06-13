@@ -5,6 +5,7 @@ import logger from "../../utils/logger";
 import { join } from "path";
 import { Plugin } from "./Plugin";
 import { Blix } from "../Blix";
+import { promisify } from "util";
 
 export class PluginManager {
   // Stores plugins that have been loaded from disk
@@ -39,28 +40,34 @@ export class PluginManager {
     });
   }
 
-  private loadPlugin(plugin: string, path: string) {
+  private async loadPlugin(plugin: string, path: string) {
+    const readFilePromise = promisify(readFile);
+
     const pluginPath = join(path, plugin);
     const packageJson = join(pluginPath, "package.json");
 
-    // TODO: Check that the plugin is valid (package.json, main exist; etc.)
+    // TODO: Check that the plugin is valid (package.json content)
 
     try {
-      readFile(packageJson, (err, data) => {
-        if (err) throw err;
+      const data = await readFilePromise(packageJson);
+      const packageData: PackageData = JSON.parse(data.toString());
 
-        const packageData: PackageData = JSON.parse(data.toString());
-        const plugin: Plugin = new Plugin(
-          packageData,
-          pluginPath,
-          join(pluginPath, packageData.main.toString())
-        );
+      const mainPath = join(pluginPath, packageData.main.toString());
 
-        this.loadedPlugins.push(plugin);
-        plugin.requireSelf(this.blix); // The plugin tries to require its corresponding npm module
-      });
+      try {
+        await readFilePromise(mainPath);
+      } catch (err) {
+        logger.warn("Failed to load plugin: " + plugin + ", main not found");
+        return;
+      }
+
+      const pluginInstance: Plugin = new Plugin(packageData, pluginPath, mainPath);
+
+      this.loadedPlugins.push(pluginInstance);
+      pluginInstance.requireSelf(this.blix); // The plugin tries to require its corresponding npm module
     } catch (err) {
-      logger.warn("Failed to load plugin: " + plugin);
+      logger.warn("Failed to load plugin: " + plugin + ", package.json not found");
+      return;
     }
   }
 }
