@@ -125,7 +125,22 @@ export class CoreGraph extends UniqueEntity {
   }
 
   private checkForCycles(ancFrom: Anchor, ancTo: Anchor): boolean {
-    // TODO
+    const curr: Node = ancFrom.getParent;
+    // For each anchor in the current node
+    for (const anchor in curr.getAnchors) {
+      // Only check input anchors
+      if (this.anchors[anchor].getIOType !== AnchorIO.output) {
+        // If edge anchfor To currently exists in current node anchors then there is a cycle
+        if (ancTo.getUUID in curr.getAnchors) {
+          return true;
+        }
+        // If edge exists from input anchor of node
+        if (anchor in this.edges) {
+          return this.checkForCycles(this.anchors[this.edges[anchor].getAnchorFrom], ancTo);
+        }
+      }
+    }
+
     return false;
   }
 
@@ -152,7 +167,10 @@ export class CoreGraph extends UniqueEntity {
   public printGraph() {
     for (const edge in this.edges) {
       if (!this.edges.hasOwnProperty(edge)) continue;
-      logger.info(edge);
+      logger.info("Edge (same as anchorTo): " + edge);
+      logger.info("Node From: " + this.anchors[this.edges[edge].getAnchorFrom].getParent.getUUID);
+      logger.info("Node To: " + this.anchors[this.edges[edge].getAnchorTo].getParent.getUUID);
+      logger.info("Anchor from -> Anchor to:");
       logger.info(
         this.anchors[this.edges[edge].getAnchorFrom].getUUID +
           " -> " +
@@ -191,6 +209,10 @@ class Node extends UniqueEntity {
 
   public get getAnchors() {
     return this.anchors;
+  }
+
+  public get getName() {
+    return this.name;
   }
 
   // public printNode() {

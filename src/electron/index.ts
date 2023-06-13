@@ -169,8 +169,6 @@ autoUpdater.on("error", (err) => {
   notification.show();
 });
 
-// ========== CREATE APPLICATION STATE ========== //
-// const blix: Blix = new Blix();
+import { testGraph } from "./lib/core-graph/GraphTesting";
 
-// ========== LOAD PLUGINS ========== //
-// This must be done before creating the main window
+// testGraph();
