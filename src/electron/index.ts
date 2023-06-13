@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Notification } from "electron";
+import { app, BrowserWindow, ipcMain, ipcRenderer, Notification } from "electron";
 import { join } from "path";
 import { parse } from "url";
 import { autoUpdater } from "electron-updater";
@@ -20,6 +20,9 @@ logger.info("Checking if settings store works correctly.");
 logger.info(
   settings.get("check") ? "Settings store works correctly." : "Settings store has a problem."
 );
+
+// ========== CREATE APPLICATION STATE ========== //
+const blix: Blix = new Blix();
 
 // ========== MAIN PROCESS ========== //
 
@@ -168,7 +171,5 @@ autoUpdater.on("error", (err) => {
   });
   notification.show();
 });
-
-import { testGraph } from "./lib/core-graph/GraphTesting";
 
 // testGraph();

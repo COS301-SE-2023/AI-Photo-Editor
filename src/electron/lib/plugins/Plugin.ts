@@ -9,6 +9,7 @@ import {
 } from "../core-graph/ToolboxRegistry";
 import { CommandInstance } from "../commands/CommandRegistry";
 import { TileInstance } from "../tiles/TileRegistry";
+import { NodeBuilder } from "./builders/NodeBuilder";
 
 export type PluginSignature = string;
 export type NodeSignature = string;
@@ -66,7 +67,7 @@ export class Plugin {
           if (!pluginModule.commands.hasOwnProperty(cmd)) continue;
 
           blix.commandRegistry.addInstance(
-            pluginModule.commands[cmd](new CommandPluginContext()) as CommandInstance
+            pluginModule.commands[cmd](new CommandPluginContext(cmd)) as CommandInstance
           );
         }
       }
@@ -112,6 +113,30 @@ class NodePluginContext extends PluginContext {
   };
 }
 
-class CommandPluginContext extends PluginContext {}
+class CommandPluginContext extends PluginContext {
+  private name: string;
+  private description: string;
+  private icon: string;
+  private command: any;
+
+  constructor(name: string) {
+    super();
+    this.name = name;
+  }
+
+  public setDescription(description: string) {
+    this.description = description;
+  }
+  public setIcon(icon: string) {
+    this.icon = icon;
+  }
+  public addCommand(command: any) {
+    this.command = command;
+  }
+
+  public create() {
+    return new CommandInstance(this.name, this.description, this.icon, this.command);
+  }
+}
 
 class TilePluginContext extends PluginContext {}

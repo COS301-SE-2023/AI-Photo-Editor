@@ -13,11 +13,16 @@ const commands = {
     "sayHello": (context) => {
         // TODO: Work this out
         // E.g. Could get context.command.inputs for instance for additional values
-        console.log("Hello from command!");
-        console.log("Blix version reported as " + context.blixVersion);
-        return {
-            "signature": "sayHello",
-        }
+    
+        context.setDescription("sayHello command");
+
+        context.setIcon("testing/image.jpg");
+
+        context.addCommand(() => {
+            console.log("hello");
+        })
+
+        return context.create();
     }
 }
 
