@@ -102,7 +102,11 @@
     "rollup-plugin-svelte": "^7.1.4",
     "svelte": "^3.59.0",
     "svelte-check": "^3.3.1",
+<<<<<<< HEAD
     "svelte-fa": "^3.0.4",
+=======
+    "svelte-fa": "^3.0.3",
+>>>>>>> 96ccc1d0e160bdd215fc940db19ed616414470c5
     "svelte-preprocess": "^5.0.3",
     "svelte-splitpanes": "^0.7.13",
     "tailwindcss": "^3.3.2",
