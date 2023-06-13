@@ -1,4 +1,4 @@
-import type { MainApis } from "./client";
+import type { MainApis } from "./init";
 
 declare global {
   interface Window {

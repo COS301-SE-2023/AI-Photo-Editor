@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, ipcRenderer, Notification } from "electron";
+import { app, BrowserWindow, Notification } from "electron";
 import { join } from "path";
 import fs from "fs";
 import { parse } from "url";
@@ -8,10 +8,9 @@ import logger from "./utils/logger";
 import settings from "./utils/settings";
 
 import { PluginManager } from "./lib/plugins/PluginManager";
-import Handlers from "./lib/handlers";
 import { Blix } from "./lib/Blix";
-
 import { exposeMainApis } from "./lib/api/MainApi";
+import { MainWindow, bindMainWindowApis } from "./lib/api/WindowApi";
 
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 
@@ -24,78 +23,24 @@ logger.info(
 
 // ========== MAIN PROCESS ========== //
 
-let mainWindow: BrowserWindow | null;
-let notification: Notification | null;
+let mainWindow: MainWindow | null = null;
+let notification: Notification | null = null;
 
-// Menu
-const menuBar = new Menu();
+app.on("ready", () => {
+  const blix = new Blix();
+  exposeMainApis(blix);
+  const pluginManager = new PluginManager(blix);
+  pluginManager.loadPlugins();
+  createMainWindow();
+  blix.mainWindow = mainWindow!;
 
-// Onyl for macOS
-if (process.platform === "darwin") {
-  menuBar.append(
-    new MenuItem({
-      label: app.name,
-      submenu: [
-        { role: "about" },
-        { type: "separator" },
-        { role: "services" },
-        { type: "separator" },
-        { role: "hide" },
-        { role: "hideOthers" },
-        { role: "unhide" },
-        { type: "separator" },
-        { role: "quit" },
-      ],
-    })
-  );
-}
+  // let i = 0;
+  // setInterval(function() {
+  //   mainWindow?.apis.commandRegistryApi.registryChanged(`Hello ${i++}`);
+  // }, 2000);
+});
 
-const menu: { [key: string]: Menu } = {};
-
-// File
-menu.File = addItems([
-  new MenuItem({ label: "New Project" }),
-  new MenuItem({ type: "separator" }),
-  new MenuItem({ label: "Open Project" }),
-  new MenuItem({ type: "separator" }),
-  new MenuItem({ label: "Save Project" }),
-]);
-
-// Help
-menu.Help = addItems([
-  new MenuItem({
-    label: "Help",
-    click: async () => {
-      // const { shell } = require('electron');
-      // await shell.openExternal('https://youtu.be/dQw4w9WgXcQ');
-      // Show a dialog box
-      await dialog.showMessageBox({
-        type: "info",
-        title: "Dialog Box",
-        message: "Hello, world!",
-        buttons: ["Ok"],
-      });
-    },
-  }),
-]);
-
-// Add Items to Menu Bar
-for (const key in menu) {
-  if (Object.hasOwn(menu, key)) menuBar.append(new MenuItem({ label: key, submenu: menu[key] }));
-}
-
-// Set new Menu Bar
-Menu.setApplicationMenu(menuBar);
-
-function addItems(items: MenuItem[]): Menu {
-  const menu = new Menu();
-  items.forEach((item) => {
-    menu.append(item);
-  });
-  return menu;
-}
-
-const createWindow = () => {
+function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1300,
     height: 1000,
@@ -103,14 +48,11 @@ const createWindow = () => {
       devTools: !isProd,
       contextIsolation: true,
       nodeIntegration: false,
-      // sandbox: false,
+      sandbox: true,
       preload: join(__dirname, "preload.js"),
     },
     icon: "public/images/icon.png",
-    // show: false,
-  });
-
-  Menu.setApplicationMenu(null);
+  }) as MainWindow;
 
   const url =
     // process.env.NODE_ENV === "production"
@@ -120,36 +62,22 @@ const createWindow = () => {
       : // in dev, target the host and port of the local rollup web server
         "http://localhost:5500";
 
-  mainWindow.loadURL(url).catch((err) => {
-    logger.error(JSON.stringify(err));
-    app.quit();
-  });
+  mainWindow
+    .loadURL(url)
+    .then(async () => {
+      await bindMainWindowApis(mainWindow!);
+    })
+    .catch((err) => {
+      logger.error(JSON.stringify(err));
+      app.quit();
+    });
 
   // if (!isProd) mainWindow.webContents.openDevTools();
 
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
-
-  // mainWindow.on('ready-to-show', () => {
-  //   if (process.platform === 'darwin' && mainWindow) {
-  //     const padding = mainWindow.getTrafficLightPosition().x;
-  //     mainWindow.setSheetOffset(padding);
-  //   }
-  // });
-};
-
-app.on("ready", () => {
-  // Initialize Blix before main window is opened
-  const blix = new Blix();
-  exposeMainApis(blix);
-  const pluginManager = new PluginManager(blix);
-  pluginManager.loadPlugins();
-
-  createWindow();
-
-  // if (mainWindow) new Handlers(mainWindow);
-});
+}
 
 // those two events are completely optional to subscrbe to, but that's a common way to get the
 // user experience people expect to have on macOS: do not quit the application directly
@@ -159,7 +87,7 @@ app.on("window-all-closed", () => {
 });
 
 app.on("activate", () => {
-  if (mainWindow === null) createWindow();
+  if (mainWindow === null) createMainWindow();
 });
 
 app.on("web-contents-created", (e, contents) => {

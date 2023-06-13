@@ -3,17 +3,9 @@
   // import Navbar from "./layout/Navbar.svelte";
   // import Palette from "./components/Palette.svelte";
 
-  import { bindMainApis } from "./client";
+  import { init } from "./init";
 
   let count = 0;
-
-  async function init() {
-    // Bind to backend IPC APIs
-    window.apis = await bindMainApis();
-
-    window.apis.utilApi.count();
-    await getNum();
-  }
 
   async function getNum() {
     count = await window.apis.utilApi.count();
