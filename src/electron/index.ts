@@ -41,6 +41,7 @@ const createWindow = () => {
       preload: join(__dirname, "preload.js"),
     },
     icon: "public/images/icon.png",
+    // show: false,
   });
 
   const url =
@@ -172,4 +173,7 @@ autoUpdater.on("error", (err) => {
   notification.show();
 });
 
-// testGraph();
+// import { TestGraph } from "./lib/core-graph/GraphTesting";
+
+// const t: TestGraph = new TestGraph();
+// t.main();
