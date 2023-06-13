@@ -50,7 +50,8 @@ export class CoreGraphStore extends UniqueEntity {
 export class CoreGraph extends UniqueEntity {
   private nodes: { [key: UUID]: Node };
   private anchors: { [key: UUID]: Anchor };
-  private edges: { [key: AnchorUUID]: Edge };
+  private edgeDest: { [key: AnchorUUID]: Edge };
+  private edgeSrc: { [key: AnchorUUID]: AnchorUUID };
 
   private subscribers: CoreGraphSubscriber[];
 
@@ -58,7 +59,8 @@ export class CoreGraph extends UniqueEntity {
     super();
     this.nodes = {};
     this.anchors = {};
-    this.edges = {};
+    this.edgeDest = {};
+    this.edgeSrc = {};
   }
 
   public get getNodes() {
@@ -67,6 +69,10 @@ export class CoreGraph extends UniqueEntity {
 
   public get getAnchors() {
     return this.anchors;
+  }
+
+  public get getEdgeDest() {
+    return this.edgeDest;
   }
 
   // We need to pass in node name and plugin name
@@ -106,7 +112,7 @@ export class CoreGraph extends UniqueEntity {
       return false;
     }
 
-    // Check for duplicate edges
+    // Check for duplicate edgeDest
     if (this.checkForDuplicateEdges(ancFrom, ancTo)) {
       return false;
     }
@@ -114,7 +120,8 @@ export class CoreGraph extends UniqueEntity {
     // Add edge to graph
     // Store edge at UUID of anchor it flows into
     const edge: Edge = new Edge(anchorFrom, anchorTo);
-    this.edges[ancTo.getUUID] = edge;
+    this.edgeDest[ancTo.getUUID] = edge;
+    this.edgeSrc[ancFrom.getUUID] = ancTo.getUUID;
 
     return true;
   }
@@ -135,8 +142,8 @@ export class CoreGraph extends UniqueEntity {
           return true;
         }
         // If edge exists from input anchor of node
-        if (anchor in this.edges) {
-          return this.checkForCycles(this.anchors[this.edges[anchor].getAnchorFrom], ancTo);
+        if (anchor in this.edgeDest) {
+          return this.checkForCycles(this.anchors[this.edgeDest[anchor].getAnchorFrom], ancTo);
         }
       }
     }
@@ -144,12 +151,18 @@ export class CoreGraph extends UniqueEntity {
     return false;
   }
 
-  public removeNode(node: Node) {
-    delete this.nodes[node.getUUID];
+  public removeNode(anchorTo: AnchorUUID) {
+    // TODO
   }
 
-  private removeEdge(edge: UUID) {
-    // TODO
+  public removeEdge(edge: UUID): boolean {
+    try {
+      delete this.edgeDest[edge];
+      delete this.edgeSrc[edge];
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   private copy() {
@@ -165,16 +178,18 @@ export class CoreGraph extends UniqueEntity {
   }
 
   public printGraph() {
-    for (const edge in this.edges) {
-      if (!this.edges.hasOwnProperty(edge)) continue;
+    for (const edge in this.edgeDest) {
+      if (!this.edgeDest.hasOwnProperty(edge)) continue;
       logger.info("Edge (same as anchorTo): " + edge);
-      logger.info("Node From: " + this.anchors[this.edges[edge].getAnchorFrom].getParent.getUUID);
-      logger.info("Node To: " + this.anchors[this.edges[edge].getAnchorTo].getParent.getUUID);
+      logger.info(
+        "Node From: " + this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.getUUID
+      );
+      logger.info("Node To: " + this.anchors[this.edgeDest[edge].getAnchorTo].getParent.getUUID);
       logger.info("Anchor from -> Anchor to:");
       logger.info(
-        this.anchors[this.edges[edge].getAnchorFrom].getUUID +
+        this.anchors[this.edgeDest[edge].getAnchorFrom].getUUID +
           " -> " +
-          this.anchors[this.edges[edge].getAnchorTo].getUUID +
+          this.anchors[this.edgeDest[edge].getAnchorTo].getUUID +
           "\n"
       );
     }
@@ -257,11 +272,11 @@ class Edge extends UniqueEntity {
     super();
   }
 
-  get getAnchorFrom() {
+  public get getAnchorFrom() {
     return this.anchorFrom;
   }
 
-  get getAnchorTo() {
+  public get getAnchorTo() {
     return this.anchorTo;
   }
 }

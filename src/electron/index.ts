@@ -106,10 +106,8 @@ const createWindow = () => {
       // sandbox: false,
       preload: join(__dirname, "preload.js"),
     },
-    // Set icon for Windows and Linux
-    icon: "public/images/blix_64x64.png",
-    titleBarStyle: "hidden",
-    trafficLightPosition: { x: 10, y: 10 },
+    icon: "public/images/icon.png",
+    // show: false,
   });
 
   Menu.setApplicationMenu(null);
@@ -250,4 +248,7 @@ autoUpdater.on("error", (err) => {
   notification.show();
 });
 
-// testGraph();
+// import { TestGraph } from "./lib/core-graph/GraphTesting";
+
+// const t: TestGraph = new TestGraph();
+// t.main();
