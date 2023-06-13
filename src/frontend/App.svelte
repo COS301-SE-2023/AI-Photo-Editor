@@ -1,12 +1,31 @@
 <script lang="ts">
-  import Layout from "./layout/Layout.svelte";
-  import Navbar from "./layout/Navbar.svelte";
-  import Palette from "./components/Palette.svelte";
+  // import Layout from "./layout/Layout.svelte";
+  // import Navbar from "./layout/Navbar.svelte";
+  // import Palette from "./components/Palette.svelte";
+
+  import { bindMainApis } from "./client";
+
+  let count = 0;
+
+  async function init() {
+    // Bind to backend IPC APIs
+    window.apis = await bindMainApis();
+
+    window.apis.utilApi.count();
+    await getNum();
+  }
+
+  async function getNum() {
+    count = await window.apis.utilApi.count();
+  }
 </script>
 
-<div class="navbar"><Navbar /></div>
-<div class="layout"><Layout /></div>
-<Palette />
+{#await init() then}
+  <div on:click="{getNum}" on:keypress="{getNum}" class="h-16 w-16 bg-sky-300">{count}</div>
+  <!-- <div class="navbar"><Navbar /></div>
+  <div class="layout"><Layout /></div>
+  <Palette /> -->
+{/await}
 
 <style lang="postcss" global>
   @tailwind base;
