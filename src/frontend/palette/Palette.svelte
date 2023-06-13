@@ -1,8 +1,8 @@
 <script lang="ts">
   import tinykeys from "tinykeys";
   import PaletteItem from "./PaletteItem.svelte";
-  import type { GraphNode, GraphSlider } from "../types";
-  import { graphStore } from "../stores/GraphStore";
+  // import type { GraphNode, GraphSlider } from "../types";
+  // import { graphStore } from "../stores/GraphStore";
   import { paletteStore } from "../stores/PaletteStore";
 
   let showPalette = false;
@@ -89,27 +89,28 @@
       return;
     }
     if (itemId === "clear") {
-      graphStore.set({ nodes: [] });
+      // graphStore.set({ nodes: [] });
       paletteStore.update((store) => ({ ...store, src: "" }));
       window.api.send("clear-file");
       return;
     }
 
-    const graphNode: GraphNode = {
-      id: itemId,
-      name: item,
-      slider: generateSlider(itemId),
-      connection: "",
-    };
+    // TODO: Remove (OLD SYSTEM)
+    // const graphNode: GraphNode = {
+    //   id: itemId,
+    //   name: item,
+    //   slider: generateSlider(itemId),
+    //   connection: "",
+    // };
 
-    let found = false;
-    $graphStore.nodes.forEach((n) => {
-      if (n.id === graphNode.id) found = true;
-    });
+    // let found = false;
+    // $graphStore.nodes.forEach((n) => {
+    //   if (n.id === graphNode.id) found = true;
+    // });
 
-    if (!found) {
-      graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
-    }
+    // if (!found) {
+    //   graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
+    // }
   }
 
   function handleItemClick(event: CustomEvent<{ id: string }>) {
@@ -124,23 +125,24 @@
     }
   }
 
-  function generateSlider(id: string) {
-    const slider: GraphSlider = { min: 0, max: 2, step: 0.1, fixed: 1, value: 1 };
+  // TODO: Remove (OLD SYSTEM)
+  // function generateSlider(id: string) {
+  //   const slider: GraphSlider = { min: 0, max: 2, step: 0.1, fixed: 1, value: 1 };
 
-    if (id === "rotate") {
-      slider.max = 360;
-      slider.step = 5;
-      slider.value = 0;
-      slider.fixed = 0;
-    } else if (id === "hue") {
-      slider.max = 360;
-      slider.step = 10;
-      slider.value = 0;
-      slider.fixed = 0;
-    }
+  //   if (id === "rotate") {
+  //     slider.max = 360;
+  //     slider.step = 5;
+  //     slider.value = 0;
+  //     slider.fixed = 0;
+  //   } else if (id === "hue") {
+  //     slider.max = 360;
+  //     slider.step = 10;
+  //     slider.value = 0;
+  //     slider.fixed = 0;
+  //   }
 
-    return slider;
-  }
+  //   return slider;
+  // }
 
   tinykeys(window, {
     "$mod+p": (event) => {
