@@ -2,6 +2,7 @@ import { BlixProject } from "./BlixProject";
 import { CommandRegistry } from "./commands/CommandRegistry";
 import { ToolboxRegistry } from "./core-graph/ToolboxRegistry";
 import { TileRegistry } from "./tiles/TileRegistry";
+import { MainWindow } from "./api/WindowApi";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -10,6 +11,7 @@ export class Blix {
   private _tileRegistry: TileRegistry;
   private _commandRegistry: CommandRegistry;
   private _openProjects: BlixProject[];
+  private _mainWindow: MainWindow;
 
   private startTime: Date;
 
@@ -27,13 +29,24 @@ export class Blix {
   get toolbox(): ToolboxRegistry {
     return this._toolbox;
   }
+
   get tileRegistry(): TileRegistry {
     return this._tileRegistry;
   }
+
   get commandRegistry(): CommandRegistry {
     return this._commandRegistry;
   }
+
   get openProjects(): BlixProject[] {
     return this._openProjects;
+  }
+
+  get mainWindow(): MainWindow {
+    return this._mainWindow;
+  }
+
+  set mainWindow(mainWindow: MainWindow) {
+    this._mainWindow = mainWindow;
   }
 }

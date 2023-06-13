@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, ipcRenderer, Notification } from "electron";
+import { app, BrowserWindow, Notification } from "electron";
 import { join } from "path";
 import { parse } from "url";
 import { autoUpdater } from "electron-updater";
@@ -7,10 +7,9 @@ import logger from "./utils/logger";
 import settings from "./utils/settings";
 
 import { PluginManager } from "./lib/plugins/PluginManager";
-import Handlers from "./lib/handlers";
 import { Blix } from "./lib/Blix";
-
 import { exposeMainApis } from "./lib/api/MainApi";
+import { MainWindow, bindMainWindowApis } from "./lib/api/WindowApi";
 
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 
@@ -21,15 +20,26 @@ logger.info(
   settings.get("check") ? "Settings store works correctly." : "Settings store has a problem."
 );
 
-// ========== CREATE APPLICATION STATE ========== //
-const blix: Blix = new Blix();
-
 // ========== MAIN PROCESS ========== //
 
-let mainWindow: BrowserWindow | null;
-let notification: Notification | null;
+let mainWindow: MainWindow | null = null;
+let notification: Notification | null = null;
 
-const createWindow = () => {
+app.on("ready", () => {
+  const blix = new Blix();
+  exposeMainApis(blix);
+  const pluginManager = new PluginManager(blix);
+  pluginManager.loadPlugins();
+  createMainWindow();
+  blix.mainWindow = mainWindow!;
+
+  // let i = 0;
+  // setInterval(function() {
+  //   mainWindow?.apis.commandRegistryApi.registryChanged(`Hello ${i++}`);
+  // }, 2000);
+});
+
+function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1300,
     height: 1000,
@@ -37,12 +47,11 @@ const createWindow = () => {
       devTools: !isProd,
       contextIsolation: true,
       nodeIntegration: false,
-      // sandbox: false,
+      sandbox: true,
       preload: join(__dirname, "preload.js"),
     },
     icon: "public/images/icon.png",
-    // show: false,
-  });
+  }) as MainWindow;
 
   const url =
     // process.env.NODE_ENV === "production"
@@ -52,29 +61,22 @@ const createWindow = () => {
       : // in dev, target the host and port of the local rollup web server
         "http://localhost:5500";
 
-  mainWindow.loadURL(url).catch((err) => {
-    logger.error(JSON.stringify(err));
-    app.quit();
-  });
+  mainWindow
+    .loadURL(url)
+    .then(async () => {
+      await bindMainWindowApis(mainWindow!);
+    })
+    .catch((err) => {
+      logger.error(JSON.stringify(err));
+      app.quit();
+    });
 
   // if (!isProd) mainWindow.webContents.openDevTools();
 
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
-};
-
-app.on("ready", () => {
-  // Initialize Blix before main window is opened
-  const blix = new Blix();
-  exposeMainApis(blix);
-  const pluginManager = new PluginManager(blix);
-  pluginManager.loadPlugins();
-
-  createWindow();
-
-  // if (mainWindow) new Handlers(mainWindow);
-});
+}
 
 // those two events are completely optional to subscrbe to, but that's a common way to get the
 // user experience people expect to have on macOS: do not quit the application directly
@@ -84,7 +86,7 @@ app.on("window-all-closed", () => {
 });
 
 app.on("activate", () => {
-  if (mainWindow === null) createWindow();
+  if (mainWindow === null) createMainWindow();
 });
 
 app.on("web-contents-created", (e, contents) => {
