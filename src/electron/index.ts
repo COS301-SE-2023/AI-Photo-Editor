@@ -10,6 +10,8 @@ import { PluginManager } from "./lib/plugins/PluginManager";
 import Handlers from "./lib/handlers";
 import { Blix } from "./lib/Blix";
 
+import { exposeMainApis } from "./lib/api/MainApi";
+
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 
 logger.info("App starting...");
@@ -31,6 +33,8 @@ const createWindow = () => {
     webPreferences: {
       devTools: !isProd,
       contextIsolation: true,
+      nodeIntegration: false,
+      // sandbox: false,
       preload: join(__dirname, "preload.js"),
     },
     icon: "public/images/icon.png",
@@ -57,8 +61,15 @@ const createWindow = () => {
 };
 
 app.on("ready", () => {
+  // Initialize Blix before main window is opened
+  const blix = new Blix();
+  exposeMainApis(blix);
+  const pluginManager = new PluginManager(blix);
+  pluginManager.loadPlugins();
+
   createWindow();
-  if (mainWindow) new Handlers(mainWindow);
+
+  // if (mainWindow) new Handlers(mainWindow);
 });
 
 // those two events are completely optional to subscrbe to, but that's a common way to get the
@@ -159,9 +170,9 @@ autoUpdater.on("error", (err) => {
 });
 
 // ========== CREATE APPLICATION STATE ========== //
-const blix: Blix = new Blix();
+// const blix: Blix = new Blix();
 
 // ========== LOAD PLUGINS ========== //
 // This must be done before creating the main window
-const pluginManager = new PluginManager(blix);
-pluginManager.loadPlugins();
+// const pluginManager = new PluginManager(blix);
+// pluginManager.loadPlugins();
