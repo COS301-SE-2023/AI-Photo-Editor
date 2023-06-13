@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Notification, Menu, MenuItem, dialog } from "electron";
+import { app, BrowserWindow, ipcMain, ipcRenderer, Notification } from "electron";
 import { join } from "path";
 import fs from "fs";
 import { parse } from "url";
@@ -249,7 +249,5 @@ autoUpdater.on("error", (err) => {
   });
   notification.show();
 });
-
-import { testGraph } from "./lib/core-graph/GraphTesting";
 
 // testGraph();
