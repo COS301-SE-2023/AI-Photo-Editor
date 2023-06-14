@@ -20,7 +20,7 @@ export class TestGraph {
       new OutputAnchorInstance("number", "signature", "output_anchor2")
     );
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 1; i < 7; i++) {
       this.tempNodes.push(
         new NodeInstance(
           `hello-plugin/node${i}`,
@@ -444,10 +444,12 @@ export class TestGraph {
     );
 
     const edges = g6.getEdgeDest;
+    const edges2 = g6.getEdgeSrc;
     // for(const key in edges){
     //   logger.info(key);
     // }
-    logger.info(`Length: ${Object.values(g6.getEdgeDest).length}`);
+    logger.info(`Length Dest: ${Object.values(g6.getEdgeDest).length}`);
+    logger.info(`Length Src: ${Object.values(g6.getEdgeSrc).length}`);
     const edge1 = Object.values(edges)[0].getAnchorTo;
     const edge2 = Object.values(edges)[1].getAnchorTo;
     const edge3 = Object.values(edges)[2].getAnchorTo;
@@ -455,13 +457,14 @@ export class TestGraph {
     const edge5 = Object.values(edges)[4].getAnchorTo;
     const edge6 = Object.values(edges)[5].getAnchorTo;
 
-    logger.info(g6.removeEdge(edge3));
-    logger.info(g6.removeEdge(edge4));
+    // logger.info(g6.removeEdge(edge3));
+    // logger.info(g6.removeEdge(edge4));
     logger.info(g6.removeEdge(edge6));
 
-    logger.info(`Length: ${Object.values(g6.getEdgeDest).length}`);
+    logger.info(`Length Dest: ${Object.values(g6.getEdgeDest).length}`);
+    logger.info(`Length Src: ${Object.values(g6.getEdgeSrc).length}`);
 
-    const edges2 = g6.getEdgeDest;
+    // const edges2 = g6.getEdgeDest;
     // for(const key in edges2){
     //   logger.info(key);
     // }
@@ -525,6 +528,97 @@ export class TestGraph {
         Object.values(g6Node1.getAnchors)[2].getUUID
       )
     );
+
+    // const edges = g6.getEdgeDest;
+    // const edges2 = g6.getEdgeSrc;
+
+    // const edge1 = Object.values(edges)[2].getAnchorTo;
+
+    logger.info("\n");
+
+    // for(const node in g6.getNodes){
+    //   logger.info(g6.getNodes[node].getName)
+    //   logger.info(g6.getNodes[node].getAnchors)
+    //   logger.info("\n")
+    // }
+
+    // for(const edge in g6.getEdgeSrc) {
+    //   for(const item in g6.getEdgeSrc[edge]){
+    //     logger.info("From:" + edge)
+    //     logger.info("To: " + g6.getEdgeSrc[edge][item])
+    //   }
+    //   logger.info("\n")
+
+    // }
+
+    // for(const edge in g6.getEdgeDest){
+    //   logger.info(g6.getEdgeDest[edge].getAnchorTo)
+    // }
+
+    const temp = g6.getNodes;
+    const nodeToDelete = Object.values(temp)[0]; // node4
+
+    // for(const node in g6.getNodes){
+    //   logger.info(g6.getNodes[node].getName)
+    //   logger.info(g6.getNodes[node].getAnchors)
+    //   logger.info("\n")
+    // }
+
+    g6.removeNode(nodeToDelete.getUUID);
+
+    // const edges = g6.getEdgeDest;
+    // const edge6 = Object.values(edges)[5].getAnchorTo;
+    // logger.info(g6.removeEdge(edge6));
+
+    logger.info(`Length Dest: ${Object.values(g6.getEdgeDest).length}`);
+    logger.info(`Length Src: ${Object.values(g6.getEdgeSrc).length}`);
+    logger.info(`Length Node: ${Object.values(g6.getNodes).length}`);
+
+    // for(const node in g6.getNodes){
+    //   logger.info(g6.getNodes[node].getName)
+    //   logger.info(g6.getNodes[node].getAnchors)
+    //   logger.info("\n")
+    // }
+
+    const ancs = g6.getAnchors;
+    logger.info(Object.values(g6.getAnchors).length);
+
+    // for(const node in g6.getNodes){
+    //   logger.info(g6.getNodes[node].getName)
+    //   logger.info(g6.getNodes[node].getAnchors)
+    //   logger.info("\n")
+    // }
+
+    // for(const edge in g6.getEdgeSrc) {
+    //   for(const item in g6.getEdgeSrc[edge]){
+    //     logger.info("From:" + edge)
+    //     logger.info("To: " + g6.getEdgeSrc[edge][item])
+    //   }
+    //   logger.info("\n")
+
+    // }
+
+    // for(const edge in g6.getEdgeDest){
+    //   logger.info(g6.getEdgeDest[edge].getAnchorTo)
+    // }
+
+    // logger.info(Object.values(g6.getAnchors).length)
+
+    // for(const node in g6.getNodes){
+    //   logger.info(g6.getNodes[node].getName)
+    //   logger.info(g6.getNodes[node].getAnchors)
+    //   logger.info("\n")
+    // }
+
+    // logger.info(g6.getEdgeDest)
+
+    // const nodes = g6.getNodes;
+    // for(const node in g6.getNodes){
+    //   logger.info(nodes[node].getName)
+    // }
+
+    // const src = g6.getEdgeSrc;
+    // logger.info(src);
   }
 
   public main() {
@@ -535,6 +629,6 @@ export class TestGraph {
     // this.test5();
     // this.test6();
     // this.test7();
-    // this.test8();
+    this.test8();
   }
 }
