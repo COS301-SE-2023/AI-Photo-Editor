@@ -50,8 +50,8 @@ export class CoreGraphStore extends UniqueEntity {
 export class CoreGraph extends UniqueEntity {
   private nodes: { [key: UUID]: Node };
   private anchors: { [key: UUID]: Anchor };
-  private edgeDest: { [key: AnchorUUID]: Edge };
-  private edgeSrc: { [key: AnchorUUID]: AnchorUUID };
+  private edgeDest: { [key: AnchorUUID]: Edge }; // Map a destination anchor to an edge
+  private edgeSrc: { [key: AnchorUUID]: AnchorUUID[] }; // Map a source anchor to a list of destination anchors
 
   private subscribers: CoreGraphSubscriber[];
 
@@ -75,6 +75,10 @@ export class CoreGraph extends UniqueEntity {
     return this.edgeDest;
   }
 
+  public get getEdgeSrc() {
+    return this.edgeSrc;
+  }
+
   // We need to pass in node name and plugin name
   public addNode(node: NodeInstance) {
     // Create New Node
@@ -93,9 +97,16 @@ export class CoreGraph extends UniqueEntity {
     }
   }
 
-  public addEdge(anchorFrom: UUID, anchorTo: UUID) {
-    const ancFrom = this.anchors[anchorFrom];
-    const ancTo = this.anchors[anchorTo];
+  public addEdge(anchorA: UUID, anchorB: UUID) {
+    // Edge can start either from an output or input anchor
+    const ancFrom =
+      this.anchors[anchorA].getIOType === AnchorIO.output
+        ? this.anchors[anchorA]
+        : this.anchors[anchorB];
+    const ancTo =
+      this.anchors[anchorB].getIOType === AnchorIO.input
+        ? this.anchors[anchorB]
+        : this.anchors[anchorA];
 
     // Edge must flow from output anchor to input anchor
     if (ancFrom.getIOType !== AnchorIO.output || ancTo.getIOType !== AnchorIO.input) {
@@ -119,9 +130,10 @@ export class CoreGraph extends UniqueEntity {
 
     // Add edge to graph
     // Store edge at UUID of anchor it flows into
-    const edge: Edge = new Edge(anchorFrom, anchorTo);
+    const edge: Edge = new Edge(ancFrom.getUUID, ancTo.getUUID);
     this.edgeDest[ancTo.getUUID] = edge;
-    this.edgeSrc[ancFrom.getUUID] = ancTo.getUUID;
+    if (!(ancFrom.getUUID in this.edgeSrc)) this.edgeSrc[ancFrom.getUUID] = [];
+    this.edgeSrc[ancFrom.getUUID].push(ancTo.getUUID);
 
     return true;
   }
@@ -151,16 +163,56 @@ export class CoreGraph extends UniqueEntity {
     return false;
   }
 
-  public removeNode(anchorTo: AnchorUUID) {
-    // TODO
+  public removeNode(nodeToDelete: UUID) {
+    const node: Node = this.nodes[nodeToDelete];
+    // Remove all edges from node
+    for (const anchor in node.getAnchors) {
+      if (!node.getAnchors.hasOwnProperty(anchor)) continue;
+      // Remove all edges feeding into node
+      if (this.anchors[anchor]?.getIOType === AnchorIO.input) {
+        this.removeEdge(anchor);
+      }
+      // Remove all edges feeding out of node
+      else if (this.anchors[anchor]?.getIOType === AnchorIO.output) {
+        if (anchor in this.edgeSrc) {
+          const anchors: AnchorUUID[] = this.edgeSrc[this.anchors[anchor].getUUID];
+          const length: number = anchors.length;
+          // Remove all edges feeding out of current output anchor
+          for (let i = 0; i < length; i++) {
+            this.removeEdge(anchors[0]);
+          }
+        }
+      }
+      // Remove node anchor
+      delete this.anchors[anchor];
+    }
+    // Remove node
+    delete this.nodes[node.getUUID];
   }
 
-  public removeEdge(edge: UUID): boolean {
+  public removeEdge(anchor: AnchorUUID): boolean {
+    // Check if Anchor doesnt have a connecting edge
+    if (!(anchor in this.edgeDest)) {
+      return false;
+    }
+
     try {
-      delete this.edgeDest[edge];
-      delete this.edgeSrc[edge];
+      const edge: Edge = this.edgeDest[anchor];
+      // Find index of destination anchor in source anchor's list of destination anchors
+      const index: number = this.edgeSrc[edge.getAnchorFrom].indexOf(anchor);
+      // Remove destination anchor from source anchor's list of destination anchors
+      delete this.edgeSrc[edge.getAnchorFrom][index];
+      // Update list
+      this.edgeSrc[edge.getAnchorFrom].splice(index, 1);
+      if (this.edgeSrc[edge.getAnchorFrom].length === 0) {
+        delete this.edgeSrc[edge.getAnchorFrom];
+      }
+      // Remove connectiong edge correlating to anchor
+      delete this.edgeDest[anchor];
+
       return true;
     } catch (error) {
+      logger.error(error);
       return false;
     }
   }
