@@ -1,20 +1,16 @@
 <script lang="ts">
-  // import Layout from "./layout/Layout.svelte";
-  // import Navbar from "./layout/Navbar.svelte";
-  // import Palette from "./components/Palette.svelte";
-
   import { init } from "./init";
+  import { blixStore } from "./stores/BlixStore";
 
-  let count = 0;
-
-  async function getNum() {
-    count = await window.apis.utilApi.count();
-  }
+  import Layout from "./layout/Layout.svelte";
+  import Navbar from "./layout/Navbar.svelte";
+  import Palette from "./components/Palette.svelte";
 </script>
 
 {#await init() then}
-  <div on:click="{getNum}" on:keypress="{getNum}" class="h-16 w-16 bg-sky-300">{count}</div>
-  <!-- <div class="navbar"><Navbar /></div>
+  <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
+    <Navbar />
+  </div>
   <div class="layout"><Layout /></div>
   <Palette /> -->
 {/await}
