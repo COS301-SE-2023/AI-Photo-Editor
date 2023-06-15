@@ -57,7 +57,7 @@ function createMainWindow() {
     trafficLightPosition: { x: 10, y: 10 },
   }) as MainWindow;
 
-  Menu.setApplicationMenu(null);
+  // Menu.setApplicationMenu(null);
 
   const url =
     // process.env.NODE_ENV === "production"
@@ -191,70 +191,70 @@ if (!fs.existsSync(tempDirPath)) {
 // const t: TestGraph = new TestGraph();
 // t.main();
 
-// Menu
-const menuBar = new Menu();
+// // Menu
+// const menuBar = new Menu();
 
-// Onyl for macOS
-if (process.platform === "darwin") {
-  menuBar.append(
-    new MenuItem({
-      label: app.name,
-      submenu: [
-        { role: "about" },
-        { type: "separator" },
-        { role: "services" },
-        { type: "separator" },
-        { role: "hide" },
-        { role: "hideOthers" },
-        { role: "unhide" },
-        { type: "separator" },
-        { role: "quit" },
-      ],
-    })
-  );
-}
+// // Onyl for macOS
+// if (process.platform === "darwin") {
+//   menuBar.append(
+//     new MenuItem({
+//       label: app.name,
+//       submenu: [
+//         { role: "about" },
+//         { type: "separator" },
+//         { role: "services" },
+//         { type: "separator" },
+//         { role: "hide" },
+//         { role: "hideOthers" },
+//         { role: "unhide" },
+//         { type: "separator" },
+//         { role: "quit" },
+//       ],
+//     })
+//   );
+// }
 
-const menu: { [key: string]: Menu } = {};
+// const menu: { [key: string]: Menu } = {};
 
-// File
-menu.File = addItems([
-  new MenuItem({ label: "New Project" }),
-  new MenuItem({ type: "separator" }),
-  new MenuItem({ label: "Open Project" }),
-  new MenuItem({ type: "separator" }),
-  new MenuItem({ label: "Save Project" }),
-]);
+// // File
+// menu.File = addItems([
+//   new MenuItem({ label: "New Project" }),
+//   new MenuItem({ type: "separator" }),
+//   new MenuItem({ label: "Open Project" }),
+//   new MenuItem({ type: "separator" }),
+//   new MenuItem({ label: "Save Project" }),
+// ]);
 
-// Help
-menu.Help = addItems([
-  new MenuItem({
-    label: "Help",
-    click: async () => {
-      // const { shell } = require('electron');
-      // await shell.openExternal('https://youtu.be/dQw4w9WgXcQ');
-      // Show a dialog box
-      await dialog.showMessageBox({
-        type: "info",
-        title: "Dialog Box",
-        message: "Hello, world!",
-        buttons: ["Ok"],
-      });
-    },
-  }),
-]);
+// // Help
+// menu.Help = addItems([
+//   new MenuItem({
+//     label: "Help",
+//     click: async () => {
+//       // const { shell } = require('electron');
+//       // await shell.openExternal('https://youtu.be/dQw4w9WgXcQ');
+//       // Show a dialog box
+//       await dialog.showMessageBox({
+//         type: "info",
+//         title: "Dialog Box",
+//         message: "Hello, world!",
+//         buttons: ["Ok"],
+//       });
+//     },
+//   }),
+// ]);
 
-// Add Items to Menu Bar
-for (const key in menu) {
-  if (Object.hasOwn(menu, key)) menuBar.append(new MenuItem({ label: key, submenu: menu[key] }));
-}
+// // Add Items to Menu Bar
+// for (const key in menu) {
+//   if (Object.hasOwn(menu, key)) menuBar.append(new MenuItem({ label: key, submenu: menu[key] }));
+// }
 
-// Set new Menu Bar
-Menu.setApplicationMenu(menuBar);
+// // Set new Menu Bar
+// Menu.setApplicationMenu(menuBar);
 
-function addItems(items: MenuItem[]): Menu {
-  const menu = new Menu();
-  items.forEach((item) => {
-    menu.append(item);
-  });
-  return menu;
-}
+// function addItems(items: MenuItem[]): Menu {
+//   const menu = new Menu();
+//   items.forEach((item) => {
+//     menu.append(item);
+//   });
+//   return menu;
+// }

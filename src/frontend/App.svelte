@@ -1,19 +1,16 @@
 <script lang="ts">
-  // import { beforeUpdate } from "svelte";
   import { init } from "./init";
+  import { blixStore } from "./stores/BlixStore";
 
   import Layout from "./layout/Layout.svelte";
   import Navbar from "./layout/Navbar.svelte";
   import Palette from "./components/Palette.svelte";
-
-  let platform = "darwin";
-
-  // beforeUpdate(async () => {
-  // });
 </script>
 
 {#await init() then}
-  <div class="navbar {platform === 'darwin' ? 'pl-20' : ''}"><Navbar /></div>
+  <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
+    <Navbar />
+  </div>
   <div class="layout"><Layout /></div>
   <Palette />
 {/await}
