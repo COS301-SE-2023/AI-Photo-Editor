@@ -1,0 +1,16 @@
+{
+  "nodes": [
+    {
+      "id": "",
+      "signature": "hello-plugin/node1",
+      "styling": { "position": { "x": 100, "y": 100 }, "size": { "w": 100, "h": 100 } }
+    }
+  ],
+  "edges": [
+    {
+      "id": "",
+      "anchorFrom": { "parent": "", "anchorID": "" },
+      "anchorTo": { "parent": "", "anchorID": "" }
+    }
+  ]
+}

@@ -52,6 +52,7 @@ function createMainWindow() {
       preload: join(__dirname, "preload.js"),
     },
     icon: "public/images/icon.png",
+    // show: false,
   }) as MainWindow;
 
   const url =
