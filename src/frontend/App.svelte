@@ -1,19 +1,22 @@
 <script lang="ts">
+  // import { beforeUpdate } from "svelte";
+  import { init } from "./init";
+
   import Layout from "./layout/Layout.svelte";
   import Navbar from "./layout/Navbar.svelte";
   import Palette from "./components/Palette.svelte";
-  import { beforeUpdate } from "svelte";
 
-  let platform = "";
+  let platform = "darwin";
 
-  beforeUpdate(async () => {
-    platform = await window.api.getPlatform();
-  });
+  // beforeUpdate(async () => {
+  // });
 </script>
 
-<div class="navbar {platform === 'darwin' ? 'pl-20' : ''}"><Navbar /></div>
-<div class="layout"><Layout /></div>
-<Palette />
+{#await init() then}
+  <div class="navbar {platform === 'darwin' ? 'pl-20' : ''}"><Navbar /></div>
+  <div class="layout"><Layout /></div>
+  <Palette />
+{/await}
 
 <style lang="postcss" global>
   @tailwind base;

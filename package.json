@@ -1,5 +1,5 @@
 {
-  "name": "photo-editor",
+  "name": "blix",
   "description": "COS 301 Capstone Project - AI Photo Editor",
   "version": "0.0.0",
   "repository": {
@@ -65,6 +65,7 @@
     "(src|scripts)/**": "prettier --write --ignore-unknown"
   },
   "dependencies": {
+    "electron-affinity": "^1.2.4",
     "electron-ipc-mock": "^0.0.3",
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",
