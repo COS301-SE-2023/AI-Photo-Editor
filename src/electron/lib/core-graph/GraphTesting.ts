@@ -1,6 +1,6 @@
 // == DEV == //
-import { CoreGraph } from "./Graph";
-import { InputAnchorInstance, OutputAnchorInstance, NodeInstance } from "./ToolboxRegistry";
+import { CoreGraph, GraphToJSON } from "./Graph";
+import { InputAnchorInstance, NodeInstance, OutputAnchorInstance } from "./ToolboxRegistry";
 
 import logger from "../../utils/logger";
 
@@ -79,6 +79,9 @@ export class TestGraph {
     // true
     // Cycle detected!
     // false
+
+    const json: GraphToJSON = g1.toJSONObject();
+    logger.info(JSON.stringify(json, null, 2));
 
     // =====================================
 
@@ -459,7 +462,7 @@ export class TestGraph {
 
     // logger.info(g6.removeEdge(edge3));
     // logger.info(g6.removeEdge(edge4));
-    logger.info(g6.removeEdge(edge6));
+    // logger.info(g6.removeEdge(edge6));
 
     logger.info(`Length Dest: ${Object.values(g6.getEdgeDest).length}`);
     logger.info(`Length Src: ${Object.values(g6.getEdgeSrc).length}`);
@@ -555,8 +558,8 @@ export class TestGraph {
     //   logger.info(g6.getEdgeDest[edge].getAnchorTo)
     // }
 
-    const temp = g6.getNodes;
-    const nodeToDelete = Object.values(temp)[0]; // node4
+    // const temp = g6.getNodes;
+    // const nodeToDelete = Object.values(temp)[0]; // node4
 
     // for(const node in g6.getNodes){
     //   logger.info(g6.getNodes[node].getName)
@@ -564,15 +567,15 @@ export class TestGraph {
     //   logger.info("\n")
     // }
 
-    g6.removeNode(nodeToDelete.getUUID);
+    // g6.removeNode(nodeToDelete.getUUID);
 
     // const edges = g6.getEdgeDest;
     // const edge6 = Object.values(edges)[5].getAnchorTo;
     // logger.info(g6.removeEdge(edge6));
 
-    logger.info(`Length Dest: ${Object.values(g6.getEdgeDest).length}`);
-    logger.info(`Length Src: ${Object.values(g6.getEdgeSrc).length}`);
-    logger.info(`Length Node: ${Object.values(g6.getNodes).length}`);
+    // logger.info(`Length Dest: ${Object.values(g6.getEdgeDest).length}`);
+    // logger.info(`Length Src: ${Object.values(g6.getEdgeSrc).length}`);
+    // logger.info(`Length Node: ${Object.values(g6.getNodes).length}`);
 
     // for(const node in g6.getNodes){
     //   logger.info(g6.getNodes[node].getName)
@@ -580,8 +583,8 @@ export class TestGraph {
     //   logger.info("\n")
     // }
 
-    const ancs = g6.getAnchors;
-    logger.info(Object.values(g6.getAnchors).length);
+    // const ancs = g6.getAnchors;
+    // logger.info(Object.values(g6.getAnchors).length);
 
     // for(const node in g6.getNodes){
     //   logger.info(g6.getNodes[node].getName)
@@ -619,6 +622,9 @@ export class TestGraph {
 
     // const src = g6.getEdgeSrc;
     // logger.info(src);
+
+    const json: GraphToJSON = g6.toJSONObject();
+    logger.info(JSON.stringify(json, null, 2));
   }
 
   public main() {

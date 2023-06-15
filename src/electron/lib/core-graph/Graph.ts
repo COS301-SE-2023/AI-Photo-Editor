@@ -1,16 +1,30 @@
 import crypto from "crypto";
-import { CoreGraphSubscriber } from "./GraphSubscriber";
 import logger from "../../utils/logger";
+import { CoreGraphSubscriber } from "./GraphSubscriber";
 import {
   AnchorType,
   InputAnchorInstance,
   NodeInstance,
   OutputAnchorInstance,
 } from "./ToolboxRegistry";
-import { Output } from "clean-css";
+
+// =========================================
+// Explicit types for type safety
+// =========================================
 
 export type UUID = string;
 export type AnchorUUID = UUID;
+type NodeToJSON = { id: string; signature: string; styling: NodeStyling };
+type AnchorToJSON = { parent: string; id: string };
+type EdgeToJSON = {
+  id: string;
+  anchorFrom: AnchorToJSON;
+  anchorTo: AnchorToJSON;
+};
+
+export type GraphToJSON = { nodes: NodeToJSON[]; edges: EdgeToJSON[] };
+
+// =========================================
 
 class UniqueEntity {
   private uuid: UUID;
@@ -95,6 +109,8 @@ export class CoreGraph extends UniqueEntity {
       if (!n.getAnchors.hasOwnProperty(anchor)) continue;
       this.anchors[anchor] = n.getAnchors[anchor];
     }
+
+    // TODO: Add Node Styling
   }
 
   public addEdge(anchorA: UUID, anchorB: UUID) {
@@ -246,6 +262,35 @@ export class CoreGraph extends UniqueEntity {
       );
     }
   }
+
+  public toJSONObject(): GraphToJSON {
+    return { nodes: this.nodesToJSONObject(), edges: this.edgesToJSONObject() };
+  }
+
+  private nodesToJSONObject(): NodeToJSON[] {
+    const json: NodeToJSON[] = [];
+    for (const node in this.nodes) {
+      if (!this.nodes.hasOwnProperty(node)) continue;
+      json.push(this.nodes[node].toJSONObject());
+    }
+    return json;
+  }
+
+  private edgesToJSONObject(): EdgeToJSON[] {
+    const json: EdgeToJSON[] = [];
+    for (const anchorFrom in this.edgeSrc) {
+      if (!this.edgeSrc.hasOwnProperty(anchorFrom)) continue;
+      const anchorTos: AnchorUUID[] = this.edgeSrc[anchorFrom];
+      for (const anchorTo of anchorTos) {
+        json.push({
+          id: anchorTo,
+          anchorFrom: { parent: this.anchors[anchorFrom].getParent.getUUID, id: anchorFrom },
+          anchorTo: { parent: this.anchors[anchorTo].getParent.getUUID, id: anchorTo },
+        });
+      }
+    }
+    return json;
+  }
 }
 
 // This Node representation effectively 'stands-in'
@@ -254,12 +299,13 @@ export class CoreGraph extends UniqueEntity {
 class Node extends UniqueEntity {
   private anchors: { [key: string]: Anchor };
   private styling: NodeStyling;
+  private colour: string;
 
   constructor(
     private name: string, // The name id of the node in the plugin
     private plugin: string, // The name id of the plugin that defined the node
     private inputAnchors: InputAnchorInstance[], // Input anchors attatched to node
-    private outputAnchors: OutputAnchorInstance[] // Output anchors attatched to node
+    private outputAnchors: OutputAnchorInstance[] // Output anchors attatched to node // Add colour and styling
   ) {
     super();
     this.anchors = {};
@@ -282,9 +328,13 @@ class Node extends UniqueEntity {
     return this.name;
   }
 
-  // public printNode() {
-  //   logger.info(`${this.inputAnchors.length} :${this.name}: ${this.outputAnchors.length}\n`)
-  // }
+  get getPlugin() {
+    return this.plugin;
+  }
+
+  public toJSONObject(): NodeToJSON {
+    return { id: this.getUUID, signature: `${this.plugin}/${this.name}`, styling: this.styling };
+  }
 }
 
 enum AnchorIO {
@@ -335,4 +385,12 @@ class Edge extends UniqueEntity {
 
 class NodeStyling {
   constructor(private position: { x: number; y: number }, private size: { w: number; h: number }) {}
+
+  get getPosition() {
+    return this.position;
+  }
+
+  get getSize() {
+    return this.size;
+  }
 }
