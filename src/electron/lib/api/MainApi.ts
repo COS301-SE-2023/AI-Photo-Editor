@@ -2,6 +2,7 @@ import { exposeMainApi } from "electron-affinity/main";
 import type { Blix } from "../Blix";
 
 import { UtilApi } from "./UtilApi";
+import { ProjectApi } from "./ProjectApi";
 
 /**
  * Expose all main process APIs to the renderer. This method will be called on
@@ -15,6 +16,7 @@ import { UtilApi } from "./UtilApi";
 export function exposeMainApis(blix: Blix) {
   const apis = {
     utilApi: new UtilApi(),
+    projectApi: new ProjectApi(blix),
   };
 
   for (const api of Object.values(apis)) {

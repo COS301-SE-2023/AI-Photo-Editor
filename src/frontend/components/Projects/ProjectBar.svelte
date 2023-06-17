@@ -1,35 +1,29 @@
 <script lang="ts">
   import { projectStore } from "../../stores/ProjectStore";
-  import { Project } from "./Project";
   import { PanelGroup } from "../../layout/PanelNode";
-
-  let count = 0;
 
   function addNewProject() {
     let layout = new PanelGroup("1");
     layout.addPanel("graph", 1);
     layout.addPanel("image", 0);
-    const project = new Project("Project", (count++).toString(), layout);
-    projectStore.addProject(project);
-    projectStore.setActiveProject(project.id);
   }
 </script>
 
 <div class="drag flex h-full flex-row flex-nowrap items-center">
-  {#each $projectStore.projects as project (project.id)}
+  {#each $projectStore.projects as project (project.uuid)}
     <div
       class="no-drag group flex h-full shrink basis-48 items-center overflow-hidden px-2 text-sm font-medium text-zinc-200
-      {$projectStore.activeProject && $projectStore.activeProject.id === project.id
+      {$projectStore.activeProject && $projectStore.activeProject.uuid === project.uuid
         ? 'bg-zinc-900'
         : 'hover:bg-zinc-700'}"
       title="{project.name}"
-      on:click="{() => projectStore.setActiveProject(project.id)}"
-      on:keypress="{() => projectStore.setActiveProject(project.id)}"
+      on:click="{() => projectStore.setActiveProject(project.uuid)}"
+      on:keypress="{() => projectStore.setActiveProject(project.uuid)}"
     >
       <p class="mr-2 truncate">{project.name}</p>
       <svg
-        on:click="{() => projectStore.removeProject(project.id)}"
-        on:keypress="{() => projectStore.removeProject(project.id)}"
+        on:click="{() => projectStore.removeProject(project.uuid)}"
+        on:keypress="{() => projectStore.removeProject(project.uuid)}"
         fill="none"
         viewBox="0 0 24 24"
         stroke-width="1.5"
