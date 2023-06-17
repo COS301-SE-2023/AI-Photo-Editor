@@ -130,7 +130,13 @@
   }
 
   function generateSlider(id: string) {
-    const slider: GraphSlider = { min: 0, max: 2, step: 0.1, fixed: 1, value: 1 };
+    const slider: GraphSlider = {
+      min: 0,
+      max: 2,
+      step: 0.1,
+      fixed: 1,
+      value: 1,
+    };
 
     if (id === "rotate") {
       slider.max = 360;
@@ -203,7 +209,9 @@
       >
         <nav>
           {#each categories as category, i}
-            <div class="p4 m-1 text-xs font-semibold text-zinc-400">{category.title}</div>
+            <div class="p4 m-1 text-xs font-semibold text-zinc-400">
+              {category.title}
+            </div>
             <ul>
               {#each category.items as item, j}
                 <Item

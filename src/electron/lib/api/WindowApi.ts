@@ -1,5 +1,6 @@
 import type { BrowserWindow } from "electron";
-import { AwaitedType, bindWindowApi } from "electron-affinity/main";
+import { bindWindowApi } from "electron-affinity/main";
+import type { AwaitedType } from "electron-affinity/main";
 
 // This import generates big problems, apparently I can't import from frontend code?
 // import type { CommandRegistryApi } from "../../../frontend/api/CommandRegistryApi"

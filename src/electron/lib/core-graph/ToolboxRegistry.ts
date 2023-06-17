@@ -1,4 +1,4 @@
-import { Registry, RegistryInstance } from "../Registry";
+import type { Registry, RegistryInstance } from "../Registry";
 
 export class ToolboxRegistry implements Registry {
   private registry: { [key: string]: NodeInstance } = {};

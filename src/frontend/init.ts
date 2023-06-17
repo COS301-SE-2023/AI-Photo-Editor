@@ -4,6 +4,7 @@ import { blixStore } from "./stores/BlixStore";
 
 // Main APIs
 import type { UtilApi } from "../electron/lib/api/UtilApi";
+import { ProjectApi } from "../electron/lib/api/ProjectApi";
 
 // Window APIs
 import { CommandRegistryApi } from "./api/CommandRegistryApi";
@@ -26,6 +27,7 @@ export async function init() {
 async function bindMainApis() {
   return {
     utilApi: await bindMainApi<UtilApi>("UtilApi"),
+    projectApi: await bindMainApi<ProjectApi>("ProjectApi"),
   };
 }
 

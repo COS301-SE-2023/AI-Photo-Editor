@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import logger from "../../utils/logger";
-import { CoreGraphSubscriber } from "./GraphSubscriber";
-import {
+import type { CoreGraphSubscriber } from "./GraphSubscriber";
+import type {
   AnchorType,
   InputAnchorInstance,
   NodeInstance,
@@ -67,7 +67,7 @@ export class CoreGraph extends UniqueEntity {
   private edgeDest: { [key: AnchorUUID]: Edge }; // Map a destination anchor to an edge
   private edgeSrc: { [key: AnchorUUID]: AnchorUUID[] }; // Map a source anchor to a list of destination anchors
 
-  private subscribers: CoreGraphSubscriber[];
+  // private subscribers: CoreGraphSubscriber[];
 
   constructor() {
     super();
@@ -284,8 +284,14 @@ export class CoreGraph extends UniqueEntity {
       for (const anchorTo of anchorTos) {
         json.push({
           id: anchorTo,
-          anchorFrom: { parent: this.anchors[anchorFrom].getParent.getUUID, id: anchorFrom },
-          anchorTo: { parent: this.anchors[anchorTo].getParent.getUUID, id: anchorTo },
+          anchorFrom: {
+            parent: this.anchors[anchorFrom].getParent.getUUID,
+            id: anchorFrom,
+          },
+          anchorTo: {
+            parent: this.anchors[anchorTo].getParent.getUUID,
+            id: anchorTo,
+          },
         });
       }
     }
@@ -298,8 +304,8 @@ export class CoreGraph extends UniqueEntity {
 // When we interpret the graph we dereference back to the plugin
 class Node extends UniqueEntity {
   private anchors: { [key: string]: Anchor };
-  private styling: NodeStyling;
-  private colour: string;
+  private styling: NodeStyling | null = null;
+  // private colour: string;
 
   constructor(
     private name: string, // The name id of the node in the plugin
@@ -333,7 +339,11 @@ class Node extends UniqueEntity {
   }
 
   public toJSONObject(): NodeToJSON {
-    return { id: this.getUUID, signature: `${this.plugin}/${this.name}`, styling: this.styling };
+    return {
+      id: this.getUUID,
+      signature: `${this.plugin}/${this.name}`,
+      styling: this.styling!,
+    };
   }
 }
 
