@@ -13,7 +13,7 @@ import type { AwaitedType } from "electron-affinity/main";
 export async function bindMainWindowApis(window: BrowserWindow) {
   return Object.assign(window, {
     apis: {
-      commandRegistryApi: await bindWindowApi<CommandRegistryApi>(window, "CommandRegistryApi"),
+      // commandRegistryApi: await bindWindowApi<CommandRegistryApi>(window, "CommandRegistryApi"),
     },
   });
 }
@@ -24,8 +24,12 @@ export type MainWindow = AwaitedType<typeof bindMainWindowApis>;
 // Import from top of file from frontend should replace all this code
 import logger from "../../utils/logger";
 
-class CommandRegistryApi implements ElectronWindowApi<CommandRegistryApi> {
-  registryChanged(results: string) {
-    logger.log("function can't be empty lol");
-  }
-}
+// class CommandRegistryApi implements ElectronWindowApi<CommandRegistryApi> {
+//   registryChanged(results: string) {
+//     logger.log("function can't be empty lol");
+//   }
+// }
+
+// interface CommandRegistryApi extends <T extends ElectronWindowApi<CommandRegistryApi>> {
+//   registryChanged()
+// }
