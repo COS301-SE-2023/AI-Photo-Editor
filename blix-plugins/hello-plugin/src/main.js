@@ -2,11 +2,14 @@
 const nodes = { 
     "hello": (context) => {
         // Use context.nodeBuilder to construct the node UI
-        context.nodeBuilder.reset();
-        context.nodeBuilder.addTitle();
+        nodeBuilder = context.instantiate("hello-plugin,hello");
+        nodeBuilder.setTitle("Gloria");
+
         //context.compile();
     }
 }
+
+
 
 // Here we define commands (that are made available in the command palette) and their callbacks
 const commands = {

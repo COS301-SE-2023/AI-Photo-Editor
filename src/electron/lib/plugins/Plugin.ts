@@ -50,14 +50,28 @@ export class Plugin {
       // @ts-ignore: no-var-requires
       const pluginModule = require(this.mainPath);
 
+      const inputs: InputAnchorInstance[] = [];
+      const outputs: OutputAnchorInstance[] = [];
+
       if ("nodes" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to toolbox
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          blix.toolbox.addInstance(
-            pluginModule.nodes[node](new NodePluginContext()) as NodeInstance
-          );
+          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs);
+
+          const nodeBuilder = new NodeBuilder(nodeInstance);
+
+          const ctx = new NodePluginContext(nodeBuilder);
+
+          pluginModule.nodes[node](ctx); // Execute node builder
+
+          try {
+            nodeBuilder.validate(); // Ensure the node is properly instantiated
+            blix.toolbox.addInstance(nodeInstance); // Add to registry
+          } catch (err) {
+            logger.warn(err);
+          }
         }
       }
 
@@ -98,19 +112,14 @@ class PluginContext {
 }
 
 class NodePluginContext extends PluginContext {
-  public nodeBuilder = {
-    reset() {
-      return;
-    },
+  constructor(private nodeBuilder: NodeBuilder) {
+    super();
+  }
 
-    addTitle() {
-      return;
-    },
-
-    compile() {
-      return;
-    },
-  };
+  public instantiate(plugin: string, name: string): NodeBuilder {
+    this.nodeBuilder.instantiate(plugin, name);
+    return this.nodeBuilder;
+  }
 }
 
 class CommandPluginContext extends PluginContext {

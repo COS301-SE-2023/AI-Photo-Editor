@@ -4,6 +4,7 @@ export class ToolboxRegistry implements Registry {
   private registry: { [key: string]: NodeInstance } = {};
 
   addInstance(instance: NodeInstance): void {
+    this.registry[instance.getSignature] = instance; // added this because of linter,
     return;
   }
   getRegistry(): { [key: string]: NodeInstance } {
@@ -13,16 +14,56 @@ export class ToolboxRegistry implements Registry {
 
 export class NodeInstance implements RegistryInstance {
   constructor(
-    private readonly signature: string,
-    private readonly name: string,
-    private readonly description: string,
-    private readonly icon: string,
+    private signature: string,
+    private name: string,
+    private plugin: string,
+    private title: string,
+    private description: string,
+    private icon: string,
     private readonly inputs: InputAnchorInstance[],
     private readonly outputs: OutputAnchorInstance[]
   ) {}
 
   get id(): string {
     return this.id;
+  }
+
+  setTitle(title: string) {
+    this.title = title;
+  }
+
+  setDescription(description: string) {
+    this.description = description;
+  }
+
+  setIcon(icon: string) {
+    this.icon = icon;
+  }
+
+  instantiate(plugin: string, name: string) {
+    this.plugin = plugin;
+    this.name = name;
+    this.signature = plugin + "." + name;
+  }
+
+  addInput(type: string, anchorname: string) {
+    const id = this.plugin + "." + this.name + "." + anchorname;
+
+    const anchor = new InputAnchorInstance(type, id, anchorname);
+
+    this.inputs.push(anchor);
+  }
+
+  addOutput(type: string, anchorname: string) {
+    const id = this.plugin + "." + this.name + "." + anchorname;
+
+    const anchor = new OutputAnchorInstance(type, id, anchorname);
+
+    this.outputs.push(anchor);
+  }
+
+  get getTitle(): string {
+    return this.title;
   }
 
   get getInputAnchorInstances(): InputAnchorInstance[] {
