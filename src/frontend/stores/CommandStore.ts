@@ -12,11 +12,11 @@ function createCommandStore() {
   }
 
   function addCommands(cmds: any[]) {
-    // TODO: Type the parameters & Implement
+    // window.apis.pluginApi.addCommand(cmd);
   }
 
-  function runCommand(cmd: string) {
-    return;
+  async function runCommand(cmd: string) {
+    await window.apis.pluginApi.runCommand();
   }
 
   return {

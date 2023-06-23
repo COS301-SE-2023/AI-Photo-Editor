@@ -6,8 +6,8 @@ export class ToolboxRegistry implements Registry {
   addInstance(instance: NodeInstance): void {
     return;
   }
-  getRegistry(): NodeInstance[] {
-    return [];
+  getRegistry(): { [key: string]: NodeInstance } {
+    return this.registry;
   }
 }
 
