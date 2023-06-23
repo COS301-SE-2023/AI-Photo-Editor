@@ -3,6 +3,7 @@ import type { Blix } from "../Blix";
 
 import { UtilApi } from "./UtilApi";
 import { ProjectApi } from "./ProjectApi";
+import { PluginApi } from "./PluginApi";
 
 /**
  * Expose all main process APIs to the renderer. This method will be called on
@@ -17,6 +18,7 @@ export function exposeMainApis(blix: Blix) {
   const apis = {
     utilApi: new UtilApi(),
     projectApi: new ProjectApi(blix),
+    pluginApi: new PluginApi(blix),
   };
 
   for (const api of Object.values(apis)) {

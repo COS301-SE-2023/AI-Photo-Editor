@@ -6,8 +6,9 @@ export class CommandRegistry implements Registry {
   addInstance(instance: CommandInstance): void {
     this.registry[instance.signature] = instance;
   }
-  getRegistry(): CommandInstance[] {
-    return [];
+
+  getRegistry(): { [key: string]: CommandInstance } {
+    return this.registry;
   }
 }
 
