@@ -2,11 +2,7 @@
   "compileOnSave": true,
   "compilerOptions": {
     "outDir": "../../build",
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["../experiment/*"]
-    },
-    "target": "ES2017",
+    "target": "ES2016",
     "module": "commonjs",
     "sourceMap": true,
     "stripInternal": true,
@@ -27,6 +23,6 @@
     "esModuleInterop": true,
     "isolatedModules": true
   },
-  "include": ["."],
+  "include": [".", "../shared/**/*"],
   "exclude": ["node_modules"]
 }
