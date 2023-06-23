@@ -20,18 +20,18 @@ export class TestGraph {
       new OutputAnchorInstance("number", "signature", "output_anchor2")
     );
 
-    for (let i = 1; i < 7; i++) {
-      this.tempNodes.push(
-        new NodeInstance(
-          `hello-plugin/node${i}`,
-          `node${i}`,
-          `node${i}`,
-          `node${i}`,
-          this.inputs,
-          this.outputs
-        )
-      );
-    }
+    // for (let i = 1; i < 7; i++) {
+    //   this.tempNodes.push(
+    // new NodeInstance(
+    //   `hello-plugin/node${i}`,
+    //   `node${i}`,
+    //   `node${i}`,
+    //   `node${i}`,
+    //   this.inputs,
+    //   this.outputs
+    // )
+    //   );
+    // }
   }
 
   public test1() {
@@ -446,19 +446,19 @@ export class TestGraph {
       )
     );
 
-    const edges = g6.getEdgeDest;
-    const edges2 = g6.getEdgeSrc;
+    // const edges = g6.getEdgeDest;
+    // const edges2 = g6.getEdgeSrc;
     // for(const key in edges){
     //   logger.info(key);
     // }
     logger.info(`Length Dest: ${Object.values(g6.getEdgeDest).length}`);
     logger.info(`Length Src: ${Object.values(g6.getEdgeSrc).length}`);
-    const edge1 = Object.values(edges)[0].getAnchorTo;
-    const edge2 = Object.values(edges)[1].getAnchorTo;
-    const edge3 = Object.values(edges)[2].getAnchorTo;
-    const edge4 = Object.values(edges)[3].getAnchorTo;
-    const edge5 = Object.values(edges)[4].getAnchorTo;
-    const edge6 = Object.values(edges)[5].getAnchorTo;
+    // const edge1 = Object.values(edges)[0].getAnchorTo;
+    // const edge2 = Object.values(edges)[1].getAnchorTo;
+    // const edge3 = Object.values(edges)[2].getAnchorTo;
+    // const edge4 = Object.values(edges)[3].getAnchorTo;
+    // const edge5 = Object.values(edges)[4].getAnchorTo;
+    // const edge6 = Object.values(edges)[5].getAnchorTo;
 
     // logger.info(g6.removeEdge(edge3));
     // logger.info(g6.removeEdge(edge4));
