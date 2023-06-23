@@ -2,11 +2,15 @@
   "compileOnSave": true,
   "compilerOptions": {
     "outDir": "../../build",
-    "target": "ES2015",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../experiment/*"]
+    },
+    "target": "ES2017",
     "module": "commonjs",
     "sourceMap": true,
     "stripInternal": true,
-    "lib": ["es2015", "esnext", "dom"],
+    "lib": ["es2017", "esnext", "dom"],
     "moduleResolution": "node",
     "noImplicitAny": true,
     "strictNullChecks": true,

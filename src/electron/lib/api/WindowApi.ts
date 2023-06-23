@@ -1,9 +1,7 @@
+import type { ElectronWindowApi } from "electron-affinity/window";
 import type { BrowserWindow } from "electron";
 import { bindWindowApi } from "electron-affinity/main";
 import type { AwaitedType } from "electron-affinity/main";
-
-// This import generates big problems, apparently I can't import from frontend code?
-// import type { CommandRegistryApi } from "../../../frontend/api/CommandRegistryApi"
 
 /**
  * Binds the window APIs to the main process for every window.
@@ -24,7 +22,6 @@ export type MainWindow = AwaitedType<typeof bindMainWindowApis>;
 
 // Code to fix broken shit...rip
 // Import from top of file from frontend should replace all this code
-import type { ElectronWindowApi } from "electron-affinity/window";
 import logger from "../../utils/logger";
 
 class CommandRegistryApi implements ElectronWindowApi<CommandRegistryApi> {

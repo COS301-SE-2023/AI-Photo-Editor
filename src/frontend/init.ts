@@ -4,7 +4,7 @@ import { blixStore } from "./stores/BlixStore";
 
 // Main APIs
 import type { UtilApi } from "../electron/lib/api/UtilApi";
-import { ProjectApi } from "../electron/lib/api/ProjectApi";
+import type { ProjectApi } from "../electron/lib/api/ProjectApi";
 
 // Window APIs
 import { CommandRegistryApi } from "./api/CommandRegistryApi";

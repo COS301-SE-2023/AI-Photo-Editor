@@ -17,8 +17,9 @@ function createProjectStore() {
   });
 
   async function createProject() {
-    const project = await window.apis.projectApi.createProject();
-    update((state) => ({ ...state, projects: [...state.projects, project] }));
+    await window.apis.projectApi.test();
+    // const project = await window.apis.projectApi.createProject();
+    // update((state) => ({ ...state, projects: [...state.projects, project] }));
   }
 
   function removeProject(uuid: UUID) {
