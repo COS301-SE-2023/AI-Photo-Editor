@@ -1,4 +1,4 @@
-import { PluginContextBuilder } from "./PluginContextBuilder";
+import { type PluginContextBuilder } from "./PluginContextBuilder";
 
 export class NodeBuilder implements PluginContextBuilder {
   get build(): any {
