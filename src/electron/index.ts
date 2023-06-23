@@ -34,6 +34,11 @@ app.on("ready", () => {
   createMainWindow();
   blix.mainWindow = mainWindow!;
 
+  let i = 1;
+  setInterval(function () {
+    mainWindow?.apis.commandRegistryApi.registryChanged(`${i++}. your mom`);
+  }, 1000);
+
   // Set icon for macOS
   if (process.platform === "darwin") {
     app.dock.setIcon("public/images/blix_64x64.png");
