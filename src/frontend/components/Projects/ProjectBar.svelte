@@ -1,12 +1,12 @@
 <script lang="ts">
   import { projectStore } from "../../stores/ProjectStore";
-  import { PanelGroup } from "../../layout/PanelNode";
+  // import { PanelGroup } from "../../layout/PanelNode";
 
-  function addNewProject() {
-    let layout = new PanelGroup("1");
-    layout.addPanel("graph", 1);
-    layout.addPanel("image", 0);
-  }
+  // function addNewProject() {
+  //   let layout = new PanelGroup("1");
+  //   layout.addPanel("graph", 1);
+  //   layout.addPanel("image", 0);
+  // }
 </script>
 
 <div class="drag flex h-full flex-row flex-nowrap items-center">
@@ -34,7 +34,11 @@
       </svg>
     </div>
   {/each}
-  <div on:click="{addNewProject}" on:keypress="{addNewProject}" class="no-drag flex-none pl-2">
+  <div
+    on:click="{projectStore.createProject}"
+    on:keypress="{projectStore.createProject}"
+    class="no-drag flex-none pl-2"
+  >
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"

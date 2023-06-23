@@ -3,7 +3,7 @@
   "compilerOptions": {
     "types": ["node", "svelte", "jest"],
     "sourceMap": true,
-    "target": "ESNext",
+    "target": "ES2015",
     "stripInternal": true,
     "strict": true,
     "noImplicitAny": true,
