@@ -1,5 +1,5 @@
 import { app } from "electron";
-import { PathLike, readFile } from "fs";
+import { type PathLike, readFile } from "fs";
 import { readdirSync } from "fs";
 import logger from "../../utils/logger";
 import { join } from "path";

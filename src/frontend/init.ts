@@ -1,6 +1,7 @@
 import { bindMainApi, exposeWindowApi } from "electron-affinity/window";
 import type { AwaitedType } from "electron-affinity/window";
 import { blixStore } from "./stores/BlixStore";
+import { commandStore } from "./stores/CommandStore";
 
 // Main APIs
 import type { UtilApi } from "../electron/lib/api/UtilApi";
@@ -18,7 +19,9 @@ export async function init() {
   exposeWindowApis();
   window.apis = await bindMainApis();
   const res = await window.apis.utilApi.getSystemInfo();
+  const command = await window.apis.pluginApi.getCommands();
   blixStore.set({ systemInfo: res });
+  commandStore.refreshStore(command);
 }
 
 /**

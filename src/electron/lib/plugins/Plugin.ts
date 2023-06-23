@@ -1,5 +1,5 @@
-import { PathLike } from "fs";
-import { PackageData } from "./PluginManager";
+import type { PathLike } from "fs";
+import type { PackageData } from "./PluginManager";
 import logger from "../../utils/logger";
 import { Blix } from "../Blix";
 import {
@@ -122,6 +122,9 @@ class CommandPluginContext extends PluginContext {
   constructor(name: string) {
     super();
     this.name = name;
+    this.description = "";
+    this.icon = "";
+    this.command = "";
   }
 
   public setDescription(description: string) {

@@ -1,14 +1,20 @@
 import { writable } from "svelte/store";
 
+interface CommandStore {
+  commands: string[];
+}
+
 function createCommandStore() {
-  const { subscribe, set } = writable([]);
+  const { subscribe, set } = writable<CommandStore>({
+    commands: [],
+  });
 
   // Called when the command registry changes
   // Automatically updates the value of the store
-  function refreshStore(results: any) {
+  function refreshStore(results: string[]) {
     // console.log(`Registry changed; Got:\n${results}`);
     // TODO: Properly set the new store values
-    set([]);
+    set({ commands: results });
   }
 
   function addCommands(cmds: any[]) {

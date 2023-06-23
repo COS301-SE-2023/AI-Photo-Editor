@@ -21,6 +21,7 @@
 
   // TODO: Change items to use the command store values directly:
   $commandStore; // Use the shorthand like this
+  console.log($commandStore);
 
   // TODO: Get rid of this
   const categoriesOriginals: Category[] = [
@@ -31,7 +32,8 @@
     },
     {
       title: "Commands",
-      items: ["Import", "Export", "Clear"],
+      // items: ["Import", "Export", "Clear"],
+      items: $commandStore.commands,
     },
   ];
 

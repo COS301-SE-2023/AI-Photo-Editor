@@ -4,11 +4,16 @@ export class CommandRegistry implements Registry {
   private registry: { [key: string]: CommandInstance } = {};
 
   addInstance(instance: CommandInstance): void {
+    instance.run();
     this.registry[instance.signature] = instance;
   }
 
   getRegistry(): { [key: string]: CommandInstance } {
     return this.registry;
+  }
+
+  getCommands(): string[] {
+    return Object.keys(this.registry);
   }
 }
 
