@@ -129,6 +129,7 @@ class NodePluginContext extends PluginContext {
 class CommandPluginContext extends PluginContext {
   private plugin: string;
   private name: string;
+  private displayName: string;
   private description: string;
   private icon: string;
   private command: any;
@@ -152,8 +153,19 @@ class CommandPluginContext extends PluginContext {
     this.command = command;
   }
 
+  public setDisplayName(displayName: string) {
+    this.displayName = displayName;
+  }
+
   public create() {
-    return new CommandInstance(this.plugin, this.name, this.description, this.icon, this.command);
+    return new CommandInstance(
+      this.plugin,
+      this.name,
+      this.displayName,
+      this.description,
+      this.icon,
+      this.command
+    );
   }
 }
 
