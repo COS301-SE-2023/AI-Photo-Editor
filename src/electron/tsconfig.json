@@ -23,6 +23,6 @@
     "esModuleInterop": true,
     "isolatedModules": true
   },
-  "include": [".", "../shared/**/*"],
+  "include": [".", "../global.d.ts", "../shared/**/*"],
   "exclude": ["node_modules"]
 }
