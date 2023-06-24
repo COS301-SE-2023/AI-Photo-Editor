@@ -31,6 +31,8 @@ const commands = {
             console.log("Add Brightness Node");
         })
 
+        context.setDisplayName("Add Brightness Node");
+
         return context.create();
     },
     "import": (context) => {
