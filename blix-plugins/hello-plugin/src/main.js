@@ -2,10 +2,16 @@
 const nodes = { 
     "hello": (context) => {
         // Use context.nodeBuilder to construct the node UI
-        nodeBuilder = context.instantiate("hello-plugin,hello");
+        nodeBuilder = context.instantiate("hello-plugin","hello");
         nodeBuilder.setTitle("Gloria");
 
-        //context.compile();
+
+        nodeBuilder.define(() => {
+            console.log("konnichi~wa");
+        });
+
+       ui =  nodeBuilder.createUIBuilder();
+       ui.addButton("bt1","Execute order 66");
     }
 }
 

@@ -1,12 +1,22 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
-import { NodeInstance } from "../../core-graph/ToolboxRegistry";
+import { NodeInstance, NodeUIParent } from "../../core-graph/ToolboxRegistry";
 
 export class NodeBuilder implements PluginContextBuilder {
-  constructor(private node: NodeInstance) {}
+  constructor(node: NodeInstance) {
+    this.node = node;
+    this.ui = null;
+  }
+
+  private node: NodeInstance;
+  public ui: NodeUIParent | null;
 
   public validate(): void {
     if (this.node.getSignature === "") {
       throw new Error("Node is not instantiated");
+    }
+
+    if (this.ui != null) {
+      this.node.setUI(this.ui);
     }
     return;
   }
@@ -15,11 +25,6 @@ export class NodeBuilder implements PluginContextBuilder {
     return null;
   }
 
-  // public reset(): void {
-  //   return;
-  // }
-
-  // TODO: Implement all of these
   public setTitle(title: string): void {
     this.node.setTitle(title);
   }
@@ -28,6 +33,10 @@ export class NodeBuilder implements PluginContextBuilder {
   }
 
   public instantiate(plugin: string, name: string): void {
+    if (plugin === "" || name === "") {
+      throw new Error("Plugin or name is not instantiated");
+    }
+
     this.node.instantiate(plugin, name);
   }
 
@@ -35,27 +44,32 @@ export class NodeBuilder implements PluginContextBuilder {
     this.node.setIcon(icon);
   }
 
-  // public addInput(type : string): void {
-  //   return;
-  // }
+  public addInput(type: string, anchorname: string): void {
+    this.node.addInput(type, anchorname);
+  }
 
-  // public addOutput(type : string): void {
-  //   return;
-  // }
+  public addOutput(type: string, anchorname: string): void {
+    this.node.addOutput(type, anchorname);
+  }
 
-  public addSlider(): void {
-    return;
+  public createUIBuilder(): NodeUIBuilder {
+    const node = new NodeUIParent();
+    const builder = new NodeUIBuilder(node);
+    if (this.ui == null) this.ui = node; // set root node
+    return builder;
   }
-  public addToggle(): void {
-    return;
+
+  public define(code: any) {
+    this.node.setFunction(code);
   }
-  public addColorPicker(): void {
-    return;
-  }
-  public addDropdown(): void {
-    return;
-  }
-  public addLayerList(): void {
-    return;
+}
+
+export class NodeUIBuilder {
+  constructor(private node: NodeUIParent) {}
+
+  public addButton(name: string, param: string): NodeUIBuilder {
+    this.node.addButton(name, param);
+
+    return this;
   }
 }
