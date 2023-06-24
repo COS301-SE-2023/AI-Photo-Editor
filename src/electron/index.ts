@@ -33,6 +33,11 @@ app.on("ready", () => {
   pluginManager.loadPlugins();
   createMainWindow();
   blix.mainWindow = mainWindow!;
+  // const p = blix.projectManager;
+  // logger.info(p.loadProject("Projectf5c858.json"))
+  // logger.info(p.getOpenProjects())
+  // const project = p.createProject("Project 1");
+  // p.saveProject(project.uuid);
 
   let i = 1;
   setInterval(function () {
