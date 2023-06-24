@@ -5,7 +5,6 @@ import { Blix } from "../Blix";
 import {
   InputAnchorInstance,
   NodeInstance,
-  NodeUIParent,
   OutputAnchorInstance,
 } from "../core-graph/ToolboxRegistry";
 import { CommandInstance } from "../commands/CommandRegistry";
@@ -59,9 +58,7 @@ export class Plugin {
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          const ui = new NodeUIParent();
-
-          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs, ui);
+          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs);
 
           const nodeBuilder = new NodeBuilder(nodeInstance);
 
