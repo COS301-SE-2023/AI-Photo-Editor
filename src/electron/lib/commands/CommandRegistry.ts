@@ -4,7 +4,6 @@ export class CommandRegistry implements Registry {
   private registry: { [key: string]: CommandInstance } = {};
 
   addInstance(instance: CommandInstance): void {
-    instance.run();
     this.registry[instance.signature] = instance;
   }
 
@@ -12,17 +11,22 @@ export class CommandRegistry implements Registry {
     return this.registry;
   }
 
-  getCommands(): string[] {
+  getCommandNames(): string[] {
     return Object.keys(this.registry);
+  }
+
+  runCommand(command: string) {
+    this.registry[command].run();
   }
 }
 
 export class CommandInstance implements RegistryInstance {
   constructor(
-    private readonly name: string,
-    private readonly description: string,
-    private readonly icon: string,
-    private readonly command: any
+    private readonly _plugin: string,
+    private readonly _name: string,
+    private readonly _description: string,
+    private readonly _icon: string,
+    private readonly _command: any
   ) {}
 
   get id(): string {
@@ -31,10 +35,14 @@ export class CommandInstance implements RegistryInstance {
 
   get signature(): string {
     // TODO create unique
-    return this.name + "/" + this.name;
+    return this._plugin + "." + this._name;
+  }
+
+  get name(): string {
+    return this._name;
   }
 
   get run(): any {
-    return this.command;
+    return this._command;
   }
 }

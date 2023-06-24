@@ -83,7 +83,9 @@ export class Plugin {
           if (!pluginModule.commands.hasOwnProperty(cmd)) continue;
 
           blix.commandRegistry.addInstance(
-            pluginModule.commands[cmd](new CommandPluginContext(cmd)) as CommandInstance
+            pluginModule.commands[cmd](
+              new CommandPluginContext(cmd, this.packageData.name)
+            ) as CommandInstance
           );
         }
       }
@@ -125,13 +127,15 @@ class NodePluginContext extends PluginContext {
 }
 
 class CommandPluginContext extends PluginContext {
+  private plugin: string;
   private name: string;
   private description: string;
   private icon: string;
   private command: any;
 
-  constructor(name: string) {
+  constructor(name: string, plugin: string) {
     super();
+    this.plugin = plugin;
     this.name = name;
     this.description = "";
     this.icon = "";
@@ -149,7 +153,7 @@ class CommandPluginContext extends PluginContext {
   }
 
   public create() {
-    return new CommandInstance(this.name, this.description, this.icon, this.command);
+    return new CommandInstance(this.plugin, this.name, this.description, this.icon, this.command);
   }
 }
 
