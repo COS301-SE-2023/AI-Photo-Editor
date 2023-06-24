@@ -4,12 +4,43 @@ export class ToolboxRegistry implements Registry {
   private registry: { [key: string]: NodeInstance } = {};
 
   addInstance(instance: NodeInstance): void {
-    this.registry[instance.getSignature] = instance; // added this because of linter,
+    this.registry[instance.getSignature] = instance;
     return;
   }
   getRegistry(): { [key: string]: NodeInstance } {
     return this.registry;
   }
+}
+
+export class NodeUI {
+  constructor() {
+    this.index = -1;
+    this.parent = null;
+  }
+  private index: number;
+  public parent: NodeUI | null;
+}
+
+export class NodeUIParent extends NodeUI {
+  constructor() {
+    super();
+    this.params = [];
+  }
+  params: NodeUI[];
+
+  public addButton(name: string, param: string): void {
+    this.params.push(new NodeUILeaf(name, param));
+  }
+}
+
+export class NodeUILeaf extends NodeUI {
+  constructor(name: string, param: string) {
+    super();
+    this.name = name;
+    this.param = param;
+  }
+  name: string;
+  param: string;
 }
 
 export class NodeInstance implements RegistryInstance {
@@ -21,9 +52,13 @@ export class NodeInstance implements RegistryInstance {
     private description: string,
     private icon: string,
     private readonly inputs: InputAnchorInstance[],
-    private readonly outputs: OutputAnchorInstance[]
-  ) {}
+    private readonly outputs: OutputAnchorInstance[],
+    private ui: NodeUIParent
+  ) {
+    this.func = "return;";
+  }
 
+  private func: any;
   get id(): string {
     return this.id;
   }
@@ -60,6 +95,14 @@ export class NodeInstance implements RegistryInstance {
     const anchor = new OutputAnchorInstance(type, id, anchorname);
 
     this.outputs.push(anchor);
+  }
+
+  setFunction(func: any) {
+    this.func = func;
+  }
+
+  setUI(ui: NodeUIParent) {
+    this.ui = ui;
   }
 
   get getTitle(): string {
