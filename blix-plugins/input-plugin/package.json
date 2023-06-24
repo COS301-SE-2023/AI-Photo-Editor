@@ -1,7 +1,7 @@
 {
-    "name": "Math-plugin",
-    "displayName": "Math Plugin",
-    "description": "Performs basic math operations through dedicated nodes.",
+    "name": "Input-plugin",
+    "displayName": "Input Plugin",
+    "description": "Provides basic nodes for providing input to a graph.",
     "version": "0.0.1",
 
     "author": "Gekota the Frog",
@@ -11,8 +11,8 @@
         "commands": [],
         "nodes": [
             {
-                "id": "math",
-                "name": "Math",
+                "id": "input",
+                "name": "Input",
                 "interface" : {
                     "inputs": {
                     "numA": "int"
@@ -33,5 +33,5 @@
         "typescript": "^3.4.5"
     },
 
-    "comments": [ "This plugin will be expanded to handle more math operations." ]
+    "comments": [ "This plugin could be expanded to handle more inputs." ]
 }

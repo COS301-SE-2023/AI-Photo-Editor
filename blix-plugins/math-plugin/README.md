@@ -3,7 +3,7 @@
 The Math Plugin is an essential component of Blix, our AI photo editor. It offers a wide range of basic arithmetic operations, enabling users to perform mathematical manipulations on images within the photo editing graph.
 Features
 
-The Math Plugin provides the following key features:
+The Math Plugin provides some of the following key features:
 
     Addition: Perform addition operations on numerical values.
     Subtraction: Perform subtraction operations on numerical values.
