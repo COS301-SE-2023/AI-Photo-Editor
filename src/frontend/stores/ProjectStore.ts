@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
-import type { Project } from "../components/Projects/Project";
-import type { UUID } from "../../electron/utils/UniqueEntity";
+import { Project } from "../components/Projects/Project";
+import type { UUID } from "../../shared/utils/UniqueEntity";
 
 // Struggling a bit to add write types for custom stores
 interface ProjectStoreState {
@@ -17,12 +17,16 @@ function createProjectStore() {
   });
 
   async function createProject() {
-    await window.apis.projectApi.test();
-    // const project = await window.apis.projectApi.createProject();
-    // update((state) => ({ ...state, projects: [...state.projects, project] }));
+    const res = await window.apis.projectApi.createProject();
+    const project = new Project(res.data.name, res.data.uuid);
+    update((state) => ({
+      ...state,
+      projects: [...state.projects, project],
+      activeProject: project,
+    }));
   }
 
-  function removeProject(uuid: UUID) {
+  async function closeProject(uuid: UUID) {
     update((state) => {
       const activeProject =
         state.activeProject?.uuid === uuid
@@ -31,6 +35,23 @@ function createProjectStore() {
       const projects = state.projects.filter((p) => p.uuid !== uuid);
       return { ...state, projects, activeProject };
     });
+
+    await window.apis.projectApi.closeProject(uuid);
+  }
+
+  async function renameProject(uuid: UUID, name: string) {
+    update((state) => {
+      const index = state.projects.findIndex((p) => p.uuid === uuid);
+
+      if (index === 1) {
+        return state;
+      }
+
+      state.projects[index].name = name;
+
+      return { ...state };
+    });
+    await window.apis.projectApi.renameProject(uuid, name);
   }
 
   function getNextActiveProject(projects: Project[], currentProject: Project | null) {
@@ -48,8 +69,9 @@ function createProjectStore() {
 
   return {
     subscribe,
-    removeProject,
+    closeProject,
     createProject,
+    renameProject,
     setActiveProject,
   };
 }

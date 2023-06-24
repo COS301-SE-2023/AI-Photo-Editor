@@ -1,6 +1,6 @@
-import { UniqueEntity } from "../../utils/UniqueEntity";
-// import { Project as FrontendProject } from "../../../frontend/components/Projects/Project";
+import { UniqueEntity } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph } from "../core-graph/Graph";
+import type { CommonProject } from "../../../shared/types/index";
 
 // Encapsulates the backend state for one of the open Blix projects
 export class CoreProject extends UniqueEntity {
@@ -11,6 +11,15 @@ export class CoreProject extends UniqueEntity {
     super();
     this._name = name;
     this._graphs = [];
+  }
+
+  public rename(name: string): boolean {
+    if (name === "") {
+      return false;
+    } else {
+      this._name = name;
+      return true;
+    }
   }
 
   public get name() {
@@ -24,8 +33,12 @@ export class CoreProject extends UniqueEntity {
    *
    * @returns A reduced version of the CoreProject for the frontend
    */
-  // public mapToFrontendProject(): FrontendProject {
-  //   const project = new FrontendProject(this.name, this.uuid);
-  //   return project;
-  // }
+  public mapToCommonProject(): CommonProject {
+    const project = {
+      name: this.name,
+      uuid: this.uuid,
+    } satisfies CommonProject;
+
+    return project;
+  }
 }
