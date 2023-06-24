@@ -24,11 +24,11 @@
 
   // TODO: Get rid of this
   const categoriesOriginals: Category[] = [
-    {
-      title: "Nodes",
-      // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
-      items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows", "Output"],
-    },
+    //{
+    //  title: "Nodes",
+    //  // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
+    //  items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows", "Output"],
+    //},
     {
       title: "Commands",
       // items: ["Import", "Export", "Clear"],
@@ -85,33 +85,36 @@
     showPalette = false;
     const item = categories[categoryIndex].items[itemIndex];
 
-    // const index = categories[categoryIndex].items.indexOf(item);
+    const index = categoriesOriginals[0].items.indexOf(item);
     const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
 
-    if (categoryIndex === 1) {
-      commandStore.runCommand($commandStore.commands[itemIndex]);
-    }
-    if (itemId === "clear") {
-      graphStore.set({ nodes: [] });
-      paletteStore.update((store) => ({ ...store, src: "" }));
-      // window.api.send("clear-file");
-      return;
-    }
+    console.log(index);
+    console.log(item);
+    commandStore.runCommand($commandStore.commands[index]);
 
-    const graphNode: GraphNode = {
-      id: itemId,
-      name: item,
-      slider: generateSlider(itemId),
-      connection: "",
-    };
+    if (false) {
+      if (itemId === "clear") {
+        graphStore.set({ nodes: [] });
+        paletteStore.update((store) => ({ ...store, src: "" }));
+        // window.api.send("clear-file");
+        return;
+      }
 
-    let found = false;
-    $graphStore.nodes.forEach((n) => {
-      if (n.id === graphNode.id) found = true;
-    });
+      const graphNode: GraphNode = {
+        id: itemId,
+        name: item,
+        slider: generateSlider(itemId),
+        connection: "",
+      };
 
-    if (!found) {
-      graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
+      let found = false;
+      $graphStore.nodes.forEach((n) => {
+        if (n.id === graphNode.id) found = true;
+      });
+
+      if (!found) {
+        graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
+      }
     }
   }
 
