@@ -4,7 +4,7 @@
   import type { GraphNode, GraphSlider } from "../types";
   import { graphStore } from "../stores/GraphStore";
   import { paletteStore } from "../stores/PaletteStore";
-  import { commandStore } from "../stores/CommandStore";
+  import { commandStore, type Command } from "../stores/CommandStore";
 
   let showPalette = false;
   let expanded = true;
@@ -13,7 +13,7 @@
 
   type Category = {
     title: string;
-    items: string[];
+    items: Command[];
   };
 
   let categoryIndex = 0;
@@ -32,7 +32,7 @@
     {
       title: "Commands",
       // items: ["Import", "Export", "Clear"],
-      items: $commandStore.commands.map((command) => command.split(".")[1]),
+      items: $commandStore.commands,
     },
   ];
 
@@ -86,11 +86,12 @@
     const item = categories[categoryIndex].items[itemIndex];
 
     const index = categoriesOriginals[0].items.indexOf(item);
-    const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
+    // const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
+    const itemId = item.signature;
 
     console.log(index);
     console.log(item);
-    commandStore.runCommand($commandStore.commands[index]);
+    commandStore.runCommand(item.signature);
 
     if (false) {
       if (itemId === "clear") {
@@ -102,7 +103,7 @@
 
       const graphNode: GraphNode = {
         id: itemId,
-        name: item,
+        name: item.displayName,
         slider: generateSlider(itemId),
         connection: "",
       };
@@ -121,7 +122,7 @@
   function handleItemClick(event: CustomEvent<{ id: string }>) {
     for (let i = 0; i < categories.length; i++) {
       for (let j = 0; j < categories[i].items.length; j++) {
-        if (categories[i].items[j] === event.detail.id) {
+        if (categories[i].items[j].displayName === event.detail.id) {
           categoryIndex = i;
           itemIndex = j;
           handleAction();
@@ -216,7 +217,7 @@
             <ul>
               {#each category.items as item, j}
                 <Item
-                  title="{item}"
+                  title="{item.displayName}"
                   selected="{i == categoryIndex && j == itemIndex}"
                   on:itemClicked="{handleItemClick}"
                 />

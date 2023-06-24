@@ -44,8 +44,10 @@ const commands = {
 
         context.setIcon("testing/image.jpg");
 
+        context.setDisplayName("Import Project");
+
         context.addCommand(() => {
-            console.log("Import picture");
+            console.log("Import project");
         })
 
         return context.create();
@@ -57,6 +59,8 @@ const commands = {
         context.setDescription("import a picture");
 
         context.setIcon("testing/image.jpg");
+
+        context.setDisplayName("Export project");
 
         context.addCommand(() => {
             console.log("Export picture");

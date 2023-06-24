@@ -20,6 +20,6 @@ export class PluginApi implements ElectronMainApi<PluginApi> {
   }
 
   async getCommands() {
-    return this._blix.commandRegistry.getCommandNames();
+    return this._blix.commandRegistry.getCommands();
   }
 }
