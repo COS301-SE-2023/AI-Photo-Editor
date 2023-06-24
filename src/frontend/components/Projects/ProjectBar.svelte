@@ -1,12 +1,6 @@
 <script lang="ts">
   import { projectStore } from "../../stores/ProjectStore";
   // import { PanelGroup } from "../../layout/PanelNode";
-
-  // function addNewProject() {
-  //   let layout = new PanelGroup("1");
-  //   layout.addPanel("graph", 1);
-  //   layout.addPanel("image", 0);
-  // }
 </script>
 
 <div class="drag flex h-full flex-row flex-nowrap items-center">
@@ -22,8 +16,8 @@
     >
       <p class="mr-2 truncate">{project.name}</p>
       <svg
-        on:click="{() => projectStore.removeProject(project.uuid)}"
-        on:keypress="{() => projectStore.removeProject(project.uuid)}"
+        on:click="{() => projectStore.closeProject(project.uuid)}"
+        on:keypress="{() => projectStore.closeProject(project.uuid)}"
         fill="none"
         viewBox="0 0 24 24"
         stroke-width="1.5"
