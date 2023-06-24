@@ -8,10 +8,14 @@
 
 <script lang="ts">
   import { Pane, Splitpanes } from "svelte-splitpanes";
-  import { PanelNode, PanelGroup, PanelLeaf } from "./PanelNode";
+  import { PanelNode, PanelGroup, PanelLeaf, type PanelType } from "./PanelNode";
   import PanelBlip from "./PanelBlip.svelte";
   import { createEventDispatcher } from "svelte";
   import TileSelector from "./TileSelector.svelte";
+
+  import Graph from "./tiles/Graph.svelte";
+  import Media from "./tiles/Media.svelte";
+  import Blank from "./tiles/Blank.svelte";
 
   // import { scale } from "svelte/transition";
 
@@ -162,6 +166,22 @@
     // TODO: Hopefully find a more elegant solution
     window.dispatchEvent(new Event("resize"));
   }
+
+  // This dict defines mappings from PanelType to the corresponding Svelte component to render
+  const panelTypeToComponent: { [key: PanelType]: ConstructorOfATypedSvelteComponent } = {
+    graph: Graph,
+    media: Media,
+  };
+
+  // Wraps the above dict safely
+  function getComponentForPanelType(panelType: PanelType): ConstructorOfATypedSvelteComponent {
+    if (panelType in panelTypeToComponent) {
+      return panelTypeToComponent[panelType];
+    } else {
+      console.error(`No component found for panel type '${panelType}'`);
+      return Blank;
+    }
+  }
 </script>
 
 {#if layout instanceof PanelGroup}
@@ -212,7 +232,7 @@
       </div>
     {/if} -->
     <!-- {layout.content} -->
-    <svelte:component this="{layout.content}" {...tileProps} />
+    <svelte:component this="{getComponentForPanelType(layout.content)}" {...tileProps} />
   </div>
 {/if}
 

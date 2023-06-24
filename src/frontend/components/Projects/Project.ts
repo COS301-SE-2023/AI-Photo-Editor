@@ -1,7 +1,5 @@
 import type { UUID } from "@shared/utils/UniqueEntity";
 import { PanelGroup } from "../../layout/PanelNode";
-import Graph from "layout/tiles/Graph.svelte";
-import Media from "layout/tiles/Media.svelte";
 
 export class Project {
   private _name: string;
@@ -12,8 +10,10 @@ export class Project {
     this._name = name;
     this._uuid = uuid;
     this._layout = new PanelGroup("1");
-    this._layout.addPanel(Graph, 1);
-    this._layout.addPanel(Media, 0);
+    // console.log(Media);
+    this._layout.addPanel("graph", 1);
+    this._layout.addPanel("media", 0);
+    this._layout.addPanel("asdf", 0);
   }
 
   public get uuid() {

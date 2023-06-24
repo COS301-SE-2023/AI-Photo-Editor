@@ -1,6 +1,6 @@
 // N-way tree of panels
 
-import type { ComponentType } from "svelte";
+export type PanelType = string;
 
 export class PanelNode {
   static panelCounter = 0;
@@ -63,7 +63,7 @@ export class PanelGroup extends PanelNode {
     panel.index = i;
     panel.id = tempId;
   }
-  addPanel(content: ComponentType, i: number) {
+  addPanel(content: PanelType, i: number) {
     const newLeaf = new PanelLeaf(content);
     this.panels.splice(i, 0, newLeaf);
     newLeaf.parent = this;
@@ -92,9 +92,9 @@ export class PanelGroup extends PanelNode {
         res += `- ${p.print(indent + 2)}`;
       } else if (p instanceof PanelLeaf) {
         if (p.parent) {
-          res += `+ ${p.content.name}[${p.parent?.name}](${p.index})\n`;
+          res += `+ ${p.content}[${p.parent?.name}](${p.index})\n`;
         } else {
-          res += `+ ${p.content.name}[NULL](${p.index})\n`;
+          res += `+ ${p.content}[NULL](${p.index})\n`;
         }
       }
     }
@@ -115,7 +115,7 @@ export class PanelGroup extends PanelNode {
 }
 
 export class PanelLeaf extends PanelNode {
-  constructor(public content: ComponentType) {
+  constructor(public content: PanelType) {
     super();
     this.parent = null;
   }
