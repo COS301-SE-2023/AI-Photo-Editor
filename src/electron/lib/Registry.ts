@@ -1,7 +1,7 @@
 // Abstract representation of a backend registry
 export interface Registry {
   addInstance(instance: RegistryInstance): void;
-  getRegistry(): RegistryInstance[];
+  getRegistry(): { [key: string]: RegistryInstance };
 }
 
 // Implementations of this interface should

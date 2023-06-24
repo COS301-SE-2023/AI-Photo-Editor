@@ -1,10 +1,12 @@
 import { bindMainApi, exposeWindowApi } from "electron-affinity/window";
 import type { AwaitedType } from "electron-affinity/window";
 import { blixStore } from "./stores/BlixStore";
+import { commandStore } from "./stores/CommandStore";
 
 // Main APIs
 import type { UtilApi } from "../electron/lib/api/UtilApi";
 import type { ProjectApi } from "../electron/lib/api/ProjectApi";
+import type { PluginApi } from "../electron/lib/api/PluginApi";
 
 // Window APIs
 import { CommandRegistryApi } from "./api/CommandRegistryApi";
@@ -17,7 +19,9 @@ export async function init() {
   exposeWindowApis();
   window.apis = await bindMainApis();
   const res = await window.apis.utilApi.getSystemInfo();
+  const command = await window.apis.pluginApi.getCommands();
   blixStore.set({ systemInfo: res });
+  commandStore.refreshStore(command);
 }
 
 /**
@@ -28,6 +32,7 @@ async function bindMainApis() {
   return {
     utilApi: await bindMainApi<UtilApi>("UtilApi"),
     projectApi: await bindMainApi<ProjectApi>("ProjectApi"),
+    pluginApi: await bindMainApi<PluginApi>("PluginApi"),
   };
 }
 

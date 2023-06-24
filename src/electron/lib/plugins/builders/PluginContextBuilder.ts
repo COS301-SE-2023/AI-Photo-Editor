@@ -2,5 +2,5 @@
 // by a plugin to build a Blix internal object.
 export interface PluginContextBuilder {
   get build(): any;
-  reset(): void;
+  // reset(): void;
 }

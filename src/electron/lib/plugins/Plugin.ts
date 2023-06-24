@@ -1,10 +1,11 @@
-import { PathLike } from "fs";
-import { PackageData } from "./PluginManager";
+import type { PathLike } from "fs";
+import type { PackageData } from "./PluginManager";
 import logger from "../../utils/logger";
 import { Blix } from "../Blix";
 import {
   InputAnchorInstance,
   NodeInstance,
+  NodeUIParent,
   OutputAnchorInstance,
 } from "../core-graph/ToolboxRegistry";
 import { CommandInstance } from "../commands/CommandRegistry";
@@ -50,14 +51,29 @@ export class Plugin {
       // @ts-ignore: no-var-requires
       const pluginModule = require(this.mainPath);
 
+      const inputs: InputAnchorInstance[] = [];
+      const outputs: OutputAnchorInstance[] = [];
+
       if ("nodes" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to toolbox
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          blix.toolbox.addInstance(
-            pluginModule.nodes[node](new NodePluginContext()) as NodeInstance
-          );
+          const ui = new NodeUIParent();
+
+          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs, ui);
+
+          const nodeBuilder = new NodeBuilder(nodeInstance);
+
+          const ctx = new NodePluginContext(nodeBuilder);
+
+          try {
+            pluginModule.nodes[node](ctx); // Execute node builder
+            nodeBuilder.validate(); // Ensure the node is properly instantiated
+            blix.toolbox.addInstance(nodeInstance); // Add to registry
+          } catch (err) {
+            logger.warn(err);
+          }
         }
       }
 
@@ -67,7 +83,9 @@ export class Plugin {
           if (!pluginModule.commands.hasOwnProperty(cmd)) continue;
 
           blix.commandRegistry.addInstance(
-            pluginModule.commands[cmd](new CommandPluginContext(cmd)) as CommandInstance
+            pluginModule.commands[cmd](
+              new CommandPluginContext(cmd, this.packageData.name)
+            ) as CommandInstance
           );
         }
       }
@@ -98,30 +116,30 @@ class PluginContext {
 }
 
 class NodePluginContext extends PluginContext {
-  public nodeBuilder = {
-    reset() {
-      return;
-    },
+  constructor(private nodeBuilder: NodeBuilder) {
+    super();
+  }
 
-    addTitle() {
-      return;
-    },
-
-    compile() {
-      return;
-    },
-  };
+  public instantiate(plugin: string, name: string): NodeBuilder {
+    this.nodeBuilder.instantiate(plugin, name);
+    return this.nodeBuilder;
+  }
 }
 
 class CommandPluginContext extends PluginContext {
+  private plugin: string;
   private name: string;
   private description: string;
   private icon: string;
   private command: any;
 
-  constructor(name: string) {
+  constructor(name: string, plugin: string) {
     super();
+    this.plugin = plugin;
     this.name = name;
+    this.description = "";
+    this.icon = "";
+    this.command = "";
   }
 
   public setDescription(description: string) {
@@ -135,7 +153,7 @@ class CommandPluginContext extends PluginContext {
   }
 
   public create() {
-    return new CommandInstance(this.name, this.description, this.icon, this.command);
+    return new CommandInstance(this.plugin, this.name, this.description, this.icon, this.command);
   }
 }
 

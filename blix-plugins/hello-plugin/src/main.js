@@ -2,24 +2,47 @@
 const nodes = { 
     "hello": (context) => {
         // Use context.nodeBuilder to construct the node UI
-        context.nodeBuilder.reset();
-        context.nodeBuilder.addTitle();
-        //context.compile();
+        nodeBuilder = context.instantiate("hello-plugin","hello");
+        nodeBuilder.setTitle("Gloria");
+
+
+        nodeBuilder.define(() => {
+            console.log("konnichi~wa");
+        });
+
+       ui =  nodeBuilder.createUIBuilder();
+       ui.addButton("bt1","Execute order 66");
     }
 }
 
+
+
 // Here we define commands (that are made available in the command palette) and their callbacks
 const commands = {
-    "sayHello": (context) => {
+    "import": (context) => {
         // TODO: Work this out
         // E.g. Could get context.command.inputs for instance for additional values
     
-        context.setDescription("sayHello command");
+        context.setDescription("import a picture");
 
         context.setIcon("testing/image.jpg");
 
         context.addCommand(() => {
-            console.log("hello");
+            console.log("Import picture");
+        })
+
+        return context.create();
+    },
+    "export": (context) => {
+        // TODO: Work this out
+        // E.g. Could get context.command.inputs for instance for additional values
+    
+        context.setDescription("import a picture");
+
+        context.setIcon("testing/image.jpg");
+
+        context.addCommand(() => {
+            console.log("Export picture");
         })
 
         return context.create();

@@ -31,7 +31,8 @@
     },
     {
       title: "Commands",
-      items: ["Import", "Export", "Clear"],
+      // items: ["Import", "Export", "Clear"],
+      items: $commandStore.commands.map((command) => command.split(".")[1]),
     },
   ];
 
@@ -83,15 +84,12 @@
 
     showPalette = false;
     const item = categories[categoryIndex].items[itemIndex];
+
+    // const index = categories[categoryIndex].items.indexOf(item);
     const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
 
-    if (itemId === "import") {
-      // window.api.send("open-file-dialog");
-      return;
-    }
-    if (itemId === "export") {
-      // window.api.send("export-image");
-      return;
+    if (categoryIndex === 1) {
+      commandStore.runCommand($commandStore.commands[itemIndex]);
     }
     if (itemId === "clear") {
       graphStore.set({ nodes: [] });
