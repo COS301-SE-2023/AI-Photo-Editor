@@ -3,6 +3,7 @@
   import { PanelGroup } from "./PanelNode";
   import Media from "./tiles/Media.svelte";
   import Graph from "./tiles/Graph.svelte";
+  import { projectStore } from "../stores/ProjectStore";
 
   // let subLayout = new PanelGroup("2");
   // subLayout.addPanel("qwer", 0);
@@ -27,4 +28,6 @@
   layout.recurseParent();
 </script>
 
-<Panel layout="{layout}" horizontal="{false}" height="100%" />
+{#if $projectStore.activeProject}
+  <Panel layout="{$projectStore.activeProject.layout}" horizontal="{false}" height="100%" />
+{/if}

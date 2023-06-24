@@ -1,12 +1,19 @@
 <script lang="ts">
+  import { init } from "./init";
+  import { blixStore } from "./stores/BlixStore";
+
   import Layout from "./layout/Layout.svelte";
   import Navbar from "./layout/Navbar.svelte";
   import Palette from "./palette/Palette.svelte";
 </script>
 
-<div class="navbar"><Navbar /></div>
-<div class="layout"><Layout /></div>
-<Palette />
+{#await init() then}
+  <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
+    <Navbar />
+  </div>
+  <div class="layout"><Layout /></div>
+  <Palette />
+{/await}
 
 <style lang="postcss" global>
   @tailwind base;
@@ -25,12 +32,13 @@
     position: relative;
   }
   :root {
-    --navbar-height: 1.5em;
+    --navbar-height: 2rem;
   }
 
   div.navbar {
     width: 100%;
     height: var(--navbar-height);
+    -webkit-app-region: drag;
   }
 
   div.layout {
