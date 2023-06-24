@@ -1,4 +1,3 @@
-// Here we define node UIs and callbacks
 const nodes ={
     "unary": (context) => {
         nodeBuilder = context.instantiate("math-plugin","unary");
@@ -49,12 +48,11 @@ const nodes ={
                 result = "Invalid state";
             }
             
-            // Return the result
             return result;
           });
           
-       nodeBuilder.addInput("string","In1");
-       nodeBuilder.addOutput("string","Out1");
+       nodeBuilder.addInput("Number","Num");
+       nodeBuilder.addOutput("Number","Result");
     },
     "binary": (context) => {
         const nodeBuilder = context.instantiate("math-plugin", "binary");
@@ -109,13 +107,12 @@ const nodes ={
               result = "Invalid state";
           }
       
-          // Return the result
           return result;
         });
       
-        nodeBuilder.addInput("number", "Num1");
-        nodeBuilder.addInput("number", "Num2");
-        nodeBuilder.addOutput("number", "Result");
+        nodeBuilder.addInput("Number", "Num1");
+        nodeBuilder.addInput("Number", "Num2");
+        nodeBuilder.addOutput("Number", "Result");
       }
     // TO BE DEVELOPED   
     // "ternary": (context) => {
@@ -133,11 +130,9 @@ const nodes ={
 }
 
 
-
-// Here we define commands (that are made available in the command palette) and their callbacks
 const commands = {}
 
-// Here we define custom tiles for the UI
+
 const tiles = {}
 
 module.exports = {
