@@ -1,23 +1,20 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Svelvet, Node } from "svelvet";
+  import { Svelvet } from "svelvet";
   import { graphStores } from "../../stores/GraphStore";
+  import PluginNode from "../../graph/PluginNode.svelte";
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
-  let panelId = Math.round(10000000 * Math.random()).toString();
+  export let panelId = Math.round(10000000 * Math.random()).toString();
   export let graphId = "default";
   let thisGraphStore = graphStores[graphId];
-
-  setInterval(() => {
-    thisGraphStore.addNode();
-  }, 4000);
 </script>
 
+<!-- <button on:click={() => thisGraphStore.addNode()}>Add Node</button> -->
 <Svelvet id="my-canvas" zoom="{0.7}" minimap theme="custom-dark">
-  <!-- title="Svelvet-{panelId}" -->
   {#each $thisGraphStore.nodes as node (node.id)}
-    <Node bgColor="#ec4899" height="{node.dims.h}" position="{node.pos}" id="{panelId}-{node.id}" />
+    <PluginNode graphNode="{node}" nodeId="{panelId}-{node.id}" />
   {/each}
 </Svelvet>
 
