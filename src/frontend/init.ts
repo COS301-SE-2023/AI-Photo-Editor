@@ -7,6 +7,7 @@ import { commandStore } from "./stores/CommandStore";
 import type { UtilApi } from "../electron/lib/api/UtilApi";
 import type { ProjectApi } from "../electron/lib/api/ProjectApi";
 import type { PluginApi } from "../electron/lib/api/PluginApi";
+import type { GraphApi } from "../electron/lib/api/GraphApi";
 
 // Window APIs
 import { CommandRegistryApi } from "./api/CommandRegistryApi";
@@ -33,6 +34,7 @@ async function bindMainApis() {
     utilApi: await bindMainApi<UtilApi>("UtilApi"),
     projectApi: await bindMainApi<ProjectApi>("ProjectApi"),
     pluginApi: await bindMainApi<PluginApi>("PluginApi"),
+    graphApi: await bindMainApi<GraphApi>("GraphApi"),
   };
 }
 

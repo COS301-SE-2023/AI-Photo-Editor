@@ -1,11 +1,16 @@
 import { UniqueEntity } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph } from "../core-graph/Graph";
 import type { CommonProject } from "../../../shared/types/index";
+import type { UUID } from "../../../shared/utils/UniqueEntity";
 
 // Encapsulates the backend state for one of the open Blix projects
 export class CoreProject extends UniqueEntity {
   private _name: string;
-  private _graphs: CoreGraph[];
+  // TODO: Appropriately handle when projects are closed/unloaded; we must remove the
+  //       respective graphs from the GraphManager so they aren't left dangling.
+  //       This also needs to be done in a way that checks that no other projects
+  //       have references to the same graph.
+  private _graphs: UUID[]; // Indexes into the GraphManager
 
   constructor(name: string) {
     super();

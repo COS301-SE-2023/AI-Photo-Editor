@@ -1,14 +1,14 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
   import { Svelvet } from "svelvet";
-  import { graphStores } from "../../stores/GraphStore";
+  import { graphMall } from "../../stores/GraphStore";
   import PluginNode from "../../graph/PluginNode.svelte";
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
   export let panelId = Math.round(10000000 * Math.random()).toString();
   export let graphId = "default";
-  let thisGraphStore = graphStores[graphId];
+  let thisGraphStore = $graphMall[graphId];
 </script>
 
 <!-- <button on:click={() => thisGraphStore.addNode()}>Add Node</button> -->

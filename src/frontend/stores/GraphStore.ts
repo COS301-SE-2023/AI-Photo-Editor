@@ -1,3 +1,4 @@
+import type { UUID } from "@shared/utils/UniqueEntity";
 import { writable, type Unsubscriber } from "svelte/store";
 import type { Connections } from "svelvet";
 
@@ -47,10 +48,15 @@ function createGraphStore() {
   //   set([]);
   // }
 
-  function addEdge() {
+  async function addEdge() {
+    // TODO
+    const res = await window.apis.graphApi.addEdge("");
     return false;
   }
-  function addNode() {
+
+  async function addNode() {
+    const res = await window.apis.graphApi.addNode("");
+
     // TODO: Implement properly, just for testing atm
     update((graph) => {
       const newNode = new GraphNode(Math.round(10000 * Math.random()).toString());
@@ -64,36 +70,32 @@ function createGraphStore() {
     return true;
   }
 
-  function removeEdge() {
+  async function removeEdge() {
+    const res = await window.apis.graphApi.removeEdge("");
     return false;
   }
-  function removeNode() {
+  async function removeNode() {
+    const res = await window.apis.graphApi.removeNode("");
     return false;
   }
 
-  return {
-    subscribe,
-    addEdge,
-    addNode,
-    removeEdge,
-    removeNode,
-  };
+  return new GraphStore(subscribe, addEdge, addNode, removeEdge, removeNode);
 }
 
 // TODO: Return a GraphStore in createGraphStore for typing
 class GraphStore {
   constructor(
     public subscribe: (...anything: any) => Unsubscriber,
-    public addEdge: () => boolean,
-    public addNode: () => boolean,
-    public removeEdge: () => boolean,
-    public removeNode: () => boolean
+    public addEdge: () => Promise<boolean>,
+    public addNode: () => Promise<boolean>,
+    public removeEdge: () => Promise<boolean>,
+    public removeNode: () => Promise<boolean>
   ) {}
 }
 
-type GraphId = string;
-type GraphNodeId = string;
-type GraphAnchorId = string;
+type GraphId = UUID;
+type GraphNodeId = UUID;
+type GraphAnchorId = UUID;
 
 export class Graph {
   nodes: GraphNode[] = [];
@@ -121,6 +123,9 @@ class GraphAnchor {
   constructor(public id: GraphAnchorId, public type: string) {}
 }
 
-export const graphStores: { [key: GraphId]: GraphStore } = {
+// The public area with all the cool stores 😎
+type GraphMall = { [key: GraphId]: GraphStore };
+
+export const graphMall = writable<GraphMall>({
   default: createGraphStore(),
-};
+});
