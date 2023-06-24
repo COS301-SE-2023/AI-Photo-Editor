@@ -14,33 +14,58 @@ export class ToolboxRegistry implements Registry {
 
 export class NodeUI {
   constructor() {
-    this.index = -1;
     this.parent = null;
+    this.label = "";
+    this.params = [];
   }
-  private index: number;
   public parent: NodeUI | null;
+  label: string;
+  params: any[];
 }
 
 export class NodeUIParent extends NodeUI {
-  constructor() {
+  constructor(label: string, parent: NodeUIParent | null) {
     super();
+    this.label = label;
+    this.parent = parent;
     this.params = [];
   }
+
+  label: string;
   params: NodeUI[];
 
-  public addButton(name: string, param: string): void {
-    this.params.push(new NodeUILeaf(name, param));
+  public addButton(label: string, param: string): void {
+    this.params.push(new NodeUILeaf("Button", label, [param], this));
+  }
+
+  public addSlider(
+    label: string,
+    min: number,
+    max: number,
+    step: number,
+    defautlVal: number
+  ): void {
+    this.params.push(new NodeUILeaf("Slider", label, [min, max, step, defautlVal], this));
+  }
+
+  public addDropdown(parent: NodeUIParent) {
+    this.params.push(parent);
+  }
+
+  public addLabel(label: string, param: string) {
+    this.params.push(new NodeUILeaf("Label", label, [param], this));
   }
 }
 
 export class NodeUILeaf extends NodeUI {
-  constructor(name: string, param: string) {
+  constructor(type: string, label: string, param: any[], parent: NodeUIParent) {
     super();
-    this.name = name;
-    this.param = param;
+    this.label = label;
+    this.params = param;
+    this.type = type;
+    this.parent = parent;
   }
-  name: string;
-  param: string;
+  type: string;
 }
 
 export class NodeInstance implements RegistryInstance {
@@ -52,11 +77,12 @@ export class NodeInstance implements RegistryInstance {
     private description: string,
     private icon: string,
     private readonly inputs: InputAnchorInstance[],
-    private readonly outputs: OutputAnchorInstance[],
-    private ui: NodeUIParent
+    private readonly outputs: OutputAnchorInstance[]
   ) {
     this.func = "return;";
+    this.ui = null;
   }
+  private ui: NodeUIParent | null;
 
   private func: any;
   get id(): string {
@@ -103,6 +129,10 @@ export class NodeInstance implements RegistryInstance {
 
   setUI(ui: NodeUIParent) {
     this.ui = ui;
+  }
+
+  get getUI(): NodeUIParent | null {
+    return this.ui;
   }
 
   get getTitle(): string {

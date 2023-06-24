@@ -8,7 +8,7 @@ export class NodeBuilder implements PluginContextBuilder {
   }
 
   private node: NodeInstance;
-  public ui: NodeUIParent | null;
+  private ui: NodeUIParent | null;
 
   public validate(): void {
     if (this.node.getSignature === "") {
@@ -28,6 +28,7 @@ export class NodeBuilder implements PluginContextBuilder {
   public setTitle(title: string): void {
     this.node.setTitle(title);
   }
+
   public setDescription(description: string): void {
     this.node.setDescription(description);
   }
@@ -53,23 +54,54 @@ export class NodeBuilder implements PluginContextBuilder {
   }
 
   public createUIBuilder(): NodeUIBuilder {
-    const node = new NodeUIParent();
+    const node = new NodeUIParent("", null);
     const builder = new NodeUIBuilder(node);
-    if (this.ui == null) this.ui = node; // set root node
+
+    if (this.ui == null) this.ui = node; // set root node automatically
     return builder;
   }
 
   public define(code: any) {
     this.node.setFunction(code);
   }
+
+  public setUI(ui: NodeUIBuilder) {
+    this.ui = ui.getUI();
+  }
 }
 
 export class NodeUIBuilder {
   constructor(private node: NodeUIParent) {}
 
-  public addButton(name: string, param: string): NodeUIBuilder {
-    this.node.addButton(name, param);
+  public addButton(label: string, param: string): NodeUIBuilder {
+    this.node.addButton(label, param);
+    return this;
+  }
 
+  public addSlider(
+    label: string,
+    min: number,
+    max: number,
+    step: number,
+    defautlVal: number
+  ): NodeUIBuilder {
+    this.node.addSlider(label, min, max, step, defautlVal);
+    return this;
+  }
+
+  public addDropdown(label: string, builder: NodeUIBuilder) {
+    builder.node.label = label;
+    this.node.addDropdown(builder.node);
+    return this;
+  }
+
+  // This needs to get sandboxed! Cant allow user access to getUI
+  public getUI() {
+    return this.node;
+  }
+
+  public addLabel(label: string, param: string) {
+    this.node.addLabel(label, param);
     return this;
   }
 }
