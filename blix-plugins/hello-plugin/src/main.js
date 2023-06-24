@@ -4,8 +4,6 @@ const nodes = {
         // Use context.nodeBuilder to construct the node UI
         nodeBuilder = context.instantiate("hello-plugin","hello");
         nodeBuilder.setTitle("Gloria");
-
-
         nodeBuilder.define(() => {
             console.log("konnichi~wa");
         });
@@ -13,6 +11,16 @@ const nodes = {
        ui =  nodeBuilder.createUIBuilder();
        ui.addButton("Execute order 66","return 66;").addSlider("Slide along",0,100,0.1,50).addDropdown("Orphanage",nodeBuilder.createUIBuilder()
        .addLabel("Label1"));   
+
+       nodeBuilder.addInput("string","In1");
+       nodeBuilder.addInput("string","In2");
+
+       nodeBuilder.addOutput("string","Out1");
+
+    }
+    ,"Jake": (context) => {
+        nodeBuilder = context.instantiate("hello-plugin","Jake");
+        console.log("Jake");
     }
 }
 

@@ -50,13 +50,13 @@ export class Plugin {
       // @ts-ignore: no-var-requires
       const pluginModule = require(this.mainPath);
 
-      const inputs: InputAnchorInstance[] = [];
-      const outputs: OutputAnchorInstance[] = [];
-
       if ("nodes" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to toolbox
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
+
+          const inputs: InputAnchorInstance[] = [];
+          const outputs: OutputAnchorInstance[] = [];
 
           const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs);
 
@@ -71,6 +71,7 @@ export class Plugin {
           } catch (err) {
             logger.warn(err);
           }
+          // console.log(blix.toolbox.getRegistry()[nodeInstance.getSignature])
         }
       }
 
