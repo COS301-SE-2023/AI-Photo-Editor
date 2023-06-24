@@ -19,6 +19,20 @@ const nodes = {
 
 // Here we define commands (that are made available in the command palette) and their callbacks
 const commands = {
+    "addBrightnessNode": (context) => {
+        // TODO: Work this out
+        // E.g. Could get context.command.inputs for instance for additional values
+    
+        context.setDescription("import a picture");
+
+        context.setIcon("testing/image.jpg");
+
+        context.addCommand(() => {
+            console.log("Add Brightness Node");
+        })
+
+        return context.create();
+    },
     "import": (context) => {
         // TODO: Work this out
         // E.g. Could get context.command.inputs for instance for additional values
