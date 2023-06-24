@@ -4,7 +4,7 @@ import type { IpcResponse } from "../api/IpcResponse";
 import { join } from "path";
 import { app } from "electron";
 import fs from "fs";
-import { UUID } from "../../../shared/utils/UniqueEntity";
+import type { UUID } from "../../../shared/utils/UniqueEntity";
 
 // This should kinda be extending Registry and then called ProjectRegistry
 // instead of Project Manager but I don't feel like the Registry interface is
@@ -51,7 +51,7 @@ export class ProjectManager {
     // Save project to local disk
     const data = { name: project.name, uuid: project.uuid };
     fs.writeFileSync(
-      join(this.path, `Project${project.uuid.slice(0, 6)}.json`),
+      join(this.path, `Project${project.uuid.slice(0, 6)}.blx`),
       JSON.stringify(data, null, 2)
     );
 

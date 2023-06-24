@@ -34,7 +34,7 @@ app.on("ready", () => {
   createMainWindow();
   blix.mainWindow = mainWindow!;
   // const p = blix.projectManager;
-  // logger.info(p.loadProject("Projectf5c858.json"))
+  // logger.info(p.loadProject("Project1387ca.blx"))
   // logger.info(p.getOpenProjects())
   // const project = p.createProject("Project 1");
   // p.saveProject(project.uuid);
