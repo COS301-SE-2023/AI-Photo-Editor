@@ -1,3 +1,18 @@
+type QueryInterface = (query: string, args: any, callback: (result: any) => void) => void;
+
+export type Api = {
+  commandRegistry: QueryInterface;
+  tileRegistry: QueryInterface;
+  toolboxRegistry: QueryInterface;
+};
+
+declare global {
+  interface Window {
+    api: Api;
+  }
+}
+
+// TODO: Replace these with better representations and move to respective Svelte store files
 export interface GraphStore {
   nodes: GraphNode[];
 }
@@ -26,11 +41,11 @@ export interface PaletteStore {
   src: "";
 }
 
-export type PaletteItem = {
+export type Command = {
   title: string;
 };
 
 export type PaletteCategory = {
   title: string;
-  items: PaletteItem[];
+  items: Command[];
 };

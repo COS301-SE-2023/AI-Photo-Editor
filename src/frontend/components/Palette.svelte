@@ -4,6 +4,8 @@
   import type { GraphNode, GraphSlider } from "../types";
   import { graphStore } from "../stores/GraphStore";
   import { paletteStore } from "../stores/PaletteStore";
+  import { commandStore } from "../stores/CommandStore";
+  import type { ICommand } from "../../shared/types/index";
 
   let showPalette = false;
   let expanded = true;
@@ -12,21 +14,26 @@
 
   type Category = {
     title: string;
-    items: string[];
+    items: ICommand[];
   };
 
   let categoryIndex = 0;
   let itemIndex = 0;
 
+  // TODO: Change items to use the command store values directly:
+  $commandStore; // Use the shorthand like this
+
+  // TODO: Get rid of this
   const categoriesOriginals: Category[] = [
-    {
-      title: "Nodes",
-      // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
-      items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows", "Output"],
-    },
+    //{
+    //  title: "Nodes",
+    //  // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
+    //  items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows", "Output"],
+    //},
     {
       title: "Commands",
-      items: ["Import", "Export", "Clear"],
+      // items: ["Import", "Export", "Clear"],
+      items: $commandStore.commands,
     },
   ];
 
@@ -78,44 +85,45 @@
 
     showPalette = false;
     const item = categories[categoryIndex].items[itemIndex];
-    const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
 
-    if (itemId === "import") {
-      window.api.send("open-file-dialog");
-      return;
-    }
-    if (itemId === "export") {
-      window.api.send("export-image");
-      return;
-    }
-    if (itemId === "clear") {
-      graphStore.set({ nodes: [] });
-      paletteStore.update((store) => ({ ...store, src: "" }));
-      window.api.send("clear-file");
-      return;
-    }
+    const index = categoriesOriginals[0].items.indexOf(item);
+    // const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
+    const itemId = item.signature;
 
-    const graphNode: GraphNode = {
-      id: itemId,
-      name: item,
-      slider: generateSlider(itemId),
-      connection: "",
-    };
+    console.log(index);
+    console.log(item);
+    commandStore.runCommand(item.signature);
 
-    let found = false;
-    $graphStore.nodes.forEach((n) => {
-      if (n.id === graphNode.id) found = true;
-    });
+    if (false) {
+      if (itemId === "clear") {
+        graphStore.set({ nodes: [] });
+        paletteStore.update((store) => ({ ...store, src: "" }));
+        // window.api.send("clear-file");
+        return;
+      }
 
-    if (!found) {
-      graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
+      const graphNode: GraphNode = {
+        id: itemId,
+        name: item.displayName,
+        slider: generateSlider(itemId),
+        connection: "",
+      };
+
+      let found = false;
+      $graphStore.nodes.forEach((n) => {
+        if (n.id === graphNode.id) found = true;
+      });
+
+      if (!found) {
+        graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
+      }
     }
   }
 
   function handleItemClick(event: CustomEvent<{ id: string }>) {
     for (let i = 0; i < categories.length; i++) {
       for (let j = 0; j < categories[i].items.length; j++) {
-        if (categories[i].items[j] === event.detail.id) {
+        if (categories[i].items[j].displayName === event.detail.id) {
           categoryIndex = i;
           itemIndex = j;
           handleAction();
@@ -125,7 +133,13 @@
   }
 
   function generateSlider(id: string) {
-    const slider: GraphSlider = { min: 0, max: 2, step: 0.1, fixed: 1, value: 1 };
+    const slider: GraphSlider = {
+      min: 0,
+      max: 2,
+      step: 0.1,
+      fixed: 1,
+      value: 1,
+    };
 
     if (id === "rotate") {
       slider.max = 360;
@@ -198,11 +212,13 @@
       >
         <nav>
           {#each categories as category, i}
-            <div class="p4 m-1 text-xs font-semibold text-zinc-400">{category.title}</div>
+            <div class="p4 m-1 text-xs font-semibold text-zinc-400">
+              {category.title}
+            </div>
             <ul>
               {#each category.items as item, j}
                 <Item
-                  title="{item}"
+                  title="{item.displayName}"
                   selected="{i == categoryIndex && j == itemIndex}"
                   on:itemClicked="{handleItemClick}"
                 />

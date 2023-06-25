@@ -1,0 +1,35 @@
+import { writable } from "svelte/store";
+import type { ICommand } from "../../shared/types/index";
+
+interface CommandStore {
+  commands: ICommand[];
+}
+
+function createCommandStore() {
+  const { subscribe, set } = writable<CommandStore>({
+    commands: [],
+  });
+
+  // Called when the command registry changes
+  // Automatically updates the value of the store
+  function refreshStore(results: ICommand[]) {
+    set({ commands: results });
+  }
+
+  async function addCommands(cmds: any[]) {
+    // window.apis.pluginApi.addCommand(cmds);
+  }
+
+  async function runCommand(cmd: string) {
+    await window.apis.pluginApi.runCommand(cmd);
+  }
+
+  return {
+    subscribe,
+    addCommands,
+    runCommand,
+    refreshStore,
+  };
+}
+
+export const commandStore = createCommandStore();

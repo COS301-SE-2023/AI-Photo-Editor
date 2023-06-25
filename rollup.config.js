@@ -77,6 +77,9 @@ export default {
       tsconfig: production ? "./tsconfig.svelte.prod.json" : "./tsconfig.svelte.json",
       sourceMap: !production,
       inlineSources: !production,
+      compilerOptions: {
+        noUnusedLocals: false
+      }
     }),
 
     // In dev mode, call `npm run start` once
