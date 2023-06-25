@@ -1,7 +1,8 @@
 <script lang="ts">
   import Panel from "./Panel.svelte";
   import { PanelGroup } from "./PanelNode";
-  import { projectStore } from "../stores/ProjectStore";
+  import { projectManager, type NewProjectStore } from "stores/ProjectStore";
+  import { get } from "svelte/store";
 
   // let subLayout = new PanelGroup("2");
   // subLayout.addPanel("qwer", 0);
@@ -24,8 +25,18 @@
   layout.addPanelGroup(subLayout, 1);
   // layout.addPanel(Media, 2);
   layout.recurseParent();
+
+  let activeLayout: PanelGroup | null = null;
+  let activeProjectStore: NewProjectStore | null = null;
+
+  projectManager.subscribe((state) => {
+    if (state.activeProject !== "") {
+      activeProjectStore = projectManager.getActiveProject();
+      activeLayout = get(activeProjectStore).layout;
+    }
+  });
 </script>
 
-{#if $projectStore.activeProject}
-  <Panel layout="{$projectStore.activeProject.layout}" horizontal="{false}" height="100%" />
+{#if activeLayout && activeProjectStore}
+  <Panel layout="{activeLayout}" horizontal="{false}" height="100%" />
 {/if}

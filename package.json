@@ -36,7 +36,7 @@
     "postbuild": "cross-env NODE_ENV=production node scripts/postBuild.js",
     "build:frontend:dev": "cross-env NODE_ENV=development rollup -c -w --bundleConfigAsCjs",
     "build:frontend:prod": "cross-env NODE_ENV=production rollup -c --bundleConfigAsCjs",
-    "build:electron:dev": "tsc --p ./tsconfig.electron.json --traceResolution",
+    "build:electron:dev": "tsc --p ./tsconfig.electron.json",
     "build:electron:dev:watch": "tsc -w --p ./tsconfig.electron.json",
     "build:electron:prod": "cross-env NODE_ENV=production tsc --p ./tsconfig.electron.prod.json",
     "validate:svelte": "svelte-check",

@@ -10,10 +10,9 @@ export class Project {
     this._name = name;
     this._uuid = uuid;
     this._layout = new PanelGroup("1");
-    // console.log(Media);
-    this._layout.addPanel("graph", 1);
     this._layout.addPanel("media", 0);
-    this._layout.addPanel("asdf", 0);
+    this._layout.addPanel("graph", 1);
+    // this._layout.addPanel("asdf", 0);
   }
 
   public get uuid() {

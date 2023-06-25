@@ -24,9 +24,9 @@
   const minSize = 10;
 
   export let horizontal: boolean = false;
-  export let layout: PanelNode;
   export let height: string;
   export let isRoot = true;
+  export let layout: PanelNode;
 
   let tileProps = {
     panelId: layout.id,
