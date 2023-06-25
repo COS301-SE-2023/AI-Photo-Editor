@@ -49,3 +49,8 @@ export type PaletteCategory = {
   title: string;
   items: Command[];
 };
+
+export type Shortcut = {
+  name: string;
+  keys: string[];
+};

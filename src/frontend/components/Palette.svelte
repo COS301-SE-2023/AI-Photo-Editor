@@ -1,10 +1,10 @@
 <script lang="ts">
-  import tinykeys from "tinykeys";
   import Item from "./Item.svelte";
   import type { GraphNode, GraphSlider } from "../types";
   import { graphStore } from "../stores/GraphStore";
   import { paletteStore } from "../stores/PaletteStore";
   import { commandStore } from "../stores/CommandStore";
+  import Shortcuts from "../Shortcuts.svelte";
 
   let showPalette = false;
   let expanded = true;
@@ -25,18 +25,20 @@
   // TODO: Get rid of this
   const categoriesOriginals: Category[] = [
     {
-      title: "Nodes",
+      title: "Recent",
       // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
       items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows", "Output"],
     },
     {
-      title: "Commands",
+      title: "Favourite",
       // items: ["Import", "Export", "Clear"],
       items: $commandStore.commands.map((command) => command.split(".")[1]),
     },
   ];
 
   let categories = categoriesOriginals;
+
+  function handleItemClick() {}
 
   function filterList(list: any[]): any[] {
     return list.filter((rowObj: any) => {
@@ -57,120 +59,31 @@
     });
   }
 
-  function handleMoveDown() {
-    if (itemIndex === categories[categoryIndex].items.length - 1) {
-      if (categoryIndex !== categories.length - 1) {
-        categoryIndex++;
-        itemIndex = 0;
-      }
-    } else {
-      itemIndex++;
-    }
-  }
-
-  function handleMoveUp() {
-    if (itemIndex === 0) {
-      if (categoryIndex !== 0) {
-        categoryIndex--;
-        itemIndex = categories[categoryIndex].items.length - 1;
-      }
-    } else {
-      itemIndex--;
-    }
-  }
-
-  function handleAction() {
-    if (!showPalette) return;
-
-    showPalette = false;
-    const item = categories[categoryIndex].items[itemIndex];
-
-    // const index = categories[categoryIndex].items.indexOf(item);
-    const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
-
-    if (categoryIndex === 1) {
-      commandStore.runCommand($commandStore.commands[itemIndex]);
-    }
-    if (itemId === "clear") {
-      graphStore.set({ nodes: [] });
-      paletteStore.update((store) => ({ ...store, src: "" }));
-      // window.api.send("clear-file");
-      return;
-    }
-
-    const graphNode: GraphNode = {
-      id: itemId,
-      name: item,
-      slider: generateSlider(itemId),
-      connection: "",
-    };
-
-    let found = false;
-    $graphStore.nodes.forEach((n) => {
-      if (n.id === graphNode.id) found = true;
-    });
-
-    if (!found) {
-      graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
-    }
-  }
-
-  function handleItemClick(event: CustomEvent<{ id: string }>) {
-    for (let i = 0; i < categories.length; i++) {
-      for (let j = 0; j < categories[i].items.length; j++) {
-        if (categories[i].items[j] === event.detail.id) {
-          categoryIndex = i;
-          itemIndex = j;
-          handleAction();
-        }
-      }
-    }
-  }
-
-  function generateSlider(id: string) {
-    const slider: GraphSlider = {
-      min: 0,
-      max: 2,
-      step: 0.1,
-      fixed: 1,
-      value: 1,
-    };
-
-    if (id === "rotate") {
-      slider.max = 360;
-      slider.step = 5;
-      slider.value = 0;
-      slider.fixed = 0;
-    } else if (id === "hue") {
-      slider.max = 360;
-      slider.step = 10;
-      slider.value = 0;
-      slider.fixed = 0;
-    }
-
-    return slider;
-  }
-
-  tinykeys(window, {
-    "$mod+p": (event) => {
-      event.preventDefault();
+  const shortcuts = {
+    "blix.palette.toggle": () => {
+      // Default mod+p
       showPalette = !showPalette;
     },
-    Escape: () => {
-      if (showPalette) showPalette = false;
+    "blix.palette.show": () => {
+      showPalette = true;
     },
-    ArrowDown: () => {
-      if (!expanded) expanded = true;
+    "blix.palette.hide": () => {
+      // Default esc
+      showPalette = false;
     },
-    ArrowUp: () => {
-      if (!expanded) expanded = true;
+    "blix.palette.scrollDown": () => {
+      // Default downArrow, ctrl+j, tab
+      // handleMoveDown();
     },
-    "Shift+Tab": handleMoveUp,
-    Tab: handleMoveDown,
-    "Control+J": handleMoveDown,
-    "Control+K": handleMoveUp,
-    Enter: handleAction,
-  });
+    "blix.palette.scrollUp": () => {
+      // Default upArrow, ctrl+k, shift+tab
+      // handleMoveUp();
+    },
+    "blix.palette.selectItem": () => {
+      // Default enter
+      // handleAction();
+    },
+  };
 
   $: if (showPalette && inputElement) {
     inputElement.focus();
@@ -267,6 +180,8 @@
     </footer>
   </div>
 {/if}
+
+<Shortcuts shortcuts="{shortcuts}" />
 
 <style lang="postcss">
   /* Chrome, Edge, and Safari */
