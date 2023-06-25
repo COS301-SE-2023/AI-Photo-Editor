@@ -1,66 +1,10 @@
 import expect from "expect";
-import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUI, NodeUIParent } from "../../../../../src/electron/lib/core-graph/ToolboxRegistry";
-import { BrowserWindow, ipcMain, IpcMainEvent } from "electron";
-import exp from "constants";
+import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent, NodeUILeaf,ToolboxRegistry } from "../../../../../src/electron/lib/core-graph/ToolboxRegistry";
+
+describe("Test toolbox", () => {
 
 
-
-// jest.mock("fs", () => ({
-//   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
-//   readFile: jest.fn((filePath, callback) => callback(null, "mocked_file_data")),
-//   existsSync: jest.fn(),
-// }));
-
-// jest.mock("../../../src/electron/lib/exposed-functions");
-
-// const ipcMainEventMock: IpcMainEvent = {
-//   sender: {
-//     send: jest.fn((channel) => {
-//       return channel;
-//     }),
-//   },
-// } as any;
-
-// jest.mock("electron", () => ({
-//   ipcMain: {
-//     on: jest.fn((event, callback) => {
-//       if (event === "open-file-dialog") {
-//         callback(ipcMainEventMock);
-//       }
-//       callback();
-//       return event;
-//     }),
-//   },
-//   dialog: {
-//     showOpenDialog: jest.fn(() => {
-//       return {
-//         canceled: true,
-//         filePaths: "hello",
-//       };
-//     }),
-//     showSaveDialog: jest.fn(() => {
-//       return {
-//         canceled: true,
-//         filePaths: "hello",
-//       };
-//     }),
-//   },
-//   ipcMainEvent: {
-//     sender: {
-//       send: jest.fn(),
-//     },
-//   },
-// }));
-
-// const mainWindow: BrowserWindow = {
-//   webContents: {
-//     send: jest.fn((channel) => {
-//       return channel;
-//     }),
-//   },
-// } as any;
-
-describe("Test Nodes", () => {
+ describe("Test getters and setters", () => {
   let node : NodeInstance;
 
   const inputs: InputAnchorInstance[] = [];
@@ -72,11 +16,6 @@ describe("Test Nodes", () => {
     node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
   });
 
-  // test("Should attatch eventListeners", () => {
-  //   expect(ipcMain.on).toBeCalledTimes(5);
-  // });
-
-  // Check editFileHandler
   test("getId should be defined", () => {
     expect(node.id).toBeDefined();
   });
@@ -114,6 +53,13 @@ describe("Test Nodes", () => {
     expect(nod.getUI).toEqual(null);
   });
 
+  test("getPlugin should return plugin", () => {
+    expect(node.getPlugin).toEqual("Jake");
+  });
+
+  test("getName should return name", () => {
+    expect(node.getName).toEqual("Shark");
+  });
   test("setUI should set ui", () => {
     const nod = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
     const nodeUI = new NodeUIParent("ui",null);
@@ -146,60 +92,175 @@ describe("Test Nodes", () => {
 
   });
 
+  test("Instantiate should initialize", () => {
+    node.instantiate("Quack","Duck");
+    expect(node.getSignature).toEqual("Quack.Duck");
+    expect(node.getPlugin).toEqual("Quack");
+    expect(node.getName).toEqual("Duck");
+  });
+});
 
-  // test("editFileHandler should send to correct channel", () => {
-  //   handlers.selectedFilePath = "/test/path";
-  //   handlers.editFileHandler();
-  //   expect(mainWindow.webContents.send).toHaveBeenLastCalledWith(
-  //     "chosenFile",
-  //     "mocked_base64_string"
-  //   );
+
+describe("Test anchors", () => {
+  let node : NodeInstance;
+
+  const inputs: InputAnchorInstance[] = [];
+  const outputs: OutputAnchorInstance[] = [];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
+  }); 
+
+
+  test("addInputAnchor should add input anchor", () => {
+    node.addInput("string","anchor1");
+    const id = node.getPlugin + "." + node.getName + "." + "anchor1";
+
+    expect(node.getInputAnchorInstances[0].displayName).toEqual("anchor1");
+    expect(node.getInputAnchorInstances[0].type).toEqual("string");
+    expect(node.getInputAnchorInstances[0].signature).toEqual(id);
+
+  });
+
+  test("addOutputAnchor should add output anchor", () => {
+    node.addOutput("string","anchor2");
+    const id = node.getPlugin + "." + node.getName + "." + "anchor2";
+
+    expect(node.getOutputAnchorInstances[0].displayName).toEqual("anchor2");
+    expect(node.getOutputAnchorInstances[0].type).toEqual("string");
+    expect(node.getOutputAnchorInstances[0].signature).toEqual(id);
+
+  });
+});
+
+describe("Test Node ui", () => {
+  let node : NodeUIParent;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    node = new NodeUIParent("Root",null);
+  });
+
+  test("nodeParent should be instantiated properly", () => {
+    const node = new NodeUIParent("Root",null);
+
+    expect(node.label).toEqual("Root");
+    expect(node.parent).toEqual(null);
+    expect(node.params).toEqual([]);
+    expect(node.type).toEqual("parent");
+  });
+
+  test("nodeLeaf should be instantiated properly", () => {
+    const nod = new NodeUILeaf("Button","leaf",[10],node);
+
+    expect(nod.label).toEqual("leaf");
+    expect(nod.parent).toEqual(node);
+    expect(nod.params).toEqual([10]);
+    expect(nod.type).toEqual("leaf");
+    expect(nod.category).toEqual("Button");
+  });
+
+  test("nodeParent should add button", () => {
+    node.addButton("Button",() => {
+         return 1;
+        });
+      
+    expect(node.params[0].label).toEqual("Button");
+    expect(node.params[0].parent).toEqual(node);
+    expect(node.params[0].type).toEqual("leaf");
+    expect(node.params[0].params[0]()).toEqual(1);
+  });
+
+  test("nodeParent should add Slider", () => {
+    node.addSlider("Slider",0,100,50,1);
+      
+    expect(node.params[0].label).toEqual("Slider");
+    expect(node.params[0].parent).toEqual(node);
+    expect(node.params[0].type).toEqual("leaf");
+    expect(node.params[0].params[0]).toEqual(0);
+    expect(node.params[0].params[1]).toEqual(100);
+    expect(node.params[0].params[2]).toEqual(50);
+    expect(node.params[0].params[3]).toEqual(1);
+  });
+
+  test("nodeParent should add Dropdown", () => {
+
+    const nod = new NodeUIParent("Root",null);
+    node.addDropdown("My Dropdown",nod);
+      
+    expect(node.params[0].label).toEqual("My Dropdown");
+    expect(node.params[0].parent).toEqual(node);
+    expect(node.params[0].type).toEqual("parent");
+    expect(node.params[0].params).toEqual([]);
+  });
+
+  test("nodeParent should add Label", () => {
+    node.addLabel("My label","Attack the D point!");
+      
+    expect(node.params[0].label).toEqual("My label");
+    expect(node.params[0].parent).toEqual(node);
+    expect(node.params[0].type).toEqual("leaf");
+    expect(node.params[0].params[0]).toEqual("Attack the D point!");
+  });
+
+  test("nodeParent should add numberInput", () => {
+    node.addNumberInput("input number");
+      
+    expect(node.params[0].label).toEqual("input number");
+    expect(node.params[0].parent).toEqual(node);
+    expect(node.params[0].type).toEqual("leaf");
+  });
+
+  test("nodeParent should add imageInput", () => {
+    node.addImageInput("Image input");
+      
+    expect(node.params[0].label).toEqual("Image input");
+    expect(node.params[0].parent).toEqual(node);
+    expect(node.params[0].type).toEqual("leaf");
+  });
+
+//This must change later to match data type
+  test("nodeParent should add colorInput", () => {
+    node.addColorPicker("a color picker",1);
+      
+    expect(node.params[0].label).toEqual("a color picker");
+    expect(node.params[0].parent).toEqual(node);
+    expect(node.params[0].type).toEqual("leaf");
+    expect(node.params[0].params[0]).toEqual(1);
+  });
+
+});
+
+
+describe("Test Toolbox registry", () => {
+  let box : ToolboxRegistry;
+
+  let inputs: InputAnchorInstance[];
+  let outputs: OutputAnchorInstance[] ;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    box = new ToolboxRegistry();
+    inputs= [];
+    outputs= [];
+  });
+
+  test("ToolboxRegistry should be instantiated properly", () => {
+    box = new ToolboxRegistry();
+    expect(box).toBeDefined();
+  });
+
+  test("ToolboxRegistry should add and return registrys properly", () => {
+    const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
+    box.addInstance(node);
+    expect(box.getRegistry()[node.getSignature]).toEqual(node);
+  });
+
+  // test("getNodes should return nodes", () => {
+
   // });
+  });
 
-  // test("editFileHandler should not send to channel", () => {
-  //   handlers.selectedFilePath = "";
-  //   handlers.editFileHandler();
-  //   expect(mainWindow.webContents.send).toHaveBeenCalledTimes(1);
-  // });
 
-  // // Check chooseFileHandler
-  // test("chooseFileHandler should attach to correct channel", () => {
-  //   handlers.chooseFileHandler();
-  //   expect(ipcMain.on).toBeCalledWith("chooseFile", expect.anything());
-  // });
-
-  // test("chooseFileHandler should send to correct channel", () => {
-  //   handlers.selectedFilePath = "/test/path";
-  //   handlers.chooseFileHandler();
-  //   expect(mainWindow.webContents.send).toHaveBeenLastCalledWith(
-  //     "chosenFile",
-  //     "mocked_base64_string"
-  //   );
-  //   expect(mainWindow.webContents.send).toHaveBeenCalledTimes(2);
-  // });
-
-  // // Check clearFileHandler
-  // test("clearFileHandler should attach to correct channel", () => {
-  //   handlers.clearFileHandler();
-  //   expect(ipcMain.on).toBeCalledWith("clear-file", expect.anything());
-  // });
-
-  // test("clearFileHandler should clear selectedPath", () => {
-  //   handlers.selectedFilePath = "/test/path";
-  //   handlers.clearFileHandler();
-  //   expect(handlers.selectedFilePath).toBe("");
-  // });
-
-  // // Check openFileDialogHandler
-  // test("openFileDialogHandler should attach to correct channel", () => {
-  //   handlers.openFileDialogHandler();
-  //   expect(ipcMain.on).lastReturnedWith("open-file-dialog");
-  // });
-
-  // // Check exportSavedEditedImageHandler
-
-  // test("exportSaveEditedImageHandler should attach to correct channel", () => {
-  //   handlers.exportSaveEditedImageHandler();
-  //   expect(ipcMain.on).lastReturnedWith("export-image");
-  // });
 });

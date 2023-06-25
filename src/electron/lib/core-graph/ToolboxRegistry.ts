@@ -22,9 +22,6 @@ export class ToolboxRegistry implements Registry {
       const inputAnchors: IAnchor[] = [];
       const outputAnchors: IAnchor[] = [];
 
-      // const inputAnchorsInstances = nodeInstance.getInputAnchorInstances;
-      // const outputAnchorsInstances = nodeInstance.getInputAnchorInstances;
-
       for (const anchor of nodeInstance.getInputAnchorInstances) {
         const anchorObject = {
           type: anchor.type,
@@ -78,13 +75,13 @@ export class NodeUIParent extends NodeUI {
     this.label = label;
     this.parent = parent;
     this.params = [];
-    this.type = "Parent";
+    this.type = "parent";
   }
 
   label: string;
   params: NodeUI[];
 
-  public addButton(label: string, param: string): void {
+  public addButton(label: string, param: any): void {
     this.params.push(new NodeUILeaf("Button", label, [param], this));
   }
 
@@ -98,16 +95,18 @@ export class NodeUIParent extends NodeUI {
     this.params.push(new NodeUILeaf("Slider", label, [min, max, step, defautlVal], this));
   }
 
-  public addDropdown(parent: NodeUIParent) {
-    this.params.push(parent);
+  public addDropdown(label: string, child: NodeUIParent) {
+    child.label = label;
+    this.params.push(child);
+    child.parent = this;
   }
 
   public addLabel(label: string, param: string) {
     this.params.push(new NodeUILeaf("Label", label, [param], this));
   }
 
-  public addNumberInput(label: string, param: number) {
-    this.params.push(new NodeUILeaf("NumberInput", label, [param], this));
+  public addNumberInput(label: string) {
+    this.params.push(new NodeUILeaf("NumberInput", label, [], this));
   }
 
   public addImageInput(label: string) {
@@ -124,7 +123,7 @@ export class NodeUILeaf extends NodeUI {
     super();
     this.label = label;
     this.params = param;
-    this.type = "Leaf";
+    this.type = "leaf";
     this.parent = parent;
     this.category = category;
   }
@@ -167,6 +166,14 @@ export class NodeInstance implements RegistryInstance {
 
   setIcon(icon: string) {
     this.icon = icon;
+  }
+
+  get getPlugin(): string {
+    return this.plugin;
+  }
+
+  get getName(): string {
+    return this.name;
   }
 
   instantiate(plugin: string, name: string) {
