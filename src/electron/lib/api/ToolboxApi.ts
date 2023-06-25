@@ -3,7 +3,7 @@ import { CommandInstance, CommandRegistry } from "../commands/CommandRegistry";
 import type { Blix } from "../Blix";
 import logger from "../../utils/logger";
 
-export class PluginApi implements ElectronMainApi<PluginApi> {
+export class ToolboxApi implements ElectronMainApi<ToolboxApi> {
   private _counter = 0;
   private readonly _blix: Blix;
 
@@ -11,15 +11,15 @@ export class PluginApi implements ElectronMainApi<PluginApi> {
     this._blix = blix;
   }
 
-  async addCommand(instance: CommandInstance) {
+  async addNode(instance: CommandInstance) {
     this._blix.commandRegistry.addInstance(instance);
   }
 
-  async runCommand(command: string) {
-    this._blix.commandRegistry.runCommand(command);
-  }
+  // async runCommand(command: string) {
+  //   this._blix.commandRegistry.runCommand(command);
+  // }
 
-  async getCommands() {
-    return this._blix.commandRegistry.getCommands();
+  async getNodes() {
+    return this._blix.toolbox.getNodes();
   }
 }

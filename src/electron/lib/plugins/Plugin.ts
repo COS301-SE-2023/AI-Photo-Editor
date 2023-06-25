@@ -5,7 +5,6 @@ import { Blix } from "../Blix";
 import {
   InputAnchorInstance,
   NodeInstance,
-  NodeUIParent,
   OutputAnchorInstance,
 } from "../core-graph/ToolboxRegistry";
 import { CommandInstance } from "../commands/CommandRegistry";
@@ -51,17 +50,15 @@ export class Plugin {
       // @ts-ignore: no-var-requires
       const pluginModule = require(this.mainPath);
 
-      const inputs: InputAnchorInstance[] = [];
-      const outputs: OutputAnchorInstance[] = [];
-
       if ("nodes" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to toolbox
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          const ui = new NodeUIParent();
+          const inputs: InputAnchorInstance[] = [];
+          const outputs: OutputAnchorInstance[] = [];
 
-          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs, ui);
+          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs);
 
           const nodeBuilder = new NodeBuilder(nodeInstance);
 
@@ -74,6 +71,7 @@ export class Plugin {
           } catch (err) {
             logger.warn(err);
           }
+          // console.log(blix.toolbox.getRegistry()[nodeInstance.getSignature])
         }
       }
 
@@ -129,6 +127,7 @@ class NodePluginContext extends PluginContext {
 class CommandPluginContext extends PluginContext {
   private plugin: string;
   private name: string;
+  private displayName: string;
   private description: string;
   private icon: string;
   private command: any;
@@ -152,8 +151,19 @@ class CommandPluginContext extends PluginContext {
     this.command = command;
   }
 
+  public setDisplayName(displayName: string) {
+    this.displayName = displayName;
+  }
+
   public create() {
-    return new CommandInstance(this.plugin, this.name, this.description, this.icon, this.command);
+    return new CommandInstance(
+      this.plugin,
+      this.name,
+      this.displayName,
+      this.description,
+      this.icon,
+      this.command
+    );
   }
 }
 

@@ -5,6 +5,7 @@
   import { paletteStore } from "../stores/PaletteStore";
   import { commandStore } from "../stores/CommandStore";
   import Shortcuts from "../Shortcuts.svelte";
+  import type { ICommand } from "../../shared/types/index";
 
   let showPalette = false;
   let expanded = true;
@@ -13,26 +14,26 @@
 
   type Category = {
     title: string;
-    items: string[];
+    items: ICommand[];
   };
 
-  let categoryIndex = 0;
-  let itemIndex = 0;
+  let selectedCategory = 0;
+  let selectedItem = 0;
 
   // TODO: Change items to use the command store values directly:
   $commandStore; // Use the shorthand like this
 
   // TODO: Get rid of this
   const categoriesOriginals: Category[] = [
-    {
-      title: "Recent",
-      // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
-      items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows", "Output"],
-    },
+    //{
+    //  title: "Nodes",
+    //  // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
+    //  items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows", "Output"],
+    //},
     {
       title: "Favourite",
       // items: ["Import", "Export", "Clear"],
-      items: $commandStore.commands.map((command) => command.split(".")[1]),
+      items: $commandStore.commands,
     },
   ];
 
@@ -49,8 +50,8 @@
 
   function onSearch(): void {
     expanded = true;
-    categoryIndex = 0;
-    itemIndex = 0;
+    selectedCategory = 0;
+    selectedItem = 0;
     let categoriesDeepCopy = JSON.parse(JSON.stringify(categoriesOriginals));
     categories = categoriesDeepCopy.filter((category: Category) => {
       category.items = filterList(category.items);
@@ -85,6 +86,18 @@
     },
   };
 
+  function handleAction() {
+    // if (!showPalette) return;
+    // showPalette = false;
+    // const item = categories[categoryIndex].items[itemIndex];
+    // const index = categoriesOriginals[0].items.indexOf(item);
+    // // const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
+    // const itemId = item.signature;
+    // console.log(index);
+    // console.log(item);
+    // commandStore.runCommand(item.signature);
+  }
+
   $: if (showPalette && inputElement) {
     inputElement.focus();
   }
@@ -92,8 +105,8 @@
   $: if (showPalette) {
     searchTerm = "";
     expanded = true;
-    categoryIndex = 0;
-    itemIndex = 0;
+    selectedCategory = 0;
+    selectedItem = 0;
     categories = categoriesOriginals;
   }
 </script>
@@ -126,8 +139,8 @@
             <ul>
               {#each category.items as item, j}
                 <Item
-                  title="{item}"
-                  selected="{i == categoryIndex && j == itemIndex}"
+                  title="{item.displayName}"
+                  selected="{i == selectedCategory && j == selectedItem}"
                   on:itemClicked="{handleItemClick}"
                 />
               {/each}

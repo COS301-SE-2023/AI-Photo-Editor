@@ -1,5 +1,7 @@
-import { MainApis } from "./electron/lib/api/MainApi";
+import type { MainApis } from "./frontend/init";
 
 declare global {
-  let mainApis: MainApis;
+  interface Window {
+    apis: MainApis;
+  }
 }

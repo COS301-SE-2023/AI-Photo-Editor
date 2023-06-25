@@ -1,19 +1,19 @@
 import { writable } from "svelte/store";
-import type { ICommand } from "../../shared/types/index";
+import type { INode } from "../../shared/types/index";
 
-interface CommandStore {
-  commands: ICommand[];
+interface NodeStore {
+  nodes: INode[];
 }
 
-function createCommandStore() {
-  const { subscribe, set } = writable<CommandStore>({
-    commands: [],
+function createNodeStore() {
+  const { subscribe, set } = writable<NodeStore>({
+    nodes: [],
   });
 
   // Called when the command registry changes
   // Automatically updates the value of the store
-  function refreshStore(results: ICommand[]) {
-    set({ commands: results });
+  function refreshStore(results: INode[]) {
+    set({ nodes: results });
   }
 
   async function addCommands(cmds: any[]) {
@@ -32,4 +32,4 @@ function createCommandStore() {
   };
 }
 
-export const commandStore = createCommandStore();
+export const nodeStore = createNodeStore();
