@@ -4,7 +4,8 @@
   import type { GraphNode, GraphSlider } from "../types";
   import { graphStore } from "../stores/GraphStore";
   import { paletteStore } from "../stores/PaletteStore";
-  import { commandStore, type Command } from "../stores/CommandStore";
+  import { commandStore } from "../stores/CommandStore";
+  import type { ICommand } from "../../shared/types/index";
 
   let showPalette = false;
   let expanded = true;
@@ -13,7 +14,7 @@
 
   type Category = {
     title: string;
-    items: Command[];
+    items: ICommand[];
   };
 
   let categoryIndex = 0;

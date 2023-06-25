@@ -1,4 +1,5 @@
 import type { Registry, RegistryInstance } from "../Registry";
+import type { INode, IAnchor } from "../../../shared/types";
 
 export class ToolboxRegistry implements Registry {
   private registry: { [key: string]: NodeInstance } = {};
@@ -9,6 +10,50 @@ export class ToolboxRegistry implements Registry {
   }
   getRegistry(): { [key: string]: NodeInstance } {
     return this.registry;
+  }
+  getNodes(): INode[] {
+    const commands: INode[] = [];
+    for (const command in this.registry) {
+      if (!this.registry.hasOwnProperty(command)) continue;
+
+      const nodeInstance: NodeInstance = this.registry[command];
+      // Get anchors
+      const inputAnchors: IAnchor[] = [];
+      const outputAnchors: IAnchor[] = [];
+
+      const inputAnchorsInstances = nodeInstance.getInputAnchorInstances;
+      const outputAnchorsInstances = nodeInstance.getInputAnchorInstances;
+
+      for (const anchor of nodeInstance.getInputAnchorInstances) {
+        const anchorObject = {
+          type: anchor.type,
+          signature: anchor.signature,
+          displayName: anchor.displayName,
+        };
+        inputAnchors.push(anchorObject);
+      }
+
+      for (const anchor of nodeInstance.getOutputAnchorInstances) {
+        const anchorObject = {
+          type: anchor.type,
+          signature: anchor.signature,
+          displayName: anchor.displayName,
+        };
+        outputAnchors.push(anchorObject);
+      }
+
+      const nodeObbject = {
+        signature: nodeInstance.getSignature,
+        title: nodeInstance.getTitle,
+        description: nodeInstance.getDescription,
+        icon: nodeInstance.getIcon,
+        inputs: inputAnchors,
+        outputs: outputAnchors,
+        ui: nodeInstance.getUI,
+      };
+      commands.push(nodeObbject);
+    }
+    return commands;
   }
 }
 
@@ -137,6 +182,14 @@ export class NodeInstance implements RegistryInstance {
 
   get getTitle(): string {
     return this.title;
+  }
+
+  get getDescription(): string {
+    return this.description;
+  }
+
+  get getIcon(): string {
+    return this.icon;
   }
 
   get getInputAnchorInstances(): InputAnchorInstance[] {
