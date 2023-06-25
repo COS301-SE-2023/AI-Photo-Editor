@@ -1,0 +1,362 @@
+\documentclass[11pt,a4paper]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                      PACKAGES                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx} % Allows you to insert figures
+\usepackage[export]{adjustbox}
+\usepackage{booktabs}
+\usepackage{amsmath} % Allows you to do equations
+\usepackage{helvet}
+\usepackage{hyperref}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[a4paper, total={6.5in, 9.5in}]{geometry} % Formats the paper size, orientation, and margins
+\linespread{1.1} % about 1.5 spacing in Word
+\setlength{\parindent}{0pt} % no paragraph indents
+\setlength{\parskip}{1em} % paragraphs separated by one line
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{pmboxdraw}
+\usepackage{dirtree}
+
+\hypersetup{
+	colorlinks=true,
+	urlcolor=cyan,
+	linktoc=none,
+}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead[L,C,R]{}
+\fancyfoot[L]{Blix - AI Photo Editor}
+\fancyfoot[C]{}
+\fancyfoot[R]{\textbf{\thepage}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.5pt}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\usepackage{listings}
+
+% Define TypeScript language style
+\lstdefinelanguage{TypeScript}{
+  keywords=[1]{class, constructor, let},
+  keywordstyle=[1]\bfseries,
+  keywords=[2]{string},
+  keywordstyle=[2]\color{blue},
+  sensitive=true,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+
+\lstdefinestyle{mystyle}{
+backgroundcolor=\color{backcolour},
+commentstyle=\color{codegreen},
+keywordstyle=\color{magenta},
+numberstyle=\tiny\color{codegray},
+stringstyle=\color{codepurple},
+basicstyle=\ttfamily\footnotesize,
+breakatwhitespace=false,
+breaklines=true,
+keepspaces=true,
+numbers=left,
+numbersep=5pt,
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+tabsize=2,
+}
+
+\lstset{style=mystyle}
+\def\code#1{\texttt{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%            TITLE PAGE & TABLE OF CONTENTS            %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\begin{titlepage}
+	\centering
+    % \includegraphics[width=0.5\textwidth]{your_logo.png}\par\vspace{1cm}
+    {\scshape\LARGE Coding Standards Specification\par}
+    \vspace{1.5cm}
+    {\huge\bfseries Blix - AI Photo Editor\par}
+    \vspace{2.5cm}
+    \begin{figure}[h]
+        \centering % center the image
+        \includegraphics[width=0.5\textwidth]{../pics/blix.png}
+    \end{figure}
+    \vspace{2.5cm}
+    {\Large\itshape The Spanish Inquisition\par}
+
+    \vfill
+    {\large \today\par}
+\end{titlepage}
+
+\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                MAIN DOCUMENT CONTENT                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\addcontentsline{toc}{section}{Introduction}
+\section*{Introduction}
+
+This is the Coding Standards Document for Blix, a cutting-edge native cross-platform desktop application designed to provide users with
+a professional and highly capable photo editing experience. 
+
+At its core, Blix combines the power of artificial intelligence with an intuitive interface, empowering users to effortlessly enhance and transform 
+their images. 
+
+With a unique and innovative blender-like graph,
+Blix enables users to manipulate images in ways that go beyond conventional editing tools.
+
+This comprehensive coding standards guide outlines the principles and best practices that govern the development of Blix, ensuring the highest 
+standards of code quality, maintainability, and scalability. 
+
+By adhering to these standards, our team strives to deliver a consistently exceptional 
+photo editing solution, where precision, efficiency, and professionalism converge. 
+
+Join us on this coding journey as we pave the way for a new era in photo editing excellence.
+\pagebreak
+
+
+\addcontentsline{toc}{section}{File Structure}
+\subsection*{File Structure}
+
+
+\DTsetlength{0.2em}{1em}{0.2em}{0.4pt}{0.4pt}
+\dirtree{%
+.1 Blix Photo Editor.
+.2 assets.
+.2 blix-plugins.
+.3 hello-plugin.
+.3 input-plugin.
+.2 src.
+.3 electron.
+.4 lib.
+.5 api.
+.5 commands.
+.5 core-graph.
+.5 plugins.
+.6 builders.
+.5 projects.
+.5 tiles.
+.4 utils.
+.3 frontend.
+.4 api.
+.4 components.
+.5 graph.
+.5 projects.
+.4 layout.
+.5 tiles.
+.4 stores.
+.4 types.
+.3 shared.
+.4 types.
+.4 utils.
+.2 tests.
+.3 unit\_tests.
+.4 electron.
+.4 frontend.
+.5 components.
+.3 integration\_tests.
+.3 end-to-end\_tests.
+}
+ 
+The Blix repository is split between 3 main folders :
+\begin{itemize}
+    \item[\textbullet] \textbf{assets}
+    \item[\textbullet] \textbf{src}
+    \item[\textbullet] \textbf{tests}
+
+\end{itemize}
+
+The "asset" folder contains all the core assets that the project will be using to provide the user with a functioning ui and interface.
+
+The "blix-plugins" folder contains all the plugins that the user has installed to use to edit their images.
+
+The "src" folder contains all the source code for the project,which is split into 3 folders, electron(backend), frontend(ui), shared(utilities).
+
+The "tests" folder contains all the unit testing, integration testing and end-to-end testing for the project.
+
+\addcontentsline{toc}{section}{Github Structure and Version Control Strategy}
+\section*{Github Version Control Strategy}
+
+\addcontentsline{toc}{subsection}{Branching}
+\subsection*{Branching}
+
+The \textbf{Github Flow} branching strategy is used for branching.
+
+The main branch from which all other branches must be created from is the \textit{dev} branch.
+Blix operates with feature based branching, thus each branch must be created based of what feature
+it will be implementing.
+
+As these features are completed or milestones are reached, these branches are merged back into the \textit{dev} branch.
+The \textit{dev} branch is then merged into the \textit{main} branch once a release is ready to be deployed.
+
+The nameing convention for branches is as follows:
+\begin{itemize}
+    \item[\textbullet] Specific features to be implemented must be prefixed with \textit{feature/} : i.e \textit{feature/palette}
+    \item[\textbullet] Core structures to be implemented must be prefixed according to their relevance : \hspace{3cm} i.e \textit{backend/graph}
+    \item[\textbullet] miscellaneous branches may be named simply accoridng to their purpose : i.e \textit{dev}, \textit{docs}
+\end{itemize}
+
+\addcontentsline{toc}{subsection}{Github Version Control Strategy}
+\subsubsection*{Github Version Control Strategy}
+
+\textbf{Commits} are handled according to the following rules : 
+\begin{itemize}
+    \item[\textbullet] Commits must be atomic, i.e they must only contain changes related to a single feature or bug fix.
+    \item[\textbullet] Commits must be in the present tense, to desbribe what the commit does, not what it did.
+\end{itemize}
+
+\textbf{Pull requests} are handled according to the following rules : 
+\begin{itemize}
+    \item[\textbullet] At least one team member other then the iniatator must review the pull request before it is merged.
+    \item[\textbullet] The pull request must be linked to an issue.
+    \item[\textbullet] The pull request must be linked to a milestone.
+    \item[\textbullet] The pull request must pass all automatic tests.
+\end{itemize}
+
+
+\textbf{Issues} are handled according to the following rules : 
+\begin{itemize}
+    \item[\textbullet] Issues must be atomic, i.e they must only contain changes related to a single feature or bug fix.
+    \item[\textbullet] Issues must describe where the problem is, what the problem is, and how to reproduce the problem.
+\end{itemize}
+
+\textbf{Merges conflicts} are handled according to the following rules : 
+\begin{itemize}
+    \item[\textbullet] The person who created the pull request must ensure that the merge conflicts are resolved.
+    \item[\textbullet] The relevant developers must be notified of the merge conflict and resolution.
+\end{itemize}
+
+
+\addcontentsline{toc}{section}{Coding Conventions}
+\section*{Coding Conventions}
+
+\addcontentsline{toc}{subsection}{Function conventions}
+\subsubsection*{Function conventions}
+
+\begin{itemize}
+    \item[\textbullet] Function names are to be in camel case, with the first letter being lowercase and the first letter of each subsequent word being uppercase.
+    \item[\textbullet] The function names must be descriptive of what the function does.
+    \item[\textbullet] The function names must be in the present tense, to describe what the function does, not what it did.
+    \item[\textbullet] The function names must not be abbreviated.
+    \item[\textbullet] Parameters are formatted according to prettier standards such that each parameter is on a new line.
+    \item[\textbullet] Parameters are to be named according to their purpose, not their type.
+    \item[\textbullet] Optional parameters are to be at the very end of the parameter list.
+\end{itemize}
+
+Example : 
+
+\begin{lstlisting}[language=TypeScript]
+  public addSlider(
+    label: string,
+    min: number,
+    max: number,
+    step: number,
+    defautlVal: number
+  ): NodeUIBuilder {
+    this.node.addSlider(label, min, max, step, defautlVal);
+    return this;
+  }
+
+\end{lstlisting}
+
+\addcontentsline{toc}{subsection}{Variable conventions}
+\subsubsection*{Variable Conventions}
+
+\begin{itemize}
+    \item[\textbullet] Variable names are to be in camel case, as described in the function conventions.
+    \item[\textbullet] Variable names must be descriptive of what the variable should do.
+    \item[\textbullet] const is preferred over var and let.
+    \item[\textbullet] Variables must never be of type any, unless absolutely neccesary.
+    \item[\textbullet] Global variables are discouraged, and should be avoided.
+    \item[\textbullet] Variables must be declared with the lowest possible scope. 
+\end{itemize}
+
+Example :
+
+\begin{lstlisting}[language=TypeScript]
+  private signature: string,
+  private name: string,
+  private plugin: string,
+  private title: string,
+  private description: string,
+  private icon: string,
+  private readonly inputs: InputAnchorInstance[],
+  private readonly outputs: OutputAnchorInstance[]
+\end{lstlisting}
+
+\addcontentsline{toc}{subsection}{Layout conventions}
+\subsubsection*{Layout conventions}
+
+\begin{itemize}
+    \item[\textbullet] Code blocks must start with a "\{" on the same line as the declaration and end with a "\}" on a new line.
+    \item[\textbullet] Each declaration and statement must be on a new line.
+\end{itemize}
+
+Example :
+
+\begin{lstlisting}[language=TypeScript]
+    public instantiate(plugin: string, name: string): NodeBuilder {
+        this.nodeBuilder.instantiate(plugin, name);
+        return this.nodeBuilder;
+      }
+\end{lstlisting}
+
+
+\addcontentsline{toc}{subsection}{General Coding conventions}
+\subsubsection*{General Coding Conventions}
+
+\begin{itemize}
+    \item[\textbullet] All code must be formatted according to prettier standards.
+    \item[\textbullet] All code must be linted according to eslint standards.
+    \item[\textbullet] All code must be typed according to typescript standards.
+    % \item[\textbullet] All code must be documented according to jsdoc standards.What are we gonna use for documentation again?
+    \item[\textbullet] All code must be tested according to jest standards.
+\end{itemize}
+
+Example :
+
+\begin{lstlisting}[language=TypeScript]
+private nodesToJSONObject(): NodeToJSON[] {
+    const json: NodeToJSON[] = [];
+    for (const node in this.nodes) {
+      if (!this.nodes.hasOwnProperty(node)) continue;
+      json.push(this.nodes[node].toJSONObject());
+    }
+    return json;
+  }
+\end{lstlisting}
+
+\addcontentsline{toc}{subsection}{Formatting tools}
+\subsubsection*{Formatting tools}
+
+Blix makes use of the following formatting tools to ensure standardization of code and to enforce the coding conventions : 
+\begin{itemize}
+    \item[\textbullet] \textbf{Prettier} : Prettier is an opinionated code formatter. It enforces a consistent style by parsing
+    your code and re-printing it with its own rules that take the maximum line length into account, wrapping code when necessary.
+    \item[\textbullet] \textbf{eslint} : Eslint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code, 
+    with the goal of making code more consistent and avoiding bugs.
+\end{itemize}
+
+There are a sizeable number of rules that are enforced by these tools, and they are not all listed here. 
+For a full list of rules enforced by these tools, please refer to the \textit{.eslintrc.js} and \textit{.prettierrc.js} files in the 
+root directory of the project.
+
+In summary these tools are configured to enforce the conventions described above, and to ensure that the code is formatted in a consistent manner.
+
+\pagebreak
+
+\end{document}
