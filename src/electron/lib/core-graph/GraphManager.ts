@@ -1,5 +1,8 @@
+import Main from "electron/main";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph } from "./Graph";
+import type { MainWindow } from "@electron/lib/api/WindowApi";
+import type { UIGraph } from "@frontend/stores/GraphStore";
 
 // This class stores all the graphs amongst all open projects
 // Projects index into this store at runtime to get their graphs
@@ -8,9 +11,29 @@ import { CoreGraph } from "./Graph";
 
 export class GraphManager {
   private _graphs: { [id: UUID]: CoreGraph };
+  private _mainWindow: MainWindow
 
-  constructor() {
+  constructor(mainWindow: MainWindow) {
+    this._mainWindow = mainWindow;
     this._graphs = {};
+
+    // Test send dummy graph to frontend
+    this.testingSendToClient();
+  }
+
+  testingSendToClient() {
+    this.createGraph(); // TODO: REMOVE; This is just for testing
+    const ids = this.getAllGraphUUIDs();
+
+    // There currently isn't proper implementation to map the CoreGraph to a
+    // UIGraph with the frontend nodes and anchors. Sorry that I didn't do this,
+    // not sure if Jake can help with this cause he made the CoreGraph
+    setTimeout(() => {
+      setInterval(() => {
+        if (this._mainWindow)
+          this._mainWindow?.apis.clientGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
+      }, 5000);
+    }, 5000);
   }
 
   createGraph(): UUID {
@@ -31,5 +54,9 @@ export class GraphManager {
 
   getAllGraphUUIDs() {
     return Object.keys(this._graphs).map((uuid) => uuid);
+  }
+
+  coreToUiGraph(graph: CoreGraph) {
+     
   }
 }

@@ -15,7 +15,8 @@ import { CommandRegistryApi } from "./CommandRegistryApi";
 import { blixStore } from "../stores/BlixStore";
 import { commandStore } from "../stores/CommandStore";
 import { nodeStore } from "../stores/NodeStore";
-import { CoreGraphApi } from "./CoreGraphApi";
+import { ClientGraphApi } from "./ClientGraphApi";
+import { ClientProjectApi } from "./ClientProjectApi";
 
 /**
  * Initializes the application by exposing the window IPC APIs to the main
@@ -53,7 +54,8 @@ async function bindMainApis() {
  */
 function exposeWindowApis() {
   exposeWindowApi(new CommandRegistryApi());
-  exposeWindowApi(new CoreGraphApi());
+  exposeWindowApi(new ClientGraphApi());
+  exposeWindowApi(new ClientProjectApi());
 }
 
 export type MainApis = AwaitedType<typeof bindMainApis>;

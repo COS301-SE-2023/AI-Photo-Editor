@@ -27,17 +27,15 @@ let mainWindow: MainWindow | null = null;
 let notification: Notification | null = null;
 
 app.on("ready", () => {
-  const blix = new Blix();
+  createMainWindow();
+
+  if (!mainWindow)
+    return
+
+  const blix = new Blix(mainWindow);
   exposeMainApis(blix);
   const pluginManager = new PluginManager(blix);
   pluginManager.loadPlugins();
-  createMainWindow();
-  blix.mainWindow = mainWindow!;
-  // const p = blix.projectManager;
-  // logger.info(p.loadProject("Project1387ca.blx"))
-  // logger.info(p.getOpenProjects())
-  // const project = p.createProject("Project 1");
-  // p.saveProject(project.uuid);
 
   // Set icon for macOS
   if (process.platform === "darwin") {

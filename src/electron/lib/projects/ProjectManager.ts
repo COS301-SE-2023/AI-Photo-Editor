@@ -5,6 +5,8 @@ import { join } from "path";
 import { app } from "electron";
 import fs from "fs";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
+import type { MainWindow } from "@electron/lib/api/WindowApi";
+import type { CommonProject } from "@shared/types";
 
 // This should kinda be extending Registry and then called ProjectRegistry
 // instead of Project Manager but I don't feel like the Registry interface is
@@ -12,13 +14,33 @@ import type { UUID } from "../../../shared/utils/UniqueEntity";
 export class ProjectManager {
   private path: string;
   private _projects: { [id: string]: CoreProject };
+  private _mainWindow;
 
-  constructor() {
+  constructor(mainWindow: MainWindow) {
+    this._mainWindow = mainWindow;
     this.path = join(app.getPath("userData"), "projects");
     if (!fs.existsSync(this.path)) {
       fs.mkdirSync(this.path);
     }
     this._projects = {};
+
+    // Example: How to send some event from the project manager to the client API
+    // Remove this!!
+
+    const proj: CommonProject = {
+      name: "TestProject",
+      uuid: "98yu4thljqwerfdq9p48pfqoawhfjadksklv"
+    }
+
+    // So, atm im kinda sending the share common data between the backend
+    // project interface and the fronted. Maybe there is a cleaner way to do
+    // this, but for example backend project doesn't have layout which the
+    // frontend project interface does. So, I couldn't really figure a way to
+    // create a frontend project in the backend then just send the entire
+    // frontend project state over the api
+    setInterval(() => {
+      this._mainWindow.apis.clientProjectApi.projectChanged(proj);
+    }, 2000)
   }
 
   createProject(name = "New Project"): CoreProject {

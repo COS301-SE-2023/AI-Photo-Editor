@@ -5,7 +5,6 @@ import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/WindowApi";
 import { GraphManager } from "./core-graph/GraphManager";
 
-import type { UIGraph } from "@frontend/stores/GraphStore";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -15,7 +14,7 @@ export class Blix {
   private _commandRegistry: CommandRegistry;
   private _graphManager: GraphManager;
   private _projectManager: ProjectManager;
-  private _mainWindow: MainWindow | null;
+  private _mainWindow: MainWindow;
 
   // private startTime: Date;
 
@@ -23,26 +22,14 @@ export class Blix {
   // private layoutRegistry: LayoutRegistry;
   // private currentLayout: LayoutId;
 
-  constructor() {
+  constructor(mainWindow: MainWindow) {
     // this.startTime = new Date();
+    this._mainWindow = mainWindow;
     this._toolbox = new ToolboxRegistry();
     this._commandRegistry = new CommandRegistry();
     this._tileRegistry = new TileRegistry();
-    this._graphManager = new GraphManager();
-    this._projectManager = new ProjectManager();
-    this._mainWindow = null;
-
-    this._graphManager.createGraph(); // TODO: REMOVE; This is just for testing
-
-    // temp for testing
-    const ids = this.graphManager.getAllGraphUUIDs();
-
-    setTimeout(() => {
-      setInterval(() => {
-        if (this.mainWindow)
-          this.mainWindow?.apis.coreGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
-      }, 5000);
-    }, 5000);
+    this._graphManager = new GraphManager(mainWindow);
+    this._projectManager = new ProjectManager(mainWindow);
   }
 
   get toolbox(): ToolboxRegistry {
@@ -67,9 +54,5 @@ export class Blix {
 
   get mainWindow(): MainWindow | null {
     return this._mainWindow;
-  }
-
-  set mainWindow(mainWindow: MainWindow | null) {
-    this._mainWindow = mainWindow;
   }
 }

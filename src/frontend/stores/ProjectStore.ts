@@ -81,6 +81,15 @@ function createProjectManager() {
     return project!;
   }
 
+  function updateProject(state: CommonProject) {
+    // Passes in the state of the backend project which changed. I would assume
+    // we'll have to update the correct project store with the new data. The
+    // project store and manager kinda a bit cooked iono. So, I guess whoever
+    // works on this will have to feel around to get it working or it will have
+    // to be changed later
+  }
+
+
   // TODO: Rewrite from old code
   // async function renameProject(uuid: UUID, name: string) {
   //   update((state) => {
@@ -103,6 +112,7 @@ function createProjectManager() {
     closeProject,
     setActiveProject,
     getActiveProject,
+    updateProject
   };
 }
 
