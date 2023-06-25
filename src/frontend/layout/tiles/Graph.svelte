@@ -8,7 +8,7 @@
   // export let panelId = 0;
   export let panelId = Math.round(10000000 * Math.random()).toString();
   export let graphId = "default";
-  let thisGraphStore = $graphMall[graphId];
+  let thisGraphStore = $graphMall.getGraph(graphId);
 </script>
 
 <!-- <button on:click={() => thisGraphStore.addNode()}>Add Node</button> -->

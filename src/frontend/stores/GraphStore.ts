@@ -3,50 +3,12 @@ import { writable, type Unsubscriber } from "svelte/store";
 import type { Connections } from "svelvet";
 
 function createGraphStore() {
-  const temp = new Graph();
-  const node1 = new GraphNode("1");
-  const node2 = new GraphNode("2");
-  const node3 = new GraphNode("3");
+  const { subscribe, update, set } = writable<UIGraph>(new UIGraph());
 
-  temp.nodes.push(node1);
-  temp.nodes.push(node2);
-  temp.nodes.push(node3);
-
-  node1.pos.x = 100;
-  node1.pos.y = 100;
-
-  node2.pos.x = -100;
-  node2.pos.y = -100;
-
-  node3.pos.x = 50;
-  node3.dims.w = 100;
-
-  node1.connections.push(["1", "2"]);
-  node2.connections.push(["2", "1"]);
-
-  const { subscribe, update } = writable<Graph>(temp);
-
-  // TODO: Implement IPC subscription
-  // let ipcConnected = false;
-
-  // function tryConnectIPC() {
-  //   if (ipcConnected) return;
-
-  //   TODO: Set up Typescript to properly identify window.api
-  //   See: [https://stackoverflow.com/a/71078436]
-  //   if ("api" in window && window.api.commandRegistry) {
-  //     window.api.commandRegistry("registryChanged", null, refreshStore);
-  //   }
-  // }
-
-  // Called when the command registry changes
-  // Automatically updates the value of the store
-  // function refreshStore(results: any) {
-  //   tryConnectIPC();
-
-  //   subscribe();
-  //   set([]);
-  // }
+  // Called by CoreGraphApi when the command registry changes
+  function refreshStore(newGraph: UIGraph) {
+    set(newGraph);
+  }
 
   async function addEdge() {
     // TODO
@@ -79,7 +41,7 @@ function createGraphStore() {
     return false;
   }
 
-  return new GraphStore(subscribe, addEdge, addNode, removeEdge, removeNode);
+  return new GraphStore(subscribe, addEdge, addNode, removeEdge, removeNode, refreshStore);
 }
 
 // TODO: Return a GraphStore in createGraphStore for typing
@@ -89,7 +51,8 @@ class GraphStore {
     public addEdge: () => Promise<boolean>,
     public addNode: () => Promise<boolean>,
     public removeEdge: () => Promise<boolean>,
-    public removeNode: () => Promise<boolean>
+    public removeNode: () => Promise<boolean>,
+    public refreshStore: (newGraph: UIGraph) => void
   ) {}
 }
 
@@ -97,7 +60,7 @@ type GraphId = UUID;
 type GraphNodeId = UUID;
 type GraphAnchorId = UUID;
 
-export class Graph {
+export class UIGraph {
   nodes: GraphNode[] = [];
 }
 
@@ -124,8 +87,45 @@ class GraphAnchor {
 }
 
 // The public area with all the cool stores 😎
-type GraphMall = { [key: GraphId]: GraphStore };
+class GraphMall {
+  private graphStores: { [key: GraphId]: GraphStore };
 
-export const graphMall = writable<GraphMall>({
-  default: createGraphStore(),
-});
+  constructor() {
+    this.graphStores = {
+      default: createGraphStore(),
+    };
+
+    // const temp = new UIGraph();
+    // const node1 = new GraphNode("1");
+    // const node2 = new GraphNode("2");
+    // const node3 = new GraphNode("3");
+
+    // temp.nodes.push(node1);
+    // temp.nodes.push(node2);
+    // temp.nodes.push(node3);
+
+    // node1.pos.x = 100;
+    // node1.pos.y = 100;
+
+    // node2.pos.x = -100;
+    // node2.pos.y = -100;
+
+    // node3.pos.x = 50;
+    // node3.dims.w = 100;
+
+    // node1.connections.push(["1", "2"]);
+    // node2.connections.push(["2", "1"]);
+
+    // this.graphStores.default.refreshStore(temp);
+  }
+
+  public refreshGraph(graphUUID: GraphId, newGraph: UIGraph) {
+    this.graphStores[graphUUID].refreshStore(newGraph);
+  }
+
+  public getGraph(graphUUID: GraphId): GraphStore {
+    return this.graphStores[graphUUID];
+  }
+}
+
+export const graphMall = writable<GraphMall>(new GraphMall());
