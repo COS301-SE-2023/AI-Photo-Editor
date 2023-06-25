@@ -1,5 +1,6 @@
 import type { Registry, RegistryInstance } from "../Registry";
 import type { INode, IAnchor } from "../../../shared/types";
+import { randomUUID } from "crypto";
 
 export class ToolboxRegistry implements Registry {
   private registry: { [key: string]: NodeInstance } = {};
@@ -131,6 +132,7 @@ export class NodeUILeaf extends NodeUI {
 }
 
 export class NodeInstance implements RegistryInstance {
+  private uuid: string;
   constructor(
     private signature: string,
     private name: string,
@@ -141,14 +143,18 @@ export class NodeInstance implements RegistryInstance {
     private readonly inputs: InputAnchorInstance[],
     private readonly outputs: OutputAnchorInstance[]
   ) {
-    this.func = "return;";
+    this.func = () => {
+      return "";
+    };
     this.ui = null;
+    this.uuid = randomUUID();
   }
   private ui: NodeUIParent | null;
 
   private func: any;
+
   get id(): string {
-    return this.id;
+    return this.uuid;
   }
 
   setTitle(title: string) {
@@ -183,6 +189,10 @@ export class NodeInstance implements RegistryInstance {
     const anchor = new OutputAnchorInstance(type, id, anchorname);
 
     this.outputs.push(anchor);
+  }
+
+  get getFunction(): any {
+    return this.func;
   }
 
   setFunction(func: any) {
