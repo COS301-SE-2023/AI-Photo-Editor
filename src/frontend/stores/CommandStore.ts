@@ -23,7 +23,7 @@ function createCommandStore() {
   }
 
   async function addCommands(cmds: any[]) {
-    // window.apis.pluginApi.addCommand(cmd);
+    // window.apis.pluginApi.addCommand(cmds);
   }
 
   async function runCommand(cmd: string) {
