@@ -95,6 +95,22 @@ export class NodeUIBuilder {
     return this;
   }
 
+  public addNumberInput(label: string, param = 0): NodeUIBuilder {
+    this.node.addNumberInput(label, param);
+    return this;
+  }
+
+  public addImageInput(label: string): NodeUIBuilder {
+    this.node.addImageInput(label);
+    return this;
+  }
+
+  // We need to discuss how to handle color pickers
+  public addColorPicker(label: string, param: any): NodeUIBuilder {
+    this.node.addColorPicker(label, param);
+    return this;
+  }
+
   // This needs to get sandboxed! Cant allow user access to getUI
   public getUI() {
     return this.node;

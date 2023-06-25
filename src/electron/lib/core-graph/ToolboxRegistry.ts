@@ -21,8 +21,8 @@ export class ToolboxRegistry implements Registry {
       const inputAnchors: IAnchor[] = [];
       const outputAnchors: IAnchor[] = [];
 
-      const inputAnchorsInstances = nodeInstance.getInputAnchorInstances;
-      const outputAnchorsInstances = nodeInstance.getInputAnchorInstances;
+      // const inputAnchorsInstances = nodeInstance.getInputAnchorInstances;
+      // const outputAnchorsInstances = nodeInstance.getInputAnchorInstances;
 
       for (const anchor of nodeInstance.getInputAnchorInstances) {
         const anchorObject = {
@@ -57,15 +57,18 @@ export class ToolboxRegistry implements Registry {
   }
 }
 
+// This should probably become virtual
 export class NodeUI {
   constructor() {
     this.parent = null;
     this.label = "";
     this.params = [];
+    this.type = "ui";
   }
   public parent: NodeUI | null;
-  label: string;
-  params: any[];
+  public label: string;
+  public params: any[];
+  public type: string;
 }
 
 export class NodeUIParent extends NodeUI {
@@ -74,6 +77,7 @@ export class NodeUIParent extends NodeUI {
     this.label = label;
     this.parent = parent;
     this.params = [];
+    this.type = "Parent";
   }
 
   label: string;
@@ -100,17 +104,30 @@ export class NodeUIParent extends NodeUI {
   public addLabel(label: string, param: string) {
     this.params.push(new NodeUILeaf("Label", label, [param], this));
   }
+
+  public addNumberInput(label: string, param: number) {
+    this.params.push(new NodeUILeaf("NumberInput", label, [param], this));
+  }
+
+  public addImageInput(label: string) {
+    this.params.push(new NodeUILeaf("ImageInput", label, [], this));
+  }
+
+  public addColorPicker(label: string, param: any) {
+    this.params.push(new NodeUILeaf("ColorPicker", label, [param], this));
+  }
 }
 
 export class NodeUILeaf extends NodeUI {
-  constructor(type: string, label: string, param: any[], parent: NodeUIParent) {
+  constructor(category: string, label: string, param: any[], parent: NodeUIParent) {
     super();
     this.label = label;
     this.params = param;
-    this.type = type;
+    this.type = "Leaf";
     this.parent = parent;
+    this.category = category;
   }
-  type: string;
+  category: string;
 }
 
 export class NodeInstance implements RegistryInstance {

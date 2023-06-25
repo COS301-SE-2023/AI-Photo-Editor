@@ -8,6 +8,10 @@ const nodes ={
             return num1;
         });
        nodeBuilder.addOutput("Number","Result");
+
+       ui = nodeBuilder.createUIBuilder();
+       ui.addNumberInput("input number",0);
+
     },
     "inputImage": (context) => {
       nodeBuilder = context.instantiate("input-plugin","inputImage");
@@ -18,6 +22,9 @@ const nodes ={
           return image;
       });
      nodeBuilder.addOutput("Image","Result");
+
+     ui = nodeBuilder.createUIBuilder();
+     ui.addImageInput("input image");
   },
   // Will we define a color type? or just a vector4/string 
   "inputColor": (context) => {
@@ -29,6 +36,9 @@ const nodes ={
         return color;
     });
    nodeBuilder.addOutput("Color","Result");
+
+   ui = nodeBuilder.createUIBuilder();
+   ui.addColorPicker("input number",0);
 },
 }
 
