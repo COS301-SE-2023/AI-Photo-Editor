@@ -4,14 +4,23 @@ const nodes = {
         // Use context.nodeBuilder to construct the node UI
         nodeBuilder = context.instantiate("hello-plugin","hello");
         nodeBuilder.setTitle("Gloria");
-
-
         nodeBuilder.define(() => {
             console.log("konnichi~wa");
         });
 
        ui =  nodeBuilder.createUIBuilder();
-       ui.addButton("bt1","Execute order 66");
+       ui.addButton("Execute order 66","return 66;").addSlider("Slide along",0,100,0.1,50).addDropdown("Orphanage",nodeBuilder.createUIBuilder()
+       .addLabel("Label1"));   
+
+       nodeBuilder.addInput("string","In1");
+       nodeBuilder.addInput("string","In2");
+
+       nodeBuilder.addOutput("string","Out1");
+
+    }
+    ,"Jake": (context) => {
+        nodeBuilder = context.instantiate("hello-plugin","Jake");
+        console.log("Jake");
     }
 }
 
@@ -19,7 +28,7 @@ const nodes = {
 
 // Here we define commands (that are made available in the command palette) and their callbacks
 const commands = {
-    "import": (context) => {
+    "addBrightnessNode": (context) => {
         // TODO: Work this out
         // E.g. Could get context.command.inputs for instance for additional values
     
@@ -28,7 +37,25 @@ const commands = {
         context.setIcon("testing/image.jpg");
 
         context.addCommand(() => {
-            console.log("Import picture");
+            console.log("Add Brightness Node");
+        })
+
+        context.setDisplayName("Add Brightness Node");
+
+        return context.create();
+    },
+    "import": (context) => {
+        // TODO: Work this out
+        // E.g. Could get context.command.inputs for instance for additional values
+    
+        context.setDescription("import a picture");
+
+        context.setIcon("testing/image.jpg");
+
+        context.setDisplayName("Import Project");
+
+        context.addCommand(() => {
+            console.log("Import project");
         })
 
         return context.create();
@@ -40,6 +67,8 @@ const commands = {
         context.setDescription("import a picture");
 
         context.setIcon("testing/image.jpg");
+
+        context.setDisplayName("Export project");
 
         context.addCommand(() => {
             console.log("Export picture");

@@ -1,7 +1,14 @@
 import { writable } from "svelte/store";
 
+export interface Command {
+  signature: string;
+  displayName: string;
+  description: string;
+  icon: string;
+}
+
 interface CommandStore {
-  commands: string[];
+  commands: Command[];
 }
 
 function createCommandStore() {
@@ -11,7 +18,7 @@ function createCommandStore() {
 
   // Called when the command registry changes
   // Automatically updates the value of the store
-  function refreshStore(results: string[]) {
+  function refreshStore(results: Command[]) {
     set({ commands: results });
   }
 
