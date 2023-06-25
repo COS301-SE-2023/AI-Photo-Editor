@@ -11,7 +11,7 @@ export class NodeBuilder implements PluginContextBuilder {
   private ui: NodeUIParent | null;
 
   public validate(): void {
-    if (this.node.getSignature === "") {
+    if (this.node.getSignature === "" || this.node.getSignature === null) {
       throw new Error("Node is not instantiated");
     }
 
