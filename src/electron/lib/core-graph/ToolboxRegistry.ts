@@ -1,5 +1,6 @@
 import type { Registry, RegistryInstance } from "../Registry";
 import type { INode, IAnchor } from "../../../shared/types";
+import { randomUUID } from "crypto";
 
 export class ToolboxRegistry implements Registry {
   private registry: { [key: string]: NodeInstance } = {};
@@ -20,9 +21,6 @@ export class ToolboxRegistry implements Registry {
       // Get anchors
       const inputAnchors: IAnchor[] = [];
       const outputAnchors: IAnchor[] = [];
-
-      // const inputAnchorsInstances = nodeInstance.getInputAnchorInstances;
-      // const outputAnchorsInstances = nodeInstance.getInputAnchorInstances;
 
       for (const anchor of nodeInstance.getInputAnchorInstances) {
         const anchorObject = {
@@ -77,13 +75,13 @@ export class NodeUIParent extends NodeUI {
     this.label = label;
     this.parent = parent;
     this.params = [];
-    this.type = "Parent";
+    this.type = "parent";
   }
 
   label: string;
   params: NodeUI[];
 
-  public addButton(label: string, param: string): void {
+  public addButton(label: string, param: any): void {
     this.params.push(new NodeUILeaf("Button", label, [param], this));
   }
 
@@ -97,16 +95,18 @@ export class NodeUIParent extends NodeUI {
     this.params.push(new NodeUILeaf("Slider", label, [min, max, step, defautlVal], this));
   }
 
-  public addDropdown(parent: NodeUIParent) {
-    this.params.push(parent);
+  public addDropdown(label: string, child: NodeUIParent) {
+    child.label = label;
+    this.params.push(child);
+    child.parent = this;
   }
 
   public addLabel(label: string, param: string) {
     this.params.push(new NodeUILeaf("Label", label, [param], this));
   }
 
-  public addNumberInput(label: string, param: number) {
-    this.params.push(new NodeUILeaf("NumberInput", label, [param], this));
+  public addNumberInput(label: string) {
+    this.params.push(new NodeUILeaf("NumberInput", label, [], this));
   }
 
   public addImageInput(label: string) {
@@ -123,7 +123,7 @@ export class NodeUILeaf extends NodeUI {
     super();
     this.label = label;
     this.params = param;
-    this.type = "Leaf";
+    this.type = "leaf";
     this.parent = parent;
     this.category = category;
   }
@@ -131,6 +131,7 @@ export class NodeUILeaf extends NodeUI {
 }
 
 export class NodeInstance implements RegistryInstance {
+  private uuid: string;
   constructor(
     private signature: string,
     private name: string,
@@ -141,14 +142,18 @@ export class NodeInstance implements RegistryInstance {
     private readonly inputs: InputAnchorInstance[],
     private readonly outputs: OutputAnchorInstance[]
   ) {
-    this.func = "return;";
+    this.func = () => {
+      return "";
+    };
     this.ui = null;
+    this.uuid = randomUUID();
   }
   private ui: NodeUIParent | null;
 
   private func: any;
+
   get id(): string {
-    return this.id;
+    return this.uuid;
   }
 
   setTitle(title: string) {
@@ -161,6 +166,14 @@ export class NodeInstance implements RegistryInstance {
 
   setIcon(icon: string) {
     this.icon = icon;
+  }
+
+  get getPlugin(): string {
+    return this.plugin;
+  }
+
+  get getName(): string {
+    return this.name;
   }
 
   instantiate(plugin: string, name: string) {
@@ -183,6 +196,10 @@ export class NodeInstance implements RegistryInstance {
     const anchor = new OutputAnchorInstance(type, id, anchorname);
 
     this.outputs.push(anchor);
+  }
+
+  get getFunction(): any {
+    return this.func;
   }
 
   setFunction(func: any) {

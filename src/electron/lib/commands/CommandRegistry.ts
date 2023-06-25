@@ -39,6 +39,7 @@ export class CommandRegistry implements Registry {
 }
 
 export class CommandInstance implements RegistryInstance {
+  private _id: string;
   constructor(
     private readonly _plugin: string,
     private readonly _name: string,
@@ -46,10 +47,12 @@ export class CommandInstance implements RegistryInstance {
     private readonly _description: string,
     private readonly _icon: string,
     private readonly _command: any
-  ) {}
+  ) {
+    this._id = "";
+  }
 
   get id(): string {
-    return this.id;
+    return this._id;
   }
 
   get signature(): string {
@@ -57,12 +60,12 @@ export class CommandInstance implements RegistryInstance {
     return this._plugin + "." + this._name;
   }
 
-  get name(): string {
-    return this._name;
+  get plugin(): string {
+    return this._plugin;
   }
 
-  get run(): any {
-    return this._command;
+  get name(): string {
+    return this._name;
   }
 
   get displayName(): string {
@@ -75,5 +78,9 @@ export class CommandInstance implements RegistryInstance {
 
   get icon(): string {
     return this._icon;
+  }
+
+  get run(): any {
+    return this._command;
   }
 }

@@ -73,7 +73,7 @@ export class NodeBuilder implements PluginContextBuilder {
 export class NodeUIBuilder {
   constructor(private node: NodeUIParent) {}
 
-  public addButton(label: string, param: string): NodeUIBuilder {
+  public addButton(label: string, param: any): NodeUIBuilder {
     this.node.addButton(label, param);
     return this;
   }
@@ -89,14 +89,13 @@ export class NodeUIBuilder {
     return this;
   }
 
-  public addDropdown(label: string, builder: NodeUIBuilder) {
-    builder.node.label = label;
-    this.node.addDropdown(builder.node);
+  public addDropdown(label: string, builder: NodeUIBuilder): NodeUIBuilder {
+    this.node.addDropdown(label, builder.node);
     return this;
   }
 
-  public addNumberInput(label: string, param = 0): NodeUIBuilder {
-    this.node.addNumberInput(label, param);
+  public addNumberInput(label: string): NodeUIBuilder {
+    this.node.addNumberInput(label);
     return this;
   }
 

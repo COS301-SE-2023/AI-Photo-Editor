@@ -56,10 +56,8 @@ function createMainWindow() {
       sandbox: true,
       preload: join(__dirname, "preload.js"),
     },
-    // Set icon for Windows and Linux
-    icon: "public/images/blix_64x64.png",
-    titleBarStyle: "hidden",
-    trafficLightPosition: { x: 10, y: 10 },
+    icon: "public/images/icon.png",
+    // show: false,
   }) as MainWindow;
 
   // Menu.setApplicationMenu(null);
@@ -186,11 +184,6 @@ autoUpdater.on("error", (err) => {
   notification.show();
 });
 
-const tempDirPath = join(app.getPath("userData"), "temp");
-
-if (!fs.existsSync(tempDirPath)) {
-  fs.mkdirSync(tempDirPath);
-}
 // import { TestGraph } from "./lib/core-graph/GraphTesting";
 
 // const t: TestGraph = new TestGraph();
