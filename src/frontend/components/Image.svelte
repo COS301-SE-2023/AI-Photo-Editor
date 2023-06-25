@@ -1,6 +1,5 @@
 <script>
   import { graphStore } from "../stores/GraphStore";
-  import { paletteStore } from "../stores/PaletteStore";
 
   let src = "";
 
@@ -44,7 +43,7 @@
   });
 </script>
 
-{#if $paletteStore.src}
+<!-- {#if $paletteStore.src}
   <img src="{$paletteStore.src}" alt="" class="max-h-[600px]" />
 {:else}
   <div
@@ -77,4 +76,4 @@
       </div>
     </label>
   </div>
-{/if}
+{/if} -->

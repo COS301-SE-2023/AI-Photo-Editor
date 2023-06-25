@@ -1,7 +1,5 @@
 <script lang="ts">
   import Item from "./Item.svelte";
-  import type { GraphNode, GraphSlider } from "../types";
-  import { paletteStore } from "../stores/PaletteStore";
   import { commandStore } from "../stores/CommandStore";
   import Shortcuts from "../Shortcuts.svelte";
   import type { ICommand } from "../../shared/types/index";
@@ -26,7 +24,7 @@
   const categoriesOriginals: Category[] = [
     {
       title: "Recent",
-      items: $commandStore.commands,
+      items: [],
     },
     {
       title: "Favourite",
@@ -39,8 +37,6 @@
   ];
 
   let categories = categoriesOriginals;
-
-  function handleItemClick() {}
 
   function filterList(list: any[]): any[] {
     return list.filter((rowObj: any) => {
@@ -69,41 +65,34 @@
       return ((n % m) + m) % m;
     };
 
-    let direction: "forward" | "backwards" | "none" = "none";
+    // Determine direction of index overflow
+    let direction: "f" | "b"; // forwards, backwards
+    if (
+      selectedItem >= categories[selectedCategory].items.length ||
+      selectedCategory >= categories.length
+    ) {
+      direction = "f";
+    } else if (selectedItem < 0 || selectedCategory < 0) {
+      direction = "b";
+    } else {
+      return;
+    }
 
-    if (selectedItem >= categories[selectedCategory].items.length) {
-      selectedItem = 0;
+    selectedItem = direction == "f" ? 0 : categories[selectedCategory].items.length - 1;
 
-      // Select next non-empty category
-      // Return to category 0 if none found
-      let prevCategory = Math.max(0, selectedCategory); // Prevent negative index just in case
-      selectedCategory = 0;
+    // Select next non-empty category
+    // Return to category 0 if none found
+    let prevCategory = Math.max(0, selectedCategory); // Prevent negative index just in case
+    selectedCategory = 0;
 
-      for (let i = 0; i < categories.length; i++) {
-        const cat = trueMod(i + prevCategory + 1, categories.length);
+    for (let i = 0; i < categories.length; i++) {
+      const cat = trueMod(prevCategory + (direction == "f" ? i + 1 : -i - 1), categories.length);
 
-        if (categories[cat].items.length == 0) continue;
+      if (categories[cat].items.length == 0) continue;
 
-        selectedCategory = cat;
-        break;
-      }
-    } else if (selectedItem < 0) {
-      selectedItem = categories[selectedCategory].items.length - 1;
-
-      // Select previous non-empty category
-      // Return to category 0 if none found
-      let prevCategory = Math.max(0, selectedCategory); // Prevent negative index just in case
-      selectedCategory = 0;
-
-      for (let i = 0; i < categories.length; i++) {
-        const cat = trueMod(prevCategory - i - 1 + categories.length, categories.length);
-
-        if (categories[cat].items.length == 0) continue;
-
-        selectedCategory = cat;
-        selectedItem = categories[cat].items.length - 1;
-        break;
-      }
+      selectedCategory = cat;
+      selectedItem = direction == "f" ? 0 : categories[cat].items.length - 1;
+      break;
     }
   }
 
@@ -127,20 +116,17 @@
     },
     "blix.palette.selectItem": () => {
       // Default enter
-      // handleAction();
+      const item = categories[selectedCategory].items[selectedItem];
+      handleAction(item);
     },
   };
 
-  function handleAction() {
-    // if (!showPalette) return;
-    // showPalette = false;
-    // const item = categories[categoryIndex].items[itemIndex];
-    // const index = categoriesOriginals[0].items.indexOf(item);
-    // // const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
-    // const itemId = item.signature;
-    // console.log(index);
-    // console.log(item);
-    // commandStore.runCommand(item.signature);
+  function handleAction(item: ICommand) {
+    if (!showPalette) return;
+    showPalette = false;
+
+    console.log(item);
+    commandStore.runCommand(item.signature);
   }
 
   $: if (showPalette && inputElement) {
@@ -153,6 +139,7 @@
     selectedCategory = 0;
     selectedItem = 0;
     categories = categoriesOriginals;
+    repairItemIndex();
   }
 </script>
 
@@ -187,8 +174,9 @@
                 {#each category.items as item, j}
                   <Item
                     title="{item.displayName}"
+                    description="{item.description}"
                     selected="{i == selectedCategory && j == selectedItem}"
-                    on:itemClicked="{handleItemClick}"
+                    on:itemClicked="{() => handleAction(item)}"
                   />
                 {/each}
               </ul>
@@ -197,49 +185,6 @@
         </nav>
       </div>
     {/if}
-
-    <!-- Footer -->
-    <footer
-      class="flex h-10 w-full items-center space-x-2 border-t border-zinc-600 bg-zinc-800/90 px-3"
-    >
-      {#if expanded}
-        <p class="mr-auto font-light text-zinc-100">
-          <kbd
-            class="rounded-lg border-zinc-500 bg-zinc-600 px-2 py-1.5 text-xs font-semibold text-zinc-100"
-            >Esc</kbd
-          >
-          to close
-          <kbd
-            class="rounded-lg border-zinc-500 bg-zinc-600 px-2 py-1.5 text-xs font-semibold text-zinc-100"
-            >Tab</kbd
-          >
-          to navigate
-          <kbd
-            class="rounded-lg border-zinc-500 bg-zinc-600 px-2 py-1.5 text-xs font-semibold text-zinc-100"
-            >Enter</kbd
-          > to select
-        </p>
-      {/if}
-      {#if !expanded}
-        <span class="ml-auto text-sm font-medium text-zinc-100">Show More</span>
-        <div class="h-6 w-6 rounded bg-zinc-600">
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" class="text-zinc-100">
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M17.25 13.75L12 19.25L6.75 13.75"></path>
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M12 18.25V4.75"></path>
-          </svg>
-        </div>
-      {/if}
-    </footer>
   </div>
 {/if}
 
