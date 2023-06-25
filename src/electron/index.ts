@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Notification } from "electron";
+import { app, BrowserWindow, Notification, Menu, MenuItem, dialog } from "electron";
 import { join } from "path";
 import fs from "fs";
 import { parse } from "url";
@@ -56,8 +56,10 @@ function createMainWindow() {
       sandbox: true,
       preload: join(__dirname, "preload.js"),
     },
-    icon: "public/images/icon.png",
-    // show: false,
+    // Set icon for Windows and Linux
+    icon: "public/images/blix_64x64.png",
+    titleBarStyle: "hidden",
+    trafficLightPosition: { x: 10, y: 10 },
   }) as MainWindow;
 
   // Menu.setApplicationMenu(null);
@@ -184,6 +186,11 @@ autoUpdater.on("error", (err) => {
   notification.show();
 });
 
+const tempDirPath = join(app.getPath("userData"), "temp");
+
+if (!fs.existsSync(tempDirPath)) {
+  fs.mkdirSync(tempDirPath);
+}
 // import { TestGraph } from "./lib/core-graph/GraphTesting";
 
 // const t: TestGraph = new TestGraph();
