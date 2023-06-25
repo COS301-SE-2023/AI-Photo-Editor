@@ -186,11 +186,6 @@ autoUpdater.on("error", (err) => {
   notification.show();
 });
 
-const tempDirPath = join(app.getPath("userData"), "temp");
-
-if (!fs.existsSync(tempDirPath)) {
-  fs.mkdirSync(tempDirPath);
-}
 // import { TestGraph } from "./lib/core-graph/GraphTesting";
 
 // const t: TestGraph = new TestGraph();
