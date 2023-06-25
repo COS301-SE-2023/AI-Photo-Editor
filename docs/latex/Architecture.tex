@@ -1,0 +1,152 @@
+\documentclass[11pt,a4paper]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                      PACKAGES                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx} % Allows you to insert figures
+\usepackage[export]{adjustbox}
+\usepackage{booktabs}
+\usepackage{amsmath} % Allows you to do equations
+\usepackage{helvet}
+\usepackage{hyperref}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[a4paper, total={6.5in, 9.5in}]{geometry} % Formats the paper size, orientation, and margins
+\linespread{1.1} % about 1.5 spacing in Word
+\setlength{\parindent}{0pt} % no paragraph indents
+\setlength{\parskip}{1em} % paragraphs separated by one line
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	urlcolor=cyan,
+	linktoc=none,
+}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead[L,C,R]{}
+\fancyfoot[L]{Blix - AI Photo Editor}
+\fancyfoot[C]{}
+\fancyfoot[R]{\textbf{\thepage}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.5pt}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+backgroundcolor=\color{backcolour},
+commentstyle=\color{codegreen},
+keywordstyle=\color{magenta},
+numberstyle=\tiny\color{codegray},
+stringstyle=\color{codepurple},
+basicstyle=\ttfamily\footnotesize,
+breakatwhitespace=false,
+breaklines=true,
+keepspaces=true,
+numbers=left,
+numbersep=5pt,
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+tabsize=2,
+}
+
+\lstset{style=mystyle}
+\def\code#1{\texttt{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%            TITLE PAGE & TABLE OF CONTENTS            %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\begin{titlepage}
+	\centering
+    % \includegraphics[width=0.5\textwidth]{your_logo.png}\par\vspace{1cm}
+    {\scshape\LARGE Architecture\par}
+    \vspace{1.5cm}
+    {\huge\bfseries Blix - AI Photo Editor\par}
+    \begin{figure}[h]
+        \centering % center the image
+        \includegraphics[width=0.5\textwidth]{./images/blix.png}
+    \end{figure}
+    \vspace{2.5cm}
+    {\Large\itshape The Spanish Inquisition\par}
+	\begin{tabular}{|c|c|}
+		\hline
+		\textbf{Name} 		& \textbf{Student Number} \\
+		\hline
+		Armand Krynauw		& u04868286  \\
+		Jake Mileham		& u21692492  \\
+		Dino Gironi			& u21630276  \\
+		Karel Olwage		& u21555258  \\
+		Francois Combrinck	& u21729752  \\
+		\hline
+	\end{tabular}
+    \vfill
+    {\large \today\par}
+\end{titlepage}
+
+\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                MAIN DOCUMENT CONTENT                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\addcontentsline{toc}{section}{Design Strategy}
+\section*{Design Strategy}
+
+\addcontentsline{toc}{section}{Architectural Styles}
+\section*{Architectural Styles}
+
+\pagebreak
+
+\addcontentsline{toc}{section}{Quality Requirements}
+\section*{Quality Requirements}
+
+\subsection*{Performance}
+
+The system should be able to handle large images and projects without
+significant lag or delay.
+
+The system should be able to process and apply image operations in real-time.
+
+\subsection*{Reliability} 
+
+The system should be able to recover from unexpected shutdowns or errors without
+losing data.
+
+The system should be able to store and retrieve images and projects reliably.
+
+\subsection*{Usability} 
+The system should be clear and concise on how it should be operated. 
+
+The system must ensure that users can easily navigate and use the system without external assistance or unwarranted difficulty. All functionality must be properly documented such that high-end users can easily perform complex operations.
+
+\subsection*{Security} 
+
+The system must ensure that a user's information is kept safe and secure from malicious actors. Additionally the system itself must be properly protected such that the system can resist any and all attacks from 3rd parties and malicious users. 
+
+\subsection*{Compatibility} 
+
+The system should be compatible with all major operating systems such as
+Windows, MacOS, and Linux.
+
+The system should be compatible with all well-known image file formats.
+
+\addcontentsline{toc}{section}{Architectural Design & Patterns}
+\section*{Quality Requirements}
+
+\addcontentsline{toc}{section}{Constraints}
+\section*{Constraints}
+
+\addcontentsline{toc}{section}{Technology Choices}
+\section*{Technology Choices}
+
+\end{document}
