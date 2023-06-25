@@ -7,7 +7,6 @@
 -->
 
 <script lang="ts">
-  import { get } from "svelte/store";
   import { Pane, Splitpanes } from "svelte-splitpanes";
   import { PanelNode, PanelGroup, PanelLeaf, type PanelType } from "./PanelNode";
   import PanelBlip from "./PanelBlip.svelte";
@@ -17,7 +16,6 @@
   import Graph from "./tiles/Graph.svelte";
   import Media from "./tiles/Media.svelte";
   import Blank from "./tiles/Blank.svelte";
-  import type { NewProjectStore } from "stores/ProjectStore";
 
   // import { scale } from "svelte/transition";
 
@@ -28,11 +26,7 @@
   export let horizontal: boolean = false;
   export let height: string;
   export let isRoot = true;
-  export let projectStore: NewProjectStore;
-
-  let layout: PanelNode = get(projectStore).layout;
-  console.log("hi");
-  console.log(layout);
+  export let layout: PanelNode;
 
   let tileProps = {
     panelId: layout.id,
