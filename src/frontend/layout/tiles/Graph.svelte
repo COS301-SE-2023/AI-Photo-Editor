@@ -12,11 +12,15 @@
 </script>
 
 <!-- <button on:click={() => thisGraphStore.addNode()}>Add Node</button> -->
-<Svelvet id="my-canvas" zoom="{0.7}" minimap theme="custom-dark">
-  {#each $thisGraphStore.nodes as node (node.id)}
-    <PluginNode graphNode="{node}" nodeId="{panelId}-{node.id}" />
-  {/each}
-</Svelvet>
+{#if thisGraphStore}
+  <Svelvet id="my-canvas" zoom="{0.7}" minimap theme="custom-dark">
+    {#each $thisGraphStore.nodes as node (node.id)}
+      <PluginNode graphNode="{node}" nodeId="{panelId}-{node.id}" />
+    {/each}
+  </Svelvet>
+{:else}
+  <div>Graph store not found</div>
+{/if}
 
 <style>
   :root[svelvet-theme="custom-dark"] {

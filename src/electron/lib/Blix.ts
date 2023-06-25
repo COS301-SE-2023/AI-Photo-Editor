@@ -37,10 +37,12 @@ export class Blix {
     // temp for testing
     const ids = this.graphManager.getAllGraphUUIDs();
 
-    setInterval(() => {
-      if (this.mainWindow)
-        this.mainWindow?.apis.coreGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
-    }, 1000);
+    setTimeout(() => {
+      setInterval(() => {
+        if (this.mainWindow)
+          this.mainWindow?.apis.coreGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
+      }, 5000);
+    }, 5000);
   }
 
   get toolbox(): ToolboxRegistry {
