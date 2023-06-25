@@ -1,37 +1,37 @@
 <script lang="ts">
-  import tinykeys from "tinykeys";
   import PaletteItem from "./PaletteItem.svelte";
-  // import type { GraphNode, GraphSlider } from "../types";
-  // import { graphStore } from "../stores/GraphStore";
-  import { paletteStore } from "../stores/PaletteStore";
-  import { commandStore, type Command } from "../stores/CommandStore";
+  import { commandStore } from "../stores/CommandStore";
+  import Shortcuts from "../Shortcuts.svelte";
+  import type { ICommand } from "../../shared/types/index";
 
   let showPalette = false;
-  let expanded = true;
+  let expanded = false;
   let inputElement: HTMLInputElement;
   let searchTerm = "";
 
   type Category = {
     title: string;
-    items: Command[];
+    items: ICommand[];
   };
 
-  let categoryIndex = 0;
-  let itemIndex = 0;
+  let selectedCategory = 0;
+  let selectedItem = 0;
 
   // TODO: Change items to use the command store values directly:
   $commandStore; // Use the shorthand like this
 
   // TODO: Get rid of this
   const categoriesOriginals: Category[] = [
-    //{
-    //  title: "Nodes",
-    //  // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
-    //  items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows", "Output"],
-    //},
     {
-      title: "Commands",
-      // items: ["Import", "Export", "Clear"],
+      title: "Recent",
+      items: [],
+    },
+    {
+      title: "Favourite",
+      items: [],
+    },
+    {
+      title: "All",
       items: $commandStore.commands,
     },
   ];
@@ -47,8 +47,9 @@
 
   function onSearch(): void {
     expanded = true;
-    categoryIndex = 0;
-    itemIndex = 0;
+    selectedCategory = 0;
+    selectedItem = 0;
+
     let categoriesDeepCopy = JSON.parse(JSON.stringify(categoriesOriginals));
     categories = categoriesDeepCopy.filter((category: Category) => {
       category.items = filterList(category.items);
@@ -57,115 +58,76 @@
     });
   }
 
-  function handleMoveDown() {
-    if (itemIndex === categories[categoryIndex].items.length - 1) {
-      if (categoryIndex !== categories.length - 1) {
-        categoryIndex++;
-        itemIndex = 0;
-      }
+  // If the item/category index is out of bounds, remap it back to a valid value
+  function repairItemIndex(): void {
+    // True modulo operator which wraps negatives back to [0, m]
+    const trueMod = (n: number, m: number) => {
+      return ((n % m) + m) % m;
+    };
+
+    // Determine direction of index overflow
+    let direction: "f" | "b"; // forwards, backwards
+    if (
+      selectedItem >= categories[selectedCategory].items.length ||
+      selectedCategory >= categories.length
+    ) {
+      direction = "f";
+    } else if (selectedItem < 0 || selectedCategory < 0) {
+      direction = "b";
     } else {
-      itemIndex++;
+      return;
     }
-  }
 
-  function handleMoveUp() {
-    if (itemIndex === 0) {
-      if (categoryIndex !== 0) {
-        categoryIndex--;
-        itemIndex = categories[categoryIndex].items.length - 1;
-      }
-    } else {
-      itemIndex--;
-    }
-  }
+    selectedItem = direction == "f" ? 0 : categories[selectedCategory].items.length - 1;
 
-  function handleAction() {
-    if (!showPalette) return;
+    // Select next non-empty category
+    // Return to category 0 if none found
+    let prevCategory = Math.max(0, selectedCategory); // Prevent negative index just in case
+    selectedCategory = 0;
 
-    showPalette = false;
-    const item = categories[categoryIndex].items[itemIndex];
-
-    const index = categoriesOriginals[0].items.indexOf(item);
-    // const itemId = item.toLocaleLowerCase().replaceAll(" ", "-");
-    const itemId = item.signature;
-
-    console.log(index);
-    console.log(item);
-    commandStore.runCommand(item.signature);
-
-    // if (false) {
-    //   if (itemId === "clear") {
-    //     graphStore.set({ nodes: [] });
-    //     paletteStore.update((store) => ({ ...store, src: "" }));
-    //     // window.api.send("clear-file");
-    //     return;
-    //   }
-
-    //   const graphNode: GraphNode = {
-    //     id: itemId,
-    //     name: item.displayName,
-    //     slider: generateSlider(itemId),
-    //     connection: "",
-    //   };
-
-    //   let found = false;
-    //   $graphStore.nodes.forEach((n) => {
-    //     if (n.id === graphNode.id) found = true;
-    //   });
-
-    //   if (!found) {
-    //     graphStore.update((store) => ({ nodes: [...store.nodes, graphNode] }));
-    //   }
-    // }
-  }
-
-  function handleItemClick(event: CustomEvent<{ id: string }>) {
     for (let i = 0; i < categories.length; i++) {
-      for (let j = 0; j < categories[i].items.length; j++) {
-        if (categories[i].items[j].displayName === event.detail.id) {
-          categoryIndex = i;
-          itemIndex = j;
-          handleAction();
-        }
-      }
+      const cat = trueMod(prevCategory + (direction == "f" ? i + 1 : -i - 1), categories.length);
+
+      if (categories[cat].items.length == 0) continue;
+
+      selectedCategory = cat;
+      selectedItem = direction == "f" ? 0 : categories[cat].items.length - 1;
+      break;
     }
   }
 
-  //   if (id === "rotate") {
-  //     slider.max = 360;
-  //     slider.step = 5;
-  //     slider.value = 0;
-  //     slider.fixed = 0;
-  //   } else if (id === "hue") {
-  //     slider.max = 360;
-  //     slider.step = 10;
-  //     slider.value = 0;
-  //     slider.fixed = 0;
-  //   }
-
-  //   return slider;
-  // }
-
-  tinykeys(window, {
-    "$mod+p": (event) => {
-      event.preventDefault();
+  const shortcuts = {
+    "blix.palette.toggle": () => {
       showPalette = !showPalette;
     },
-    Escape: () => {
-      if (showPalette) showPalette = false;
+    "blix.palette.show": () => {
+      showPalette = true;
     },
-    ArrowDown: () => {
-      if (!expanded) expanded = true;
+    "blix.palette.hide": () => {
+      showPalette = false;
     },
-    ArrowUp: () => {
-      if (!expanded) expanded = true;
+    "blix.palette.scrollDown": () => {
+      selectedItem++;
+      repairItemIndex();
     },
-    "Shift+Tab": handleMoveUp,
-    Tab: handleMoveDown,
-    "Control+J": handleMoveDown,
-    "Control+K": handleMoveUp,
-    Enter: handleAction,
-  });
+    "blix.palette.scrollUp": () => {
+      selectedItem--;
+      repairItemIndex();
+    },
+    "blix.palette.selectItem": () => {
+      // Default enter
+      const item = categories[selectedCategory].items[selectedItem];
+      handleAction(item);
+    },
+  };
+
+  function handleAction(item: ICommand) {
+    if (!showPalette) return;
+    showPalette = false;
+
+    console.log(item);
+    commandStore.runCommand(item.signature);
+  }
 
   $: if (showPalette && inputElement) {
     inputElement.focus();
@@ -174,9 +136,10 @@
   $: if (showPalette) {
     searchTerm = "";
     expanded = true;
-    categoryIndex = 0;
-    itemIndex = 0;
+    selectedCategory = 0;
+    selectedItem = 0;
     categories = categoriesOriginals;
+    repairItemIndex();
   }
 </script>
 
@@ -195,6 +158,7 @@
         on:input="{onSearch}"
       />
     </header>
+
     <!-- Results -->
     {#if expanded && categories.length > 0}
       <div
@@ -202,66 +166,29 @@
       >
         <nav>
           {#each categories as category, i}
-            <div class="p4 m-1 text-xs font-semibold text-zinc-400">
-              {category.title}
-            </div>
-            <ul>
-              {#each category.items as item, j}
-                <PaletteItem
-                  title="{item.displayName}"
-                  selected="{i == categoryIndex && j == itemIndex}"
-                  on:itemClicked="{handleItemClick}"
-                />
-              {/each}
-            </ul>
+            {#if category.items.length > 0}
+              <div class="p4 m-1 text-xs font-semibold text-zinc-400">
+                {category.title}
+              </div>
+              <ul>
+                {#each category.items as item, j}
+                  <PaletteItem
+                    title="{item.displayName}"
+                    description="{item.description}"
+                    selected="{i == selectedCategory && j == selectedItem}"
+                    on:itemClicked="{() => handleAction(item)}"
+                  />
+                {/each}
+              </ul>
+            {/if}
           {/each}
         </nav>
       </div>
     {/if}
-    <!-- Footer -->
-    <footer
-      class="flex h-10 w-full items-center space-x-2 border-t border-zinc-600 bg-zinc-800/90 px-3"
-    >
-      {#if expanded}
-        <p class="mr-auto font-light text-zinc-100">
-          <kbd
-            class="rounded-lg border-zinc-500 bg-zinc-600 px-2 py-1.5 text-xs font-semibold text-zinc-100"
-            >Esc</kbd
-          >
-          to close
-          <kbd
-            class="rounded-lg border-zinc-500 bg-zinc-600 px-2 py-1.5 text-xs font-semibold text-zinc-100"
-            >Tab</kbd
-          >
-          to navigate
-          <kbd
-            class="rounded-lg border-zinc-500 bg-zinc-600 px-2 py-1.5 text-xs font-semibold text-zinc-100"
-            >Enter</kbd
-          > to select
-        </p>
-      {/if}
-      {#if !expanded}
-        <span class="ml-auto text-sm font-medium text-zinc-100">Show More</span>
-        <div class="h-6 w-6 rounded bg-zinc-600">
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" class="text-zinc-100">
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M17.25 13.75L12 19.25L6.75 13.75"></path>
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M12 18.25V4.75"></path>
-          </svg>
-        </div>
-      {/if}
-    </footer>
   </div>
 {/if}
+
+<Shortcuts shortcuts="{shortcuts}" />
 
 <style lang="postcss">
   /* Chrome, Edge, and Safari */

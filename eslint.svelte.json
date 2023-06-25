@@ -65,7 +65,22 @@
         }
       }
     ],
-    "@typescript-eslint/naming-convention": "error",
+     "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "property",
+        "format": ["camelCase", "snake_case"],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": "objectLiteralProperty",
+        "format": null,
+        "filter": {
+          "regex": "^[a-zA-Z_][a-zA-Z0-9\\.\\-_]*$",
+          "match": true
+        }
+      }
+    ],
     "@typescript-eslint/no-empty-function": "error",
     "@typescript-eslint/no-empty-interface": "error",
     "@typescript-eslint/no-explicit-any": "off",

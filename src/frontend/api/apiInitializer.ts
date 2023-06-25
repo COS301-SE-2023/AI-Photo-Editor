@@ -6,9 +6,15 @@ import type { UtilApi } from "@electron/lib/api/UtilApi";
 import type { ProjectApi } from "@electron/lib/api/ProjectApi";
 import type { PluginApi } from "@electron/lib/api/PluginApi";
 import type { GraphApi } from "@electron/lib/api/GraphApi";
+import type { ToolboxApi } from "@electron/lib/api/ToolboxApi";
 
 // Window APIs
 import { CommandRegistryApi } from "./CommandRegistryApi";
+
+// stores
+import { blixStore } from "../stores/BlixStore";
+import { commandStore } from "../stores/CommandStore";
+import { nodeStore } from "../stores/NodeStore";
 import { CoreGraphApi } from "./CoreGraphApi";
 
 /**
@@ -18,6 +24,13 @@ import { CoreGraphApi } from "./CoreGraphApi";
 export async function initializeAPIs() {
   exposeWindowApis();
   window.apis = await bindMainApis();
+  const res = await window.apis.utilApi.getSystemInfo();
+  // Get commands and nodes from plugins
+  const command = await window.apis.pluginApi.getCommands();
+  const node = await window.apis.toolboxApi.getNodes();
+  blixStore.set({ systemInfo: res });
+  commandStore.refreshStore(command);
+  nodeStore.refreshStore(node);
 }
 
 /**
@@ -30,6 +43,7 @@ async function bindMainApis() {
     projectApi: await bindMainApi<ProjectApi>("ProjectApi"),
     pluginApi: await bindMainApi<PluginApi>("PluginApi"),
     graphApi: await bindMainApi<GraphApi>("GraphApi"),
+    toolboxApi: await bindMainApi<ToolboxApi>("ToolboxApi"),
   };
 }
 

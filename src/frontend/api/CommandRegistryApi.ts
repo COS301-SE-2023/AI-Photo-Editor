@@ -1,8 +1,9 @@
 import type { ElectronWindowApi } from "electron-affinity/window";
-import { commandStore, type Command } from "../stores/CommandStore";
+import { commandStore } from "../stores/CommandStore";
+import type { ICommand } from "../../shared/types/index";
 
 export class CommandRegistryApi implements ElectronWindowApi<CommandRegistryApi> {
-  registryChanged(results: Command[]) {
+  registryChanged(results: ICommand[]) {
     commandStore.refreshStore(results);
   }
 }

@@ -1,11 +1,5 @@
 import type { Registry, RegistryInstance } from "../Registry";
-
-interface Command {
-  signature: string;
-  displayName: string;
-  description: string;
-  icon: string;
-}
+import type { ICommand } from "../../../shared/types";
 
 export class CommandRegistry implements Registry {
   private registry: { [key: string]: CommandInstance } = {};
@@ -22,8 +16,8 @@ export class CommandRegistry implements Registry {
     return Object.keys(this.registry);
   }
 
-  getCommands(): Command[] {
-    const commands: Command[] = [];
+  getCommands(): ICommand[] {
+    const commands: ICommand[] = [];
     for (const command in this.registry) {
       if (!this.registry.hasOwnProperty(command)) continue;
 
