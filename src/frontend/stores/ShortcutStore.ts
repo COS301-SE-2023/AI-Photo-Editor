@@ -65,8 +65,8 @@ class ShortcutStore {
     "blix.palette.toggle": ["ctrl+[KeyP]"],
     "blix.palette.show": [],
     "blix.palette.hide": ["[Escape]"],
-    "blix.palette.scrollDown": ["[ArrowDown]", "ctrl+[KeyJ]"],
-    "blix.palette.scrollUp": ["[ArrowUp]", "ctrl+[KeyK]"],
+    "blix.palette.scrollDown": ["[ArrowDown]", "ctrl+[KeyJ]", "[Tab]"],
+    "blix.palette.scrollUp": ["[ArrowUp]", "ctrl+[KeyK]", "shift+[Tab]"],
     "blix.palette.selectItem": ["[Enter]"],
   };
 

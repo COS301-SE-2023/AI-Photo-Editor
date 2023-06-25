@@ -1,14 +1,13 @@
 <script lang="ts">
   import Item from "./Item.svelte";
   import type { GraphNode, GraphSlider } from "../types";
-  import { graphStore } from "../stores/GraphStore";
   import { paletteStore } from "../stores/PaletteStore";
   import { commandStore } from "../stores/CommandStore";
   import Shortcuts from "../Shortcuts.svelte";
   import type { ICommand } from "../../shared/types/index";
 
   let showPalette = false;
-  let expanded = true;
+  let expanded = false;
   let inputElement: HTMLInputElement;
   let searchTerm = "";
 
@@ -25,14 +24,16 @@
 
   // TODO: Get rid of this
   const categoriesOriginals: Category[] = [
-    //{
-    //  title: "Nodes",
-    //  // items: ["Brightness", "Contrast", "Saturation", "Hue", "Sharpness", "Exposure", "Shadows"],
-    //  items: ["Brightness", "Saturation", "Hue", "Rotate", "Shadows", "Output"],
-    //},
+    {
+      title: "Recent",
+      items: $commandStore.commands,
+    },
     {
       title: "Favourite",
-      // items: ["Import", "Export", "Clear"],
+      items: [],
+    },
+    {
+      title: "All",
       items: $commandStore.commands,
     },
   ];
@@ -52,6 +53,7 @@
     expanded = true;
     selectedCategory = 0;
     selectedItem = 0;
+
     let categoriesDeepCopy = JSON.parse(JSON.stringify(categoriesOriginals));
     categories = categoriesDeepCopy.filter((category: Category) => {
       category.items = filterList(category.items);
@@ -60,25 +62,68 @@
     });
   }
 
+  // If the item/category index is out of bounds, remap it back to a valid value
+  function repairItemIndex(): void {
+    // True modulo operator which wraps negatives back to [0, m]
+    const trueMod = (n: number, m: number) => {
+      return ((n % m) + m) % m;
+    };
+
+    let direction: "forward" | "backwards" | "none" = "none";
+
+    if (selectedItem >= categories[selectedCategory].items.length) {
+      selectedItem = 0;
+
+      // Select next non-empty category
+      // Return to category 0 if none found
+      let prevCategory = Math.max(0, selectedCategory); // Prevent negative index just in case
+      selectedCategory = 0;
+
+      for (let i = 0; i < categories.length; i++) {
+        const cat = trueMod(i + prevCategory + 1, categories.length);
+
+        if (categories[cat].items.length == 0) continue;
+
+        selectedCategory = cat;
+        break;
+      }
+    } else if (selectedItem < 0) {
+      selectedItem = categories[selectedCategory].items.length - 1;
+
+      // Select previous non-empty category
+      // Return to category 0 if none found
+      let prevCategory = Math.max(0, selectedCategory); // Prevent negative index just in case
+      selectedCategory = 0;
+
+      for (let i = 0; i < categories.length; i++) {
+        const cat = trueMod(prevCategory - i - 1 + categories.length, categories.length);
+
+        if (categories[cat].items.length == 0) continue;
+
+        selectedCategory = cat;
+        selectedItem = categories[cat].items.length - 1;
+        break;
+      }
+    }
+  }
+
   const shortcuts = {
     "blix.palette.toggle": () => {
-      // Default mod+p
       showPalette = !showPalette;
     },
     "blix.palette.show": () => {
       showPalette = true;
     },
     "blix.palette.hide": () => {
-      // Default esc
       showPalette = false;
     },
     "blix.palette.scrollDown": () => {
-      // Default downArrow, ctrl+j, tab
-      // handleMoveDown();
+      selectedItem++;
+      repairItemIndex();
     },
     "blix.palette.scrollUp": () => {
-      // Default upArrow, ctrl+k, shift+tab
-      // handleMoveUp();
+      selectedItem--;
+      repairItemIndex();
     },
     "blix.palette.selectItem": () => {
       // Default enter
@@ -126,6 +171,7 @@
         on:input="{onSearch}"
       />
     </header>
+
     <!-- Results -->
     {#if expanded && categories.length > 0}
       <div
@@ -133,22 +179,25 @@
       >
         <nav>
           {#each categories as category, i}
-            <div class="p4 m-1 text-xs font-semibold text-zinc-400">
-              {category.title}
-            </div>
-            <ul>
-              {#each category.items as item, j}
-                <Item
-                  title="{item.displayName}"
-                  selected="{i == selectedCategory && j == selectedItem}"
-                  on:itemClicked="{handleItemClick}"
-                />
-              {/each}
-            </ul>
+            {#if category.items.length > 0}
+              <div class="p4 m-1 text-xs font-semibold text-zinc-400">
+                {category.title}
+              </div>
+              <ul>
+                {#each category.items as item, j}
+                  <Item
+                    title="{item.displayName}"
+                    selected="{i == selectedCategory && j == selectedItem}"
+                    on:itemClicked="{handleItemClick}"
+                  />
+                {/each}
+              </ul>
+            {/if}
           {/each}
         </nav>
       </div>
     {/if}
+
     <!-- Footer -->
     <footer
       class="flex h-10 w-full items-center space-x-2 border-t border-zinc-600 bg-zinc-800/90 px-3"
