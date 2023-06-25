@@ -2,6 +2,7 @@ import { bindMainApi, exposeWindowApi } from "electron-affinity/window";
 import type { AwaitedType } from "electron-affinity/window";
 import { blixStore } from "./stores/BlixStore";
 import { commandStore } from "./stores/CommandStore";
+import { GraphNode, UIGraph, graphMall } from "./stores/GraphStore";
 
 // Main APIs
 import type { UtilApi } from "../electron/lib/api/UtilApi";
@@ -20,9 +21,35 @@ export async function init() {
   exposeWindowApis();
   window.apis = await bindMainApis();
   const res = await window.apis.utilApi.getSystemInfo();
+
+  // ===== SET INITIAL STORE VALUES ===== //
+
+  // Command store
   const command = await window.apis.pluginApi.getCommands();
   blixStore.set({ systemInfo: res });
   commandStore.refreshStore(command);
+
+  // Graph store
+  const allGraphIds = await window.apis.graphApi.getAllGraphUUIDs();
+  for (const graphId of allGraphIds) {
+    const graph = await window.apis.graphApi.getGraph(graphId);
+
+    // TODO: REMOVE; This is just for testing
+    const uiGraph = new UIGraph(graphId);
+    const node1 = new GraphNode("1");
+    const node2 = new GraphNode("2");
+    uiGraph.nodes.push(node1);
+    uiGraph.nodes.push(node2);
+    node1.pos.x = 100;
+    node1.pos.y = 100;
+
+    graphMall.update((mall) => {
+      // Only update the graph that has changed
+      mall.refreshGraph(graph.uuid, uiGraph);
+
+      return mall;
+    });
+  }
 }
 
 /**

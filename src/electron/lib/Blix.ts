@@ -29,6 +29,8 @@ export class Blix {
     this._graphManager = new GraphManager();
     this._projectManager = new ProjectManager();
     this._mainWindow = null;
+
+    this._graphManager.createGraph(); // TODO: REMOVE; This is just for testing
   }
 
   get toolbox(): ToolboxRegistry {

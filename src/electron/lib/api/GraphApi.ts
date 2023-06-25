@@ -36,4 +36,8 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
   async getGraph(uuid: UUID) {
     return this._blix.graphManager.getGraph(uuid);
   }
+
+  async getAllGraphUUIDs() {
+    return this._blix.graphManager.getAllGraphUUIDs();
+  }
 }

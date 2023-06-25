@@ -28,4 +28,8 @@ export class GraphManager {
       delete this._graphs[uuid];
     });
   }
+
+  getAllGraphUUIDs() {
+    return Object.keys(this._graphs).map((uuid) => uuid);
+  }
 }

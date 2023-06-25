@@ -1,9 +1,9 @@
-import type { UUID } from "@shared/utils/UniqueEntity";
+import { type UUID } from "@shared/utils/UniqueEntity";
 import { writable, type Unsubscriber } from "svelte/store";
 import type { Connections } from "svelvet";
 
-function createGraphStore() {
-  const { subscribe, update, set } = writable<UIGraph>(new UIGraph());
+function createGraphStore(graphUUID: GraphUUID) {
+  const { subscribe, update, set } = writable<UIGraph>(new UIGraph(graphUUID));
 
   // Called by CoreGraphApi when the command registry changes
   function refreshStore(newGraph: UIGraph) {
@@ -56,12 +56,14 @@ class GraphStore {
   ) {}
 }
 
-type GraphId = UUID;
-type GraphNodeId = UUID;
-type GraphAnchorId = UUID;
+type GraphUUID = UUID;
+type GraphNodeUUID = UUID;
+type GraphAnchorUUID = UUID;
 
 export class UIGraph {
   nodes: GraphNode[] = [];
+
+  constructor(public uuid: GraphUUID) {}
 }
 
 export class GraphNode {
@@ -76,23 +78,23 @@ export class GraphNode {
   pos: { x: number; y: number } = { x: 0, y: 0 };
   dims: { w: number; h: number } = { w: 0, h: 0 };
 
-  constructor(public id: GraphNodeId) {
-    this.name = "Node-" + id;
+  constructor(public uuid: GraphNodeUUID) {
+    this.name = "Node-" + uuid;
     this.connections = [];
   }
 }
 
 class GraphAnchor {
-  constructor(public id: GraphAnchorId, public type: string) {}
+  constructor(public uuid: GraphAnchorUUID, public type: string) {}
 }
 
 // The public area with all the cool stores 😎
 class GraphMall {
-  private graphStores: { [key: GraphId]: GraphStore };
+  private graphStores: { [key: GraphUUID]: GraphStore };
 
   constructor() {
     this.graphStores = {
-      default: createGraphStore(),
+      // default: createGraphStore("default"),
     };
 
     // const temp = new UIGraph();
@@ -119,11 +121,15 @@ class GraphMall {
     // this.graphStores.default.refreshStore(temp);
   }
 
-  public refreshGraph(graphUUID: GraphId, newGraph: UIGraph) {
+  public refreshGraph(graphUUID: GraphUUID, newGraph: UIGraph) {
+    if (!this.graphStores[graphUUID]) {
+      this.graphStores[graphUUID] = createGraphStore(graphUUID);
+    }
+
     this.graphStores[graphUUID].refreshStore(newGraph);
   }
 
-  public getGraph(graphUUID: GraphId): GraphStore {
+  public getGraph(graphUUID: GraphUUID): GraphStore {
     return this.graphStores[graphUUID];
   }
 }
