@@ -65,6 +65,7 @@
     "(src|scripts)/**": "prettier --write --ignore-unknown"
   },
   "dependencies": {
+    "chokidar": "^3.5.3",
     "electron-affinity": "^1.2.4",
     "electron-ipc-mock": "^0.0.3",
     "electron-log": "^4.4.8",
