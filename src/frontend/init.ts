@@ -2,13 +2,13 @@ import { bindMainApi, exposeWindowApi } from "electron-affinity/window";
 import type { AwaitedType } from "electron-affinity/window";
 import { blixStore } from "./stores/BlixStore";
 import { commandStore } from "./stores/CommandStore";
-// import { nodeStore } from "./stores/NodeStore";
+import { nodeStore } from "./stores/NodeStore";
 
 // Main APIs
 import type { UtilApi } from "../electron/lib/api/UtilApi";
 import type { ProjectApi } from "../electron/lib/api/ProjectApi";
 import type { PluginApi } from "../electron/lib/api/PluginApi";
-import { ToolboxApi } from "../electron/lib/api/ToolboxApi";
+import type { ToolboxApi } from "../electron/lib/api/ToolboxApi";
 
 // Window APIs
 import { CommandRegistryApi } from "./api/CommandRegistryApi";
@@ -23,10 +23,10 @@ export async function init() {
   const res = await window.apis.utilApi.getSystemInfo();
   // Get commands and nodes from plugins
   const command = await window.apis.pluginApi.getCommands();
-  // const node = await window.apis.toolboxApi.getNodes();
+  const node = await window.apis.toolboxApi.getNodes();
   blixStore.set({ systemInfo: res });
   commandStore.refreshStore(command);
-  // nodeStore.refreshStore(node);
+  nodeStore.refreshStore(node);
 }
 
 /**
