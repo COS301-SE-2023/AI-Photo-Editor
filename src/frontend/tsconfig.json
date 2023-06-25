@@ -3,7 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../shared/*"],
+      "@electron/*": ["../electron/*"],
+      "@frontend/*": ["../frontend/*"]
     },
     "types": ["node", "svelte", "jest"],
     "sourceMap": true,
@@ -25,6 +27,6 @@
     "esModuleInterop": true,
     "isolatedModules": true
   },
-  "include": [".", "../global.d.ts"],
+  "include": [".", "../global.d.ts", "../shared/**/*.ts"],
   "exclude": ["node_modules/*", "__sapper__/*", "public/*"]
 }

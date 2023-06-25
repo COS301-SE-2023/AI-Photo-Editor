@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { init } from "./init";
+  import { init } from "./Blix";
   import { blixStore } from "./stores/BlixStore";
 
   import Layout from "./layout/Layout.svelte";

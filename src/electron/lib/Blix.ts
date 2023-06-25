@@ -5,6 +5,8 @@ import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/WindowApi";
 import { GraphManager } from "./core-graph/GraphManager";
 
+import type { UIGraph } from "@frontend/stores/GraphStore";
+
 // Encapsulates the backend representation for
 // the entire running Blix application
 export class Blix {
@@ -31,6 +33,14 @@ export class Blix {
     this._mainWindow = null;
 
     this._graphManager.createGraph(); // TODO: REMOVE; This is just for testing
+
+    // temp for testing
+    const ids = this.graphManager.getAllGraphUUIDs();
+
+    setInterval(() => {
+      if (this.mainWindow)
+        this.mainWindow?.apis.coreGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
+    }, 1000);
   }
 
   get toolbox(): ToolboxRegistry {

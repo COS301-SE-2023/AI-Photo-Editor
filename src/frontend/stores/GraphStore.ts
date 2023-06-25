@@ -1,6 +1,20 @@
 import { type UUID } from "@shared/utils/UniqueEntity";
 import { writable, type Unsubscriber } from "svelte/store";
-import type { Connections } from "svelvet";
+
+// When the the CoreGraphApi type has to be imported into the backend
+// (WindowApi.ts) so that the API can be bound then it tries to import the type
+// below because the GraphStore gets used in the CoreGraphApi (its like one long
+// type dependency chain), this seems to cause some sort of duplicate export
+// issue originating from the svelvet node files when it tries to check the
+// types at compile time: node_modules/svelvet/dist/types/index.d.ts:4:1 - error
+// TS2308: Module './general' has already exported a member named
+// 'ActiveIntervals'. Consider explicitly re-exporting to resolve the ambiguity.
+
+// Not sure how to solve this at the moment, so had to add a temp fix below
+// unfortunately because of time constraints.
+
+// import type { Connections } from "svelvet";
+type Connections = (string | number | [string | number, string | number] | null)[];
 
 function createGraphStore(graphUUID: GraphUUID) {
   const { subscribe, update, set } = writable<UIGraph>(new UIGraph(graphUUID));

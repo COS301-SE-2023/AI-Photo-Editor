@@ -2,6 +2,12 @@
   "compileOnSave": true,
   "compilerOptions": {
     "outDir": "../../build",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../shared/*"],
+      "@electron/*": ["../electron/*"],
+      "@frontend/*": ["../frontend/*"]
+    },
     "target": "ES2016",
     "module": "commonjs",
     "sourceMap": true,
@@ -23,6 +29,6 @@
     "esModuleInterop": true,
     "isolatedModules": true
   },
-  "include": [".", "../global.d.ts", "../shared/**/*"],
+  "include": [".", "../global.d.ts", "../shared/**/*.ts"],
   "exclude": ["node_modules"]
 }
