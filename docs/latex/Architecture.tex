@@ -73,7 +73,7 @@ tabsize=2,
     {\huge\bfseries Blix - AI Photo Editor\par}
     \begin{figure}[h]
         \centering % center the image
-        \includegraphics[width=0.5\textwidth]{./images/blix.png}
+        \includegraphics[width=0.5\textwidth]{../pics/blix.png}
     \end{figure}
     \vspace{2.5cm}
     {\Large\itshape The Spanish Inquisition\par}
@@ -101,6 +101,23 @@ tabsize=2,
 
 \addcontentsline{toc}{section}{Design Strategy}
 \section*{Design Strategy}
+Our design process used the \textbf{Decomposition} and \textbf{Design based on quality requirements} strategies.
+
+Application of \textbf{Decomposition Strategy:}
+
+Our system has been designed in individual components or subsystems. The interaction of these components create the fully functioning system. This interaction of subsystems is used for the system's Architectural style and pattern decisions.
+
+Application of \textbf{Design based otooboxn quality requirements Strategy:}
+
+Each subsystem has also been created based on certain quality requirements in mind to ensure when interacting together, the system meets the specified requirements.
+
+% The system has been created using the decomposition design strategy. 
+% Our system holds true to this description, as smaller component subsystems have been created and their interaction creates the fully functioning system.
+
+% Each subsystem has also been created based on certain quality requirements in mind to ensure when brought together, the system meets its requirements.
+
+% As the decomposition strategy is described, (Software Architecture in Practice - 3rd, Len Bass et al. 2013)'In some contexts, the system may end up being constructed mostly from preexisting components; in others, the preexisting components may be a smaller portion of the overall system.'(page 312). 
+
 
 \addcontentsline{toc}{section}{Architectural Styles}
 \section*{Architectural Styles}
@@ -117,6 +134,8 @@ significant lag or delay.
 
 The system should be able to process and apply image operations in real-time.
 
+The system should receive updates in real time when dispatched by the developers.
+
 \subsection*{Reliability} 
 
 The system should be able to recover from unexpected shutdowns or errors without
@@ -131,22 +150,121 @@ The system must ensure that users can easily navigate and use the system without
 
 \subsection*{Security} 
 
-The system must ensure that a user's information is kept safe and secure from malicious actors. Additionally the system itself must be properly protected such that the system can resist any and all attacks from 3rd parties and malicious users. 
+The system must ensure that a user's information is kept safe and secure from malicious actors. 
+Additionally the system itself must be properly protected such that the system can resist any and all attacks from 3rd parties and malicious users. 
+
+The plugin and its functionality is user defined code so we need to isolate this code so that it does not effect any user that uses the plugins. The system should isolate the plugin code to prevent it from accessing any sensitive user information and core system functionality.
 
 \subsection*{Compatibility} 
 
-The system should be compatible with all major operating systems such as
-Windows, MacOS, and Linux.
+The system should be compatible with all major operating systems such as Windows, MacOS, and Linux.
 
 The system should be compatible with all well-known image file formats.
 
-\addcontentsline{toc}{section}{Architectural Design & Patterns}
-\section*{Quality Requirements}
+
+\subsection*{Scalability}
+
+The system should allow multiple projects to be open at a single point in time.
+
+The system
+
+\subsection*{Availability}
+
+The system should allow plugins to be loaded in real time while the system is running.
+
+\addcontentsline{toc}{section}{Architectural Design \& Patterns}
+\section*{Architectural Design \& Patterns}
 
 \addcontentsline{toc}{section}{Constraints}
 \section*{Constraints}
 
 \addcontentsline{toc}{section}{Technology Choices}
+
 \section*{Technology Choices}
 
+
+\addcontentsline{toc}{subsection}{Svelte}
+\subsection*{Svelte}
+Svelte is an open-source JavaScript framework for building user interfaces. It is designed to be highly efficient and focused on delivering optimal performance by shifting the work from the runtime to the build process.
+One of the key visions of Blix is to provide a fast and responsive user interface with lightning fast reactivity. Additionally due to the large scope
+of the project, it is important to ensure that the system is as lightweight as possible. Svelte is the perfect choice for this as it is a lightweight framework
+
+\textbf{Pros:}
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] Fast and responsive user interface with lightning fast reactivity. 
+	\item[\textbullet] Svelte is a highly scalable framework that allows for the creation of large scale applications.
+	\item[\textbullet] Reusability of components shortens development time.
+\end{enumerate}
+
+
+\textbf{Cons:}
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] Svelte is a relatively new framework and as such has a smaller community than other frameworks such as React and Vue.
+	\item[\textbullet] Svelte has a smaller ecosystem than other frameworks such as React and Vue.
+	\item[\textbullet] Svelte is lacking in stabilty as it is still a relatively new framework.
+\end{enumerate}
+
+\addcontentsline{toc}{subsection}{Tailwind CSS}
+\subsection*{Tailwind CSS}
+Tailwind CSS is an utility-first CSS framework that provides a set of pre-designed, low-level utility classes. Tailwind CSS focuses on providing a comprehensive set of utility classes that you can combine to build custom user interfaces.
+Tailwind CSS is the perfect choice for Blix as it allows for the creation of a custom user interface that is unique to Blix. 
+Additionally, Tailwind CSS is highly scalable and allows for the creation of large scale applications.
+
+\textbf{Pros:}
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] Tailwind CSS is a scalable framework that allows for the creation of large scale applications.
+	\item[\textbullet] Tailwind CSS is a customizable framework that allows for the creation of a custom user interface that is unique to Blix.
+	\item[\textbullet] Tailwind CSS is a responsive framework that allows for the creation of a responsive user interface.
+\end{enumerate}
+
+\textbf{Cons:}
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] The class names can make the HTML markup harder to read and maintain, especially for larger projects.
+	\item[\textbullet] Tailwind CSS generates a large CSS file due to the extensive collection of utility classes. 
+	\item[\textbullet] The class names can make the markup harder to read and maintain, especially for larger projects.
+\end{enumerate}
+
+\addcontentsline{toc}{subsection}{Electron}
+\subsection*{Electron}
+
+Electron allows developers to build cross-platform desktop applications using web technologies such as HTML, CSS, and JavaScript.
+Electron allows deveopers to locally host a web application within a desktop application. 
+This allows for the creation of a desktop application that is highly scalable and can be easily ported to other platforms.
+\textbf{Pros:}
+
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] Highly scalable framework that allows for the creation of large scale applications.
+	\item[\textbullet] Electron provides a comprehensive set of APIs that allows for the creation of a desktop application that is unique to Blix.
+	\item[\textbullet] Allows code reusage as the same codebase can be used to create a desktop application and a web application.
+\end{enumerate}
+
+\textbf{Cons:}
+
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] Electron generates a large executable file due to the extensive collection of APIs.
+	\item[\textbullet] High memory usage due to the extensive collection of APIs.
+	\item[\textbullet] Dependent on chromium browser updates.
+\end{enumerate}
+
+
+\addcontentsline{toc}{subsection}{Firebase}
+\subsection*{Firebase}
+
+Firebase is a mobile and web application development platform developed by Firebase, Inc. in 2011, then acquired by Google in 2014.
+Firebase provides a comprehensive set of APIs that allows developers to build, manage, and deploy applications.
+Firebase is the perfect choice for Blix as it provides a comprehensive set of APIs that allows for the creation of a highly scalable application.
+
+\textbf{Pros:}
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] Real time database that allows for the creation of a highly scalable application.
+	\item[\textbullet] Cloud storage that allows for efficient data storage and retrieval.
+	\item[\textbullet] Quick and easy authentication that allows for the creation of a secure application.
+\end{enumerate}
+
+\textbf{Cons:}
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] Lack of flexibility as Firebase is a closed source platform.
+	\item[\textbullet] Limited server side logic as Firebase is a closed source platform.
+	\item[\textbullet] Scalability and latency considerations is an external service.
+\end{enumerate}
 \end{document}
