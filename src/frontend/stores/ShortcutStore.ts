@@ -9,12 +9,14 @@ export class ShortcutCombo {
   ctrl: boolean;
   alt: boolean;
   shift: boolean;
+  meta: boolean;
 
-  constructor(keyCode: string, ctrl: boolean, alt: boolean, shift: boolean) {
+  constructor(keyCode: string, ctrl: boolean, alt: boolean, shift: boolean, meta: boolean) {
     this.keyCode = keyCode;
     this.ctrl = ctrl;
     this.alt = alt;
     this.shift = shift;
+    this.meta = meta;
   }
 
   public static cleanString(shortcutString: ShortcutString): ShortcutString {
@@ -22,7 +24,13 @@ export class ShortcutCombo {
   }
 
   public static fromEvent(event: KeyboardEvent): ShortcutCombo {
-    return new ShortcutCombo(event.code, event.ctrlKey, event.altKey, event.shiftKey);
+    return new ShortcutCombo(
+      event.code,
+      event.ctrlKey,
+      event.altKey,
+      event.shiftKey,
+      event.metaKey
+    );
   }
 
   // Valid shortcut strings:
@@ -47,14 +55,15 @@ export class ShortcutCombo {
       keyCode,
       parts.includes("ctrl"),
       parts.includes("alt"),
-      parts.includes("shift")
+      parts.includes("shift"),
+      parts.includes("meta")
     );
   }
 
   public get getString(): ShortcutString {
-    return `${this.ctrl ? "ctrl+" : ""}${this.alt ? "alt+" : ""}${this.shift ? "shift+" : ""}[${
-      this.keyCode
-    }]`;
+    return `${this.ctrl ? "ctrl+" : ""}${this.alt ? "alt+" : ""}${this.shift ? "shift+" : ""}${
+      this.meta ? "meta+" : ""
+    }[${this.keyCode}]`;
   }
 }
 
@@ -62,7 +71,7 @@ export class ShortcutCombo {
 class ShortcutStore {
   // Fill default shortcuts here
   shortcuts: { [key: ShortcutAction]: ShortcutString[] } = {
-    "blix.palette.toggle": ["ctrl+[KeyP]"],
+    "blix.palette.toggle": ["ctrl+[KeyP]", "meta+[KeyP]"],
     "blix.palette.show": [],
     "blix.palette.hide": ["[Escape]"],
     "blix.palette.scrollDown": ["[ArrowDown]", "ctrl+[KeyJ]", "[Tab]"],
