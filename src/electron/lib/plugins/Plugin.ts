@@ -10,6 +10,9 @@ import {
 import { CommandInstance } from "../commands/CommandRegistry";
 import { TileInstance } from "../tiles/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
+import Main from "electron/main";
+import type { MainWindow } from "lib/api/WindowApi";
+import { dialog } from "electron";
 
 export type PluginSignature = string;
 export type NodeSignature = string;
@@ -82,7 +85,7 @@ export class Plugin {
 
           blix.commandRegistry.addInstance(
             pluginModule.commands[cmd](
-              new CommandPluginContext(cmd, this.packageData.name)
+              new CommandPluginContext(cmd, this.packageData.name, blix.mainWindow)
             ) as CommandInstance
           );
         }
@@ -102,6 +105,7 @@ export class Plugin {
       this.hasRequiredSelf = true;
     } catch (err) {
       logger.warn(`Failed to require plugin: ${this.name}`);
+      logger.warn(err);
     }
   }
 }
@@ -131,14 +135,19 @@ class CommandPluginContext extends PluginContext {
   private description: string;
   private icon: string;
   private command: any;
+  private mainWindow: MainWindow;
 
-  constructor(name: string, plugin: string) {
+  constructor(name: string, plugin: string, mainWindow: MainWindow | null) {
     super();
     this.plugin = plugin;
     this.name = name;
     this.description = "";
     this.icon = "";
     this.command = "";
+  }
+
+  public get getMainWindow() {
+    return this.mainWindow;
   }
 
   public setDescription(description: string) {
@@ -164,6 +173,13 @@ class CommandPluginContext extends PluginContext {
       this.icon,
       this.command
     );
+  }
+
+  public async createDialogBox(options: string) {
+    const result = await dialog.showOpenDialog(this.mainWindow, {
+      properties: ["openFile"],
+      filters: [{ name: "Projects", extensions: ["*"] }],
+    });
   }
 }
 

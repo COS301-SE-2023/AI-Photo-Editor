@@ -1,4 +1,6 @@
 // Here we define node UIs and callbacks
+// import fs from "fs";
+// import { dialog } from "electron";
 const nodes = { 
     // "hello": (context) => {
     //     // Use context.nodeBuilder to construct the node UI
@@ -40,6 +42,7 @@ const commands = {
         context.setDisplayName("Import Project");
 
         context.addCommand(() => {
+            context.createDialogBox();
             console.log("Import project");
         })
 
@@ -55,8 +58,10 @@ const commands = {
 
         context.setDisplayName("Export project");
 
+        // Very unsafe, but just for proof of concept
         context.addCommand(() => {
             console.log("Export project");
+            context.createDialogBox(); // For opening a file
         })
 
         return context.create();
