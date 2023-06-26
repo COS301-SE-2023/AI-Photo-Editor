@@ -1,0 +1,29 @@
+{
+    "name": "base-plugin",
+    "displayName": "Base Plugin",
+    "description": "This plugin provides the basic services that can be used for blix",
+    "version": "0.0.69",
+
+    "author": "Sharkman",
+    "repository": "",
+
+    "contributes": {
+        "commands": [
+            {
+                "command": "base-plugin.export-project",
+                "title": "Export Project"
+            }
+        ],
+        "nodes": []
+    },
+
+    "main": "src/main.js",
+    "renderer": "src/renderer.js",
+
+    "devDependencies": {
+        "@types/node": "^12.0.0",
+        "typescript": "^3.4.5"
+    },
+
+    "comments": [ "This property will be completely ignored" ]
+}

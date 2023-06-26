@@ -174,7 +174,9 @@
                 {#each category.items as item, j}
                   <PaletteItem
                     title="{item.displayName}"
-                    description="{item.description}"
+                    description="{item.signature.split('.')[0] === 'base-plugin'
+                      ? 'Default'
+                      : item.signature.split('.')[0]}"
                     selected="{i == selectedCategory && j == selectedItem}"
                     on:itemClicked="{() => handleAction(item)}"
                   />
