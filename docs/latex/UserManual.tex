@@ -28,6 +28,8 @@
 	linktoc=none,
 }
 \usepackage{fancyhdr}
+\usepackage{float}
+
 \pagestyle{fancy}
 \fancyhead[L,C,R]{}
 \fancyfoot[L]{Blix - AI Photo Editor}
@@ -189,10 +191,10 @@ Projects can be permanently removed from your workspace as follows :
   \item[\textbullet] Select the project you wish to delete.
 \end{itemize}
 
-\addcontentsline{toc}{section}{Image editing}
-\section*{Image editing}
+\addcontentsline{toc}{subsection}{Photo editing}
+\subsection*{Photo editing}
 
-\textbf{Importing an image}
+\textbf{Importing a Photo}
 
 Images can be added to the graph as input. This can be done using the input plugin : 
 \begin{itemize}
@@ -211,10 +213,71 @@ There are a wide array of nodes that can be added to the workspace area.
   \item[\textbullet] Connect the node to the graph.
 \end{itemize}
 
-\textbf{Editing an image}
+\begin{figure}[H]
+  \centering
+  \href{https://www.youtube.com/watch?v=ak3Bto3phqk}
+  {\includegraphics[width=0.5\textwidth]{../pics/nodes.png}}
+\end{figure}
+
+
+\textbf{Editing a Photo}
 
 Images can be edited in the graph using the various editing nodes. These nodes can be connected to the image input node to apply the desired effect.
 The nodes will perform manipulations on the image and output the result. This result can then be connected to other nodes to create a chain of effects.
 It should be noted that this functionality does not only apply to images, but to any input given.
+
+\textbf{Exporting a Photo}
+
+Photos can be exported to a format of your choice. This can be done as follows :
+
+\begin{itemize}
+  \item[\textbullet] Select file in the top left corner of the screen or open the command palette.
+  \item[\textbullet] Select export image.
+  \item[\textbullet] The image of your currently active workspace will be exported to the directory of your choice.
+\end{itemize}
+
+\addcontentsline{toc}{subsection}{Layout Customization}
+\subsection*{Layout Customization}
+
+Blix prides itself on its intuitive and user-friendly interface. The layout of the application is highly customizable, enabling you to tailor the interface to your preferences.
+
+\textbf{Changing the panels layout}
+
+Blix allows a wide array of customizablity for the panels layout. You can customize the panel layout as follows :
+
+\begin{itemize}
+  \item[\textbullet] Panel borders can be changed by dragging the borders of the panels.
+  \item[\textbullet] Panels can be moved by dragging the panel header.
+  \item[\textbullet] Panels can be closed by dragging the blip upwards.
+  \item[\textbullet] Panels can be duplicated by dragging the blip downwards or sideways.
+\end{itemize}
+
+
+\addcontentsline{toc}{subsection}{Plugins}
+\subsection*{Plugins}
+
+One of the core features of Blix is its plugin system. This system allows users to create their own plugins and add them to the application. This enables users to create their own custom nodes and 
+add them to the graph. This section will serve as a guide to creating your own plugins.
+
+\textbf{Using plugins}
+
+Blix ensures that every node in the graph is a plugin. This means that all node functionality is extremely extensible and add them to the graph. Key features include : 
+
+\begin{itemize}
+  \item[\textbullet] Plugin files are stored in the blix-plugins folder.
+  \item[\textbullet] Users can create their own plugins and share them with other users.
+  \item[\textbullet] Every property of the node is defined in the plugin file.
+\end{itemize}
+
+\textbf{Creating plugins}
+
+Blix allows users to create and customize their own plugins with an elegant and intuitive interface. Users can define nodes, commands and tiles.
+
+\begin{itemize}
+  \item[\textbullet] Nodes are constructed using the dedicated nodeBuilders provided in our docs.
+  \item[\textbullet] Commands are more loosely created by users, however well defined commands are provided in our system.
+  \item[\textbullet] Tiles are created using the dedicated tileBuilders provided in our docs.
+\end{itemize}
+
 
 \end{document}
