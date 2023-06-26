@@ -11,7 +11,7 @@
 
     // Check each action
     for (const action of Object.keys(shortcuts)) {
-      if ($shortcutsRegistry.checkShortcut(action as ShortcutAction, combo)) {
+      if (shortcutsRegistry.checkShortcut(action as ShortcutAction, combo)) {
         shortcuts[action as ShortcutAction](event);
       }
     }

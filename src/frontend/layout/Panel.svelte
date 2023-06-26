@@ -16,6 +16,7 @@
   import Graph from "./tiles/Graph.svelte";
   import Media from "./tiles/Media.svelte";
   import Blank from "./tiles/Blank.svelte";
+  import ShortcutSettings from "./tiles/ShortcutSettings.svelte";
 
   // import { scale } from "svelte/transition";
 
@@ -171,6 +172,7 @@
   const panelTypeToComponent: { [key: PanelType]: ConstructorOfATypedSvelteComponent } = {
     graph: Graph,
     media: Media,
+    shortcutSettings: ShortcutSettings,
   };
 
   // Wraps the above dict safely
