@@ -128,74 +128,84 @@ main approaches: decomposition and design based on quality requirements.
 \subsection{Performance}
 
 \begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] {\bf Description}:
+	\item[\textbullet] {\bf Description}: The application should demonstrate
+	efficient speed and responsiveness when editing large images and handling
+	multiple projects. Real-time processing of graph-based image operations
+	should be seamless and should not cause any delay during editing. The
+	application should be able to support the execution of multiple system
+	plugins that should not cause any significant performance degradation.
 
-	\item[\textbullet] {\bf Quantification}:
+	\item[\textbullet] {\bf Quantification}: The performance requirement will be
+	measured by defining specific metrics, such as the maximum size of images
+	that can be edited without lag, the duration of time it takes for the
+	application to load and display images of various sizes, and the average
+	time taken for the application to process a graph-based image operation. The
+	application's performance with different numbers of open projects and
+	running plugins can also be benchmarked by measuring the percentage of CPU
+	and RAM usage and observing performance during peak usage.
 \end{enumerate}
-
-\subsubsection*{Description}
-The application should demonstrate efficient speed and
-responsiveness when editing large images and handling multiple projects.
-Real-time processing of graph-based image operations should be seamless and
-should not cause any delay during editing. The application should be able to
-support the execution of multiple system plugins that should not cause any
-significant performance degradation.
-
-\subsubsection*{Quantification}
-The performance requirement will be measured by defining specific metrics, such
-as the maximum size of images that can be edited without lag, the duration of
-time it takes for the application to load and display images of various sizes,
-and the average time taken for the application to process a graph-based image
-operation. The application's performance with different numbers of open projects
-and running plugins can also be benchmarked by measuring the percentage of CPU
-and RAM usage and observing performance during peak usage.
 
 
 \subsection{Customizability}
-\subsubsection*{Description}
-The system be extensible and customizable to the extent where they can change
-the theme of the system to their liking. Customize application command shortcuts
-as they see fit and change the layout of the system with hot-swappable tiles.
-The system should also allow for custom plugin creation and customization.
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] {\bf Description}: The system be extensible and
+	customizable to the extent where they can change the theme of the system to
+	their liking. Customize application command shortcuts as they see fit and
+	change the layout of the system with hot-swappable tiles. The system should
+	also allow for custom plugin creation and customization.
 
-\subsubsection*{Quantification}
+	\item[\textbullet] {\bf Quantification}: The system should support a minimum
+	of five themes. The system should allow the shortcut customization of base
+	system commands and plugin commands. The system should allow users to
+	rearrange the the base layout and add custom plugin tiles. The system will
+	provide a plugin development API that allows users to create and customize
+	their own plugins.
+\end{enumerate}
 
 \subsection{Usability} 
-The system should be clear and concise on how it should be operated. 
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] {\bf Description}: The system should be clear and concise
+	on how it should be operated. The system must ensure that users can easily
+	navigate and use the system without external assistance or unwarranted
+	difficulty. The system should provide keyboard navigation for primary parts
+	of the system to make powers users more efficient. All functionality must be
+	properly documented such that high-end users can easily perform complex
+	operations.
 
-The system must ensure that users can easily navigate and use the system without
-external assistance or unwarranted difficulty. All functionality must be
-properly documented such that high-end users can easily perform complex
-operations.
+	\item[\textbullet] {\bf Quantification}: The percentage of users who are
+	able complete a given set of tasks should be above specified threshold. User
+	errors rates should be kept to a minimum and users should have and easy and
+	pleasant time interacting with the system. 
+	
+\end{enumerate}
 
 \subsection{Security} 
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] {\bf Description}: The application must ensure the
+	confidentiality, integrity, and availability of user data by protecting
+	against unauthorized access, disclosure, modification, or destruction.
+	Furthermore, the application and its plugin system must be resilient to
+	attacks from third-party entities and malicious users.
 
-\subsubsection*{Description}
-The application must ensure the confidentiality, integrity, and availability of
-user data by protecting against unauthorized access, disclosure, modification,
-or destruction. Furthermore, the application and its plugin system must be
-resilient to attacks from third-party entities and malicious users.
-
-\subsubsection*{Quantification}
-The application should isolate and sandbox plugin code to prevent it from
-accessing sensitive user information and core system functionality.
-
-The application should use encryption for sensitive user data both at-rest and
-in-transit. 
+	\item[\textbullet] {\bf Quantification}: The application should isolate and
+	sandbox plugin code to prevent it from accessing sensitive user information
+	and core system functionality.  The application should use encryption for
+	sensitive user data both at-rest and in-transit. 
+\end{enumerate}
 
 \subsection{Compatibility} 
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] {\bf Description}: The application must be compatible
+	with major operating systems such as Windows, macOS, and Linux distributions
+	such as Ubuntu and Debian. It should support image file formats commonly
+	used in the industry such as JPEG, PNG, GIF, BMP, and RAW from popular
+	camera brands.
 
-\subsubsection*{Description}
-The application must be compatible with major operating systems such as Windows,
-macOS, and Linux distributions such as Ubuntu and Debian. It should support
-image file formats commonly used in the industry such as JPEG, PNG, GIF, BMP,
-and RAW from popular camera brands.
-
-\subsubsection*{Quantification}
-The application must be able to run without errors on the latest stable versions
-of the aforementioned operating systems. It must be able to import and export
-image files with the aforementioned formats without any data loss or corruption. 
-
+	\item[\textbullet] {\bf Quantification}: The application must be able to run
+	without errors on the latest stable versions of the aforementioned operating
+	systems. It must be able to import and export image files with the
+	aforementioned formats without any data loss or corruption. 
+\end{enumerate}
 
 \section{Architectural Design \& Patterns}
 Three main architectural patterns where identified to decompose the base system
@@ -279,82 +289,115 @@ by shifting the work from the runtime to the build process. One of the key
 visions of Blix is to provide a fast and responsive user interface with
 lightning fast reactivity. Additionally due to the large scope of the project,
 it is important to ensure that the system is as lightweight as possible. Svelte
-is the perfect choice for this as it compiles the application into highly performant JavaScript, instead of simulating a virtual DOM for performing reactive page updates.
+is the perfect choice for this as it compiles the application into highly
+performant JavaScript, instead of simulating a virtual DOM for performing
+reactive page updates.
 
 \textbf{Pros:}
 \begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] Fast and responsive user interface with lightning fast reactivity. 
-	\item[\textbullet] Svelte is a highly scalable framework that allows for the creation of large scale applications.
+	\item[\textbullet] Fast and responsive user interface with lightning fast
+	reactivity. 
+	\item[\textbullet] Svelte is a highly scalable framework that allows for the
+	creation of large scale applications.
 	\item[\textbullet] Reusability of components shortens development time.
 \end{enumerate}
 
 
 \textbf{Cons:}
 \begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] Svelte is a relatively new framework and as such has a smaller community than other frameworks such as React and Vue.
-	\item[\textbullet] Svelte has a smaller ecosystem than other frameworks such as React and Vue.
-	\item[\textbullet] Svelte is lacking in stabilty as it is still a relatively new framework.
+	\item[\textbullet] Svelte is a relatively new framework and as such has a
+	smaller community than other frameworks such as React and Vue.
+	\item[\textbullet] Svelte has a smaller ecosystem than other frameworks such
+	as React and Vue.
+	\item[\textbullet] Svelte is lacking in stability as it is still a
+	relatively new framework.
 \end{enumerate}
 
 \subsection{Tailwind CSS}
-Tailwind CSS is an utility-first CSS framework that provides a set of pre-designed, low-level utility classes. Tailwind CSS focuses on providing a comprehensive set of utility classes that you can combine to build custom user interfaces.
-Tailwind CSS is the perfect choice for Blix as it allows for the creation of a custom user interface that is unique to Blix. 
-Additionally, Tailwind CSS is highly scalable and allows for the creation of large scale applications.
+Tailwind CSS is an utility-first CSS framework that provides a set of
+pre-designed, low-level utility classes. Tailwind CSS focuses on providing a
+comprehensive set of utility classes that you can combine to build custom user
+interfaces. Tailwind CSS is the perfect choice for Blix as it allows for the
+creation of a custom user interface that is unique to Blix. Additionally,
+Tailwind CSS is highly scalable and allows for the creation of large scale
+applications.
 
 \textbf{Pros:}
 \begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] Tailwind CSS is a scalable framework that allows for the creation of large scale applications.
-	\item[\textbullet] Tailwind CSS is a customizable framework that allows for the creation of a custom user interface that is unique to Blix.
-	\item[\textbullet] Tailwind CSS is a responsive framework that allows for the creation of a responsive user interface.
+	\item[\textbullet] Tailwind CSS is a scalable framework that allows for the
+	creation of large scale applications.
+	\item[\textbullet] Tailwind CSS is a customizable framework that allows for
+	the creation of a custom user interface that is unique to Blix.
+	\item[\textbullet] Tailwind CSS is a responsive framework that allows for
+	the creation of a responsive user interface.
 \end{enumerate}
 
 \textbf{Cons:}
 \begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] The class names can make the HTML markup harder to read and maintain, especially for larger projects.
-	\item[\textbullet] Tailwind CSS generates a large CSS file due to the extensive collection of utility classes. 
-	\item[\textbullet] The class names can make the markup harder to read and maintain, especially for larger projects.
+	\item[\textbullet] The class names can make the HTML markup harder to read
+	and maintain, especially for larger projects.
+	\item[\textbullet] Tailwind CSS generates a large CSS file due to the
+	extensive collection of utility classes. 
+	\item[\textbullet] The class names can make the markup harder to read and
+	maintain, especially for larger projects.
 \end{enumerate}
 
 \subsection{Electron}
 
-Electron allows developers to build cross-platform desktop applications using web technologies such as HTML, CSS, and JavaScript.
-Electron allows deveopers to locally host a web application within a desktop application. 
-This allows for the creation of a desktop application that is highly scalable and can be easily ported to other platforms.
+Electron allows developers to build cross-platform desktop applications using
+web technologies such as HTML, CSS, and JavaScript. Electron allows developers
+to locally host a web application within a desktop application. This allows for
+the creation of a desktop application that is highly scalable and can be easily
+ported to other platforms.
 \textbf{Pros:}
 
 \begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] Highly scalable framework that allows for the creation of large scale applications.
-	\item[\textbullet] Electron provides a comprehensive set of APIs that allows for the creation of a desktop application that is unique to Blix.
-	\item[\textbullet] Allows code reusage as the same codebase can be used to create a desktop application and a web application.
+	\item[\textbullet] Highly scalable framework that allows for the creation of
+	large scale applications.
+	\item[\textbullet] Electron provides a comprehensive set of APIs that allows
+	for the creation of a desktop application that is unique to Blix.
+	\item[\textbullet] Allows code reuse as the same codebase can be used to
+	create a desktop application and a web application.
 	\item[\textbullet] Leverages the power of Node.js modules to provide 
 \end{enumerate}
 
 \textbf{Cons:}
 
 \begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] Electron generates a large executable file due to the extensive collection of APIs.
-	\item[\textbullet] High memory usage due to the extensive collection of APIs.
+	\item[\textbullet] Electron generates a large executable file due to the
+	extensive collection of APIs.
+	\item[\textbullet] High memory usage due to the extensive collection of
+	APIs.
 	\item[\textbullet] Dependent on chromium browser updates.
 \end{enumerate}
 
 
 \subsection{Firebase}
 
-Firebase is a mobile and web application development platform developed by Firebase, Inc. in 2011, then acquired by Google in 2014.
-Firebase provides a comprehensive set of APIs that allows developers to build, manage, and deploy applications.
-Firebase is the perfect choice for Blix as it provides a comprehensive set of APIs that allows for the creation of a highly scalable application.
+Firebase is a mobile and web application development platform developed by
+Firebase, Inc. in 2011, then acquired by Google in 2014. Firebase provides a
+comprehensive set of APIs that allows developers to build, manage, and deploy
+applications. Firebase is the perfect choice for Blix as it provides a
+comprehensive set of APIs that allows for the creation of a highly scalable
+application.
 
 \textbf{Pros:}
 \begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] Real time database that allows for the creation of a highly scalable application.
-	\item[\textbullet] Cloud storage that allows for efficient data storage and retrieval.
-	\item[\textbullet] Quick and easy authentication that allows for the creation of a secure application.
+	\item[\textbullet] Real time database that allows for the creation of a
+	highly scalable application.
+	\item[\textbullet] Cloud storage that allows for efficient data storage and
+	retrieval.
+	\item[\textbullet] Quick and easy authentication that allows for the
+	creation of a secure application.
 \end{enumerate}
 
 \textbf{Cons:}
 \begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] Lack of flexibility as Firebase is a closed source platform.
-	\item[\textbullet] Limited server side logic as Firebase is a closed source platform.
-	\item[\textbullet] Scalability and latency considerations is an external service.
+	\item[\textbullet] Lack of flexibility as Firebase is a closed source
+	platform.
+	\item[\textbullet] Limited server side logic as Firebase is a closed source
+	platform.
+	\item[\textbullet] Scalability and latency considerations is an external
+	service.
 \end{enumerate}
 \end{document}
