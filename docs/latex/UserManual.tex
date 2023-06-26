@@ -154,175 +154,67 @@ Blix is compatible with the following operating systems:
 
  Internet connection is not required, however additional features are available when connected to the internet.
 
-\addcontentsline{toc}{section}{Github Structure and Version Control Strategy}
-\section*{Github Version Control Strategy}
+\addcontentsline{toc}{section}{Usage}
+\section*{Usage}
 
-\addcontentsline{toc}{subsection}{Branching}
-\subsection*{Branching}
+\addcontentsline{toc}{subsection}{Projects}
+\subsection*{Projects}
 
-The \textbf{Github Flow} branching strategy is used for branching.
+Projects form the basis of Blix. A project is a collection of images and their associated editing graphs. Projects are saved locally on your machine and can be accessed at any time. 
+Alternatively these projects can be exported and shared with other users. When you open Blix, you will either see the projects you have previously created or a blank canvas to create new projects.
 
-The main branch from which all other branches must be created from is the \textit{dev} branch.
-Blix operates with feature based branching, thus each branch must be created based of what feature
-it will be implementing.
-
-As these features are completed or milestones are reached, these branches are merged back into the \textit{dev} branch.
-The \textit{dev} branch is then merged into the \textit{main} branch once a release is ready to be deployed.
-
-The nameing convention for branches is as follows:
-\begin{itemize}
-    \item[\textbullet] Specific features to be implemented must be prefixed with \textit{feature/} : i.e \textit{feature/palette}
-    \item[\textbullet] Core structures to be implemented must be prefixed according to their relevance : \hspace{3cm} i.e \textit{backend/graph}
-    \item[\textbullet] miscellaneous branches may be named simply accoridng to their purpose : i.e \textit{dev}, \textit{docs}
-\end{itemize}
-
-\addcontentsline{toc}{subsection}{Github Version Control Strategy}
-\subsubsection*{Github Version Control Strategy}
-
-\textbf{Commits} are handled according to the following rules : 
-\begin{itemize}
-    \item[\textbullet] Commits must be atomic, i.e they must only contain changes related to a single feature or bug fix.
-    \item[\textbullet] Commits must be in the present tense, to desbribe what the commit does, not what it did.
-\end{itemize}
-
-\textbf{Pull requests} are handled according to the following rules : 
-\begin{itemize}
-    \item[\textbullet] At least one team member other then the iniatator must review the pull request before it is merged.
-    \item[\textbullet] The pull request must be linked to an issue.
-    \item[\textbullet] The pull request must be linked to a milestone.
-    \item[\textbullet] The pull request must pass all automatic tests.
-\end{itemize}
-
-
-\textbf{Issues} are handled according to the following rules : 
-\begin{itemize}
-    \item[\textbullet] Issues must be atomic, i.e they must only contain changes related to a single feature or bug fix.
-    \item[\textbullet] Issues must describe where the problem is, what the problem is, and how to reproduce the problem.
-\end{itemize}
-
-\textbf{Merges conflicts} are handled according to the following rules : 
-\begin{itemize}
-    \item[\textbullet] The person who created the pull request must ensure that the merge conflicts are resolved.
-    \item[\textbullet] The relevant developers must be notified of the merge conflict and resolution.
-\end{itemize}
-
-
-\addcontentsline{toc}{section}{Coding Conventions}
-\section*{Coding Conventions}
-
-\addcontentsline{toc}{subsection}{Function conventions}
-\subsubsection*{Function conventions}
+\textbf{Saving a project}
+When you have the main app open, you can create a project as follows : 
 
 \begin{itemize}
-    \item[\textbullet] Function names are to be in camel case, with the first letter being lowercase and the first letter of each subsequent word being uppercase.
-    \item[\textbullet] The function names must be descriptive of what the function does.
-    \item[\textbullet] The function names must be in the present tense, to describe what the function does, not what it did.
-    \item[\textbullet] The function names must not be abbreviated.
-    \item[\textbullet] Parameters are formatted according to prettier standards such that each parameter is on a new line.
-    \item[\textbullet] Parameters are to be named according to their purpose, not their type.
-    \item[\textbullet] Optional parameters are to be at the very end of the parameter list.
+  \item[\textbullet] Click on the + icon in the top left corner of the screen.
+  \item[\textbullet] Click on file in the top left and select save project, or choose the save file command in the command palette.
+  \item[\textbullet] Select a directory and file name for the project. Save.
 \end{itemize}
 
-Example : 
-
-\begin{lstlisting}[language=TypeScript]
-  public addSlider(
-    label: string,
-    min: number,
-    max: number,
-    step: number,
-    defautlVal: number
-  ): NodeUIBuilder {
-    this.node.addSlider(label, min, max, step, defautlVal);
-    return this;
-  }
-
-\end{lstlisting}
-
-\addcontentsline{toc}{subsection}{Variable conventions}
-\subsubsection*{Variable Conventions}
+\textbf{Importing a project}
+Projects will automatically be loaded when you open Blix. If you wish to import a project, you can do so as follows : 
 
 \begin{itemize}
-    \item[\textbullet] Variable names are to be in camel case, as described in the function conventions.
-    \item[\textbullet] Variable names must be descriptive of what the variable should do.
-    \item[\textbullet] const is preferred over var and let.
-    \item[\textbullet] Variables must never be of type any, unless absolutely neccesary.
-    \item[\textbullet] Global variables are discouraged, and should be avoided.
-    \item[\textbullet] Variables must be declared with the lowest possible scope. 
+  \item[\textbullet] Select file in the top left corner of the screen.
+  \item[\textbullet] Select import project, or choose the import file command in the command palette.
+  \item[\textbullet] Select the project you wish to import.
 \end{itemize}
 
-Example :
-
-\begin{lstlisting}[language=TypeScript]
-  private signature: string,
-  private name: string,
-  private plugin: string,
-  private title: string,
-  private description: string,
-  private icon: string,
-  private readonly inputs: InputAnchorInstance[],
-  private readonly outputs: OutputAnchorInstance[]
-\end{lstlisting}
-
-\addcontentsline{toc}{subsection}{Layout conventions}
-\subsubsection*{Layout conventions}
-
+\textbf{Deleting a project}
+Projects can be permanently removed from your workspace as follows : 
 \begin{itemize}
-    \item[\textbullet] Code blocks must start with a "\{" on the same line as the declaration and end with a "\}" on a new line.
-    \item[\textbullet] Each declaration and statement must be on a new line.
+  \item[\textbullet] Select file in the top left corner of the screen.
+  \item[\textbullet] Select delete project, or choose the delete file command in the command palette.
+  \item[\textbullet] Select the project you wish to delete.
 \end{itemize}
 
-Example :
+\addcontentsline{toc}{section}{Image editing}
+\section*{Image editing}
 
-\begin{lstlisting}[language=TypeScript]
-    public instantiate(plugin: string, name: string): NodeBuilder {
-        this.nodeBuilder.instantiate(plugin, name);
-        return this.nodeBuilder;
-      }
-\end{lstlisting}
+\textbf{Importing an image}
 
-
-\addcontentsline{toc}{subsection}{General Coding conventions}
-\subsubsection*{General Coding Conventions}
-
+Images can be added to the graph as input. This can be done using the input plugin : 
 \begin{itemize}
-    \item[\textbullet] All code must be formatted according to prettier standards.
-    \item[\textbullet] All code must be linted according to eslint standards.
-    \item[\textbullet] All code must be typed according to typescript standards.
-    % \item[\textbullet] All code must be documented according to jsdoc standards.What are we gonna use for documentation again?
-    \item[\textbullet] All code must be tested according to jest standards.
+  \item[\textbullet] Select the Image input node.
+  \item[\textbullet] Place the node in the tile you wish to add the image to.
+  \item[\textbullet] Use the interface provided to import the image to the node.
+  \item[\textbullet] Connect the image to the graph.
 \end{itemize}
 
-Example :
+\textbf{Adding nodes to a graph}
 
-\begin{lstlisting}[language=TypeScript]
-private nodesToJSONObject(): NodeToJSON[] {
-    const json: NodeToJSON[] = [];
-    for (const node in this.nodes) {
-      if (!this.nodes.hasOwnProperty(node)) continue;
-      json.push(this.nodes[node].toJSONObject());
-    }
-    return json;
-  }
-\end{lstlisting}
-
-\addcontentsline{toc}{subsection}{Formatting tools}
-\subsubsection*{Formatting tools}
-
-Blix makes use of the following formatting tools to ensure standardization of code and to enforce the coding conventions : 
+There are a wide array of nodes that can be added to the workspace area.
 \begin{itemize}
-    \item[\textbullet] \textbf{Prettier} : Prettier is an opinionated code formatter. It enforces a consistent style by parsing
-    your code and re-printing it with its own rules that take the maximum line length into account, wrapping code when necessary.
-    \item[\textbullet] \textbf{eslint} : Eslint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code, 
-    with the goal of making code more consistent and avoiding bugs.
+  \item[\textbullet] Select the node from either the command palette or the nodes pane.
+  \item[\textbullet] Place the node in the tile you wish to add the image to.
+  \item[\textbullet] Connect the node to the graph.
 \end{itemize}
 
-There are a sizeable number of rules that are enforced by these tools, and they are not all listed here. 
-For a full list of rules enforced by these tools, please refer to the \textit{.eslintrc.js} and \textit{.prettierrc.js} files in the 
-root directory of the project.
+\textbf{Editing an image}
 
-In summary these tools are configured to enforce the conventions described above, and to ensure that the code is formatted in a consistent manner.
-
-\pagebreak
+Images can be edited in the graph using the various editing nodes. These nodes can be connected to the image input node to apply the desired effect.
+The nodes will perform manipulations on the image and output the result. This result can then be connected to other nodes to create a chain of effects.
+It should be noted that this functionality does not only apply to images, but to any input given.
 
 \end{document}
