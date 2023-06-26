@@ -99,17 +99,22 @@ tabsize=2,
 %                MAIN DOCUMENT CONTENT                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\addcontentsline{toc}{section}{Design Strategy}
-\section*{Design Strategy}
-Our design process used the \textbf{Decomposition} and \textbf{Design based on quality requirements} strategies.
+\section{Design Strategy}
+Our design process used the \textbf{Decomposition} and \textbf{Design based on
+quality requirements} strategies.
 
 Application of \textbf{Decomposition Strategy:}
 
-Our system has been designed in individual components or subsystems. The interaction of these components create the fully functioning system. This interaction of subsystems is used for the system's Architectural style and pattern decisions.
+Our system has been designed in individual components or subsystems. The
+interaction of these components create the fully functioning system. This
+interaction of subsystems is used for the system's Architectural style and
+pattern decisions.
 
-Application of \textbf{Design based otooboxn quality requirements Strategy:}
+Application of \textbf{Design based on quality requirements Strategy:}
 
-Each subsystem has also been created based on certain quality requirements in mind to ensure when interacting together, the system meets the specified requirements.
+Each subsystem has also been created based on certain quality requirements in
+mind to ensure when interacting together, the system meets the specified
+requirements.
 
 % The system has been created using the decomposition design strategy. 
 % Our system holds true to this description, as smaller component subsystems have been created and their interaction creates the fully functioning system.
@@ -119,75 +124,119 @@ Each subsystem has also been created based on certain quality requirements in mi
 % As the decomposition strategy is described, (Software Architecture in Practice - 3rd, Len Bass et al. 2013)'In some contexts, the system may end up being constructed mostly from preexisting components; in others, the preexisting components may be a smaller portion of the overall system.'(page 312). 
 
 
-\addcontentsline{toc}{section}{Architectural Styles}
-\section*{Architectural Styles}
+\section{Architectural Styles}
+
+
 
 \pagebreak
 
-\addcontentsline{toc}{section}{Quality Requirements}
-\section*{Quality Requirements}
+\section{Quality Requirements}
 
-\subsection*{Performance}
+\subsection{Performance}
 
-The system should be able to handle large images and projects without
-significant lag or delay.
+\subsubsection*{Description}
+The application should demonstrate efficient speed and
+responsiveness when editing large images and handling multiple projects.
+Real-time processing of graph-based image operations should be seamless and
+should not cause any delay during editing. The application should be able to
+support the execution of multiple system plugins that should not cause any
+significant performance degradation.
 
-The system should be able to process and apply image operations in real-time.
+\subsubsection*{Quantification}
+The performance requirement will be measured by defining specific metrics, such
+as the maximum size of images that can be edited without lag, the duration of
+time it takes for the application to load and display images of various sizes,
+and the average time taken for the application to process a graph-based image
+operation. The application's performance with different numbers of open projects
+and running plugins can also be benchmarked by measuring the percentage of CPU
+and RAM usage and observing performance during peak usage.
 
-The system should receive updates in real time when dispatched by the developers.
 
-\subsection*{Reliability} 
+\subsection{Customizability}
+\subsubsection*{Description}
+
+
+\subsection{Reliability} 
+\subsubsection*{Description}
 
 The system should be able to recover from unexpected shutdowns or errors without
 losing data.
 
 The system should be able to store and retrieve images and projects reliably.
 
-\subsection*{Usability} 
+
+\subsection{Usability} 
 The system should be clear and concise on how it should be operated. 
 
-The system must ensure that users can easily navigate and use the system without external assistance or unwarranted difficulty. All functionality must be properly documented such that high-end users can easily perform complex operations.
+The system must ensure that users can easily navigate and use the system without
+external assistance or unwarranted difficulty. All functionality must be
+properly documented such that high-end users can easily perform complex
+operations.
 
-\subsection*{Security} 
+\subsection{Security} 
 
-The system must ensure that a user's information is kept safe and secure from malicious actors. 
-Additionally the system itself must be properly protected such that the system can resist any and all attacks from 3rd parties and malicious users. 
+\subsubsection*{Description}
+The application must ensure the confidentiality, integrity, and availability of
+user data by protecting against unauthorized access, disclosure, modification,
+or destruction. Furthermore, the application and its plugin system must be
+resilient to attacks from third-party entities and malicious users.
 
-The plugin and its functionality is user defined code so we need to isolate this code so that it does not effect any user that uses the plugins. The system should isolate the plugin code to prevent it from accessing any sensitive user information and core system functionality.
+\subsubsection*{Quantification}
+The application should isolate and sandbox plugin code to prevent it from
+accessing sensitive user information and core system functionality.
 
-\subsection*{Compatibility} 
+The application should use encryption for sensitive user data both at-rest and
+in-transit. 
 
-The system should be compatible with all major operating systems such as Windows, MacOS, and Linux.
+\subsection{Compatibility} 
 
-The system should be compatible with all well-known image file formats.
+\subsubsection*{Description}
+The application must be compatible with major operating systems such as Windows,
+macOS, and Linux distributions such as Ubuntu and Debian. It should support
+image file formats commonly used in the industry such as JPEG, PNG, GIF, BMP,
+and RAW from popular camera brands.
 
-
-\subsection*{Scalability}
-
-The system should allow multiple projects to be open at a single point in time.
-
-The system
-
-\subsection*{Availability}
-
-The system should allow plugins to be loaded in real time while the system is running.
-
-\addcontentsline{toc}{section}{Architectural Design \& Patterns}
-\section*{Architectural Design \& Patterns}
-
-\addcontentsline{toc}{section}{Constraints}
-\section*{Constraints}
-
-\addcontentsline{toc}{section}{Technology Choices}
-
-\section*{Technology Choices}
+\subsubsection*{Quantification}
+The application must be able to run without errors on the latest stable versions
+of the aforementioned operating systems. It must be able to import and export
+image files with the aforementioned formats without any data loss or corruption. 
 
 
-\addcontentsline{toc}{subsection}{Svelte}
-\subsection*{Svelte}
-Svelte is an open-source JavaScript framework for building user interfaces. It is designed to be highly efficient and focused on delivering optimal performance by shifting the work from the runtime to the build process.
-One of the key visions of Blix is to provide a fast and responsive user interface with lightning fast reactivity. Additionally due to the large scope
-of the project, it is important to ensure that the system is as lightweight as possible. Svelte is the perfect choice for this as it is a lightweight framework
+% \subsection{Availability}
+
+% The system should allow plugins to be loaded in real time while the system is
+% running.
+
+
+\section{Architectural Design \& Patterns}
+Three main architectural patterns where identified to decompose the base system
+into components and subsystems.
+
+\subsection{Model-View-Controller (MVC)}
+The MVC pattern was chosen in order to create clear separation between the user
+interface, business logic and system data. The disconnected nature of these
+components allow 
+
+
+\subsection{Publish-Subscribe}
+
+
+\subsection{Client Server}
+
+
+\section{Constraints}
+
+
+\section{Technology Choices}
+
+\subsection{Svelte}
+Svelte is an open-source JavaScript framework for building user interfaces. It
+is designed to be highly efficient and focused on delivering optimal performance
+by shifting the work from the runtime to the build process. One of the key
+visions of Blix is to provide a fast and responsive user interface with
+lightning fast reactivity. Additionally due to the large scope of the project,
+it is important to ensure that the system is as lightweight as possible. Svelte
+is the perfect choice for this as it is a lightweight framework
 
 \textbf{Pros:}
 \begin{enumerate}[label*=\arabic*.]
@@ -204,8 +253,7 @@ of the project, it is important to ensure that the system is as lightweight as p
 	\item[\textbullet] Svelte is lacking in stabilty as it is still a relatively new framework.
 \end{enumerate}
 
-\addcontentsline{toc}{subsection}{Tailwind CSS}
-\subsection*{Tailwind CSS}
+\subsection{Tailwind CSS}
 Tailwind CSS is an utility-first CSS framework that provides a set of pre-designed, low-level utility classes. Tailwind CSS focuses on providing a comprehensive set of utility classes that you can combine to build custom user interfaces.
 Tailwind CSS is the perfect choice for Blix as it allows for the creation of a custom user interface that is unique to Blix. 
 Additionally, Tailwind CSS is highly scalable and allows for the creation of large scale applications.
@@ -224,8 +272,7 @@ Additionally, Tailwind CSS is highly scalable and allows for the creation of lar
 	\item[\textbullet] The class names can make the markup harder to read and maintain, especially for larger projects.
 \end{enumerate}
 
-\addcontentsline{toc}{subsection}{Electron}
-\subsection*{Electron}
+\subsection{Electron}
 
 Electron allows developers to build cross-platform desktop applications using web technologies such as HTML, CSS, and JavaScript.
 Electron allows deveopers to locally host a web application within a desktop application. 
@@ -247,8 +294,7 @@ This allows for the creation of a desktop application that is highly scalable an
 \end{enumerate}
 
 
-\addcontentsline{toc}{subsection}{Firebase}
-\subsection*{Firebase}
+\subsection{Firebase}
 
 Firebase is a mobile and web application development platform developed by Firebase, Inc. in 2011, then acquired by Google in 2014.
 Firebase provides a comprehensive set of APIs that allows developers to build, manage, and deploy applications.
