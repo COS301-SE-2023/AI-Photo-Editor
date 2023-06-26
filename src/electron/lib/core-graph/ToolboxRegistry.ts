@@ -15,42 +15,43 @@ export class ToolboxRegistry implements Registry {
   getNodes(): INode[] {
     const commands: INode[] = [];
     for (const command in this.registry) {
-      if (!this.registry.hasOwnProperty(command)) continue;
+      if (this.registry.hasOwnProperty(command)) {
+        const nodeInstance: NodeInstance = this.registry[command];
+        // Get anchors
+        const inputAnchors: IAnchor[] = [];
+        const outputAnchors: IAnchor[] = [];
 
-      const nodeInstance: NodeInstance = this.registry[command];
-      // Get anchors
-      const inputAnchors: IAnchor[] = [];
-      const outputAnchors: IAnchor[] = [];
+        for (const anchor of nodeInstance.getInputAnchorInstances) {
+          const anchorObject = {
+            type: anchor.type,
+            signature: anchor.signature,
+            displayName: anchor.displayName,
+          };
+          inputAnchors.push(anchorObject);
+        }
 
-      for (const anchor of nodeInstance.getInputAnchorInstances) {
-        const anchorObject = {
-          type: anchor.type,
-          signature: anchor.signature,
-          displayName: anchor.displayName,
+        for (const anchor of nodeInstance.getOutputAnchorInstances) {
+          const anchorObject = {
+            type: anchor.type,
+            signature: anchor.signature,
+            displayName: anchor.displayName,
+          };
+          outputAnchors.push(anchorObject);
+        }
+
+        const nodeObbject = {
+          signature: nodeInstance.getSignature,
+          title: nodeInstance.getTitle,
+          description: nodeInstance.getDescription,
+          icon: nodeInstance.getIcon,
+          inputs: inputAnchors,
+          outputs: outputAnchors,
+          ui: nodeInstance.getUI,
         };
-        inputAnchors.push(anchorObject);
+        commands.push(nodeObbject);
       }
-
-      for (const anchor of nodeInstance.getOutputAnchorInstances) {
-        const anchorObject = {
-          type: anchor.type,
-          signature: anchor.signature,
-          displayName: anchor.displayName,
-        };
-        outputAnchors.push(anchorObject);
-      }
-
-      const nodeObbject = {
-        signature: nodeInstance.getSignature,
-        title: nodeInstance.getTitle,
-        description: nodeInstance.getDescription,
-        icon: nodeInstance.getIcon,
-        inputs: inputAnchors,
-        outputs: outputAnchors,
-        ui: nodeInstance.getUI,
-      };
-      commands.push(nodeObbject);
     }
+
     return commands;
   }
 }

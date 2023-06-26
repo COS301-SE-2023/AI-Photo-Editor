@@ -98,6 +98,7 @@ describe("Test toolbox", () => {
     expect(node.getPlugin).toEqual("Quack");
     expect(node.getName).toEqual("Duck");
   });
+
 });
 
 
@@ -257,9 +258,36 @@ describe("Test Toolbox registry", () => {
     expect(box.getRegistry()[node.getSignature]).toEqual(node);
   });
 
-  // test("getNodes should return nodes", () => {
+  test("getNodes should return nodes", () => {
+    box = new ToolboxRegistry();
+    let nodes : NodeInstance[] = [];
 
-  // });
+    for(let i = 0; i < 10; i++){
+      const node = new NodeInstance("Jake"+i.toString()+".Shark", "Shark", "Jake"+i.toString(), "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
+      box.addInstance(node);
+      nodes.push(node);
+    }
+
+    const anchor = new InputAnchorInstance("anchor1", "string", "Jake.Shark.anchor1");
+    const anchor2 = new OutputAnchorInstance("anchor2", "string", "Jake.Shark.anchor2");
+
+    const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", [anchor], [anchor2]);
+    box.addInstance(node);
+    nodes.push(node);
+
+    const nods = box.getNodes();
+    for(let i = 0; i < 11; i++){
+      expect(nods[i].signature).toEqual(nodes[i].getSignature);
+    }
+
+
+    box = new ToolboxRegistry();
+    const nod = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
+
+    box.addInstance((nod));
+    box.addInstance(new NodeInstance("", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs));
+    expect(box.getNodes()[0].description).toEqual(nod.getDescription);
+  });
   });
 
 

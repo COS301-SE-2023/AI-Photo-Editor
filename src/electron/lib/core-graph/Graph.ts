@@ -1,6 +1,4 @@
-import crypto from "crypto";
 import logger from "../../utils/logger";
-import type { CoreGraphSubscriber } from "./GraphSubscriber";
 import type {
   AnchorType,
   InputAnchorInstance,
@@ -39,7 +37,7 @@ class UniqueEntity {
   // 64-bit hex string (length 32 chars)
   private static genUUID(): UUID {
     // 1% chance of collision after 83 million years at 1 hash/ms 🫨
-    return crypto.randomBytes(32).toString("hex");
+    return require("crypto").randomBytes(32).toString("hex");
   }
 }
 
@@ -97,8 +95,8 @@ export class CoreGraph extends UniqueEntity {
   public addNode(node: NodeInstance) {
     // Create New Node
     const n: Node = new Node(
-      node.getSignature.split("/")[1],
-      node.getSignature.split("/")[0],
+      node.getName,
+      node.getPlugin,
       node.getInputAnchorInstances,
       node.getOutputAnchorInstances
     );
@@ -156,6 +154,7 @@ export class CoreGraph extends UniqueEntity {
 
   private checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
     // TODO
+
     return false;
   }
 
