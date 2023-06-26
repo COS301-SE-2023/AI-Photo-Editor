@@ -19,16 +19,16 @@ export class CommandRegistry implements Registry {
   getCommands(): ICommand[] {
     const commands: ICommand[] = [];
     for (const command in this.registry) {
-      if (!this.registry.hasOwnProperty(command)) continue;
-
-      const commandInstance: CommandInstance = this.registry[command];
-      const commandObject = {
-        signature: commandInstance.signature,
-        displayName: commandInstance.displayName,
-        description: commandInstance.description,
-        icon: commandInstance.icon,
-      };
-      commands.push(commandObject);
+      if (this.registry.hasOwnProperty(command)) {
+        const commandInstance: CommandInstance = this.registry[command];
+        const commandObject = {
+          signature: commandInstance.signature,
+          displayName: commandInstance.displayName,
+          description: commandInstance.description,
+          icon: commandInstance.icon,
+        };
+        commands.push(commandObject);
+      }
     }
     return commands;
   }
