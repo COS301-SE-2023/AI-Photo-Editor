@@ -11,7 +11,7 @@ import type { UIGraph } from "@frontend/stores/GraphStore";
 
 export class GraphManager {
   private _graphs: { [id: UUID]: CoreGraph };
-  private _mainWindow: MainWindow
+  private _mainWindow: MainWindow;
 
   constructor(mainWindow: MainWindow) {
     this._mainWindow = mainWindow;
@@ -28,12 +28,12 @@ export class GraphManager {
     // There currently isn't proper implementation to map the CoreGraph to a
     // UIGraph with the frontend nodes and anchors. Sorry that I didn't do this,
     // not sure if Jake can help with this cause he made the CoreGraph
-    setTimeout(() => {
-      setInterval(() => {
-        if (this._mainWindow)
-          this._mainWindow?.apis.clientGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
-      }, 5000);
-    }, 5000);
+    // setTimeout(() => {
+    //   setInterval(() => {
+    //     if (this._mainWindow)
+    //       this._mainWindow?.apis.clientGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
+    //   }, 5000);
+    // }, 5000);
   }
 
   createGraph(): UUID {
@@ -56,7 +56,7 @@ export class GraphManager {
     return Object.keys(this._graphs).map((uuid) => uuid);
   }
 
-  coreToUiGraph(graph: CoreGraph) {
-     
-  }
+  // coreToUiGraph(graph: CoreGraph) {
+
+  // }
 }

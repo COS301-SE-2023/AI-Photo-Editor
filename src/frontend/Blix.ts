@@ -2,7 +2,8 @@ import { blixStore } from "./stores/BlixStore";
 import { commandStore } from "./stores/CommandStore";
 import { GraphNode, UIGraph, graphMall } from "./stores/GraphStore";
 import { initializeAPIs } from "api/apiInitializer";
-
+import { projectManager } from "./stores/ProjectStore";
+import type { CommonProject } from "@shared/types";
 /**
  * Runs on app start. Will initialize the IPC APIs and set the initial frontend
  * stores.
@@ -22,6 +23,12 @@ async function setInitialStores() {
   // Command store
   const command = await window.apis.pluginApi.getCommands();
   commandStore.refreshStore(command);
+
+  // Project store
+  const projects = await window.apis.projectApi.getRecentProjects();
+  for (const p of projects.data) {
+    projectManager.loadProject(p);
+  }
 
   // Graph store
   const allGraphIds = await window.apis.graphApi.getAllGraphUUIDs();
