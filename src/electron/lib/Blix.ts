@@ -3,6 +3,7 @@ import { ToolboxRegistry } from "./core-graph/ToolboxRegistry";
 import { TileRegistry } from "./tiles/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/WindowApi";
+import { GraphManager } from "./core-graph/GraphManager";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -10,8 +11,9 @@ export class Blix {
   private _toolbox: ToolboxRegistry;
   private _tileRegistry: TileRegistry;
   private _commandRegistry: CommandRegistry;
+  private _graphManager: GraphManager;
   private _projectManager: ProjectManager;
-  private _mainWindow: MainWindow | null;
+  private _mainWindow: MainWindow;
 
   // private startTime: Date;
 
@@ -19,13 +21,14 @@ export class Blix {
   // private layoutRegistry: LayoutRegistry;
   // private currentLayout: LayoutId;
 
-  constructor() {
+  constructor(mainWindow: MainWindow) {
     // this.startTime = new Date();
+    this._mainWindow = mainWindow;
     this._toolbox = new ToolboxRegistry();
     this._commandRegistry = new CommandRegistry();
     this._tileRegistry = new TileRegistry();
-    this._projectManager = new ProjectManager();
-    this._mainWindow = null;
+    this._graphManager = new GraphManager(mainWindow);
+    this._projectManager = new ProjectManager(mainWindow);
   }
 
   get toolbox(): ToolboxRegistry {
@@ -40,15 +43,15 @@ export class Blix {
     return this._commandRegistry;
   }
 
+  get graphManager(): GraphManager {
+    return this._graphManager;
+  }
+
   get projectManager(): ProjectManager {
     return this._projectManager;
   }
 
   get mainWindow(): MainWindow | null {
     return this._mainWindow;
-  }
-
-  set mainWindow(mainWindow: MainWindow | null) {
-    this._mainWindow = mainWindow;
   }
 }

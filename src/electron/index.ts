@@ -25,20 +25,18 @@ logger.info(
 
 let mainWindow: MainWindow | null = null;
 let notification: Notification | null = null;
+let blix: Blix;
 
 app.on("ready", () => {
-  const blix = new Blix();
+  createMainWindow();
+
+  if (!mainWindow) return;
+
+  blix = new Blix(mainWindow);
   exposeMainApis(blix);
   const pluginManager = new PluginManager(blix);
   pluginManager.loadPlugins();
-  createMainWindow();
-  blix.mainWindow = mainWindow!;
-  // const p = blix.projectManager;
-  // logger.info(p.loadProject("Project1387ca.blx"))
-  // logger.info(p.getOpenProjects())
-  // const project = p.createProject("Project 1");
-  // p.saveProject(project.uuid);
-
+  // blix.projectManager.openRecentProjects();
   // Set icon for macOS
   if (process.platform === "darwin") {
     app.dock.setIcon("public/images/blix_64x64.png");
@@ -92,8 +90,14 @@ function createMainWindow() {
 // those two events are completely optional to subscrbe to, but that's a common way to get the
 // user experience people expect to have on macOS: do not quit the application directly
 // after the user close the last window, instead wait for Command + Q (or equivalent).
+// Noted. Will look into this later.
 app.on("window-all-closed", () => {
+  // blix.projectManager.saveAllProjects();
   if (process.platform !== "darwin") app.quit();
+});
+
+app.on("will-quit", () => {
+  blix.projectManager.saveAllProjects();
 });
 
 app.on("activate", () => {

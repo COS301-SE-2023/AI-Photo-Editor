@@ -3,7 +3,9 @@ import type { AwaitedType } from "electron-affinity/main";
 import { bindWindowApi } from "electron-affinity/main";
 
 // Window APIs
-import type { CommandRegistryApi } from "../../../frontend/api/CommandRegistryApi";
+import type { CommandRegistryApi } from "@frontend/api/CommandRegistryApi";
+import type { ClientGraphApi } from "@frontend/api/ClientGraphApi";
+import type { ClientProjectApi } from "@frontend/api/ClientProjectApi";
 
 /**
  * Binds the window APIs to the main process for every window.
@@ -16,6 +18,8 @@ export async function bindMainWindowApis(window: BrowserWindow) {
   return Object.assign(window, {
     apis: {
       commandRegistryApi: await bindWindowApi<CommandRegistryApi>(window, "CommandRegistryApi"),
+      clientGraphApi: await bindWindowApi<ClientGraphApi>(window, "ClientGraphApi"),
+      clientProjectApi: await bindWindowApi<ClientProjectApi>(window, "ClientProjectApi"),
     },
   });
 }

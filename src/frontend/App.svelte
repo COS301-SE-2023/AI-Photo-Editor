@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { init } from "./init";
+  import { init } from "./Blix";
   import { blixStore } from "./stores/BlixStore";
 
   import Layout from "./layout/Layout.svelte";
   import Navbar from "./layout/Navbar.svelte";
-  import Palette from "./components/Palette.svelte";
+  import Palette from "./palette/Palette.svelte";
 </script>
 
 {#await init() then}

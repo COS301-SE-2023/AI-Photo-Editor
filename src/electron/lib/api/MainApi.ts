@@ -4,6 +4,7 @@ import type { Blix } from "../Blix";
 import { UtilApi } from "./UtilApi";
 import { ProjectApi } from "./ProjectApi";
 import { PluginApi } from "./PluginApi";
+import { GraphApi } from "./GraphApi";
 import { ToolboxApi } from "./ToolboxApi";
 
 /**
@@ -20,6 +21,7 @@ export function exposeMainApis(blix: Blix) {
     utilApi: new UtilApi(),
     projectApi: new ProjectApi(blix),
     pluginApi: new PluginApi(blix),
+    graphApi: new GraphApi(blix),
     toolboxApi: new ToolboxApi(blix),
   };
 

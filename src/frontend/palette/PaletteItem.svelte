@@ -3,6 +3,7 @@
 
   export let selected = false;
   export let title = "";
+  export let description = "";
   let itemRef: HTMLElement;
 
   const dispatch = createEventDispatcher<{ itemClicked: { id: string } }>();
@@ -25,4 +26,7 @@
   on:keydown="{clicked}"
 >
   <span>{title}</span>
+  {#if selected}
+    <span class="float-right ml-2 text-xs text-zinc-400">{description}</span>
+  {/if}
 </li>

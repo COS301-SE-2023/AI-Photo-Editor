@@ -1,21 +1,42 @@
 // N-way tree of panels
+
+export type PanelType = string;
+
 export class PanelNode {
-  constructor() {
+  static panelCounter = 0;
+
+  constructor(id = -1) {
     this.parent = null;
     this.index = -1;
+    if (id !== -1) {
+      this.id = id;
+    } else {
+      this.id = PanelNode.panelCounter++;
+    }
   }
 
   parent: PanelGroup | null;
   index: number;
+  id: number; // Unique ID for each panel, helps Svelte with keying
+  size?: number;
 }
 
 // Always has a minimum of two children, or self-destructs
 export class PanelGroup extends PanelNode {
-  constructor(public name: string) {
-    super();
-    this.parent = null;
-  }
+  static groupCounter = 0;
 
+  // A custom name can optionally be provided
+  constructor(name = "", id = -1) {
+    super(id);
+    this.parent = null;
+    if (name !== "") {
+      this.name = name;
+    } else {
+      this.name = `pg_${PanelGroup.groupCounter}`;
+    }
+    PanelGroup.groupCounter++;
+  }
+  name: string;
   panels: PanelNode[] = [];
 
   // Nukes the current panelgroup and replaces it with its first child if possible
@@ -36,11 +57,13 @@ export class PanelGroup extends PanelNode {
     }
   }
   setPanel(panel: PanelNode, i: number) {
+    const tempId = this.panels[i].id;
     this.panels[i] = panel;
     panel.parent = this;
     panel.index = i;
+    panel.id = tempId;
   }
-  addPanel(content: string, i: number) {
+  addPanel(content: PanelType, i: number) {
     const newLeaf = new PanelLeaf(content);
     this.panels.splice(i, 0, newLeaf);
     newLeaf.parent = this;
@@ -92,7 +115,7 @@ export class PanelGroup extends PanelNode {
 }
 
 export class PanelLeaf extends PanelNode {
-  constructor(public content: string) {
+  constructor(public content: PanelType) {
     super();
     this.parent = null;
   }

@@ -54,21 +54,21 @@ export class TestGraph {
 
     logger.info(
       g1.addEdge(
-        Object.values(actualNode1.getAnchors)[3].getUUID,
-        Object.values(actualNode2.getAnchors)[0].getUUID
+        Object.values(actualNode1.getAnchors)[3].uuid,
+        Object.values(actualNode2.getAnchors)[0].uuid
       )
     );
     logger.info(
       g1.addEdge(
-        Object.values(actualNode2.getAnchors)[3].getUUID,
-        Object.values(actualNode3.getAnchors)[0].getUUID
+        Object.values(actualNode2.getAnchors)[3].uuid,
+        Object.values(actualNode3.getAnchors)[0].uuid
       )
     );
     // Add defective edge
     logger.info(
       g1.addEdge(
-        Object.values(actualNode3.getAnchors)[3].getUUID,
-        Object.values(actualNode1.getAnchors)[0].getUUID
+        Object.values(actualNode3.getAnchors)[3].uuid,
+        Object.values(actualNode1.getAnchors)[0].uuid
       )
     );
 
@@ -117,40 +117,40 @@ export class TestGraph {
 
     logger.info(
       g2.addEdge(
-        Object.values(g2Node1.getAnchors)[3].getUUID,
-        Object.values(g2Node2.getAnchors)[0].getUUID
+        Object.values(g2Node1.getAnchors)[3].uuid,
+        Object.values(g2Node2.getAnchors)[0].uuid
       )
     );
     logger.info(
       g2.addEdge(
-        Object.values(g2Node1.getAnchors)[3].getUUID,
-        Object.values(g2Node3.getAnchors)[0].getUUID
+        Object.values(g2Node1.getAnchors)[3].uuid,
+        Object.values(g2Node3.getAnchors)[0].uuid
       )
     );
     logger.info(
       g2.addEdge(
-        Object.values(g2Node3.getAnchors)[3].getUUID,
-        Object.values(g2Node4.getAnchors)[0].getUUID
+        Object.values(g2Node3.getAnchors)[3].uuid,
+        Object.values(g2Node4.getAnchors)[0].uuid
       )
     );
     logger.info(
       g2.addEdge(
-        Object.values(g2Node4.getAnchors)[3].getUUID,
-        Object.values(g2Node6.getAnchors)[0].getUUID
+        Object.values(g2Node4.getAnchors)[3].uuid,
+        Object.values(g2Node6.getAnchors)[0].uuid
       )
     );
     logger.info(
       g2.addEdge(
-        Object.values(g2Node5.getAnchors)[3].getUUID,
-        Object.values(g2Node6.getAnchors)[0].getUUID
+        Object.values(g2Node5.getAnchors)[3].uuid,
+        Object.values(g2Node6.getAnchors)[0].uuid
       )
     );
 
     // Add non-defective edge
     logger.info(
       g2.addEdge(
-        Object.values(g2Node2.getAnchors)[3].getUUID,
-        Object.values(g2Node5.getAnchors)[0].getUUID
+        Object.values(g2Node2.getAnchors)[3].uuid,
+        Object.values(g2Node5.getAnchors)[0].uuid
       )
     );
 
@@ -192,21 +192,21 @@ export class TestGraph {
 
     logger.info(
       g3.addEdge(
-        Object.values(g3Node1.getAnchors)[3].getUUID,
-        Object.values(g3Node2.getAnchors)[0].getUUID
+        Object.values(g3Node1.getAnchors)[3].uuid,
+        Object.values(g3Node2.getAnchors)[0].uuid
       )
     );
     logger.info(
       g3.addEdge(
-        Object.values(g3Node1.getAnchors)[4].getUUID,
-        Object.values(g3Node2.getAnchors)[1].getUUID
+        Object.values(g3Node1.getAnchors)[4].uuid,
+        Object.values(g3Node2.getAnchors)[1].uuid
       )
     );
     // Add defective edge
     logger.info(
       g3.addEdge(
-        Object.values(g3Node2.getAnchors)[3].getUUID,
-        Object.values(g3Node1.getAnchors)[0].getUUID
+        Object.values(g3Node2.getAnchors)[3].uuid,
+        Object.values(g3Node1.getAnchors)[0].uuid
       )
     );
 
@@ -241,21 +241,21 @@ export class TestGraph {
 
     logger.info(
       g4.addEdge(
-        Object.values(g4Node1.getAnchors)[3].getUUID,
-        Object.values(g4Node2.getAnchors)[0].getUUID
+        Object.values(g4Node1.getAnchors)[3].uuid,
+        Object.values(g4Node2.getAnchors)[0].uuid
       )
     );
     logger.info(
       g4.addEdge(
-        Object.values(g4Node1.getAnchors)[3].getUUID,
-        Object.values(g4Node2.getAnchors)[1].getUUID
+        Object.values(g4Node1.getAnchors)[3].uuid,
+        Object.values(g4Node2.getAnchors)[1].uuid
       )
     );
     // Add defective edge
     logger.info(
       g4.addEdge(
-        Object.values(g4Node2.getAnchors)[3].getUUID,
-        Object.values(g4Node1.getAnchors)[0].getUUID
+        Object.values(g4Node2.getAnchors)[3].uuid,
+        Object.values(g4Node1.getAnchors)[0].uuid
       )
     );
 
@@ -286,8 +286,8 @@ export class TestGraph {
 
     logger.info(
       g5.addEdge(
-        Object.values(g5Node1.getAnchors)[3].getUUID,
-        Object.values(g5Node1.getAnchors)[0].getUUID
+        Object.values(g5Node1.getAnchors)[3].uuid,
+        Object.values(g5Node1.getAnchors)[0].uuid
       )
     );
 
@@ -328,45 +328,45 @@ export class TestGraph {
 
     logger.info(
       g6.addEdge(
-        Object.values(g6Node2.getAnchors)[3].getUUID,
-        Object.values(g6Node3.getAnchors)[0].getUUID
+        Object.values(g6Node2.getAnchors)[3].uuid,
+        Object.values(g6Node3.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node3.getAnchors)[3].getUUID,
-        Object.values(g6Node4.getAnchors)[0].getUUID
+        Object.values(g6Node3.getAnchors)[3].uuid,
+        Object.values(g6Node4.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node3.getAnchors)[3].getUUID,
-        Object.values(g6Node1.getAnchors)[0].getUUID
+        Object.values(g6Node3.getAnchors)[3].uuid,
+        Object.values(g6Node1.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node4.getAnchors)[3].getUUID,
-        Object.values(g6Node1.getAnchors)[0].getUUID
+        Object.values(g6Node4.getAnchors)[3].uuid,
+        Object.values(g6Node1.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node4.getAnchors)[3].getUUID,
-        Object.values(g6Node5.getAnchors)[0].getUUID
+        Object.values(g6Node4.getAnchors)[3].uuid,
+        Object.values(g6Node5.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node5.getAnchors)[3].getUUID,
-        Object.values(g6Node1.getAnchors)[0].getUUID
+        Object.values(g6Node5.getAnchors)[3].uuid,
+        Object.values(g6Node1.getAnchors)[0].uuid
       )
     );
     // Add defective edge
     logger.info(
       g6.addEdge(
-        Object.values(g6Node1.getAnchors)[3].getUUID,
-        Object.values(g6Node2.getAnchors)[0].getUUID
+        Object.values(g6Node1.getAnchors)[3].uuid,
+        Object.values(g6Node2.getAnchors)[0].uuid
       )
     );
 
@@ -411,38 +411,38 @@ export class TestGraph {
 
     logger.info(
       g6.addEdge(
-        Object.values(g6Node2.getAnchors)[3].getUUID,
-        Object.values(g6Node3.getAnchors)[0].getUUID
+        Object.values(g6Node2.getAnchors)[3].uuid,
+        Object.values(g6Node3.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node3.getAnchors)[3].getUUID,
-        Object.values(g6Node4.getAnchors)[0].getUUID
+        Object.values(g6Node3.getAnchors)[3].uuid,
+        Object.values(g6Node4.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node3.getAnchors)[3].getUUID,
-        Object.values(g6Node1.getAnchors)[0].getUUID
+        Object.values(g6Node3.getAnchors)[3].uuid,
+        Object.values(g6Node1.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node4.getAnchors)[3].getUUID,
-        Object.values(g6Node1.getAnchors)[1].getUUID
+        Object.values(g6Node4.getAnchors)[3].uuid,
+        Object.values(g6Node1.getAnchors)[1].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node4.getAnchors)[3].getUUID,
-        Object.values(g6Node5.getAnchors)[0].getUUID
+        Object.values(g6Node4.getAnchors)[3].uuid,
+        Object.values(g6Node5.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node5.getAnchors)[3].getUUID,
-        Object.values(g6Node1.getAnchors)[2].getUUID
+        Object.values(g6Node5.getAnchors)[3].uuid,
+        Object.values(g6Node1.getAnchors)[2].uuid
       )
     );
 
@@ -497,38 +497,38 @@ export class TestGraph {
 
     logger.info(
       g6.addEdge(
-        Object.values(g6Node2.getAnchors)[3].getUUID,
-        Object.values(g6Node3.getAnchors)[0].getUUID
+        Object.values(g6Node2.getAnchors)[3].uuid,
+        Object.values(g6Node3.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node3.getAnchors)[3].getUUID,
-        Object.values(g6Node4.getAnchors)[0].getUUID
+        Object.values(g6Node3.getAnchors)[3].uuid,
+        Object.values(g6Node4.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node3.getAnchors)[3].getUUID,
-        Object.values(g6Node1.getAnchors)[0].getUUID
+        Object.values(g6Node3.getAnchors)[3].uuid,
+        Object.values(g6Node1.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node4.getAnchors)[3].getUUID,
-        Object.values(g6Node1.getAnchors)[1].getUUID
+        Object.values(g6Node4.getAnchors)[3].uuid,
+        Object.values(g6Node1.getAnchors)[1].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node4.getAnchors)[3].getUUID,
-        Object.values(g6Node5.getAnchors)[0].getUUID
+        Object.values(g6Node4.getAnchors)[3].uuid,
+        Object.values(g6Node5.getAnchors)[0].uuid
       )
     );
     logger.info(
       g6.addEdge(
-        Object.values(g6Node5.getAnchors)[3].getUUID,
-        Object.values(g6Node1.getAnchors)[2].getUUID
+        Object.values(g6Node5.getAnchors)[3].uuid,
+        Object.values(g6Node1.getAnchors)[2].uuid
       )
     );
 
@@ -567,7 +567,7 @@ export class TestGraph {
     //   logger.info("\n")
     // }
 
-    // g6.removeNode(nodeToDelete.getUUID);
+    // g6.removeNode(nodeToDelete.uuid);
 
     // const edges = g6.getEdgeDest;
     // const edge6 = Object.values(edges)[5].getAnchorTo;

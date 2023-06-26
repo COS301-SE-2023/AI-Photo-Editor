@@ -1,6 +1,6 @@
 <script>
-  import { graphStore } from "../stores/GraphStore";
-  import { paletteStore } from "../stores/PaletteStore";
+  // import { paletteStore } from "../stores/PaletteStore";
+  // import { graphStore } from "../stores/GraphStore";
 
   let src = "";
 
@@ -30,21 +30,22 @@
     reader.readAsDataURL(file);
   }
 
-  graphStore.subscribe((store) => {
-    if (store.nodes.length === 0) return;
+  // TODO: Remove (OLD SYSTEM)
+  // graphStore.subscribe((store) => {
+  //   if (store.nodes.length === 0) return;
 
-    let data = {};
+  //   let data = {};
 
-    store.nodes.forEach((n) => {
-      // @ts-ignore
-      data[n.id] = n.slider?.value || 0;
-    });
+  //   store.nodes.forEach((n) => {
+  //     // @ts-ignore
+  //     data[n.id] = n.slider?.value || 0;
+  //   });
 
-    window.api.send("editPhoto", data);
-  });
+  //   window.api.send("editPhoto", data);
+  // });
 </script>
 
-{#if $paletteStore.src}
+<!-- {#if $paletteStore.src}
   <img src="{$paletteStore.src}" alt="" class="max-h-[600px]" />
 {:else}
   <div
@@ -77,4 +78,4 @@
       </div>
     </label>
   </div>
-{/if}
+{/if} -->

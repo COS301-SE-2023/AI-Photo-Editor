@@ -1,23 +1,31 @@
 <script lang="ts">
-  import { projectStore } from "../../stores/ProjectStore";
-  // import { PanelGroup } from "../../layout/PanelNode";
+  import { get } from "svelte/store";
+  import { onDestroy } from "svelte";
+  import { projectManager } from "../../stores/ProjectStore";
+  import type { Project } from "./Project";
+
+  let projects: Project[] = [];
+
+  const unsubscribe = projectManager.subscribe((state) => {
+    projects = state.projectStores.map((store) => get(store));
+  });
+
+  onDestroy(unsubscribe);
 </script>
 
 <div class="drag flex h-full flex-row flex-nowrap items-center">
-  {#each $projectStore.projects as project (project.uuid)}
+  {#each projects as project (project.uuid)}
     <div
       class="no-drag group flex h-full shrink basis-48 items-center overflow-hidden px-2 text-sm font-medium text-zinc-200
-      {$projectStore.activeProject && $projectStore.activeProject.uuid === project.uuid
-        ? 'bg-zinc-900'
-        : 'hover:bg-zinc-700'}"
+      {$projectManager.activeProject === project.uuid ? 'bg-zinc-900' : 'hover:bg-zinc-700'}"
       title="{project.name}"
-      on:click="{() => projectStore.setActiveProject(project.uuid)}"
-      on:keypress="{() => projectStore.setActiveProject(project.uuid)}"
+      on:click="{() => projectManager.setActiveProject(project.uuid)}"
+      on:keypress="{() => projectManager.setActiveProject(project.uuid)}"
     >
       <p class="mr-2 truncate">{project.name}</p>
       <svg
-        on:click="{() => projectStore.closeProject(project.uuid)}"
-        on:keypress="{() => projectStore.closeProject(project.uuid)}"
+        on:click="{() => projectManager.closeProject(project.uuid)}"
+        on:keypress="{() => projectManager.closeProject(project.uuid)}"
         fill="none"
         viewBox="0 0 24 24"
         stroke-width="1.5"
@@ -29,8 +37,8 @@
     </div>
   {/each}
   <div
-    on:click="{projectStore.createProject}"
-    on:keypress="{projectStore.createProject}"
+    on:click="{projectManager.createProject}"
+    on:keypress="{projectManager.createProject}"
     class="no-drag flex-none pl-2"
   >
     <svg
