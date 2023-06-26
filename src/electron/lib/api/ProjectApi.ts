@@ -4,6 +4,7 @@ import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { IpcResponse } from "./IpcResponse";
 import type { CommonProject } from "../../../shared/types/index";
 import logger from "../../utils/logger";
+import { ClientProjectApi } from "@frontend/api/ClientProjectApi";
 
 export class ProjectApi implements ElectronMainApi<ProjectApi> {
   private readonly _projMgr;

@@ -33,8 +33,8 @@ export class CommandRegistry implements Registry {
     return commands;
   }
 
-  runCommand(command: string) {
-    this.registry[command].run();
+  runCommand(command: string, options?: { data: any }) {
+    this.registry[command].run(options);
   }
 }
 
