@@ -36,7 +36,7 @@
       <div
         class="tileOption"
         on:click="{() => {
-          type = to.toLocaleLowerCase();
+          type = to;
           open = false;
         }}"
         on:keydown="{null}"
