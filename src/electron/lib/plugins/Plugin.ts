@@ -11,7 +11,7 @@ import { CommandInstance } from "../commands/CommandRegistry";
 import { TileInstance } from "../tiles/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
 import Main from "electron/main";
-import type { MainWindow } from "lib/api/WindowApi";
+import type { MainWindow } from "@electron/lib/api/WindowApi";
 import { dialog } from "electron";
 
 export type PluginSignature = string;
