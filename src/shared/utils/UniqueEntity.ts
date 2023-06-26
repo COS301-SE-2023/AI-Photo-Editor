@@ -26,6 +26,6 @@ export class UniqueEntity {
   // 64-bit hex string (length 32 chars)
   private static genUUID(): UUID {
     // 1% chance of collision after 83 million years at 1 hash/ms 🫨
-    return crypto.randomBytes(32).toString("hex");
+    return require("crypto").randomBytes(32).toString("hex");
   }
 }

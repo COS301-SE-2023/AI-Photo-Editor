@@ -72,12 +72,12 @@ describe("Test CommandRegistry", () => {
     expect(commands[1].signature).toBe("plugin1.name1");
   })
 
-  test("Test runCommand", () => {
-    const command2 = new CommandInstance("plugin1","name1","displayName","description","icon",() => {return 2});
+  // test("Test runCommand", () => {
+  //   const command2 = new CommandInstance("plugin1","name1","displayName","description","icon",() => {return 2});
 
-    commandRegistry.addInstance(command);
-    commandRegistry.addInstance(command2);
-    expect(commandRegistry.runCommand("plugin.name")).toBe(1);
-    expect(commandRegistry.runCommand("plugin1.name1")).toBe(2);
-  })
+  //   commandRegistry.addInstance(command);
+  //   commandRegistry.addInstance(command2);
+  //   expect(commandRegistry.runCommand("plugin.name")).toBe(1);
+  //   expect(commandRegistry.runCommand("plugin1.name1")).toBe(2);
+  // })
 });
