@@ -206,7 +206,7 @@
           <PanelBlip dock="tr" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.t, dockH.r])}" />
           <PanelBlip dock="bl" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.l])}" />
           <PanelBlip dock="br" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.r])}" />
-          <TileSelector />
+          <TileSelector bind:type="{panel.content}" current="{panel.content}" />
           <!-- {:else} -->
         {/if}
         <!-- Subpanels alternate horiz/vert -->

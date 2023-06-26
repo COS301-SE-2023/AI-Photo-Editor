@@ -3,8 +3,25 @@
 
 <script lang="ts">
   let open = false;
-
+  export let type: string;
+  export let current: string;
   let tileOptions = ["Graph", "Media", "Inspector", "PromptBox"];
+
+  import Fa from "svelte-fa";
+  // import { faFlag } from '@fortawesome/free-solid-svg-icons'
+  // import { faGithub } from '@fortawesome/free-brands-svg-icons';
+  import {
+    faDiagramProject,
+    faImage,
+    faMagnifyingGlass,
+    faTerminal,
+  } from "@fortawesome/free-solid-svg-icons";
+
+  const icons: { [key: string]: any } = {};
+  icons["Graph"] = faDiagramProject;
+  icons["Media"] = faImage;
+  icons["Inspector"] = faMagnifyingGlass;
+  icons["PromptBox"] = faTerminal;
 </script>
 
 <div class="tileSel" on:click="{() => (open = !open)}" on:keypress="{null}">
@@ -14,7 +31,19 @@
   <div class="tileDialog" on:mouseleave="{() => (open = false)}">
     {#each tileOptions as to}
       <!-- {#each Array(50).fill("Some item") as to} -->
-      <div class="tileOption">{to}</div>
+      <div
+        class="tileOption"
+        on:click="{() => {
+          type = to.toLocaleLowerCase();
+        }}"
+        on:keydown="{() => {
+          type = to.toLocaleLowerCase();
+        }}"
+      >
+        <div class="innerTileOption">
+          <span class="padRight"><Fa icon="{icons[to]}" /></span>{to}
+        </div>
+      </div>
     {/each}
   </div>
 {/if}
@@ -48,6 +77,10 @@
     text-align: center;
     display: inline-block;
     width: fit-content;
+  }
+
+  .padRight {
+    padding-right: 0.4rem;
   }
 
   .tileDialog {
@@ -84,5 +117,13 @@
 
   .tileOption {
     cursor: pointer;
+  }
+
+  .innerTileOption {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: center;
   }
 </style>
