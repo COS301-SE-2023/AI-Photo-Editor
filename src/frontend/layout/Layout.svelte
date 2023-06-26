@@ -33,6 +33,9 @@
     if (state.activeProject !== "") {
       activeProjectStore = projectManager.getActiveProject();
       activeLayout = get(activeProjectStore).layout;
+    } else {
+      activeLayout = null;
+      activeProjectStore = null;
     }
   });
 </script>
