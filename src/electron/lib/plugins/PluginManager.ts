@@ -37,8 +37,8 @@ export class PluginManager {
     // This is only checking the first plugin directory
     chokibar
       .watch(".", { depth: 0, ignoreInitial: true, cwd: this.pluginPaths[0] })
-      .on("addDir", (plugin) => {
-        this.loadPlugin(plugin, this.pluginPaths[0]);
+      .on("addDir", async (plugin) => {
+        await this.loadPlugin(plugin, this.pluginPaths[0]);
         this.blix.mainWindow?.apis.commandRegistryApi.registryChanged(
           this.blix.commandRegistry.getCommands()
         );
