@@ -1,48 +1,44 @@
 <script lang="ts">
-  import { Node, Slider, generateInput /* generateOutput */ } from "svelvet";
-  import type { GraphNode } from "../stores/GraphStore";
+  import { Node, Slider, generateInput /* generateOutput */, type GraphStore } from "svelvet";
+  import { graphMall } from "../stores/GraphStore";
+  import { writable } from "svelte/store";
   // import NodeUiFragment from "./NodeUIFragment.svelte";
 
-  export let graphNode: GraphNode | null = null;
+  export let graphId: string;
   export let nodeId: string;
+  export let svelvetNodeId: string;
 
-  type Inputs = {
-    width: number;
-  };
+  let thisGraphStore = $graphMall.getGraph(graphId);
 
-  const initialData: Inputs = {
-    width: 2.5,
-  };
+  // Parameter store
+  type Inputs = { width: number };
+  const initialData: Inputs = { width: 2.5 };
   const inputs = generateInput(initialData);
-  // const processor = (inputs: Inputs) => inputs.width;
-  // const output = generateOutput(inputs, processor);
 
-  // const ui: { [key: string]: { [key:string]: string } } = {
-  // 	"val1": {
-  // 		"type": "slider",
-  // 	}
-  // }
+  const nodePos = writable($thisGraphStore.nodes[nodeId]?.pos);
 
-  const title = "Custom Node";
+  nodePos.subscribe(async (pos) => {
+    await thisGraphStore.setNodePos(nodeId, pos);
+  });
 </script>
 
-{#if graphNode != null}
+{#if svelvetNodeId !== ""}
   <!-- width="{graphNode.dims.w}"
 height="{graphNode.dims.h}" -->
   <Node
     bgColor="#262630"
     textColor="#ffffff"
-    position="{graphNode.pos}"
-    id="{nodeId}"
+    bind:position="{$nodePos}"
+    id="{svelvetNodeId}"
     borderColor="#ffffff"
-    borderWidth="{2}"
-    borderRadius="{5}"
+    borderWidth="{3}"
+    borderRadius="{10}"
     inputs="{3}"
     outputs="{1}"
   >
     <div class="node">
       <div class="header">
-        <h1>{title}</h1>
+        <h1>{$thisGraphStore.nodes[nodeId].name}</h1>
       </div>
       <!--  -->
       <div class="node-body">
