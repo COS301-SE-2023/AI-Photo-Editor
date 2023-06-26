@@ -213,16 +213,40 @@ Three main architectural patterns where identified to decompose the base system
 into components and subsystems.
 
 \subsection{Model-View-Controller (MVC)}
-The MVC pattern was chosen in order to create clear separation between the user
-interface, business logic and system data. The disconnected nature of these
-components allow 
+The MVC pattern was chosen in order to create clear distinction between the user
+interface, business logic and system data. This trinity-based setup enables separation of concerns and allows for the system to be easily extended and maintained.
+Each of the three components play their parts as follows:
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] {\bf Model}: The 'model' in our system is the core backend graph running on the Node.js server within the Electron application.
+	This represents the core state of the system, and is the central source of truth for all other views in the system. In a sense, it acts as a central database which all other 'services' utilize.
+	\item[\textbullet] {\bf Views}: Our system consists of multiple views which all derive representations from the core graph {\it model}.
+	Some examples of views in the system include the frontend {\it Svelvet} graph which the user interacts with, as well as the text-based (e.g. JSON) model which is passed to the LLM AI assistant.
+	When changes take place within the core graph, these views are automatically updated to reflect them.
+	\item[\textbullet] {\bf Controllers}: These are the 'middle-men' between each view, and the core graph.
+	As our system is an Electron application, the frontend views must be able to communicate with the core graph over Electron's IPC ({\it Interprocess Communication}) protocol.
+
+	When changes to local view state take place (e.g. If the user were to add a new node to the frontend graph), the controllers are responsible for instructing the core backend graph that these changes have taken place.
+	Then after the core graph has applied these changes in a manner that is consistent (forms a valid directed compute graph), all subscriber views are notified of the changes and are updated accordingly.
+\end{enumerate}
 
 
 \subsection{Publish-Subscribe}
+Our implementation layers the Publish-Subscribe architectural pattern on top of the MVC pattern to endow the system with multiple-reactivity.
+The PubSub architecture allows one central source of information to be propagated to a multitude of subscribers, in our case the core graph and each of its views respectively.
+PubSub is a highly effective pattern as it abstracts the notion of state propagation into a composable set of participant modules which can be easily added/removed from the system.
+This helps us future-proof the application and allows for scalability as the system grows.
 
+As an example, let's say down the line we wanted to add a command line utility to compute a given graph without needing the user interface to be loaded;
+In such a situation we could easily disable the UI graph subscriber, and add alongside a 'command line utility' subsciber, which still communicates with the core graph, but does so entirely through the standard input/output streams of the command line.
 
-\subsection{Client Server}
+Thus by using this architecture we have effectively made core parts of the system 'hot-swappable'.
 
+\subsection{Client-Server}
+The Large Language Model AI assistant is a significant part of the system which we are building, and at the time of writing all major LLMs (which provide the sufficient level of intellitence that we are looking for) are hosted on the cloud. As our app is hosted natively on this users machine, this means we must also enable remote communication to the respective LLM API's.
+
+From this perspective, the Blix application exists as a client to the LLM API server, and must be able to perform remote HTTP requests as such.
+Google has recently announced the release of their PaLM models as open source, however, and so we are currently investigating the possibility of hosting the LLM locally on the users machine.
+In such a situation the client-server architecture would still apply, except that the server 'LLM API' would be hosted locally on the users machine, and all communication would be done over the loopback interface.
 
 \section{Constraints}
 
@@ -236,7 +260,7 @@ by shifting the work from the runtime to the build process. One of the key
 visions of Blix is to provide a fast and responsive user interface with
 lightning fast reactivity. Additionally due to the large scope of the project,
 it is important to ensure that the system is as lightweight as possible. Svelte
-is the perfect choice for this as it is a lightweight framework
+is the perfect choice for this as it compiles the application into highly performant JavaScript, instead of simulating a virtual DOM for performing reactive page updates.
 
 \textbf{Pros:}
 \begin{enumerate}[label*=\arabic*.]
@@ -283,6 +307,7 @@ This allows for the creation of a desktop application that is highly scalable an
 	\item[\textbullet] Highly scalable framework that allows for the creation of large scale applications.
 	\item[\textbullet] Electron provides a comprehensive set of APIs that allows for the creation of a desktop application that is unique to Blix.
 	\item[\textbullet] Allows code reusage as the same codebase can be used to create a desktop application and a web application.
+	\item[\textbullet] Leverages the power of Node.js modules to provide 
 \end{enumerate}
 
 \textbf{Cons:}
