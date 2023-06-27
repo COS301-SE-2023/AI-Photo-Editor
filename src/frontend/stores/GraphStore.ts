@@ -1,5 +1,5 @@
 import { type UUID } from "@shared/utils/UniqueEntity";
-import { writable, type Unsubscriber } from "svelte/store";
+import { writable, type Unsubscriber, get, derived, type Writable } from "svelte/store";
 
 // When the the CoreGraphApi type has to be imported into the backend
 // (WindowApi.ts) so that the API can be bound then it tries to import the type
@@ -16,25 +16,30 @@ import { writable, type Unsubscriber } from "svelte/store";
 // import type { Connections } from "svelvet";
 type Connections = (string | number | [string | number, string | number] | null)[];
 
-function createGraphStore(graphUUID: GraphUUID) {
-  const { subscribe, update, set } = writable<UIGraph>(new UIGraph(graphUUID));
+// TODO: Return a GraphStore in createGraphStore for typing
+class GraphStore {
+  graphStore: Writable<UIGraph>;
 
-  // Called by CoreGraphApi when the command registry changes
-  function refreshStore(newGraph: UIGraph) {
-    set(newGraph);
+  constructor(public uuid: GraphUUID) {
+    this.graphStore = writable<UIGraph>(new UIGraph(uuid));
   }
 
-  async function addEdge() {
+  // Called by CoreGraphApi when the command registry changes
+  public refreshStore(newGraph: UIGraph) {
+    this.graphStore.set(newGraph);
+  }
+
+  async addEdge() {
     // TODO
     const res = await window.apis.graphApi.addEdge("");
     return false;
   }
 
-  async function addNode() {
+  async addNode() {
     const res = await window.apis.graphApi.addNode("");
 
     // TODO: Implement properly, just for testing atm
-    update((graph) => {
+    this.graphStore.update((graph) => {
       const newNode = new GraphNode(Math.round(10000 * Math.random()).toString());
       newNode.pos.x = Math.round(1000 * Math.random());
       newNode.pos.y = Math.round(1000 * Math.random());
@@ -46,19 +51,33 @@ function createGraphStore(graphUUID: GraphUUID) {
     return true;
   }
 
-  async function removeEdge() {
+  public get update() {
+    return this.graphStore.update;
+  }
+
+  public get subscribe() {
+    return this.graphStore.subscribe;
+  }
+
+  public getNodesReactive() {
+    return derived(this.graphStore, (graph) => {
+      return Object.values(graph.nodes);
+    });
+  }
+
+  async removeEdge() {
     const res = await window.apis.graphApi.removeEdge("");
     return false;
   }
-  async function removeNode() {
+  async removeNode() {
     const res = await window.apis.graphApi.removeNode("");
     return false;
   }
 
-  async function setNodePos(nodeId: string, pos: { x: number; y: number }) {
+  async setNodePos(nodeId: string, pos: { x: number; y: number }) {
     const res = await window.apis.graphApi.setNodePos("");
 
-    update((graph) => {
+    this.graphStore.update((graph) => {
       if (!graph.nodes[nodeId]) return graph;
 
       graph.nodes[nodeId].pos = pos;
@@ -67,32 +86,9 @@ function createGraphStore(graphUUID: GraphUUID) {
     });
     return false;
   }
-
-  return new GraphStore(
-    subscribe,
-    addEdge,
-    addNode,
-    removeEdge,
-    removeNode,
-    setNodePos,
-    refreshStore
-  );
 }
 
-// TODO: Return a GraphStore in createGraphStore for typing
-class GraphStore {
-  constructor(
-    public subscribe: (...anything: any) => Unsubscriber,
-    public addEdge: () => Promise<boolean>,
-    public addNode: () => Promise<boolean>,
-    public removeEdge: () => Promise<boolean>,
-    public removeNode: () => Promise<boolean>,
-    public setNodePos: (nodeId: string, pos: { x: number; y: number }) => Promise<boolean>,
-    public refreshStore: (newGraph: UIGraph) => void
-  ) {}
-}
-
-type GraphUUID = UUID;
+export type GraphUUID = UUID;
 type GraphNodeUUID = UUID;
 type GraphAnchorUUID = UUID;
 
@@ -104,6 +100,7 @@ export class UIGraph {
 
 export class GraphNode {
   name = "";
+  id = "";
   public connections: Connections;
 
   nodeUI: any; // TODO: Change this to NodeUI
@@ -115,6 +112,7 @@ export class GraphNode {
   dims: { w: number; h: number } = { w: 0, h: 0 };
 
   constructor(public uuid: GraphNodeUUID) {
+    this.id = uuid;
     this.name = "Node-" + uuid;
     this.connections = [];
   }
@@ -124,29 +122,80 @@ class GraphAnchor {
   constructor(public uuid: GraphAnchorUUID, public type: string) {}
 }
 
+type GraphDict = { [key: GraphUUID]: GraphStore };
+
 // The public area with all the cool stores 😎
 class GraphMall {
-  public graphStores: { [key: GraphUUID]: GraphStore };
-
-  constructor() {
-    this.graphStores = {};
-  }
+  mall = writable<GraphDict>({});
 
   public refreshGraph(graphUUID: GraphUUID, newGraph: UIGraph) {
-    if (!this.graphStores[graphUUID]) {
-      this.graphStores[graphUUID] = createGraphStore(graphUUID);
-    }
+    this.mall.update((stores) => {
+      if (!stores[graphUUID]) {
+        stores[graphUUID] = new GraphStore(graphUUID);
+      }
+      stores[graphUUID].refreshStore(newGraph);
+      return stores;
+    });
 
-    this.graphStores[graphUUID].refreshStore(newGraph);
+    const val = get(this.mall);
+  }
+
+  public get subscribe() {
+    return this.mall.subscribe;
+  }
+
+  // Returns a derived store containing only the graph UUIDs
+  public getAllGraphUUIDsReactive() {
+    return derived(this.mall, (mall) => {
+      return Object.keys(mall);
+    });
   }
 
   public getAllGraphUUIDs(): GraphUUID[] {
-    return Object.keys(this.graphStores).map((uuid) => uuid);
+    return Object.keys(get(this.mall)).map((uuid) => uuid);
   }
 
+  // Returns a derived store containing only the specified graph
+  public getGraphReactive(graphUUID: GraphUUID) {
+    return derived(this.mall, (mall) => {
+      if (!mall[graphUUID]) return null;
+      return mall[graphUUID];
+    });
+  }
+
+  // Returns the store for the specified graph
   public getGraph(graphUUID: GraphUUID): GraphStore {
-    return this.graphStores[graphUUID];
+    return get(this.mall)[graphUUID];
+  }
+
+  // Returns the internal once-off state of the specified graph
+  public getGraphState(graphUUID: GraphUUID): UIGraph {
+    return get(this.getGraph(graphUUID));
+  }
+
+  public getNode(graphUUID: GraphUUID, nodeUUID: GraphNodeUUID): GraphNode {
+    return get(get(this.mall)[graphUUID]).nodes[nodeUUID];
+  }
+
+  public updateNode(
+    graphUUID: GraphUUID,
+    nodeUUID: GraphNodeUUID,
+    func: (node: GraphNode) => GraphNode
+  ) {
+    this.mall.update((mall) => {
+      if (!mall[graphUUID]) return mall;
+
+      mall[graphUUID].update((graph) => {
+        if (!graph.nodes[nodeUUID]) return graph;
+
+        graph.nodes[nodeUUID] = func(graph.nodes[nodeUUID]);
+        return graph;
+      });
+
+      return mall;
+    });
   }
 }
 
-export const graphMall = writable<GraphMall>(new GraphMall());
+// export const graphMall = writable<GraphMall>(new GraphMall());
+export const graphMall = new GraphMall();

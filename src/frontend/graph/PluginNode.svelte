@@ -1,25 +1,44 @@
 <script lang="ts">
-  import { Node, Slider, generateInput /* generateOutput */, type GraphStore } from "svelvet";
-  import { graphMall } from "../stores/GraphStore";
+  import { Anchor, Node, Slider, generateInput } from "svelvet";
+  import { GraphNode, graphMall } from "../stores/GraphStore";
   import { writable } from "svelte/store";
   // import NodeUiFragment from "./NodeUIFragment.svelte";
 
   export let graphId: string;
-  export let nodeId: string;
+  export let node: GraphNode;
   export let svelvetNodeId: string;
-
-  let thisGraphStore = $graphMall.getGraph(graphId);
 
   // Parameter store
   type Inputs = { width: number };
   const initialData: Inputs = { width: 2.5 };
   const inputs = generateInput(initialData);
 
-  const nodePos = writable($thisGraphStore.nodes[nodeId]?.pos);
+  const nodePos = writable(node.pos);
+  const nodeConns = writable(node.connections);
 
   nodePos.subscribe(async (pos) => {
-    await thisGraphStore.setNodePos(nodeId, pos);
+    // On node moved
+    graphMall.updateNode(graphId, node.id, (node) => {
+      node.pos = pos;
+      return node;
+    });
   });
+
+  nodeConns.subscribe(async (conns) => {
+    // On connection changed
+    graphMall.updateNode(graphId, node.id, (node) => {
+      node.connections = conns;
+      return node;
+    });
+  });
+
+  // graphMall.subscribe((graphMall) => {
+  // });
+
+  setInterval(() => {
+    nodePos.set(node.pos);
+    nodeConns.set(node.connections);
+  }, 100);
 </script>
 
 {#if svelvetNodeId !== ""}
@@ -33,55 +52,30 @@ height="{graphNode.dims.h}" -->
     borderColor="#ffffff"
     borderWidth="{3}"
     borderRadius="{10}"
-    inputs="{3}"
+    inputs="{2}"
     outputs="{1}"
   >
     <div class="node">
       <div class="header">
-        <h1>{$thisGraphStore.nodes[nodeId].name}</h1>
+        <h1>{node.name}</h1>
       </div>
-      <!--  -->
       <div class="node-body">
         <!-- TODO:  -->
         <!-- <NodeUiFragment />  -->
         <Slider min="{1}" max="{12}" fixed="{1}" step="{0.1}" parameterStore="{$inputs.width}" />
       </div>
-      <!--  -->
     </div>
 
-    <!-- {#if outputStore && key}
-	<div class="output-anchors">
-		<Anchor
-			id={key}
-			connections={[['output', key]]}
-			let:linked
-			let:connecting
-			let:hovering
-			{outputStore}
-			output
-		>
-			<CustomAnchor {hovering} {connecting} {linked} />
-		</Anchor>
-	</div>
-{/if} -->
-
-    <!-- <div>
-    <Anchor
-        id="{nodeId}-in"
+    <div>
+      <Anchor dynamic="{true}" id="{node.id}-in" />
+      <!-- bind:connections={$nodeConns} -->
+      <br />
+      <!-- <Anchor
+        dynamic="{true}"
+        id="{node.id}-in2"
         connections={[]}
-    />
-    <br />
-    <Anchor
-        id="{nodeId}-in2"
-        connections={[]}
-    />
-</div> -->
-
-    <!-- {#each node.connections as _}
-    <div class="node-body">
-    asdf
+    /> -->
     </div>
-{/each} -->
   </Node>
 {/if}
 

@@ -2,7 +2,8 @@
 <script lang="ts">
   import Image from "../../components/Image.svelte";
 
-  let options = ["svelteSoHot"];
+  let options = ["None selected"];
+  let showSoHot = false;
 </script>
 
 <div class="fullPane">
@@ -17,7 +18,28 @@
   </div>
 
   <div class="media">
-    <Image src="images/svelte-so-hot.jpg" />
+    {#if !showSoHot}
+      <div
+        class="placeholder"
+        on:click="{() => {
+          showSoHot = true;
+          options = ['svelteSoHot'];
+        }}"
+        on:keydown="{null}"
+      >
+        Select Image
+      </div>
+    {:else}
+      <div
+        on:click="{() => {
+          showSoHot = false;
+          options = ['None Selected'];
+        }}"
+        on:keydown="{null}"
+      >
+        <Image src="images/svelte-so-hot.jpg" />
+      </div>
+    {/if}
   </div>
 </div>
 
@@ -33,6 +55,7 @@
     width: calc(100%-2em);
     margin: auto;
     height: auto;
+    text-align: center;
   }
 
   .hover {
@@ -40,5 +63,20 @@
     bottom: 1em;
     left: 1em;
     color: black;
+  }
+
+  .placeholder {
+    padding-top: 140px;
+    text-align: center;
+    display: inline-block;
+    width: 300px;
+    height: 300px;
+    border: 2px solid grey;
+    border-radius: 0.4em;
+    margin-top: 1em;
+  }
+  .placeholder:hover {
+    background-color: #1e1e2e;
+    cursor: pointer;
   }
 </style>
