@@ -135,13 +135,13 @@ export class CoreGraph extends UniqueEntity {
     return true;
   }
 
-  private checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
+  public checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
     // TODO
-
+    if (ancFrom.uuid === ancTo.uuid) return true; // Needs to be changed
     return false;
   }
 
-  private checkForCycles(ancFrom: Anchor, ancTo: Anchor): boolean {
+  public checkForCycles(ancFrom: Anchor, ancTo: Anchor): boolean {
     const curr: Node = ancFrom.getParent;
     // For each anchor in the current node
     for (const anchor in curr.getAnchors) {
@@ -227,27 +227,27 @@ export class CoreGraph extends UniqueEntity {
     // TODO
   }
 
-  public printGraph() {
-    for (const edge in this.edgeDest) {
-      if (!this.edgeDest.hasOwnProperty(edge)) continue;
-      logger.info("Edge (same as anchorTo): " + edge);
-      logger.info("Node From: " + this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.uuid);
-      logger.info("Node To: " + this.anchors[this.edgeDest[edge].getAnchorTo].getParent.uuid);
-      logger.info("Anchor from -> Anchor to:");
-      logger.info(
-        this.anchors[this.edgeDest[edge].getAnchorFrom].uuid +
-          " -> " +
-          this.anchors[this.edgeDest[edge].getAnchorTo].uuid +
-          "\n"
-      );
-    }
-  }
+  // public printGraph() {
+  //   for (const edge in this.edgeDest) {
+  //     if (!this.edgeDest.hasOwnProperty(edge)) continue;
+  //     logger.info("Edge (same as anchorTo): " + edge);
+  //     logger.info("Node From: " + this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.uuid);
+  //     logger.info("Node To: " + this.anchors[this.edgeDest[edge].getAnchorTo].getParent.uuid);
+  //     logger.info("Anchor from -> Anchor to:");
+  //     logger.info(
+  //       this.anchors[this.edgeDest[edge].getAnchorFrom].uuid +
+  //         " -> " +
+  //         this.anchors[this.edgeDest[edge].getAnchorTo].uuid +
+  //         "\n"
+  //     );
+  //   }
+  // }
 
   public toJSONObject(): GraphToJSON {
     return { nodes: this.nodesToJSONObject(), edges: this.edgesToJSONObject() };
   }
 
-  private nodesToJSONObject(): NodeToJSON[] {
+  public nodesToJSONObject(): NodeToJSON[] {
     const json: NodeToJSON[] = [];
     for (const node in this.nodes) {
       if (!this.nodes.hasOwnProperty(node)) continue;
@@ -256,7 +256,7 @@ export class CoreGraph extends UniqueEntity {
     return json;
   }
 
-  private edgesToJSONObject(): EdgeToJSON[] {
+  public edgesToJSONObject(): EdgeToJSON[] {
     const json: EdgeToJSON[] = [];
     for (const anchorFrom in this.edgeSrc) {
       if (!this.edgeSrc.hasOwnProperty(anchorFrom)) continue;

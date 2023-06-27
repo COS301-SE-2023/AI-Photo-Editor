@@ -1,7 +1,7 @@
 import { blixStore } from "./stores/BlixStore";
 import { commandStore } from "./stores/CommandStore";
 import { GraphNode, UIGraph, graphMall } from "./stores/GraphStore";
-import { initializeAPIs } from "api/apiInitializer";
+import { initializeAPIs } from "./api/apiInitializer";
 import { projectManager } from "./stores/ProjectStore";
 /**
  * Runs on app start. Will initialize the IPC APIs and set the initial frontend

@@ -31,37 +31,37 @@ const nodes = {
 // Here we define commands (that are made available in the command palette) and their callbacks
 const commands = {
     
-    "import": (context) => {
+    "open": (context) => {
         // TODO: Work this out
         // E.g. Could get context.command.inputs for instance for additional values
     
-        context.setDescription("Import a project");
+        context.setDescription("Open a project");
 
         context.setIcon("testing/image.jpg");
 
-        context.setDisplayName("Import Project");
+        context.setDisplayName("Open Project");
 
         context.addCommand(() => {
-            context.createDialogBox();
-            console.log("Import project");
+            context.loadProject("openFile");
         })
 
         return context.create();
     },
-    "export": (context) => {
+    "saveas": (context) => {
         // TODO: Work this out
         // E.g. Could get context.command.inputs for instance for additional values
     
-        context.setDescription("Export a project");
+        context.setDescription("Save project to user storage");
 
         context.setIcon("testing/image.jpg");
 
-        context.setDisplayName("Export project");
+        context.setDisplayName("Save project as...");
 
         // Very unsafe, but just for proof of concept
-        context.addCommand(() => {
-            console.log("Export project");
-            context.createDialogBox(); // For opening a file
+        context.addCommand((options) => {
+            // console.log("Save project as...");
+            context.saveCurrentProject(options.data);
+            // console.log(options.data);
         })
 
         return context.create();

@@ -4,10 +4,11 @@ import type { IpcResponse } from "../api/IpcResponse";
 import { join } from "path";
 import { app } from "electron";
 import fs from "fs";
+import type { PathLike } from "fs";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "@electron/lib/api/WindowApi";
 import type { CommonProject } from "@shared/types";
-
+import { dialog } from "electron";
 // This should kinda be extending Registry and then called ProjectRegistry
 // instead of Project Manager but I don't feel like the Registry interface is
 // the correct fit for this.
@@ -104,16 +105,40 @@ export class ProjectManager {
     return { success: true, data: recentProjects };
   }
 
-  // loadProject(projectName: string): IpcResponse<string> {
-  //   const project = fs.readFileSync(join(this.path, projectName));
-  //   if (!project) {
-  //     return { success: false, data: "Project not found" };
-  //   }
+  async loadProject(options: "openFile" | "openDirectory" | "multiSelections") {
+    const result = await this.createDialogBox(options);
+    if (!(result && !result.canceled && result.filePaths.length > 0)) return;
 
-  //   const data = JSON.parse(project.toString());
-  //   this.createProject(data.name as string);
-  //   return { success: true, data: "Project loaded" };
-  // }
+    const project = fs.readFileSync(result.filePaths[0]);
+    if (!project) {
+      return;
+    }
+
+    const data = JSON.parse(project.toString());
+    this._mainWindow.apis.clientProjectApi.loadProject(
+      this.createProject(data.name as string).mapToCommonProject()
+    );
+  }
+
+  async createDialogBox(options: "openFile" | "openDirectory" | "multiSelections") {
+    if (!this._mainWindow) return;
+    return await dialog.showOpenDialog(this._mainWindow, {
+      properties: [options],
+      filters: [{ name: "Projects", extensions: ["blx"] }],
+    });
+  }
+
+  async saveCurrentProject(id: UUID) {
+    if (!this._mainWindow) return;
+    const name = await dialog.showSaveDialog(this._mainWindow, {});
+    const pathToProject = name.filePath as PathLike;
+    const project = this._projects[id];
+    if (!project) return;
+
+    const data = { name: project.name, uuid: project.uuid };
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    fs.writeFileSync(pathToProject, JSON.stringify(data, null, 2));
+  }
 
   // async renameProject(uuid: UUID) {}
 }
