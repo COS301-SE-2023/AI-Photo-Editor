@@ -12,7 +12,7 @@
     <Navbar />
   </div>
   <div class="layout"><Layout /></div>
-  <Palette /> -->
+  <Palette />
 {/await}
 
 <style lang="postcss" global>
