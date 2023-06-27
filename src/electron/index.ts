@@ -39,7 +39,7 @@ app.on("ready", () => {
   // blix.projectManager.openRecentProjects();
   // Set icon for macOS
   if (process.platform === "darwin") {
-    app.dock.setIcon("public/images/blix_64x64.png");
+    app.dock.setIcon("public/images/gaeblix.png");
   }
 });
 
@@ -55,7 +55,7 @@ function createMainWindow() {
       preload: join(__dirname, "preload.js"),
     },
     // Set icon for Windows and Linux
-    icon: "public/images/blix_64x64.png",
+    icon: "public/images/gaeblix.png",
     titleBarStyle: "hidden",
     trafficLightPosition: { x: 10, y: 10 },
   }) as MainWindow;
