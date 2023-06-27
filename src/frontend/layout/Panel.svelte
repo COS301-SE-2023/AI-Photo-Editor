@@ -2,24 +2,38 @@
 
 <!-- TODO:
     - Double click blip should maximize panel within its group
+    - Left click _|_
+    - Right click outward drag blip should swap panels
 -->
 
 <script lang="ts">
   import { Pane, Splitpanes } from "svelte-splitpanes";
-  import { PanelNode, PanelGroup, PanelLeaf } from "./PanelNode";
+  import { PanelNode, PanelGroup, PanelLeaf, type PanelType } from "./PanelNode";
   import PanelBlip from "./PanelBlip.svelte";
   import { createEventDispatcher } from "svelte";
-  import Graph from "../components/Graph/Graph.svelte";
-  import Image from "../components/Image.svelte";
+  import TileSelector from "./TileSelector.svelte";
+
+  import Graph from "./tiles/Graph.svelte";
+  import Media from "./tiles/Media.svelte";
+  import Blank from "./tiles/Blank.svelte";
+  import Debug from "./tiles/Debug.svelte";
+  import WebView from "./tiles/WebView.svelte";
+  import ShortcutSettings from "./tiles/ShortcutSettings.svelte";
+
+  // import { scale } from "svelte/transition";
 
   const dispatch = createEventDispatcher();
 
   const minSize = 10;
 
   export let horizontal: boolean = false;
-  export let layout: PanelNode;
   export let height: string;
   export let isRoot = true;
+  export let layout: PanelNode;
+
+  let tileProps = {
+    panelId: layout.id,
+  };
 
   enum dockV {
     "t",
@@ -104,10 +118,13 @@
       ? indexDir.f
       : indexDir.b;
 
+    // Get the content in this panel leaf
+    const thisLeafContent = (layout.panels[index] as PanelLeaf).content;
+
     // Perform panel operation
     switch (slide) {
       case localDir.pl_i: // add panel at index
-        layout.addPanel("newPanel", index);
+        layout.addPanel(thisLeafContent, index);
         layout = layout; // Force update
         break;
 
@@ -116,8 +133,10 @@
         let toRem = index + (iDir == indexDir.f ? 1 : -1);
 
         if (toRem >= 0 && toRem < layout.panels.length) {
-          layout.removePanel(toRem);
-          layout = layout;
+          layout.getPanel(toRem).size = -1;
+
+          // layout.removePanel(toRem);
+          // layout = layout;
 
           bubbleToRoot();
         }
@@ -125,14 +144,12 @@
         break;
 
       case localDir.pp_i: // encapsulate panel within panelgroup, add another panel to group
-        let group = new PanelGroup(Math.floor(1000 * Math.random()).toString());
-
-        //TODO: Pass actual panel content instead of just string
+        let group = new PanelGroup(undefined, layout.getPanel(index).id);
 
         //Add this panel
-        group.addPanel((layout.panels[index] as PanelLeaf).content, 0);
+        group.addPanel(thisLeafContent, 0);
         //Add new panel
-        group.addPanel(Math.floor(1000 * Math.random()).toString(), 1);
+        group.addPanel(thisLeafContent, 1);
         // Replace this panel with new group
         layout.setPanel(group, index);
 
@@ -145,22 +162,58 @@
         return;
     }
   }
+
+  function triggerWindowResize() {
+    // For now this is necessary to force Svelvet
+    // to update the positions of objects on it's canvas
+    // TODO: Hopefully find a more elegant solution
+    window.dispatchEvent(new Event("resize"));
+  }
+
+  // This dict defines mappings from PanelType to the corresponding Svelte component to render
+  const panelTypeToComponent: { [key: PanelType]: ConstructorOfATypedSvelteComponent } = {
+    graph: Graph,
+    media: Media,
+    debug: Debug,
+    webview: WebView,
+    shortcutSettings: ShortcutSettings,
+  };
+
+  // Wraps the above dict safely
+  function getComponentForPanelType(panelType: PanelType): ConstructorOfATypedSvelteComponent {
+    if (panelType in panelTypeToComponent) {
+      return panelTypeToComponent[panelType];
+    } else {
+      console.error(`No component found for panel type '${panelType}'`);
+      return Blank;
+    }
+  }
 </script>
 
 {#if layout instanceof PanelGroup}
+  <!-- <div class="container"> -->
   <Splitpanes
     class="main-theme"
     horizontal="{horizontal}"
     style="{height == '' ? '' : 'height: {height}'}"
     dblClickSplitter="{false}"
+    on:pane-remove="{(e) => e.stopPropagation()}"
+    on:resize="{triggerWindowResize}"
   >
-    {#each layout.panels as panel, i}
-      <Pane minSize="{minSize}">
+    {layout.id}
+    {#each layout.panels as panel, i (panel.id)}
+      <!-- TODO: Fix; look into using svelte animations -->
+      {#key layout}
+        <!-- Look into using #key instead of bubbleToRoot + transition: scale -->
+      {/key}
+      <Pane minSize="{panel.size == -1 ? 0 : minSize}" bind:size="{panel.size}">
         {#if panel instanceof PanelLeaf}
           <PanelBlip dock="tl" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.t, dockH.l])}" />
           <PanelBlip dock="tr" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.t, dockH.r])}" />
           <PanelBlip dock="bl" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.l])}" />
           <PanelBlip dock="br" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.r])}" />
+          <TileSelector bind:type="{panel.content}" current="{panel.content}" />
+          <!-- {:else} -->
         {/if}
         <!-- Subpanels alternate horiz/vert -->
         <svelte:self
@@ -173,17 +226,19 @@
       </Pane>
     {/each}
   </Splitpanes>
+  <!-- </div> -->
 {:else if layout instanceof PanelLeaf}
   <!-- Actual panel content goes here -->
   <div class="fullPanel">
-    {#if layout.content === "graph"}
+    <!-- {#if layout.content === "graph"}
       <Graph />
     {:else if layout.content === "image"}
       <div class="flex h-full w-full items-center justify-center p-5">
         <Image />
       </div>
-    {/if}
+    {/if} -->
     <!-- {layout.content} -->
+    <svelte:component this="{getComponentForPanelType(layout.content)}" {...tileProps} />
   </div>
 {/if}
 
@@ -192,6 +247,13 @@
     width: 100%;
     height: 100%;
     /* padding: 0.4em 1.2em; */
+  }
+
+  .container {
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    margin: 0px;
   }
 
   .splitpanes.main-theme .splitpanes__splitter {

@@ -1,0 +1,37 @@
+{
+    "name": "Input-plugin",
+    "displayName": "Input Plugin",
+    "description": "Provides basic nodes for providing input to a graph.",
+    "version": "0.0.1",
+
+    "author": "Gekota the Frog",
+    "repository": "",
+
+    "contributes": {
+        "commands": [],
+        "nodes": [
+            {
+                "id": "input",
+                "name": "Input",
+                "interface" : {
+                    "inputs": {
+                    "numA": "int"
+                    },
+                    "outputs": {
+                        "numOut": "int"
+                    }
+                }
+            }
+        ]
+    },
+
+    "main": "src/main.js",
+    "renderer": "src/renderer.js",
+
+    "devDependencies": {
+        "@types/node": "^12.0.0",
+        "typescript": "^3.4.5"
+    },
+
+    "comments": [ "This plugin could be expanded to handle more inputs." ]
+}

@@ -2,17 +2,23 @@
   "compileOnSave": true,
   "compilerOptions": {
     "outDir": "../../build",
-    "target": "ES2015",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../shared/*"],
+      "@electron/*": ["../electron/*"],
+      "@frontend/*": ["../frontend/*"]
+    },
+    "target": "ES2016",
     "module": "commonjs",
     "sourceMap": true,
     "stripInternal": true,
-    "lib": ["es2015", "esnext", "dom"],
+    "lib": ["es2017", "esnext", "dom"],
     "moduleResolution": "node",
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "noImplicitThis": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
@@ -23,6 +29,6 @@
     "esModuleInterop": true,
     "isolatedModules": true
   },
-  "include": ["."],
+  "include": [".", "../global.d.ts", "../shared/**/*.ts"],
   "exclude": ["node_modules"]
 }

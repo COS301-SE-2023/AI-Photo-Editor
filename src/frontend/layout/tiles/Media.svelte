@@ -2,33 +2,44 @@
 <script lang="ts">
   import Image from "../../components/Image.svelte";
 
-  let test: string;
-
-  function asdf(e: Event) {
-    test = (e.target as HTMLInputElement).value;
-  }
-
-  let options = ["asdf", "fdsa", "qwer", "rewq"];
-
-  let selected: string;
+  let options = ["None selected"];
+  let showSoHot = false;
 </script>
 
 <div class="fullPane">
-  {test}
-
-  <!-- Rather use bind: -->
-  <input type="text" name="asdf" id="asdf" on:input="{asdf}" />
-
-  <select value="{selected}">
-    {#each options as option}
-      <option value="{option}">
-        {option}
-      </option>
-    {/each}
-  </select>
+  <div class="hover">
+    <select value="{options[0]}">
+      {#each options as option}
+        <option value="{option}">
+          {option}
+        </option>
+      {/each}
+    </select>
+  </div>
 
   <div class="media">
-    <Image src="images/svelte-so-hot.jpg" />
+    {#if !showSoHot}
+      <div
+        class="placeholder"
+        on:click="{() => {
+          showSoHot = true;
+          options = ['svelteSoHot'];
+        }}"
+        on:keydown="{null}"
+      >
+        Select Image
+      </div>
+    {:else}
+      <div
+        on:click="{() => {
+          showSoHot = false;
+          options = ['None Selected'];
+        }}"
+        on:keydown="{null}"
+      >
+        <Image src="images/svelte-so-hot.jpg" />
+      </div>
+    {/if}
   </div>
 </div>
 
@@ -41,8 +52,31 @@
   }
 
   .media {
-    width: 100%;
+    width: calc(100%-2em);
+    margin: auto;
     height: auto;
-    border: 1px solid blue;
+    text-align: center;
+  }
+
+  .hover {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    color: black;
+  }
+
+  .placeholder {
+    padding-top: 140px;
+    text-align: center;
+    display: inline-block;
+    width: 300px;
+    height: 300px;
+    border: 2px solid grey;
+    border-radius: 0.4em;
+    margin-top: 1em;
+  }
+  .placeholder:hover {
+    background-color: #1e1e2e;
+    cursor: pointer;
   }
 </style>
