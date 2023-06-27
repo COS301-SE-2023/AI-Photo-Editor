@@ -43,6 +43,17 @@
 <h3>Software Requirement Specification</h3>
 <a href="https://drive.google.com/file/d/1ATjzOak-0K-Q_kudSD9OEBIK9wS2q4Gy/view?usp=sharing">SRSv1</a>
 
+<a href="https://drive.google.com/file/d/1PUAM4CS4qMLwbHv37kl86bTaVbaIDlLZ/view?usp=sharing">SRSv2</a>
+
+<h3>Software Architecture</h3>
+<a href="https://drive.google.com/file/d/1vXylz_2AGhIbI3x6IT7RJHlcIxV7ydWe/view?usp=sharing">Software Architecture v1</a>
+
+<h3>Extras</h3>
+<a href="https://drive.google.com/file/d/1KSBoSISRutLugk6KTDuSiBa4gBeDqJEq/view?usp=sharing">Coding Standards</a>
+
+<a href="https://drive.google.com/file/d/141GD2XQz7EbAA--MKQ5w9Yfh9zRA05ss/view?usp=sharing">User Manual</a>
+
+
 <h3>Contributions</h3>
 <a href="https://drive.google.com/file/d/1ewItSWd0Ag0mQbVnYTd4y8H6PclSpRNi/view?usp=sharing">Documentation Contributions</a>
 
