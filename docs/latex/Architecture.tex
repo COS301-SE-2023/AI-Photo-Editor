@@ -208,7 +208,7 @@ main approaches: decomposition and design based on quality requirements.
 \end{enumerate}
 
 \section{Architectural Design \& Patterns}
-Three main architectural patterns where identified to decompose the base system
+Four main architectural patterns where identified to decompose the base system
 into components and subsystems.
 
 \subsection{Model-View-Controller (MVC)}
@@ -262,20 +262,33 @@ the command line.
 Thus by using this architecture we have effectively made core parts of the
 system 'hot-swappable'.
 
-\subsection{Client-Server}
-The Large Language Model AI assistant is a significant part of the system which
-we are building, and at the time of writing all major LLMs (which provide the
-sufficient level of intelligence that we are looking for) are hosted on the
-cloud. As our app is hosted natively on this users machine, this means we must
-also enable remote communication to the respective LLM API's.
+\subsection{Service-Oriented}
+The Service-Oriented architectural pattern exists within an essential aspect of our system, the AI LLM assistant.
+This pattern enables modularity, flexibility, and extensibility by defining the system's components as a collection of distinct services.
+Here we treat each LLM model as a separate service, which can be added, removed, or swapped out with another model.
 
-From this perspective, the Blix application exists as a client to the LLM API
-server, and must be able to perform remote HTTP requests as such. Google has
-recently announced the release of their PaLM models as open source, however, and
-so we are currently investigating the possibility of hosting the LLM locally on
-the users machine. In such a situation the client-server architecture would
-still apply, except that the server 'LLM API' would be hosted locally on the
-users machine, and all communication would be done over the loopback interface.
+Models that may be supported as 'services' include GPT-3, GPT-4, PaLM, etc.
+Each of these models can subscribe to the core graph and make updates to it.
+Moreover, by leveraging the power of LangChain using a custom pre-trained vector database of graph {\it word2vec} embeddings,
+the Service-Oriented architecture helps us to create a comprehensive and efficient system for managing these models and enhancing their capabilities with domain-specific knowledge.
+
+This allows for seamless exchanging of information among the services, as well as smooth updating and enhancement of the system when new AI models become available or when updates to existing models are released.
+Consequently, the Service-Oriented architecture maximizes the potential of our AI-driven system by promoting modularity, interoperability, and the rapid development of new features and capabilities.
+
+% \subsection{Client-Server}
+% The Large Language Model AI assistant is a significant part of the system which
+% we are building, and at the time of writing all major LLMs (which provide the
+% sufficient level of intelligence that we are looking for) are hosted on the
+% cloud. As our app is hosted natively on this users machine, this means we must
+% also enable remote communication to the respective LLM API's.
+
+% From this perspective, the Blix application exists as a client to the LLM API
+% server, and must be able to perform remote HTTP requests as such. Google has
+% recently announced the release of their PaLM models as open source, however, and
+% so we are currently investigating the possibility of hosting the LLM locally on
+% the users machine. In such a situation the client-server architecture would
+% still apply, except that the server 'LLM API' would be hosted locally on the
+% users machine, and all communication would be done over the loopback interface.
 
 \section{Constraints}
 
