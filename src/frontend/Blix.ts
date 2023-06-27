@@ -45,11 +45,6 @@ async function setInitialStores() {
     node1.pos.x = 100;
     node1.pos.y = 100;
 
-    graphMall.update((mall) => {
-      // Only update the graph that has changed
-      mall.refreshGraph(uiGraph.uuid, uiGraph);
-
-      return mall;
-    });
+    graphMall.refreshGraph(uiGraph.uuid, uiGraph);
   }
 }

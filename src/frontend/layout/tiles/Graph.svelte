@@ -1,49 +1,39 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
   import { Svelvet } from "svelvet";
-  import { graphMall } from "../../stores/GraphStore";
+  import { graphMall, GraphNode } from "../../stores/GraphStore";
   import PluginNode from "../../graph/PluginNode.svelte";
+  import { type Readable } from "svelte/store";
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
   export let panelId = Math.round(10000000 * Math.random()).toString();
 
-  let graphIds: any;
-  let graphId: any;
+  let graphIds = graphMall.getAllGraphUUIDsReactive();
+  $: graphId = $graphIds[0]; //Always use the first graph
 
-  graphMall.subscribe((mall) => {
-    console.log("Mall updated");
-    graphIds = mall.getAllGraphUUIDs();
-    graphId = graphIds[0];
-  });
-
-  // export let graphId = graphIds[0]; //TODO: Put this in a selectable dropdown
-  let thisGraphStore = $graphMall.getGraph(graphId);
-
-  $: {
-    $thisGraphStore.nodes;
-    thisGraphStore = thisGraphStore;
-  }
+  $: thisGraphStore = graphMall.getGraphReactive(graphId);
+  let graphNodes: Readable<GraphNode[]> | undefined;
+  $: graphNodes = $thisGraphStore?.getNodesReactive();
 </script>
 
 <div class="hoverElements">
-  <button on:click="{() => thisGraphStore.addNode()}">Add Node</button>
-  <button on:click="{() => (thisGraphStore = thisGraphStore)}">Refresh</button>
+  <!-- <button on:click="{() => $thisGraphStore?.addNode()}">Add Node</button> -->
+  <!-- <button on:click="{() => (thisGraphStore = thisGraphStore)}">Refresh</button> -->
   <select name="graphPicker" class="dropdown" bind:value="{graphId}">
-    {#each graphIds as id}
+    {#each $graphIds as id}
       <option value="{id}">{id.slice(0, 8)}</option>
     {/each}
   </select>
 </div>
 
 {#if thisGraphStore}
-  {#key graphId}
-    <Svelvet id="my-canvas" zoom="{0.7}" minimap theme="custom-dark">
-      {#each Object.entries($thisGraphStore.nodes) as [nodeId, _]}
-        <PluginNode graphId="{graphId}" nodeId="{nodeId}" svelvetNodeId="{panelId}-{nodeId}" />
-      {/each}
-    </Svelvet>
-  {/key}
+  <!-- {JSON.stringify($graphNodes)} -->
+  <Svelvet id="my-canvas" zoom="{0.7}" minimap theme="custom-dark">
+    {#each $graphNodes || [] as node}
+      <PluginNode graphId="{graphId}" node="{node}" svelvetNodeId="{panelId}-{node.id}" />
+    {/each}
+  </Svelvet>
 {:else}
   <div>Graph store not found</div>
 {/if}

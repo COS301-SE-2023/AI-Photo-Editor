@@ -10,11 +10,6 @@ export class ClientGraphApi implements ElectronWindowApi<ClientGraphApi> {
   graphChanged(graphUUID: UUID, newState: UIGraph): void {
     // console.log("GRAPH CHANGED", graphUUID, newState);
 
-    graphMall.update((mall) => {
-      // Only update the graph that has changed
-      mall.refreshGraph(graphUUID, newState);
-
-      return mall;
-    });
+    graphMall.refreshGraph(graphUUID, newState);
   }
 }

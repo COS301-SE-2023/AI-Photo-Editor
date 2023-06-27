@@ -1,9 +1,16 @@
 <script lang="ts">
   import { graphMall } from "stores/GraphStore";
   import { projectStore } from "stores/ProjectStore";
+  import { get } from "svelte/store";
 
-  export let graphId = $graphMall.getAllGraphUUIDs()[0]; //TODO: Put this in a selectable dropdown
-  $: thisGraphStore = $graphMall.getGraph(graphId);
+  let graphIds = graphMall.getAllGraphUUIDsReactive();
+
+  // setInterval(() => {
+  //   console.log(get($graphMall[$graphIds[0]]));
+  // }, 3000);
+
+  // export let graphId = $graphMall.getAllGraphUUIDs()[0]; //TODO: Put this in a selectable dropdown
+  // $: thisGraphStore = $graphMall.getGraph(graphId);
 </script>
 
 <div class="content">
@@ -11,8 +18,11 @@
     <b>Graph Mall</b>: <br />
     {JSON.stringify($graphMall)}
     <hr />
-    <b>Graph Store</b>: <br />
-    {JSON.stringify($thisGraphStore)}
+    <b>Graph Stores</b>: <br />
+    {#each $graphIds as data}
+      {data.slice(0, 8)}: {JSON.stringify(get($graphMall[data]))}
+      <br />
+    {/each}
     <hr />
     <b>Project Store</b>: <br />
     {JSON.stringify($projectStore)}

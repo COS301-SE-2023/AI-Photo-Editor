@@ -1,24 +1,25 @@
 <script lang="ts">
-  import { Node, Slider, generateInput /* generateOutput */, type GraphStore } from "svelvet";
-  import { graphMall } from "../stores/GraphStore";
+  import { Node, Slider, generateInput } from "svelvet";
+  import { GraphNode, graphMall } from "../stores/GraphStore";
   import { writable } from "svelte/store";
   // import NodeUiFragment from "./NodeUIFragment.svelte";
 
   export let graphId: string;
-  export let nodeId: string;
+  export let node: GraphNode;
   export let svelvetNodeId: string;
-
-  let thisGraphStore = $graphMall.getGraph(graphId);
 
   // Parameter store
   type Inputs = { width: number };
   const initialData: Inputs = { width: 2.5 };
   const inputs = generateInput(initialData);
 
-  const nodePos = writable($thisGraphStore.nodes[nodeId]?.pos);
+  const nodePos = writable(node.pos);
 
   nodePos.subscribe(async (pos) => {
-    await thisGraphStore.setNodePos(nodeId, pos);
+    graphMall.updateNode(graphId, node.id, (node) => {
+      node.pos = pos;
+      return node;
+    });
   });
 </script>
 
@@ -38,7 +39,7 @@ height="{graphNode.dims.h}" -->
   >
     <div class="node">
       <div class="header">
-        <h1>{$thisGraphStore.nodes[nodeId].name}</h1>
+        <h1>{node.name}</h1>
       </div>
       <!--  -->
       <div class="node-body">
