@@ -18,8 +18,7 @@
 </script>
 
 <div class="hoverElements">
-  <!-- <button on:click="{() => $thisGraphStore?.addNode()}">Add Node</button> -->
-  <!-- <button on:click="{() => (thisGraphStore = thisGraphStore)}">Refresh</button> -->
+  <button on:click="{() => $thisGraphStore?.addNode()}">Add Node</button>
   <select name="graphPicker" class="dropdown" bind:value="{graphId}">
     {#each $graphIds as id}
       <option value="{id}">{id.slice(0, 8)}</option>
