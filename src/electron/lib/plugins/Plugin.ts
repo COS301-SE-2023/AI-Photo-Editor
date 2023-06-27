@@ -13,6 +13,7 @@ import { NodeBuilder } from "./builders/NodeBuilder";
 import Main from "electron/main";
 import type { MainWindow } from "@electron/lib/api/WindowApi";
 import { dialog } from "electron";
+import { UUID } from "@shared/utils/UniqueEntity";
 
 export type PluginSignature = string;
 export type NodeSignature = string;
@@ -85,7 +86,7 @@ export class Plugin {
 
           blix.commandRegistry.addInstance(
             pluginModule.commands[cmd](
-              new CommandPluginContext(cmd, this.packageData.name, blix.mainWindow)
+              new CommandPluginContext(cmd, this.packageData.name, blix)
             ) as CommandInstance
           );
         }
@@ -135,20 +136,21 @@ class CommandPluginContext extends PluginContext {
   private description: string;
   private icon: string;
   private command: any;
-  private mainWindow: MainWindow;
+  private blix: Blix;
 
-  constructor(name: string, plugin: string, mainWindow: MainWindow | null) {
+  constructor(name: string, plugin: string, blix: Blix) {
     super();
     this.plugin = plugin;
     this.name = name;
     this.description = "";
     this.icon = "";
     this.command = "";
+    this.blix = blix;
   }
 
-  public get getMainWindow() {
-    return this.mainWindow;
-  }
+  // public get getMainWindow() {
+  //   return this.mainWindow;
+  // }
 
   public setDescription(description: string) {
     this.description = description;
@@ -175,11 +177,12 @@ class CommandPluginContext extends PluginContext {
     );
   }
 
-  public async createDialogBox(options: string) {
-    const result = await dialog.showOpenDialog(this.mainWindow, {
-      properties: ["openFile"],
-      filters: [{ name: "Projects", extensions: ["*"] }],
-    });
+  public loadProject(options: "openFile" | "openDirectory" | "multiSelections") {
+    this.blix.projectManager.loadProject(options);
+  }
+
+  public saveCurrentProject(project: UUID) {
+    this.blix.projectManager.saveCurrentProject(project);
   }
 }
 
