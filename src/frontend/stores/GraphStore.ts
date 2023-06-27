@@ -39,7 +39,7 @@ function createGraphStore(graphUUID: GraphUUID) {
       newNode.pos.x = Math.round(1000 * Math.random());
       newNode.pos.y = Math.round(1000 * Math.random());
       newNode.dims.h = Math.round(100 + 200 * Math.random());
-      graph.nodes.push(newNode);
+      graph.nodes[newNode.uuid] = newNode;
       return graph;
     });
 
@@ -55,7 +55,28 @@ function createGraphStore(graphUUID: GraphUUID) {
     return false;
   }
 
-  return new GraphStore(subscribe, addEdge, addNode, removeEdge, removeNode, refreshStore);
+  async function setNodePos(nodeId: string, pos: { x: number; y: number }) {
+    const res = await window.apis.graphApi.setNodePos("");
+
+    update((graph) => {
+      if (!graph.nodes[nodeId]) return graph;
+
+      graph.nodes[nodeId].pos = pos;
+      graph.nodes[nodeId] = graph.nodes[nodeId];
+      return graph;
+    });
+    return false;
+  }
+
+  return new GraphStore(
+    subscribe,
+    addEdge,
+    addNode,
+    removeEdge,
+    removeNode,
+    setNodePos,
+    refreshStore
+  );
 }
 
 // TODO: Return a GraphStore in createGraphStore for typing
@@ -66,6 +87,7 @@ class GraphStore {
     public addNode: () => Promise<boolean>,
     public removeEdge: () => Promise<boolean>,
     public removeNode: () => Promise<boolean>,
+    public setNodePos: (nodeId: string, pos: { x: number; y: number }) => Promise<boolean>,
     public refreshStore: (newGraph: UIGraph) => void
   ) {}
 }
@@ -75,7 +97,7 @@ type GraphNodeUUID = UUID;
 type GraphAnchorUUID = UUID;
 
 export class UIGraph {
-  nodes: GraphNode[] = [];
+  nodes: { [key: GraphNodeUUID]: GraphNode } = {};
 
   constructor(public uuid: GraphUUID) {}
 }
@@ -104,35 +126,10 @@ class GraphAnchor {
 
 // The public area with all the cool stores 😎
 class GraphMall {
-  private graphStores: { [key: GraphUUID]: GraphStore };
+  public graphStores: { [key: GraphUUID]: GraphStore };
 
   constructor() {
-    this.graphStores = {
-      // default: createGraphStore("default"),
-    };
-
-    // const temp = new UIGraph();
-    // const node1 = new GraphNode("1");
-    // const node2 = new GraphNode("2");
-    // const node3 = new GraphNode("3");
-
-    // temp.nodes.push(node1);
-    // temp.nodes.push(node2);
-    // temp.nodes.push(node3);
-
-    // node1.pos.x = 100;
-    // node1.pos.y = 100;
-
-    // node2.pos.x = -100;
-    // node2.pos.y = -100;
-
-    // node3.pos.x = 50;
-    // node3.dims.w = 100;
-
-    // node1.connections.push(["1", "2"]);
-    // node2.connections.push(["2", "1"]);
-
-    // this.graphStores.default.refreshStore(temp);
+    this.graphStores = {};
   }
 
   public refreshGraph(graphUUID: GraphUUID, newGraph: UIGraph) {
@@ -141,6 +138,10 @@ class GraphMall {
     }
 
     this.graphStores[graphUUID].refreshStore(newGraph);
+  }
+
+  public getAllGraphUUIDs(): GraphUUID[] {
+    return Object.keys(this.graphStores).map((uuid) => uuid);
   }
 
   public getGraph(graphUUID: GraphUUID): GraphStore {

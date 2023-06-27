@@ -2,30 +2,19 @@
 <script lang="ts">
   import Image from "../../components/Image.svelte";
 
-  let test: string;
-
-  function asdf(e: Event) {
-    test = (e.target as HTMLInputElement).value;
-  }
-
-  let options = ["asdf", "fdsa", "qwer", "rewq"];
-
-  let selected: string;
+  let options = ["svelteSoHot"];
 </script>
 
 <div class="fullPane">
-  {test}
-
-  <!-- Rather use bind: -->
-  <input type="text" name="asdf" id="asdf" on:input="{asdf}" />
-
-  <select value="{selected}">
-    {#each options as option}
-      <option value="{option}">
-        {option}
-      </option>
-    {/each}
-  </select>
+  <div class="hover">
+    <select value="{options[0]}">
+      {#each options as option}
+        <option value="{option}">
+          {option}
+        </option>
+      {/each}
+    </select>
+  </div>
 
   <div class="media">
     <Image src="images/svelte-so-hot.jpg" />
@@ -41,8 +30,15 @@
   }
 
   .media {
-    width: 100%;
+    width: calc(100%-2em);
+    margin: auto;
     height: auto;
-    border: 1px solid blue;
+  }
+
+  .hover {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    color: black;
   }
 </style>

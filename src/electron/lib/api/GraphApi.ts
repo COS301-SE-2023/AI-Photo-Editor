@@ -33,6 +33,10 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
     return;
   }
 
+  async setNodePos(uuid: UUID) {
+    return this._blix.graphManager.getGraph(uuid);
+  }
+
   async getGraph(uuid: UUID) {
     return this._blix.graphManager.getGraph(uuid);
   }

@@ -11,4 +11,9 @@ export class ClientProjectApi implements ElectronWindowApi<ClientProjectApi> {
     // console.log("Project Changed", state);
     projectManager.updateProject(state);
   }
+
+  public loadProject(state: CommonProject): void {
+    // console.log("Project Loaded", state);
+    projectManager.loadProject(state);
+  }
 }

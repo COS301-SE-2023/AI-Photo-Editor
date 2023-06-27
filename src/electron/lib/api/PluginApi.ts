@@ -15,8 +15,8 @@ export class PluginApi implements ElectronMainApi<PluginApi> {
     this._blix.commandRegistry.addInstance(instance);
   }
 
-  async runCommand(command: string) {
-    this._blix.commandRegistry.runCommand(command);
+  async runCommand(command: string, options?: { data: any }) {
+    this._blix.commandRegistry.runCommand(command, options);
   }
 
   async getCommands() {

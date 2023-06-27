@@ -56,7 +56,7 @@ export class GraphManager {
     return Object.keys(this._graphs).map((uuid) => uuid);
   }
 
-  // coreToUiGraph(graph: CoreGraph) {
-
-  // }
+  coreToUiGraph(graph: CoreGraph) {
+    return;
+  }
 }
