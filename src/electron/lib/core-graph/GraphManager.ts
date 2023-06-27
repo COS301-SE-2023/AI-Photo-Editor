@@ -1,8 +1,8 @@
 import Main from "electron/main";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph } from "./Graph";
-import type { MainWindow } from "@electron/lib/api/WindowApi";
-import type { UIGraph } from "@frontend/stores/GraphStore";
+import type { MainWindow } from "../api/WindowApi";
+import type { UIGraph } from "../../../frontend/stores/GraphStore";
 
 // This class stores all the graphs amongst all open projects
 // Projects index into this store at runtime to get their graphs

@@ -13,5 +13,10 @@
   "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node", "svelte"],
   "coverageDirectory": "coverage",
-  "testPathIgnorePatterns": ["\bbuild\b","integration"]
+  "testPathIgnorePatterns": ["\bbuild\b"],
+  "moduleNameMapper": {
+    "^@electron/(.*)$": "./src/electron/$1",
+    "^@frontend/(.*)$": "./src/frontend/$1",
+    "^@shared/(.*)$": "./src/shared/$1"
+}
 }
