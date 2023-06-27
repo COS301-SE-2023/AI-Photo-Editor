@@ -20,7 +20,6 @@ const nodes = {
     }
     ,"Jake": (context) => {
         nodeBuilder = context.instantiate("hello-plugin","Jake");
-        console.log("Jake");
     }
 }
 

@@ -15,8 +15,8 @@
   "coverageDirectory": "coverage",
   "testPathIgnorePatterns": ["\bbuild\b"],
   "moduleNameMapper": {
-    "^@electron/(.*)$": "<rootDir>/src/electron/$1",
-    "^@frontend/(.*)$": "<rootDir>/src/frontend/$1",
-   "^@shared/(.*)$": "<rootDir>/src/shared/$1"
+    "^@electron/(.*)$": "./src/electron/$1",
+    "^@frontend/(.*)$": "./src/frontend/$1",
+    "^@shared/(.*)$": "./src/shared/$1"
 }
 }

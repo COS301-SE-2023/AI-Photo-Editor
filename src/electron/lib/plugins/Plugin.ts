@@ -13,7 +13,7 @@ import { NodeBuilder } from "./builders/NodeBuilder";
 import Main from "electron/main";
 import type { MainWindow } from "../api/WindowApi";
 import { dialog } from "electron";
-import { UUID } from "@shared/utils/UniqueEntity";
+import { UUID } from "../../../shared/utils/UniqueEntity";
 
 export type PluginSignature = string;
 export type NodeSignature = string;

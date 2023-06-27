@@ -48,63 +48,63 @@ describe("Test builder propagations", () => {
       });
 });
 
-// describe("Test plugin integrations", () => {
-//     let plugin : Plugin;
-//     let blix : Blix;
-//     let mainWindow : MainWindow;
+describe("Test plugin integrations", () => {
+    let plugin : Plugin;
+    let blix : Blix;
+    let mainWindow : MainWindow;
 
 
-//     const pack : any = {
-//         name: 'hello-plugin',
-//         displayName: 'Hello Plugin',
-//         description: 'A plugin that says hello',
-//         version: '0.0.1',
-//         author: 'Rec1dite',
-//         repository: '',
-//         contributes: { commands: [ [Object] ], nodes: [ [Object] ] },
-//         main: 'src/main.js',
-//         renderer: 'src/renderer.js',
-//         devDependencies: { '@types/node': '^12.0.0', typescript: '^3.4.5' },
-//         comments: [ 'This property will be completely ignored' ]
-//       };
+    const pack : any = {
+        name: 'hello-plugin',
+        displayName: 'Hello Plugin',
+        description: 'A plugin that says hello',
+        version: '0.0.1',
+        author: 'Rec1dite',
+        repository: '',
+        contributes: { commands: [ [Object] ], nodes: [ [Object] ] },
+        main: 'src/main.js',
+        renderer: 'src/renderer.js',
+        devDependencies: { '@types/node': '^12.0.0', typescript: '^3.4.5' },
+        comments: [ 'This property will be completely ignored' ]
+      };
 
-//       mainWindow = new BrowserWindow({
-//         width: 1300,
-//         height: 1000,
-//         webPreferences: {
-//           devTools: !true,
-//           contextIsolation: true,
-//           nodeIntegration: false,
-//           sandbox: true,
-//           preload: join(__dirname, "preload.js"),
-//         },
-//         // Set icon for Windows and Linux
-//         icon: "public/images/blix_64x64.png",
-//         titleBarStyle: "hidden",
-//         trafficLightPosition: { x: 10, y: 10 },
-//       }) as MainWindow;
+      mainWindow = new BrowserWindow({
+        width: 1300,
+        height: 1000,
+        webPreferences: {
+          devTools: !true,
+          contextIsolation: true,
+          nodeIntegration: false,
+          sandbox: true,
+          preload: join(__dirname, "preload.js"),
+        },
+        // Set icon for Windows and Linux
+        icon: "public/images/blix_64x64.png",
+        titleBarStyle: "hidden",
+        trafficLightPosition: { x: 10, y: 10 },
+      }) as MainWindow;
 
       
 
-//     const plugDir : string = "/home/centurion/Desktop/Centurion/Coding/301/Capstone/AI-Photo-Editor/blix-plugins/base-plugin";
-//     const main : string = "/home/centurion/Desktop/Centurion/Coding/301/Capstone/AI-Photo-Editor/blix-plugins/base-plugin/src/main.js";
+    const plugDir : string = "/home/centurion/Desktop/Centurion/Coding/301/Capstone/AI-Photo-Editor/blix-plugins/base-plugin";
+    const main : string = "/home/centurion/Desktop/Centurion/Coding/301/Capstone/AI-Photo-Editor/blix-plugins/base-plugin/src/main.js";
 
 
-//     beforeEach(() => {
-//       jest.clearAllMocks();
-//       plugin = new Plugin(pack,plugDir,main);
-//       blix = new Blix(mainWindow);
-//     });
+    beforeEach(() => {
+      jest.clearAllMocks();
+      plugin = new Plugin(pack,plugDir,main);
+      blix = new Blix(mainWindow);
+    });
 
-//     test("Plugin should send nodes to toolbox registry", () => {
+    test("Plugin should send nodes to toolbox registry", () => {
 
-//         plugin.requireSelf(blix);
+        plugin.requireSelf(blix);
 
-//         const tools =  Object.values(blix.toolbox.getRegistry);
-//         expect(blix.toolbox.getRegistry.length).toEqual();
-//       });
+        const tools =  Object.values(blix.toolbox.getRegistry);
+        expect(blix.toolbox.getRegistry.length).toEqual(2);
+      });
   
-//       test("addDropdown should affect nodeUi's children", () => {
+      test("addDropdown should affect nodeUi's children", () => {
 
-//       });
-// });
+      });
+});
