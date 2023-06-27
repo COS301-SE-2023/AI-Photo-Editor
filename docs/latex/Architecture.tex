@@ -117,12 +117,6 @@ main approaches: decomposition and design based on quality requirements.
 	usable.
 \end{enumerate}
 
-
-\section{Architectural Styles}
-
-
-\pagebreak
-
 \section{Quality Requirements}
 
 \subsection{Performance}
@@ -145,6 +139,19 @@ main approaches: decomposition and design based on quality requirements.
 	and RAM usage and observing performance during peak usage.
 \end{enumerate}
 
+\subsection{Security} 
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] {\bf Description}: The application must ensure the
+	confidentiality, integrity, and availability of user data by protecting
+	against unauthorized access, disclosure, modification, or destruction.
+	Furthermore, the application and its plugin system must be resilient to
+	attacks from third-party entities and malicious users.
+
+	\item[\textbullet] {\bf Quantification}: The application should isolate and
+	sandbox plugin code to prevent it from accessing sensitive user information
+	and core system functionality.  The application should use encryption for
+	sensitive user data both at-rest and in-transit. 
+\end{enumerate}
 
 \subsection{Customizability}
 \begin{enumerate}[label*=\arabic*.]
@@ -179,20 +186,6 @@ main approaches: decomposition and design based on quality requirements.
 	
 \end{enumerate}
 
-\subsection{Security} 
-\begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] {\bf Description}: The application must ensure the
-	confidentiality, integrity, and availability of user data by protecting
-	against unauthorized access, disclosure, modification, or destruction.
-	Furthermore, the application and its plugin system must be resilient to
-	attacks from third-party entities and malicious users.
-
-	\item[\textbullet] {\bf Quantification}: The application should isolate and
-	sandbox plugin code to prevent it from accessing sensitive user information
-	and core system functionality.  The application should use encryption for
-	sensitive user data both at-rest and in-transit. 
-\end{enumerate}
-
 \subsection{Compatibility} 
 \begin{enumerate}[label*=\arabic*.]
 	\item[\textbullet] {\bf Description}: The application must be compatible
@@ -207,9 +200,16 @@ main approaches: decomposition and design based on quality requirements.
 	aforementioned formats without any data loss or corruption. 
 \end{enumerate}
 
+\pagebreak
+
 \section{Architectural Design \& Patterns}
 Four main architectural patterns where identified to decompose the base system
 into components and subsystems.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=1\textwidth,height=\textheight,keepaspectratio,rotate=0,origin=c]{../diagramPng/SystemArchitecture.png}
+\end{figure}
 
 \subsection{Model-View-Controller (MVC)}
 The MVC pattern was chosen in order to create clear distinction between the user
@@ -275,6 +275,7 @@ the Service-Oriented architecture helps us to create a comprehensive and efficie
 This allows for seamless exchanging of information among the services, as well as smooth updating and enhancement of the system when new AI models become available or when updates to existing models are released.
 Consequently, the Service-Oriented architecture maximizes the potential of our AI-driven system by promoting modularity, interoperability, and the rapid development of new features and capabilities.
 
+
 % \subsection{Client-Server}
 % The Large Language Model AI assistant is a significant part of the system which
 % we are building, and at the time of writing all major LLMs (which provide the
@@ -290,8 +291,11 @@ Consequently, the Service-Oriented architecture maximizes the potential of our A
 % still apply, except that the server 'LLM API' would be hosted locally on the
 % users machine, and all communication would be done over the loopback interface.
 
+
 \section{Constraints}
 
+No special constraints or limitations have been identified or explicitly
+communicated by the client.
 
 \section{Technology Choices}
 
@@ -373,7 +377,7 @@ ported to other platforms.
 	create a desktop application and a web application.
 	\item[\textbullet] Leverages the power of Node.js modules to provide 
 \end{enumerate}
-
+\pagebreak
 \textbf{Cons:}
 
 \begin{enumerate}[label*=\arabic*.]
