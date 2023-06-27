@@ -25,21 +25,21 @@ logger.info(
 
 let mainWindow: MainWindow | null = null;
 let notification: Notification | null = null;
+let blix: Blix;
 
 app.on("ready", () => {
   createMainWindow();
 
-  if (!mainWindow)
-    return
+  if (!mainWindow) return;
 
-  const blix = new Blix(mainWindow);
+  blix = new Blix(mainWindow);
   exposeMainApis(blix);
   const pluginManager = new PluginManager(blix);
   pluginManager.loadPlugins();
-
+  // blix.projectManager.openRecentProjects();
   // Set icon for macOS
   if (process.platform === "darwin") {
-    app.dock.setIcon("public/images/blix_64x64.png");
+    app.dock.setIcon("public/images/gaeblix.png");
   }
 });
 
@@ -55,7 +55,7 @@ function createMainWindow() {
       preload: join(__dirname, "preload.js"),
     },
     // Set icon for Windows and Linux
-    icon: "public/images/blix_64x64.png",
+    icon: "public/images/gaeblix.png",
     titleBarStyle: "hidden",
     trafficLightPosition: { x: 10, y: 10 },
   }) as MainWindow;
@@ -90,8 +90,14 @@ function createMainWindow() {
 // those two events are completely optional to subscrbe to, but that's a common way to get the
 // user experience people expect to have on macOS: do not quit the application directly
 // after the user close the last window, instead wait for Command + Q (or equivalent).
+// Noted. Will look into this later.
 app.on("window-all-closed", () => {
+  // blix.projectManager.saveAllProjects();
   if (process.platform !== "darwin") app.quit();
+});
+
+app.on("will-quit", () => {
+  blix.projectManager.saveAllProjects();
 });
 
 app.on("activate", () => {
@@ -184,11 +190,6 @@ autoUpdater.on("error", (err) => {
   notification.show();
 });
 
-const tempDirPath = join(app.getPath("userData"), "temp");
-
-if (!fs.existsSync(tempDirPath)) {
-  fs.mkdirSync(tempDirPath);
-}
 // import { TestGraph } from "./lib/core-graph/GraphTesting";
 
 // const t: TestGraph = new TestGraph();

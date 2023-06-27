@@ -3,6 +3,7 @@
   import { commandStore } from "../stores/CommandStore";
   import Shortcuts from "../Shortcuts.svelte";
   import type { ICommand } from "../../shared/types/index";
+  import { onDestroy } from "svelte";
 
   let showPalette = false;
   let expanded = false;
@@ -21,7 +22,7 @@
   $commandStore; // Use the shorthand like this
 
   // TODO: Get rid of this
-  const categoriesOriginals: Category[] = [
+  let categoriesOriginals: Category[] = [
     {
       title: "Recent",
       items: [],
@@ -37,6 +38,27 @@
   ];
 
   let categories = categoriesOriginals;
+
+  const unsubscribe = commandStore.subscribe((state) => {
+    categoriesOriginals = [
+      {
+        title: "Recent",
+        items: [],
+      },
+      {
+        title: "Favourite",
+        items: [],
+      },
+      {
+        title: "All",
+        items: state.commands,
+      },
+    ];
+
+    categories = categoriesOriginals;
+  });
+
+  onDestroy(unsubscribe);
 
   function filterList(list: any[]): any[] {
     return list.filter((rowObj: any) => {
@@ -174,7 +196,9 @@
                 {#each category.items as item, j}
                   <PaletteItem
                     title="{item.displayName}"
-                    description="{item.description}"
+                    description="{item.signature.split('.')[0] === 'base-plugin'
+                      ? 'Default'
+                      : item.signature.split('.')[0]}"
                     selected="{i == selectedCategory && j == selectedItem}"
                     on:itemClicked="{() => handleAction(item)}"
                   />

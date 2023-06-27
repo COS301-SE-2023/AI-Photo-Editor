@@ -6,13 +6,16 @@ import { join } from "path";
 import { Plugin } from "./Plugin";
 import { Blix } from "../Blix";
 import { promisify } from "util";
+import chokibar from "chokidar";
 
 export class PluginManager {
   // Stores plugins that have been loaded from disk
   // The plugins have not necessarily been required/activated
   private loadedPlugins: Plugin[] = [];
 
-  constructor(private blix: Blix) {}
+  constructor(private blix: Blix) {
+    this.watchPlugins();
+  }
 
   get pluginPaths() {
     const appPath = app.getAppPath();
@@ -28,6 +31,18 @@ export class PluginManager {
     }
 
     return paths;
+  }
+
+  public watchPlugins() {
+    // This is only checking the first plugin directory
+    chokibar
+      .watch(".", { depth: 0, ignoreInitial: true, cwd: this.pluginPaths[0] })
+      .on("addDir", async (plugin) => {
+        await this.loadPlugin(plugin, this.pluginPaths[0]);
+        this.blix.mainWindow?.apis.commandRegistryApi.registryChanged(
+          this.blix.commandRegistry.getCommands()
+        );
+      });
   }
 
   public loadPlugins() {

@@ -11,7 +11,7 @@ export class NodeBuilder implements PluginContextBuilder {
   private ui: NodeUIParent | null;
 
   public validate(): void {
-    if (this.node.getSignature === "") {
+    if (this.node.getSignature === "" || this.node.getSignature === null) {
       throw new Error("Node is not instantiated");
     }
 
@@ -73,7 +73,7 @@ export class NodeBuilder implements PluginContextBuilder {
 export class NodeUIBuilder {
   constructor(private node: NodeUIParent) {}
 
-  public addButton(label: string, param: string): NodeUIBuilder {
+  public addButton(label: string, param: any): NodeUIBuilder {
     this.node.addButton(label, param);
     return this;
   }
@@ -89,9 +89,24 @@ export class NodeUIBuilder {
     return this;
   }
 
-  public addDropdown(label: string, builder: NodeUIBuilder) {
-    builder.node.label = label;
-    this.node.addDropdown(builder.node);
+  public addDropdown(label: string, builder: NodeUIBuilder): NodeUIBuilder {
+    this.node.addDropdown(label, builder.node);
+    return this;
+  }
+
+  public addNumberInput(label: string): NodeUIBuilder {
+    this.node.addNumberInput(label);
+    return this;
+  }
+
+  public addImageInput(label: string): NodeUIBuilder {
+    this.node.addImageInput(label);
+    return this;
+  }
+
+  // We need to discuss how to handle color pickers
+  public addColorPicker(label: string, param: any): NodeUIBuilder {
+    this.node.addColorPicker(label, param);
     return this;
   }
 

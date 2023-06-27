@@ -5,7 +5,6 @@ import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/WindowApi";
 import { GraphManager } from "./core-graph/GraphManager";
 
-
 // Encapsulates the backend representation for
 // the entire running Blix application
 export class Blix {

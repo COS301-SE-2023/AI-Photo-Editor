@@ -8,7 +8,7 @@ export class ClientGraphApi implements ElectronWindowApi<ClientGraphApi> {
   //       implications though if the frontend/backend someone got out-of-sync.
 
   graphChanged(graphUUID: UUID, newState: UIGraph): void {
-    console.log("GRAPH CHANGED", graphUUID, newState);
+    // console.log("GRAPH CHANGED", graphUUID, newState);
 
     graphMall.update((mall) => {
       // Only update the graph that has changed

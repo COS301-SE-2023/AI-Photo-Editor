@@ -18,6 +18,7 @@
   import Blank from "./tiles/Blank.svelte";
   import Debug from "./tiles/Debug.svelte";
   import WebView from "./tiles/WebView.svelte";
+  import ShortcutSettings from "./tiles/ShortcutSettings.svelte";
 
   // import { scale } from "svelte/transition";
 
@@ -175,6 +176,7 @@
     media: Media,
     debug: Debug,
     webview: WebView,
+    shortcutSettings: ShortcutSettings,
   };
 
   // Wraps the above dict safely
@@ -210,7 +212,7 @@
           <PanelBlip dock="tr" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.t, dockH.r])}" />
           <PanelBlip dock="bl" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.l])}" />
           <PanelBlip dock="br" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.r])}" />
-          <TileSelector />
+          <TileSelector bind:type="{panel.content}" current="{panel.content}" />
           <!-- {:else} -->
         {/if}
         <!-- Subpanels alternate horiz/vert -->

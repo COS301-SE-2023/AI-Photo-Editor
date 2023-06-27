@@ -13,15 +13,15 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
     this._projMgr = this._blix.projectManager;
   }
 
+  // ========================================
+  // 2 way communication
+  // ========================================
+
   async createProject(): Promise<IpcResponse<CommonProject>> {
     return {
       success: true,
       data: this._projMgr.createProject().mapToCommonProject(),
     };
-  }
-
-  async closeProject(uuid: UUID) {
-    this._projMgr.closeProject(uuid);
   }
 
   async renameProject(uuid: UUID, name: string): Promise<IpcResponse<string>> {
@@ -36,6 +36,22 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
         data: "Project renamed failed.",
       };
     }
+  }
+
+  async getRecentProjects(): Promise<IpcResponse<CommonProject[]>> {
+    const projects: CommonProject[] = this._projMgr.getRecentProjects().data;
+    return {
+      success: true,
+      data: projects ? projects : [],
+    };
+  }
+
+  // ========================================
+  // 1 way communication
+  // ========================================
+
+  async closeProject(uuid: UUID) {
+    this._projMgr.closeProject(uuid);
   }
 
   // async getOpenProjects(): Promise<FrontendProject[]> {

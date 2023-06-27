@@ -41,6 +41,14 @@ function createProjectManager() {
     }));
   }
 
+  function loadProject(project: CommonProject) {
+    store.update((state) => ({
+      ...state,
+      projectStores: [...state.projectStores, createNewProjectStore(project)],
+      activeProject: project.uuid,
+    }));
+  }
+
   async function closeProject(uuid: UUID) {
     store.update((state) => {
       const activeProject =
@@ -89,7 +97,6 @@ function createProjectManager() {
     // to be changed later
   }
 
-
   // TODO: Rewrite from old code
   // async function renameProject(uuid: UUID, name: string) {
   //   update((state) => {
@@ -109,10 +116,11 @@ function createProjectManager() {
   return {
     subscribe: store.subscribe,
     createProject,
+    loadProject,
     closeProject,
     setActiveProject,
     getActiveProject,
-    updateProject
+    updateProject,
   };
 }
 

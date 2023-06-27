@@ -3,18 +3,50 @@
 
 <script lang="ts">
   let open = false;
+  export let type: string;
+  export let current: string;
 
-  let tileOptions = ["Graph", "Media", "Inspector", "PromptBox"];
+  import Fa from "svelte-fa";
+  // import { faFlag } from '@fortawesome/free-solid-svg-icons'
+  // import { faGithub } from '@fortawesome/free-brands-svg-icons';
+  import {
+    faDiagramProject,
+    faImage,
+    faMagnifyingGlass,
+    faTerminal,
+    faKeyboard,
+    faCode,
+  } from "@fortawesome/free-solid-svg-icons";
+
+  // TODO: Clean this up and bundle it with the string -> tile mappings in Panel.svelte
+  const tileIcons: { [key: string]: any } = {};
+  tileIcons["graph"] = faDiagramProject;
+  tileIcons["media"] = faImage;
+  tileIcons["inspector"] = faMagnifyingGlass;
+  tileIcons["promptBox"] = faTerminal;
+  tileIcons["shortcutSettings"] = faKeyboard;
+  tileIcons["debug"] = faCode;
 </script>
 
 <div class="tileSel" on:click="{() => (open = !open)}" on:keypress="{null}">
-  <div class="icon"></div>
+  <div class="icon"><Fa icon="{tileIcons[type]}" /></div>
 </div>
 {#if open}
   <div class="tileDialog" on:mouseleave="{() => (open = false)}">
-    {#each tileOptions as to}
+    {#each Object.keys(tileIcons) as to}
       <!-- {#each Array(50).fill("Some item") as to} -->
-      <div class="tileOption">{to}</div>
+      <div
+        class="tileOption"
+        on:click="{() => {
+          type = to;
+          open = false;
+        }}"
+        on:keydown="{null}"
+      >
+        <div class="innerTileOption">
+          <span class="padRight"><Fa icon="{tileIcons[to]}" /></span>{to}
+        </div>
+      </div>
     {/each}
   </div>
 {/if}
@@ -48,6 +80,10 @@
     text-align: center;
     display: inline-block;
     width: fit-content;
+  }
+
+  .padRight {
+    padding-right: 0.4rem;
   }
 
   .tileDialog {
@@ -84,5 +120,13 @@
 
   .tileOption {
     cursor: pointer;
+  }
+
+  .innerTileOption {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: center;
   }
 </style>

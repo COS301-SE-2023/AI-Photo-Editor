@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { derived, writable, get } from "svelte/store";
 
 export type ShortcutAction = `${string}.${string}`; // Actions must be nested at least one layer deep
 export type ShortcutString = string;
@@ -9,12 +9,14 @@ export class ShortcutCombo {
   ctrl: boolean;
   alt: boolean;
   shift: boolean;
+  meta: boolean;
 
-  constructor(keyCode: string, ctrl: boolean, alt: boolean, shift: boolean) {
+  constructor(keyCode: string, ctrl: boolean, alt: boolean, shift: boolean, meta: boolean) {
     this.keyCode = keyCode;
     this.ctrl = ctrl;
     this.alt = alt;
     this.shift = shift;
+    this.meta = meta;
   }
 
   public static cleanString(shortcutString: ShortcutString): ShortcutString {
@@ -22,7 +24,13 @@ export class ShortcutCombo {
   }
 
   public static fromEvent(event: KeyboardEvent): ShortcutCombo {
-    return new ShortcutCombo(event.code, event.ctrlKey, event.altKey, event.shiftKey);
+    return new ShortcutCombo(
+      event.code,
+      event.ctrlKey,
+      event.altKey,
+      event.shiftKey,
+      event.metaKey
+    );
   }
 
   // Valid shortcut strings:
@@ -47,46 +55,82 @@ export class ShortcutCombo {
       keyCode,
       parts.includes("ctrl"),
       parts.includes("alt"),
-      parts.includes("shift")
+      parts.includes("shift"),
+      parts.includes("meta")
     );
   }
 
   public get getString(): ShortcutString {
-    return `${this.ctrl ? "ctrl+" : ""}${this.alt ? "alt+" : ""}${this.shift ? "shift+" : ""}[${
-      this.keyCode
-    }]`;
+    return `${this.ctrl ? "ctrl+" : ""}${this.alt ? "alt+" : ""}${this.shift ? "shift+" : ""}${
+      this.meta ? "meta+" : ""
+    }[${this.keyCode}]`;
   }
 }
+
+type ShortcutsDict = { [key: ShortcutAction]: ShortcutString[] };
 
 // Maps actions to their respective shortcuts
 class ShortcutStore {
   // Fill default shortcuts here
-  shortcuts: { [key: ShortcutAction]: ShortcutString[] } = {
-    "blix.palette.toggle": ["ctrl+[KeyP]"],
+  shortcuts = writable<ShortcutsDict>({
+    "blix.palette.toggle": ["ctrl+[KeyP]", "meta+[KeyP]"],
     "blix.palette.show": [],
     "blix.palette.hide": ["[Escape]"],
     "blix.palette.scrollDown": ["[ArrowDown]", "ctrl+[KeyJ]", "[Tab]"],
     "blix.palette.scrollUp": ["[ArrowUp]", "ctrl+[KeyK]", "shift+[Tab]"],
     "blix.palette.selectItem": ["[Enter]"],
-  };
+  });
 
   public addActionShortcut(action: ShortcutAction, combo: ShortcutCombo) {
-    if (this.shortcuts[action] === undefined) {
-      this.shortcuts[action] = [];
-    }
-    this.shortcuts[action].push(combo.getString);
+    this.shortcuts.update((shortcuts) => {
+      if (shortcuts[action] === undefined) {
+        shortcuts[action] = [];
+      }
+      shortcuts[action].push(combo.getString);
+      return shortcuts;
+    });
   }
 
-  public getShortcuts(action: ShortcutAction): ShortcutString[] {
-    if (this.shortcuts[action] === undefined) {
+  public updateActionShortcut(action: ShortcutAction, index: number, combo: ShortcutCombo) {
+    this.shortcuts.update((shortcuts) => {
+      if (shortcuts[action] === undefined) {
+        shortcuts[action] = [];
+      }
+      if (shortcuts[action].length <= index) {
+        shortcuts[action].push(combo.getString);
+        return shortcuts;
+      }
+      shortcuts[action][index] = combo.getString;
+      return shortcuts;
+    });
+  }
+
+  public get subscribe() {
+    return this.shortcuts.subscribe;
+  }
+
+  public getShortcutsForAction(action: ShortcutAction): ShortcutString[] {
+    const sc = get(this.shortcuts);
+    if (sc[action] === undefined) {
       return [];
     }
-    return this.shortcuts[action];
+    return sc[action];
+  }
+
+  // Returns a derived store that only listens for the specified action
+  public getShortcutsForActionReactive(action: ShortcutAction) {
+    return derived(this.shortcuts, ($shortcuts) => {
+      if ($shortcuts[action] === undefined) {
+        return [];
+      }
+      return $shortcuts[action];
+    });
   }
 
   public checkShortcut(action: ShortcutAction, combo: ShortcutCombo): boolean {
-    return this.getShortcuts(action).includes(combo.getString);
+    return this.getShortcutsForAction(action).includes(combo.getString);
   }
 }
 
-export const shortcutsRegistry = writable<ShortcutStore>(new ShortcutStore());
+// export const shortcutsRegistry = writable<ShortcutStore>(new ShortcutStore());
+export const shortcutsRegistry = new ShortcutStore();

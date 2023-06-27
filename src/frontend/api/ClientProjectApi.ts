@@ -8,7 +8,7 @@ export class ClientProjectApi implements ElectronWindowApi<ClientProjectApi> {
   // an interval which emits an event in the ProjectManager in the backend as an
   // example
   projectChanged(state: CommonProject): void {
-    console.log("Project Changed", state);
+    // console.log("Project Changed", state);
     projectManager.updateProject(state);
   }
 }

@@ -78,8 +78,8 @@ export class CoreGraph extends UniqueEntity {
   public addNode(node: NodeInstance) {
     // Create New Node
     const n: Node = new Node(
-      node.getSignature.split("/")[1],
-      node.getSignature.split("/")[0],
+      node.getName,
+      node.getPlugin,
       node.getInputAnchorInstances,
       node.getOutputAnchorInstances
     );
@@ -137,6 +137,7 @@ export class CoreGraph extends UniqueEntity {
 
   private checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
     // TODO
+
     return false;
   }
 

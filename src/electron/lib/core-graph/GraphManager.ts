@@ -29,10 +29,10 @@ export class GraphManager {
     // UIGraph with the frontend nodes and anchors. Sorry that I didn't do this,
     // not sure if Jake can help with this cause he made the CoreGraph
     // setTimeout(() => {
-    //   // setInterval(() => {
-    //   //   if (this._mainWindow)
-    //   //     this._mainWindow?.apis.clientGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
-    //   // }, 5000);
+    //   setInterval(() => {
+    //     if (this._mainWindow)
+    //       this._mainWindow?.apis.clientGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
+    //   }, 5000);
     // }, 5000);
   }
 
