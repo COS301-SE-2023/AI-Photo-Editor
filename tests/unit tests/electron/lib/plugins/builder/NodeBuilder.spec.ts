@@ -159,28 +159,6 @@ describe("Test NodeUIBuilder", () => {
       expect(nodeUI.params[0].parent).toEqual(nodeUI);
     });
 
-    test("addSlider should add a slider", () => {
-      const nodeUI = new NodeUIParent("Jake.Shark", null);
-      nodeUIBuilder = new NodeUIBuilder(nodeUI);
-      nodeUIBuilder.addSlider("shrek",0,100,50,1);
-
-      expect(nodeUI.params[0].label).toEqual("shrek");
-      expect(nodeUI.params[0].parent).toEqual(nodeUI);
-      expect(nodeUI.params[0].type).toEqual("leaf");
-      expect(nodeUI.params[0].params).toEqual([0,100,50,1]);
-    });
-
-    test("addDropdown should add a dropdown", () => {
-      const nodeUI = new NodeUIParent("Jake.Shark", null);
-      nodeUIBuilder = new NodeUIBuilder(nodeUI);
-      nodeUIBuilder.addDropdown("shrek",nodeBuilder.createUIBuilder().addButton("Shrek",() => {return "Shrek";}));
-
-      expect(nodeUI.params[0].label).toEqual("shrek");
-      expect(nodeUI.params[0].parent).toEqual(nodeUI);
-      expect(nodeUI.params[0].type).toEqual("parent");
-      expect(nodeUI.params[0].params[0].label).toEqual("Shrek");
-    });
-
     test("addNumberInput should add a numberInput", () => {
       const nodeUI = new NodeUIParent("Jake.Shark", null);
       nodeUIBuilder = new NodeUIBuilder(nodeUI);

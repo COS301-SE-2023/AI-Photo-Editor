@@ -403,7 +403,7 @@ describe("Test CoreGraph", () => {
       });
   });
 
-  test("Test edge convering to JSON", () => {
+  test("Test edge converting to JSON", () => {
     const plugin: string = "BestPlugin";
     const bestNode: string = "BestNode";
     const title: string = "Best Node";
@@ -441,7 +441,7 @@ describe("Test CoreGraph", () => {
 
   });
 
-  test("Test graph convering to JSON", () => {
+  test("Test graph converting to JSON", () => {
     const plugin: string = "BestPlugin";
     const name: string = "BestNode";
     const title: string = "Best Node";
