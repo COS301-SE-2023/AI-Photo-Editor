@@ -173,6 +173,10 @@ class GraphMall {
     return get(this.getGraph(graphUUID));
   }
 
+  public getNode(graphUUID: GraphUUID, nodeUUID: GraphNodeUUID): GraphNode {
+    return get(get(this.mall)[graphUUID]).nodes[nodeUUID];
+  }
+
   public updateNode(
     graphUUID: GraphUUID,
     nodeUUID: GraphNodeUUID,

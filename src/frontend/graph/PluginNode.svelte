@@ -16,11 +16,19 @@
   const nodePos = writable(node.pos);
 
   nodePos.subscribe(async (pos) => {
+    // On node moved
     graphMall.updateNode(graphId, node.id, (node) => {
       node.pos = pos;
       return node;
     });
   });
+
+  // graphMall.subscribe((graphMall) => {
+  // });
+
+  setInterval(() => {
+    nodePos.set(node.pos);
+  }, 100);
 </script>
 
 {#if svelvetNodeId !== ""}
