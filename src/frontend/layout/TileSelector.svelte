@@ -58,7 +58,7 @@
     left: 0.8rem;
     width: 1.6rem;
     height: 1rem;
-    z-index: 9999;
+    z-index: 40;
 
     padding: 0px;
     padding-top: 0.1rem;
