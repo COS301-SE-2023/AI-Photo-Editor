@@ -57,24 +57,25 @@ export class Plugin {
       if ("nodes" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to toolbox
         for (const node in pluginModule.nodes) {
-          if (!pluginModule.nodes.hasOwnProperty(node)) continue;
+          if (pluginModule.nodes.hasOwnProperty(node)) {
+            const inputs: InputAnchorInstance[] = [];
+            const outputs: OutputAnchorInstance[] = [];
 
-          const inputs: InputAnchorInstance[] = [];
-          const outputs: OutputAnchorInstance[] = [];
+            const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs);
 
-          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs);
+            const nodeBuilder = new NodeBuilder(nodeInstance);
 
-          const nodeBuilder = new NodeBuilder(nodeInstance);
+            const ctx = new NodePluginContext(nodeBuilder);
 
-          const ctx = new NodePluginContext(nodeBuilder);
-
-          try {
-            pluginModule.nodes[node](ctx); // Execute node builder
-            nodeBuilder.validate(); // Ensure the node is properly instantiated
-            blix.toolbox.addInstance(nodeInstance); // Add to registry
-          } catch (err) {
-            logger.warn(err);
+            try {
+              pluginModule.nodes[node](ctx); // Execute node builder
+              nodeBuilder.validate(); // Ensure the node is properly instantiated
+              blix.toolbox.addInstance(nodeInstance); // Add to registry
+            } catch (err) {
+              logger.warn(err);
+            }
           }
+
           // console.log(blix.toolbox.getRegistry()[nodeInstance.getSignature])
         }
       }
@@ -82,24 +83,24 @@ export class Plugin {
       if ("commands" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to command registry
         for (const cmd in pluginModule.commands) {
-          if (!pluginModule.commands.hasOwnProperty(cmd)) continue;
-
-          blix.commandRegistry.addInstance(
-            pluginModule.commands[cmd](
-              new CommandPluginContext(cmd, this.packageData.name, blix)
-            ) as CommandInstance
-          );
+          if (pluginModule.commands.hasOwnProperty(cmd)) {
+            blix.commandRegistry.addInstance(
+              pluginModule.commands[cmd](
+                new CommandPluginContext(cmd, this.packageData.name, blix)
+              ) as CommandInstance
+            );
+          }
         }
       }
 
       if ("tiles" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to tile registry
         for (const tile in pluginModule.tiles) {
-          if (!pluginModule.tiles.hasOwnProperty(tile)) continue;
-
-          blix.tileRegistry.addInstance(
-            pluginModule.tiles[tile](new TilePluginContext()) as TileInstance
-          );
+          if (pluginModule.tiles.hasOwnProperty(tile)) {
+            blix.tileRegistry.addInstance(
+              pluginModule.tiles[tile](new TilePluginContext()) as TileInstance
+            );
+          }
         }
       }
 
@@ -111,7 +112,7 @@ export class Plugin {
   }
 }
 
-class PluginContext {
+export class PluginContext {
   // TODO: Add more stuff here
   get blixVersion() {
     return "0.0.1";
@@ -129,7 +130,7 @@ class NodePluginContext extends PluginContext {
   }
 }
 
-class CommandPluginContext extends PluginContext {
+export class CommandPluginContext extends PluginContext {
   private plugin: string;
   private name: string;
   private displayName: string;

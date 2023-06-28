@@ -5,10 +5,6 @@ import {NodeBuilder,NodeUIBuilder} from "../../../src/electron/lib/plugins/build
 import { Plugin } from "../../../src/electron/lib/plugins/Plugin";
 import { Blix } from "../../../src/electron/lib/Blix";
 import { MainWindow } from "../../../src/electron/lib/api/WindowApi";
-import {BrowserWindow} from "electron";
-import { join } from "path";
-import { writeFileSync } from "fs";
-
 
 const mainWindow: MainWindow = {
   apis: {
@@ -144,6 +140,5 @@ describe("Test plugin integrations", () => {
       expect(commands.hasOwnProperty("hello-plugin.import")).toBeTruthy();
       expect(commands.hasOwnProperty("hello-plugin.export")).toBeTruthy();
       expect(commands.hasOwnProperty("hello-plugin.addBrightnessNode")).toBeTruthy();
-
     })
 });
