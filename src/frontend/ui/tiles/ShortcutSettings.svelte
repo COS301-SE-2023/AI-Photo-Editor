@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { shortcutsRegistry, type ShortcutAction, ShortcutCombo } from "stores/ShortcutStore";
+  import { shortcutsRegistry, type ShortcutAction, ShortcutCombo } from "lib/stores/ShortcutStore";
 
   function updateShortcut(action: string, index: number, event: KeyboardEvent) {
     console.log(action, event);

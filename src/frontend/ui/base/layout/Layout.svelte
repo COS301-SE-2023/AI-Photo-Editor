@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { PanelGroup } from "lib/PanelNode";
   import Panel from "./Panel.svelte";
-  import { PanelGroup } from "./PanelNode";
-  import { projectManager, type NewProjectStore } from "stores/ProjectStore";
+  import { projectManager, type NewProjectStore } from "lib/stores/ProjectStore";
   import { get } from "svelte/store";
 
   // let subLayout = new PanelGroup("2");

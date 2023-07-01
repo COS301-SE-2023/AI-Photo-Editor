@@ -1,6 +1,6 @@
 import { writable, get } from "svelte/store";
-import { Project } from "../components/Projects/Project";
-import type { UUID } from "../../shared/utils/UniqueEntity";
+import { Project } from "../Project";
+import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { CommonProject } from "@shared/types";
 
 interface ProjectManagerState {

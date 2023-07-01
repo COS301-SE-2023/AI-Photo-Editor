@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import type { ICommand } from "../../shared/types/index";
+import type { ICommand } from "../../../shared/types/index";
 import { projectManager } from "./ProjectStore";
 
 interface CommandStore {

@@ -1,5 +1,5 @@
 import type { UUID } from "@shared/utils/UniqueEntity";
-import { PanelGroup } from "../../layout/PanelNode";
+import { PanelGroup } from "./PanelNode";
 
 export class Project {
   private _name: string;

@@ -1,6 +1,6 @@
 import type { UUID } from "@shared/utils/UniqueEntity";
 import type { ElectronWindowApi } from "electron-affinity/window";
-import { UIGraph, graphMall } from "@frontend/stores/GraphStore";
+import { UIGraph, graphMall } from "@frontend/lib/stores/GraphStore";
 
 export class ClientGraphApi implements ElectronWindowApi<ClientGraphApi> {
   // TODO: Consider only sending the _changes_ that took place on the graph

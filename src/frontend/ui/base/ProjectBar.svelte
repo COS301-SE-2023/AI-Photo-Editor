@@ -1,8 +1,8 @@
 <script lang="ts">
   import { get } from "svelte/store";
   import { onDestroy } from "svelte";
-  import { projectManager } from "../../stores/ProjectStore";
-  import type { Project } from "./Project";
+  import type { Project } from "../../lib/Project";
+  import { projectManager } from "lib/stores/ProjectStore";
 
   let projects: Project[] = [];
 

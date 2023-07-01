@@ -3,9 +3,9 @@ import type { AwaitedType } from "electron-affinity/main";
 import { bindWindowApi } from "electron-affinity/main";
 
 // Window APIs
-import type { CommandRegistryApi } from "@frontend/api/CommandRegistryApi";
-import type { ClientGraphApi } from "@frontend/api/ClientGraphApi";
-import type { ClientProjectApi } from "@frontend/api/ClientProjectApi";
+import type { CommandRegistryApi } from "@frontend/lib/api/CommandRegistryApi";
+import type { ClientGraphApi } from "@frontend/lib/api/ClientGraphApi";
+import type { ClientProjectApi } from "@frontend/lib/api/ClientProjectApi";
 
 /**
  * Binds the window APIs to the main process for every window.

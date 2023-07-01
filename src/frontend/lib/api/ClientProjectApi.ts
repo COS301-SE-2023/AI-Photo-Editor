@@ -1,6 +1,6 @@
 import type { ElectronWindowApi } from "electron-affinity/window";
-import { projectManager } from "@frontend/stores/ProjectStore";
 import type { CommonProject } from "@shared/types";
+import { projectManager } from "@frontend/lib/stores/ProjectStore";
 
 export class ClientProjectApi implements ElectronWindowApi<ClientProjectApi> {
   // Add more methods to this class which can be called by the backend if any

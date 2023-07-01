@@ -3,7 +3,7 @@ import type { Blix } from "../../Blix";
 import type { UUID } from "../../../../shared/utils/UniqueEntity";
 import type { CommonProject } from "../../../../shared/types/index";
 import logger from "../../../utils/logger";
-import { ClientProjectApi } from "@frontend/api/ClientProjectApi";
+import { ClientProjectApi } from "@frontend/lib/api/ClientProjectApi";
 import type { IpcResponse } from "../MainApi";
 
 // Exposes project data for currently loaded projects

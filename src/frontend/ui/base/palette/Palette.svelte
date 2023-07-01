@@ -1,9 +1,9 @@
 <script lang="ts">
   import PaletteItem from "./PaletteItem.svelte";
-  import { commandStore } from "../stores/CommandStore";
-  import Shortcuts from "../Shortcuts.svelte";
-  import type { ICommand } from "../../shared/types/index";
+  import { commandStore } from "../../../lib/stores/CommandStore";
+  import type { ICommand } from "../../../../shared/types/index";
   import { onDestroy } from "svelte";
+  import Shortcuts from "../../utils/Shortcuts.svelte";
 
   let showPalette = false;
   let expanded = false;

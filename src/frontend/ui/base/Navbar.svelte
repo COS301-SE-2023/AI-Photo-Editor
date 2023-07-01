@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ProjectBar from "../components/Projects/ProjectBar.svelte";
+  import ProjectBar from "./ProjectBar.svelte";
 </script>
 
 <!-- The navbar at the top of the page -->

@@ -38,7 +38,7 @@ async function setInitialStores() {
     const uiGraph = new UIGraph(graphId);
     const node1 = new GraphNode("1");
     const node2 = new GraphNode("2");
-    const node3 = new GraphNode("3");
+    const node3 = new GraphNode("a");
     uiGraph.nodes[node1.uuid] = node1;
     uiGraph.nodes[node2.uuid] = node2;
     uiGraph.nodes[node3.uuid] = node3;

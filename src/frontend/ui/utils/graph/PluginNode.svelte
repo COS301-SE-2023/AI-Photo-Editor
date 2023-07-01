@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Anchor, Node, Slider, generateInput } from "svelvet";
-  import { GraphNode, graphMall } from "../stores/GraphStore";
   import { writable } from "svelte/store";
+  import { graphMall, type GraphNode } from "lib/stores/GraphStore";
   // import NodeUiFragment from "./NodeUIFragment.svelte";
 
   export let graphId: string;

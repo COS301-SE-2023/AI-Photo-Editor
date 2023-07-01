@@ -1,9 +1,9 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
   import { Svelvet } from "svelvet";
-  import { graphMall, GraphNode } from "../../stores/GraphStore";
-  import PluginNode from "../../graph/PluginNode.svelte";
   import { type Readable } from "svelte/store";
+  import { GraphNode, graphMall } from "lib/stores/GraphStore";
+  import PluginNode from "../utils/graph/PluginNode.svelte";
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;

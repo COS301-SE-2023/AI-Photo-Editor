@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import type { INode } from "../../shared/types/index";
+import type { INode } from "../../../shared/types/index";
 
 interface NodeStore {
   nodes: INode[];
