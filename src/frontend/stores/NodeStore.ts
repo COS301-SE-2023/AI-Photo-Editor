@@ -21,7 +21,7 @@ function createNodeStore() {
   }
 
   async function runCommand(cmd: string) {
-    await window.apis.pluginApi.runCommand(cmd);
+    await window.apis.commandApi.runCommand(cmd);
   }
 
   return {

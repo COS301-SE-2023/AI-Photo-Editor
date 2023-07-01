@@ -1,9 +1,9 @@
-import { CommandRegistry } from "./commands/CommandRegistry";
-import { ToolboxRegistry } from "./core-graph/ToolboxRegistry";
-import { TileRegistry } from "./tiles/TileRegistry";
+import { CommandRegistry } from "./registries/CommandRegistry";
+import { ToolboxRegistry } from "./registries/ToolboxRegistry";
+import { TileRegistry } from "./registries/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
-import type { MainWindow } from "./api/WindowApi";
-import { GraphManager } from "./core-graph/GraphManager";
+import type { MainWindow } from "./api/apis/WindowApi";
+import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -11,7 +11,7 @@ export class Blix {
   private _toolbox: ToolboxRegistry;
   private _tileRegistry: TileRegistry;
   private _commandRegistry: CommandRegistry;
-  private _graphManager: GraphManager;
+  private _graphManager: CoreGraphManager;
   private _projectManager: ProjectManager;
   private _mainWindow: MainWindow;
 
@@ -27,7 +27,7 @@ export class Blix {
     this._toolbox = new ToolboxRegistry();
     this._commandRegistry = new CommandRegistry();
     this._tileRegistry = new TileRegistry();
-    this._graphManager = new GraphManager(mainWindow);
+    this._graphManager = new CoreGraphManager(mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
   }
 
@@ -43,7 +43,7 @@ export class Blix {
     return this._commandRegistry;
   }
 
-  get graphManager(): GraphManager {
+  get graphManager(): CoreGraphManager {
     return this._graphManager;
   }
 

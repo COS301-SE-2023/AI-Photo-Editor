@@ -1,7 +1,7 @@
 import type { ElectronMainApi } from "electron-affinity/main";
-import { CommandInstance, CommandRegistry } from "../commands/CommandRegistry";
-import type { Blix } from "../Blix";
-import logger from "../../utils/logger";
+import { CommandInstance, CommandRegistry } from "../../registries/CommandRegistry";
+import type { Blix } from "../../Blix";
+import logger from "../../../utils/logger";
 
 export class ToolboxApi implements ElectronMainApi<ToolboxApi> {
   private _counter = 0;

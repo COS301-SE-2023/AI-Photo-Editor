@@ -1,6 +1,10 @@
 // == DEV == //
-import { CoreGraph, GraphToJSON } from "./Graph";
-import { InputAnchorInstance, NodeInstance, OutputAnchorInstance } from "./ToolboxRegistry";
+import { CoreGraph, GraphToJSON } from "./CoreGraph";
+import {
+  InputAnchorInstance,
+  NodeInstance,
+  OutputAnchorInstance,
+} from "../registries/ToolboxRegistry";
 
 import logger from "../../utils/logger";
 

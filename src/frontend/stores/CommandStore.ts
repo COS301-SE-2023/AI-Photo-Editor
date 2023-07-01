@@ -29,7 +29,7 @@ function createCommandStore() {
       options = { data: projectManager.getActiveProject().getId() };
     }
     // console.log(options.data)
-    await window.apis.pluginApi.runCommand(cmd, options);
+    await window.apis.commandApi.runCommand(cmd, options);
   }
 
   return {

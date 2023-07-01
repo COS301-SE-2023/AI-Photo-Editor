@@ -1,5 +1,5 @@
 import { UniqueEntity } from "../../../shared/utils/UniqueEntity";
-import { CoreGraph } from "../core-graph/Graph";
+import { CoreGraph } from "../core-graph/CoreGraph";
 import type { CommonProject } from "../../../shared/types/index";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { PathLike } from "fs";

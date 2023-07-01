@@ -1,5 +1,5 @@
 import type { UUID } from "../utils/UniqueEntity";
-import { NodeUI } from "../../electron/lib/core-graph/ToolboxRegistry";
+import { NodeUI } from "../../electron/lib/registries/ToolboxRegistry";
 
 interface CommonProject {
   name: string;

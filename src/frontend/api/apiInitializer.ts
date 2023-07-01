@@ -2,11 +2,11 @@ import { bindMainApi, exposeWindowApi } from "electron-affinity/window";
 import type { AwaitedType } from "electron-affinity/window";
 
 // Main APIs
-import type { UtilApi } from "@electron/lib/api/UtilApi";
-import type { ProjectApi } from "@electron/lib/api/ProjectApi";
-import type { PluginApi } from "@electron/lib/api/PluginApi";
-import type { GraphApi } from "@electron/lib/api/GraphApi";
-import type { ToolboxApi } from "@electron/lib/api/ToolboxApi";
+import type { UtilApi } from "@electron/lib/api/apis/UtilApi";
+import type { ProjectApi } from "@electron/lib/api/apis/ProjectApi";
+import type { CommandApi } from "@electron/lib/api/apis/CommandApi";
+import type { GraphApi } from "@electron/lib/api/apis/GraphApi";
+import type { ToolboxApi } from "@electron/lib/api/apis/ToolboxApi";
 
 // Window APIs
 import { CommandRegistryApi } from "./CommandRegistryApi";
@@ -27,7 +27,7 @@ export async function initializeAPIs() {
   window.apis = await bindMainApis();
   const res = await window.apis.utilApi.getSystemInfo();
   // Get commands and nodes from plugins
-  const command = await window.apis.pluginApi.getCommands();
+  const command = await window.apis.commandApi.getCommands();
   const node = await window.apis.toolboxApi.getNodes();
   blixStore.set({ systemInfo: res });
   commandStore.refreshStore(command);
@@ -42,7 +42,7 @@ async function bindMainApis() {
   return {
     utilApi: await bindMainApi<UtilApi>("UtilApi"),
     projectApi: await bindMainApi<ProjectApi>("ProjectApi"),
-    pluginApi: await bindMainApi<PluginApi>("PluginApi"),
+    commandApi: await bindMainApi<CommandApi>("CommandApi"),
     graphApi: await bindMainApi<GraphApi>("GraphApi"),
     toolboxApi: await bindMainApi<ToolboxApi>("ToolboxApi"),
   };

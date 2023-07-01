@@ -10,7 +10,7 @@ import settings from "./utils/settings";
 import { PluginManager } from "./lib/plugins/PluginManager";
 import { Blix } from "./lib/Blix";
 import { exposeMainApis } from "./lib/api/MainApi";
-import { MainWindow, bindMainWindowApis } from "./lib/api/WindowApi";
+import { MainWindow, bindMainWindowApis } from "./lib/api/apis/WindowApi";
 
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 

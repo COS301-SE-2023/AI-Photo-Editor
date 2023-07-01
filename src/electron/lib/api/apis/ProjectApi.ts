@@ -1,11 +1,12 @@
 import type { ElectronMainApi } from "electron-affinity/main";
-import type { Blix } from "../Blix";
-import type { UUID } from "../../../shared/utils/UniqueEntity";
-import type { IpcResponse } from "./IpcResponse";
-import type { CommonProject } from "../../../shared/types/index";
-import logger from "../../utils/logger";
+import type { Blix } from "../../Blix";
+import type { UUID } from "../../../../shared/utils/UniqueEntity";
+import type { CommonProject } from "../../../../shared/types/index";
+import logger from "../../../utils/logger";
 import { ClientProjectApi } from "@frontend/api/ClientProjectApi";
+import type { IpcResponse } from "../MainApi";
 
+// Exposes project data for currently loaded projects
 export class ProjectApi implements ElectronMainApi<ProjectApi> {
   private readonly _projMgr;
 

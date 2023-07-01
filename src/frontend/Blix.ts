@@ -20,7 +20,7 @@ async function setInitialStores() {
   blixStore.set({ systemInfo: res });
 
   // Command store
-  const command = await window.apis.pluginApi.getCommands();
+  const command = await window.apis.commandApi.getCommands();
   commandStore.refreshStore(command);
 
   // Project store

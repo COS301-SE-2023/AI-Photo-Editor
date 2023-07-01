@@ -1,11 +1,8 @@
 import type { ElectronMainApi } from "electron-affinity/main";
-import { CommandInstance, CommandRegistry } from "../commands/CommandRegistry";
-import type { Blix } from "../Blix";
-import logger from "../../utils/logger";
-import { type UUID } from "../../../shared/utils/UniqueEntity";
-import { NodeInstance } from "../core-graph/ToolboxRegistry";
+import type { Blix } from "../../Blix";
+import { type UUID } from "../../../../shared/utils/UniqueEntity";
 
-// Graphs are stored homogeneously
+// Graphs across projects are stored homogeneously and referenced by UUID
 export class GraphApi implements ElectronMainApi<GraphApi> {
   private readonly _blix: Blix;
 

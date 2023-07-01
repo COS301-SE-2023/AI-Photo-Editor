@@ -1,4 +1,4 @@
-import type { Registry, RegistryInstance } from "../Registry";
+import type { Registry, RegistryInstance } from "./Registry";
 
 export class TileRegistry implements Registry {
   private registry: { [key: string]: TileInstance } = {};

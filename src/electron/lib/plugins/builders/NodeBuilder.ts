@@ -1,5 +1,5 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
-import { NodeInstance, NodeUIParent } from "../../core-graph/ToolboxRegistry";
+import { NodeInstance, NodeUIParent } from "../../registries/ToolboxRegistry";
 
 export class NodeBuilder implements PluginContextBuilder {
   constructor(node: NodeInstance) {

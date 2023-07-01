@@ -1,9 +1,10 @@
 import type { ElectronMainApi } from "electron-affinity/main";
-import { CommandInstance, CommandRegistry } from "../commands/CommandRegistry";
-import type { Blix } from "../Blix";
-import logger from "../../utils/logger";
+import { CommandInstance, CommandRegistry } from "../../registries/CommandRegistry";
+import type { Blix } from "../../Blix";
+import logger from "../../../utils/logger";
 
-export class PluginApi implements ElectronMainApi<PluginApi> {
+// Exposes all possible commands stored in the registry (plugin and blix commands)
+export class CommandApi implements ElectronMainApi<CommandApi> {
   private _counter = 0;
   private readonly _blix: Blix;
 

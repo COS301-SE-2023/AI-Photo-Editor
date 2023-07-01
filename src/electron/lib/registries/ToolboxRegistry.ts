@@ -1,4 +1,4 @@
-import type { Registry, RegistryInstance } from "../Registry";
+import type { Registry, RegistryInstance } from "./Registry";
 import type { INode, IAnchor } from "../../../shared/types";
 import { randomUUID } from "crypto";
 

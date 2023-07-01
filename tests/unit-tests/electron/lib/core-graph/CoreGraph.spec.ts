@@ -1,6 +1,6 @@
 import expect from "expect";
-import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent, NodeUILeaf,ToolboxRegistry } from "../../../../../src/electron/lib/core-graph/ToolboxRegistry";
-import { CoreGraph, CoreGraphStore } from "../../../../../src/electron/lib/core-graph/Graph";
+import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent, NodeUILeaf,ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
+import { CoreGraph, CoreGraphStore } from "../../../../../src/electron/lib/core-graph/CoreGraph";
 import { UUID } from "../../../../../src/shared/utils/UniqueEntity";
 
 describe("Test Graph", () => {

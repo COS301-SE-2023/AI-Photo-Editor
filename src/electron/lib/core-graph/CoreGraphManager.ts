@@ -1,15 +1,15 @@
 import Main from "electron/main";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
-import { CoreGraph } from "./Graph";
-import type { MainWindow } from "../api/WindowApi";
+import type { MainWindow } from "../api/apis/WindowApi";
 import type { UIGraph } from "../../../frontend/stores/GraphStore";
+import { CoreGraph } from "./CoreGraph";
 
 // This class stores all the graphs amongst all open projects
 // Projects index into this store at runtime to get their graphs
 // Yes, this means that technically two projects can share the same graph
 // Whether we embrace this or not remains to be seen
 
-export class GraphManager {
+export class CoreGraphManager {
   private _graphs: { [id: UUID]: CoreGraph };
   private _mainWindow: MainWindow;
 

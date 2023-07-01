@@ -1,12 +1,12 @@
 import logger from "../../utils/logger";
 import { type UUID, UniqueEntity } from "../../../shared/utils/UniqueEntity";
-import type { CoreGraphSubscriber } from "./GraphSubscriber";
+import type { CoreGraphSubscriber } from "./CoreGraphSubscriber";
 import type {
   AnchorType,
   InputAnchorInstance,
   NodeInstance,
   OutputAnchorInstance,
-} from "./ToolboxRegistry";
+} from "../registries/ToolboxRegistry";
 
 // =========================================
 // Explicit types for type safety
