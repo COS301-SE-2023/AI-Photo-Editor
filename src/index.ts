@@ -34,9 +34,11 @@ app.on("ready", () => {
 
   blix = new Blix(mainWindow);
   exposeMainApis(blix);
+  logger.info("Hello World");
   const pluginManager = new PluginManager(blix);
-  // pluginManager.loadPlugins();
+  pluginManager.loadBasePlugins();
   // blix.projectManager.openRecentProjects();
+
   // Set icon for macOS
   if (process.platform === "darwin") {
     app.dock.setIcon(
