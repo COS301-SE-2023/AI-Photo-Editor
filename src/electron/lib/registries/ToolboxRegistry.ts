@@ -81,42 +81,6 @@ export class NodeUIParent extends NodeUI {
 
   label: string;
   params: NodeUI[];
-
-  public addButton(label: string, param: any): void {
-    this.params.push(new NodeUILeaf("Button", label, [param], this));
-  }
-
-  public addSlider(
-    label: string,
-    min: number,
-    max: number,
-    step: number,
-    defautlVal: number
-  ): void {
-    this.params.push(new NodeUILeaf("Slider", label, [min, max, step, defautlVal], this));
-  }
-
-  public addDropdown(label: string, child: NodeUIParent) {
-    child.label = label;
-    this.params.push(child);
-    child.parent = this;
-  }
-
-  public addLabel(label: string, param: string) {
-    this.params.push(new NodeUILeaf("Label", label, [param], this));
-  }
-
-  public addNumberInput(label: string) {
-    this.params.push(new NodeUILeaf("NumberInput", label, [], this));
-  }
-
-  public addImageInput(label: string) {
-    this.params.push(new NodeUILeaf("ImageInput", label, [], this));
-  }
-
-  public addColorPicker(label: string, param: any) {
-    this.params.push(new NodeUILeaf("ColorPicker", label, [param], this));
-  }
 }
 
 export class NodeUILeaf extends NodeUI {

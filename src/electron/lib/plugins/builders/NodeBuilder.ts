@@ -1,5 +1,5 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
-import { NodeInstance, NodeUIParent } from "../../registries/ToolboxRegistry";
+import { NodeInstance, NodeUILeaf, NodeUIParent } from "../../registries/ToolboxRegistry";
 
 export class NodeBuilder implements PluginContextBuilder {
   constructor(node: NodeInstance) {
@@ -74,7 +74,7 @@ export class NodeUIBuilder {
   constructor(private node: NodeUIParent) {}
 
   public addButton(label: string, param: any): NodeUIBuilder {
-    this.node.addButton(label, param);
+    this.node.params.push(new NodeUILeaf("Button", label, [param], this.node));
     return this;
   }
 
@@ -85,28 +85,31 @@ export class NodeUIBuilder {
     step: number,
     defautlVal: number
   ): NodeUIBuilder {
-    this.node.addSlider(label, min, max, step, defautlVal);
+    this.node.params.push(new NodeUILeaf("Slider", label, [min, max, step, defautlVal], this.node));
+
     return this;
   }
 
   public addDropdown(label: string, builder: NodeUIBuilder): NodeUIBuilder {
-    this.node.addDropdown(label, builder.node);
+    builder.node.label = label;
+    builder.node.parent = this.node;
+    this.node.params.push(builder.node);
     return this;
   }
 
   public addNumberInput(label: string): NodeUIBuilder {
-    this.node.addNumberInput(label);
+    this.node.params.push(new NodeUILeaf("NumberInput", label, [], this.node));
     return this;
   }
 
   public addImageInput(label: string): NodeUIBuilder {
-    this.node.addImageInput(label);
+    this.node.params.push(new NodeUILeaf("ImageInput", label, [], this.node));
     return this;
   }
 
   // We need to discuss how to handle color pickers
   public addColorPicker(label: string, param: any): NodeUIBuilder {
-    this.node.addColorPicker(label, param);
+    this.node.params.push(new NodeUILeaf("ColorPicker", label, [param], this.node));
     return this;
   }
 
@@ -116,7 +119,7 @@ export class NodeUIBuilder {
   }
 
   public addLabel(label: string, param: string) {
-    this.node.addLabel(label, param);
+    this.node.params.push(new NodeUILeaf("Label", label, [param], this.node));
     return this;
   }
 }

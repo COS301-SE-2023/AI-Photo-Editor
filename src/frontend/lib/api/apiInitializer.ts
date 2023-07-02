@@ -14,7 +14,7 @@ import { CommandClientApi } from "./apis/CommandClientApi";
 // stores
 import { blixStore } from "../stores/BlixStore";
 import { commandStore } from "../stores/CommandStore";
-import { nodeStore } from "../stores/NodeStore";
+import { nodeStore } from "../stores/ToolboxStore";
 import { GraphClientApi } from "./apis/GraphClientApi";
 import { ProjectClientApi } from "./apis/ProjectClientApi";
 

@@ -61,7 +61,7 @@ describe("Test Graph", () => {
 
     for(let i = 0; i < 10; i++){
 
-      expect(names).toContain(obs[i].getDisplayName);
+      expect(names).toContain(obs[i].displayName);
     }
   });
 
@@ -399,7 +399,7 @@ describe("Test CoreGraph", () => {
       {
         id: node1Node.uuid,
         signature: `${plugin}/${name}-1`,
-        styling: null
+        styling: undefined
       });
   });
 
@@ -478,12 +478,12 @@ describe("Test CoreGraph", () => {
           {
             id: node1Node.uuid,
             signature: `${plugin}/${name}-1`,
-            styling: null
+            styling: undefined
           },
           {
             id: node2Node.uuid,
             signature: `${plugin}/${name}-2`,
-            styling: null
+            styling: undefined
           }
         ],
         edges: [
