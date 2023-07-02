@@ -36,7 +36,7 @@ class GraphStore {
   }
 
   async addNode() {
-    const res = await window.apis.graphApi.addNode("");
+    const res = await window.apis.graphApi.addNode("hello");
 
     // TODO: Implement properly, just for testing atm
     this.graphStore.update((graph) => {

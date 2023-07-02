@@ -27,7 +27,7 @@ export class Blix {
     this._toolbox = new ToolboxRegistry();
     this._commandRegistry = new CommandRegistry();
     this._tileRegistry = new TileRegistry();
-    this._graphManager = new CoreGraphManager(mainWindow);
+    this._graphManager = new CoreGraphManager(this, mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
   }
 

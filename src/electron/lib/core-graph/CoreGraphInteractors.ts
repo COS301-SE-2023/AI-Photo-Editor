@@ -1,4 +1,4 @@
-import { UIGraph } from "../../../shared/ui/UIGraph";
+import { GraphNode, UIGraph } from "../../../shared/ui/UIGraph";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph, NodesAndEdgesGraph } from "./CoreGraph";
 
@@ -33,6 +33,14 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
   onGraphChanged(graphId: UUID, graphData: CoreGraph): void {
     const uiGraph: UIGraph = new UIGraph(graphId);
     const nodesAndEdges: NodesAndEdgesGraph = graphData.exportNodesAndEdges();
+
+    for (const node in nodesAndEdges.nodes) {
+      if (!nodesAndEdges.nodes.hasOwnProperty(node)) continue;
+
+      uiGraph.nodes[node] = new GraphNode(node);
+      uiGraph.nodes[node].pos = nodesAndEdges.nodes[node].styling.getPosition;
+    }
+
     // TODO: Convert nodesAndEdges to UIGraph
 
     if (this._notifyee) this._notifyee(graphId, uiGraph);
