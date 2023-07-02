@@ -11,7 +11,7 @@
   export let panelId = Math.round(10000000 * Math.random()).toString();
 
   let graphIds = graphMall.getAllGraphUUIDsReactive();
-  $: graphId = $graphIds[0]; //Always use the first graph
+  let graphId = $graphIds[0];
 
   $: thisGraphStore = graphMall.getGraphReactive(graphId);
   let graphNodes: Readable<GraphNode[]> | undefined;
