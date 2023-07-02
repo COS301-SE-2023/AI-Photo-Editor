@@ -27,7 +27,7 @@
     "rollup"
   ],
   "homepage": "https://github.com/COS301-SE-2023/AI-Photo-Editor#readme",
-  "main": "build/electron/index.js",
+  "main": "build/index.js",
   "scripts": {
     "prestart": "cross-env NODE_ENV=development node scripts/preBuild.js",
     "start": "cross-env NODE_ENV=development npm-run-all -p -r build:frontend:dev start:electron",

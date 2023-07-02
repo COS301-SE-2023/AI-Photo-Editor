@@ -4,7 +4,7 @@
 <script lang="ts">
   let open = false;
   export let type: string;
-  export let current: string;
+  export const current: string = "";
 
   import Fa from "svelte-fa";
   // import { faFlag } from '@fortawesome/free-solid-svg-icons'

@@ -7,6 +7,7 @@ import { Plugin } from "./Plugin";
 import { Blix } from "../Blix";
 import { promisify } from "util";
 import chokibar from "chokidar";
+import { log } from "console";
 
 export class PluginManager {
   // Stores plugins that have been loaded from disk
@@ -29,6 +30,8 @@ export class PluginManager {
       // Production
       paths.push(join(userDataPath, "plugins"));
     }
+
+    logger.info(paths);
 
     return paths;
   }
