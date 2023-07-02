@@ -1,6 +1,6 @@
 import logger from "../../utils/logger";
 import { type UUID, UniqueEntity } from "../../../shared/utils/UniqueEntity";
-import type { CoreGraphSubscriber } from "./CoreGraphSubscriber";
+import type { CoreGraphSubscriber } from "./CoreGraphInteractors";
 import type {
   AnchorType,
   InputAnchorInstance,

@@ -39,7 +39,7 @@ export class PluginManager {
       .watch(".", { depth: 0, ignoreInitial: true, cwd: this.pluginPaths[0] })
       .on("addDir", async (plugin) => {
         await this.loadPlugin(plugin, this.pluginPaths[0]);
-        this.blix.mainWindow?.apis.commandRegistryApi.registryChanged(
+        this.blix.mainWindow?.apis.commandClientApi.registryChanged(
           this.blix.commandRegistry.getCommands()
         );
       });

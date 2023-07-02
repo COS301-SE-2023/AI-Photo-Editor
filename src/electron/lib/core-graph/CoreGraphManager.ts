@@ -1,8 +1,8 @@
 import Main from "electron/main";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
-import type { UIGraph } from "../../../frontend/lib/stores/GraphStore";
 import { CoreGraph } from "./CoreGraph";
+import { CoreGraphSubscriber } from "./CoreGraphInteractors";
 
 // This class stores all the graphs amongst all open projects
 // Projects index into this store at runtime to get their graphs
@@ -12,10 +12,12 @@ import { CoreGraph } from "./CoreGraph";
 export class CoreGraphManager {
   private _graphs: { [id: UUID]: CoreGraph };
   private _mainWindow: MainWindow;
+  private _subscribers: { [key: UUID]: CoreGraphSubscriber<any>[] };
 
   constructor(mainWindow: MainWindow) {
     this._mainWindow = mainWindow;
     this._graphs = {};
+    this._subscribers = {};
 
     // Test send dummy graph to frontend
     this.testingSendToClient();
@@ -23,7 +25,9 @@ export class CoreGraphManager {
 
   testingSendToClient() {
     this.createGraph(); // TODO: REMOVE; This is just for testing
-    const ids = this.getAllGraphUUIDs();
+    this.createGraph();
+    this.createGraph();
+    this.createGraph();
 
     // There currently isn't proper implementation to map the CoreGraph to a
     // UIGraph with the frontend nodes and anchors. Sorry that I didn't do this,
@@ -56,7 +60,41 @@ export class CoreGraphManager {
     return Object.keys(this._graphs).map((uuid) => uuid);
   }
 
-  coreToUiGraph(graph: CoreGraph) {
+  // Notify all subscribers of change
+  onGraphUpdated(graphUUID: UUID) {
+    if (this._subscribers[graphUUID] !== undefined) {
+      this._subscribers[graphUUID].forEach((subscriber) => {
+        subscriber.onGraphChanged(graphUUID, this._graphs[graphUUID]);
+      });
+    }
+    if (this._subscribers.all !== undefined) {
+      this._subscribers.all.forEach((subscriber) => {
+        subscriber.onGraphChanged(graphUUID, this._graphs[graphUUID]);
+      });
+    }
+  }
+
+  // Subscribe to all graph events
+  addAllSubscriber(subscriber: CoreGraphSubscriber<any>) {
+    if (this._subscribers.all === undefined) {
+      this._subscribers.all = [];
+    }
+
+    subscriber.subscriberIndex = this._subscribers.all.length;
+    this._subscribers.all.push(subscriber);
+  }
+
+  // Subscribe to a specific graph's events
+  addSubscriber(graphUUID: UUID, subscriber: CoreGraphSubscriber<any>) {
+    if (this._subscribers[graphUUID] === undefined) {
+      this._subscribers[graphUUID] = [];
+    }
+
+    subscriber.subscriberIndex = this._subscribers[graphUUID].length;
+    this._subscribers[graphUUID].push(subscriber);
+  }
+
+  removeSubscriber() {
     return;
   }
 }

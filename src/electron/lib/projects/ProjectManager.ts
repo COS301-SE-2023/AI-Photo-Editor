@@ -116,7 +116,7 @@ export class ProjectManager {
     }
 
     const data = JSON.parse(project.toString());
-    this._mainWindow.apis.clientProjectApi.loadProject(
+    this._mainWindow.apis.projectClientApi.loadProject(
       this.createProject(data.name as string).mapToCommonProject()
     );
   }
