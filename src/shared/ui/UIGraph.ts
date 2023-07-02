@@ -5,7 +5,8 @@ export type GraphNodeUUID = UUID;
 export type GraphAnchorUUID = UUID;
 
 export class UIGraph {
-  nodes: { [key: GraphNodeUUID]: GraphNode } = {};
+  public nodes: { [key: GraphNodeUUID]: GraphNode } = {};
+  public edges: { [key: GraphUUID]: any } = {}; // TODO
 
   constructor(public uuid: GraphUUID) {}
 }

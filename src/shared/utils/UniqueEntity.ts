@@ -4,7 +4,7 @@
 export type UUID = string;
 
 export class UniqueEntity {
-  private _uuid: UUID;
+  readonly _uuid: UUID;
 
   constructor() {
     this._uuid = UniqueEntity.genUUID();

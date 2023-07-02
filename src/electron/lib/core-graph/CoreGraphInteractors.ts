@@ -1,6 +1,6 @@
-import { UIGraph } from "@shared/ui/UIGraph";
+import { UIGraph } from "../../../shared/ui/UIGraph";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
-import { CoreGraph } from "./CoreGraph";
+import { CoreGraph, NodesAndEdgesGraph } from "./CoreGraph";
 
 // Implement this interface to communicate with a CoreGraph instance
 export abstract class CoreGraphSubscriber<T> {
@@ -31,7 +31,10 @@ export abstract class CoreGraphUpdater {
 
 export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
   onGraphChanged(graphId: UUID, graphData: CoreGraph): void {
-    // const uiGraph: UIGraph = new UIGraph("");
-    // if (this._notifyee) this._notifyee(graphId, uiGraph);
+    const uiGraph: UIGraph = new UIGraph(graphId);
+    const nodesAndEdges: NodesAndEdgesGraph = graphData.exportNodesAndEdges();
+    // TODO: Convert nodesAndEdges to UIGraph
+
+    if (this._notifyee) this._notifyee(graphId, uiGraph);
   }
 }

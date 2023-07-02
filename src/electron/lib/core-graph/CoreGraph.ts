@@ -44,9 +44,11 @@ export class CoreGraphStore extends UniqueEntity {
 // Testting done in index.ts
 export class CoreGraph extends UniqueEntity {
   private nodes: { [key: UUID]: Node };
-  private anchors: { [key: UUID]: Anchor };
+  private anchors: { [key: AnchorUUID]: Anchor };
   private edgeDest: { [key: AnchorUUID]: Edge }; // Map a destination anchor to an edge
   private edgeSrc: { [key: AnchorUUID]: AnchorUUID[] }; // Map a source anchor to a list of destination anchors
+  // E.g. we can do (source anchor) ---[edgeSrc]--> (destination anchors) ---[edgeDest]--> (Edges)
+  //      to get all the edges that flow from a source anchor
 
   // private subscribers: CoreGraphSubscriber[];
 
@@ -56,6 +58,63 @@ export class CoreGraph extends UniqueEntity {
     this.anchors = {};
     this.edgeDest = {};
     this.edgeSrc = {};
+  }
+
+  // Export a reduced NodesAndEdges representation of the graph
+  public exportNodesAndEdges(): NodesAndEdgesGraph {
+    const graphId: UUID = this.uuid;
+    const nodes: { [key: UUID]: ReducedNode } = {};
+    const edges: { [key: UUID]: ReducedEdge } = {};
+
+    // Convert nodes
+    for (const node in this.nodes) {
+      if (!this.nodes.hasOwnProperty(node)) continue;
+      const n: Node = this.nodes[node];
+      const inputs: { [key: UUID]: ReducedAnchor } = {};
+      const outputs: { [key: UUID]: ReducedAnchor } = {};
+
+      // Obtain anchors
+      for (const anchor in n.getAnchors) {
+        if (!n.getAnchors.hasOwnProperty(anchor)) continue;
+
+        const a: Anchor = n.getAnchors[anchor];
+        const reducedAnchor: ReducedAnchor = new ReducedAnchor(a.uuid, a.getType, a.getDisplayName);
+
+        (a.getIOType === AnchorIO.input ? inputs : outputs)[a.uuid] = reducedAnchor;
+      }
+
+      // Obtain styling
+      const styling: NodeStyling = new NodeStyling({ x: 0, y: 0 }, { w: 0, h: 0 }); // TODO
+
+      // Create reduced node
+      nodes[n.uuid] = new ReducedNode(
+        n.uuid,
+        `${n.getPlugin}/${n.getName}`,
+        styling,
+        inputs,
+        outputs
+      );
+    }
+
+    // Convert edges
+    for (const anchorTo in this.edgeDest) {
+      if (!this.edgeDest.hasOwnProperty(anchorTo)) continue;
+
+      const edge: Edge = this.edgeDest[anchorTo];
+      const edgeAnchorFrom: Anchor = this.anchors[edge.getAnchorFrom];
+      const edgeAnchorTo: Anchor = this.anchors[edge.getAnchorTo];
+
+      // Create reduced edge
+      edges[edge.uuid] = new ReducedEdge(
+        edge.uuid,
+        edgeAnchorFrom.getParent.uuid,
+        edgeAnchorTo.getParent.uuid,
+        edgeAnchorFrom.uuid,
+        edgeAnchorTo.uuid
+      );
+    }
+
+    return new NodesAndEdgesGraph(graphId, nodes, edges);
   }
 
   public get getNodes() {
@@ -219,14 +278,6 @@ export class CoreGraph extends UniqueEntity {
     // TODO
   }
 
-  public subscribe() {
-    // TODO
-  }
-
-  public unsubscribe() {
-    // TODO
-  }
-
   // public printGraph() {
   //   for (const edge in this.edgeDest) {
   //     if (!this.edgeDest.hasOwnProperty(edge)) continue;
@@ -243,7 +294,7 @@ export class CoreGraph extends UniqueEntity {
   //   }
   // }
 
-  public toJSONObject(): GraphToJSON {
+  public exportJSON(): GraphToJSON {
     return { nodes: this.nodesToJSONObject(), edges: this.edgesToJSONObject() };
   }
 
@@ -251,7 +302,7 @@ export class CoreGraph extends UniqueEntity {
     const json: NodeToJSON[] = [];
     for (const node in this.nodes) {
       if (!this.nodes.hasOwnProperty(node)) continue;
-      json.push(this.nodes[node].toJSONObject());
+      json.push(this.nodes[node].exportJSON());
     }
     return json;
   }
@@ -285,7 +336,6 @@ export class CoreGraph extends UniqueEntity {
 class Node extends UniqueEntity {
   private anchors: { [key: string]: Anchor };
   private styling: NodeStyling | null = null;
-  // private colour: string;
 
   constructor(
     private name: string, // The name id of the node in the plugin
@@ -318,7 +368,7 @@ class Node extends UniqueEntity {
     return this.plugin;
   }
 
-  public toJSONObject(): NodeToJSON {
+  public exportJSON(): NodeToJSON {
     return {
       id: this.uuid,
       signature: `${this.plugin}/${this.name}`,
@@ -373,7 +423,7 @@ class Edge extends UniqueEntity {
   }
 }
 
-class NodeStyling {
+export class NodeStyling {
   constructor(private position: { x: number; y: number }, private size: { w: number; h: number }) {}
 
   get getPosition() {
@@ -383,4 +433,56 @@ class NodeStyling {
   get getSize() {
     return this.size;
   }
+}
+
+// ========== EXPORTED GRAPH REPRESENTATIONS ========== //
+// Some reduced graph representations for exporting without trinkets for optimization
+
+// export enum CoreGraphExportRepresentation {
+//   NodesAndEdges,
+//   NodesToNodes, // TODO (if required)
+//   AnchorNetwork // TODO (if required)
+// }
+
+export interface GraphRepresentation {
+  readonly graphId: UUID;
+}
+
+// A set of nodes and a set of edges between node anchors
+export class NodesAndEdgesGraph implements GraphRepresentation {
+  constructor(
+    readonly graphId: UUID,
+    readonly nodes: { [key: UUID]: ReducedNode },
+    readonly edges: { [key: UUID]: ReducedEdge }
+  ) {}
+}
+
+class ReducedNode {
+  constructor(
+    readonly id: UUID,
+    readonly signature: string,
+    readonly styling: NodeStyling,
+    readonly inputs: { [key: UUID]: ReducedAnchor },
+    readonly outputs: { [key: UUID]: ReducedAnchor }
+  ) {}
+}
+
+class ReducedEdge {
+  constructor(
+    readonly id: UUID,
+    readonly nodeFrom: UUID,
+    readonly nodeTo: UUID,
+    readonly anchorFrom: UUID,
+    readonly anchorTo: UUID
+  ) {}
+}
+
+class ReducedAnchor {
+  constructor(readonly id: UUID, readonly type: AnchorType, readonly displayName: string) {}
+}
+
+// A set of nodes with input anchors, output anchors point directly to other nodes' input anchors
+export class NodesToNodes implements GraphRepresentation {
+  // TODO
+  constructor(public graphId: UUID) {}
 }

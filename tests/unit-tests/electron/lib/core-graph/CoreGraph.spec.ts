@@ -393,7 +393,7 @@ describe("Test CoreGraph", () => {
     const node1Instance = new NodeInstance(`${plugin}.${name}`,`${name}-${1}`, `${plugin}`, title, description, icon, inputs, outputs);
     graph.addNode(node1Instance);
     const node1Node = Object.values(graph.getNodes)[0];
-    const result = node1Node.toJSONObject();
+    const result = node1Node.exportJSON();
 
     expect(result).toEqual(
       {
@@ -465,7 +465,7 @@ describe("Test CoreGraph", () => {
 
   
 
-    let graphJSON = graph.toJSONObject();
+    let graphJSON = graph.exportJSON();
     expect(graphJSON).toEqual(
       {
         nodes: graph.nodesToJSONObject(),
