@@ -5,7 +5,7 @@ import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
-import { NodeUI } from "../../shared/ui/NodeUI";
+import { NodeUI } from "../../shared/ui/NodeUITypes";
 
 // Encapsulates the backend representation for
 // the entire running Blix application

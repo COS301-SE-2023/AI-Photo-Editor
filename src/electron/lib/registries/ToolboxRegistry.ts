@@ -1,6 +1,6 @@
 import type { Registry, RegistryInstance } from "./Registry";
 import { randomUUID } from "crypto";
-import { NodeUIParent } from "../../../shared/ui/NodeUI";
+import { NodeUIParent } from "../../../shared/ui/NodeUITypes";
 import { IAnchor, INode } from "../../../shared/ui/ToolboxTypes";
 import type { MainWindow } from "../api/apis/WindowApi";
 

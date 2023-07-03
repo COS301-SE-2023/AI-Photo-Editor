@@ -1,5 +1,5 @@
 import type { UUID } from "../utils/UniqueEntity";
-import { NodeUI } from "./NodeUI";
+import { NodeUI } from "./NodeUITypes";
 
 export class CommonProject {
   constructor(readonly name: string, readonly uuid: UUID) {}

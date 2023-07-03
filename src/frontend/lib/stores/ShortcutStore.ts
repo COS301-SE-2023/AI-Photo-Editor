@@ -11,6 +11,18 @@ export class ShortcutCombo {
   shift: boolean;
   meta: boolean;
 
+  // Codes that cannot be used alone as shortcuts
+  static readonly invalidCodes = [
+    "ControlLeft",
+    "ControlRight",
+    "AltLeft",
+    "AltRight",
+    "ShiftLeft",
+    "ShiftRight",
+    "MetaLeft",
+    "MetaRight",
+  ];
+
   constructor(keyCode: string, ctrl: boolean, alt: boolean, shift: boolean, meta: boolean) {
     this.keyCode = keyCode;
     this.ctrl = ctrl;
@@ -23,7 +35,10 @@ export class ShortcutCombo {
     return this.fromString(shortcutString).getString;
   }
 
-  public static fromEvent(event: KeyboardEvent): ShortcutCombo {
+  // Returns null if the event is not a valid shortcut
+  public static fromEvent(event: KeyboardEvent): ShortcutCombo | null {
+    if (this.invalidCodes.includes(event.code)) return null;
+
     return new ShortcutCombo(
       event.code,
       event.ctrlKey,

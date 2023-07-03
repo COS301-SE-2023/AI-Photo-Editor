@@ -8,7 +8,7 @@ import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
 import {BrowserWindow} from "electron";
 import { join } from "path";
 import { writeFileSync } from "fs";
-import { NodeUIParent } from "../../../src/shared/ui/NodeUI";
+import { NodeUIParent } from "../../../src/shared/ui/NodeUITypes";
 
 
 const mainWindow: MainWindow = {

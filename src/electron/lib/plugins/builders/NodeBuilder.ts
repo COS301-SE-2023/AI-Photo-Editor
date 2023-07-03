@@ -1,6 +1,6 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
 import { NodeInstance } from "../../registries/ToolboxRegistry";
-import { NodeUILeaf, NodeUIParent } from "../../../../shared/ui/NodeUI";
+import { NodeUILeaf, NodeUIParent } from "../../../../shared/ui/NodeUITypes";
 
 export class NodeBuilder implements PluginContextBuilder {
   constructor(node: NodeInstance) {

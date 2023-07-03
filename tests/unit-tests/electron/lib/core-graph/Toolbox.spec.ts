@@ -1,7 +1,7 @@
 import expect from "expect";
 import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
 import { NodeUIBuilder } from "../../../../../src/electron/lib/plugins/builders/NodeBuilder"
-import { NodeUILeaf, NodeUIParent } from "../../../../../src/shared/ui/NodeUI";
+import { NodeUILeaf, NodeUIParent } from "../../../../../src/shared/ui/NodeUITypes";
 
 describe("Test toolbox", () => {
 
