@@ -1,6 +1,6 @@
 <!-- This pane is for showing media content large-scale -->
 <script lang="ts">
-  import Image from "ui/utils/Image.svelte";
+  // import Image from "ui/utils/Image.svelte";
 
   let options = ["None selected"];
   let showSoHot = false;
@@ -37,7 +37,7 @@
         }}"
         on:keydown="{null}"
       >
-        <Image src="images/svelte-so-hot.jpg" />
+        <img src="blix-image://public/images/svelte-so-hot.jpg" alt="svelteSoHot" />
       </div>
     {/if}
   </div>

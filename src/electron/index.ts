@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Notification, Menu, MenuItem, dialog } from "electron";
+import { app, BrowserWindow, Notification, protocol, Menu, MenuItem, dialog, net } from "electron";
 import { join } from "path";
 import fs from "fs";
 import { parse } from "url";
@@ -23,6 +23,18 @@ logger.info(
 
 // ========== MAIN PROCESS ========== //
 
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "blix-image",
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      bypassCSP: true,
+    },
+  },
+]);
+
 let mainWindow: MainWindow | null = null;
 let notification: Notification | null = null;
 let blix: Blix;
@@ -31,6 +43,11 @@ app.on("ready", () => {
   createMainWindow();
 
   if (!mainWindow) return;
+
+  protocol.registerFileProtocol("blix-image", (request, callback) => {
+    const url = request.url.slice("blix-image://".length);
+    callback({ path: join(__dirname, "..", "..", url) });
+  });
 
   blix = new Blix(mainWindow);
   exposeMainApis(blix);
