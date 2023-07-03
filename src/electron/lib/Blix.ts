@@ -29,6 +29,7 @@ export class Blix {
     this._tileRegistry = new TileRegistry();
     this._graphManager = new CoreGraphManager(mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
+    this._projectManager.loadRecentProjects();
   }
 
   get toolbox(): ToolboxRegistry {

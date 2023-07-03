@@ -40,13 +40,13 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
     }
   }
 
-  async getRecentProjects(): Promise<IpcResponse<CommonProject[]>> {
-    const projects: CommonProject[] = this._projMgr.getRecentProjects().data;
-    return {
-      success: true,
-      data: projects ? projects : [],
-    };
-  }
+  // async getRecentProjects(): Promise<IpcResponse<CommonProject[]>> {
+  //   const projects: CommonProject[] = this._projMgr.getRecentProjects().data;
+  //   return {
+  //     success: true,
+  //     data: projects ? projects : [],
+  //   };
+  // }
 
   // ========================================
   // 1 way communication

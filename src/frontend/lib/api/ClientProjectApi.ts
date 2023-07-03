@@ -16,4 +16,12 @@ export class ClientProjectApi implements ElectronWindowApi<ClientProjectApi> {
     // console.log("Project Loaded", state);
     projectManager.loadProject(state);
   }
+
+  public loadProjects(state: CommonProject[]): void {
+    // console.log("Projects Loaded", state);
+    // projectManager.loadProjects(state);
+    for (const project of state) {
+      projectManager.loadProject(project);
+    }
+  }
 }
