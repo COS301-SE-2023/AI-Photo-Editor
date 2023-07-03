@@ -31,22 +31,21 @@
 
 <style>
   .content {
-    display: table;
     width: 100%;
     height: 100%;
+    max-height: 100%;
     padding: 2em;
-    word-wrap: break-word;
   }
 
   .output {
     font-family: monospace;
     font-size: 0.8em;
-    display: table-cell;
     vertical-align: center;
+    max-height: 100%;
+    overflow-y: auto;
 
     padding: 2em;
-    overflow-y: scroll;
-    overflow-wrap: break-word;
+    word-break: break-all;
     background-color: #11111b;
     border-radius: 0.4em;
   }
