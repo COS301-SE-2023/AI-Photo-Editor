@@ -2,7 +2,7 @@
 <script lang="ts">
   import { Svelvet } from "svelvet";
   import { type Readable } from "svelte/store";
-  import { GraphNode, graphMall } from "lib/stores/GraphStore";
+  import { GraphNode, graphMall } from "@frontend/lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
 
   // TODO: Abstract panelId to use a generic UUID

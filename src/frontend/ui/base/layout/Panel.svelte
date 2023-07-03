@@ -18,7 +18,7 @@
   import Debug from "../../tiles/Debug.svelte";
   import WebView from "../../tiles/WebView.svelte";
   import ShortcutSettings from "../../tiles/ShortcutSettings.svelte";
-  import { PanelGroup, PanelLeaf, type PanelNode, type PanelType } from "lib/PanelNode";
+  import { PanelGroup, PanelLeaf, type PanelNode, type PanelType } from "@frontend/lib/PanelNode";
 
   // import { scale } from "svelte/transition";
 

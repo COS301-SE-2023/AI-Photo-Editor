@@ -1,6 +1,6 @@
 <!-- This pane is for showing media content large-scale -->
 <script lang="ts">
-  import Image from "ui/utils/Image.svelte";
+  import Image from "../utils/Image.svelte";
 
   let options = ["None selected"];
   let showSoHot = false;

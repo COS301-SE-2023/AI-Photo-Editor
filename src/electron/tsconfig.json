@@ -29,6 +29,6 @@
     "esModuleInterop": true,
     "isolatedModules": true
   },
-  "include": [".", "../global.d.ts", "../shared/**/*.ts"],
+  "include": [".", "../global.d.ts", "../index.ts"],
   "exclude": ["node_modules"]
 }
