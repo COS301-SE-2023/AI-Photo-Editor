@@ -34,17 +34,8 @@ app.on("ready", () => {
 
   blix = new Blix(mainWindow);
   exposeMainApis(blix);
-  logger.info("Hello World");
   const pluginManager = new PluginManager(blix);
   pluginManager.loadBasePlugins();
-  // blix.projectManager.openRecentProjects();
-
-  // Set icon for macOS
-  if (process.platform === "darwin") {
-    app.dock.setIcon(
-      isProd ? join(__dirname, "public/images/gaeblix.png") : "public/images/gaeblix.png"
-    );
-  }
 });
 
 function createMainWindow() {
@@ -59,7 +50,7 @@ function createMainWindow() {
       preload: join(__dirname, "electron/preload.js"),
     },
     // Set icon for Windows and Linux
-    icon: isProd ? join(__dirname, "public/images/gaeblix.png") : "public/images/gaeblix.png",
+    icon: isProd ? join(__dirname, "icon.png") : "public/images/icon.png",
     titleBarStyle: "hidden",
     trafficLightPosition: { x: 10, y: 10 },
   }) as MainWindow;
@@ -140,59 +131,59 @@ app.on("web-contents-created", (e, contents) => {
 
 // ========== AUTO UPDATER ==========//
 
-// if (isProd)
-//   autoUpdater.checkForUpdates().catch((err) => {
-//     logger.error(JSON.stringify(err));
-//   });
+if (isProd)
+  autoUpdater.checkForUpdates().catch((err) => {
+    logger.error(JSON.stringify(err));
+  });
 
-// autoUpdater.logger = logger;
+autoUpdater.logger = logger;
 
-// autoUpdater.on("update-available", () => {
-//   notification = new Notification({
-//     title: "Electron-Svelte-Typescript",
-//     body: "Updates are available. Click to download.",
-//     silent: true,
-//     // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
-//   });
-//   notification.show();
-//   notification.on("click", () => {
-//     autoUpdater.downloadUpdate().catch((err) => {
-//       logger.error(JSON.stringify(err));
-//     });
-//   });
-// });
+autoUpdater.on("update-available", () => {
+  notification = new Notification({
+    title: "BLix",
+    body: "Updates are available. Click to download.",
+    silent: true,
+    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
+  });
+  notification.show();
+  notification.on("click", () => {
+    autoUpdater.downloadUpdate().catch((err) => {
+      logger.error(JSON.stringify(err));
+    });
+  });
+});
 
-// autoUpdater.on("update-not-available", () => {
-//   notification = new Notification({
-//     title: "Electron-Svelte-Typescript",
-//     body: "Your software is up to date.",
-//     silent: true,
-//     // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
-//   });
-//   notification.show();
-// });
+autoUpdater.on("update-not-available", () => {
+  notification = new Notification({
+    title: "Blix",
+    body: "Your software is up to date.",
+    silent: true,
+    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
+  });
+  notification.show();
+});
 
-// autoUpdater.on("update-downloaded", () => {
-//   notification = new Notification({
-//     title: "Electron-Svelte-Typescript",
-//     body: "The updates are ready. Click to quit and install.",
-//     silent: true,
-//     // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
-//   });
-//   notification.show();
-//   notification.on("click", () => {
-//     autoUpdater.quitAndInstall();
-//   });
-// });
+autoUpdater.on("update-downloaded", () => {
+  notification = new Notification({
+    title: "Blix",
+    body: "The updates are ready. Click to quit and install.",
+    silent: true,
+    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
+  });
+  notification.show();
+  notification.on("click", () => {
+    autoUpdater.quitAndInstall();
+  });
+});
 
-// autoUpdater.on("error", (err) => {
-//   notification = new Notification({
-//     title: "Electron-Svelte-Typescript",
-//     body: JSON.stringify(err),
-//     // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
-//   });
-//   notification.show();
-// });
+autoUpdater.on("error", (err) => {
+  notification = new Notification({
+    title: "Blix",
+    body: JSON.stringify(err),
+    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
+  });
+  notification.show();
+});
 
 // import { TestGraph } from "./lib/core-graph/GraphTesting";
 

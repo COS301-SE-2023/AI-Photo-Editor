@@ -10,7 +10,7 @@ const {
   mkdirSync,
   copyFileSync,
 } = require("fs");
-const { join } = require("path");
+const { join, basename } = require("path");
 
 const Terser = require("terser");
 const HTMLMinifier = require("html-minifier");
@@ -173,6 +173,12 @@ const copyDirectory = (sourceDir, targetDir) => {
   });
 };
 
+const copyFile = (sourceFile, targetDir) => {
+  const fileName = basename(sourceFile);
+  const targetPath = join(targetDir, fileName);
+  copyFileSync(sourceFile, targetPath);
+};
+
 const bundledElectronPath = join(__dirname, "..", "build");
 
 const jsFiles = getAllJSFiles(bundledElectronPath);
@@ -180,4 +186,5 @@ minifyJSFiles(jsFiles);
 
 copyPublicFolderAndMinify(join(__dirname, "..", "public"), join(bundledElectronPath, "public"));
 copyDirectory(join(__dirname, "../blix-plugins"), join(bundledElectronPath, "blix-plugins"));
+copyFile(join(__dirname, "../public/images/icon.png"), bundledElectronPath);
 cleanTsconfig();
