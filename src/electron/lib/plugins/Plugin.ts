@@ -13,7 +13,7 @@ import { NodeBuilder } from "./builders/NodeBuilder";
 import Main from "electron/main";
 import type { MainWindow } from "../api/apis/WindowApi";
 import { dialog } from "electron";
-import { UUID } from "../../../shared/utils/UniqueEntity";
+import type { UUID } from "../../../shared/utils/UniqueEntity";
 
 export type PluginSignature = string;
 export type NodeSignature = string;
@@ -146,6 +146,7 @@ class CommandPluginContext extends PluginContext {
     this.icon = "";
     this.command = "";
     this.blix = blix;
+    this.displayName = "";
   }
 
   // public get getMainWindow() {

@@ -28,17 +28,19 @@ let notification: Notification | null = null;
 let blix: Blix;
 
 app.on("ready", () => {
-  createMainWindow();
-
-  if (!mainWindow) return;
-
-  blix = new Blix(mainWindow);
+  blix = new Blix();
   exposeMainApis(blix);
-  const pluginManager = new PluginManager(blix);
-  pluginManager.loadBasePlugins();
+
+  createMainWindow().then(() => {
+    if (mainWindow) {
+      blix.init(mainWindow);
+    } else {
+      app.quit();
+    }
+  });
 });
 
-function createMainWindow() {
+async function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1300,
     height: 1000,
@@ -55,8 +57,6 @@ function createMainWindow() {
     trafficLightPosition: { x: 10, y: 10 },
   }) as MainWindow;
 
-  // Menu.setApplicationMenu(null);
-
   const url =
     // process.env.NODE_ENV === "production"
     isProd
@@ -65,17 +65,13 @@ function createMainWindow() {
       : // in dev, target the host and port of the local rollup web server
         "http://localhost:5500";
 
-  mainWindow
-    .loadURL(url)
-    .then(async () => {
-      await bindMainWindowApis(mainWindow!);
-    })
-    .catch((err) => {
-      logger.error(JSON.stringify(err));
-      app.quit();
-    });
-
-  // if (!isProd) mainWindow.webContents.openDevTools();
+  try {
+    await mainWindow.loadURL(url);
+    await bindMainWindowApis(mainWindow);
+  } catch (e) {
+    logger.error(JSON.stringify(e));
+    app.quit();
+  }
 
   mainWindow.on("closed", () => {
     mainWindow = null;
