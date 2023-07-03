@@ -1,10 +1,10 @@
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import type { UUID } from "../../../../shared/utils/UniqueEntity";
-import type { CommonProject } from "../../../../shared/types/index";
 import logger from "../../../utils/logger";
 import { ProjectClientApi } from "@frontend/lib/api/apis/ProjectClientApi";
 import type { IpcResponse } from "../MainApi";
+import { CommonProject } from "@shared/ui/ToolboxTypes";
 
 // Exposes project data for currently loaded projects
 export class ProjectApi implements ElectronMainApi<ProjectApi> {

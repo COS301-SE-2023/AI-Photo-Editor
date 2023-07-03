@@ -92,7 +92,7 @@ type GraphDict = { [key: GraphUUID]: GraphStore };
 
 // The public area with all the cool stores 😎
 class GraphMall {
-  mall = writable<GraphDict>({});
+  private mall = writable<GraphDict>({});
 
   public refreshGraph(graphUUID: GraphUUID, newGraph: UIGraph) {
     this.mall.update((stores) => {

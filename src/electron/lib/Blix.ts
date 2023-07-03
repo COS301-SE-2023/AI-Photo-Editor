@@ -1,14 +1,16 @@
 import { CommandRegistry } from "./registries/CommandRegistry";
-import { ToolboxRegistry } from "./registries/ToolboxRegistry";
+import { NodeInstance, ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
+import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
+import { NodeUI } from "../../shared/ui/NodeUI";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
 export class Blix {
-  private _toolbox: ToolboxRegistry;
+  private _toolboxRegistry: ToolboxRegistry;
   private _tileRegistry: TileRegistry;
   private _commandRegistry: CommandRegistry;
   private _graphManager: CoreGraphManager;
@@ -24,15 +26,26 @@ export class Blix {
   constructor(mainWindow: MainWindow) {
     // this.startTime = new Date();
     this._mainWindow = mainWindow;
-    this._toolbox = new ToolboxRegistry();
+    this._toolboxRegistry = new ToolboxRegistry(mainWindow);
     this._commandRegistry = new CommandRegistry();
     this._tileRegistry = new TileRegistry();
     this._graphManager = new CoreGraphManager(this, mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
+
+    // TESTING ADD NODE TO TOOLBOX
+    // setInterval(() => {
+    //   const nodeInstance = new NodeInstance("", "", "", "", "", "", [], []);
+    //   const nodeUI = new NodeUI();
+    //   const nodeBuilder = new NodeBuilder(nodeInstance).setUI(
+    //     new NodeUIBuilder(nodeUI).addLabel("Test", "test")
+    //   )
+
+    //   this._toolboxRegistry.addInstance(nodeInstance);
+    // }, 5000);
   }
 
   get toolbox(): ToolboxRegistry {
-    return this._toolbox;
+    return this._toolboxRegistry;
   }
 
   get tileRegistry(): TileRegistry {

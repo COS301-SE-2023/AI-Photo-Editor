@@ -1,60 +1,39 @@
-import { writable } from "svelte/store";
-import type { INode } from "../../../shared/types/index";
-import type { NodeUI } from "@electron/lib/registries/ToolboxRegistry";
-
-interface NodeStore {
-  nodes: INode[];
-}
-
-function createNodeStore() {
-  const { subscribe, set } = writable<NodeStore>({
-    nodes: [],
-  });
-
-  // Called when the command registry changes
-  // Automatically updates the value of the store
-  function refreshStore(results: INode[]) {
-    set({ nodes: results });
-  }
-
-  return {
-    subscribe,
-    // addCommands,
-    // runCommand,
-    refreshStore,
-  };
-}
-
-export const nodeStore = createNodeStore();
+import type { INode } from "@shared/ui/ToolboxTypes";
+import { derived, writable } from "svelte/store";
 
 type NodeSignature = string;
-type ToolboxDict = { [key: NodeSignature]: NodeUI };
+type ToolboxDict = { [key: NodeSignature]: INode };
 
 class ToolboxStore {
-  store = writable<ToolboxDict>({});
+  private store = writable<ToolboxDict>({});
 
-  public refreshToolbox() {
-    // this.store.update((stores) => {
-    //   if (!stores[graphUUID]) {
-    //     stores[graphUUID] = new GraphStore(graphUUID);
-    //   }
-    //   stores[graphUUID].refreshStore(newGraph);
-    //   return stores;
-    // });
-    // const val = get(this.store);
+  public refreshStore(nodes: INode[]) {
+    this.store.update((toolbox) => {
+      for (const node of nodes) {
+        toolbox[node.signature] = node;
+      }
+      return toolbox;
+    });
+    // console.log("REFRESH TOOLBOX", nodes);
   }
 
   public get subscribe() {
     return this.store.subscribe;
   }
 
-  // Returns a derived store containing only the graph UUIDs
-  // public getAllGraphUUIDsReactive() {
-  //   return derived(this.store, (mall) => {
-  //     return Object.keys(mall);
-  //   });
-  // }
+  public getAllSignaturesReactive() {
+    return derived(this.store, (toolbox) => {
+      return Object.keys(toolbox);
+    });
+  }
+
+  // Returns a derived store containing only the specified INode
+  public getNodeReactive(signature: NodeSignature) {
+    return derived(this.store, (toolbox) => {
+      return toolbox[signature];
+    });
+  }
 }
 
 // export const graphMall = writable<GraphMall>(new GraphMall());
-export const graphMall = new ToolboxStore();
+export const toolboxStore = new ToolboxStore();

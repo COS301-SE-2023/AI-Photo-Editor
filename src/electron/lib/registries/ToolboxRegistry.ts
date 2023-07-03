@@ -1,17 +1,28 @@
 import type { Registry, RegistryInstance } from "./Registry";
-import type { INode, IAnchor } from "../../../shared/types";
 import { randomUUID } from "crypto";
+import { NodeUIParent } from "../../../shared/ui/NodeUI";
+import { IAnchor, INode } from "../../../shared/ui/ToolboxTypes";
+import type { MainWindow } from "../api/apis/WindowApi";
 
 export class ToolboxRegistry implements Registry {
   private registry: { [key: string]: NodeInstance } = {};
 
+  constructor(readonly mainWindow?: MainWindow) {}
+
   addInstance(instance: NodeInstance): void {
     this.registry[instance.getSignature] = instance;
+    // console.log("REGISTERING NODE " + instance.getSignature);
+
+    // Update frontend toolbox
+    this.mainWindow?.apis.toolboxClientApi.registryChanged(this.getNodes());
+
     return;
   }
+
   getRegistry(): { [key: string]: NodeInstance } {
     return this.registry;
   }
+
   getNodes(): INode[] {
     const commands: INode[] = [];
     for (const command in this.registry) {
@@ -22,77 +33,31 @@ export class ToolboxRegistry implements Registry {
         const outputAnchors: IAnchor[] = [];
 
         for (const anchor of nodeInstance.getInputAnchorInstances) {
-          const anchorObject = {
-            type: anchor.type,
-            signature: anchor.signature,
-            displayName: anchor.displayName,
-          };
+          const anchorObject = new IAnchor(anchor.type, anchor.signature, anchor.displayName);
+
           inputAnchors.push(anchorObject);
         }
 
         for (const anchor of nodeInstance.getOutputAnchorInstances) {
-          const anchorObject = {
-            type: anchor.type,
-            signature: anchor.signature,
-            displayName: anchor.displayName,
-          };
+          const anchorObject = new IAnchor(anchor.type, anchor.signature, anchor.displayName);
           outputAnchors.push(anchorObject);
         }
 
-        const nodeObbject = {
-          signature: nodeInstance.getSignature,
-          title: nodeInstance.getTitle,
-          description: nodeInstance.getDescription,
-          icon: nodeInstance.getIcon,
-          inputs: inputAnchors,
-          outputs: outputAnchors,
-          ui: nodeInstance.getUI,
-        };
-        commands.push(nodeObbject);
+        const nodeObject = new INode(
+          nodeInstance.getSignature,
+          nodeInstance.getTitle,
+          nodeInstance.getDescription,
+          nodeInstance.getIcon,
+          inputAnchors,
+          outputAnchors,
+          nodeInstance.getUI
+        );
+        commands.push(nodeObject);
       }
     }
 
     return commands;
   }
-}
-
-// This should probably become virtual
-export class NodeUI {
-  constructor() {
-    this.parent = null;
-    this.label = "";
-    this.params = [];
-    this.type = "ui";
-  }
-  public parent: NodeUI | null;
-  public label: string;
-  public params: any[];
-  public type: string;
-}
-
-export class NodeUIParent extends NodeUI {
-  constructor(label: string, parent: NodeUIParent | null) {
-    super();
-    this.label = label;
-    this.parent = parent;
-    this.params = [];
-    this.type = "parent";
-  }
-
-  label: string;
-  params: NodeUI[];
-}
-
-export class NodeUILeaf extends NodeUI {
-  constructor(category: string, label: string, param: any[], parent: NodeUIParent) {
-    super();
-    this.label = label;
-    this.params = param;
-    this.type = "leaf";
-    this.parent = parent;
-    this.category = category;
-  }
-  category: string;
 }
 
 export class NodeInstance implements RegistryInstance {

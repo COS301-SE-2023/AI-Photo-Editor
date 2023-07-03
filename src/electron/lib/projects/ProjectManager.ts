@@ -6,9 +6,9 @@ import fs from "fs";
 import type { PathLike } from "fs";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
-import type { CommonProject } from "../../../shared/types";
 import { dialog } from "electron";
 import type { IpcResponse } from "../api/MainApi";
+import { CommonProject } from "../../../shared/ui/ToolboxTypes";
 
 // This should kinda be extending Registry and then called ProjectRegistry
 // instead of Project Manager but I don't feel like the Registry interface is

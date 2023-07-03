@@ -1,7 +1,7 @@
 import { writable, get } from "svelte/store";
 import { Project } from "../Project";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
-import type { CommonProject } from "@shared/types";
+import type { CommonProject } from "@shared/ui/ToolboxTypes";
 
 interface ProjectManagerState {
   projectStores: NewProjectStore[];

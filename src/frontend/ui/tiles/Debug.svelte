@@ -1,9 +1,12 @@
 <script lang="ts">
   import { graphMall } from "lib/stores/GraphStore";
   import { projectStore } from "lib/stores/ProjectStore";
+  import { toolboxStore } from "lib/stores/ToolboxStore";
   import { get } from "svelte/store";
 
   let graphIds = graphMall.getAllGraphUUIDsReactive();
+
+  const toolboxSignatures = toolboxStore.getAllSignaturesReactive();
 
   // setInterval(() => {
   //   console.log(get($graphMall[$graphIds[0]]));
@@ -15,6 +18,9 @@
 
 <div class="content">
   <div class="output">
+    <b>Toolbox</b>: <br />
+    {JSON.stringify($toolboxSignatures)}
+    <hr />
     <b>Graph Mall</b>: <br />
     {JSON.stringify($graphMall)}
     <hr />
