@@ -33,12 +33,12 @@ function createProjectManager() {
   });
 
   async function createProject() {
-    const res = await window.apis.projectApi.createProject();
-    store.update((state) => ({
-      ...state,
-      projectStores: [...state.projectStores, createNewProjectStore(res.data)],
-      activeProject: res.data.uuid,
-    }));
+    // const res = await window.apis.projectApi.createProject();
+    // store.update((state) => ({
+    //   ...state,
+    //   projectStores: [...state.projectStores, createNewProjectStore(res.data)],
+    //   activeProject: res.data.uuid,
+    // }));
   }
 
   function loadProject(project: CommonProject) {
@@ -143,22 +143,22 @@ function createProjectStore() {
   });
 
   async function createProject() {
-    const res = await window.apis.projectApi.createProject();
-    const project = new Project(res.data.name, res.data.uuid);
-    update((state) => ({
-      ...state,
-      projects: [...state.projects, project],
-      activeProject: project,
-    }));
+    // const res = await window.apis.projectApi.createProject();
+    // const project = new Project(res.data.name, res.data.uuid);
+    // update((state) => ({
+    //   ...state,
+    //   projects: [...state.projects, project],
+    //   activeProject: project,
+    // }));
   }
 
   async function closeProject(uuid: UUID) {
     update((state) => {
       const activeProject =
-        state.activeProject?.uuid === uuid
+        state.activeProject?.id === uuid
           ? getNextActiveProject(state.projects, state.activeProject)
           : state.activeProject;
-      const projects = state.projects.filter((p) => p.uuid !== uuid);
+      const projects = state.projects.filter((p) => p.id !== uuid);
       return { ...state, projects, activeProject };
     });
 
@@ -167,7 +167,7 @@ function createProjectStore() {
 
   async function renameProject(uuid: UUID, name: string) {
     update((state) => {
-      const index = state.projects.findIndex((p) => p.uuid === uuid);
+      const index = state.projects.findIndex((p) => p.id === uuid);
 
       if (index === 1) {
         return state;
@@ -181,14 +181,14 @@ function createProjectStore() {
   }
 
   function getNextActiveProject(projects: Project[], currentProject: Project | null) {
-    const currentIndex = projects.findIndex((p) => p.uuid === currentProject?.uuid);
+    const currentIndex = projects.findIndex((p) => p.id === currentProject?.id);
     const nextIndex = currentIndex === projects.length - 1 ? currentIndex - 1 : currentIndex + 1;
     return projects[nextIndex] || null;
   }
 
   function setActiveProject(id: string) {
     update((state) => {
-      const project = state.projects.find((p) => p.uuid === id);
+      const project = state.projects.find((p) => p.id === id);
       return { ...state, activeProject: project || null };
     });
   }

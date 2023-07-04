@@ -1,6 +1,7 @@
 import type { ElectronWindowApi } from "electron-affinity/window";
 import type { CommonProject } from "@shared/types";
-import { projectManager } from "@frontend/lib/stores/ProjectStore";
+import { projectsStore } from "../stores/ProjectBarStore";
+import { Project } from "../Project";
 
 export class ClientProjectApi implements ElectronWindowApi<ClientProjectApi> {
   // Add more methods to this class which can be called by the backend if any
@@ -9,19 +10,19 @@ export class ClientProjectApi implements ElectronWindowApi<ClientProjectApi> {
   // example
   projectChanged(state: CommonProject): void {
     // console.log("Project Changed", state);
-    projectManager.updateProject(state);
+    // projectsStore.updateProject(state);
   }
 
   public loadProject(state: CommonProject): void {
-    // console.log("Project Loaded", state);
-    projectManager.loadProject(state);
+    const project = new Project(state.name, state.uuid);
+    projectsStore.addProject(project);
   }
 
   public loadProjects(state: CommonProject[]): void {
-    // console.log("Projects Loaded", state);
-    // projectManager.loadProjects(state);
+    const projects: Project[] = [];
     for (const project of state) {
-      projectManager.loadProject(project);
+      projects.push(new Project(project.name, project.uuid));
     }
+    projectsStore.addProjects(projects);
   }
 }
