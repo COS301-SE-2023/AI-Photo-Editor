@@ -54,6 +54,10 @@ export class ToolboxRegistry implements Registry {
 
     return commands;
   }
+
+  getNodeInstance(signature: string): NodeInstance {
+    return this.registry[signature];
+  }
 }
 
 // This should probably become virtual
@@ -183,18 +187,18 @@ export class NodeInstance implements RegistryInstance {
     this.signature = plugin + "." + name;
   }
 
-  addInput(type: string, anchorname: string) {
-    const id = this.plugin + "." + this.name + "." + anchorname;
+  addInput(type: string, anchorname: string, id: number) {
+    const signature = this.plugin + "." + this.name + "." + anchorname + `.${id}`;
 
-    const anchor = new InputAnchorInstance(type, id, anchorname);
+    const anchor = new InputAnchorInstance(type, signature, anchorname);
 
     this.inputs.push(anchor);
   }
 
-  addOutput(type: string, anchorname: string) {
-    const id = this.plugin + "." + this.name + "." + anchorname;
+  addOutput(type: string, anchorname: string, id: number) {
+    const signature = this.plugin + "." + this.name + "." + anchorname + `.${id}`;
 
-    const anchor = new OutputAnchorInstance(type, id, anchorname);
+    const anchor = new OutputAnchorInstance(type, signature, anchorname);
 
     this.outputs.push(anchor);
   }

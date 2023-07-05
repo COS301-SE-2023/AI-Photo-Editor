@@ -5,7 +5,8 @@ import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 import { PluginManager } from "./plugins/PluginManager";
-
+import { testStuffies } from "./core-graph/CoreGraphTesting";
+import logger from "../utils/logger";
 // Encapsulates the backend representation for
 // the entire running Blix application
 export class Blix {
@@ -44,9 +45,11 @@ export class Blix {
     this._pluginManager = new PluginManager(this);
     await this._pluginManager.loadBasePlugins();
 
-    this._graphManager = new CoreGraphManager(mainWindow);
+    this._graphManager = new CoreGraphManager(mainWindow, this._toolbox);
     this._projectManager = new ProjectManager(mainWindow);
     this._projectManager.loadRecentProjects();
+
+    testStuffies(this);
   }
 
   get toolbox(): ToolboxRegistry {

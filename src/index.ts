@@ -1,13 +1,11 @@
-import { app, BrowserWindow, Notification, protocol, Menu, MenuItem, dialog, net } from "electron";
+import { app, BrowserWindow, Notification, protocol, Menu, MenuItem, dialog } from "electron";
 import { join } from "path";
-import fs from "fs";
 import { parse } from "url";
 import { autoUpdater } from "electron-updater";
 
 import logger from "./electron/utils/logger";
 import settings from "./electron/utils/settings";
 
-import { PluginManager } from "./electron/lib/plugins/PluginManager";
 import { Blix } from "./electron/lib/Blix";
 import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
@@ -72,6 +70,7 @@ async function createMainWindow() {
     icon: isProd ? join(__dirname, "icon.png") : "public/images/icon.png",
     titleBarStyle: "hidden",
     trafficLightPosition: { x: 10, y: 10 },
+    // show: false,
   }) as MainWindow;
 
   const url =
@@ -197,11 +196,6 @@ autoUpdater.on("error", (err) => {
   });
   notification.show();
 });
-
-// import { TestGraph } from "./lib/core-graph/GraphTesting";
-
-// const t: TestGraph = new TestGraph();
-// t.main();
 
 // // Menu
 // const menuBar = new Menu();

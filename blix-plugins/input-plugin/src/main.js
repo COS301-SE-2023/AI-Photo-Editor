@@ -7,7 +7,7 @@ const nodes ={
         nodeBuilder.define((num1) => {
             return num1;
         });
-       nodeBuilder.addOutput("Number","Result");
+       nodeBuilder.addOutput("Number","Result", 0);
 
        ui = nodeBuilder.createUIBuilder();
        ui.addNumberInput("input number",0);
@@ -21,7 +21,7 @@ const nodes ={
       nodeBuilder.define((image) => {
           return image;
       });
-     nodeBuilder.addOutput("Image","Result");
+     nodeBuilder.addOutput("Image","Result", 0);
 
      ui = nodeBuilder.createUIBuilder();
      ui.addImageInput("input image");
@@ -35,7 +35,7 @@ const nodes ={
     nodeBuilder.define((color) => {
         return color;
     });
-   nodeBuilder.addOutput("Color","Result");
+   nodeBuilder.addOutput("Color","Result", 0);
 
    ui = nodeBuilder.createUIBuilder();
    ui.addColorPicker("input number",0);

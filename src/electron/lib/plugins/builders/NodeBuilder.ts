@@ -45,12 +45,12 @@ export class NodeBuilder implements PluginContextBuilder {
     this.node.setIcon(icon);
   }
 
-  public addInput(type: string, anchorname: string): void {
-    this.node.addInput(type, anchorname);
+  public addInput(type: string, anchorname: string, id: number): void {
+    this.node.addInput(type, anchorname, id);
   }
 
-  public addOutput(type: string, anchorname: string): void {
-    this.node.addOutput(type, anchorname);
+  public addOutput(type: string, anchorname: string, id: number): void {
+    this.node.addOutput(type, anchorname, id);
   }
 
   public createUIBuilder(): NodeUIBuilder {

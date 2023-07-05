@@ -48,6 +48,7 @@ export class Plugin {
   // Load this plugin into a local Node module
   // See: [https://rollupjs.org/es-module-syntax/#dynamic-import]
   requireSelf(blix: Blix): void {
+    // console.log("Armand")
     try {
       // This uses Node.js require() to load the plugin as a module
       // TODO: ISOLATION + LIMITED API
