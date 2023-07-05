@@ -1,5 +1,6 @@
 import { blixStore } from "./stores/BlixStore";
 import { commandStore } from "./stores/CommandStore";
+import { nodeStore } from "./stores/NodeStore";
 import { GraphNode, UIGraph, graphMall } from "./stores/GraphStore";
 import { initializeAPIs } from "./api/apiInitializer";
 /**
@@ -21,6 +22,10 @@ async function setInitialStores() {
   // Command store
   const command = await window.apis.commandApi.getCommands();
   commandStore.refreshStore(command);
+
+  // Node store
+  const node = await window.apis.toolboxApi.getNodes();
+  nodeStore.refreshStore(node);
 
   // Graph store
   const allGraphIds = await window.apis.graphApi.getAllGraphUUIDs();

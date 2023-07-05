@@ -1,31 +1,62 @@
 <script lang="ts">
-  import { get } from "svelte/store";
-  import { onDestroy } from "svelte";
-  import type { Project } from "../../lib/Project";
-  import { projectManager } from "@frontend/lib/stores/ProjectStore";
+  import { projectsStore } from "@frontend/lib/stores/ProjectStore";
+  // import Shortcuts from "../utils/Shortcuts.svelte";
+  // import { registerShortcuts } from "../../lib/Shortcuts";
 
-  let projects: Project[] = [];
+  let count = 0;
+  function createProject() {
+    projectsStore.createProject();
+  }
 
-  const unsubscribe = projectManager.subscribe((state) => {
-    projects = state.projectStores.map((store) => get(store));
-  });
+  function draggable(node: HTMLElement) {
+    // let state = params;
+    node.draggable = true;
+    node.style.cursor = "grab";
+  }
 
-  onDestroy(unsubscribe);
+  // projectsStore.subscribe((state) => {
+  //   alert(`ProjectsStore changed`);
+  // });
+
+  function subscribeToProject(id: string) {
+    alert("Subscribing to project...");
+    const projectStore = projectsStore.getProjectStore(id);
+    projectStore.subscribe((state) => {
+      console.log(`Project ${state?.name} [${state?.id}] changed`);
+    });
+  }
+
+  function changeName(id: string) {
+    projectsStore.changeName(`Hello World ${count++}`, id);
+  }
+
+  // TODO: Fix when shortcuts is fixed
+  // registerShortcuts({
+  //   "blix.projects.newProject": () => {
+  //     projectsStore.createProject();
+  //   },
+  //   "blix.projects.closeActiveProject": () => {
+  //     projectsStore.closeProject($projectsStore.activeProject?.id || "");
+  //   },
+  // });
 </script>
 
 <div class="drag flex h-full flex-row flex-nowrap items-center">
-  {#each projects as project (project.uuid)}
+  {#each $projectsStore.projects as project (project.id)}
     <div
       class="no-drag group flex h-full shrink basis-48 items-center overflow-hidden px-2 text-sm font-medium text-zinc-200
-      {$projectManager.activeProject === project.uuid ? 'bg-zinc-900' : 'hover:bg-zinc-700'}"
+      {$projectsStore.activeProject?.id === project.id ? 'bg-zinc-900' : 'hover:bg-zinc-700'}"
       title="{project.name}"
-      on:click="{() => projectManager.setActiveProject(project.uuid)}"
-      on:keypress="{() => projectManager.setActiveProject(project.uuid)}"
+      on:click="{() => projectsStore.setActiveProject(project.id)}"
+      on:keypress="{() => projectsStore.setActiveProject(project.id)}"
+      on:dblclick="{() => changeName(project.id)}"
+      on:contextmenu|preventDefault="{() => subscribeToProject(project.id)}"
+      use:draggable
     >
       <p class="mr-2 truncate">{project.name}</p>
       <svg
-        on:click="{() => projectManager.closeProject(project.uuid)}"
-        on:keypress="{() => projectManager.closeProject(project.uuid)}"
+        on:click="{() => projectsStore.closeProject(project.id)}"
+        on:keypress="{() => projectsStore.closeProject(project.id)}"
         fill="none"
         viewBox="0 0 24 24"
         stroke-width="1.5"
@@ -36,11 +67,7 @@
       </svg>
     </div>
   {/each}
-  <div
-    on:click="{projectManager.createProject}"
-    on:keypress="{projectManager.createProject}"
-    class="no-drag flex-none pl-2"
-  >
+  <div on:click="{createProject}" on:keypress="{createProject}" class="no-drag flex-none pl-2">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
@@ -53,6 +80,8 @@
     </svg>
   </div>
 </div>
+
+<!-- <Shortcuts {shortcuts} /> -->
 
 <style lang="postcss">
   .no-drag {
