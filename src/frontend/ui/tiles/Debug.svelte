@@ -1,6 +1,6 @@
-<script lang="ts">
+<script ang="ts">
   import { graphMall } from "@frontend/lib/stores/GraphStore";
-  import { projectStore } from "@frontend/lib/stores/ProjectStore";
+  import { projectsStore } from "@frontend/lib/stores/ProjectStore";
   import { get } from "svelte/store";
 
   let graphIds = graphMall.getAllGraphUUIDsReactive();
@@ -25,7 +25,13 @@
     {/each}
     <hr />
     <b>Project Store</b>: <br />
-    {JSON.stringify($projectStore)}
+    <div>
+      Active Project - Name: {$projectsStore.activeProject.name} ID: {$projectsStore.activeProject
+        .id}
+    </div>
+    {#each $projectsStore.projects as project (project.id)}
+      <div>Name: {project.name} ID: {project.id}</div>
+    {/each}
   </div>
 </div>
 

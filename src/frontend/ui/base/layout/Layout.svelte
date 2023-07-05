@@ -3,7 +3,7 @@
   import Panel from "./Panel.svelte";
   // import { projectManager, type NewProjectStore } from "@frontend/lib/stores/ProjectStore";
   // import { get } from "svelte/store";
-  import { projectsStore } from "lib/stores/ProjectBarStore";
+  import { projectsStore } from "lib/stores/ProjectStore";
 
   // let subLayout = new PanelGroup("2");
   // subLayout.addPanel("qwer", 0);

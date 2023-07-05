@@ -1,205 +1,176 @@
-import { writable, get } from "svelte/store";
+import { writable, derived, type Readable, get } from "svelte/store";
+import { type UUID } from "@shared/utils/UniqueEntity";
 import { Project } from "../Project";
-import type { UUID } from "../../../shared/utils/UniqueEntity";
-import type { CommonProject } from "@shared/types";
 
-interface ProjectManagerState {
-  projectStores: NewProjectStore[];
-  activeProject: UUID;
-}
-
-function createNewProjectStore(project: CommonProject) {
-  const { subscribe, update, set } = writable<Project>(new Project(project.name, project.uuid));
-  const uuid = project.uuid;
-
-  function getId() {
-    return uuid;
-  }
-
-  return {
-    subscribe,
-    update,
-    set,
-    getId,
-  };
-}
-
-export type NewProjectStore = ReturnType<typeof createNewProjectStore>;
-
-function createProjectManager() {
-  const store = writable<ProjectManagerState>({
-    projectStores: [],
-    activeProject: "",
-  });
-
-  async function createProject() {
-    // const res = await window.apis.projectApi.createProject();
-    // store.update((state) => ({
-    //   ...state,
-    //   projectStores: [...state.projectStores, createNewProjectStore(res.data)],
-    //   activeProject: res.data.uuid,
-    // }));
-  }
-
-  function loadProject(project: CommonProject) {
-    store.update((state) => ({
-      ...state,
-      projectStores: [...state.projectStores, createNewProjectStore(project)],
-      activeProject: project.uuid,
-    }));
-  }
-
-  async function closeProject(uuid: UUID) {
-    store.update((state) => {
-      const activeProject =
-        state.activeProject === uuid
-          ? getNextActiveProject(state.projectStores, state.activeProject)
-          : state.activeProject;
-      const projectStores = state.projectStores.filter((p) => p.getId() !== uuid);
-      return { ...state, projectStores, activeProject };
-    });
-
-    await window.apis.projectApi.closeProject(uuid);
-  }
-
-  function getNextActiveProject(projects: NewProjectStore[], activeProject: UUID): UUID {
-    const currentIndex = projects.findIndex((p) => p.getId() === activeProject);
-    const nextIndex = currentIndex === projects.length - 1 ? currentIndex - 1 : currentIndex + 1;
-    if (nextIndex < 0) {
-      return "";
-    } else {
-      return projects[nextIndex].getId();
-    }
-  }
-
-  function setActiveProject(uuid: UUID) {
-    store.update((state) => {
-      const project = state.projectStores.find((p) => p.getId() === uuid);
-      if (!project) {
-        return state;
-      } else {
-        return { ...state, activeProject: uuid };
-      }
-    });
-  }
-
-  function getActiveProject(): NewProjectStore {
-    const storeState = get(store);
-    const project = storeState.projectStores.find((p) => p.getId() === storeState.activeProject);
-    return project!;
-  }
-
-  function updateProject(state: CommonProject) {
-    // Passes in the state of the backend project which changed. I would assume
-    // we'll have to update the correct project store with the new data. The
-    // project store and manager kinda a bit cooked iono. So, I guess whoever
-    // works on this will have to feel around to get it working or it will have
-    // to be changed later
-  }
-
-  // TODO: Rewrite from old code
-  // async function renameProject(uuid: UUID, name: string) {
-  //   update((state) => {
-  //     const index = state.projects.findIndex((p) => p.uuid === uuid);
-
-  //     if (index === 1) {
-  //       return state;
-  //     }
-
-  //     state.projects[index].name = name;
-
-  //     return { ...state };
-  //   });
-  //   await window.apis.projectApi.renameProject(uuid, name);
-  // }
-
-  return {
-    subscribe: store.subscribe,
-    createProject,
-    loadProject,
-    closeProject,
-    setActiveProject,
-    getActiveProject,
-    updateProject,
-  };
-}
-
-export type ProjectManagerStore = ReturnType<typeof createProjectManager>;
-export const projectManager: ProjectManagerStore = createProjectManager();
-
-// Struggling a bit to add write types for custom stores
-interface ProjectStoreState {
+type ProjectsStoreState = {
   projects: Project[];
   activeProject: Project | null;
-  project?: Project;
-}
+};
 
-export type ProjectStore = ReturnType<typeof createProjectStore>;
-
-function createProjectStore() {
-  const { subscribe, update } = writable<ProjectStoreState>({
+/**
+ * TODO: Still a bit conflicted about this store. Biggest issue that if I change
+ * the store so that it stores individual project stores then the ProjectsStore
+ * will not be notified if the state of the individual project stores get
+ * changed somewhere else in the app. I see two options to fix this issue:
+ *
+ * 1. Create writable ProjectStore but only expose the subscribe method to the
+ * outside world to almost make it readable. Then force update of these
+ * stores through the ProjectsStore.
+ *
+ * 2. Create some sort of proxy store so that only part of the state can be
+ * subscribed to. This probably not going to be so easy.
+ *
+ * 3. Just leave the current implementation as is. The derived project store
+ * subscribers will get notified every time the ProjectStore updates.
+ */
+class ProjectsStore {
+  private readonly store = writable<ProjectsStoreState>({
     projects: [],
     activeProject: null,
   });
 
-  async function createProject() {
-    // const res = await window.apis.projectApi.createProject();
-    // const project = new Project(res.data.name, res.data.uuid);
-    // update((state) => ({
-    //   ...state,
-    //   projects: [...state.projects, project],
-    //   activeProject: project,
-    // }));
-  }
-
-  async function closeProject(uuid: UUID) {
-    update((state) => {
-      const activeProject =
-        state.activeProject?.id === uuid
-          ? getNextActiveProject(state.projects, state.activeProject)
-          : state.activeProject;
-      const projects = state.projects.filter((p) => p.id !== uuid);
-      return { ...state, projects, activeProject };
-    });
-
-    await window.apis.projectApi.closeProject(uuid);
-  }
-
-  async function renameProject(uuid: UUID, name: string) {
-    update((state) => {
-      const index = state.projects.findIndex((p) => p.id === uuid);
-
-      if (index === 1) {
-        return state;
+  /**
+   * Adds a project to the store. Use when project is opened in the backend
+   * and UI has to reflect the new state.
+   */
+  public addProject(project: Project): void {
+    this.store.update((state) => {
+      state.projects.push(project);
+      if (!state.activeProject) {
+        state.activeProject = project;
       }
-
-      state.projects[index].name = name;
-
-      return { ...state };
+      return state;
     });
-    await window.apis.projectApi.renameProject(uuid, name);
   }
 
-  function getNextActiveProject(projects: Project[], currentProject: Project | null) {
+  /**
+   * Adds a list of projects to the store. Use when projects are opened in the
+   * backend and UI has to reflect the new state.
+   */
+  public addProjects(projects: Project[]): void {
+    if (projects.length) {
+      this.store.update((state) => {
+        state.projects.push(...projects);
+        if (!state.activeProject) {
+          state.activeProject = projects[0];
+        }
+        return state;
+      });
+    }
+  }
+
+  /**
+   * Creates a new project in the backend and adds it to the store.
+   */
+  public async createProject(): Promise<void> {
+    const res = await window.apis.projectApi.createProject();
+
+    if (res.success) {
+      const data = res.data;
+      const project = new Project(data.name, data.uuid);
+      this.addProject(project);
+      this.setActiveProject(project.id);
+    }
+  }
+
+  /**
+   * Removes a projects to the store. Use when projected is closed in the
+   * backend and UI has to reflect the new state.
+   *
+   * @param id ID of specific Project
+   */
+  public removeProject(id: UUID): void {
+    this.store.update((state) => {
+      state.activeProject =
+        state.activeProject?.id === id
+          ? this.getNextActiveProject(state.projects, state.activeProject)
+          : state.activeProject;
+      state.projects = state.projects.filter((p) => p.id !== id);
+      return state;
+    });
+  }
+
+  /**
+   * Closes an open project in the backend and removes it from the the store.
+   *
+   * @param id ID of specific Project
+   */
+  public async closeProject(id: UUID): Promise<void> {
+    this.removeProject(id);
+    await window.apis.projectApi.closeProject(id);
+  }
+
+  /**
+   * Changes the current active project to be reflected on the UI.
+   *
+   * @param id ID of specific Project
+   */
+  public setActiveProject(id: UUID) {
+    const storeValue = get(this.store);
+
+    if (storeValue.activeProject?.id !== id) {
+      this.store.update((state) => {
+        state.activeProject = state.projects.find((p) => p.id === id) || null;
+        return state;
+      });
+    }
+  }
+
+  /**
+   * @param newState
+   */
+  public updateProject(newState: Project) {
+    // TODO: This method is supposed to take the new state of a project
+    // which might have been changed by the backend or frontend it should
+    // then update the project. So, the parameter might have to change from
+    // a Project to a CommonProject. Data flow will also have to be thought
+    // about, because assume we changed the name of Project on the UI then
+    // it should update in the store optimistically but then it should also
+    // update the name in the backend. But then then backend should not send
+    // an event to the store to be updated cause it kinda was already just
+    // updated optimistically.
+  }
+
+  public changeName(newName: string, id: UUID) {
+    this.store.update((state) => {
+      const project = state.projects.find((p) => p.id === id);
+      if (project) {
+        project.name = newName;
+      }
+      return state;
+    });
+  }
+
+  /**
+   * DISCLAIMER: At the moment this actually does not return an independent
+   * readable store. If some data is changed in this main store then all the
+   * derived stores will be notified as well even if their state did not
+   * necessarily change.
+   *
+   *
+   * Returns a readable **Project** store which was derived from the
+   * **ProjectsStore**. This store can be used independently and will not be
+   * notified if the **ProjectsStore** is updated. A notification will only be
+   * sent if the state of a specific project is updated.
+   *
+   * @param id ID of specific Project
+   * @returns Derived readable ProjectStore
+   */
+  public getProjectStore(id: UUID): Readable<Project | null> {
+    return derived(this.store, ($store) => {
+      return $store.projects.find((p) => p.id === id) || null;
+    });
+  }
+
+  public get subscribe() {
+    return this.store.subscribe;
+  }
+
+  private getNextActiveProject(projects: Project[], currentProject: Project | null): Project {
     const currentIndex = projects.findIndex((p) => p.id === currentProject?.id);
     const nextIndex = currentIndex === projects.length - 1 ? currentIndex - 1 : currentIndex + 1;
     return projects[nextIndex] || null;
   }
-
-  function setActiveProject(id: string) {
-    update((state) => {
-      const project = state.projects.find((p) => p.id === id);
-      return { ...state, activeProject: project || null };
-    });
-  }
-
-  return {
-    subscribe,
-    closeProject,
-    createProject,
-    renameProject,
-    setActiveProject,
-  };
 }
 
-export const projectStore: ProjectStore = createProjectStore();
+export const projectsStore = new ProjectsStore();

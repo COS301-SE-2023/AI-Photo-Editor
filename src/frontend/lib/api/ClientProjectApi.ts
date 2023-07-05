@@ -1,6 +1,6 @@
 import type { ElectronWindowApi } from "electron-affinity/window";
 import type { CommonProject } from "@shared/types";
-import { projectsStore } from "../stores/ProjectBarStore";
+import { projectsStore } from "../stores/ProjectStore";
 import { Project } from "../Project";
 
 export class ClientProjectApi implements ElectronWindowApi<ClientProjectApi> {
