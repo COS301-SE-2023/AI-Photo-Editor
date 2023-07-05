@@ -3,12 +3,12 @@ import { PanelGroup } from "./PanelNode";
 
 export class Project {
   private _name: string;
-  private readonly _uuid: UUID;
+  private readonly _id: UUID;
   private _layout: PanelGroup;
 
-  constructor(name: string, uuid: UUID) {
+  constructor(name: string, id: UUID) {
     this._name = name;
-    this._uuid = uuid;
+    this._id = id;
     this._layout = new PanelGroup("1");
 
     const group1 = new PanelGroup("2");
@@ -21,8 +21,8 @@ export class Project {
     this._layout.addPanel("graph", 3);
   }
 
-  public get uuid() {
-    return this._uuid;
+  public get id() {
+    return this._id;
   }
   public set name(name: string) {
     this._name = name;

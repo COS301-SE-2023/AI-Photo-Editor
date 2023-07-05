@@ -10,11 +10,6 @@ import type { ToolboxApi } from "@electron/lib/api/apis/ToolboxApi";
 
 // Window APIs
 import { CommandClientApi } from "./apis/CommandClientApi";
-
-// stores
-import { blixStore } from "../stores/BlixStore";
-import { commandStore } from "../stores/CommandStore";
-import { nodeStore } from "../stores/NodeStore";
 import { GraphClientApi } from "./apis/GraphClientApi";
 import { ProjectClientApi } from "./apis/ProjectClientApi";
 
@@ -25,13 +20,6 @@ import { ProjectClientApi } from "./apis/ProjectClientApi";
 export async function initializeAPIs() {
   exposeWindowApis();
   window.apis = await bindMainApis();
-  const res = await window.apis.utilApi.getSystemInfo();
-  // Get commands and nodes from plugins
-  const command = await window.apis.commandApi.getCommands();
-  const node = await window.apis.toolboxApi.getNodes();
-  blixStore.set({ systemInfo: res });
-  commandStore.refreshStore(command);
-  nodeStore.refreshStore(node);
 }
 
 /**

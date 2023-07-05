@@ -4,13 +4,13 @@ import fs from "fs";
 import { parse } from "url";
 import { autoUpdater } from "electron-updater";
 
-import logger from "./utils/logger";
-import settings from "./utils/settings";
+import logger from "./electron/utils/logger";
+import settings from "./electron/utils/settings";
 
-import { PluginManager } from "./lib/plugins/PluginManager";
-import { Blix } from "./lib/Blix";
-import { exposeMainApis } from "./lib/api/MainApi";
-import { MainWindow, bindMainWindowApis } from "./lib/api/apis/WindowApi";
+import { PluginManager } from "./electron/lib/plugins/PluginManager";
+import { Blix } from "./electron/lib/Blix";
+import { exposeMainApis } from "./electron/lib/api/MainApi";
+import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
 
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 
@@ -40,44 +40,39 @@ let notification: Notification | null = null;
 let blix: Blix;
 
 app.on("ready", () => {
-  createMainWindow();
-
-  if (!mainWindow) return;
-
   protocol.registerFileProtocol("blix-image", (request, callback) => {
     const url = request.url.slice("blix-image://".length);
     callback({ path: join(__dirname, "..", "..", url) });
   });
 
-  blix = new Blix(mainWindow);
+  blix = new Blix();
   exposeMainApis(blix);
-  const pluginManager = new PluginManager(blix);
-  pluginManager.loadPlugins();
-  // blix.projectManager.openRecentProjects();
-  // Set icon for macOS
-  if (process.platform === "darwin") {
-    app.dock.setIcon("public/images/gaeblix.png");
-  }
+
+  createMainWindow().then(async () => {
+    if (mainWindow) {
+      await blix.init(mainWindow);
+    } else {
+      app.quit();
+    }
+  });
 });
 
-function createMainWindow() {
+async function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1300,
     height: 1000,
     webPreferences: {
-      devTools: !isProd,
+      devTools: true,
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
-      preload: join(__dirname, "preload.js"),
+      preload: join(__dirname, "electron/preload.js"),
     },
     // Set icon for Windows and Linux
-    icon: "public/images/gaeblix.png",
+    icon: isProd ? join(__dirname, "icon.png") : "public/images/icon.png",
     titleBarStyle: "hidden",
     trafficLightPosition: { x: 10, y: 10 },
   }) as MainWindow;
-
-  // Menu.setApplicationMenu(null);
 
   const url =
     // process.env.NODE_ENV === "production"
@@ -87,17 +82,13 @@ function createMainWindow() {
       : // in dev, target the host and port of the local rollup web server
         "http://localhost:5500";
 
-  mainWindow
-    .loadURL(url)
-    .then(async () => {
-      await bindMainWindowApis(mainWindow!);
-    })
-    .catch((err) => {
-      logger.error(JSON.stringify(err));
-      app.quit();
-    });
-
-  // if (!isProd) mainWindow.webContents.openDevTools();
+  try {
+    await mainWindow.loadURL(url);
+    await bindMainWindowApis(mainWindow);
+  } catch (e) {
+    logger.error(JSON.stringify(e));
+    app.quit();
+  }
 
   mainWindow.on("closed", () => {
     mainWindow = null;
@@ -162,7 +153,7 @@ autoUpdater.logger = logger;
 
 autoUpdater.on("update-available", () => {
   notification = new Notification({
-    title: "Electron-Svelte-Typescript",
+    title: "BLix",
     body: "Updates are available. Click to download.",
     silent: true,
     // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
@@ -177,7 +168,7 @@ autoUpdater.on("update-available", () => {
 
 autoUpdater.on("update-not-available", () => {
   notification = new Notification({
-    title: "Electron-Svelte-Typescript",
+    title: "Blix",
     body: "Your software is up to date.",
     silent: true,
     // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
@@ -187,7 +178,7 @@ autoUpdater.on("update-not-available", () => {
 
 autoUpdater.on("update-downloaded", () => {
   notification = new Notification({
-    title: "Electron-Svelte-Typescript",
+    title: "Blix",
     body: "The updates are ready. Click to quit and install.",
     silent: true,
     // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
@@ -200,7 +191,7 @@ autoUpdater.on("update-downloaded", () => {
 
 autoUpdater.on("error", (err) => {
   notification = new Notification({
-    title: "Electron-Svelte-Typescript",
+    title: "Blix",
     body: JSON.stringify(err),
     // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
   });

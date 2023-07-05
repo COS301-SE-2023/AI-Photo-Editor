@@ -6,7 +6,7 @@ import { join } from "path";
 import { Plugin } from "./Plugin";
 import { Blix } from "../Blix";
 import { promisify } from "util";
-import chokibar from "chokidar";
+import chokidar from "chokidar";
 
 export class PluginManager {
   // Stores plugins that have been loaded from disk
@@ -23,11 +23,11 @@ export class PluginManager {
 
     const paths = [];
 
-    if (process.env.NODE_ENV !== "production") {
-      paths.push(join(appPath, "./blix-plugins"));
-    } else {
+    if (app.isPackaged) {
       // Production
       paths.push(join(userDataPath, "plugins"));
+    } else {
+      paths.push(join(appPath, "./blix-plugins"));
     }
 
     return paths;
@@ -35,7 +35,7 @@ export class PluginManager {
 
   public watchPlugins() {
     // This is only checking the first plugin directory
-    chokibar
+    chokidar
       .watch(".", { depth: 0, ignoreInitial: true, cwd: this.pluginPaths[0] })
       .on("addDir", async (plugin) => {
         await this.loadPlugin(plugin, this.pluginPaths[0]);
@@ -53,6 +53,26 @@ export class PluginManager {
         this.loadPlugin(plugin, path);
       });
     });
+  }
+
+  /**
+   * Loads the base plugins that come packaged with Blix. This method may need
+   * modification to also load installed plugins in the userData directory.
+   */
+  public async loadBasePlugins() {
+    const appPath = app.getAppPath();
+    const pluginsPath = join(appPath, app.isPackaged ? "build/blix-plugins" : "blix-plugins");
+    const ignorePatterns = [".DS_Store"];
+    const plugins = readdirSync(pluginsPath);
+    plugins.filter((plugin) => {
+      return !ignorePatterns.some((pattern) => plugin.includes(pattern));
+    });
+
+    const promises = plugins.map((plugin) => {
+      return this.loadPlugin(plugin, pluginsPath);
+    });
+
+    await Promise.all(promises);
   }
 
   private async loadPlugin(plugin: string, path: string) {

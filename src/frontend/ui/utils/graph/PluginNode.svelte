@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Anchor, Node, Slider, generateInput } from "svelvet";
   import { writable } from "svelte/store";
-  import { graphMall, type GraphNode } from "lib/stores/GraphStore";
+  import { graphMall, type GraphNode } from "@frontend/lib/stores/GraphStore";
   // import NodeUiFragment from "./NodeUIFragment.svelte";
 
   export let graphId: string;
@@ -109,14 +109,14 @@ height="{graphNode.dims.h}" -->
     border-color: inherit;
   }
 
-  .output-anchors {
+  /* .output-anchors {
     position: absolute;
     right: -24px;
     top: 8px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-  }
+  } */
   .header {
     display: flex;
     justify-content: space-between;

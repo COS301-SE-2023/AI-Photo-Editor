@@ -1,6 +1,6 @@
-import { writable } from "svelte/store";
+import { writable, get } from "svelte/store";
 import type { ICommand } from "../../../shared/types/index";
-import { projectManager } from "./ProjectStore";
+import { projectsStore } from "./ProjectStore";
 
 interface CommandStore {
   commands: ICommand[];
@@ -26,7 +26,7 @@ function createCommandStore() {
     // console.log(cmd)
     // console.log(projectManager.getActiveProject().getId())
     if (cmd === "base-plugin.saveas") {
-      options = { data: projectManager.getActiveProject().getId() };
+      options = { data: get(projectsStore).activeProject?.id };
     }
     // console.log(options.data)
     await window.apis.commandApi.runCommand(cmd, options);

@@ -4,6 +4,7 @@ import { TileRegistry } from "./registries/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
+import { PluginManager } from "./plugins/PluginManager";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -11,9 +12,10 @@ export class Blix {
   private _toolbox: ToolboxRegistry;
   private _tileRegistry: TileRegistry;
   private _commandRegistry: CommandRegistry;
-  private _graphManager: CoreGraphManager;
-  private _projectManager: ProjectManager;
-  private _mainWindow: MainWindow;
+  private _graphManager!: CoreGraphManager;
+  private _projectManager!: ProjectManager;
+  private _pluginManager!: PluginManager;
+  private _mainWindow!: MainWindow;
 
   // private startTime: Date;
 
@@ -21,14 +23,30 @@ export class Blix {
   // private layoutRegistry: LayoutRegistry;
   // private currentLayout: LayoutId;
 
-  constructor(mainWindow: MainWindow) {
+  constructor() {
     // this.startTime = new Date();
-    this._mainWindow = mainWindow;
     this._toolbox = new ToolboxRegistry();
     this._commandRegistry = new CommandRegistry();
     this._tileRegistry = new TileRegistry();
+  }
+
+  /**
+   * Initializes the managers of the electron app after the Main Window has been
+   * instantiated. **Do not** change the implementation so that it passes in the
+   * window through the constructor.
+   *
+   * @param mainWindow
+   */
+  public async init(mainWindow: MainWindow) {
+    this._mainWindow = mainWindow;
+
+    // Load plugins before instantiating any managers
+    this._pluginManager = new PluginManager(this);
+    await this._pluginManager.loadBasePlugins();
+
     this._graphManager = new CoreGraphManager(mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
+    this._projectManager.loadRecentProjects();
   }
 
   get toolbox(): ToolboxRegistry {

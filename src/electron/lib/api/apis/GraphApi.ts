@@ -7,17 +7,17 @@ import { UIGraph } from "@shared/ui/UIGraph";
 // Graphs across projects are stored homogeneously and referenced by UUID
 export class GraphApi implements ElectronMainApi<GraphApi> {
   private readonly _blix: Blix;
-  private readonly graphSubscriber: IPCGraphSubscriber;
+  // private readonly graphSubscriber: IPCGraphSubscriber;
 
   constructor(blix: Blix) {
     this._blix = blix;
-    this.graphSubscriber = new IPCGraphSubscriber();
+    // this.graphSubscriber = new IPCGraphSubscriber();
 
     // Add IPC subscriber to listen for graph changes and alert the frontend
-    this._blix.graphManager.addAllSubscriber(this.graphSubscriber);
-    this.graphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
-      this._blix.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
-    };
+    // this._blix.graphManager.addAllSubscriber(this.graphSubscriber);
+    // this.graphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
+    //   this._blix.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
+    // };
   }
 
   async addNode(graphUUID: UUID) {
