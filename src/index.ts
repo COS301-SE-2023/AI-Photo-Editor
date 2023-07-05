@@ -37,7 +37,15 @@ let mainWindow: MainWindow | null = null;
 let notification: Notification | null = null;
 let blix: Blix;
 
-app.on("ready", () => {
+/**
+ * Will run when Electron has finished initializing. 1. Blix is instantiated
+ * which will bootstrap the registries 2. The main process IPC APIs will be
+ * exposed to the renderer 3. The renderer process is instantiated which will
+ * expose the window IPC APIs and bind to main process IPC APIs 4. The main
+ * process will bind to the window IPC APIs 5. The Blix state is instantiated
+ * and the various managers are initialized.
+ */
+app.on("ready", async () => {
   protocol.registerFileProtocol("blix-image", (request, callback) => {
     const url = request.url.slice("blix-image://".length);
     callback({ path: join(__dirname, "..", "..", url) });
