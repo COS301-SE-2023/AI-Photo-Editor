@@ -59,17 +59,20 @@ export class PluginManager {
    * Loads the base plugins that come packaged with Blix. This method may need
    * modification to also load installed plugins in the userData directory.
    */
-  public loadBasePlugins() {
+  public async loadBasePlugins() {
     const appPath = app.getAppPath();
     const pluginsPath = join(appPath, app.isPackaged ? "build/blix-plugins" : "blix-plugins");
+    const ignorePatterns = [".DS_Store"];
     const plugins = readdirSync(pluginsPath);
-
-    plugins.forEach((plugin) => {
-      // Ignore MacOS temp files
-      if (plugin !== ".DS_Store") {
-        this.loadPlugin(plugin, pluginsPath);
-      }
+    plugins.filter((plugin) => {
+      return !ignorePatterns.some((pattern) => plugin.includes(pattern));
     });
+
+    const promises = plugins.map((plugin) => {
+      return this.loadPlugin(plugin, pluginsPath);
+    });
+
+    await Promise.all(promises);
   }
 
   private async loadPlugin(plugin: string, path: string) {

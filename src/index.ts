@@ -31,9 +31,9 @@ app.on("ready", () => {
   blix = new Blix();
   exposeMainApis(blix);
 
-  createMainWindow().then(() => {
+  createMainWindow().then(async () => {
     if (mainWindow) {
-      blix.init(mainWindow);
+      await blix.init(mainWindow);
     } else {
       app.quit();
     }

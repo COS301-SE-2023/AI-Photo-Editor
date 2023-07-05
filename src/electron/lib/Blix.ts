@@ -37,13 +37,15 @@ export class Blix {
    *
    * @param mainWindow
    */
-  public init(mainWindow: MainWindow) {
-    this._graphManager = new CoreGraphManager(mainWindow);
-    this._projectManager = new ProjectManager(mainWindow);
-    this._pluginManager = new PluginManager(this);
+  public async init(mainWindow: MainWindow) {
     this._mainWindow = mainWindow;
 
-    this._pluginManager.loadBasePlugins();
+    // Load plugins before instantiating any managers
+    this._pluginManager = new PluginManager(this);
+    await this._pluginManager.loadBasePlugins();
+
+    this._graphManager = new CoreGraphManager(mainWindow);
+    this._projectManager = new ProjectManager(mainWindow);
     this._projectManager.loadRecentProjects();
   }
 
