@@ -10,9 +10,6 @@ import {
 import { CommandInstance } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
-import Main from "electron/main";
-import type { MainWindow } from "../api/apis/WindowApi";
-import { dialog } from "electron";
 import { UUID } from "../../../shared/utils/UniqueEntity";
 
 export type PluginSignature = string;
@@ -183,6 +180,10 @@ class CommandPluginContext extends PluginContext {
 
   public saveCurrentProject(project: UUID) {
     this.blix.projectManager.saveCurrentProject(project);
+  }
+
+  public sendPrompt() {
+    this.blix.aiManager.sendPrompt();
   }
 }
 

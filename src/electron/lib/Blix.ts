@@ -2,6 +2,7 @@ import { CommandRegistry } from "./registries/CommandRegistry";
 import { ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
+import { AiManager } from "./ai/AiManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 
@@ -13,6 +14,7 @@ export class Blix {
   private _commandRegistry: CommandRegistry;
   private _graphManager: CoreGraphManager;
   private _projectManager: ProjectManager;
+  private _aiManager: AiManager;
   private _mainWindow: MainWindow;
 
   // private startTime: Date;
@@ -29,6 +31,7 @@ export class Blix {
     this._tileRegistry = new TileRegistry();
     this._graphManager = new CoreGraphManager(mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
+    this._aiManager = new AiManager(mainWindow);
   }
 
   get toolbox(): ToolboxRegistry {
@@ -49,6 +52,10 @@ export class Blix {
 
   get projectManager(): ProjectManager {
     return this._projectManager;
+  }
+
+  get aiManager(): AiManager {
+    return this._aiManager;
   }
 
   get mainWindow(): MainWindow | null {
