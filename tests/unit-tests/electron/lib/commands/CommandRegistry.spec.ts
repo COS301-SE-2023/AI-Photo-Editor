@@ -1,5 +1,5 @@
 import exp from "constants";
-import { CommandInstance, CommandRegistry } from "../../../../../src/electron/lib/commands/CommandRegistry"
+import { CommandInstance, CommandRegistry } from "../../../../../src/electron/lib/registries/CommandRegistry"
 import type { ICommand } from "../../../../../src/shared/types";
 
 

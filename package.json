@@ -1,7 +1,7 @@
 {
   "name": "blix",
-  "description": "COS 301 Capstone Project - AI Photo Editor",
-  "version": "0.0.0",
+  "description": "Blix - A cross-platform AI-assisted graph photo editor",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor"
@@ -27,7 +27,7 @@
     "rollup"
   ],
   "homepage": "https://github.com/COS301-SE-2023/AI-Photo-Editor#readme",
-  "main": "build/electron/index.js",
+  "main": "build/index.js",
   "scripts": {
     "prestart": "cross-env NODE_ENV=development node scripts/preBuild.js",
     "start": "cross-env NODE_ENV=development npm-run-all -p -r build:frontend:dev start:electron",
@@ -138,9 +138,9 @@
     "dmg-license": "^1.0.11"
   },
   "build": {
-    "productName": "AI Photo Editor",
-    "appId": "ai.photo.editor",
-    "copyright": "Copyright © 2021 ${author}",
+    "productName": "Blix",
+    "appId": "com.the-spanish-inquisition.blix",
+    "copyright": "Copyright © 2023 The Spanish Inquisition",
     "win": {
       "target": [
         "nsis"

@@ -1,5 +1,5 @@
 import expect from "expect";
-import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent } from "../../../src/electron/lib/core-graph/ToolboxRegistry";
+import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent } from "../../../src/electron/lib/registries/ToolboxRegistry";
 import {NodeBuilder,NodeUIBuilder} from "../../../src/electron/lib/plugins/builders/NodeBuilder"
 // import { ProjectManager } from "../../../src/electron/lib/projects/ProjectManager";
 import { Plugin } from "../../../src/electron/lib/plugins/Plugin";

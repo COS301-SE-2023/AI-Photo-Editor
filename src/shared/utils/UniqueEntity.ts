@@ -1,14 +1,5 @@
-import crypto from "crypto";
-
-// export class UniqueEntity {
-// private readonly _uuid: UUID = randomUUID();
-
-//   public get uuid() {
-//     return this._uuid;
-//   }
-// }
-
-// export type UUID = ReturnType<typeof randomUUID>;
+// import crypto from "crypto";
+// const crypto = require("crypto");
 
 export type UUID = string;
 

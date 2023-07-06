@@ -6,12 +6,12 @@ import {
   InputAnchorInstance,
   NodeInstance,
   OutputAnchorInstance,
-} from "../core-graph/ToolboxRegistry";
-import { CommandInstance } from "../commands/CommandRegistry";
-import { TileInstance } from "../tiles/TileRegistry";
+} from "../registries/ToolboxRegistry";
+import { CommandInstance } from "../registries/CommandRegistry";
+import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
 import Main from "electron/main";
-import type { MainWindow } from "../api/WindowApi";
+import type { MainWindow } from "../api/apis/WindowApi";
 import { dialog } from "electron";
 import { UUID } from "../../../shared/utils/UniqueEntity";
 
