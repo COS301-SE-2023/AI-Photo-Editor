@@ -1,4 +1,4 @@
-import { type UUID } from "@shared/utils/UniqueEntity";
+import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraph } from "./CoreGraph";
 import {
