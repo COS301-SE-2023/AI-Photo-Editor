@@ -41,9 +41,9 @@ class GraphStore {
     // TODO: Implement properly, just for testing atm
     this.graphStore.update((graph) => {
       const newNode = new GraphNode(Math.round(10000 * Math.random()).toString());
-      newNode.pos.x = Math.round(1000 * Math.random());
-      newNode.pos.y = Math.round(1000 * Math.random());
-      newNode.dims.h = Math.round(100 + 200 * Math.random());
+      // newNode.pos.x = Math.round(1000 * Math.random());
+      // newNode.pos.y = Math.round(1000 * Math.random());
+      // newNode.dims.h = Math.round(100 + 200 * Math.random());
       graph.nodes[newNode.uuid] = newNode;
       return graph;
     });
@@ -71,19 +71,6 @@ class GraphStore {
   }
   async removeNode() {
     const res = await window.apis.graphApi.removeNode("");
-    return false;
-  }
-
-  async setNodePos(nodeId: string, pos: { x: number; y: number }) {
-    const res = await window.apis.graphApi.setNodePos("");
-
-    this.graphStore.update((graph) => {
-      if (!graph.nodes[nodeId]) return graph;
-
-      graph.nodes[nodeId].pos = pos;
-      graph.nodes[nodeId] = graph.nodes[nodeId];
-      return graph;
-    });
     return false;
   }
 }

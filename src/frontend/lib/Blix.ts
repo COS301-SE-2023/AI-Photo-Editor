@@ -46,8 +46,7 @@ async function setInitialStores() {
     uiGraph.nodes[node1.uuid] = node1;
     uiGraph.nodes[node2.uuid] = node2;
     uiGraph.nodes[node3.uuid] = node3;
-    node1.pos.x = 100;
-    node1.pos.y = 100;
+    // node1.styling.pos.set({ x: 100, y: 100 });
 
     graphMall.refreshGraph(uiGraph.uuid, uiGraph);
   }
