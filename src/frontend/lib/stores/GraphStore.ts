@@ -143,24 +143,22 @@ class GraphMall {
     return get(get(this.mall)[graphUUID]).nodes[nodeUUID];
   }
 
-  public updateNode(
-    graphUUID: GraphUUID,
-    nodeUUID: GraphNodeUUID,
-    func: (node: GraphNode) => GraphNode
-  ) {
-    this.mall.update((mall) => {
-      if (!mall[graphUUID]) return mall;
+  // Update specific graph without updating the mall
+  // public updateNode(
+  //   graphUUID: GraphUUID,
+  //   nodeUUID: GraphNodeUUID,
+  //   func: (node: GraphNode) => GraphNode
+  // ) {
+  //   console.log("UPDATE NODE", graphUUID, nodeUUID);
 
-      mall[graphUUID].update((graph) => {
-        if (!graph.nodes[nodeUUID]) return graph;
+  //   const currMall = get(this.mall)[graphUUID];
+  //   if (!currMall) return;
 
-        graph.nodes[nodeUUID] = func(graph.nodes[nodeUUID]);
-        return graph;
-      });
-
-      return mall;
-    });
-  }
+  //   currMall.update((graph) => {
+  //     graph.nodes[nodeUUID] = func(graph.nodes[nodeUUID]);
+  //     return graph;
+  //   });
+  // }
 }
 
 // export const graphMall = writable<GraphMall>(new GraphMall());

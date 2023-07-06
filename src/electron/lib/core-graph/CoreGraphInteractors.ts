@@ -39,6 +39,7 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
 
       uiGraph.nodes[node] = new GraphNode(node);
       uiGraph.nodes[node].pos = nodesAndEdges.nodes[node].styling.getPosition;
+      // uiGraph.nodes[node].signature = nodesAndEdges.nodes[node].signature;
     }
 
     // TODO: Convert nodesAndEdges to UIGraph

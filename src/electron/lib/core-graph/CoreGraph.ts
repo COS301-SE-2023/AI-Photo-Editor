@@ -89,7 +89,7 @@ export class CoreGraph extends UniqueEntity {
       // Create reduced node
       nodes[n.uuid] = new ReducedNode(
         n.uuid,
-        `${n.getPlugin}/${n.getName}`,
+        `${n.getPlugin}.${n.getName}`,
         styling,
         inputs,
         outputs
@@ -386,7 +386,7 @@ class Node extends UniqueEntity {
   public exportJSON(): NodeToJSON {
     return {
       id: this.uuid,
-      signature: `${this.plugin}/${this.name}`,
+      signature: `${this.plugin}.${this.name}`,
       styling: this.styling!,
     };
   }
@@ -459,7 +459,7 @@ export class NodesAndEdgesGraph implements GraphRepresentation {
 class ReducedNode {
   constructor(
     readonly id: UUID,
-    readonly signature: string,
+    readonly signature: `${string}.${string}`,
     readonly styling: NodeStyling,
     readonly inputs: { [key: UUID]: ReducedAnchor },
     readonly outputs: { [key: UUID]: ReducedAnchor }

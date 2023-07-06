@@ -3,11 +3,14 @@
   import { writable } from "svelte/store";
   import { graphMall } from "lib/stores/GraphStore";
   import type { GraphNode } from "@shared/ui/UIGraph";
+  import { toolboxStore } from "lib/stores/ToolboxStore";
   // import NodeUiFragment from "./NodeUIFragment.svelte";
 
   export let graphId: string;
   export let node: GraphNode;
   export let svelvetNodeId: string;
+
+  $: toolboxNode = toolboxStore.getNodeReactive(node.signature);
 
   // Parameter store
   type Inputs = { width: number };
@@ -15,31 +18,31 @@
   const inputs = generateInput(initialData);
 
   const nodePos = writable(node.pos);
-  const nodeConns = writable(node.connections);
+  // const nodeConns = writable(node.connections);
 
-  nodePos.subscribe(async (pos) => {
-    // On node moved
-    graphMall.updateNode(graphId, node.id, (node) => {
-      node.pos = pos;
-      return node;
-    });
-  });
+  // nodePos.subscribe(async (pos) => {
+  //   // On node moved
+  //   graphMall.updateNode(graphId, node.id, (node) => {
+  //     node.pos = pos;
+  //     return node;
+  //   });
+  // });
 
-  nodeConns.subscribe(async (conns) => {
-    // On connection changed
-    graphMall.updateNode(graphId, node.id, (node) => {
-      node.connections = conns;
-      return node;
-    });
-  });
+  // nodeConns.subscribe(async (conns) => {
+  //   // On connection changed
+  //   graphMall.updateNode(graphId, node.id, (node) => {
+  //     node.connections = conns;
+  //     return node;
+  //   });
+  // });
 
   // graphMall.subscribe((graphMall) => {
   // });
 
-  setInterval(() => {
-    nodePos.set(node.pos);
-    nodeConns.set(node.connections);
-  }, 100);
+  // setInterval(() => {
+  //   nodePos.set(node.pos);
+  //   nodeConns.set(node.connections);
+  // }, 100);
 </script>
 
 {#if svelvetNodeId !== ""}
@@ -59,8 +62,11 @@ height="{graphNode.dims.h}" -->
     <div class="node">
       <div class="header">
         <h1>{node.name}</h1>
+        <br /><br />
+        <h2>Signature: {node.signature}</h2>
       </div>
       <div class="node-body">
+        {JSON.stringify({ ...toolboxNode, ui: null })}
         <!-- TODO:  -->
         <!-- <NodeUiFragment />  -->
         <Slider min="{1}" max="{12}" fixed="{1}" step="{0.1}" parameterStore="{$inputs.width}" />

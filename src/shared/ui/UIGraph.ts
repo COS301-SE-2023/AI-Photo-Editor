@@ -1,4 +1,6 @@
 import { type UUID } from "@shared/utils/UniqueEntity";
+import { type NodeSignature } from "./ToolboxTypes";
+import { writable } from "svelte/store";
 
 export type GraphUUID = UUID;
 export type GraphNodeUUID = UUID;
@@ -16,10 +18,10 @@ export class GraphNode {
   id = "";
   public connections: [];
 
-  nodeUI: any; // TODO: Change this to NodeUI
+  signature: NodeSignature = "";
 
-  inAnchors: GraphAnchor[] = [];
-  outAnchors: GraphAnchor[] = [];
+  // inAnchors: GraphAnchor[] = [];
+  // outAnchors: GraphAnchor[] = [];
 
   pos: { x: number; y: number } = { x: 0, y: 0 };
   dims: { w: number; h: number } = { w: 0, h: 0 };

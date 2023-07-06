@@ -32,16 +32,37 @@ export class Blix {
     this._graphManager = new CoreGraphManager(this, mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
 
-    // TESTING ADD NODE TO TOOLBOX
-    // setInterval(() => {
-    //   const nodeInstance = new NodeInstance("", "", "", "", "", "", [], []);
-    //   const nodeUI = new NodeUI();
-    //   const nodeBuilder = new NodeBuilder(nodeInstance).setUI(
-    //     new NodeUIBuilder(nodeUI).addLabel("Test", "test")
-    //   )
+    // TESTING ADD NODE TO GRAPH
+    setInterval(() => {
+      const allIds = this._graphManager.getAllGraphUUIDs();
+      const randId = allIds[Math.floor(Math.random() * allIds.length)];
+      // const toolbox = this.blix.toolbox.getRegistry();
+      this._graphManager.addNode(
+        randId,
+        new NodeInstance(
+          "hello-plugin.hello",
+          "hello",
+          "hello-plugin",
+          "asdf4",
+          "asdf5",
+          "asdf6",
+          [],
+          []
+        )
+      );
+    }, 3000);
 
-    //   this._toolboxRegistry.addInstance(nodeInstance);
-    // }, 5000);
+    // TESTING ADD NODE TO TOOLBOX
+    setInterval(() => {
+      const nodeInstance = new NodeInstance("asdf", "Name", "Plugin", "", "", "", [], []);
+      const nodeUI = new NodeUI();
+
+      const nodeBuilder = new NodeBuilder(nodeInstance);
+      nodeBuilder.setUI(new NodeUIBuilder(nodeUI).addLabel("Test", "test"));
+      nodeBuilder.validate();
+
+      this._toolboxRegistry.addInstance(nodeInstance);
+    }, 5000);
   }
 
   get toolbox(): ToolboxRegistry {

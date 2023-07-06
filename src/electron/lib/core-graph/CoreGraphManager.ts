@@ -23,17 +23,6 @@ export class CoreGraphManager {
 
     // Test send dummy graph to frontend
     this.testingSendToClient();
-
-    // Testing subcribers
-    setInterval(() => {
-      const allIds = this.getAllGraphUUIDs();
-      const randId = allIds[Math.floor(Math.random() * allIds.length)];
-      // const toolbox = this.blix.toolbox.getRegistry();
-      this.addNode(
-        randId,
-        new NodeInstance("asdf1", "asdf2", "asdf3", "asdf4", "asdf5", "asdf6", [], [])
-      );
-    }, 5000);
   }
 
   testingSendToClient() {

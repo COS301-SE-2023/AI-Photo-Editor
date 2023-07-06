@@ -4,7 +4,6 @@
   import { type Readable } from "svelte/store";
   import { graphMall } from "lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
-  import type { GraphNode } from "@shared/ui/UIGraph";
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
@@ -13,9 +12,21 @@
   let graphIds = graphMall.getAllGraphUUIDsReactive();
   let graphId = $graphIds[0];
 
-  $: thisGraphStore = graphMall.getGraphReactive(graphId);
-  let graphNodes: Readable<GraphNode[]> | undefined;
-  $: graphNodes = $thisGraphStore?.getNodesReactive();
+  let thisGraphStore: Readable<any>;
+  let graphNodes: Readable<any[]>;
+
+  function updateOnGraphId(graphId: string) {
+    thisGraphStore = graphMall.getGraphReactive(graphId);
+    if ($thisGraphStore) {
+      graphNodes = $thisGraphStore.getNodesReactive();
+    }
+  }
+
+  // Only updates when _graphId_ changes
+  $: updateOnGraphId(graphId);
+
+  $: console.log("GRAPH MALL UPDATED", $graphMall);
+  // $: console.log($graphNodes);
 </script>
 
 <div class="hoverElements">

@@ -1,6 +1,8 @@
 import type { UUID } from "../utils/UniqueEntity";
 import { NodeUI } from "./NodeUITypes";
 
+export type NodeSignature = string;
+
 export class CommonProject {
   constructor(readonly name: string, readonly uuid: UUID) {}
 }
@@ -12,7 +14,7 @@ export class IAnchor {
 
 export class INode {
   constructor(
-    readonly signature: string,
+    readonly signature: NodeSignature,
     readonly title: string,
     readonly description: string,
     readonly icon: string,

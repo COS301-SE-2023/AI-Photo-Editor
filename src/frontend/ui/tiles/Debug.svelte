@@ -7,6 +7,7 @@
   let graphIds = graphMall.getAllGraphUUIDsReactive();
 
   const toolboxSignatures = toolboxStore.getAllSignaturesReactive();
+  // console.log($toolboxStore);
 
   // setInterval(() => {
   //   console.log(get($graphMall[$graphIds[0]]));
@@ -19,7 +20,11 @@
 <div class="content">
   <div class="output">
     <b>Toolbox</b>: <br />
-    {JSON.stringify($toolboxSignatures)}
+    {#each $toolboxSignatures as key}
+      {key}: {JSON.stringify({ ...$toolboxStore[key], ui: null })}
+      <br /><br />
+    {/each}
+
     <hr />
     <b>Graph Mall</b>: <br />
     {JSON.stringify($graphMall)}

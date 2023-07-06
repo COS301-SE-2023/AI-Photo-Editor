@@ -16,7 +16,6 @@ import { dialog } from "electron";
 import { UUID } from "../../../shared/utils/UniqueEntity";
 
 export type PluginSignature = string;
-export type NodeSignature = string;
 
 export class Plugin {
   private hasRequiredSelf: boolean;
