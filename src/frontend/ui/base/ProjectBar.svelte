@@ -1,33 +1,8 @@
 <script lang="ts">
   import { projectsStore } from "@frontend/lib/stores/ProjectStore";
-  // import Shortcuts from "../utils/Shortcuts.svelte";
-  // import { registerShortcuts } from "../../lib/Shortcuts";
 
-  let count = 0;
   function createProject() {
     projectsStore.createProject();
-  }
-
-  function draggable(node: HTMLElement) {
-    // let state = params;
-    node.draggable = true;
-    node.style.cursor = "grab";
-  }
-
-  // projectsStore.subscribe((state) => {
-  //   alert(`ProjectsStore changed`);
-  // });
-
-  function subscribeToProject(id: string) {
-    alert("Subscribing to project...");
-    const projectStore = projectsStore.getProjectStore(id);
-    projectStore.subscribe((state) => {
-      console.log(`Project ${state?.name} [${state?.id}] changed`);
-    });
-  }
-
-  function changeName(id: string) {
-    projectsStore.changeName(`Hello World ${count++}`, id);
   }
 
   // TODO: Fix when shortcuts is fixed
@@ -49,9 +24,6 @@
       title="{project.name}"
       on:click="{() => projectsStore.setActiveProject(project.id)}"
       on:keypress="{() => projectsStore.setActiveProject(project.id)}"
-      on:dblclick="{() => changeName(project.id)}"
-      on:contextmenu|preventDefault="{() => subscribeToProject(project.id)}"
-      use:draggable
     >
       <p class="mr-2 truncate">{project.name}</p>
       <svg

@@ -9,6 +9,7 @@ import { testStuffies } from "./core-graph/CoreGraphTesting";
 import logger from "../utils/logger";
 // Encapsulates the backend representation for
 // the entire running Blix application
+
 export class Blix {
   private _toolbox: ToolboxRegistry;
   private _tileRegistry: TileRegistry;
@@ -49,7 +50,7 @@ export class Blix {
     this._projectManager = new ProjectManager(mainWindow);
     this._projectManager.loadRecentProjects();
 
-    testStuffies(this);
+    // testStuffies(this);
   }
 
   get toolbox(): ToolboxRegistry {

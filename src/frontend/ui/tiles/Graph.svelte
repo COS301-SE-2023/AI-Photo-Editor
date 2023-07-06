@@ -2,7 +2,7 @@
 <script lang="ts">
   import { Svelvet } from "svelvet";
   import { type Readable } from "svelte/store";
-  import { graphMall } from "lib/stores/GraphStore";
+  import { graphMall } from "@frontend/lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import type { GraphNode } from "@shared/ui/UIGraph";
 
