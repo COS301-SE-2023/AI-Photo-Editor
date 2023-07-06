@@ -4,7 +4,7 @@ import {NodeBuilder,NodeUIBuilder} from "../../../src/electron/lib/plugins/build
 // import { ProjectManager } from "../../../src/electron/lib/projects/ProjectManager";
 import { Plugin } from "../../../src/electron/lib/plugins/Plugin";
 import { Blix } from "../../../src/electron/lib/Blix";
-import { MainWindow } from "../../../src/electron/lib/api/WindowApi";
+import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
 
 const mainWindow: MainWindow = {
   apis: {

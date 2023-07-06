@@ -46,6 +46,7 @@ function createMainWindow() {
       devTools: true,
       contextIsolation: true,
       nodeIntegration: false,
+      webviewTag: true,
       sandbox: true,
       preload: join(__dirname, "electron/preload.js"),
     },
