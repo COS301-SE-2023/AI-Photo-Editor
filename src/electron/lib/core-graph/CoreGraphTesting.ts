@@ -1,5 +1,5 @@
 // == DEV == //
-import { CoreGraph, GraphToJSON } from "./CoreGraph";
+import { CoreGraph } from "./CoreGraph";
 import {
   InputAnchorInstance,
   NodeInstance,
@@ -7,6 +7,8 @@ import {
 } from "../registries/ToolboxRegistry";
 
 import logger from "../../utils/logger";
+import { Blix } from "../Blix";
+import type { GraphToJSON } from "./CoreGraphExporter";
 
 export class TestGraph {
   inputs: InputAnchorInstance[] = [];
@@ -15,27 +17,29 @@ export class TestGraph {
 
   constructor() {
     this.inputs.push(
-      new InputAnchorInstance("number", "signature", "input_anchor1"),
-      new InputAnchorInstance("number", "signature", "input_anchor2"),
-      new InputAnchorInstance("number", "signature", "input_anchor3")
+      new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.0", "input_anchor1"),
+      new InputAnchorInstance("number", "hello-plugin.hello.input_anchor2.1", "input_anchor2"),
+      new InputAnchorInstance("number", "hello-plugin.hello.input_anchor3.2", "input_anchor3")
     );
     this.outputs.push(
-      new OutputAnchorInstance("number", "signature", "output_anchor1"),
-      new OutputAnchorInstance("number", "signature", "output_anchor2")
+      new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.3", "output_anchor1"),
+      new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.4", "output_anchor2")
     );
 
-    // for (let i = 1; i < 7; i++) {
-    //   this.tempNodes.push(
-    // new NodeInstance(
-    //   `hello-plugin/node${i}`,
-    //   `node${i}`,
-    //   `node${i}`,
-    //   `node${i}`,
-    //   this.inputs,
-    //   this.outputs
-    // )
-    //   );
-    // }
+    for (let i = 1; i < 7; i++) {
+      this.tempNodes.push(
+        new NodeInstance(
+          `hello-plugin.hello`,
+          `hello`,
+          `hello-plugin`,
+          `title`,
+          `description`,
+          `icon`,
+          this.inputs,
+          this.outputs
+        )
+      );
+    }
   }
 
   public test1() {
@@ -84,8 +88,8 @@ export class TestGraph {
     // Cycle detected!
     // false
 
-    const json: GraphToJSON = g1.toJSONObject();
-    logger.info(JSON.stringify(json, null, 2));
+    // const json: GraphToJSON = g1.toJSONObject();
+    // logger.info(JSON.stringify(json, null, 2));
 
     // =====================================
 
@@ -627,8 +631,10 @@ export class TestGraph {
     // const src = g6.getEdgeSrc;
     // logger.info(src);
 
-    const json: GraphToJSON = g6.toJSONObject();
-    logger.info(JSON.stringify(json, null, 2));
+    // const json = g6;
+    // logger.info(JSON.stringify(json, null, 2));
+    // return json;
+    return g6;
   }
 
   public main() {
@@ -639,6 +645,26 @@ export class TestGraph {
     // this.test5();
     // this.test6();
     // this.test7();
-    this.test8();
+    return this.test8();
   }
+}
+
+export function testStuffies(blix: Blix) {
+  const t: TestGraph = new TestGraph();
+  const graph = t.main();
+  blix.graphManager.loadGraph(graph);
+  const g: GraphToJSON = blix.graphManager.exportGraph("json", graph.uuid);
+  logger.info(JSON.stringify(g, null, 2));
+
+  const g2 = blix.graphManager.importGraph("json", g);
+  const g3: GraphToJSON = blix.graphManager.exportGraph("json", g2.uuid);
+  // logger.info("Hello");
+  logger.info(JSON.stringify(g3, null, 2));
+  // const table: { [key: number]: string} = {};
+  // table[0] = "test";
+  // table[2] = "test3";
+  // table[1] = "test2";
+  // for(const key in table) {
+  //   logger.info(key + "\n");
+  // }
 }

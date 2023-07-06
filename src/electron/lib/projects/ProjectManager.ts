@@ -16,7 +16,7 @@ import type { IpcResponse } from "../api/MainApi";
 export class ProjectManager {
   private _path: string;
   private _projects: { [id: string]: CoreProject };
-  private _mainWindow;
+  private _mainWindow: MainWindow;
 
   constructor(mainWindow: MainWindow) {
     this._mainWindow = mainWindow;
@@ -91,19 +91,25 @@ export class ProjectManager {
     return { success: true, data: "Project saved" };
   }
 
-  getRecentProjects(): IpcResponse<CommonProject[]> {
+  loadRecentProjects(): void {
     const projects = fs.readdirSync(this._path);
     if (!projects) {
-      return { success: false, data: [] };
+      return;
     }
     const recentProjects: CommonProject[] = [];
     for (const project of projects) {
       if (project === ".DS_Store") continue; // Some File returned when using readdirSync on mac
       const data = JSON.parse(fs.readFileSync(join(this._path, project)).toString());
-      recentProjects.push(this.createProject(data.name as string).mapToCommonProject());
+      // TODO:
+      // At the moment we just create a project with the name, we dont actually load the graphs or layour
+      const newProject: CoreProject = this.createProject(data.name as string);
+      this._projects[newProject.uuid] = newProject;
+      recentProjects.push(newProject.mapToCommonProject());
       fs.unlinkSync(join(this._path, project));
     }
-    return { success: true, data: recentProjects };
+
+    // console.log(this._mainWindow?.apis.clientProjectApi)
+    this._mainWindow.apis.projectClientApi.loadProjects(recentProjects);
   }
 
   async loadProject(options: "openFile" | "openDirectory" | "multiSelections") {
@@ -116,7 +122,7 @@ export class ProjectManager {
     }
 
     const data = JSON.parse(project.toString());
-    this._mainWindow.apis.clientProjectApi.loadProject(
+    this._mainWindow.apis.projectClientApi.loadProject(
       this.createProject(data.name as string).mapToCommonProject()
     );
   }

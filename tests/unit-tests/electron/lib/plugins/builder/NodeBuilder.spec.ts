@@ -117,14 +117,14 @@ describe("Test NodeBuilder", () => {
   test("addInput should add an input", () => {
     const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
     nodeBuilder = new NodeBuilder(node);
-    nodeBuilder.addInput("string","Shrek");
+    nodeBuilder.addInput("string","Shrek", 0);
     expect(node.getInputAnchorInstances[0].displayName).toEqual("Shrek");
   });
 
   test("addOutput should add an output", () => {
     const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
     nodeBuilder = new NodeBuilder(node);
-    nodeBuilder.addOutput("string","Shrek");
+    nodeBuilder.addOutput("string","Shrek", 1);
     expect(node.getOutputAnchorInstances[0].displayName).toEqual("Shrek");
   });
 

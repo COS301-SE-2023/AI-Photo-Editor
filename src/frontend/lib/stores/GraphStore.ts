@@ -1,5 +1,5 @@
-import { type UUID } from "@shared/utils/UniqueEntity";
-import { writable, type Unsubscriber, get, derived, type Writable } from "svelte/store";
+import { UIGraph, GraphNode, type GraphNodeUUID, type GraphUUID } from "@shared/ui/UIGraph";
+import { writable, get, derived, type Writable } from "svelte/store";
 
 // When the the CoreGraphApi type has to be imported into the backend
 // (WindowApi.ts) so that the API can be bound then it tries to import the type
@@ -14,7 +14,7 @@ import { writable, type Unsubscriber, get, derived, type Writable } from "svelte
 // unfortunately because of time constraints.
 
 // import type { Connections } from "svelvet";
-type Connections = (string | number | [string | number, string | number] | null)[];
+// type Connections = (string | number | [string | number, string | number] | null)[];
 
 // TODO: Return a GraphStore in createGraphStore for typing
 class GraphStore {
@@ -86,40 +86,6 @@ class GraphStore {
     });
     return false;
   }
-}
-
-export type GraphUUID = UUID;
-type GraphNodeUUID = UUID;
-type GraphAnchorUUID = UUID;
-
-export class UIGraph {
-  nodes: { [key: GraphNodeUUID]: GraphNode } = {};
-
-  constructor(public uuid: GraphUUID) {}
-}
-
-export class GraphNode {
-  name = "";
-  id = "";
-  public connections: Connections;
-
-  nodeUI: any; // TODO: Change this to NodeUI
-
-  inAnchors: GraphAnchor[] = [];
-  outAnchors: GraphAnchor[] = [];
-
-  pos: { x: number; y: number } = { x: 0, y: 0 };
-  dims: { w: number; h: number } = { w: 0, h: 0 };
-
-  constructor(public uuid: GraphNodeUUID) {
-    this.id = uuid;
-    this.name = "Node-" + uuid;
-    this.connections = [];
-  }
-}
-
-class GraphAnchor {
-  constructor(public uuid: GraphAnchorUUID, public type: string) {}
 }
 
 type GraphDict = { [key: GraphUUID]: GraphStore };

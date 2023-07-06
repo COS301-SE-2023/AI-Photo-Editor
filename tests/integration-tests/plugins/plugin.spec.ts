@@ -5,9 +5,7 @@ import {NodeBuilder,NodeUIBuilder} from "../../../src/electron/lib/plugins/build
 import { Plugin } from "../../../src/electron/lib/plugins/Plugin";
 import { Blix } from "../../../src/electron/lib/Blix";
 import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
-import {BrowserWindow} from "electron";
-import { join } from "path";
-import { writeFileSync } from "fs";
+
 
 
 const mainWindow: MainWindow = {
@@ -18,6 +16,8 @@ const mainWindow: MainWindow = {
     
   }
 } as any;
+
+jest.mock("chokidar", () => ({}));
 
 jest.mock("../../../src/electron/lib/projects/ProjectManager");
 
@@ -109,7 +109,7 @@ describe("Test plugin integrations", () => {
     beforeEach(() => {
       jest.clearAllMocks();
       plugin = new Plugin(pack,plugDir,main);
-      blix = new Blix(mainWindow);
+      blix = new Blix();
       plugin.requireSelf(blix);
     });
 

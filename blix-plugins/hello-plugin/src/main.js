@@ -12,11 +12,12 @@ const nodes = {
        ui.addButton("Execute order 66","return 66;").addSlider("Slide along",0,100,0.1,50).addDropdown("Orphanage",nodeBuilder.createUIBuilder()
        .addLabel("Label1"));   
 
-       nodeBuilder.addInput("string","In1");
-       nodeBuilder.addInput("string","In2");
+       nodeBuilder.addInput("Number","In1", 0);
+       nodeBuilder.addInput("Number","In2", 1);
+       nodeBuilder.addInput("Number","In3", 2);
 
-       nodeBuilder.addOutput("string","Out1");
-
+       nodeBuilder.addOutput("Number","Out1", 3);
+       nodeBuilder.addOutput("Number","Out2", 4);
     }
     ,"Jake": (context) => {
         nodeBuilder = context.instantiate("hello-plugin","Jake");

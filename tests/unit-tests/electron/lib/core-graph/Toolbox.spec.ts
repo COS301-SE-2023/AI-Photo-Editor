@@ -115,8 +115,8 @@ describe("Test anchors", () => {
 
 
   test("addInputAnchor should add input anchor", () => {
-    node.addInput("string","anchor1");
-    const id = node.getPlugin + "." + node.getName + "." + "anchor1";
+    node.addInput("string","anchor1", 0);
+    const id = node.getPlugin + "." + node.getName + "." + "anchor1." + 0;
 
     expect(node.getInputAnchorInstances[0].displayName).toEqual("anchor1");
     expect(node.getInputAnchorInstances[0].type).toEqual("string");
@@ -125,8 +125,8 @@ describe("Test anchors", () => {
   });
 
   test("addOutputAnchor should add output anchor", () => {
-    node.addOutput("string","anchor2");
-    const id = node.getPlugin + "." + node.getName + "." + "anchor2";
+    node.addOutput("string","anchor2", 0);
+    const id = node.getPlugin + "." + node.getName + "." + "anchor2" + "." + 0;
 
     expect(node.getOutputAnchorInstances[0].displayName).toEqual("anchor2");
     expect(node.getOutputAnchorInstances[0].type).toEqual("string");

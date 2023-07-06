@@ -132,7 +132,7 @@
     "terser": "^5.17.1",
     "ts-jest": "^29.1.0",
     "tslib": "^2.5.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.6"
   },
   "optionalDependencies": {
     "dmg-license": "^1.0.11"

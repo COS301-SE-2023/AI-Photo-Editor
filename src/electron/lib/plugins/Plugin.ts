@@ -13,7 +13,7 @@ import { NodeBuilder } from "./builders/NodeBuilder";
 import Main from "electron/main";
 import type { MainWindow } from "../api/apis/WindowApi";
 import { dialog } from "electron";
-import { UUID } from "../../../shared/utils/UniqueEntity";
+import type { UUID } from "../../../shared/utils/UniqueEntity";
 
 export type PluginSignature = string;
 export type NodeSignature = string;
@@ -48,6 +48,7 @@ export class Plugin {
   // Load this plugin into a local Node module
   // See: [https://rollupjs.org/es-module-syntax/#dynamic-import]
   requireSelf(blix: Blix): void {
+    // console.log("Armand")
     try {
       // This uses Node.js require() to load the plugin as a module
       // TODO: ISOLATION + LIMITED API
@@ -146,6 +147,7 @@ class CommandPluginContext extends PluginContext {
     this.icon = "";
     this.command = "";
     this.blix = blix;
+    this.displayName = "";
   }
 
   // public get getMainWindow() {

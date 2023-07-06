@@ -1,13 +1,25 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { init } from "../../lib/Blix";
   import { blixStore } from "../../lib/stores/BlixStore";
   import Navbar from "./Navbar.svelte";
-
   import Layout from "./layout/Layout.svelte";
   import Palette from "./palette/Palette.svelte";
+
+  let isLoading = false;
+
+  onMount(async () => {
+    isLoading = true;
+    await init();
+    isLoading = false;
+  });
 </script>
 
-{#await init() then}
+{#if isLoading}
+  <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
+    <span class="text-5xl text-purple-400">Loading</span>
+  </div>
+{:else}
   <div class="h-screen w-screen bg-zinc-800 p-0">
     <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
       <Navbar />
@@ -15,7 +27,7 @@
     <div class="layout"><Layout /></div>
     <Palette />
   </div>
-{/await}
+{/if}
 
 <style lang="postcss" global>
   @tailwind base;
