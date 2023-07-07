@@ -7,7 +7,7 @@
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
-  export let panelId = Math.round(10000000 * Math.random()).toString();
+  export let panelId = Math.round(10000000.0 * Math.random()).toString();
 
   let graphIds = graphMall.getAllGraphUUIDsReactive();
   let graphId = $graphIds[0];
@@ -25,8 +25,7 @@
   // Only updates when _graphId_ changes
   $: updateOnGraphId(graphId);
 
-  $: console.log("GRAPH MALL UPDATED", $graphMall);
-  // $: console.log($graphNodes);
+  // $: console.log("GRAPH MALL UPDATED", $graphMall);
 </script>
 
 <div class="hoverElements">
@@ -39,10 +38,9 @@
 </div>
 
 {#if thisGraphStore}
-  <!-- {JSON.stringify($graphNodes)} -->
-  <Svelvet id="my-canvas" zoom="{0.7}" minimap theme="custom-dark">
+  <Svelvet id="{panelId}-{graphId}" zoom="{0.7}" minimap theme="custom-dark">
     {#each $graphNodes || [] as node}
-      <PluginNode graphId="{graphId}" node="{node}" svelvetNodeId="{panelId}-{node.id}" />
+      <PluginNode panelId="{panelId}" graphId="{graphId}" node="{node}" />
     {/each}
   </Svelvet>
 {:else}

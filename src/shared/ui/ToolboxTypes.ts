@@ -9,7 +9,7 @@ export class CommonProject {
 
 // Interfaces for node
 export class IAnchor {
-  constructor(readonly type: string, readonly signature: string, readonly displayName: string) {}
+  constructor(readonly type: string, readonly id: string, readonly displayName: string) {}
 }
 
 export class INode {

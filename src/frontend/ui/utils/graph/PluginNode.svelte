@@ -1,20 +1,25 @@
 <script lang="ts">
-  import { Anchor, Node, Slider, generateInput } from "svelvet";
-  import { type GraphNode, activateStorable } from "@shared/ui/UIGraph";
+  import { Anchor, Node } from "svelvet";
+  import { GraphNode, NodeStylingStore } from "@shared/ui/UIGraph";
   import { toolboxStore } from "lib/stores/ToolboxStore";
+  import NodeUiFragment from "./NodeUIFragment.svelte";
 
+  export let panelId: string;
   export let graphId: string;
   export let node: GraphNode;
-  export let svelvetNodeId: string;
 
+  $: svelvetNodeId = `${panelId}_${graphId.substring(0, 6)}_${node.id.substring(0, 6)}`;
   $: toolboxNode = toolboxStore.getNodeReactive(node.signature);
 
   // Parameter store
-  type Inputs = { width: number };
-  const initialData: Inputs = { width: 2.5 };
-  const inputs = generateInput(initialData);
+  // type Inputs = { width: number };
+  // const initialData: Inputs = { width: 2.5 };
+  // const inputs = generateInput(initialData);
 
-  const nodePos = activateStorable(node.styling.pos);
+  if (!node.styling) {
+    node.styling = new NodeStylingStore();
+  }
+  const nodePos = node.styling.pos;
 </script>
 
 {#if svelvetNodeId !== ""}
@@ -34,29 +39,36 @@ height="{graphNode.dims.h}" -->
     >
       <div class="node">
         <div class="header">
-          <h1>{node.displayName}</h1>
-          <br /><br />
+          <h1>{$toolboxNode?.title || node.displayName}</h1>
+        </div>
+        <div class="node-body" style="max-width: 400px">
           <h2>Signature: {node.signature}</h2>
-        </div>
-        <div class="node-body">
-          {JSON.stringify({ ...toolboxNode, ui: null })}
+          <h2>SvelvetNodeId: {svelvetNodeId}</h2>
+          {JSON.stringify({ ...$toolboxNode, ui: null })}
           <!-- TODO:  -->
-          <!-- <NodeUiFragment />  -->
-          <Slider min="{1}" max="{12}" fixed="{1}" step="{0.1}" parameterStore="{$inputs.width}" />
+          <!-- <Slider min="{1}" max="{12}" fixed="{1}" step="{0.1}" parameterStore="{$inputs.width}" /> -->
         </div>
-      </div>
+        <div class="node-body" style="max-width: 400px">
+          <NodeUiFragment ui="{$toolboxNode?.ui}" />
+        </div>
 
-      <div>
-        <Anchor dynamic="{true}" id="{node.id}-in" />
-        <!-- bind:connections={$nodeConns} -->
-        <br />
-        <!-- <Anchor
+        <div>
+          {#if $toolboxNode}
+            {#each $toolboxNode.inputs as input}
+              <Anchor id="{svelvetNodeId}_{input.id}" direction="west" />
+              {svelvetNodeId}-{input.id}
+            {/each}
+            <!-- bind:connections={$nodeConns} -->
+            <br />
+            <!-- <Anchor
         dynamic="{true}"
         id="{node.id}-in2"
         connections={[]}
     /> -->
-      </div>
-    </Node>
+          {/if}
+        </div>
+      </div></Node
+    >
   {/key}
 {/if}
 

@@ -11,12 +11,13 @@ export class Project {
     this._uuid = uuid;
     this._layout = new PanelGroup("1");
 
-    const group1 = new PanelGroup("2");
+    // const group1 = new PanelGroup("2");
 
-    group1.addPanel("graph", 0);
-    group1.addPanel("debug", 1);
+    // group1.addPanel("graph", 0);
+    // group1.addPanel("debug", 1);
 
-    this._layout.addPanelGroup(group1, 0);
+    // this._layout.addPanelGroup(group1, 0);
+    this._layout.addPanel("debug", 2);
     this._layout.addPanel("graph", 3);
   }
 

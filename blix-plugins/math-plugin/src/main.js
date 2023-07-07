@@ -51,8 +51,8 @@ const nodes ={
             return result;
           });
           
-       nodeBuilder.addInput("Number","Num");
-       nodeBuilder.addOutput("Number","Result");
+       nodeBuilder.addInput("Number", "num","Num");
+       nodeBuilder.addOutput("Number", "res","Result");
     },
     "binary": (context) => {
         const nodeBuilder = context.instantiate("math-plugin", "binary");
@@ -110,9 +110,9 @@ const nodes ={
           return result;
         });
       
-        nodeBuilder.addInput("Number", "Num1");
-        nodeBuilder.addInput("Number", "Num2");
-        nodeBuilder.addOutput("Number", "Result");
+        nodeBuilder.addInput("Number", "num1", "Num1");
+        nodeBuilder.addInput("Number", "num2", "Num2");
+        nodeBuilder.addOutput("Number", "res1", "Result");
       }
     // TO BE DEVELOPED   
     // "ternary": (context) => {

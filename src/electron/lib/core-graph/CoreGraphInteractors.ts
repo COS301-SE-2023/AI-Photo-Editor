@@ -1,4 +1,4 @@
-import { GraphNode, StorableNodeStyling, UIGraph } from "../../../shared/ui/UIGraph";
+import { GraphNode, NodeStylingStore, UIGraph } from "../../../shared/ui/UIGraph";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph, NodesAndEdgesGraph } from "./CoreGraph";
 
@@ -40,7 +40,6 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
 
       uiGraph.nodes[node] = new GraphNode(node);
       // console.log(uiGraph.nodes[node])
-      uiGraph.nodes[node].styling = new StorableNodeStyling();
       uiGraph.nodes[node].signature = nodesAndEdges.nodes[node].signature;
     }
 

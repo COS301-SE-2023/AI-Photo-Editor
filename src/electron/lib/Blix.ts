@@ -5,7 +5,7 @@ import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
-import { NodeUI } from "../../shared/ui/NodeUITypes";
+import { NodeUI, NodeUIParent } from "../../shared/ui/NodeUITypes";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -55,10 +55,10 @@ export class Blix {
     // TESTING ADD NODE TO TOOLBOX
     setInterval(() => {
       const nodeInstance = new NodeInstance("asdf", "Name", "Plugin", "", "", "", [], []);
-      const nodeUI = new NodeUI();
+      // const nodeUI = new NodeUIParent();
 
       const nodeBuilder = new NodeBuilder(nodeInstance);
-      nodeBuilder.setUI(new NodeUIBuilder(nodeUI).addLabel("Test", "test"));
+      nodeBuilder.setUI(new NodeUIBuilder().addLabel("Test", "test"));
       nodeBuilder.validate();
 
       this._toolboxRegistry.addInstance(nodeInstance);

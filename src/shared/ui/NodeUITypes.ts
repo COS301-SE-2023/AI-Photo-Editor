@@ -1,5 +1,5 @@
 // This should probably become virtual
-export class NodeUI {
+export abstract class NodeUI {
   constructor() {
     this.parent = null;
     this.label = "";
@@ -26,13 +26,27 @@ export class NodeUIParent extends NodeUI {
 }
 
 export class NodeUILeaf extends NodeUI {
-  constructor(category: string, label: string, param: any[], parent: NodeUIParent) {
+  constructor(
+    public category: NodeUIComponent,
+    public label: string,
+    public param: any[],
+    public parent: NodeUIParent
+  ) {
     super();
-    this.label = label;
-    this.params = param;
     this.type = "leaf";
-    this.parent = parent;
-    this.category = category;
   }
-  category: string;
+}
+
+export enum NodeUIComponent {
+  Button = "Button",
+  Slider = "Slider",
+  Knob = "Knob",
+  Label = "Label",
+  Radio = "Radio",
+  Dropdown = "Dropdown",
+  NumberInput = "NumberInput",
+  TextInput = "TextInput",
+  Checkbox = "Checkbox",
+  ColorPicker = "ColorPicker",
+  FilePicker = "FilePicker",
 }

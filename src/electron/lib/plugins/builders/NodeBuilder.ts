@@ -1,6 +1,6 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
 import { NodeInstance } from "../../registries/ToolboxRegistry";
-import { NodeUILeaf, NodeUIParent } from "../../../../shared/ui/NodeUITypes";
+import { NodeUIComponent, NodeUILeaf, NodeUIParent } from "../../../../shared/ui/NodeUITypes";
 
 export class NodeBuilder implements PluginContextBuilder {
   constructor(node: NodeInstance) {
@@ -46,19 +46,18 @@ export class NodeBuilder implements PluginContextBuilder {
     this.node.setIcon(icon);
   }
 
-  public addInput(type: string, anchorname: string): void {
-    this.node.addInput(type, anchorname);
+  public addInput(type: string, identifier: string, displayName: string): void {
+    this.node.addInput(type, identifier, displayName);
   }
 
-  public addOutput(type: string, anchorname: string): void {
-    this.node.addOutput(type, anchorname);
+  public addOutput(type: string, identifier: string, displayName: string): void {
+    this.node.addOutput(type, identifier, displayName);
   }
 
   public createUIBuilder(): NodeUIBuilder {
-    const node = new NodeUIParent("", null);
-    const builder = new NodeUIBuilder(node);
+    const builder = new NodeUIBuilder();
 
-    if (this.ui == null) this.ui = node; // set root node automatically
+    // if (this.ui == null) this.ui = node; // set root node automatically
     return builder;
   }
 
@@ -72,10 +71,14 @@ export class NodeBuilder implements PluginContextBuilder {
 }
 
 export class NodeUIBuilder {
-  constructor(private node: NodeUIParent) {}
+  private node: NodeUIParent;
+
+  constructor() {
+    this.node = new NodeUIParent("", null);
+  }
 
   public addButton(label: string, param: any): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf("Button", label, [param], this.node));
+    this.node.params.push(new NodeUILeaf(NodeUIComponent.Button, label, [param], this.node));
     return this;
   }
 
@@ -86,7 +89,9 @@ export class NodeUIBuilder {
     step: number,
     defautlVal: number
   ): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf("Slider", label, [min, max, step, defautlVal], this.node));
+    this.node.params.push(
+      new NodeUILeaf(NodeUIComponent.Slider, label, [min, max, step, defautlVal], this.node)
+    );
 
     return this;
   }
@@ -99,18 +104,18 @@ export class NodeUIBuilder {
   }
 
   public addNumberInput(label: string): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf("NumberInput", label, [], this.node));
+    this.node.params.push(new NodeUILeaf(NodeUIComponent.NumberInput, label, [], this.node));
     return this;
   }
 
   public addImageInput(label: string): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf("ImageInput", label, [], this.node));
+    this.node.params.push(new NodeUILeaf(NodeUIComponent.FilePicker, label, [], this.node));
     return this;
   }
 
   // We need to discuss how to handle color pickers
   public addColorPicker(label: string, param: any): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf("ColorPicker", label, [param], this.node));
+    this.node.params.push(new NodeUILeaf(NodeUIComponent.ColorPicker, label, [param], this.node));
     return this;
   }
 
@@ -120,7 +125,7 @@ export class NodeUIBuilder {
   }
 
   public addLabel(label: string, param: string) {
-    this.node.params.push(new NodeUILeaf("Label", label, [param], this.node));
+    this.node.params.push(new NodeUILeaf(NodeUIComponent.Label, label, [param], this.node));
     return this;
   }
 }

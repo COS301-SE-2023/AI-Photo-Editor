@@ -14,10 +14,10 @@ const nodes = {
     //    ui.addButton("Execute order 66","return 66;").addSlider("Slide along",0,100,0.1,50).addDropdown("Orphanage",nodeBuilder.createUIBuilder()
     //    .addLabel("Label1"));   
 
-    //    nodeBuilder.addInput("string","In1");
-    //    nodeBuilder.addInput("string","In2");
+    //    nodeBuilder.addInput("string", "in1", "In1");
+    //    nodeBuilder.addInput("string", "in2", "In2");
 
-    //    nodeBuilder.addOutput("string","Out1");
+    //    nodeBuilder.addOutput("string", "out01", "Out1");
 
     // }
     // ,"Jake": (context) => {

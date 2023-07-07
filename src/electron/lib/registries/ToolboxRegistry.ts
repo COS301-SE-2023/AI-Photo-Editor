@@ -33,13 +33,13 @@ export class ToolboxRegistry implements Registry {
         const outputAnchors: IAnchor[] = [];
 
         for (const anchor of nodeInstance.getInputAnchorInstances) {
-          const anchorObject = new IAnchor(anchor.type, anchor.signature, anchor.displayName);
+          const anchorObject = new IAnchor(anchor.type, anchor.id, anchor.displayName);
 
           inputAnchors.push(anchorObject);
         }
 
         for (const anchor of nodeInstance.getOutputAnchorInstances) {
-          const anchorObject = new IAnchor(anchor.type, anchor.signature, anchor.displayName);
+          const anchorObject = new IAnchor(anchor.type, anchor.id, anchor.displayName);
           outputAnchors.push(anchorObject);
         }
 
@@ -112,18 +112,14 @@ export class NodeInstance implements RegistryInstance {
     this.signature = plugin + "." + name;
   }
 
-  addInput(type: string, anchorname: string) {
-    const id = this.plugin + "." + this.name + "." + anchorname;
-
-    const anchor = new InputAnchorInstance(type, id, anchorname);
+  addInput(type: string, identifier: string, displayName: string) {
+    const anchor = new InputAnchorInstance(type, identifier, displayName);
 
     this.inputs.push(anchor);
   }
 
-  addOutput(type: string, anchorname: string) {
-    const id = this.plugin + "." + this.name + "." + anchorname;
-
-    const anchor = new OutputAnchorInstance(type, id, anchorname);
+  addOutput(type: string, identifier: string, displayName: string) {
+    const anchor = new OutputAnchorInstance(type, identifier, displayName);
 
     this.outputs.push(anchor);
   }
@@ -173,22 +169,19 @@ export type AnchorType = string; // This uses MIME types E.g. "int", "text/json"
 
 interface AnchorInstance {
   readonly type: AnchorType;
-  readonly signature: string;
+  readonly id: string;
   readonly displayName: string;
 }
 
 export class InputAnchorInstance implements AnchorInstance {
   constructor(
     readonly type: AnchorType,
-    readonly signature: string,
+    // TODO: Check uniqueness when loading the plugin!
+    readonly id: string, // The lowercase anchor identifier name; must be unique within the node!
     readonly displayName: string
   ) {}
 }
 
 export class OutputAnchorInstance implements AnchorInstance {
-  constructor(
-    readonly type: AnchorType,
-    readonly signature: string,
-    readonly displayName: string
-  ) {}
+  constructor(readonly type: AnchorType, readonly id: string, readonly displayName: string) {}
 }

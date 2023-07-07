@@ -1,14 +1,41 @@
-<script type="ts">
-  import { Slider, generateInput } from "svelvet";
+<script lang="ts">
+  import { NodeUILeaf, type NodeUI } from "@shared/ui/NodeUITypes";
+  import NodeUiComponent from "./NodeUIComponent.svelte";
+  // import { writable } from "svelte/store";
+  // import { ColorPicker, RadioGroup, type CSSColorString } from "svelvet";
 
-  export let inputsStore: ReturnType<typeof generateInput> | null = null;
+  export let ui: NodeUI | null = null;
+
+  // const colorPicker = writable("red" as CSSColorString);
+  // const radio = writable("a");
+
+  function toLeafRepresentation(ui: NodeUI): NodeUILeaf | null {
+    if (ui.type === "leaf") {
+      return ui as NodeUILeaf;
+    }
+    return null;
+  }
 </script>
 
-<!-- {#if $inputsStore?.width != undefined} -->
-<!-- <div> -->
-<!-- <Slider min={1} max={12} fixed={1} step={0.1} parameterStore={$inputs.width} /> -->
-<!-- </div> -->
-<!-- {/if} -->
+{#if ui}
+  {#if ui.type === "parent"}
+    <ul>
+      {#each ui.params as child}
+        <li class="component">
+          <svelte:self ui="{child}" />
+        </li>
+      {/each}
+    </ul>
+  {:else if ui.type === "leaf"}
+    <p>
+      <NodeUiComponent leafUI="{toLeafRepresentation(ui)}" />
+    </p>
+  {/if}
+{/if}
 
 <style>
+  .component {
+    text-align: center;
+    padding: 10px 0px;
+  }
 </style>
