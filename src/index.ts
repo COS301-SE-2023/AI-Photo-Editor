@@ -7,6 +7,7 @@ import logger from "./electron/utils/logger";
 import settings from "./electron/utils/settings";
 
 import { Blix } from "./electron/lib/Blix";
+import { CoreGraphInterpreter } from "./electron/lib/core-graph/CoreGraphInterpreter";
 import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
 
@@ -50,6 +51,9 @@ app.on("ready", async () => {
     const url = request.url.slice("blix-image://".length);
     callback({ path: join(__dirname, "..", "..", url) });
   });
+
+  // const coreGraphInterpreter = new CoreGraphInterpreter();
+  // coreGraphInterpreter.run();
 
   blix = new Blix();
   exposeMainApis(blix);

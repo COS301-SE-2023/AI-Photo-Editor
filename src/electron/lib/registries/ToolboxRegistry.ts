@@ -147,8 +147,8 @@ export class NodeInstance implements RegistryInstance {
     private readonly inputs: InputAnchorInstance[],
     private readonly outputs: OutputAnchorInstance[]
   ) {
-    this.func = () => {
-      return "";
+    this.func = (input: number) => {
+      return 5 + input;
     };
     this.ui = null;
     this.uuid = randomUUID();

@@ -42,6 +42,76 @@ export class TestGraph {
     }
   }
 
+  public interpreterTest(): CoreGraph {
+    // =====================================
+    // 1 -> 2
+    // 2 -> 3
+    // Add 3 -> 1 = Cycle
+    // =====================================
+    const g2: CoreGraph = new CoreGraph();
+
+    g2.addNode(this.tempNodes[0]);
+    g2.addNode(this.tempNodes[1]);
+    g2.addNode(this.tempNodes[2]);
+    g2.addNode(this.tempNodes[3]);
+    g2.addNode(this.tempNodes[4]);
+    g2.addNode(this.tempNodes[5]);
+
+    const g2Nodes = g2.getNodes;
+    const g2Node1 = Object.values(g2Nodes)[0];
+    const g2Node2 = Object.values(g2Nodes)[1];
+    const g2Node3 = Object.values(g2Nodes)[2];
+    const g2Node4 = Object.values(g2Nodes)[3];
+    const g2Node5 = Object.values(g2Nodes)[4];
+    const g2Node6 = Object.values(g2Nodes)[5];
+
+    g2.addEdge(
+      Object.values(g2Node1.getAnchors)[3].uuid,
+      Object.values(g2Node2.getAnchors)[0].uuid
+    );
+    g2.addEdge(
+      Object.values(g2Node1.getAnchors)[3].uuid,
+      Object.values(g2Node3.getAnchors)[0].uuid
+    );
+    g2.addEdge(
+      Object.values(g2Node3.getAnchors)[3].uuid,
+      Object.values(g2Node4.getAnchors)[0].uuid
+    );
+    g2.addEdge(
+      Object.values(g2Node4.getAnchors)[3].uuid,
+      Object.values(g2Node6.getAnchors)[0].uuid
+    );
+    g2.addEdge(
+      Object.values(g2Node5.getAnchors)[3].uuid,
+      Object.values(g2Node6.getAnchors)[0].uuid
+    );
+
+    g2.addEdge(
+      Object.values(g2Node2.getAnchors)[3].uuid,
+      Object.values(g2Node5.getAnchors)[0].uuid
+    );
+
+    g2.getOutputNodes.push(g2Node6.uuid);
+    g2.getOutputNodes.push(g2Node4.uuid);
+
+    // Expected output:
+    // No cycle detected
+    // true
+    // No cycle detected
+    // true
+    // No cycle detected
+    // true
+    // No cycle detected
+    // true
+    // No cycle detected
+    // true
+    // No cycle detected
+    // true
+
+    // =====================================
+
+    return g2;
+  }
   public test1() {
     // =====================================
     // 1 -> 2

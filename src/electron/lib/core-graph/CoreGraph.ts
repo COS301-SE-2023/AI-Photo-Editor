@@ -40,6 +40,7 @@ export class CoreGraph extends UniqueEntity {
   private anchors: { [key: UUID]: Anchor };
   private edgeDest: { [key: AnchorUUID]: Edge }; // Map a destination anchor to an edge
   private edgeSrc: { [key: AnchorUUID]: AnchorUUID[] }; // Map a source anchor to a list of destination anchors
+  private outputNodes: string[];
 
   // private subscribers: CoreGraphSubscriber[];
   private static nodeTracker = 0;
@@ -49,11 +50,16 @@ export class CoreGraph extends UniqueEntity {
     this.anchors = {};
     this.edgeDest = {};
     this.edgeSrc = {};
+    this.outputNodes = [];
     // this.nodeList = [];
   }
 
   public get getNodes() {
     return this.nodes;
+  }
+
+  public get getOutputNodes() {
+    return this.outputNodes;
   }
 
   public get getAnchors() {
@@ -75,7 +81,8 @@ export class CoreGraph extends UniqueEntity {
       node.getName,
       node.getPlugin,
       node.getInputAnchorInstances,
-      node.getOutputAnchorInstances
+      node.getOutputAnchorInstances,
+      node.getFunction
     );
     // Add Node to Graph
     this.nodes[n.uuid] = n;
@@ -85,6 +92,8 @@ export class CoreGraph extends UniqueEntity {
       if (!n.getAnchors.hasOwnProperty(anchor)) continue;
       this.anchors[anchor] = n.getAnchors[anchor];
     }
+
+    // TODO: Check if node is an output node and add it to the outputNode list
 
     return n.uuid;
     // TODO: Add Node Styling
@@ -223,27 +232,27 @@ export class CoreGraph extends UniqueEntity {
     // TODO
   }
 
-  // public printGraph() {
-  //   for (const edge in this.edgeDest) {
-  //     if (!this.edgeDest.hasOwnProperty(edge)) continue;
-  //     logger.info("Edge (same as anchorTo): " + edge);
-  //     logger.info("Node From: " + this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.uuid);
-  //     logger.info("Node To: " + this.anchors[this.edgeDest[edge].getAnchorTo].getParent.uuid);
-  //     logger.info("Anchor from -> Anchor to:");
-  //     logger.info(
-  //       this.anchors[this.edgeDest[edge].getAnchorFrom].uuid +
-  //         " -> " +
-  //         this.anchors[this.edgeDest[edge].getAnchorTo].uuid +
-  //         "\n"
-  //     );
-  //   }
-  // }
+  public printGraph() {
+    for (const edge in this.edgeDest) {
+      if (!this.edgeDest.hasOwnProperty(edge)) continue;
+      logger.info("Edge (same as anchorTo): " + edge);
+      logger.info("Node From: " + this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.uuid);
+      logger.info("Node To: " + this.anchors[this.edgeDest[edge].getAnchorTo].getParent.uuid);
+      logger.info("Anchor from -> Anchor to:");
+      logger.info(
+        this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.getName +
+          " -> " +
+          this.anchors[this.edgeDest[edge].getAnchorTo].getParent.getName +
+          "\n"
+      );
+    }
+  }
 }
 
 // This Node representation effectively 'stands-in'
 // as a reference to the plugin's functional implementation.
 // When we interpret the graph we dereference back to the plugin
-class Node extends UniqueEntity {
+export class Node extends UniqueEntity {
   private anchors: { [key: string]: Anchor };
   private styling: NodeStyling | null = null;
   // private colour: string;
@@ -252,7 +261,8 @@ class Node extends UniqueEntity {
     private name: string, // The name id of the node in the plugin
     private plugin: string, // The name id of the plugin that defined the node
     private inputAnchors: InputAnchorInstance[], // Input anchors attatched to node
-    private outputAnchors: OutputAnchorInstance[] // Output anchors attatched to node // Add colour and styling
+    private outputAnchors: OutputAnchorInstance[], // Output anchors attatched to node // Add colour and styling
+    private func: any
   ) {
     super();
     this.anchors = {};
@@ -294,14 +304,18 @@ class Node extends UniqueEntity {
   get getStyling() {
     return this.styling;
   }
+
+  get execute() {
+    return this.func;
+  }
 }
 
-enum AnchorIO {
+export enum AnchorIO {
   input,
   output,
 }
 
-class Anchor extends UniqueEntity {
+export class Anchor extends UniqueEntity {
   private localAnchorId: number;
   constructor(
     private parent: Node,
