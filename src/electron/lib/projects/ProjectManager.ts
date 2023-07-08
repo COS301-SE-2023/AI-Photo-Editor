@@ -6,7 +6,7 @@ import fs from "fs";
 import type { PathLike } from "fs";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
-import type { CommonProject } from "../../../shared/types";
+import type { CommonProject, panel, projectSchema } from "../../../shared/types";
 import { dialog } from "electron";
 import type { IpcResponse } from "../api/MainApi";
 
@@ -44,12 +44,40 @@ export class ProjectManager {
     //   this._mainWindow.apis.clientProjectApi.projectChanged(proj);
     // }, 2000)
   }
+  
+  /**
+   * This function creates a new project and adds it in the backend. A default layout is used for now
+   * This layout will eventually be loaded from from some user choice on project creation.
+   * 
+   * @param name Default name of a project
+   * @returns a new CoreProject
+   */
 
   createProject(name = "New Project"): CoreProject {
-    const project = new CoreProject(name);
+    const starterLayout = {
+      "panels":[
+        {
+           "panels":[
+              {
+                 "content":"media"
+              },
+              {
+                 "content":"shortcutSettings"
+              }
+           ]
+        },
+        {
+           "content":"debug"
+        },
+        {
+           "content":"graph"
+        }
+     ]
+    };
+    const project = new CoreProject(name, starterLayout);
     project.location = join(this._path, project.uuid);
     this._projects[project.uuid] = project;
-
+    
     const data = { name: project.name, uuid: project.uuid };
     return project;
   }
@@ -84,7 +112,7 @@ export class ProjectManager {
       return { success: false, data: "Project not found" };
     }
     // Save project to local disk
-    const data = { name: project.name, uuid: project.uuid };
+    const data = { name: project.name, uuid: project.uuid , layout: project.layout };
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     fs.writeFileSync(`${project.location}.blx`, JSON.stringify(data, null, 2));
 
@@ -101,7 +129,7 @@ export class ProjectManager {
       if (project === ".DS_Store") continue; // Some File returned when using readdirSync on mac
       const data = JSON.parse(fs.readFileSync(join(this._path, project)).toString());
       // TODO:
-      // At the moment we just create a project with the name, we dont actually load the graphs or layour
+      // At the moment we just create a project with the name, we dont actually load the graphs or layout
       const newProject: CoreProject = this.createProject(data.name as string);
       this._projects[newProject.uuid] = newProject;
       recentProjects.push(newProject.mapToCommonProject());
@@ -121,7 +149,11 @@ export class ProjectManager {
       return;
     }
 
+
     const data = JSON.parse(project.toString());
+
+    if(!this.validateProjectFile(data)) return; // Some sort of error
+
     this._mainWindow.apis.projectClientApi.loadProject(
       this.createProject(data.name as string).mapToCommonProject()
     );
@@ -135,16 +167,27 @@ export class ProjectManager {
     });
   }
 
-  async saveCurrentProject(id: UUID) {
+  async saveCurrentProject(schema: projectSchema) {
     if (!this._mainWindow) return;
     const name = await dialog.showSaveDialog(this._mainWindow, {});
     const pathToProject = name.filePath as PathLike;
-    const project = this._projects[id];
+    const project = this._projects[schema.id];
     if (!project) return;
 
-    const data = { name: project.name, uuid: project.uuid };
+    const data = { name: project.name, uuid: project.uuid, layout: schema.layout };
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     fs.writeFileSync(pathToProject, JSON.stringify(data, null, 2));
+    console.log(JSON.stringify(data, null, 2))
+  }
+
+  async updateLayout(id: UUID, layout: panel) {
+    this._projects[id].layout = layout;
+  } 
+  
+  validateProjectFile(data: projectSchema): boolean {
+    if(!data.id || !data.name || !data.layout) return false;
+    
+    return true;
   }
 
   // async renameProject(uuid: UUID) {}

@@ -1,13 +1,13 @@
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import type { UUID } from "../../../../shared/utils/UniqueEntity";
-import type { CommonProject } from "../../../../shared/types/index";
+import type { CommonProject, panel } from "../../../../shared/types/index";
 import type { IpcResponse } from "../MainApi";
 
 export class ProjectApi implements ElectronMainApi<ProjectApi> {
   constructor(private readonly _blix: Blix) {}
 
-  async createProject(): Promise<IpcResponse<CommonProject>> {
+  async createProject(): Promise<IpcResponse<CommonProject>> { 
     return {
       success: true,
       data: this._blix.projectManager.createProject().mapToCommonProject(),
@@ -44,4 +44,8 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
   //   logger.info("Retrieving open projects");
   //   return this._projMgr.getOpenProjects().map((proj) => proj.mapToFrontendProject());
   // }
+
+  async updateLayout(id: UUID, layout: panel) {
+    this._blix.projectManager.updateLayout(id, layout);
+  }
 }

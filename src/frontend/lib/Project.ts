@@ -1,24 +1,18 @@
 import type { UUID } from "@shared/utils/UniqueEntity";
 import { PanelGroup } from "./PanelNode";
+import type { panel } from "@shared/types/index";
 
 export class Project {
   private _name: string;
   private readonly _id: UUID;
   private _layout: PanelGroup;
+  private _group: number = 1;
 
-  constructor(name: string, id: UUID) {
+  constructor(name: string, id: UUID, layout: panel) {
     this._name = name;
     this._id = id;
-    this._layout = new PanelGroup("1");
-
-    const group1 = new PanelGroup("2");
-
-    group1.addPanel("media", 0);
-    group1.addPanel("shortcutSettings", 1);
-
-    this._layout.addPanelGroup(group1, 0);
-    this._layout.addPanel("debug", 2);
-    this._layout.addPanel("graph", 3);
+    
+    this._layout = this.constructLayout(layout);
   }
 
   public get id() {
@@ -35,4 +29,31 @@ export class Project {
   public get layout() {
     return this._layout;
   }
+  /**
+   * This function takes in the loaded in project and constructs the layout from JSON to svelte components
+   * 
+   * @param layout JSON format of the layout to be constructed
+   * @returns A root PanelGroup that contains the layout of the project 
+   */
+  constructLayout(layout: panel): PanelGroup {
+    const group = new PanelGroup((this._group++).toString());
+    if(layout.panels) {
+      console.log("Group")
+      for (const panel of layout.panels) {
+        if(panel.panels) {
+          console.log("Group")
+          group.addPanelGroup(this.constructLayout(panel), panel.panels.length);
+        } 
+        else {
+          console.log("Leaf")
+          if(panel.content) {
+            group.addPanel(panel.content, layout.panels.length);
+          }
+        }
+      }
+      return group;
+    }
+    return group;
+  }
+
 }

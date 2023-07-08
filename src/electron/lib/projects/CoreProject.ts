@@ -1,6 +1,6 @@
 import { UniqueEntity } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph } from "../core-graph/CoreGraph";
-import type { CommonProject } from "../../../shared/types/index";
+import type { CommonProject, panel } from "../../../shared/types/index";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { PathLike } from "fs";
 
@@ -13,11 +13,13 @@ export class CoreProject extends UniqueEntity {
   //       have references to the same graph.
   private _graphs: UUID[]; // Indexes into the GraphManager
   private _location: PathLike; // Location in user local storage to sync to
-  constructor(name: string) {
+  private _layout: panel;
+  constructor(name: string, layout: panel) {
     super();
     this._name = name;
     this._graphs = [];
     this._location = "" as PathLike;
+    this._layout = layout;
   }
 
   public rename(name: string): boolean {
@@ -33,12 +35,20 @@ export class CoreProject extends UniqueEntity {
     return this._name;
   }
 
+  public get layout() {
+    return this._layout;
+  }
+
   public get location() {
     return this._location;
   }
 
   public set location(value: PathLike) {
     this._location = value;
+  }
+
+  public set layout(value: panel) {
+    this._layout = value;
   }
 
   /**
@@ -52,6 +62,7 @@ export class CoreProject extends UniqueEntity {
     const project = {
       name: this.name,
       uuid: this.uuid,
+      layout: this.layout,
     } satisfies CommonProject;
 
     return project;

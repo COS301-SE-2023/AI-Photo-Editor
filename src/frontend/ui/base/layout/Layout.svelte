@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PanelGroup } from "@frontend/lib/PanelNode";
+  // import { PanelGroup } from "@frontend/lib/PanelNode";
   import Panel from "./Panel.svelte";
   // import { projectManager, type NewProjectStore } from "@frontend/lib/stores/ProjectStore";
   // import { get } from "svelte/store";
@@ -16,16 +16,16 @@
   // layout.addPanel("image", 0);
   // layout.recurseParent();
 
-  let subLayout = new PanelGroup();
-  // subLayout.addPanel(Media, 0);
-  // subLayout.addPanel(Graph, 0);
-  // subLayout.addPanel(Media, 0);
+  // let subLayout = new PanelGroup();
+  // // subLayout.addPanel(Media, 0);
+  // // subLayout.addPanel(Graph, 0);
+  // // subLayout.addPanel(Media, 0);
 
-  let layout = new PanelGroup();
-  // layout.addPanel(Graph, 0);
-  layout.addPanelGroup(subLayout, 1);
-  // layout.addPanel(Media, 2);
-  layout.recurseParent();
+  // let layout = new PanelGroup();
+  // // layout.addPanel(Graph, 0);
+  // layout.addPanelGroup(subLayout, 1);
+  // // layout.addPanel(Media, 2);
+  // layout.recurseParent();
 
   // let activeLayout: PanelGroup | null = null;
   // let activeProjectStore: NewProjectStore | null = null;
@@ -38,7 +38,15 @@
   //     activeLayout = null;
   //     activeProjectStore = null;
   //   }
-  // });
+  // })A;
+  $: {
+    if($projectsStore.activeProject) {
+      console.log("New active project")
+      $projectsStore.activeProject.layout;
+      console.log("New layout")
+      projectsStore.updateLayout($projectsStore.activeProject.id);
+    }
+  }
 </script>
 
 <!-- {#if activeLayout && activeProjectStore}

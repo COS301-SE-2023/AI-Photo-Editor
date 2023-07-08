@@ -1,5 +1,7 @@
 // N-way tree of panels
 
+import type { panel } from "@shared/types/index";
+
 export type PanelType = string;
 
 export class PanelNode {
@@ -55,6 +57,7 @@ export class PanelGroup extends PanelNode {
         this.parent.removePanel(this.index);
       }
     }
+    this.updateParent(this);
   }
   setPanel(panel: PanelNode, i: number) {
     const tempId = this.panels[i].id;
@@ -68,6 +71,8 @@ export class PanelGroup extends PanelNode {
     this.panels.splice(i, 0, newLeaf);
     newLeaf.parent = this;
     newLeaf.index = i;
+
+    this.updateParent(this);
   }
   addPanelGroup(panelGroup: PanelGroup, i: number) {
     this.panels.splice(i, 0, panelGroup);
@@ -78,8 +83,18 @@ export class PanelGroup extends PanelNode {
     return this.panels[i];
   }
 
+  updateParent(_current: PanelGroup) {
+    console.log("Updating parent")
+    let current = _current
+    while (current.parent != null) {
+      current = current.parent;
+    }
+    console.log("Setting parent")
+    current = current;
+  }
+
   // Print tree for debug
-  print(indent = 0): string {
+  public print(indent = 0): string {
     let res;
     if (this.parent) {
       res = `${this.name}[${this.parent?.name}](${this.index})\n`;
@@ -112,6 +127,21 @@ export class PanelGroup extends PanelNode {
       }
     }
   }
+
+  public saveLayout(): panel {
+    let p: panel = {
+        panels: [] 
+    };
+    for (const panel of this.panels) {
+      if (panel instanceof PanelGroup) {
+        p.panels?.push(panel.saveLayout());
+      } else if (panel instanceof PanelLeaf) {
+        p.panels?.push( { content: panel.content } );
+      }
+    }
+    return p;
+  }
+
 }
 
 export class PanelLeaf extends PanelNode {

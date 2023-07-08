@@ -49,4 +49,5 @@ async function setInitialStores() {
 
     graphMall.refreshGraph(uiGraph.uuid, uiGraph);
   }
+  // exportLayout()
 }

@@ -1,9 +1,11 @@
 import type { UUID } from "../utils/UniqueEntity";
 import { NodeUI } from "../../electron/lib/registries/ToolboxRegistry";
+import type { panel } from "./layout";
 
 interface CommonProject {
   name: string;
   uuid: UUID;
+  layout: panel;
 }
 
 // Interfaces for node

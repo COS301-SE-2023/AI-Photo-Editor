@@ -14,15 +14,16 @@ export class ProjectClientApi implements ElectronWindowApi<ProjectClientApi> {
   }
 
   public loadProject(state: CommonProject): void {
-    const project = new Project(state.name, state.uuid);
+    const project = new Project(state.name, state.uuid, state.layout);
     projectsStore.addProject(project);
   }
 
   public loadProjects(state: CommonProject[]): void {
     const projects: Project[] = [];
     for (const project of state) {
-      projects.push(new Project(project.name, project.uuid));
+      projects.push(new Project(project.name, project.uuid, project.layout));
     }
     projectsStore.addProjects(projects);
   }
+
 }

@@ -26,7 +26,7 @@ function createCommandStore() {
     // console.log(cmd)
     // console.log(projectManager.getActiveProject().getId())
     if (cmd === "base-plugin.saveas") {
-      options = { data: get(projectsStore).activeProject?.id };
+      options = { data: { id: get(projectsStore).activeProject?.id, layout: get(projectsStore).activeProject?.layout.saveLayout() } };
     }
     // console.log(options.data)
     await window.apis.commandApi.runCommand(cmd, options);

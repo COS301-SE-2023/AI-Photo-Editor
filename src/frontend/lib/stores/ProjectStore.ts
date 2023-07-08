@@ -67,7 +67,7 @@ class ProjectsStore {
 
     if (res.success) {
       const data = res.data;
-      const project = new Project(data.name, data.uuid);
+      const project = new Project(data.name, data.uuid, data.layout);
       this.addProject(project);
       this.setActiveProject(project.id);
     }
@@ -171,6 +171,29 @@ class ProjectsStore {
     const nextIndex = currentIndex === projects.length - 1 ? currentIndex - 1 : currentIndex + 1;
     return projects[nextIndex] || null;
   }
+  /**
+   * This function searches for a project and reuturns the jsonified layout
+   * so that the backend may export the project
+   * 
+   * @param id The id of the project to get the layout from
+   * @returns JSON formatted layout
+   */
+  public updateLayout(id: UUID): void {
+    const project = get(this.store).projects.find((p) => p.id === id);
+    if(!project) return;
+    window.apis.projectApi.updateLayout(project.id, project.layout.saveLayout())
+  }
+
+  // public getAllProjectLayouts(): ProjectSavedState[] {
+  //   const projects = get(this.store).projects;
+  //   return projects.map((p) => ({  name: p.name, uuid: p.id, layout: p.layout.saveLayout() }));
+  // }
 }
+
+// export interface ProjectSavedState {
+//   name: string;
+//   uuid: UUID;
+//   layout: panel;
+// }
 
 export const projectsStore = new ProjectsStore();
