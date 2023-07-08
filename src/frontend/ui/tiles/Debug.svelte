@@ -30,7 +30,11 @@
         .id}
     </div>
     {#each $projectsStore.projects as project (project.id)}
-      <div>Name: {project.name} ID: {project.id}</div>
+      <div>
+        Name: {project.name} ID: {project.id.slice(0, 8)} Graphs: {project.graphs.map((g) =>
+          g.slice(0, 8)
+        )}
+      </div>
     {/each}
   </div>
 </div>

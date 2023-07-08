@@ -66,8 +66,7 @@ class ProjectsStore {
     const res = await window.apis.projectApi.createProject();
 
     if (res.success) {
-      const data = res.data;
-      const project = new Project(data.name, data.uuid, data.layout);
+      const project = Project.createFromSharedProject(res.data);
       this.addProject(project);
       this.setActiveProject(project.id);
     }
@@ -174,14 +173,14 @@ class ProjectsStore {
   /**
    * This function searches for a project and reuturns the jsonified layout
    * so that the backend may export the project
-   * 
+   *
    * @param id The id of the project to get the layout from
    * @returns JSON formatted layout
    */
-  public updateLayout(id: UUID): void {
+  public async updateLayout(id: UUID): Promise<void> {
     const project = get(this.store).projects.find((p) => p.id === id);
-    if(!project) return;
-    window.apis.projectApi.updateLayout(project.id, project.layout.saveLayout())
+    if (!project) return;
+    await window.apis.projectApi.updateLayout(project.id, project.layout.saveLayout());
   }
 
   // public getAllProjectLayouts(): ProjectSavedState[] {

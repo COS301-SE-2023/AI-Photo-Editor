@@ -14,7 +14,7 @@ import Main from "electron/main";
 import type { MainWindow } from "../api/apis/WindowApi";
 import { dialog } from "electron";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
-import type { projectSchema } from "@shared/types";
+import type { SharedProject } from "@shared/types";
 
 export type PluginSignature = string;
 export type NodeSignature = string;
@@ -184,8 +184,8 @@ class CommandPluginContext extends PluginContext {
     this.blix.projectManager.loadProject(options);
   }
 
-  public saveCurrentProject(project: projectSchema) {
-    this.blix.projectManager.saveCurrentProject(project);
+  public saveCurrentProject(project: SharedProject) {
+    // this.blix.projectManager.saveCurrentProject(project);
   }
 }
 

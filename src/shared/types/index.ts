@@ -1,3 +1,4 @@
 export * from "./layout";
-export * from "./index.d"
 export * from "./project";
+export * from "./graph";
+export * from "./command";

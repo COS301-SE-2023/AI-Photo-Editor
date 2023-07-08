@@ -6,7 +6,7 @@ import fs from "fs";
 import type { PathLike } from "fs";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
-import type { CommonProject, panel, projectSchema } from "../../../shared/types";
+import type { SharedProject, LayoutPanel } from "../../../shared/types";
 import { dialog } from "electron";
 import type { IpcResponse } from "../api/MainApi";
 
@@ -25,60 +25,39 @@ export class ProjectManager {
       fs.mkdirSync(this._path);
     }
     this._projects = {};
-
-    // Example: How to send some event from the project manager to the client API
-    // Remove this!!
-
-    // const proj: CommonProject = {
-    //   name: "TestProject",
-    //   uuid: "98yu4thljqwerfdq9p48pfqoawhfjadksklv"
-    // }
-
-    // So, atm im kinda sending the share common data between the backend
-    // project interface and the fronted. Maybe there is a cleaner way to do
-    // this, but for example backend project doesn't have layout which the
-    // frontend project interface does. So, I couldn't really figure a way to
-    // create a frontend project in the backend then just send the entire
-    // frontend project state over the api
-    // setInterval(() => {
-    //   this._mainWindow.apis.clientProjectApi.projectChanged(proj);
-    // }, 2000)
   }
-  
-  /**
-   * This function creates a new project and adds it in the backend. A default layout is used for now
-   * This layout will eventually be loaded from from some user choice on project creation.
-   * 
-   * @param name Default name of a project
-   * @returns a new CoreProject
-   */
 
-  createProject(name = "New Project"): CoreProject {
-    const starterLayout = {
-      "panels":[
+  /**
+   *	Creates a new CoreProject with the given name and a starter layout.
+   *
+   *	@param name The name of the project.
+   *
+   *	@returns The newly created project.
+   */
+  public createProject(name = "New Project"): CoreProject {
+    const starterLayout: LayoutPanel = {
+      panels: [
+        // {
+        //   panels: [
+        //     {
+        //       content: "media",
+        //     },
+        //     {
+        //       content: "shortcutSettings",
+        //     },
+        //   ],
+        // },
         {
-           "panels":[
-              {
-                 "content":"media"
-              },
-              {
-                 "content":"shortcutSettings"
-              }
-           ]
+          content: "debug",
         },
         {
-           "content":"debug"
+          content: "graph",
         },
-        {
-           "content":"graph"
-        }
-     ]
+      ],
     };
     const project = new CoreProject(name, starterLayout);
     project.location = join(this._path, project.uuid);
     this._projects[project.uuid] = project;
-    
-    const data = { name: project.name, uuid: project.uuid };
     return project;
   }
 
@@ -112,7 +91,7 @@ export class ProjectManager {
       return { success: false, data: "Project not found" };
     }
     // Save project to local disk
-    const data = { name: project.name, uuid: project.uuid , layout: project.layout };
+    const data = { name: project.name, uuid: project.uuid, layout: project.layout };
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     fs.writeFileSync(`${project.location}.blx`, JSON.stringify(data, null, 2));
 
@@ -124,7 +103,7 @@ export class ProjectManager {
     if (!projects) {
       return;
     }
-    const recentProjects: CommonProject[] = [];
+    const recentProjects: SharedProject[] = [];
     for (const project of projects) {
       if (project === ".DS_Store") continue; // Some File returned when using readdirSync on mac
       const data = JSON.parse(fs.readFileSync(join(this._path, project)).toString());
@@ -132,7 +111,7 @@ export class ProjectManager {
       // At the moment we just create a project with the name, we dont actually load the graphs or layout
       const newProject: CoreProject = this.createProject(data.name as string);
       this._projects[newProject.uuid] = newProject;
-      recentProjects.push(newProject.mapToCommonProject());
+      recentProjects.push(newProject.toSharedProject());
       fs.unlinkSync(join(this._path, project));
     }
 
@@ -149,13 +128,12 @@ export class ProjectManager {
       return;
     }
 
-
     const data = JSON.parse(project.toString());
 
-    if(!this.validateProjectFile(data)) return; // Some sort of error
+    if (!this.validateProjectFile(data)) return; // Some sort of error
 
     this._mainWindow.apis.projectClientApi.loadProject(
-      this.createProject(data.name as string).mapToCommonProject()
+      this.createProject(data.name as string).toSharedProject()
     );
   }
 
@@ -167,28 +145,50 @@ export class ProjectManager {
     });
   }
 
-  async saveCurrentProject(schema: projectSchema) {
+  async saveCurrentProject(schema: ProjectFile) {
     if (!this._mainWindow) return;
     const name = await dialog.showSaveDialog(this._mainWindow, {});
     const pathToProject = name.filePath as PathLike;
-    const project = this._projects[schema.id];
-    if (!project) return;
+    // const project = this._projects[schema.id];
+    // if (!project) return;
 
-    const data = { name: project.name, uuid: project.uuid, layout: schema.layout };
+    // const data = { name: project.name, uuid: project.uuid, layout: schema.layout };
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    fs.writeFileSync(pathToProject, JSON.stringify(data, null, 2));
-    console.log(JSON.stringify(data, null, 2))
+    // fs.writeFileSync(pathToProject, JSON.stringify(data, null, 2));
+    // console.log(JSON.stringify(data, null, 2))
   }
 
-  async updateLayout(id: UUID, layout: panel) {
+  async updateLayout(id: UUID, layout: LayoutPanel) {
     this._projects[id].layout = layout;
-  } 
-  
-  validateProjectFile(data: projectSchema): boolean {
-    if(!data.id || !data.name || !data.layout) return false;
-    
+  }
+
+  validateProjectFile(data: any): boolean {
+    // if(!data.id || !data.name || !data.layout) return false;
+
     return true;
   }
 
-  // async renameProject(uuid: UUID) {}
+  /**
+   * Adds a graph to a project.
+   *
+   * @param projectId - The UUID of the project to add the graph to.
+   * @param graphId - The UUID of the graph to add.
+   */
+  public addGraph(projectId: UUID, graphId: UUID): boolean {
+    const project = this._projects[projectId];
+
+    if (project) {
+      project.addGraph(graphId);
+      // TODO: Notify frontend of project change
+      return true;
+    }
+
+    return false;
+  }
+}
+
+interface ProjectFile {
+  name: string;
+  layout: LayoutPanel;
+  graphs?: []; // TODO: Add graphs contained in project here
 }

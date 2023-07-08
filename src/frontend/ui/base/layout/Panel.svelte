@@ -18,7 +18,8 @@
   import Debug from "../../tiles/Debug.svelte";
   import WebView from "../../tiles/WebView.svelte";
   import ShortcutSettings from "../../tiles/ShortcutSettings.svelte";
-  import { PanelGroup, PanelLeaf, type PanelNode, type PanelType } from "@frontend/lib/PanelNode";
+  import { PanelGroup, PanelLeaf, type PanelNode } from "@frontend/lib/PanelNode";
+  import type { PanelType } from "@shared/types";
 
   // import { scale } from "svelte/transition";
 
@@ -171,7 +172,7 @@
   }
 
   // This dict defines mappings from PanelType to the corresponding Svelte component to render
-  const panelTypeToComponent: { [key: PanelType]: ConstructorOfATypedSvelteComponent } = {
+  const panelTypeToComponent: Record<PanelType, ConstructorOfATypedSvelteComponent> = {
     graph: Graph,
     media: Media,
     debug: Debug,

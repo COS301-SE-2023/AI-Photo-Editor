@@ -6,7 +6,10 @@
   import Layout from "./layout/Layout.svelte";
   import Palette from "./palette/Palette.svelte";
 
+  import Test from "./Test.svelte";
+
   let isLoading = false;
+  const testing = false;
 
   onMount(async () => {
     isLoading = true;
@@ -15,7 +18,15 @@
   });
 </script>
 
-{#if isLoading}
+{#if testing}
+  {#if isLoading}
+    <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
+      <span class="text-5xl text-purple-400">Loading</span>
+    </div>
+  {:else}
+    <Test />
+  {/if}
+{:else if isLoading}
   <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
     <span class="text-5xl text-purple-400">Loading</span>
   </div>

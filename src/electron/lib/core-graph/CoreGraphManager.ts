@@ -64,11 +64,17 @@ export class CoreGraphManager {
     return graph; // For testing purposes, dont know what to do with this yet
   }
 
+  /**
+   * Creates and new graph and adds it into the Graph Manager map
+   *
+   * @returns UUID of created graph
+   */
   createGraph(): UUID {
     const newGraph: CoreGraph = new CoreGraph();
     this._graphs[newGraph.uuid] = newGraph;
     return newGraph.uuid;
   }
+
   // For testing purposes
   loadGraph(graph: CoreGraph): void {
     this._graphs[graph.uuid] = graph;

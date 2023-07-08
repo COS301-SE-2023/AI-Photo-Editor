@@ -1,8 +1,6 @@
 // N-way tree of panels
 
-import type { panel } from "@shared/types/index";
-
-export type PanelType = string;
+import type { LayoutPanel, PanelType } from "@shared/types/index";
 
 export class PanelNode {
   static panelCounter = 0;
@@ -84,12 +82,10 @@ export class PanelGroup extends PanelNode {
   }
 
   updateParent(_current: PanelGroup) {
-    console.log("Updating parent")
-    let current = _current
+    let current = _current;
     while (current.parent != null) {
       current = current.parent;
     }
-    console.log("Setting parent")
     current = current;
   }
 
@@ -128,20 +124,19 @@ export class PanelGroup extends PanelNode {
     }
   }
 
-  public saveLayout(): panel {
-    let p: panel = {
-        panels: [] 
+  public saveLayout(): LayoutPanel {
+    const p: LayoutPanel = {
+      panels: [],
     };
     for (const panel of this.panels) {
       if (panel instanceof PanelGroup) {
         p.panels?.push(panel.saveLayout());
       } else if (panel instanceof PanelLeaf) {
-        p.panels?.push( { content: panel.content } );
+        p.panels?.push({ content: panel.content });
       }
     }
     return p;
   }
-
 }
 
 export class PanelLeaf extends PanelNode {

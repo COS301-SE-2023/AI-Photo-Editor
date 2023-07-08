@@ -1,21 +1,25 @@
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import type { UUID } from "../../../../shared/utils/UniqueEntity";
-import type { CommonProject, panel } from "../../../../shared/types/index";
+import type { SharedProject, LayoutPanel } from "../../../../shared/types/index";
 import type { IpcResponse } from "../MainApi";
 
 export class ProjectApi implements ElectronMainApi<ProjectApi> {
-  constructor(private readonly _blix: Blix) {}
+  constructor(private readonly blix: Blix) {}
 
-  async createProject(): Promise<IpcResponse<CommonProject>> { 
+  async createProject(): Promise<IpcResponse<SharedProject>> {
+    const graphId = this.blix.graphManager.createGraph();
+    const project = this.blix.projectManager.createProject();
+    project.addGraph(graphId);
+
     return {
       success: true,
-      data: this._blix.projectManager.createProject().mapToCommonProject(),
+      data: project.toSharedProject(),
     };
   }
 
   async renameProject(uuid: UUID, name: string): Promise<IpcResponse<string>> {
-    if (this._blix.projectManager.renameProject(uuid, name)) {
+    if (this.blix.projectManager.renameProject(uuid, name)) {
       return {
         success: true,
         data: "Project renamed successfully.",
@@ -37,7 +41,7 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
   // }
 
   async closeProject(uuid: UUID) {
-    this._blix.projectManager.closeProject(uuid);
+    this.blix.projectManager.closeProject(uuid);
   }
 
   // async getOpenProjects(): Promise<FrontendProject[]> {
@@ -45,7 +49,7 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
   //   return this._projMgr.getOpenProjects().map((proj) => proj.mapToFrontendProject());
   // }
 
-  async updateLayout(id: UUID, layout: panel) {
-    this._blix.projectManager.updateLayout(id, layout);
+  async updateLayout(id: UUID, layout: LayoutPanel) {
+    this.blix.projectManager.updateLayout(id, layout);
   }
 }

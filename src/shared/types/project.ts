@@ -1,8 +1,9 @@
 import type { UUID } from "@shared/utils/UniqueEntity";
-import type { panel } from "./layout";
+import type { LayoutPanel } from "./layout";
 
-export interface projectSchema {
-    id: UUID;
-    name: string;
-    layout: panel;
+export interface SharedProject {
+  id: UUID;
+  name: string;
+  layout: LayoutPanel;
+  graphs: UUID[];
 }
