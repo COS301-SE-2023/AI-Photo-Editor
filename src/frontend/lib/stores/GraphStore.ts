@@ -1,5 +1,5 @@
-import { type UUID } from "@shared/utils/UniqueEntity";
-import { writable, type Unsubscriber, get, derived, type Writable } from "svelte/store";
+import { UIGraph, GraphNode, type GraphNodeUUID, type GraphUUID } from "@shared/ui/UIGraph";
+import { writable, get, derived, type Writable } from "svelte/store";
 
 // When the the CoreGraphApi type has to be imported into the backend
 // (WindowApi.ts) so that the API can be bound then it tries to import the type
@@ -14,7 +14,7 @@ import { writable, type Unsubscriber, get, derived, type Writable } from "svelte
 // unfortunately because of time constraints.
 
 // import type { Connections } from "svelvet";
-type Connections = (string | number | [string | number, string | number] | null)[];
+// type Connections = (string | number | [string | number, string | number] | null)[];
 
 // TODO: Return a GraphStore in createGraphStore for typing
 class GraphStore {
@@ -36,14 +36,14 @@ class GraphStore {
   }
 
   async addNode() {
-    const res = await window.apis.graphApi.addNode("");
+    const res = await window.apis.graphApi.addNode("hello");
 
     // TODO: Implement properly, just for testing atm
     this.graphStore.update((graph) => {
       const newNode = new GraphNode(Math.round(10000 * Math.random()).toString());
-      newNode.pos.x = Math.round(1000 * Math.random());
-      newNode.pos.y = Math.round(1000 * Math.random());
-      newNode.dims.h = Math.round(100 + 200 * Math.random());
+      // newNode.pos.x = Math.round(1000 * Math.random());
+      // newNode.pos.y = Math.round(1000 * Math.random());
+      // newNode.dims.h = Math.round(100 + 200 * Math.random());
       graph.nodes[newNode.uuid] = newNode;
       return graph;
     });
@@ -73,60 +73,13 @@ class GraphStore {
     const res = await window.apis.graphApi.removeNode("");
     return false;
   }
-
-  async setNodePos(nodeId: string, pos: { x: number; y: number }) {
-    const res = await window.apis.graphApi.setNodePos("");
-
-    this.graphStore.update((graph) => {
-      if (!graph.nodes[nodeId]) return graph;
-
-      graph.nodes[nodeId].pos = pos;
-      graph.nodes[nodeId] = graph.nodes[nodeId];
-      return graph;
-    });
-    return false;
-  }
-}
-
-export type GraphUUID = UUID;
-type GraphNodeUUID = UUID;
-type GraphAnchorUUID = UUID;
-
-export class UIGraph {
-  nodes: { [key: GraphNodeUUID]: GraphNode } = {};
-
-  constructor(public uuid: GraphUUID) {}
-}
-
-export class GraphNode {
-  name = "";
-  id = "";
-  public connections: Connections;
-
-  nodeUI: any; // TODO: Change this to NodeUI
-
-  inAnchors: GraphAnchor[] = [];
-  outAnchors: GraphAnchor[] = [];
-
-  pos: { x: number; y: number } = { x: 0, y: 0 };
-  dims: { w: number; h: number } = { w: 0, h: 0 };
-
-  constructor(public uuid: GraphNodeUUID) {
-    this.id = uuid;
-    this.name = "Node-" + uuid;
-    this.connections = [];
-  }
-}
-
-class GraphAnchor {
-  constructor(public uuid: GraphAnchorUUID, public type: string) {}
 }
 
 type GraphDict = { [key: GraphUUID]: GraphStore };
 
 // The public area with all the cool stores 😎
 class GraphMall {
-  mall = writable<GraphDict>({});
+  private mall = writable<GraphDict>({});
 
   public refreshGraph(graphUUID: GraphUUID, newGraph: UIGraph) {
     this.mall.update((stores) => {
@@ -177,24 +130,22 @@ class GraphMall {
     return get(get(this.mall)[graphUUID]).nodes[nodeUUID];
   }
 
-  public updateNode(
-    graphUUID: GraphUUID,
-    nodeUUID: GraphNodeUUID,
-    func: (node: GraphNode) => GraphNode
-  ) {
-    this.mall.update((mall) => {
-      if (!mall[graphUUID]) return mall;
+  // Update specific graph without updating the mall
+  // public updateNode(
+  //   graphUUID: GraphUUID,
+  //   nodeUUID: GraphNodeUUID,
+  //   func: (node: GraphNode) => GraphNode
+  // ) {
+  //   console.log("UPDATE NODE", graphUUID, nodeUUID);
 
-      mall[graphUUID].update((graph) => {
-        if (!graph.nodes[nodeUUID]) return graph;
+  //   const currMall = get(this.mall)[graphUUID];
+  //   if (!currMall) return;
 
-        graph.nodes[nodeUUID] = func(graph.nodes[nodeUUID]);
-        return graph;
-      });
-
-      return mall;
-    });
-  }
+  //   currMall.update((graph) => {
+  //     graph.nodes[nodeUUID] = func(graph.nodes[nodeUUID]);
+  //     return graph;
+  //   });
+  // }
 }
 
 // export const graphMall = writable<GraphMall>(new GraphMall());

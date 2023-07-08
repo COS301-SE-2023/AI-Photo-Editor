@@ -1,17 +1,28 @@
 import type { Registry, RegistryInstance } from "./Registry";
-import type { INode, IAnchor } from "../../../shared/types";
 import { randomUUID } from "crypto";
+import { NodeUIParent } from "../../../shared/ui/NodeUITypes";
+import { IAnchor, INode } from "../../../shared/ui/ToolboxTypes";
+import type { MainWindow } from "../api/apis/WindowApi";
 
 export class ToolboxRegistry implements Registry {
   private registry: { [key: string]: NodeInstance } = {};
 
+  constructor(readonly mainWindow?: MainWindow) {}
+
   addInstance(instance: NodeInstance): void {
     this.registry[instance.getSignature] = instance;
+    // console.log("REGISTERING NODE " + instance.getSignature);
+
+    // Update frontend toolbox
+    this.mainWindow?.apis.toolboxClientApi.registryChanged(this.getNodes());
+
     return;
   }
+
   getRegistry(): { [key: string]: NodeInstance } {
     return this.registry;
   }
+
   getNodes(): INode[] {
     const commands: INode[] = [];
     for (const command in this.registry) {
@@ -22,113 +33,31 @@ export class ToolboxRegistry implements Registry {
         const outputAnchors: IAnchor[] = [];
 
         for (const anchor of nodeInstance.getInputAnchorInstances) {
-          const anchorObject = {
-            type: anchor.type,
-            signature: anchor.signature,
-            displayName: anchor.displayName,
-          };
+          const anchorObject = new IAnchor(anchor.type, anchor.id, anchor.displayName);
+
           inputAnchors.push(anchorObject);
         }
 
         for (const anchor of nodeInstance.getOutputAnchorInstances) {
-          const anchorObject = {
-            type: anchor.type,
-            signature: anchor.signature,
-            displayName: anchor.displayName,
-          };
+          const anchorObject = new IAnchor(anchor.type, anchor.id, anchor.displayName);
           outputAnchors.push(anchorObject);
         }
 
-        const nodeObbject = {
-          signature: nodeInstance.getSignature,
-          title: nodeInstance.getTitle,
-          description: nodeInstance.getDescription,
-          icon: nodeInstance.getIcon,
-          inputs: inputAnchors,
-          outputs: outputAnchors,
-          ui: nodeInstance.getUI,
-        };
-        commands.push(nodeObbject);
+        const nodeObject = new INode(
+          nodeInstance.getSignature,
+          nodeInstance.getTitle,
+          nodeInstance.getDescription,
+          nodeInstance.getIcon,
+          inputAnchors,
+          outputAnchors,
+          nodeInstance.getUI
+        );
+        commands.push(nodeObject);
       }
     }
 
     return commands;
   }
-}
-
-// This should probably become virtual
-export class NodeUI {
-  constructor() {
-    this.parent = null;
-    this.label = "";
-    this.params = [];
-    this.type = "ui";
-  }
-  public parent: NodeUI | null;
-  public label: string;
-  public params: any[];
-  public type: string;
-}
-
-export class NodeUIParent extends NodeUI {
-  constructor(label: string, parent: NodeUIParent | null) {
-    super();
-    this.label = label;
-    this.parent = parent;
-    this.params = [];
-    this.type = "parent";
-  }
-
-  label: string;
-  params: NodeUI[];
-
-  public addButton(label: string, param: any): void {
-    this.params.push(new NodeUILeaf("Button", label, [param], this));
-  }
-
-  public addSlider(
-    label: string,
-    min: number,
-    max: number,
-    step: number,
-    defautlVal: number
-  ): void {
-    this.params.push(new NodeUILeaf("Slider", label, [min, max, step, defautlVal], this));
-  }
-
-  public addDropdown(label: string, child: NodeUIParent) {
-    child.label = label;
-    this.params.push(child);
-    child.parent = this;
-  }
-
-  public addLabel(label: string, param: string) {
-    this.params.push(new NodeUILeaf("Label", label, [param], this));
-  }
-
-  public addNumberInput(label: string) {
-    this.params.push(new NodeUILeaf("NumberInput", label, [], this));
-  }
-
-  public addImageInput(label: string) {
-    this.params.push(new NodeUILeaf("ImageInput", label, [], this));
-  }
-
-  public addColorPicker(label: string, param: any) {
-    this.params.push(new NodeUILeaf("ColorPicker", label, [param], this));
-  }
-}
-
-export class NodeUILeaf extends NodeUI {
-  constructor(category: string, label: string, param: any[], parent: NodeUIParent) {
-    super();
-    this.label = label;
-    this.params = param;
-    this.type = "leaf";
-    this.parent = parent;
-    this.category = category;
-  }
-  category: string;
 }
 
 export class NodeInstance implements RegistryInstance {
@@ -183,18 +112,14 @@ export class NodeInstance implements RegistryInstance {
     this.signature = plugin + "." + name;
   }
 
-  addInput(type: string, anchorname: string) {
-    const id = this.plugin + "." + this.name + "." + anchorname;
-
-    const anchor = new InputAnchorInstance(type, id, anchorname);
+  addInput(type: string, identifier: string, displayName: string) {
+    const anchor = new InputAnchorInstance(type, identifier, displayName);
 
     this.inputs.push(anchor);
   }
 
-  addOutput(type: string, anchorname: string) {
-    const id = this.plugin + "." + this.name + "." + anchorname;
-
-    const anchor = new OutputAnchorInstance(type, id, anchorname);
+  addOutput(type: string, identifier: string, displayName: string) {
+    const anchor = new OutputAnchorInstance(type, identifier, displayName);
 
     this.outputs.push(anchor);
   }
@@ -244,22 +169,19 @@ export type AnchorType = string; // This uses MIME types E.g. "int", "text/json"
 
 interface AnchorInstance {
   readonly type: AnchorType;
-  readonly signature: string;
+  readonly id: string;
   readonly displayName: string;
 }
 
 export class InputAnchorInstance implements AnchorInstance {
   constructor(
     readonly type: AnchorType,
-    readonly signature: string,
+    // TODO: Check uniqueness when loading the plugin!
+    readonly id: string, // The lowercase anchor identifier name; must be unique within the node!
     readonly displayName: string
   ) {}
 }
 
 export class OutputAnchorInstance implements AnchorInstance {
-  constructor(
-    readonly type: AnchorType,
-    readonly signature: string,
-    readonly displayName: string
-  ) {}
+  constructor(readonly type: AnchorType, readonly id: string, readonly displayName: string) {}
 }

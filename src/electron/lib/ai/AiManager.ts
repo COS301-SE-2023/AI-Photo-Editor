@@ -4,6 +4,8 @@ import fs from "fs";
 import type { MainWindow } from "../api/apis/WindowApi";
 import prompt from "electron-prompt";
 import { error } from "console";
+import { OpenAI } from "langchain/llms/openai";
+import { OpenAIEmbeddings } from "langchain/embeddings";
 
 export class AiManager {
   private _path: string;
@@ -19,34 +21,43 @@ export class AiManager {
 
   async sendPrompt() {
     //  Creates a prompt window for the user to input a prompt for the AI to respond to
-    const prompt = this.createInputWindow();
+    const prompt = await this.createInputWindow();
+    if (prompt === "undefined") return;
+
+    // Manipulate prompt
+    const model = new OpenAI({ openAIApiKey: process.env.OPENAI_API_KEY, temperature: 0.3 });
+    model.modelName = "text-ada-001";
+    // console.log("meep");
+    const res = await model.call(prompt);
+    // console.log(res);
+    // console.log("meep");
   }
 
-  async createInputWindow(): Promise<string | void> {
-    prompt(
-      {
-        title: "AI Prompt",
-        label: "Prompt:",
-        value: "",
-        inputAttrs: {
-          type: "text",
+  async createInputWindow(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      prompt(
+        {
+          title: "AI Prompt",
+          label: "Prompt:",
+          value: "",
+          inputAttrs: {
+            type: "text",
+          },
+          type: "input",
+          customStylesheet: "./assets/promptWindow.css",
+          menuBarVisible: true,
+          alwaysOnTop: true,
         },
-        type: "input",
-        customStylesheet: "./assets/promptWindow.css",
-        menuBarVisible: true,
-        alwaysOnTop: true,
-      },
-      this._mainWindow
-    )
-      .then((r) => {
-        if (r === null) {
-          // console.log('user cancelled');
-          return r;
-        } else {
-          // console.log('result', r);
-          return r;
-        }
-      })
-      .catch(error);
+        this._mainWindow
+      )
+        .then((r) => {
+          if (r === null) {
+            resolve("undefined"); // User cancelled
+          } else {
+            resolve(r); // Resolve with the prompt value
+          }
+        })
+        .catch(error);
+    });
   }
 }

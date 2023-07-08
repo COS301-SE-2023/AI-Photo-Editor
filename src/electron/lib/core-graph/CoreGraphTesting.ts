@@ -84,7 +84,7 @@ export class TestGraph {
     // Cycle detected!
     // false
 
-    const json: GraphToJSON = g1.toJSONObject();
+    const json: GraphToJSON = g1.exportJSON();
     logger.info(JSON.stringify(json, null, 2));
 
     // =====================================
@@ -627,7 +627,7 @@ export class TestGraph {
     // const src = g6.getEdgeSrc;
     // logger.info(src);
 
-    const json: GraphToJSON = g6.toJSONObject();
+    const json: GraphToJSON = g6.exportJSON();
     logger.info(JSON.stringify(json, null, 2));
   }
 

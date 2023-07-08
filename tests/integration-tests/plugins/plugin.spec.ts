@@ -1,10 +1,14 @@
 import expect from "expect";
-import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent } from "../../../src/electron/lib/registries/ToolboxRegistry";
+import { NodeInstance,InputAnchorInstance,OutputAnchorInstance } from "../../../src/electron/lib/registries/ToolboxRegistry";
 import {NodeBuilder,NodeUIBuilder} from "../../../src/electron/lib/plugins/builders/NodeBuilder"
 // import { ProjectManager } from "../../../src/electron/lib/projects/ProjectManager";
 import { Plugin } from "../../../src/electron/lib/plugins/Plugin";
 import { Blix } from "../../../src/electron/lib/Blix";
 import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
+import {BrowserWindow} from "electron";
+import { join } from "path";
+import { writeFileSync } from "fs";
+import { NodeUIParent } from "../../../src/shared/ui/NodeUITypes";
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
 const mainWindow: MainWindow = {

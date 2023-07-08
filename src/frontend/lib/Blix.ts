@@ -1,11 +1,12 @@
+import { graphMall } from "./stores/GraphStore";
 import { blixStore } from "./stores/BlixStore";
 import { commandStore } from "./stores/CommandStore";
-import { GraphNode, UIGraph, graphMall } from "./stores/GraphStore";
 import { initializeAPIs } from "./api/apiInitializer";
 import { projectManager } from "./stores/ProjectStore";
+import { GraphNode, UIGraph } from "@shared/ui/UIGraph";
 /**
- * Runs on app start. Will initialize the IPC APIs and set the initial frontend
- * stores.
+ * Runs on app start. Will initialize the IPC APIs and set
+ * the initial frontend stores.
  */
 export async function init() {
   await initializeAPIs();
@@ -31,8 +32,11 @@ async function setInitialStores() {
 
   // Graph store
   const allGraphIds = await window.apis.graphApi.getAllGraphUUIDs();
+  // console.log("ALL GRAPHS", allGraphIds);
+
   for (const graphId of allGraphIds) {
     const graph = await window.apis.graphApi.getGraph(graphId);
+    // console.log("BACKEND GRAPH", graph.getNodes);
 
     // TODO: REMOVE; This is just for testing
     const uiGraph = new UIGraph(graphId);
@@ -42,8 +46,7 @@ async function setInitialStores() {
     uiGraph.nodes[node1.uuid] = node1;
     uiGraph.nodes[node2.uuid] = node2;
     uiGraph.nodes[node3.uuid] = node3;
-    node1.pos.x = 100;
-    node1.pos.y = 100;
+    // node1.styling.pos.set({ x: 100, y: 100 });
 
     graphMall.refreshGraph(uiGraph.uuid, uiGraph);
   }

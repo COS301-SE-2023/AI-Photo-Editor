@@ -1,5 +1,5 @@
 import expect from "expect";
-import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent, NodeUILeaf,ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
+import { NodeInstance,InputAnchorInstance,OutputAnchorInstance } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
 import { CoreGraph, CoreGraphStore } from "../../../../../src/electron/lib/core-graph/CoreGraph";
 import { UUID } from "../../../../../src/shared/utils/UniqueEntity";
 
@@ -61,7 +61,7 @@ describe("Test Graph", () => {
 
     for(let i = 0; i < 10; i++){
 
-      expect(names).toContain(obs[i].getDisplayName);
+      expect(names).toContain(obs[i].displayName);
     }
   });
 
@@ -393,13 +393,13 @@ describe("Test CoreGraph", () => {
     const node1Instance = new NodeInstance(`${plugin}.${name}`,`${name}-${1}`, `${plugin}`, title, description, icon, inputs, outputs);
     graph.addNode(node1Instance);
     const node1Node = Object.values(graph.getNodes)[0];
-    const result = node1Node.toJSONObject();
+    const result = node1Node.exportJSON();
 
     expect(result).toEqual(
       {
         id: node1Node.uuid,
         signature: `${plugin}/${name}-1`,
-        styling: null
+        styling: undefined
       });
   });
 
@@ -465,7 +465,7 @@ describe("Test CoreGraph", () => {
 
   
 
-    let graphJSON = graph.toJSONObject();
+    let graphJSON = graph.exportJSON();
     expect(graphJSON).toEqual(
       {
         nodes: graph.nodesToJSONObject(),
@@ -478,12 +478,12 @@ describe("Test CoreGraph", () => {
           {
             id: node1Node.uuid,
             signature: `${plugin}/${name}-1`,
-            styling: null
+            styling: undefined
           },
           {
             id: node2Node.uuid,
             signature: `${plugin}/${name}-2`,
-            styling: null
+            styling: undefined
           }
         ],
         edges: [

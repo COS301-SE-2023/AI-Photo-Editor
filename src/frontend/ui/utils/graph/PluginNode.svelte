@@ -1,82 +1,75 @@
 <script lang="ts">
-  import { Anchor, Node, Slider, generateInput } from "svelvet";
-  import { writable } from "svelte/store";
-  import { graphMall, type GraphNode } from "@frontend/lib/stores/GraphStore";
-  // import NodeUiFragment from "./NodeUIFragment.svelte";
+  import { Anchor, Node } from "svelvet";
+  import { GraphNode, NodeStylingStore } from "@shared/ui/UIGraph";
+  import { toolboxStore } from "lib/stores/ToolboxStore";
+  import NodeUiFragment from "./NodeUIFragment.svelte";
 
+  export let panelId: string;
   export let graphId: string;
   export let node: GraphNode;
-  export let svelvetNodeId: string;
+
+  $: svelvetNodeId = `${panelId}_${graphId.substring(0, 6)}_${node.id.substring(0, 6)}`;
+  $: toolboxNode = toolboxStore.getNodeReactive(node.signature);
 
   // Parameter store
-  type Inputs = { width: number };
-  const initialData: Inputs = { width: 2.5 };
-  const inputs = generateInput(initialData);
+  // type Inputs = { width: number };
+  // const initialData: Inputs = { width: 2.5 };
+  // const inputs = generateInput(initialData);
 
-  const nodePos = writable(node.pos);
-  const nodeConns = writable(node.connections);
-
-  nodePos.subscribe(async (pos) => {
-    // On node moved
-    graphMall.updateNode(graphId, node.id, (node) => {
-      node.pos = pos;
-      return node;
-    });
-  });
-
-  nodeConns.subscribe(async (conns) => {
-    // On connection changed
-    graphMall.updateNode(graphId, node.id, (node) => {
-      node.connections = conns;
-      return node;
-    });
-  });
-
-  // graphMall.subscribe((graphMall) => {
-  // });
-
-  setInterval(() => {
-    nodePos.set(node.pos);
-    nodeConns.set(node.connections);
-  }, 100);
+  if (!node.styling) {
+    node.styling = new NodeStylingStore();
+  }
+  const nodePos = node.styling.pos;
 </script>
 
 {#if svelvetNodeId !== ""}
-  <!-- width="{graphNode.dims.w}"
+  {#key nodePos}
+    <!-- width="{graphNode.dims.w}"
 height="{graphNode.dims.h}" -->
-  <Node
-    bgColor="#262630"
-    textColor="#ffffff"
-    bind:position="{$nodePos}"
-    id="{svelvetNodeId}"
-    borderColor="#ffffff"
-    borderWidth="{3}"
-    borderRadius="{10}"
-    inputs="{2}"
-    outputs="{1}"
-  >
-    <div class="node">
-      <div class="header">
-        <h1>{node.name}</h1>
-      </div>
-      <div class="node-body">
-        <!-- TODO:  -->
-        <!-- <NodeUiFragment />  -->
-        <Slider min="{1}" max="{12}" fixed="{1}" step="{0.1}" parameterStore="{$inputs.width}" />
-      </div>
-    </div>
+    <Node
+      bgColor="#262630"
+      textColor="#ffffff"
+      bind:position="{$nodePos}"
+      id="{svelvetNodeId}"
+      borderColor="#ffffff"
+      borderWidth="{3}"
+      borderRadius="{10}"
+      inputs="{2}"
+      outputs="{1}"
+    >
+      <div class="node">
+        <div class="header">
+          <h1>{$toolboxNode?.title || node.displayName}</h1>
+        </div>
+        <div class="node-body" style="max-width: 400px">
+          <h2>Signature: {node.signature}</h2>
+          <h2>SvelvetNodeId: {svelvetNodeId}</h2>
+          {JSON.stringify({ ...$toolboxNode, ui: null })}
+          <!-- TODO:  -->
+          <!-- <Slider min="{1}" max="{12}" fixed="{1}" step="{0.1}" parameterStore="{$inputs.width}" /> -->
+        </div>
+        <div class="node-body" style="max-width: 400px">
+          <NodeUiFragment ui="{$toolboxNode?.ui}" />
+        </div>
 
-    <div>
-      <Anchor dynamic="{true}" id="{node.id}-in" />
-      <!-- bind:connections={$nodeConns} -->
-      <br />
-      <!-- <Anchor
+        <div>
+          {#if $toolboxNode}
+            {#each $toolboxNode.inputs as input}
+              <Anchor id="{svelvetNodeId}_{input.id}" direction="west" />
+              {svelvetNodeId}-{input.id}
+            {/each}
+            <!-- bind:connections={$nodeConns} -->
+            <br />
+            <!-- <Anchor
         dynamic="{true}"
         id="{node.id}-in2"
         connections={[]}
     /> -->
-    </div>
-  </Node>
+          {/if}
+        </div>
+      </div></Node
+    >
+  {/key}
 {/if}
 
 <style>

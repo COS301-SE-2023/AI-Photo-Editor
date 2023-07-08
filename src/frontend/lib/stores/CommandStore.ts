@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
-import type { ICommand } from "../../../shared/types/index";
 import { projectManager } from "./ProjectStore";
+import type { ICommand } from "@shared/ui/ToolboxTypes";
 
 interface CommandStore {
   commands: ICommand[];

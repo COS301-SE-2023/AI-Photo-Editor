@@ -1,6 +1,7 @@
 import expect from "expect";
-import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent, NodeUILeaf,ToolboxRegistry } from "../../../../../../src/electron/lib/registries/ToolboxRegistry";
+import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, ToolboxRegistry } from "../../../../../../src/electron/lib/registries/ToolboxRegistry";
 import {NodeBuilder,NodeUIBuilder} from "../../../../../../src/electron/lib/plugins/builders/NodeBuilder"
+import { NodeUIParent } from "../../../../../../src/shared/ui/NodeUITypes";
 
 describe("Test NodeBuilder", () => {
 
@@ -117,14 +118,14 @@ describe("Test NodeBuilder", () => {
   test("addInput should add an input", () => {
     const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
     nodeBuilder = new NodeBuilder(node);
-    nodeBuilder.addInput("string","Shrek");
+    nodeBuilder.addInput("string", "shrek", "Shrek");
     expect(node.getInputAnchorInstances[0].displayName).toEqual("Shrek");
   });
 
   test("addOutput should add an output", () => {
     const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
     nodeBuilder = new NodeBuilder(node);
-    nodeBuilder.addOutput("string","Shrek");
+    nodeBuilder.addOutput("string", "shrek2", "Shrek");
     expect(node.getOutputAnchorInstances[0].displayName).toEqual("Shrek");
   });
 

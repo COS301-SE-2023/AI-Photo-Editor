@@ -1,5 +1,5 @@
+import { ICommand } from "../../../shared/ui/ToolboxTypes";
 import type { Registry, RegistryInstance } from "./Registry";
-import type { ICommand } from "../../../shared/types";
 
 export class CommandRegistry implements Registry {
   private registry: { [key: string]: CommandInstance } = {};

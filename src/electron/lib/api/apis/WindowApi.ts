@@ -3,9 +3,10 @@ import type { AwaitedType } from "electron-affinity/main";
 import { bindWindowApi } from "electron-affinity/main";
 
 // Window APIs
-import type { CommandRegistryApi } from "@frontend/lib/api/CommandRegistryApi";
-import type { ClientGraphApi } from "@frontend/lib/api/ClientGraphApi";
-import type { ClientProjectApi } from "@frontend/lib/api/ClientProjectApi";
+import type { ToolboxClientApi } from "@frontend/lib/api/apis/ToolboxClientApi";
+import type { CommandClientApi } from "@frontend/lib/api/apis/CommandClientApi";
+import type { GraphClientApi } from "@frontend/lib/api/apis/GraphClientApi";
+import type { ProjectClientApi } from "@frontend/lib/api/apis/ProjectClientApi";
 
 /**
  * Binds the window APIs to the main process for every window.
@@ -17,9 +18,10 @@ import type { ClientProjectApi } from "@frontend/lib/api/ClientProjectApi";
 export async function bindMainWindowApis(window: BrowserWindow) {
   return Object.assign(window, {
     apis: {
-      commandRegistryApi: await bindWindowApi<CommandRegistryApi>(window, "CommandRegistryApi"),
-      clientGraphApi: await bindWindowApi<ClientGraphApi>(window, "ClientGraphApi"),
-      clientProjectApi: await bindWindowApi<ClientProjectApi>(window, "ClientProjectApi"),
+      commandClientApi: await bindWindowApi<CommandClientApi>(window, "CommandClientApi"),
+      toolboxClientApi: await bindWindowApi<ToolboxClientApi>(window, "ToolboxClientApi"),
+      graphClientApi: await bindWindowApi<GraphClientApi>(window, "GraphClientApi"),
+      projectClientApi: await bindWindowApi<ProjectClientApi>(window, "ProjectClientApi"),
     },
   });
 }

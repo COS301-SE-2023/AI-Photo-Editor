@@ -11,6 +11,9 @@ import { PluginManager } from "./electron/lib/plugins/PluginManager";
 import { Blix } from "./electron/lib/Blix";
 import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 

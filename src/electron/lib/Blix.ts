@@ -1,15 +1,17 @@
 import { CommandRegistry } from "./registries/CommandRegistry";
-import { ToolboxRegistry } from "./registries/ToolboxRegistry";
+import { NodeInstance, ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
-import { AiManager } from "./ai/AiManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
+import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
+import { NodeUI, NodeUIParent } from "../../shared/ui/NodeUITypes";
+import { AiManager } from "./ai/AiManager";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
 export class Blix {
-  private _toolbox: ToolboxRegistry;
+  private _toolboxRegistry: ToolboxRegistry;
   private _tileRegistry: TileRegistry;
   private _commandRegistry: CommandRegistry;
   private _graphManager: CoreGraphManager;
@@ -26,16 +28,48 @@ export class Blix {
   constructor(mainWindow: MainWindow) {
     // this.startTime = new Date();
     this._mainWindow = mainWindow;
-    this._toolbox = new ToolboxRegistry();
+    this._toolboxRegistry = new ToolboxRegistry(mainWindow);
     this._commandRegistry = new CommandRegistry();
     this._tileRegistry = new TileRegistry();
-    this._graphManager = new CoreGraphManager(mainWindow);
-    this._projectManager = new ProjectManager(mainWindow);
+    this._graphManager = new CoreGraphManager(this, mainWindow);
     this._aiManager = new AiManager(mainWindow);
+    this._projectManager = new ProjectManager(mainWindow);
+
+    // TESTING ADD NODE TO GRAPH
+    setInterval(() => {
+      const allIds = this._graphManager.getAllGraphUUIDs();
+      const randId = allIds[Math.floor(Math.random() * allIds.length)];
+      // const toolbox = this.blix.toolbox.getRegistry();
+      this._graphManager.addNode(
+        randId,
+        new NodeInstance(
+          "hello-plugin.hello",
+          "hello",
+          "hello-plugin",
+          "asdf4",
+          "asdf5",
+          "asdf6",
+          [],
+          []
+        )
+      );
+    }, 3000);
+
+    // TESTING ADD NODE TO TOOLBOX
+    setInterval(() => {
+      const nodeInstance = new NodeInstance("asdf", "Name", "Plugin", "", "", "", [], []);
+      // const nodeUI = new NodeUIParent();
+
+      const nodeBuilder = new NodeBuilder(nodeInstance);
+      nodeBuilder.setUI(new NodeUIBuilder().addLabel("Test", "test"));
+      nodeBuilder.validate();
+
+      this._toolboxRegistry.addInstance(nodeInstance);
+    }, 5000);
   }
 
   get toolbox(): ToolboxRegistry {
-    return this._toolbox;
+    return this._toolboxRegistry;
   }
 
   get tileRegistry(): TileRegistry {

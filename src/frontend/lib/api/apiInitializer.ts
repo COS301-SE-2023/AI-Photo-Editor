@@ -9,14 +9,15 @@ import type { GraphApi } from "@electron/lib/api/apis/GraphApi";
 import type { ToolboxApi } from "@electron/lib/api/apis/ToolboxApi";
 
 // Window APIs
-import { CommandRegistryApi } from "./CommandRegistryApi";
+import { CommandClientApi } from "./apis/CommandClientApi";
 
 // stores
 import { blixStore } from "../stores/BlixStore";
 import { commandStore } from "../stores/CommandStore";
-import { nodeStore } from "../stores/NodeStore";
-import { ClientGraphApi } from "./ClientGraphApi";
-import { ClientProjectApi } from "./ClientProjectApi";
+import { GraphClientApi } from "./apis/GraphClientApi";
+import { ProjectClientApi } from "./apis/ProjectClientApi";
+import { toolboxStore } from "../stores/ToolboxStore";
+import { ToolboxClientApi } from "./apis/ToolboxClientApi";
 
 /**
  * Initializes the application by exposing the window IPC APIs to the main
@@ -28,10 +29,10 @@ export async function initializeAPIs() {
   const res = await window.apis.utilApi.getSystemInfo();
   // Get commands and nodes from plugins
   const command = await window.apis.commandApi.getCommands();
-  const node = await window.apis.toolboxApi.getNodes();
+  const toolbox = await window.apis.toolboxApi.getNodes();
   blixStore.set({ systemInfo: res });
   commandStore.refreshStore(command);
-  nodeStore.refreshStore(node);
+  toolboxStore.refreshStore(toolbox);
 }
 
 /**
@@ -53,9 +54,10 @@ async function bindMainApis() {
  * If a new window API is created then add it to this method.
  */
 function exposeWindowApis() {
-  exposeWindowApi(new CommandRegistryApi());
-  exposeWindowApi(new ClientGraphApi());
-  exposeWindowApi(new ClientProjectApi());
+  exposeWindowApi(new ToolboxClientApi());
+  exposeWindowApi(new CommandClientApi());
+  exposeWindowApi(new GraphClientApi());
+  exposeWindowApi(new ProjectClientApi());
 }
 
 export type MainApis = AwaitedType<typeof bindMainApis>;

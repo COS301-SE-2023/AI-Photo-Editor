@@ -8,14 +8,19 @@ const nodes = {
             console.log("konnichi~wa");
         });
 
-       ui =  nodeBuilder.createUIBuilder();
-       ui.addButton("Execute order 66","return 66;").addSlider("Slide along",0,100,0.1,50).addDropdown("Orphanage",nodeBuilder.createUIBuilder()
+       const ui = nodeBuilder.createUIBuilder();
+       ui.addButton("Execute order 66","return 66;")
+       .addSlider("Slide along",0,100,0.1,50)
+       .addColorPicker("Massacre", "red")
+       .addDropdown("Orphanage",nodeBuilder.createUIBuilder()
        .addLabel("Label1"));   
 
-       nodeBuilder.addInput("string","In1");
-       nodeBuilder.addInput("string","In2");
+       nodeBuilder.setUI(ui);
 
-       nodeBuilder.addOutput("string","Out1");
+       nodeBuilder.addInput("string", "in1", "In1");
+       nodeBuilder.addInput("string", "in2", "In2");
+
+       nodeBuilder.addOutput("string", "out1", "Out1");
 
     }
     ,"Jake": (context) => {
