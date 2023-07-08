@@ -6,16 +6,33 @@ import prompt from "electron-prompt";
 import { error } from "console";
 import { OpenAI } from "langchain/llms/openai";
 import { OpenAIEmbeddings } from "langchain/embeddings";
+import { Interface } from "readline";
+import { Blix } from "../Blix";
+import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 
+interface Nodes {
+  name: string;
+  description: string;
+}
 export class AiManager {
   private _path: string;
   private _mainWindow;
+  private _context: Nodes[] = [];
 
   constructor(mainWindow: MainWindow) {
     this._mainWindow = mainWindow;
     this._path = join(app.getPath("userData"), "projects");
     if (!fs.existsSync(this._path)) {
       fs.mkdirSync(this._path);
+    }
+  }
+
+  instantiate(toolbox: ToolboxRegistry): void {
+    for (const index in toolbox.getRegistry()) {
+      if (toolbox.hasOwnProperty(index)) {
+        const node: NodeInstance = toolbox.getRegistry()[index];
+        this._context.push({ name: node.getSignature, description: node.getDescription });
+      }
     }
   }
 
@@ -27,10 +44,8 @@ export class AiManager {
     // Manipulate prompt
     const model = new OpenAI({ openAIApiKey: process.env.OPENAI_API_KEY, temperature: 0.3 });
     model.modelName = "text-ada-001";
-    // console.log("meep");
     const res = await model.call(prompt);
     // console.log(res);
-    // console.log("meep");
   }
 
   async createInputWindow(): Promise<string> {

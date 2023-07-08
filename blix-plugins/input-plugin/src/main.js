@@ -2,7 +2,7 @@ const nodes ={
     "inputNumber": (context) => {
         nodeBuilder = context.instantiate("input-plugin","inputNumber");
         nodeBuilder.setTitle("Input number");
-        nodeBuilder.setDescription("Provides a number input");
+        nodeBuilder.setDescription("Provides a number input and returns a single number output");
 
         nodeBuilder.define((num1) => {
             return num1;
@@ -16,7 +16,7 @@ const nodes ={
     "inputImage": (context) => {
       nodeBuilder = context.instantiate("input-plugin","inputImage");
       nodeBuilder.setTitle("Input image");
-      nodeBuilder.setDescription("Provides an image input");
+      nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
       nodeBuilder.define((image) => {
           return image;
@@ -30,7 +30,7 @@ const nodes ={
   "inputColor": (context) => {
     nodeBuilder = context.instantiate("input-plugin","inputColor");
     nodeBuilder.setTitle("Input color");
-    nodeBuilder.setDescription("Provides a color input");
+    nodeBuilder.setDescription("Provides a color input and returns a single color output");
 
     nodeBuilder.define((color) => {
         return color;

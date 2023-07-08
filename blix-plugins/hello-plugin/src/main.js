@@ -4,6 +4,7 @@ const nodes = {
         // Use context.nodeBuilder to construct the node UI
         nodeBuilder = context.instantiate("hello-plugin","hello");
         nodeBuilder.setTitle("Gloria");
+        nodeBuilder.setDescription("Provides a test slider and button and label for testing purposes, taking two string inputs and returning one string output");
         nodeBuilder.define(() => {
             console.log("konnichi~wa");
         });
@@ -25,6 +26,8 @@ const nodes = {
     }
     ,"Jake": (context) => {
         nodeBuilder = context.instantiate("hello-plugin","Jake");
+        nodeBuilder.setDescription("This is currently a useless node that does nothing.");
+
     }
 }
 
