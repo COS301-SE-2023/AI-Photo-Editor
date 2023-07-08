@@ -5,6 +5,9 @@ import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 import { PluginManager } from "./plugins/PluginManager";
+import { IPCGraphSubscriber } from "./core-graph/CoreGraphInteractors";
+import type { UUID } from "../../shared/utils/UniqueEntity";
+import type { UIGraph } from "../../shared/ui/UIGraph";
 import { testStuffies } from "./core-graph/CoreGraphTesting";
 import logger from "../utils/logger";
 // Encapsulates the backend representation for
@@ -50,7 +53,14 @@ export class Blix {
     this._projectManager = new ProjectManager(mainWindow);
     this._projectManager.loadRecentProjects();
 
-    // testStuffies(this);
+    // Add subscribers
+    const graphSubscriber = new IPCGraphSubscriber();
+
+    graphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
+      mainWindow.apis.graphClientApi.graphChanged(graphId, newGraph);
+    };
+
+    this._graphManager.addAllSubscriber(graphSubscriber);
   }
 
   get toolbox(): ToolboxRegistry {

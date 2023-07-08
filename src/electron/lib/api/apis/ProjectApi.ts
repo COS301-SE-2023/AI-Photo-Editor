@@ -11,6 +11,7 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
     const graphId = this.blix.graphManager.createGraph();
     const project = this.blix.projectManager.createProject();
     project.addGraph(graphId);
+    this.blix.graphManager.onGraphUpdated(graphId);
 
     return {
       success: true,

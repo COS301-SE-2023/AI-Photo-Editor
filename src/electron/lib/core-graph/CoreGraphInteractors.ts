@@ -1,4 +1,4 @@
-import { UIGraph } from "@shared/ui/UIGraph";
+import { UIGraph } from "../../../shared/ui/UIGraph";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph } from "./CoreGraph";
 
@@ -31,7 +31,8 @@ export abstract class CoreGraphUpdater {
 
 export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
   onGraphChanged(graphId: UUID, graphData: CoreGraph): void {
-    // const uiGraph: UIGraph = new UIGraph("");
-    // if (this._notifyee) this._notifyee(graphId, uiGraph);
+    // TODO: Convert graph (is semi-done on frontend/graph)
+    const uiGraph: UIGraph = new UIGraph("");
+    if (this._notifyee) this._notifyee(graphId, uiGraph);
   }
 }
