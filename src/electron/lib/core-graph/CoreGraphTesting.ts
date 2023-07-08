@@ -44,55 +44,164 @@ export class TestGraph {
 
   public interpreterTest(): CoreGraph {
     // =====================================
-    // 1 -> 2
-    // 2 -> 3
-    // Add 3 -> 1 = Cycle
+    // Input -> 2, 2, 2, 2
+    // Add2/Mul2 -> 3, 3
+    // Output ->
     // =====================================
+    const tempNodesInt: NodeInstance[] = [];
+
+    tempNodesInt.push(
+      new NodeInstance(
+        `hello-plugin.hello`,
+        `input`,
+        `hello-plugin`,
+        `title`,
+        `description`,
+        `icon`,
+        [],
+        [
+          new OutputAnchorInstance(
+            "number",
+            "hello-plugin.hello.output_anchor1.0",
+            "output_anchor1"
+          ),
+          new OutputAnchorInstance(
+            "number",
+            "hello-plugin.hello.output_anchor2.1",
+            "output_anchor2"
+          ),
+          new OutputAnchorInstance(
+            "number",
+            "hello-plugin.hello.output_anchor3.2",
+            "output_anchor3"
+          ),
+          new OutputAnchorInstance(
+            "number",
+            "hello-plugin.hello.output_anchor4.3",
+            "output_anchor4"
+          ),
+        ]
+      )
+    );
+    tempNodesInt[0].setFunction((x: number[], from: number) => {
+      return ["Hello ", "World", 2, 4.4][from];
+    });
+
+    tempNodesInt.push(
+      new NodeInstance(
+        `hello-plugin.hello`,
+        `add2/mul2`,
+        `hello-plugin`,
+        `title`,
+        `description`,
+        `icon`,
+        [
+          new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.0", "input_anchor1"),
+          new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.1", "input_anchor2"),
+          new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.2", "input_anchor3"),
+          new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.3", "input_anchor4"),
+        ],
+        [
+          new OutputAnchorInstance(
+            "number",
+            "hello-plugin.hello.output_anchor0.0",
+            "output_anchor1"
+          ),
+          new OutputAnchorInstance(
+            "number",
+            "hello-plugin.hello.output_anchor0.1",
+            "output_anchor2"
+          ),
+        ]
+      )
+    );
+    tempNodesInt[1].setFunction((input: number[], from: number) => {
+      return [input[0] + input[1], input[2] * input[3]][from];
+    });
+
+    tempNodesInt.push(
+      new NodeInstance(
+        `hello-plugin.hello`,
+        `output`,
+        `hello-plugin`,
+        `title`,
+        `description`,
+        `icon`,
+        [
+          new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.0", "input_anchor1"),
+          new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.0", "input_anchor2"),
+        ],
+        []
+      )
+    );
+    tempNodesInt[2].setFunction((x: number[]) => {
+      logger.info("Add Frist two: ", x[0]);
+      logger.info("Multiply Last two: ", x[1]);
+    });
+
     const g2: CoreGraph = new CoreGraph();
 
-    g2.addNode(this.tempNodes[0]);
-    g2.addNode(this.tempNodes[1]);
-    g2.addNode(this.tempNodes[2]);
-    g2.addNode(this.tempNodes[3]);
-    g2.addNode(this.tempNodes[4]);
-    g2.addNode(this.tempNodes[5]);
+    g2.addNode(tempNodesInt[0]);
+    g2.addNode(tempNodesInt[1]);
+    g2.addNode(tempNodesInt[2]);
+    // g2.addNode(tempNodesInt[3]);
+    // g2.addNode(tempNodesInt[4]);
+    // g2.addNode(tempNodesInt[5]);
 
     const g2Nodes = g2.getNodes;
     const g2Node1 = Object.values(g2Nodes)[0];
     const g2Node2 = Object.values(g2Nodes)[1];
     const g2Node3 = Object.values(g2Nodes)[2];
-    const g2Node4 = Object.values(g2Nodes)[3];
-    const g2Node5 = Object.values(g2Nodes)[4];
-    const g2Node6 = Object.values(g2Nodes)[5];
+    // const g2Node4 = Object.values(g2Nodes)[3];
+    // const g2Node5 = Object.values(g2Nodes)[4];
+    // const g2Node6 = Object.values(g2Nodes)[5];
 
     g2.addEdge(
-      Object.values(g2Node1.getAnchors)[3].uuid,
+      Object.values(g2Node1.getAnchors)[0].uuid,
       Object.values(g2Node2.getAnchors)[0].uuid
     );
     g2.addEdge(
+      Object.values(g2Node1.getAnchors)[1].uuid,
+      Object.values(g2Node2.getAnchors)[1].uuid
+    );
+
+    g2.addEdge(
+      Object.values(g2Node1.getAnchors)[2].uuid,
+      Object.values(g2Node2.getAnchors)[2].uuid
+    );
+
+    g2.addEdge(
       Object.values(g2Node1.getAnchors)[3].uuid,
+      Object.values(g2Node2.getAnchors)[3].uuid
+    );
+
+    // Add output
+    g2.addEdge(
+      Object.values(g2Node2.getAnchors)[4].uuid,
       Object.values(g2Node3.getAnchors)[0].uuid
     );
-    g2.addEdge(
-      Object.values(g2Node3.getAnchors)[3].uuid,
-      Object.values(g2Node4.getAnchors)[0].uuid
-    );
-    g2.addEdge(
-      Object.values(g2Node4.getAnchors)[3].uuid,
-      Object.values(g2Node6.getAnchors)[0].uuid
-    );
-    g2.addEdge(
-      Object.values(g2Node5.getAnchors)[3].uuid,
-      Object.values(g2Node6.getAnchors)[0].uuid
-    );
 
     g2.addEdge(
-      Object.values(g2Node2.getAnchors)[3].uuid,
-      Object.values(g2Node5.getAnchors)[0].uuid
+      Object.values(g2Node2.getAnchors)[5].uuid,
+      Object.values(g2Node3.getAnchors)[1].uuid
     );
+    // g2.addEdge(
+    //   Object.values(g2Node4.getAnchors)[3].uuid,
+    //   Object.values(g2Node6.getAnchors)[0].uuid
+    // );
+    // g2.addEdge(
+    //   Object.values(g2Node5.getAnchors)[3].uuid,
+    //   Object.values(g2Node6.getAnchors)[0].uuid
+    // );
 
-    g2.getOutputNodes.push(g2Node6.uuid);
-    g2.getOutputNodes.push(g2Node4.uuid);
+    // g2.addEdge(
+    //   Object.values(g2Node2.getAnchors)[3].uuid,
+    //   Object.values(g2Node5.getAnchors)[0].uuid
+    // );
+
+    // g2.getOutputNodes.push(g2Node6.uuid);
+    g2.getOutputNodes.push(g2Node3.uuid);
+    // g2.getOutputNodes.push(g2Node6.uuid);
 
     // Expected output:
     // No cycle detected

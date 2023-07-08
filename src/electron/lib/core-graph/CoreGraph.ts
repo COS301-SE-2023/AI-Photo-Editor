@@ -232,21 +232,21 @@ export class CoreGraph extends UniqueEntity {
     // TODO
   }
 
-  public printGraph() {
-    for (const edge in this.edgeDest) {
-      if (!this.edgeDest.hasOwnProperty(edge)) continue;
-      logger.info("Edge (same as anchorTo): " + edge);
-      logger.info("Node From: " + this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.uuid);
-      logger.info("Node To: " + this.anchors[this.edgeDest[edge].getAnchorTo].getParent.uuid);
-      logger.info("Anchor from -> Anchor to:");
-      logger.info(
-        this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.getName +
-          " -> " +
-          this.anchors[this.edgeDest[edge].getAnchorTo].getParent.getName +
-          "\n"
-      );
-    }
-  }
+  // public printGraph() {
+  //   for (const edge in this.edgeDest) {
+  //     if (!this.edgeDest.hasOwnProperty(edge)) continue;
+  //     logger.info("Edge (same as anchorTo): " + edge);
+  //     logger.info("Node From: " + this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.uuid);
+  //     logger.info("Node To: " + this.anchors[this.edgeDest[edge].getAnchorTo].getParent.uuid);
+  //     logger.info("Anchor from -> Anchor to:");
+  //     logger.info(
+  //       this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.getName +
+  //         " -> " +
+  //         this.anchors[this.edgeDest[edge].getAnchorTo].getParent.getName +
+  //         "\n"
+  //     );
+  //   }
+  // }
 }
 
 // This Node representation effectively 'stands-in'
