@@ -29,11 +29,12 @@ export class AiManager {
 
   instantiate(toolbox: ToolboxRegistry): void {
     for (const index in toolbox.getRegistry()) {
-      if (toolbox.hasOwnProperty(index)) {
+      if (!toolbox.hasOwnProperty(index)) {
         const node: NodeInstance = toolbox.getRegistry()[index];
         this._context.push({ name: node.getSignature, description: node.getDescription });
       }
     }
+    // console.log(this._context);
   }
 
   async sendPrompt() {
