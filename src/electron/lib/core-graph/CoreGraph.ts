@@ -136,12 +136,7 @@ export class CoreGraph extends UniqueEntity {
   // We need to pass in node name and plugin name
   public addNode(node: NodeInstance): boolean {
     // Create New Node
-    const n: Node = new Node(
-      node.getName,
-      node.getPlugin,
-      node.getInputAnchorInstances,
-      node.getOutputAnchorInstances
-    );
+    const n: Node = new Node(node.name, node.plugin, node.inputs, node.outputs);
     // Add Node to Graph
     this.nodes[n.uuid] = n;
     // Add Nodes's Anchors to Graph

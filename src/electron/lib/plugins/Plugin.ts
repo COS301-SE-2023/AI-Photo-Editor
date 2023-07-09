@@ -58,19 +58,11 @@ export class Plugin {
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          const inputs: InputAnchorInstance[] = [];
-          const outputs: OutputAnchorInstance[] = [];
-
-          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs);
-
-          const nodeBuilder = new NodeBuilder(nodeInstance);
-
-          const ctx = new NodePluginContext(nodeBuilder);
+          const ctx = new NodePluginContext();
 
           try {
             pluginModule.nodes[node](ctx); // Execute node builder
-            nodeBuilder.validate(); // Ensure the node is properly instantiated
-            blix.toolbox.addInstance(nodeInstance); // Add to registry
+            blix.toolbox.addInstance(ctx.nodeBuilder.build); // Add to registry
           } catch (err) {
             logger.warn(err);
           }
@@ -118,12 +110,18 @@ class PluginContext {
 }
 
 class NodePluginContext extends PluginContext {
-  constructor(private nodeBuilder: NodeBuilder) {
+  private _nodeBuilder: NodeBuilder;
+  constructor() {
     super();
   }
 
+  public get nodeBuilder() {
+    return this._nodeBuilder;
+  }
+
+  // nodeBuilder = context.instantiate("hello-plugin","hello");
   public instantiate(plugin: string, name: string): NodeBuilder {
-    this.nodeBuilder.instantiate(plugin, name);
+    this._nodeBuilder = new NodeBuilder(plugin, name);
     return this.nodeBuilder;
   }
 }

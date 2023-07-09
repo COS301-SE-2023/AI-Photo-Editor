@@ -25,7 +25,7 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
   async addNode(graphUUID: UUID) {
     return this._blix.graphManager.addNode(
       graphUUID,
-      new NodeInstance("fdsa1", "fdsa2", "fdsa3", "fdsa4", "fdsa5", "fdsa6", [], [])
+      new NodeInstance("fdsa2", "fdsa3", "fdsa4", "fdsa5", "fdsa6", [], [])
     );
   }
 

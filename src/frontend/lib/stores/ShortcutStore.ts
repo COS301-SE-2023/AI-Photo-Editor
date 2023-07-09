@@ -143,6 +143,8 @@ class ShortcutStore {
   }
 
   public checkShortcut(action: ShortcutAction, combo: ShortcutCombo): boolean {
+    if (!combo) return false;
+
     return this.getShortcutsForAction(action).includes(combo.getString);
   }
 }

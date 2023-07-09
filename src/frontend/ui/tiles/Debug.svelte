@@ -32,7 +32,7 @@
     <b>Graph Stores</b>: <br />
     {#each $graphIds as data}
       {data.slice(0, 8)}: {JSON.stringify(get($graphMall[data]))}
-      <br />
+      <br /><br />
     {/each}
     <hr />
     <b>Project Store</b>: <br />

@@ -115,6 +115,11 @@ dist
 
 docs/latex/*.pdf
 docs/latex/*.gz
+docs/latex/*.aux
+docs/latex/*.fdb_latexmk
+docs/latex/*.fls
+docs/latex/*.out
+docs/latex/*.toc
 docs/latex/images
 
 tsconfig.electron.prod.json

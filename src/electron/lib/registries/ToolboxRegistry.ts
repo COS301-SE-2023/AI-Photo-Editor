@@ -10,7 +10,7 @@ export class ToolboxRegistry implements Registry {
   constructor(readonly mainWindow?: MainWindow) {}
 
   addInstance(instance: NodeInstance): void {
-    this.registry[instance.getSignature] = instance;
+    this.registry[instance.signature] = instance;
     // console.log("REGISTERING NODE " + instance.getSignature);
 
     // Update frontend toolbox
@@ -32,25 +32,25 @@ export class ToolboxRegistry implements Registry {
         const inputAnchors: IAnchor[] = [];
         const outputAnchors: IAnchor[] = [];
 
-        for (const anchor of nodeInstance.getInputAnchorInstances) {
+        for (const anchor of nodeInstance.inputs) {
           const anchorObject = new IAnchor(anchor.type, anchor.id, anchor.displayName);
 
           inputAnchors.push(anchorObject);
         }
 
-        for (const anchor of nodeInstance.getOutputAnchorInstances) {
+        for (const anchor of nodeInstance.outputs) {
           const anchorObject = new IAnchor(anchor.type, anchor.id, anchor.displayName);
           outputAnchors.push(anchorObject);
         }
 
         const nodeObject = new INode(
-          nodeInstance.getSignature,
-          nodeInstance.getTitle,
-          nodeInstance.getDescription,
-          nodeInstance.getIcon,
+          nodeInstance.signature,
+          nodeInstance.displayName,
+          nodeInstance.description,
+          nodeInstance.icon,
           inputAnchors,
           outputAnchors,
-          nodeInstance.getUI
+          nodeInstance.ui
         );
         commands.push(nodeObject);
       }
@@ -60,108 +60,45 @@ export class ToolboxRegistry implements Registry {
   }
 }
 
-export class NodeInstance implements RegistryInstance {
-  private uuid: string;
-  constructor(
-    private signature: string,
-    private name: string,
-    private plugin: string,
-    private title: string,
-    private description: string,
-    private icon: string,
-    private readonly inputs: InputAnchorInstance[],
-    private readonly outputs: OutputAnchorInstance[]
-  ) {
-    this.func = () => {
-      return "";
-    };
-    this.ui = null;
-    this.uuid = randomUUID();
-  }
-  private ui: NodeUIParent | null;
+export type MinAnchor = { type: string; identifier: string; displayName: string };
+export type NodeFunc = (input: any) => any;
 
-  private func: any;
+export class NodeInstance implements RegistryInstance {
+  public readonly inputs: InputAnchorInstance[];
+  public readonly outputs: OutputAnchorInstance[];
+
+  constructor(
+    public readonly name: string, // Unique identifier for the node within the plugin
+    public readonly plugin: string,
+    public readonly displayName: string,
+    public readonly description: string,
+    public readonly icon: string,
+    inputs: MinAnchor[],
+    outputs: MinAnchor[],
+    public readonly func: NodeFunc = () => null,
+    public readonly ui: NodeUIParent | null = null
+  ) {
+    this.inputs = [];
+    this.outputs = [];
+    for (const a of inputs) {
+      this.inputs.push(new InputAnchorInstance(a.type, a.identifier, a.displayName));
+    }
+    for (const a of outputs) {
+      this.outputs.push(new OutputAnchorInstance(a.type, a.identifier, a.displayName));
+    }
+  }
 
   get id(): string {
-    return this.uuid;
+    return this.signature;
   }
 
-  setTitle(title: string) {
-    this.title = title;
-  }
-
-  setDescription(description: string) {
-    this.description = description;
-  }
-
-  setIcon(icon: string) {
-    this.icon = icon;
-  }
-
-  get getPlugin(): string {
-    return this.plugin;
-  }
-
-  get getName(): string {
-    return this.name;
-  }
-
-  instantiate(plugin: string, name: string) {
-    this.plugin = plugin;
-    this.name = name;
-    this.signature = plugin + "." + name;
-  }
-
-  addInput(type: string, identifier: string, displayName: string) {
-    const anchor = new InputAnchorInstance(type, identifier, displayName);
-
-    this.inputs.push(anchor);
-  }
-
-  addOutput(type: string, identifier: string, displayName: string) {
-    const anchor = new OutputAnchorInstance(type, identifier, displayName);
-
-    this.outputs.push(anchor);
+  // Global unique identifier for the node (amongst all plugins)
+  get signature(): string {
+    return this.plugin + "." + this.name;
   }
 
   get getFunction(): any {
     return this.func;
-  }
-
-  setFunction(func: any) {
-    this.func = func;
-  }
-
-  setUI(ui: NodeUIParent) {
-    this.ui = ui;
-  }
-
-  get getUI(): NodeUIParent | null {
-    return this.ui;
-  }
-
-  get getTitle(): string {
-    return this.title;
-  }
-
-  get getDescription(): string {
-    return this.description;
-  }
-
-  get getIcon(): string {
-    return this.icon;
-  }
-
-  get getInputAnchorInstances(): InputAnchorInstance[] {
-    return this.inputs;
-  }
-
-  get getOutputAnchorInstances(): OutputAnchorInstance[] {
-    return this.outputs;
-  }
-
-  get getSignature(): string {
-    return this.signature;
   }
 }
 

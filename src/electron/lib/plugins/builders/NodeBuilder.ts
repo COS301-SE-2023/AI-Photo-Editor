@@ -1,57 +1,69 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
-import { NodeInstance } from "../../registries/ToolboxRegistry";
+import { type MinAnchor, type NodeFunc, NodeInstance } from "../../registries/ToolboxRegistry";
 import { NodeUIComponent, NodeUILeaf, NodeUIParent } from "../../../../shared/ui/NodeUITypes";
 
+type PartialNode = {
+  name: string;
+  plugin: string;
+  displayName: string;
+  description: string;
+  icon: string;
+  inputs: MinAnchor[];
+  outputs: MinAnchor[];
+  ui: NodeUIParent | null;
+  func: NodeFunc;
+};
+
+// TODO: Verification must be done in all these setter functions
+//       that the type expected at runtime is what's actually being received.
+//       See: [https://stackoverflow.com/a/44078574] / (Runtime type checking)
 export class NodeBuilder implements PluginContextBuilder {
-  constructor(node: NodeInstance) {
-    this.node = node;
-    this.ui = null;
+  private partialNode: PartialNode;
+
+  constructor(plugin: string, name: string) {
+    this.partialNode = {
+      name,
+      plugin,
+      displayName: "",
+      description: "",
+      icon: "",
+      inputs: [],
+      outputs: [],
+      ui: null,
+      func: () => null,
+    };
   }
 
-  private node: NodeInstance;
-  private ui: NodeUIParent | null;
-
-  public validate(): void {
-    if (this.node.getSignature === "" || this.node.getSignature === null) {
-      throw new Error("Node is not instantiated");
-    }
-
-    if (this.ui != null) {
-      this.node.setUI(this.ui);
-    }
-    return;
-  }
-
-  get build(): any {
-    return null;
+  get build(): NodeInstance {
+    return new NodeInstance(
+      this.partialNode.name,
+      this.partialNode.plugin,
+      this.partialNode.displayName,
+      this.partialNode.description,
+      this.partialNode.icon,
+      this.partialNode.inputs,
+      this.partialNode.outputs
+    );
   }
 
   public setTitle(title: string): void {
-    this.node.setTitle(title);
+    this.partialNode.displayName = title;
   }
 
   public setDescription(description: string): void {
-    this.node.setDescription(description);
-  }
-
-  public instantiate(plugin: string, name: string): void {
-    if (plugin === "" || name === "") {
-      throw new Error("Plugin or name is not instantiated");
-    }
-
-    this.node.instantiate(plugin, name);
+    this.partialNode.description = description;
   }
 
   public addIcon(icon: string): void {
-    this.node.setIcon(icon);
+    this.partialNode.icon = icon;
   }
 
   public addInput(type: string, identifier: string, displayName: string): void {
-    this.node.addInput(type, identifier, displayName);
+    this.partialNode.inputs.push({ type, identifier, displayName });
   }
 
   public addOutput(type: string, identifier: string, displayName: string): void {
-    this.node.addOutput(type, identifier, displayName);
+    this.partialNode.outputs.push({ type, identifier, displayName });
   }
 
   public createUIBuilder(): NodeUIBuilder {
@@ -61,12 +73,12 @@ export class NodeBuilder implements PluginContextBuilder {
     return builder;
   }
 
-  public define(code: any) {
-    this.node.setFunction(code);
+  public define(code: NodeFunc) {
+    this.partialNode.func = code;
   }
 
   public setUI(ui: NodeUIBuilder) {
-    this.ui = ui.getUI();
+    this.partialNode.ui = ui.getUI();
   }
 }
 
@@ -78,7 +90,7 @@ export class NodeUIBuilder {
   }
 
   public addButton(label: string, param: any): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(NodeUIComponent.Button, label, [param], this.node));
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Button, label, [param]));
     return this;
   }
 
@@ -90,7 +102,7 @@ export class NodeUIBuilder {
     defautlVal: number
   ): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(NodeUIComponent.Slider, label, [min, max, step, defautlVal], this.node)
+      new NodeUILeaf(this.node, NodeUIComponent.Slider, label, [min, max, step, defautlVal])
     );
 
     return this;
@@ -104,18 +116,18 @@ export class NodeUIBuilder {
   }
 
   public addNumberInput(label: string): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(NodeUIComponent.NumberInput, label, [], this.node));
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.NumberInput, label, []));
     return this;
   }
 
   public addImageInput(label: string): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(NodeUIComponent.FilePicker, label, [], this.node));
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.FilePicker, label, []));
     return this;
   }
 
   // We need to discuss how to handle color pickers
   public addColorPicker(label: string, param: any): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(NodeUIComponent.ColorPicker, label, [param], this.node));
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, label, [param]));
     return this;
   }
 
@@ -125,7 +137,7 @@ export class NodeUIBuilder {
   }
 
   public addLabel(label: string, param: string) {
-    this.node.params.push(new NodeUILeaf(NodeUIComponent.Label, label, [param], this.node));
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Label, label, [param]));
     return this;
   }
 }
