@@ -9,6 +9,7 @@ import type { MainWindow } from "../api/apis/WindowApi";
 import type { SharedProject, LayoutPanel } from "../../../shared/types";
 import { dialog } from "electron";
 import type { IpcResponse } from "../api/MainApi";
+import type { ProjectFile } from "./CoreProject";
 
 // This should kinda be extending Registry and then called ProjectRegistry
 // instead of Project Manager but I don't feel like the Registry interface is
@@ -59,6 +60,10 @@ export class ProjectManager {
     project.location = join(this._path, project.uuid);
     this._projects[project.uuid] = project;
     return project;
+  }
+
+  getProject(id: UUID): CoreProject | null {
+    return this._projects[id];
   }
 
   closeProject(uuid: UUID) {
@@ -185,10 +190,4 @@ export class ProjectManager {
 
     return false;
   }
-}
-
-interface ProjectFile {
-  name: string;
-  layout: LayoutPanel;
-  graphs?: []; // TODO: Add graphs contained in project here
 }

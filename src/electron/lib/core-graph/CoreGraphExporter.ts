@@ -2,6 +2,22 @@ import { ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { type AnchorUUID, CoreGraph } from "./CoreGraph";
 import { NodeStyling } from "./CoreGraph";
 
+/**
+ * This class is used to export a CoreGraph to external representations
+ */
+export class CoreGraphExporter<T> {
+  constructor(private exporter: ExportStrategy<T>) {}
+
+  exportGraph(graph: CoreGraph): T {
+    return this.exporter.export(graph);
+  }
+}
+
+interface ExportStrategy<T> {
+  export(graph: CoreGraph): T;
+}
+
+export type GraphToJSON = { nodes: NodeToJSON[]; edges: EdgeToJSON[] };
 export type NodeToJSON = { signature: string; styling: NodeStyling | null };
 export type AnchorToJSON = { parent: number; id: number };
 export type EdgeToJSON = {
@@ -9,46 +25,8 @@ export type EdgeToJSON = {
   anchorTo: AnchorToJSON;
 };
 
-export type GraphToJSON = { nodes: NodeToJSON[]; edges: EdgeToJSON[] };
-
-/**
- * This class is used to export a CoreGraph to external representations
- */
-export class CoreGraphExporter {
-  export(format: string, graph: CoreGraph): any {
-    switch (format) {
-      case "yaml":
-        return this.exportYAML(graph);
-      case "xml":
-        return this.exportXML(graph);
-      case "json":
-        return this.exportJSON(graph);
-      default:
-        return "";
-    }
-  }
-
-  // ===============================================
-  // YAML
-  // ===============================================
-
-  exportYAML(graph: CoreGraph): string {
-    return "";
-  }
-
-  // ===============================================
-  // XML
-  // ===============================================
-
-  exportXML(graph: CoreGraph): string {
-    return "";
-  }
-
-  // ===============================================
-  // JSON
-  // ===============================================
-
-  exportJSON(graph: CoreGraph): GraphToJSON {
+export class GraphFileExportStrategy implements ExportStrategy<GraphToJSON> {
+  export(graph: CoreGraph): GraphToJSON {
     return { nodes: this.nodesToJSON(graph), edges: this.edgesToJSON(graph) };
   }
 
@@ -86,5 +64,11 @@ export class CoreGraphExporter {
       }
     }
     return json;
+  }
+}
+
+class YamlExportStrategy implements ExportStrategy<string> {
+  export(graph: CoreGraph): string {
+    throw Error("YamlExportStrategy not implemented");
   }
 }

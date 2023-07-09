@@ -9,6 +9,7 @@ import {
 import logger from "../../utils/logger";
 import { Blix } from "../Blix";
 import type { GraphToJSON } from "./CoreGraphExporter";
+import { CoreGraphExporter, GraphFileExportStrategy } from "./CoreGraphExporter";
 
 export class TestGraph {
   inputs: InputAnchorInstance[] = [];
@@ -650,14 +651,15 @@ export class TestGraph {
 }
 
 export function testStuffies(blix: Blix) {
+  const exporter = new CoreGraphExporter<GraphToJSON>(new GraphFileExportStrategy());
   const t: TestGraph = new TestGraph();
   const graph = t.main();
   blix.graphManager.loadGraph(graph);
-  const g: GraphToJSON = blix.graphManager.exportGraph("json", graph.uuid);
+  const g: GraphToJSON = exporter.exportGraph(graph);
   logger.info(JSON.stringify(g, null, 2));
 
   const g2 = blix.graphManager.importGraph("json", g);
-  const g3: GraphToJSON = blix.graphManager.exportGraph("json", g2.uuid);
+  const g3: GraphToJSON = exporter.exportGraph(g2);
   // logger.info("Hello");
   logger.info(JSON.stringify(g3, null, 2));
   // const table: { [key: number]: string} = {};

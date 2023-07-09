@@ -2,6 +2,7 @@ import { UniqueEntity } from "../../../shared/utils/UniqueEntity";
 import type { SharedProject, LayoutPanel } from "../../../shared/types/index";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { PathLike } from "fs";
+import type { GraphToJSON } from "../../lib/core-graph/CoreGraphExporter";
 
 // Encapsulates the backend state for one of the open Blix projects
 export class CoreProject extends UniqueEntity {
@@ -73,6 +74,10 @@ export class CoreProject extends UniqueEntity {
     this._location = value;
   }
 
+  public get graphs() {
+    return [...this._graphs];
+  }
+
   /**
    * Reduces the the state of the core project to be used by frontend. Might
    * need to figure out how this can be better implemented since it feels a bit
@@ -90,4 +95,10 @@ export class CoreProject extends UniqueEntity {
 
     return project;
   }
+}
+
+export interface ProjectFile {
+  name: string;
+  layout: LayoutPanel;
+  graphs: GraphToJSON[]; // TODO: Add graphs contained in project here
 }

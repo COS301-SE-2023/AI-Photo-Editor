@@ -10,9 +10,16 @@ import type { UUID } from "../../shared/utils/UniqueEntity";
 import type { UIGraph } from "../../shared/ui/UIGraph";
 import { testStuffies } from "./core-graph/CoreGraphTesting";
 import logger from "../utils/logger";
+
+import type { ProjectFile } from "./projects/CoreProject";
+import {
+  CoreGraphExporter,
+  GraphFileExportStrategy,
+  type GraphToJSON,
+} from "./core-graph/CoreGraphExporter";
+
 // Encapsulates the backend representation for
 // the entire running Blix application
-
 export class Blix {
   private _toolbox: ToolboxRegistry;
   private _tileRegistry: TileRegistry;
@@ -61,6 +68,36 @@ export class Blix {
     };
 
     this._graphManager.addAllSubscriber(graphSubscriber);
+  }
+
+  // NOTICE: Potentially move these methods to commands later
+
+  /**
+   *
+   *
+   * @param id Project to be exported
+   * @param path System path to export project to
+   */
+  public exportProject(id: UUID, path: string) {
+    const project = this.projectManager.getProject(id);
+    if (!project) return;
+    const graphs = project.graphs.map((g) => this._graphManager.getGraph(g));
+    const exporter = new CoreGraphExporter<GraphToJSON>(new GraphFileExportStrategy());
+    const exportedGraphs = graphs.map((g) => exporter.exportGraph(g));
+
+    const projectFile: ProjectFile = {
+      name: project.name,
+      layout: project.layout,
+      graphs: exportedGraphs,
+    };
+
+    // TODO: Save the file disk
+
+    throw Error("Export project not implemented");
+  }
+
+  public importProject() {
+    // TODO: Kinda follow exact strategy as above but now just for importing
   }
 
   get toolbox(): ToolboxRegistry {

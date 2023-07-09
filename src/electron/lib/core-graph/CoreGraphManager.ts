@@ -18,7 +18,6 @@ export class CoreGraphManager {
   private _subscribers: { [key: UUID]: CoreGraphSubscriber<any>[] };
   private _toolbox: ToolboxRegistry;
   private _importer: CoreGraphImporter;
-  private _exporter: CoreGraphExporter;
 
   constructor(mainWindow: MainWindow, toolbox: ToolboxRegistry) {
     this._mainWindow = mainWindow;
@@ -26,7 +25,6 @@ export class CoreGraphManager {
     this._subscribers = {};
     this._toolbox = toolbox;
     this._importer = new CoreGraphImporter(this._toolbox);
-    this._exporter = new CoreGraphExporter();
     // Test send dummy graph to frontend
     this.testingSendToClient();
   }
@@ -46,16 +44,6 @@ export class CoreGraphManager {
     //       this._mainWindow?.apis.clientGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
     //   }, 5000);
     // }, 5000);
-  }
-  /**
-   * This function is called by the GraphApi to export a certain graph
-   *
-   * @param format Format to export to (e.g. "json", "xml", "yaml")
-   * @param graph The graph to export
-   * @returns Formatted Graph
-   */
-  exportGraph(format: string, graph: UUID) {
-    return this._exporter.export(format, this._graphs[graph]);
   }
 
   importGraph(format: string, data: GraphToJSON | string) {
