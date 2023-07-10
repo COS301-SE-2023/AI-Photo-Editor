@@ -42,7 +42,7 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
   // }
 
   async closeProject(uuid: UUID) {
-    this.blix.projectManager.closeProject(uuid);
+    this.blix.projectManager.removeProject(uuid);
   }
 
   // async getOpenProjects(): Promise<FrontendProject[]> {

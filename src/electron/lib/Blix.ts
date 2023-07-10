@@ -17,6 +17,9 @@ import {
   GraphFileExportStrategy,
   type GraphToJSON,
 } from "./core-graph/CoreGraphExporter";
+import { writeFileSync } from "fs";
+import { app } from "electron";
+import { join } from "path";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -58,7 +61,6 @@ export class Blix {
 
     this._graphManager = new CoreGraphManager(mainWindow, this._toolbox);
     this._projectManager = new ProjectManager(mainWindow);
-    this._projectManager.loadRecentProjects();
 
     // Add subscribers
     const graphSubscriber = new IPCGraphSubscriber();
@@ -68,6 +70,8 @@ export class Blix {
     };
 
     this._graphManager.addAllSubscriber(graphSubscriber);
+
+    logger.info(await this._projectManager.getRecentProjectsList());
   }
 
   // NOTICE: Potentially move these methods to commands later

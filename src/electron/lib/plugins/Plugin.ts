@@ -179,14 +179,6 @@ class CommandPluginContext extends PluginContext {
       this.command
     );
   }
-
-  public loadProject(options: "openFile" | "openDirectory" | "multiSelections") {
-    this.blix.projectManager.loadProject(options);
-  }
-
-  public saveCurrentProject(project: SharedProject) {
-    // this.blix.projectManager.saveCurrentProject(project);
-  }
 }
 
 class TilePluginContext extends PluginContext {}

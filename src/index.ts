@@ -10,7 +10,6 @@ import { Blix } from "./electron/lib/Blix";
 import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
 
-
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 
 logger.info("App starting...");
@@ -113,7 +112,7 @@ app.on("window-all-closed", () => {
 });
 
 app.on("will-quit", () => {
-  blix.projectManager.saveAllProjects();
+  // blix.projectManager.saveAllProjects();
 });
 
 app.on("activate", () => {
