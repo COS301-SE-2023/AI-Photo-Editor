@@ -7,16 +7,12 @@ export type GraphNodeUUID = UUID;
 export type GraphAnchorUUID = UUID;
 
 export class UIGraph {
-  public storify() {
-    for (const nodeUUID in this.nodes) {
-      const node = this.nodes[nodeUUID];
-    }
-  }
-
   public nodes: { [key: GraphNodeUUID]: GraphNode } = {};
   public edges: { [key: GraphUUID]: any } = {}; // TODO
 
   constructor(public uuid: GraphUUID) {}
+
+  public updateNodes() {}
 }
 
 export class GraphNode {
@@ -30,14 +26,20 @@ export class GraphNode {
   // inAnchors: GraphAnchor[] = [];
   // outAnchors: GraphAnchor[] = [];
 
-  constructor(public uuid: GraphNodeUUID) {
+  constructor(public uuid: GraphNodeUUID, pos?: SvelvetCanvasPos) {
     this.id = uuid;
     this.displayName = "Node-" + uuid.substring(0, 6);
+    if (pos) {
+      this.styling = new NodeStylingStore();
+      this.styling.pos.set(pos);
+    }
   }
 }
 
+export type SvelvetCanvasPos = { x: number; y: number };
+
 export class NodeStylingStore {
-  pos = writable<{ x: number; y: number }>({ x: 0, y: 0 });
+  pos = writable<SvelvetCanvasPos>({ x: 0, y: 0 });
   width = writable<number>(0);
   height = writable<number>(0);
 }

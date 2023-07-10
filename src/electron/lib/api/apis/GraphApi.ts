@@ -4,6 +4,7 @@ import { type UUID } from "../../../../shared/utils/UniqueEntity";
 import { IPCGraphSubscriber } from "../../core-graph/CoreGraphInteractors";
 import { UIGraph } from "@shared/ui/UIGraph";
 import { NodeInstance } from "../../registries/ToolboxRegistry";
+import { type NodeSignature } from "@shared/ui/ToolboxTypes";
 
 // Graphs across projects are stored homogeneously and referenced by UUID
 export class GraphApi implements ElectronMainApi<GraphApi> {
@@ -22,10 +23,11 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
   }
 
   // TODO: Implement these properly
-  async addNode(graphUUID: UUID) {
+  async addNode(graphUUID: UUID, nodeSignature: NodeSignature) {
     return this._blix.graphManager.addNode(
       graphUUID,
-      new NodeInstance("fdsa2", "fdsa3", "fdsa4", "fdsa5", "fdsa6", [], [])
+      this._blix.toolbox.getNode(nodeSignature)
+      // new NodeInstance("fdsa2", "fdsa3", "fdsa4", "fdsa5", "fdsa6", [], [])
     );
   }
 

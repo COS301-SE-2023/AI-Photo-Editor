@@ -3,6 +3,7 @@
   import { GraphNode, NodeStylingStore } from "@shared/ui/UIGraph";
   import { toolboxStore } from "lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";
+  import PluginEdge from "./PluginEdge.svelte";
 
   export let panelId: string;
   export let graphId: string;
@@ -45,28 +46,29 @@ height="{graphNode.dims.h}" -->
           <h2>Signature: {node.signature}</h2>
           <h2>SvelvetNodeId: {svelvetNodeId}</h2>
           {JSON.stringify({ ...$toolboxNode, ui: null })}
-          <!-- TODO:  -->
-          <!-- <Slider min="{1}" max="{12}" fixed="{1}" step="{0.1}" parameterStore="{$inputs.width}" /> -->
         </div>
         <div class="node-body" style="max-width: 400px">
           <NodeUiFragment ui="{$toolboxNode?.ui}" />
         </div>
 
-        <div>
-          {#if $toolboxNode}
+        {#if $toolboxNode}
+          <div class="anchors inputs">
             {#each $toolboxNode.inputs as input}
-              <Anchor id="{svelvetNodeId}_{input.id}" direction="west" />
-              {svelvetNodeId}-{input.id}
+              <Anchor id="{svelvetNodeId}_{input.id}" direction="west" edge="{PluginEdge}" input />
+              <!-- bind:connections={$nodeConns} -->
             {/each}
-            <!-- bind:connections={$nodeConns} -->
-            <br />
-            <!-- <Anchor
-        dynamic="{true}"
-        id="{node.id}-in2"
-        connections={[]}
-    /> -->
-          {/if}
-        </div>
+          </div>
+          <div class="anchors outputs">
+            {#each $toolboxNode.outputs as output}
+              <Anchor
+                id="{svelvetNodeId}_{output.id}"
+                direction="east"
+                edge="{PluginEdge}"
+                output
+              />
+            {/each}
+          </div>
+        {/if}
       </div></Node
     >
   {/key}
@@ -102,13 +104,21 @@ height="{graphNode.dims.h}" -->
     border-color: inherit;
   }
 
-  .output-anchors {
+  .anchors {
     position: absolute;
-    right: -24px;
-    top: 8px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    gap: 5px;
+    z-index: 10;
+  }
+  .inputs {
+    left: -24px;
+    top: 40px;
+  }
+  .outputs {
+    right: -24px;
+    top: 40px;
   }
   .header {
     display: flex;

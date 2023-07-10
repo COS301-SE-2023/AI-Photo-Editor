@@ -36,10 +36,6 @@ export class Blix {
     setInterval(() => {
       const allIds = this._graphManager.getAllGraphUUIDs();
 
-      // const randId = allIds[Math.floor(Math.random() * allIds.length)];
-
-      // this._graphManager.addNode( randId, randomNode );
-
       const randId = allIds[Math.floor(Math.random() * allIds.length)];
       const toolbox = this._toolboxRegistry.getRegistry();
       const toolboxKeys = Object.keys(toolbox);
@@ -47,14 +43,6 @@ export class Blix {
 
       this._graphManager.addNode(randId, randomNode);
     }, 3000);
-
-    // TESTING ADD NODE TO TOOLBOX
-    setInterval(() => {
-      const nodeBuilder = new NodeBuilder("test-plugin", "test-node");
-      nodeBuilder.setUI(new NodeUIBuilder().addLabel("Test", "test"));
-
-      this._toolboxRegistry.addInstance(nodeBuilder.build);
-    }, 5000);
   }
 
   get toolbox(): ToolboxRegistry {

@@ -20,6 +20,6 @@ export class ToolboxApi implements ElectronMainApi<ToolboxApi> {
   // }
 
   async getNodes() {
-    return this._blix.toolbox.getNodes();
+    return this._blix.toolbox.getINodes();
   }
 }

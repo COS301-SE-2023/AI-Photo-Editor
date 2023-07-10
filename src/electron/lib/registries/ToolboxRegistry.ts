@@ -1,29 +1,33 @@
 import type { Registry, RegistryInstance } from "./Registry";
-import { randomUUID } from "crypto";
 import { NodeUIParent } from "../../../shared/ui/NodeUITypes";
-import { IAnchor, INode } from "../../../shared/ui/ToolboxTypes";
+import { IAnchor, INode, type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { MainWindow } from "../api/apis/WindowApi";
 
 export class ToolboxRegistry implements Registry {
-  private registry: { [key: string]: NodeInstance } = {};
+  private registry: { [key: NodeSignature]: NodeInstance } = {};
 
   constructor(readonly mainWindow?: MainWindow) {}
 
+  // TODO: Change this to addInstances(instances: NodeInstance[])
+  //       so adding multiple nodes only triggers one registryChanged()
   addInstance(instance: NodeInstance): void {
     this.registry[instance.signature] = instance;
-    // console.log("REGISTERING NODE " + instance.getSignature);
 
     // Update frontend toolbox
-    this.mainWindow?.apis.toolboxClientApi.registryChanged(this.getNodes());
+    this.mainWindow?.apis.toolboxClientApi.registryChanged(this.getINodes());
 
     return;
+  }
+
+  getNode(signature: NodeSignature) {
+    return this.registry[signature];
   }
 
   getRegistry(): { [key: string]: NodeInstance } {
     return this.registry;
   }
 
-  getNodes(): INode[] {
+  getINodes(): INode[] {
     const commands: INode[] = [];
     for (const command in this.registry) {
       if (this.registry.hasOwnProperty(command)) {
@@ -93,7 +97,7 @@ export class NodeInstance implements RegistryInstance {
   }
 
   // Global unique identifier for the node (amongst all plugins)
-  get signature(): string {
+  get signature(): NodeSignature {
     return this.plugin + "." + this.name;
   }
 
