@@ -441,4 +441,27 @@ of the graph and photos using natural language and llms.
 	\item[\textbullet] Generally requires more requests to llm's to achieve the desired result.
 	\item[\textbullet] Lack of integrations for a typescript environment.
 \end{enumerate}
+
+\subsection{PineCone}
+
+PineCone is a vector database which allows developers to build, manage, and search
+embeddings using optimized storage and querying abilities that better suit the complexities
+and size of the data from embeddings then traditional databases. PineCone is used in Blix
+to store and query the embeddings of our knowledge base to provide short and efficient contexts
+to llm's.
+
+\textbf{Pros:}
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] Enables easy integration with AI related technologies.
+	\item[\textbullet] Can store metadata associated with each entry for finer grained queries.
+	\item[\textbullet] High performance and low latency.
+\end{enumerate}
+
+\textbf{Cons:}
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] Relies heavily on the quality of input data.
+	\item[\textbullet] Requires a large amount of data to be effective.
+	\item[\textbullet] High complexity indexing.
+\end{enumerate}
+
 \end{document}
