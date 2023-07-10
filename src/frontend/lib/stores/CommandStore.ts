@@ -25,8 +25,9 @@ function createCommandStore() {
     let options: { data: any } = { data: null };
     // console.log(cmd)
     // console.log(projectManager.getActiveProject().getId())
-    if (cmd === "base-plugin.saveas") {
-      options = { data: { id: get(projectsStore).activeProject?.id, layout: get(projectsStore).activeProject?.layout.saveLayout() } };
+    if (cmd === "base-plugin.save" || cmd === "base-plugin.saveas") {
+      // options = { data: { id: get(projectsStore).activeProject?.id, layout: get(projectsStore).activeProject?.layout.saveLayout() } };
+      options = { data: { id: get(projectsStore).activeProject?.id } };
     }
     // console.log(options.data)
     await window.apis.commandApi.runCommand(cmd, options);

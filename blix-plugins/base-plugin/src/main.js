@@ -32,38 +32,30 @@ const nodes = {
 const commands = {
     
     "open": (context) => {
-        // TODO: Work this out
-        // E.g. Could get context.command.inputs for instance for additional values
-    
         context.setDescription("Open a project");
-
         context.setIcon("testing/image.jpg");
-
         context.setDisplayName("Open Project");
-
         context.addCommand(() => {
-            context.loadProject("openFile");
+            context.getBlix().importProject();
         })
-
         return context.create();
     },
     "saveas": (context) => {
-        // TODO: Work this out
-        // E.g. Could get context.command.inputs for instance for additional values
-    
         context.setDescription("Save project to user storage");
-
         context.setIcon("testing/image.jpg");
-
         context.setDisplayName("Save project as...");
-
-        // Very unsafe, but just for proof of concept
         context.addCommand((options) => {
-            // console.log("Save project as...");
-            context.saveCurrentProject(options.data);
-            // console.log(options.data);
+            context.getBlix().saveProjectAs(options.data.id);
         })
-
+        return context.create();
+    },
+    "save": (context) => {
+        context.setDescription("Save project");
+        context.setIcon("testing/image.jpg");
+        context.setDisplayName("Save project");
+        context.addCommand((options) => {
+            context.getBlix().saveProject(options.data.id);
+        })
         return context.create();
     }
 }

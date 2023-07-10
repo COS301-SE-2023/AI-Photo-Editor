@@ -37,17 +37,17 @@ async function setInitialStores() {
     // console.log("BACKEND GRAPH", graph.getNodes);
 
     // TODO: REMOVE; This is just for testing
-    const uiGraph = new UIGraph(graphId);
-    const node1 = new GraphNode("1");
-    const node2 = new GraphNode("2");
-    const node3 = new GraphNode("a");
-    uiGraph.nodes[node1.uuid] = node1;
-    uiGraph.nodes[node2.uuid] = node2;
-    uiGraph.nodes[node3.uuid] = node3;
-    node1.pos.x = 100;
-    node1.pos.y = 100;
+    // const uiGraph = new UIGraph(graphId);
+    // const node1 = new GraphNode("1");
+    // const node2 = new GraphNode("2");
+    // const node3 = new GraphNode("a");
+    // uiGraph.nodes[node1.uuid] = node1;
+    // uiGraph.nodes[node2.uuid] = node2;
+    // uiGraph.nodes[node3.uuid] = node3;
+    // node1.pos.x = 100;
+    // node1.pos.y = 100;
 
-    graphMall.refreshGraph(uiGraph.uuid, uiGraph);
+    // graphMall.refreshGraph(uiGraph.uuid, uiGraph);
   }
   // exportLayout()
 }

@@ -169,6 +169,10 @@ class CommandPluginContext extends PluginContext {
     this.displayName = displayName;
   }
 
+  public getBlix() {
+    return this.blix;
+  }
+
   public create() {
     return new CommandInstance(
       this.plugin,

@@ -651,17 +651,43 @@ export class TestGraph {
 }
 
 export function testStuffies(blix: Blix) {
-  const exporter = new CoreGraphExporter<GraphToJSON>(new GraphFileExportStrategy());
-  const t: TestGraph = new TestGraph();
-  const graph = t.main();
-  blix.graphManager.loadGraph(graph);
-  const g: GraphToJSON = exporter.exportGraph(graph);
-  logger.info(JSON.stringify(g, null, 2));
+  const inputs: InputAnchorInstance[] = [];
+  const outputs: OutputAnchorInstance[] = [];
+  const tempNodes: NodeInstance[] = [];
 
-  const g2 = blix.graphManager.importGraph("json", g);
-  const g3: GraphToJSON = exporter.exportGraph(g2);
-  // logger.info("Hello");
-  logger.info(JSON.stringify(g3, null, 2));
+  inputs.push(
+    new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.0", "input_anchor1"),
+    new InputAnchorInstance("number", "hello-plugin.hello.input_anchor2.1", "input_anchor2"),
+    new InputAnchorInstance("number", "hello-plugin.hello.input_anchor3.2", "input_anchor3")
+  );
+  outputs.push(
+    new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.3", "output_anchor1"),
+    new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.4", "output_anchor2")
+  );
+
+  for (let i = 1; i < 7; i++) {
+    tempNodes.push(
+      new NodeInstance(
+        `hello-plugin.hello`,
+        `hello`,
+        `hello-plugin`,
+        `title`,
+        `description`,
+        `icon`,
+        inputs,
+        outputs
+      )
+    );
+  }
+
+  const project = blix.projectManager.createProject("Test Project");
+  const graph = blix.graphManager.createGraph();
+  project.addGraph(graph);
+  const g = blix.graphManager.getGraph(graph);
+  g.addNode(tempNodes[0]);
+  g.addNode(tempNodes[1]);
+  return project.uuid;
+
   // const table: { [key: number]: string} = {};
   // table[0] = "test";
   // table[2] = "test3";

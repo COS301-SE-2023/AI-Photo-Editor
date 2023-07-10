@@ -31,16 +31,6 @@ export class ProjectManager {
   public createProject(name = "Untitled"): CoreProject {
     const starterLayout: LayoutPanel = {
       panels: [
-        // {
-        //   panels: [
-        //     {
-        //       content: "media",
-        //     },
-        //     {
-        //       content: "shortcutSettings",
-        //     },
-        //   ],
-        // },
         {
           content: "debug",
         },
@@ -52,6 +42,20 @@ export class ProjectManager {
     const project = new CoreProject(name, starterLayout);
     this._projects[project.uuid] = project;
     return project;
+  }
+  /**
+   * This function will load a project that is stored on a user's device.
+   *
+   * @param fileName Project name derived from file name
+   * @param fileContent Project file content
+   * @param path Path to project file
+   * @returns UUID of new CoreProject
+   */
+  public loadProject(fileName: string, fileContent: ProjectFile, path: PathLike): UUID {
+    const project = new CoreProject(fileName, fileContent.layout);
+    project.location = path;
+    this._projects[project.uuid] = project;
+    return project.uuid;
   }
 
   public getProject(id: UUID): CoreProject | null {

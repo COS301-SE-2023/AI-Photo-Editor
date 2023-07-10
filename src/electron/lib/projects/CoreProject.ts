@@ -90,7 +90,7 @@ export class CoreProject extends UniqueEntity {
       name: this.name,
       id: this.uuid,
       layout: this.layout,
-      graphs: this._graphs,
+      graphs: [...this._graphs],
     };
 
     return project;
@@ -98,7 +98,6 @@ export class CoreProject extends UniqueEntity {
 }
 
 export interface ProjectFile {
-  name: string;
   layout: LayoutPanel;
   graphs: GraphToJSON[]; // TODO: Add graphs contained in project here
 }
