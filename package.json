@@ -68,6 +68,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.10",
+    "blix_svelvet": "^1.0.0",
     "chokidar": "^3.5.3",
     "cohere-ai": "^5.1.0",
     "electron-affinity": "^1.2.4",
@@ -78,7 +79,6 @@
     "electron-updater": "^5.3.0",
     "langchain": "^0.0.104",
     "sharp": "^0.32.1",
-    "svelvet": "^8.0.4",
     "tinykeys": "^1.4.0"
   },
   "devDependencies": {

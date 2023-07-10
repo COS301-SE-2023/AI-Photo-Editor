@@ -1,6 +1,6 @@
 <script lang="ts">
   import { writable } from "svelte/store";
-  import { Knob } from "svelvet";
+  import { Knob } from "blix_svelvet";
   const knob = writable(0);
 </script>
 

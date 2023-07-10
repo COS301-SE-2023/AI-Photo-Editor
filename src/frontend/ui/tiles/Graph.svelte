@@ -1,6 +1,6 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Svelvet } from "svelvet";
+  import { Svelvet } from "blix_svelvet";
   import { type Readable } from "svelte/store";
   import { graphMall } from "lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
