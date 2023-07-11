@@ -67,14 +67,18 @@
     "(src|scripts)/**": "prettier --write --ignore-unknown"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "chokidar": "^3.5.3",
     "electron-affinity": "^1.2.4",
     "electron-ipc-mock": "^0.0.3",
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",
     "electron-updater": "^5.3.0",
+    "flowbite": "^1.7.0",
+    "flowbite-svelte": "^0.39.2",
     "sharp": "^0.32.1",
     "svelvet": "^8.0.4",
+    "tailwind-merge": "^1.13.2",
     "tinykeys": "^1.4.0",
     "zod": "^3.21.4"
   },

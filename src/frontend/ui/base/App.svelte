@@ -5,6 +5,7 @@
   import Navbar from "./Navbar.svelte";
   import Layout from "./layout/Layout.svelte";
   import Palette from "./palette/Palette.svelte";
+  import Toasts from "../../ui/utils/toasts/Toasts.svelte";
 
   import Test from "./Test.svelte";
 
@@ -17,6 +18,8 @@
     isLoading = false;
   });
 </script>
+
+<Toasts />
 
 {#if testing}
   {#if isLoading}

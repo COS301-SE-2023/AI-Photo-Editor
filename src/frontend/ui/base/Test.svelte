@@ -1,7 +1,9 @@
 <script lang="ts">
   import { projectsStore } from "lib/stores/ProjectStore";
+  import { toastStore } from "../../lib/stores/ToastStore";
 
   let logs: any[] = [];
+  let count = 0;
 
   const createProject = async () => {
     await projectsStore.createProject();
@@ -19,8 +21,39 @@
     <div class="flex flex-col items-center space-y-2">
       <span
         class="rounded-md bg-zinc-400 p-2 hover:cursor-pointer hover:bg-zinc-500"
-        on:click="{createProject}">Create new project</span
+        on:click="{createProject}"
+        on:keydown="{createProject}"
       >
+        Create new project
+      </span>
+      <span
+        class="rounded-md bg-zinc-400 p-2 hover:cursor-pointer hover:bg-zinc-500"
+        on:click="{() => toastStore.trigger({ message: `Hello Jake ${count++}`, type: 'success' })}"
+        on:keydown="{null}"
+      >
+        Add toast success
+      </span>
+      <span
+        class="rounded-md bg-zinc-400 p-2 hover:cursor-pointer hover:bg-zinc-500"
+        on:click="{() => toastStore.trigger({ message: `Hello Jake ${count++}`, type: 'error' })}"
+        on:keydown="{null}"
+      >
+        Add toast error
+      </span>
+      <span
+        class="rounded-md bg-zinc-400 p-2 hover:cursor-pointer hover:bg-zinc-500"
+        on:click="{() => toastStore.trigger({ message: `Hello Jake ${count++}`, type: 'warn' })}"
+        on:keydown="{null}"
+      >
+        Add toast warn
+      </span>
+      <span
+        class="rounded-md bg-zinc-400 p-2 hover:cursor-pointer hover:bg-zinc-500"
+        on:click="{() => toastStore.trigger({ message: `Hello Jake ${count++}`, type: 'info' })}"
+        on:keydown="{null}"
+      >
+        Add toast info
+      </span>
     </div>
   </section>
   <section class="flex h-[400px] min-w-[150px] flex-col items-center">
