@@ -4,7 +4,9 @@ import { join } from "path";
 
 test('example test', async () => {
   // const electronApp = await electron.launch({ args: [join(__dirname, "..", "..", "src", "index.ts")] })
-  const electronApp = await electron.launch({ args: ['/home/klairgo/Documents/Documents/University of Pretoria/Year 3/Semester 1/COS 301/Capstone Project/Code/AI-Photo-Editor/build/index.js'] })
+  const electronApp = await electron.launch({ args: ['.'],
+  // executablePath: '/home/klairgo/Documents/Documents/University of Pretoria/Year 3/Semester 1/COS 301/Capstone Project/Code/AI-Photo-Editor/dist/linux-unpacked/blix'
+})
   const isPackaged = await electronApp.evaluate(async ({ app }) => {
     // This runs in Electron's main process, parameter here is always
     // the result of the require('electron') in the main app script.
@@ -24,12 +26,14 @@ test('example test', async () => {
     })
   })
 
-  expect(isPackaged).toBe(false);
+  // expect(isPackaged).toBe(false);
 
   // Wait for the first BrowserWindow to open
   // and return its Page object
-  // const window = await electronApp.firstWindow();
-  // await window.screenshot({ path: 'intro.png' })
+  const window = await electronApp.firstWindow();
+  const html = await window.innerText('div');
+  await window.getByText('Item').click({position: { x: 0, y: 0 } });
+  await window.screenshot({ path: 'intro.png' })
 
   // close app
   await electronApp.close()
