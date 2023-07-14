@@ -6,36 +6,62 @@ import prompt from "electron-prompt";
 import { error } from "console";
 import { OpenAI } from "langchain/llms/openai";
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
+import { PromptTemplate } from "langchain/prompts";
 
 // Refer to .env for api keys
 
 //  TODO : Provide the graph context that will be given to ai as context
 
-interface Nodes {
-  name: string;
-  description: string;
-}
+// interface Nodes {
+//   name: string;
+//   description: string;
+// }
 
 const graph = {
   nodes: [
     {
-      signature: "input-plugin.number1",
+      inputAnchors: [
+        {
+          id: 1,
+          type: "number",
+        },
+      ],
+      outputAnchors: [
+        {
+          id: 2,
+          type: "number",
+        },
+      ],
+      signature: "input-plugin.number",
+    },
+    {
+      id: 2,
+      signature: "input-plugin.number",
       inputs: [],
+      outputs: [3],
+    },
+    {
+      id: 3,
+      signature: "math-plugin.binary",
+      inputs: [1, 2],
       outputs: [5],
     },
     {
-      signature: "input-plugin.number2",
-      inputs: [],
-      outputs: [7],
+      id: 5,
+      signature: "input-plugin.number",
+      inputs: [3],
+      outputs: [6],
     },
     {
-      signature: "math-plugin.add",
-      inputs: [5, 7],
-      outputs: [12],
+      id: 6,
+      signature: "math-plugin.binary",
+      inputs: [5],
+      outputs: [],
     },
     {
+      id: 4,
       signature: "output-plugin.print",
-      inputs: [12],
+      inputs: [],
       outputs: [],
     },
   ],
@@ -50,7 +76,7 @@ const graph = {
 export class AiManager {
   private _path: string;
   private _mainWindow;
-  private _context: Nodes[] = [];
+  private _context: string[] = [];
 
   constructor(mainWindow: MainWindow) {
     this._mainWindow = mainWindow;
@@ -71,7 +97,7 @@ export class AiManager {
     for (const index in toolbox.getRegistry()) {
       if (!toolbox.hasOwnProperty(index)) {
         const node: NodeInstance = toolbox.getRegistry()[index];
-        this._context.push({ name: node.getSignature, description: node.getDescription });
+        this._context.push(node.getSignature + ": " + node.getDescription);
       }
     }
     // console.log(this._context);
@@ -84,13 +110,30 @@ export class AiManager {
 
   async sendPrompt() {
     //  Creates a prompt window for the user to input a prompt for the AI to respond to
-    const prompt = await this.createInputWindow();
-    if (prompt === "undefined") return;
+    const request = await this.createInputWindow();
+    if (request === "undefined") return;
 
+    const template =
+      "Provided is the following graph : {graph}. This graph consists of nodes that have specific functionality. The list of available nodes are : {nodes} Using the provided information, {request}";
+
+    const prompt = new PromptTemplate({
+      inputVariables: ["graph", "nodes", "request"],
+      template,
+    });
+
+    const res = await prompt.format({
+      graph: JSON.stringify(graph) + "\n" + "\n",
+      nodes: this._context.toLocaleString() + "\n" + "\n",
+      request,
+    });
+
+    // console.log(res);
+
+    // console.log(res);
     // Manipulate prompt
-    const model = new OpenAI({ openAIApiKey: process.env.OPENAI_API_KEY, temperature: 0.1 });
-    model.modelName = "text-ada-001";
-    const res = await model.call(prompt);
+    // const model = new OpenAI({ openAIApiKey: process.env.OPENAI_API_KEY, temperature: 0.1 });
+    // model.modelName = "text-ada-001";
+    // const res = await model.call(prompt);
     // console.log(res);
   }
 

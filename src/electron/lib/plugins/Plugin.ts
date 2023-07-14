@@ -73,7 +73,6 @@ export class Plugin {
           }
           // console.log(blix.toolbox.getRegistry()[nodeInstance.getSignature])
         }
-        blix.aiManager.instantiate(blix.toolbox);
       }
 
       if ("commands" in pluginModule && typeof pluginModule.nodes === "object") {
