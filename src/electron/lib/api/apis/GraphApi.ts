@@ -31,6 +31,10 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
     );
   }
 
+  async setNodePos(graphUUID: UUID, nodeUUID: UUID, pos: { x: number; y: number }) {
+    return this._blix.graphManager.setPos(graphUUID, nodeUUID, pos.x, pos.y);
+  }
+
   async addEdge(graphUUID: UUID) {
     return this._blix.graphManager.addEdge(graphUUID, "asdf", "asdf");
   }
@@ -41,10 +45,6 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
 
   async removeEdge(graphUUID: UUID) {
     return this._blix.graphManager.removeEdge(graphUUID, "asdf");
-  }
-
-  async setNodePos(uuid: UUID) {
-    return this._blix.graphManager.getGraph(uuid);
   }
 
   async getGraph(uuid: UUID) {

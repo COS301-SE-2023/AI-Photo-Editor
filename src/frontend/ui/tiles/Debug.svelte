@@ -21,7 +21,7 @@
   <div class="output">
     <b>Toolbox</b>: <br />
     {#each $toolboxSignatures as key}
-      {key}: {JSON.stringify({ ...$toolboxStore[key], ui: null })}
+      {key}: {JSON.stringify({ ...$toolboxStore[key], ui: $toolboxStore[key].ui !== null })}
       <br /><br />
     {/each}
 

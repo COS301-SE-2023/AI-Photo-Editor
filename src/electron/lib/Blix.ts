@@ -1,10 +1,11 @@
 import { CommandRegistry } from "./registries/CommandRegistry";
-import { ToolboxRegistry } from "./registries/ToolboxRegistry";
+import { NodeInstance, ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 import { AiManager } from "./ai/AiManager";
+import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
 
 // Encapsulates the backend representation for
 // the entire running Blix application

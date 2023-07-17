@@ -24,54 +24,49 @@
 </script>
 
 {#if svelvetNodeId !== ""}
-  {#key nodePos}
-    <!-- width="{graphNode.dims.w}"
+  <!-- {#key nodePos} -->
+  <!-- width="{graphNode.dims.w}"
 height="{graphNode.dims.h}" -->
-    <Node
-      bgColor="#262630"
-      textColor="#ffffff"
-      bind:position="{$nodePos}"
-      id="{svelvetNodeId}"
-      borderColor="#ffffff"
-      borderWidth="{3}"
-      borderRadius="{10}"
-      inputs="{2}"
-      outputs="{1}"
-    >
-      <div class="node">
-        <div class="header">
-          <h1>{$toolboxNode?.title || node.displayName}</h1>
-        </div>
-        <div class="node-body" style="max-width: 400px">
-          <h2>Signature: {node.signature}</h2>
-          <h2>SvelvetNodeId: {svelvetNodeId}</h2>
-          {JSON.stringify({ ...$toolboxNode, ui: null })}
-        </div>
-        <div class="node-body" style="max-width: 400px">
-          <NodeUiFragment ui="{$toolboxNode?.ui}" />
-        </div>
+  <Node
+    bgColor="#262630"
+    textColor="#ffffff"
+    bind:position="{$nodePos}"
+    id="{svelvetNodeId}"
+    borderColor="#ffffff"
+    borderWidth="{3}"
+    borderRadius="{10}"
+    inputs="{2}"
+    outputs="{1}"
+  >
+    <div class="node">
+      <div class="header">
+        <h1>{$toolboxNode?.title || node.displayName}</h1>
+      </div>
+      <div class="node-body" style="max-width: 400px">
+        <h2>Signature: {node.signature}</h2>
+        <h2>SvelvetNodeId: {svelvetNodeId}</h2>
+        {JSON.stringify({ ...$toolboxNode, ui: undefined })}
+      </div>
+      <div class="node-body" style="max-width: 400px">
+        <NodeUiFragment ui="{$toolboxNode?.ui}" />
+      </div>
 
-        {#if $toolboxNode}
-          <div class="anchors inputs">
-            {#each $toolboxNode.inputs as input}
-              <Anchor id="{svelvetNodeId}_{input.id}" direction="west" edge="{PluginEdge}" input />
-              <!-- bind:connections={$nodeConns} -->
-            {/each}
-          </div>
-          <div class="anchors outputs">
-            {#each $toolboxNode.outputs as output}
-              <Anchor
-                id="{svelvetNodeId}_{output.id}"
-                direction="east"
-                edge="{PluginEdge}"
-                output
-              />
-            {/each}
-          </div>
-        {/if}
-      </div></Node
-    >
-  {/key}
+      {#if $toolboxNode}
+        <div class="anchors inputs">
+          {#each $toolboxNode.inputs as input}
+            <Anchor id="{svelvetNodeId}_{input.id}" direction="west" edge="{PluginEdge}" input />
+            <!-- bind:connections={$nodeConns} -->
+          {/each}
+        </div>
+        <div class="anchors outputs">
+          {#each $toolboxNode.outputs as output}
+            <Anchor id="{svelvetNodeId}_{output.id}" direction="east" edge="{PluginEdge}" output />
+          {/each}
+        </div>
+      {/if}
+    </div></Node
+  >
+  <!-- {/key} -->
 {/if}
 
 <style>

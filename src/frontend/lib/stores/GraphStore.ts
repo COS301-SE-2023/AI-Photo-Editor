@@ -59,19 +59,13 @@ export class GraphStore {
   }
 
   async addNode(nodeSignature: NodeSignature, pos?: SvelvetCanvasPos) {
-    const res = await window.apis.graphApi.addNode(get(this.graphStore).uuid, nodeSignature);
+    const thisUUID = get(this.graphStore).uuid;
+    const res = await window.apis.graphApi.addNode(thisUUID, nodeSignature);
 
-    // this.graphStore.update((graph) => {
-    //   const newNode = new GraphNode(
-    //     Math.round(10000 * Math.random()).toString(),
-    //     pos
-    //   );
-    //   // newNode.pos.x = Math.round(1000 * Math.random());
-    //   // newNode.pos.y = Math.round(1000 * Math.random());
-    //   // newNode.dims.h = Math.round(100 + 200 * Math.random());
-    //   graph.nodes[newNode.uuid] = newNode;
-    //   return graph;
-    // });
+    // if (pos) {
+    //   console.log("SET NODE POS", pos);
+    //   const posRes = await window.apis.graphApi.setNodePos(thisUUID, res, pos);
+    // }
 
     return true;
   }

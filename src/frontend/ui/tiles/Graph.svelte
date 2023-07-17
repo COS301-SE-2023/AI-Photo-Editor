@@ -37,11 +37,8 @@
   // }
 
   function addNode() {
-    // $thisGraphStore?.addNode("hello-plugin.Jake", {
-    //   x: 1000 * Math.random(),
-    //   y: 1000 * Math.random(),
-    // });
-    $thisGraphStore?.addNode();
+    $thisGraphStore?.addNode("hello-plugin.hello", getGraphCenter());
+    // $thisGraphStore?.addNode();
   }
 
   function getGraphCenter() {

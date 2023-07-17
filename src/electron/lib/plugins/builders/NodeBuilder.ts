@@ -42,7 +42,9 @@ export class NodeBuilder implements PluginContextBuilder {
       this.partialNode.description,
       this.partialNode.icon,
       this.partialNode.inputs,
-      this.partialNode.outputs
+      this.partialNode.outputs,
+      this.partialNode.func,
+      this.partialNode.ui
     );
   }
 
