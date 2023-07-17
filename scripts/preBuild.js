@@ -45,7 +45,6 @@ const generateProdTSConfig = () => {
   tsconfigSvelteJSON.compilerOptions.sourceMap = false;
   tsconfigSvelteJSON.include = [
     join(__dirname, "..", "src", "frontend"),
-    join(__dirname, "..", "src", "shared/**/*.ts"),
     join(__dirname, "..", "src", "global.d.ts"),
   ];
   tsconfigSvelteJSON.compilerOptions.paths = {
@@ -57,8 +56,8 @@ const generateProdTSConfig = () => {
   tsconfigElectronJSON.compilerOptions.outDir = "build";
   tsconfigElectronJSON.include = [
     join(__dirname, "..", "src", "electron"),
-    join(__dirname, "..", "src", "shared**/*.ts"),
     join(__dirname, "..", "src", "global.d.ts"),
+    join(__dirname, "..", "src", "index.ts"),
   ];
   tsconfigElectronJSON.compilerOptions.paths = {
     "@shared/*": [join(__dirname, "..", "src", "shared/*")],

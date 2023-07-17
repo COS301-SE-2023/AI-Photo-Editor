@@ -1,11 +1,10 @@
 import { CommandRegistry } from "./registries/CommandRegistry";
-import { NodeInstance, ToolboxRegistry } from "./registries/ToolboxRegistry";
+import { ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
-import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
-import { NodeUI, NodeUIParent } from "../../shared/ui/NodeUITypes";
+import { AiManager } from "./ai/AiManager";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -15,6 +14,7 @@ export class Blix {
   private _commandRegistry: CommandRegistry;
   private _graphManager: CoreGraphManager;
   private _projectManager: ProjectManager;
+  private _aiManager: AiManager;
   private _mainWindow: MainWindow;
 
   // private startTime: Date;
@@ -30,6 +30,7 @@ export class Blix {
     this._commandRegistry = new CommandRegistry();
     this._tileRegistry = new TileRegistry();
     this._graphManager = new CoreGraphManager(this, mainWindow);
+    this._aiManager = new AiManager(mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
 
     // TESTING ADD NODE TO GRAPH
@@ -63,6 +64,10 @@ export class Blix {
 
   get projectManager(): ProjectManager {
     return this._projectManager;
+  }
+
+  get aiManager(): AiManager {
+    return this._aiManager;
   }
 
   get mainWindow(): MainWindow | null {

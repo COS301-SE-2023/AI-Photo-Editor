@@ -10,7 +10,7 @@ import { join } from "path";
 import { writeFileSync } from "fs";
 import { NodeUIParent } from "../../../src/shared/ui/NodeUITypes";
 
-
+jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
 const mainWindow: MainWindow = {
   apis: {
     commandRegistryApi: jest.fn(),

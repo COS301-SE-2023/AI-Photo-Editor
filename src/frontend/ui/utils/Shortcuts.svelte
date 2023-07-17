@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { ShortcutCombo, type ShortcutAction, shortcutsRegistry } from "lib/stores/ShortcutStore";
+  import {
+    ShortcutCombo,
+    type ShortcutAction,
+    shortcutsRegistry,
+  } from "@frontend/lib/stores/ShortcutStore";
 
   export let shortcuts: { [key: ShortcutAction]: (event?: KeyboardEvent) => any } = {};
 

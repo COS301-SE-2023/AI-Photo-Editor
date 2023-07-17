@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Anchor, Node } from "svelvet";
+  import { Anchor, Node } from "blix_svelvet";
   import { GraphNode, NodeStylingStore } from "@shared/ui/UIGraph";
   import { toolboxStore } from "lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";

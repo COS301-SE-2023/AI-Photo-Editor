@@ -40,7 +40,19 @@ const commands = {
         })
 
         return context.create();
-    }
+    },
+    "send-prompt": (context) => {
+        context.setDescription("Send a user prompt to the ai");
+        context.setIcon("testing/image.jpg");
+
+        context.setDisplayName("AI prompt");
+
+        context.addCommand((options) => {
+            context.sendPrompt(options.data);
+        })
+
+        return context.create();
+    },
 }
 
 // Here we define custom tiles for the UI

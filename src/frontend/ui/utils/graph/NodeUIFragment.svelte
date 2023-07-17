@@ -2,7 +2,7 @@
   import { NodeUILeaf, type NodeUI } from "@shared/ui/NodeUITypes";
   import NodeUiComponent from "./NodeUIComponent.svelte";
   // import { writable } from "svelte/store";
-  // import { ColorPicker, RadioGroup, type CSSColorString } from "svelvet";
+  // import { ColorPicker, RadioGroup, type CSSColorString } from "blix_svelvet";
 
   export let ui: NodeUI | null = null;
 

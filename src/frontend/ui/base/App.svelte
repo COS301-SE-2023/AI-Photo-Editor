@@ -8,11 +8,13 @@
 </script>
 
 {#await init() then}
-  <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
-    <Navbar />
+  <div class="h-screen w-screen bg-zinc-800 p-0">
+    <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
+      <Navbar />
+    </div>
+    <div class="layout"><Layout /></div>
+    <Palette />
   </div>
-  <div class="layout"><Layout /></div>
-  <Palette />
 {/await}
 
 <style lang="postcss" global>

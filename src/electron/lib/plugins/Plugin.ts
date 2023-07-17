@@ -2,17 +2,9 @@ import type { PathLike } from "fs";
 import type { PackageData } from "./PluginManager";
 import logger from "../../utils/logger";
 import { Blix } from "../Blix";
-import {
-  InputAnchorInstance,
-  NodeInstance,
-  OutputAnchorInstance,
-} from "../registries/ToolboxRegistry";
 import { CommandInstance } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
-import Main from "electron/main";
-import type { MainWindow } from "../api/apis/WindowApi";
-import { dialog } from "electron";
 import { UUID } from "../../../shared/utils/UniqueEntity";
 
 export type PluginSignature = string;
@@ -68,6 +60,7 @@ export class Plugin {
           }
           // console.log(blix.toolbox.getRegistry()[nodeInstance.getSignature])
         }
+        blix.aiManager.instantiate(blix.toolbox);
       }
 
       if ("commands" in pluginModule && typeof pluginModule.nodes === "object") {
@@ -180,6 +173,10 @@ class CommandPluginContext extends PluginContext {
 
   public saveCurrentProject(project: UUID) {
     this.blix.projectManager.saveCurrentProject(project);
+  }
+
+  public sendPrompt() {
+    this.blix.aiManager.sendPrompt();
   }
 }
 

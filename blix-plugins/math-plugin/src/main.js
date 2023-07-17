@@ -2,7 +2,7 @@ const nodes ={
     "unary": (context) => {
         nodeBuilder = context.instantiate("math-plugin","unary");
         nodeBuilder.setTitle("Unary");
-        nodeBuilder.setDescription("Unary math operations");
+        nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output");
 
         nodeBuilder.define((num1, state) => {
             let result;
@@ -57,7 +57,7 @@ const nodes ={
     "binary": (context) => {
         const nodeBuilder = context.instantiate("math-plugin", "binary");
         nodeBuilder.setTitle("Binary");
-        nodeBuilder.setDescription("Binary math operations");
+        nodeBuilder.setDescription("Performs Binary math operations taking two number inputs and returning one number output");
       
         nodeBuilder.define((num1, num2, state) => {
           let result;

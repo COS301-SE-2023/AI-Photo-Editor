@@ -1,6 +1,6 @@
 <script lang="ts">
   import { writable } from "svelte/store";
-  import { ColorPicker, type CSSColorString } from "svelvet";
+  import { ColorPicker, type CSSColorString } from "blix_svelvet";
 
   const colorPicker = writable("red" as CSSColorString);
 </script>

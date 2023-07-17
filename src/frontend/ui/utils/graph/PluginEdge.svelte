@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Edge } from "svelvet";
+  import { Edge } from "blix_svelvet";
 
   export let label: string = "";
 </script>

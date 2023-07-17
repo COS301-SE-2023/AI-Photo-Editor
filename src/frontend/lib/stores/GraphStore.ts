@@ -21,7 +21,7 @@ import { writable, get, derived, type Writable, type Readable } from "svelte/sto
 // Not sure how to solve this at the moment, so had to add a temp fix below
 // unfortunately because of time constraints.
 
-// import type { Connections } from "svelvet";
+// import type { Connections } from "blix_svelvet";
 // type Connections = (string | number | [string | number, string | number] | null)[];
 
 // TODO: Return a GraphStore in createGraphStore for typing

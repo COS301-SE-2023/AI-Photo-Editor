@@ -2,7 +2,7 @@
   import { get } from "svelte/store";
   import { onDestroy } from "svelte";
   import type { Project } from "../../lib/Project";
-  import { projectManager } from "lib/stores/ProjectStore";
+  import { projectManager } from "@frontend/lib/stores/ProjectStore";
 
   let projects: Project[] = [];
 

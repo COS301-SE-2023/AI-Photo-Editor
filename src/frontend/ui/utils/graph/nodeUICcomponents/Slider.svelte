@@ -1,6 +1,6 @@
 <script lang="ts">
   import { writable } from "svelte/store";
-  import { Slider } from "svelvet";
+  import { Slider } from "blix_svelvet";
 
   const slider = writable(0);
 </script>
