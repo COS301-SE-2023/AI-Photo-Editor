@@ -1,21 +1,20 @@
-import { join } from "path";
-import { app } from "electron";
-import fs from "fs";
 import type { MainWindow } from "../api/apis/WindowApi";
 import prompt from "electron-prompt";
 import { error } from "console";
-import { OpenAI } from "langchain/llms/openai";
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
-import { PromptTemplate } from "langchain/prompts";
-
+import type { ChildProcessWithoutNullStreams } from "child_process";
+import { spawn } from "child_process";
+import logger from "../../utils/logger";
 // Refer to .env for api keys
 
 //  TODO : Provide the graph context that will be given to ai as context
 
-// interface Nodes {
-//   name: string;
-//   description: string;
-// }
+interface PromptContext {
+  prompt: string;
+  plugin: string[];
+  graph: string;
+  commands: string[];
+}
 
 const graph = {
   nodes: [
@@ -74,16 +73,13 @@ const graph = {
  *
  * */
 export class AiManager {
-  private _path: string;
   private _mainWindow;
-  private _context: string[] = [];
+  private _pluginContext: string[] = [];
+  private _childProcess: ChildProcessWithoutNullStreams | null = null;
+  private _promptContext: PromptContext | null = null;
 
   constructor(mainWindow: MainWindow) {
     this._mainWindow = mainWindow;
-    this._path = join(app.getPath("userData"), "projects");
-    if (!fs.existsSync(this._path)) {
-      fs.mkdirSync(this._path);
-    }
   }
 
   /**
@@ -97,48 +93,74 @@ export class AiManager {
     for (const index in toolbox.getRegistry()) {
       if (!toolbox.hasOwnProperty(index)) {
         const node: NodeInstance = toolbox.getRegistry()[index];
-        this._context.push(node.getSignature + ": " + node.getDescription);
+        this._pluginContext.push(node.getSignature + ": " + node.getDescription);
       }
     }
-    // console.log(this._context);
+    //  console.log(this._pluginContext)
+
+    this._promptContext = {
+      prompt: "This is a test prompt",
+      plugin: this._pluginContext,
+      graph: JSON.stringify(graph),
+      commands: this._pluginContext,
+    };
   }
 
   /**
    *
    * Creates prompt window for the user to input a prompt for the AI to respond to
+   * @returns A promise that resolves with the prompt value
    */
 
-  async sendPrompt() {
+  async getPrompt(): Promise<string> {
     //  Creates a prompt window for the user to input a prompt for the AI to respond to
     const request = await this.createInputWindow();
-    if (request === "undefined") return;
-
-    const template =
-      "Provided is the following graph : {graph}. This graph consists of nodes that have specific functionality. The list of available nodes are : {nodes} Using the provided information, {request}";
-
-    const prompt = new PromptTemplate({
-      inputVariables: ["graph", "nodes", "request"],
-      template,
-    });
-
-    const res = await prompt.format({
-      graph: JSON.stringify(graph) + "\n" + "\n",
-      nodes: this._context.toLocaleString() + "\n" + "\n",
-      request,
-    });
-
-    // console.log(res);
-
-    // console.log(res);
-    // Manipulate prompt
-    // const model = new OpenAI({ openAIApiKey: process.env.OPENAI_API_KEY, temperature: 0.1 });
-    // model.modelName = "text-ada-001";
-    // const res = await model.call(prompt);
-    // console.log(res);
+    if (request === "undefined") return "null";
+    else return request;
   }
 
   /**
    *
+   * Sends prompt to langchain and handles responses.
+   *
+   * */
+  async sendPrompt() {
+    if (this._promptContext === null) throw new Error("Prompt context is null");
+
+    const request = await this.getPrompt();
+
+    if (request === "null") return;
+
+    this._promptContext.prompt = request;
+
+    //  Creates a prompt window for the user to input a prompt for the AI to respond to
+    this._childProcess = spawn("python3", ["src/electron/lib/ai/API.py"]);
+
+    const dataToSend2 = JSON.stringify(this._promptContext);
+    this._childProcess.stdin.write(dataToSend2 + "\n");
+
+    this._childProcess.stdin.end();
+
+    // Receive output from the Python script
+    this._childProcess.stdout.on("data", (data) => {
+      const result = data.toString();
+      logger.info("Received from Python:", result);
+    });
+
+    // Handle errors
+    this._childProcess.stderr.on("data", (data) => {
+      const result = data.toString();
+      logger.warn("Error executing Python script: ", result);
+    });
+
+    // Handle process exit
+    this._childProcess.on("close", (code) => {
+      if (code == null) logger.warn(`Python script exited with code null`);
+      else logger.warn(`Python script exited with code ${code}`);
+    });
+  }
+
+  /**
    *
    * @returns A promise that resolves with the prompt value
    */
@@ -161,7 +183,7 @@ export class AiManager {
         this._mainWindow
       )
         .then((r) => {
-          if (r === null) {
+          if (r === null || r === "") {
             resolve("undefined"); // User cancelled
           } else {
             resolve(r); // Resolve with the prompt value

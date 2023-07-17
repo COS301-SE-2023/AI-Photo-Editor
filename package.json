@@ -68,6 +68,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.10",
+    "child_process": "^1.0.2",
     "chokidar": "^3.5.3",
     "cohere-ai": "^5.1.0",
     "electron-affinity": "^1.2.4",
