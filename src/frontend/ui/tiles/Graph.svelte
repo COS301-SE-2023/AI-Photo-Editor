@@ -1,6 +1,6 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Svelvet } from "blix_svelvet";
+  import { Node, Svelvet, type GraphDimensions } from "blix_svelvet";
   import { type Readable } from "svelte/store";
   import { graphMall } from "lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
@@ -15,6 +15,13 @@
   let thisGraphStore: Readable<any>;
   let graphNodes: Readable<any[]>;
 
+  let graphData: any;
+
+  // Svelvet graph data
+  $: translation = graphData?.transforms?.translation;
+  $: zoom = graphData?.transforms?.scale;
+  $: dimensions = graphData?.dimensions;
+
   function updateOnGraphId(graphId: string) {
     thisGraphStore = graphMall.getGraphReactive(graphId);
     if ($thisGraphStore) {
@@ -25,11 +32,22 @@
   // Only updates when _graphId_ changes
   $: updateOnGraphId(graphId);
 
+  function addNode() {
+    $thisGraphStore?.addNode();
+  }
+
+  function getGraphCenter() {
+    return {
+      x: $dimensions.width / 2 - $translation.x / $zoom,
+      y: $dimensions.height / 2 - $translation.y / $zoom,
+    };
+  }
+
   // $: console.log("GRAPH MALL UPDATED", $graphMall);
 </script>
 
 <div class="hoverElements">
-  <button on:click="{() => $thisGraphStore?.addNode()}">Add Node</button>
+  <button on:click="{addNode}">Add Node</button>
   <select name="graphPicker" class="dropdown" bind:value="{graphId}">
     {#each $graphIds as id}
       <option value="{id}">{id.slice(0, 8)}</option>
@@ -38,10 +56,26 @@
 </div>
 
 {#if thisGraphStore}
-  <Svelvet id="{panelId}-{graphId}" zoom="{0.7}" minimap theme="custom-dark">
+  <Svelvet
+    id="{panelId}-{graphId}"
+    zoom="{0.7}"
+    minimap
+    theme="custom-dark"
+    bind:graph="{graphData}"
+  >
     {#each $graphNodes || [] as node}
       <PluginNode panelId="{panelId}" graphId="{graphId}" node="{node}" />
     {/each}
+
+    <!-- Testing graph center -->
+    <!-- {#key [$translation, $dimensions]}
+    <Node position={getGraphCenter()}>
+      <div class="text-white z-50">
+        {JSON.stringify($translation)}<br />
+        {JSON.stringify($zoom)}
+      </div>
+    </Node>
+    {/key} -->
   </Svelvet>
 {:else}
   <div>Graph store not found</div>
