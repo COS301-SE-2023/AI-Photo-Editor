@@ -68,21 +68,24 @@ export class PluginManager {
       return !ignorePatterns.some((pattern) => plugin.includes(pattern));
     });
 
-    const promises = plugins.map((plugin) => {
-      return this.loadPlugin(plugin, pluginsPath);
-    });
-
-    await Promise.all(promises);
+    await Promise.all(
+      plugins.map(async (plugin) => {
+        // Ignore MacOS temp files
+        if (plugin !== ".DS_Store") {
+          await this.loadPlugin(plugin, pluginsPath);
+        }
+      })
+    );
+    // this.blix.aiManager.instantiate(this.blix.toolbox);
   }
 
-  private async loadPlugin(plugin: string, path: string) {
+  public async loadPlugin(plugin: string, path: string): Promise<void> {
     const readFilePromise = promisify(readFile);
 
     const pluginPath = join(path, plugin);
     const packageJson = join(pluginPath, "package.json");
 
     // TODO: Check that the plugin is valid (package.json content)
-
     try {
       const data = await readFilePromise(packageJson);
       const packageData: PackageData = JSON.parse(data.toString());
