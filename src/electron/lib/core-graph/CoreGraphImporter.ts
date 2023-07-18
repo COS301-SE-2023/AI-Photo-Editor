@@ -72,11 +72,11 @@ export class CoreGraphImporter {
     return graph;
   }
 
-  findCorrectAnchor(graph: CoreGraph, nodes: { [key: number]: UUID }, anchor: AnchorToJSON): UUID {
+  findCorrectAnchor(graph: CoreGraph, nodes: { [key: UUID]: UUID }, anchor: AnchorToJSON): UUID {
     let result = "";
     const node = graph.getNodes[nodes[anchor.parent]];
     Object.keys(node.getAnchors).forEach((key) => {
-      if (node.getAnchors[key].getLocalAnchorId === anchor.id) {
+      if (node.getAnchors[key].anchorId === anchor.id) {
         result = node.getAnchors[key].uuid;
       }
     });

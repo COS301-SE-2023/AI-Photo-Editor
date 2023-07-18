@@ -1,13 +1,16 @@
 import expect from "expect";
-import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent } from "../../../src/electron/lib/registries/ToolboxRegistry";
+import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, MinAnchor } from "../../../src/electron/lib/registries/ToolboxRegistry";
 import {NodeBuilder,NodeUIBuilder} from "../../../src/electron/lib/plugins/builders/NodeBuilder"
 // import { ProjectManager } from "../../../src/electron/lib/projects/ProjectManager";
 import { Plugin } from "../../../src/electron/lib/plugins/Plugin";
 import { Blix } from "../../../src/electron/lib/Blix";
 import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
+import {BrowserWindow} from "electron";
+import { join } from "path";
+import { writeFileSync } from "fs";
+import { NodeUIParent } from "../../../src/shared/ui/NodeUITypes";
 
-
-
+jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
 const mainWindow: MainWindow = {
   apis: {
     commandRegistryApi: jest.fn(),
@@ -48,21 +51,21 @@ describe("Test builder propagations", () => {
     let nodeBuilder : NodeBuilder;
     let nodeUIBuilder : NodeUIBuilder;
   
-    const inputs: InputAnchorInstance[] = [];
-    const outputs: OutputAnchorInstance[] = [];
+    const inputs: MinAnchor[] = [];
+    const outputs: MinAnchor[] = [];
     beforeEach(() => {
       jest.clearAllMocks();
 
-      const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
+      const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
       const nodeUI = new NodeUIParent("Jake.Shark", null);
   
-      nodeBuilder = new NodeBuilder(node);
-      nodeUIBuilder = new NodeUIBuilder(nodeUI);
+      nodeBuilder = new NodeBuilder("testing-plugin", "My cool node");
+      nodeUIBuilder = new NodeUIBuilder();
     });
 
     test("Adding a slider should affect nodeUI's paramaters", () => {
         const nodeUI = new NodeUIParent("Jake.Shark", null);
-        nodeUIBuilder = new NodeUIBuilder(nodeUI);
+        nodeUIBuilder = new NodeUIBuilder();
         nodeUIBuilder.addSlider("shrek",0,100,50,1);
   
         expect(nodeUI.params[0].label).toEqual("shrek");
@@ -73,7 +76,7 @@ describe("Test builder propagations", () => {
   
       test("addDropdown should affect nodeUi's children", () => {
         const nodeUI = new NodeUIParent("Jake.Shark", null);
-        nodeUIBuilder = new NodeUIBuilder(nodeUI);
+        nodeUIBuilder = new NodeUIBuilder();
         nodeUIBuilder.addDropdown("shrek",nodeBuilder.createUIBuilder().addButton("Shrek",() => {return "Shrek";}));
   
         expect(nodeUI.params[0].label).toEqual("shrek");

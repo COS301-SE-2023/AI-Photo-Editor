@@ -1,5 +1,13 @@
-import { UIGraph, GraphNode, type GraphNodeUUID, type GraphUUID } from "@shared/ui/UIGraph";
-import { writable, get, derived, type Writable } from "svelte/store";
+import type { NodeSignature } from "@shared/ui/ToolboxTypes";
+import {
+  UIGraph,
+  GraphNode,
+  type GraphNodeUUID,
+  type GraphUUID,
+  type SvelvetCanvasPos,
+  NodeStylingStore,
+} from "@shared/ui/UIGraph";
+import { writable, get, derived, type Writable, type Readable } from "svelte/store";
 
 // When the the CoreGraphApi type has to be imported into the backend
 // (WindowApi.ts) so that the API can be bound then it tries to import the type
@@ -13,20 +21,35 @@ import { writable, get, derived, type Writable } from "svelte/store";
 // Not sure how to solve this at the moment, so had to add a temp fix below
 // unfortunately because of time constraints.
 
-// import type { Connections } from "svelvet";
+// import type { Connections } from "blix_svelvet";
 // type Connections = (string | number | [string | number, string | number] | null)[];
 
 // TODO: Return a GraphStore in createGraphStore for typing
-class GraphStore {
+export class GraphStore {
   graphStore: Writable<UIGraph>;
 
   constructor(public uuid: GraphUUID) {
+    // Starts with empty graph
     this.graphStore = writable<UIGraph>(new UIGraph(uuid));
   }
 
   // Called by CoreGraphApi when the command registry changes
   public refreshStore(newGraph: UIGraph) {
-    this.graphStore.set(newGraph);
+    this.graphStore.update((graph) => {
+      graph.edges = newGraph.edges;
+
+      const oldNodes = graph.nodes;
+      graph.nodes = newGraph.nodes;
+
+      // Maintain styling from old graph
+      for (const node of Object.keys(oldNodes)) {
+        if (graph.nodes[node]) {
+          graph.nodes[node].styling = oldNodes[node].styling;
+        }
+      }
+
+      return graph;
+    });
   }
 
   async addEdge() {
@@ -35,18 +58,14 @@ class GraphStore {
     return false;
   }
 
-  async addNode() {
-    const res = await window.apis.graphApi.addNode("");
+  async addNode(nodeSignature: NodeSignature, pos?: SvelvetCanvasPos) {
+    const thisUUID = get(this.graphStore).uuid;
+    const res = await window.apis.graphApi.addNode(thisUUID, nodeSignature);
 
-    // TODO: Implement properly, just for testing atm
-    this.graphStore.update((graph) => {
-      const newNode = new GraphNode(Math.round(10000 * Math.random()).toString());
-      newNode.pos.x = Math.round(1000 * Math.random());
-      newNode.pos.y = Math.round(1000 * Math.random());
-      newNode.dims.h = Math.round(100 + 200 * Math.random());
-      graph.nodes[newNode.uuid] = newNode;
-      return graph;
-    });
+    // if (pos) {
+    //   console.log("SET NODE POS", pos);
+    //   const posRes = await window.apis.graphApi.setNodePos(thisUUID, res, pos);
+    // }
 
     return true;
   }
@@ -73,26 +92,13 @@ class GraphStore {
     const res = await window.apis.graphApi.removeNode("");
     return false;
   }
-
-  async setNodePos(nodeId: string, pos: { x: number; y: number }) {
-    const res = await window.apis.graphApi.setNodePos("");
-
-    this.graphStore.update((graph) => {
-      if (!graph.nodes[nodeId]) return graph;
-
-      graph.nodes[nodeId].pos = pos;
-      graph.nodes[nodeId] = graph.nodes[nodeId];
-      return graph;
-    });
-    return false;
-  }
 }
 
 type GraphDict = { [key: GraphUUID]: GraphStore };
 
 // The public area with all the cool stores 😎
 class GraphMall {
-  mall = writable<GraphDict>({});
+  private mall = writable<GraphDict>({});
 
   public refreshGraph(graphUUID: GraphUUID, newGraph: UIGraph) {
     this.mall.update((stores) => {
@@ -122,7 +128,7 @@ class GraphMall {
   }
 
   // Returns a derived store containing only the specified graph
-  public getGraphReactive(graphUUID: GraphUUID) {
+  public getGraphReactive(graphUUID: GraphUUID): Readable<GraphStore | null> {
     return derived(this.mall, (mall) => {
       if (!mall[graphUUID]) return null;
       return mall[graphUUID];
@@ -143,24 +149,22 @@ class GraphMall {
     return get(get(this.mall)[graphUUID]).nodes[nodeUUID];
   }
 
-  public updateNode(
-    graphUUID: GraphUUID,
-    nodeUUID: GraphNodeUUID,
-    func: (node: GraphNode) => GraphNode
-  ) {
-    this.mall.update((mall) => {
-      if (!mall[graphUUID]) return mall;
+  // Update specific graph without updating the mall
+  // public updateNode(
+  //   graphUUID: GraphUUID,
+  //   nodeUUID: GraphNodeUUID,
+  //   func: (node: GraphNode) => GraphNode
+  // ) {
+  //   console.log("UPDATE NODE", graphUUID, nodeUUID);
 
-      mall[graphUUID].update((graph) => {
-        if (!graph.nodes[nodeUUID]) return graph;
+  //   const currMall = get(this.mall)[graphUUID];
+  //   if (!currMall) return;
 
-        graph.nodes[nodeUUID] = func(graph.nodes[nodeUUID]);
-        return graph;
-      });
-
-      return mall;
-    });
-  }
+  //   currMall.update((graph) => {
+  //     graph.nodes[nodeUUID] = func(graph.nodes[nodeUUID]);
+  //     return graph;
+  //   });
+  // }
 }
 
 // export const graphMall = writable<GraphMall>(new GraphMall());

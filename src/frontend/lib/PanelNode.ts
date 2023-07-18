@@ -2,7 +2,7 @@
 
 export type PanelType = string;
 
-export class PanelNode {
+export abstract class PanelNode {
   static panelCounter = 0;
 
   constructor(id = -1) {

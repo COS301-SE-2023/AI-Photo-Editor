@@ -2,11 +2,6 @@ import type { PathLike } from "fs";
 import type { PackageData } from "./PluginManager";
 import logger from "../../utils/logger";
 import { Blix } from "../Blix";
-import {
-  InputAnchorInstance,
-  NodeInstance,
-  OutputAnchorInstance,
-} from "../registries/ToolboxRegistry";
 import { CommandInstance } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
@@ -16,7 +11,6 @@ import { dialog } from "electron";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 
 export type PluginSignature = string;
-export type NodeSignature = string;
 
 export class Plugin {
   private hasRequiredSelf: boolean;
@@ -60,24 +54,17 @@ export class Plugin {
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          const inputs: InputAnchorInstance[] = [];
-          const outputs: OutputAnchorInstance[] = [];
-
-          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs);
-
-          const nodeBuilder = new NodeBuilder(nodeInstance);
-
-          const ctx = new NodePluginContext(nodeBuilder);
+          const ctx = new NodePluginContext();
 
           try {
             pluginModule.nodes[node](ctx); // Execute node builder
-            nodeBuilder.validate(); // Ensure the node is properly instantiated
-            blix.toolbox.addInstance(nodeInstance); // Add to registry
+            blix.toolbox.addInstance(ctx.nodeBuilder.build); // Add to registry
           } catch (err) {
             logger.warn(err);
           }
           // console.log(blix.toolbox.getRegistry()[nodeInstance.getSignature])
         }
+        blix.aiManager.instantiate(blix.toolbox);
       }
 
       if ("commands" in pluginModule && typeof pluginModule.nodes === "object") {
@@ -120,12 +107,18 @@ class PluginContext {
 }
 
 class NodePluginContext extends PluginContext {
-  constructor(private nodeBuilder: NodeBuilder) {
+  private _nodeBuilder!: NodeBuilder;
+  constructor() {
     super();
   }
 
+  public get nodeBuilder() {
+    return this._nodeBuilder;
+  }
+
+  // nodeBuilder = context.instantiate("hello-plugin","hello");
   public instantiate(plugin: string, name: string): NodeBuilder {
-    this.nodeBuilder.instantiate(plugin, name);
+    this._nodeBuilder = new NodeBuilder(plugin, name);
     return this.nodeBuilder;
   }
 }
@@ -185,6 +178,10 @@ class CommandPluginContext extends PluginContext {
 
   public saveCurrentProject(project: UUID) {
     this.blix.projectManager.saveCurrentProject(project);
+  }
+
+  public sendPrompt() {
+    this.blix.aiManager.sendPrompt();
   }
 }
 

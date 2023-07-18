@@ -3,7 +3,7 @@ import { blixStore } from "./stores/BlixStore";
 import { commandStore } from "./stores/CommandStore";
 import { initializeAPIs } from "./api/apiInitializer";
 import { GraphNode, UIGraph } from "@shared/ui/UIGraph";
-import { nodeStore } from "./stores/NodeStore";
+import { toolboxStore } from "./stores/ToolboxStore";
 /**
  * Runs on app start. Will initialize the IPC APIs and set
  * the initial frontend stores.
@@ -24,9 +24,9 @@ async function setInitialStores() {
   const command = await window.apis.commandApi.getCommands();
   commandStore.refreshStore(command);
 
-  // Node store
+  // Toolbox store
   const node = await window.apis.toolboxApi.getNodes();
-  nodeStore.refreshStore(node);
+  toolboxStore.refreshStore(node);
 
   // Graph store
   const allGraphIds = await window.apis.graphApi.getAllGraphUUIDs();
@@ -44,8 +44,7 @@ async function setInitialStores() {
     uiGraph.nodes[node1.uuid] = node1;
     uiGraph.nodes[node2.uuid] = node2;
     uiGraph.nodes[node3.uuid] = node3;
-    node1.pos.x = 100;
-    node1.pos.y = 100;
+    // node1.styling.pos.set({ x: 100, y: 100 });
 
     graphMall.refreshGraph(uiGraph.uuid, uiGraph);
   }

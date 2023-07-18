@@ -1,6 +1,8 @@
 import { CoreGraph, Node, Anchor, AnchorIO } from "./CoreGraph";
 import { TestGraph } from "./CoreGraphTesting";
 import logger from "./../../utils/logger";
+import { UUID } from "@shared/utils/UniqueEntity";
+import { ToolboxRegistry } from "lib/registries/ToolboxRegistry";
 
 /*
 Assumptions:
@@ -31,6 +33,7 @@ class Monad<T> {
 
 export class CoreGraphInterpreter {
   private coreGraph: CoreGraph;
+  private toolboxRegistry: ToolboxRegistry;
   private monads: { [key: string]: Monad<number> } = {};
   private context: { [key: string]: any };
 
@@ -44,9 +47,9 @@ export class CoreGraphInterpreter {
 
     this.coreGraph.getOutputNodes.forEach((uuid) => {
       try {
-        this.traverse(this.coreGraph.getNodes[uuid], 0).catch((err) => {
-          logger.error(err);
-        });
+        // this.traverse(this.coreGraph.getNodes[uuid], 0).catch((err) => {
+        //   logger.error(err);
+        // });
       } catch (err) {
         logger.error(err);
       }
@@ -86,20 +89,19 @@ export class CoreGraphInterpreter {
 
   // USING PROMISES
 
-  public async traverse<T>(curr: Node, anhcorIn: number): Promise<T> {
+  public async traverse<T>(curr: Node, anhcorIn: UUID): Promise<T> {
     const inputPromises: Promise<T>[] = [];
 
     // Get all input values
     for (const anchor in curr.getAnchors) {
       // Only check input anchors
-      if (this.coreGraph.getAnchors[anchor].getIOType !== AnchorIO.output) {
+      if (this.coreGraph.getAnchors[anchor].ioType !== AnchorIO.output) {
         // If input was given
         if (anchor in this.coreGraph.getEdgeDest) {
           inputPromises.push(
             this.traverse(
-              this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom].getParent,
-              this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom]
-                .getLocalAnchorId
+              this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom].parent,
+              this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom].anchorId
             )
           );
         }
@@ -110,7 +112,10 @@ export class CoreGraphInterpreter {
     const inputs: T[] = await Promise.all(inputPromises).catch((err) => {
       throw err;
     });
-    const output: T = await Promise.resolve(curr.execute(inputs, anhcorIn));
+    // const output: T = await Promise.resolve(curr.execute(inputs, anhcorIn));
+    const output: T = await Promise.resolve(
+      this.toolboxRegistry.getNodeInstance(curr.getSignature).func({ inputs, anhcorIn })
+    );
 
     return output;
   }

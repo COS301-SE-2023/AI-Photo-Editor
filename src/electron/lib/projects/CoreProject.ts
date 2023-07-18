@@ -1,8 +1,8 @@
 import { UniqueEntity } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph } from "../core-graph/CoreGraph";
-import type { CommonProject } from "../../../shared/types/index";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { PathLike } from "fs";
+import { CommonProject } from "../../../shared/ui/ToolboxTypes";
 
 // Encapsulates the backend state for one of the open Blix projects
 export class CoreProject extends UniqueEntity {

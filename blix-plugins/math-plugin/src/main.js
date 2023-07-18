@@ -2,7 +2,7 @@ const nodes ={
     "unary": (context) => {
         nodeBuilder = context.instantiate("math-plugin","unary");
         nodeBuilder.setTitle("Unary");
-        nodeBuilder.setDescription("Unary math operations");
+        nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output");
 
         nodeBuilder.define((num1, state) => {
             let result;
@@ -51,13 +51,13 @@ const nodes ={
             return result;
           });
           
-       nodeBuilder.addInput("Number","Num", 0);
-       nodeBuilder.addOutput("Number","Result", 1);
+       nodeBuilder.addInput("Number", "num","Num");
+       nodeBuilder.addOutput("Number", "res","Result");
     },
     "binary": (context) => {
         const nodeBuilder = context.instantiate("math-plugin", "binary");
         nodeBuilder.setTitle("Binary");
-        nodeBuilder.setDescription("Binary math operations");
+        nodeBuilder.setDescription("Performs Binary math operations taking two number inputs and returning one number output");
       
         nodeBuilder.define((num1, num2, state) => {
           let result;
@@ -110,9 +110,9 @@ const nodes ={
           return result;
         });
       
-        nodeBuilder.addInput("Number", "Num1", 0);
-        nodeBuilder.addInput("Number", "Num2", 1);
-        nodeBuilder.addOutput("Number", "Result", 2);
+        nodeBuilder.addInput("Number", "num1", "Num1");
+        nodeBuilder.addInput("Number", "num2", "Num2");
+        nodeBuilder.addOutput("Number", "res1", "Result");
       }
     // TO BE DEVELOPED   
     // "ternary": (context) => {

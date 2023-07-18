@@ -6,6 +6,7 @@ import { CoreGraphSubscriber } from "./CoreGraphInteractors";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphImporter } from "./CoreGraphImporter";
 import { CoreGraphExporter, type GraphToJSON } from "./CoreGraphExporter";
+import { NodeInstance } from "../registries/ToolboxRegistry";
 
 // This class stores all the graphs amongst all open projects
 // Projects index into this store at runtime to get their graphs
@@ -62,6 +63,43 @@ export class CoreGraphManager {
     const graph: CoreGraph = this._importer.import(format, data);
     this._graphs[graph.uuid] = graph;
     return graph; // For testing purposes, dont know what to do with this yet
+  }
+
+  addNode(graphUUID: UUID, node: NodeInstance): boolean {
+    if (this._graphs[graphUUID] === undefined) return false;
+    const res = this._graphs[graphUUID].addNode(node);
+    if (res) this.onGraphUpdated(graphUUID);
+    return res !== "";
+  }
+
+  addEdge(graphUUID: UUID, anchorA: UUID, anchorB: UUID): boolean {
+    if (this._graphs[graphUUID] === undefined) return false;
+    const res = this._graphs[graphUUID].addEdge(anchorA, anchorB);
+    if (res) this.onGraphUpdated(graphUUID);
+    return res;
+  }
+
+  removeNode(graphUUID: UUID, nodeUUID: UUID): boolean {
+    if (this._graphs[graphUUID] === undefined) return false;
+    const res = this._graphs[graphUUID].removeNode(nodeUUID);
+    if (res) this.onGraphUpdated(graphUUID);
+    return res;
+  }
+
+  removeEdge(graphUUID: UUID, anchorTo: UUID): boolean {
+    if (this._graphs[graphUUID] === undefined) return false;
+    const res = this._graphs[graphUUID].removeEdge(anchorTo);
+    if (res) this.onGraphUpdated(graphUUID);
+    return res;
+  }
+
+  setPos(graphUUID: UUID, nodeUUID: UUID, x: number, y: number): boolean {
+    if (this._graphs[graphUUID] === undefined) return false;
+    const res = this._graphs[graphUUID].setNodePos(nodeUUID, { x, y });
+    // if (res) this.onGraphUpdated(graphUUID);
+    // Style changes shouldn't update the subscribers
+    // We only need this state when reloading the graph
+    return res;
   }
 
   createGraph(): UUID {
