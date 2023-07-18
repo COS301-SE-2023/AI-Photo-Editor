@@ -1,5 +1,9 @@
 import open
 import json
+from functions import graphFunc
+
+
+
 
 
 # This is an example of the object that is passed in from the ai Manager to the API
@@ -25,6 +29,5 @@ object = {
      '{"id":"kadjbg","from":"b3e1f4","to":"4f2e1d"}', '{"id":"0d1e2f","from":"b3e1f4","to":"8c7b6a"}'
     ]
 }
-
 
 
