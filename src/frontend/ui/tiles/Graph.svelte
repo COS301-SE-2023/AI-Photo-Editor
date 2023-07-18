@@ -78,12 +78,12 @@
 
     <!-- Testing graph center -->
     {#key [$translation, $dimensions]}
-      <Node position="{getGraphCenter()}">
+      <!-- <Node position="{getGraphCenter()}">
         <div class="z-50 text-white">
           {JSON.stringify($translation)}<br />
           {JSON.stringify($zoom)}
         </div>
-      </Node>
+      </Node> -->
     {/key}
   </Svelvet>
 {:else}
