@@ -12,60 +12,65 @@ import logger from "../../utils/logger";
 interface PromptContext {
   prompt: string;
   plugin: string[];
-  graph: string;
-  commands: string[];
+  nodes: string[];
+  edges: string[];
 }
 
-const graph = {
-  nodes: [
-    {
-      inputAnchors: [
-        {
-          id: 1,
-          type: "number",
-        },
-      ],
-      outputAnchors: [
-        {
-          id: 2,
-          type: "number",
-        },
-      ],
-      signature: "input-plugin.number",
-    },
-    {
-      id: 2,
-      signature: "input-plugin.number",
-      inputs: [],
-      outputs: [3],
-    },
-    {
-      id: 3,
-      signature: "math-plugin.binary",
-      inputs: [1, 2],
-      outputs: [5],
-    },
-    {
-      id: 5,
-      signature: "input-plugin.number",
-      inputs: [3],
-      outputs: [6],
-    },
-    {
-      id: 6,
-      signature: "math-plugin.binary",
-      inputs: [5],
-      outputs: [],
-    },
-    {
-      id: 4,
-      signature: "output-plugin.print",
-      inputs: [],
-      outputs: [],
-    },
-  ],
-};
+const nodes = [
+  {
+    id: "jakd14",
+    signature: "math-plugin.binary",
+    inputs: [
+      {
+        id: "d2b6f0",
+        type: "number",
+      },
+      {
+        id: "7a8c9e",
+        type: "number",
+      },
+    ],
+    outputs: [
+      {
+        id: "b3e1f4",
+        type: "number",
+      },
+    ],
+  },
+  {
+    id: "3a2b1c",
+    signature: "math-plugin.binary",
+    inputs: [
+      {
+        id: "4f2e1d",
+        type: "number",
+      },
+      {
+        id: "8c7b6a",
+        type: "number",
+      },
+    ],
+    outputs: [
+      {
+        id: "e9d8c7",
+        type: "number",
+      },
+    ],
+  },
+];
 
+const edges = [
+  {
+    id: "kadjbg",
+    from: "b3e1f4",
+    to: "4f2e1d",
+  },
+  {
+    id: "0d1e2f",
+    from: "b3e1f4",
+    to: "8c7b6a",
+  },
+];
 /**
  *
  * Manages ai by storing context and handling prompt input
@@ -98,11 +103,19 @@ export class AiManager {
     }
     //  console.log(this._pluginContext)
 
+    const stringNodes: string[] = [];
+    const stringEdges: string[] = [];
+
+    for (const index of nodes) {
+      stringNodes.push(JSON.stringify(index));
+      stringEdges.push(JSON.stringify(index));
+    }
+
     this._promptContext = {
       prompt: "This is a test prompt",
       plugin: this._pluginContext,
-      graph: JSON.stringify(graph),
-      commands: this._pluginContext,
+      nodes: stringNodes,
+      edges: stringEdges,
     };
   }
 

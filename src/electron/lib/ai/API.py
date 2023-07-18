@@ -1,5 +1,6 @@
 import sys
 import json
+from models import open
 
 output = ""
 
@@ -10,12 +11,13 @@ for line in sys.stdin:
 
 object = json.loads(output)
 
+print("\n")
+print(object)
+# open.sendPrompt(object["prompt"])
 
-print(object["prompt"])
+# Send the processed line to stdout
+# print(object["prompt"])
 
-    # Send the processed line to stdout
-
-# print(output.rstrip())# Read input from stdin
 
 
 

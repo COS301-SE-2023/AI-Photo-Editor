@@ -120,4 +120,5 @@ docs/latex/images
 tsconfig.electron.prod.json
 tsconfig.svelte.prod.json
 
-.env
+__pycache__
+
