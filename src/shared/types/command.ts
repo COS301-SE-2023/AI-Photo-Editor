@@ -1,6 +1,6 @@
 export interface ICommand {
-  signature: string;
-  displayName: string;
+  id: string;
+  name: string;
   description: string;
   icon: string;
 }

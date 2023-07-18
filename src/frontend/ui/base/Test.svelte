@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { projectsStore } from "lib/stores/ProjectStore";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
   import { toastStore } from "../../lib/stores/ToastStore";
 
   let logs: any[] = [];

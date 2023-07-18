@@ -23,16 +23,16 @@
 </script>
 
 <div
-  class="mb-r flex w-full max-w-sm items-center rounded-lg bg-zinc-800 p-3 text-zinc-400 shadow ring-2 ring-zinc-400 {hovered &&
+  class="mb-r flex w-full max-w-sm items-center rounded-lg bg-zinc-800 p-2 text-zinc-400 shadow ring-2 ring-zinc-400 {hovered &&
   freezable
     ? 'scale-[101%]'
     : ''}"
   role="alert"
 >
   <div
-    class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg {iconColors}"
+    class="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg {iconColors}"
   >
-    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
       {#if type === "success"}
         <path
           d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
@@ -55,7 +55,7 @@
   <div class="ml-3 text-sm font-normal">{message}</div>
   <button
     type="button"
-    class="-mx-1.5 -my-1.5 ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border-none bg-zinc-800 p-1.5 text-zinc-500 hover:bg-zinc-700 hover:text-white focus:ring-2 focus:ring-gray-300"
+    class="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border-none bg-zinc-800 p-1.5 text-zinc-500 hover:bg-zinc-700 hover:text-white focus:ring-2 focus:ring-gray-300"
     aria-label="Close"
     on:click="{() => dispatch('dismiss')}"
   >

@@ -1,31 +1,54 @@
-import type { Registry, RegistryInstance } from "./Registry";
+import type { Registry } from "./Registry";
 import type { ICommand } from "../../../shared/types";
+import { Blix } from "../Blix";
+
+export type CommandContext = Blix;
+
+export interface Command {
+  id: string;
+  handler: CommandHandler;
+  description?: CommandDescription | null;
+}
+
+export type CommandHandler = (ctx: CommandContext, params: any) => void;
+
+export interface CommandDescription {
+  readonly name: string;
+  readonly description: string;
+  readonly icon?: string;
+  // readonly args?: ReadonlyArray<{
+  // Specify arg schema for command here
+  // }>;
+  // readonly returns?: string    specify return type here
+}
 
 export class CommandRegistry implements Registry {
-  private registry: { [key: string]: CommandInstance } = {};
+  private registry: { [key: string]: Command } = {};
 
-  addInstance(instance: CommandInstance): void {
-    this.registry[instance.signature] = instance;
+  constructor(private readonly blix: Blix) {}
+
+  addInstance(instance: Command): void {
+    if (!instance) {
+      throw Error("Invalid Command");
+    }
+    this.registry[instance.id] = instance;
+    this.blix.mainWindow?.apis.commandClientApi.registryChanged(this.getCommands());
   }
 
-  getRegistry(): { [key: string]: CommandInstance } {
-    return this.registry;
-  }
-
-  getCommandNames(): string[] {
-    return Object.keys(this.registry);
+  getRegistry() {
+    return { ...this.registry };
   }
 
   getCommands(): ICommand[] {
     const commands: ICommand[] = [];
-    for (const command in this.registry) {
-      if (this.registry.hasOwnProperty(command)) {
-        const commandInstance: CommandInstance = this.registry[command];
-        const commandObject = {
-          signature: commandInstance.signature,
-          displayName: commandInstance.displayName,
-          description: commandInstance.description,
-          icon: commandInstance.icon,
+    for (const key in this.registry) {
+      if (key in this.registry) {
+        const command = this.registry[key];
+        const commandObject: ICommand = {
+          id: command.id,
+          name: command.description?.name ?? "",
+          description: command.description?.description ?? "",
+          icon: command.description?.icon ?? "",
         };
         commands.push(commandObject);
       }
@@ -33,54 +56,13 @@ export class CommandRegistry implements Registry {
     return commands;
   }
 
-  runCommand(command: string, options?: { data: any }) {
-    this.registry[command].run(options);
-  }
-}
+  async runCommand(id: string, params?: any) {
+    const command = this.registry[id];
 
-export class CommandInstance implements RegistryInstance {
-  private _id: string;
-  constructor(
-    private readonly _plugin: string,
-    private readonly _name: string,
-    private readonly _displayName: string,
-    private readonly _description: string,
-    private readonly _icon: string,
-    private readonly _command: any
-  ) {
-    this._id = "";
-  }
+    if (!command) {
+      throw Error("Invalid Command");
+    }
 
-  get id(): string {
-    return this._id;
-  }
-
-  get signature(): string {
-    // TODO create unique
-    return this._plugin + "." + this._name;
-  }
-
-  get plugin(): string {
-    return this._plugin;
-  }
-
-  get name(): string {
-    return this._name;
-  }
-
-  get displayName(): string {
-    return this._displayName;
-  }
-
-  get description(): string {
-    return this._description;
-  }
-
-  get icon(): string {
-    return this._icon;
-  }
-
-  get run(): any {
-    return this._command;
+    return command.handler(this.blix, params);
   }
 }

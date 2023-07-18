@@ -6,6 +6,7 @@ import { bindWindowApi } from "electron-affinity/main";
 import type { CommandClientApi } from "@frontend/lib/api/apis/CommandClientApi";
 import type { GraphClientApi } from "@frontend/lib/api/apis/GraphClientApi";
 import type { ProjectClientApi } from "@frontend/lib/api/apis/ProjectClientApi";
+import type { UtilClientApi } from "@frontend/lib/api/apis/UtilClientApi";
 
 /**
  * Binds the window APIs to the main process for every window.
@@ -20,6 +21,7 @@ export async function bindMainWindowApis(window: BrowserWindow) {
       commandClientApi: await bindWindowApi<CommandClientApi>(window, "CommandClientApi"),
       graphClientApi: await bindWindowApi<GraphClientApi>(window, "GraphClientApi"),
       projectClientApi: await bindWindowApi<ProjectClientApi>(window, "ProjectClientApi"),
+      utilClientApi: await bindWindowApi<UtilClientApi>(window, "UtilClientApi"),
     },
   });
 }

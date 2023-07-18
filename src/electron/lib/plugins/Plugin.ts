@@ -7,14 +7,14 @@ import {
   NodeInstance,
   OutputAnchorInstance,
 } from "../registries/ToolboxRegistry";
-import { CommandInstance } from "../registries/CommandRegistry";
+import type { Command } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
 import Main from "electron/main";
 import type { MainWindow } from "../api/apis/WindowApi";
 import { dialog } from "electron";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
-import type { SharedProject } from "@shared/types";
+import type { SharedProject } from "../../../shared/types";
 
 export type PluginSignature = string;
 export type NodeSignature = string;
@@ -89,16 +89,16 @@ export class Plugin {
           blix.commandRegistry.addInstance(
             pluginModule.commands[cmd](
               new CommandPluginContext(cmd, this.packageData.name, blix)
-            ) as CommandInstance
+            ) as Command
           );
         }
       }
 
       if ("tiles" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to tile registry
+
         for (const tile in pluginModule.tiles) {
           if (!pluginModule.tiles.hasOwnProperty(tile)) continue;
-
           blix.tileRegistry.addInstance(
             pluginModule.tiles[tile](new TilePluginContext()) as TileInstance
           );
@@ -173,15 +173,16 @@ class CommandPluginContext extends PluginContext {
     return this.blix;
   }
 
-  public create() {
-    return new CommandInstance(
-      this.plugin,
-      this.name,
-      this.displayName,
-      this.description,
-      this.icon,
-      this.command
-    );
+  public create(): Command {
+    return {
+      id: `${this.plugin}.${this.name}`,
+      handler: this.command,
+      description: {
+        name: this.displayName,
+        description: this.description,
+        icon: this.icon,
+      },
+    };
   }
 }
 

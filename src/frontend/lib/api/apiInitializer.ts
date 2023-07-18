@@ -12,6 +12,7 @@ import type { ToolboxApi } from "@electron/lib/api/apis/ToolboxApi";
 import { CommandClientApi } from "./apis/CommandClientApi";
 import { GraphClientApi } from "./apis/GraphClientApi";
 import { ProjectClientApi } from "./apis/ProjectClientApi";
+import { UtilClientApi } from "./apis/UtilClientApi";
 
 /**
  * Initializes the application by exposing the window IPC APIs to the main
@@ -44,6 +45,7 @@ function exposeWindowApis() {
   exposeWindowApi(new CommandClientApi());
   exposeWindowApi(new GraphClientApi());
   exposeWindowApi(new ProjectClientApi());
+  exposeWindowApi(new UtilClientApi());
 }
 
 export type MainApis = AwaitedType<typeof bindMainApis>;

@@ -21,16 +21,12 @@ function createCommandStore() {
     // window.apis.pluginApi.addCommand(cmds);
   }
 
-  async function runCommand(cmd: string) {
-    let options: { data: any } = { data: null };
-    // console.log(cmd)
-    // console.log(projectManager.getActiveProject().getId())
-    if (cmd === "base-plugin.save" || cmd === "base-plugin.saveas") {
-      // options = { data: { id: get(projectsStore).activeProject?.id, layout: get(projectsStore).activeProject?.layout.saveLayout() } };
-      options = { data: { id: get(projectsStore).activeProject?.id } };
+  async function runCommand(id: string) {
+    if (id in blixCommandParams) {
+      await window.apis.commandApi.runCommand(id, blixCommandParams[id]());
+    } else {
+      await window.apis.commandApi.runCommand(id);
     }
-    // console.log(options.data)
-    await window.apis.commandApi.runCommand(cmd, options);
   }
 
   return {
@@ -40,5 +36,17 @@ function createCommandStore() {
     refreshStore,
   };
 }
+
+// ========== Native Command Parameters ==========
+
+const blixCommandParams: Record<string, () => any> = {
+  "blix.projects.save": () => {
+    const project = get(projectsStore).activeProject;
+    return {
+      projectId: project?.id,
+      layout: project?.layout.saveLayout(),
+    };
+  },
+};
 
 export const commandStore = createCommandStore();

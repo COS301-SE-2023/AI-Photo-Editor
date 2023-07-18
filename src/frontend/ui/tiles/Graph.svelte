@@ -5,13 +5,14 @@
   import { graphMall } from "@frontend/lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import type { GraphNode } from "@shared/ui/UIGraph";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
   export let panelId = Math.round(10000000 * Math.random()).toString();
 
-  let graphIds = graphMall.getAllGraphUUIDsReactive();
-  $: graphId = $graphIds[0]; //Always use the first graph
+  let graphIds = projectsStore.activeProjectGraphIds;
+  let graphId = $graphIds[0];
 
   $: thisGraphStore = graphMall.getGraphReactive(graphId);
   let graphNodes: Readable<GraphNode[]> | undefined;

@@ -148,7 +148,7 @@
     showPalette = false;
 
     console.log(item);
-    commandStore.runCommand(item.signature);
+    commandStore.runCommand(item.id);
   }
 
   $: if (showPalette && inputElement) {
@@ -195,10 +195,8 @@
               <ul>
                 {#each category.items as item, j}
                   <PaletteItem
-                    title="{item.displayName}"
-                    description="{item.signature.split('.')[0] === 'base-plugin'
-                      ? 'Default'
-                      : item.signature.split('.')[0]}"
+                    title="{item.name}"
+                    description="{item.id.split('.')[0]}"
                     selected="{i == selectedCategory && j == selectedItem}"
                     on:itemClicked="{() => handleAction(item)}"
                   />

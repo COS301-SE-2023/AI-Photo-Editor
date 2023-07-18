@@ -7,15 +7,15 @@ import type { IpcResponse } from "../MainApi";
 export class ProjectApi implements ElectronMainApi<ProjectApi> {
   constructor(private readonly blix: Blix) {}
 
-  async createProject(): Promise<IpcResponse<SharedProject>> {
-    const graphId = this.blix.graphManager.createGraph();
+  async createProject(): Promise<IpcResponse<string>> {
     const project = this.blix.projectManager.createProject();
-    project.addGraph(graphId);
+    const graphId = this.blix.graphManager.createGraph();
+    this.blix.projectManager.addGraph(project.uuid, graphId);
     this.blix.graphManager.onGraphUpdated(graphId);
 
     return {
       success: true,
-      data: project.toSharedProject(),
+      data: "Project created successfully",
     };
   }
 
@@ -43,14 +43,5 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
 
   async closeProject(uuid: UUID) {
     this.blix.projectManager.removeProject(uuid);
-  }
-
-  // async getOpenProjects(): Promise<FrontendProject[]> {
-  //   logger.info("Retrieving open projects");
-  //   return this._projMgr.getOpenProjects().map((proj) => proj.mapToFrontendProject());
-  // }
-
-  async updateLayout(id: UUID, layout: LayoutPanel) {
-    this.blix.projectManager.updateLayout(id, layout);
   }
 }

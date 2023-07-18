@@ -1,25 +1,19 @@
 import type { ElectronMainApi } from "electron-affinity/main";
-import { CommandInstance, CommandRegistry } from "../../registries/CommandRegistry";
+import { NodeInstance } from "../../registries/ToolboxRegistry";
 import type { Blix } from "../../Blix";
-import logger from "../../../utils/logger";
 
 export class ToolboxApi implements ElectronMainApi<ToolboxApi> {
-  private _counter = 0;
-  private readonly _blix: Blix;
+  private readonly blix: Blix;
 
   constructor(blix: Blix) {
-    this._blix = blix;
+    this.blix = blix;
   }
 
-  async addNode(instance: CommandInstance) {
-    this._blix.commandRegistry.addInstance(instance);
+  async addNode(instance: NodeInstance) {
+    this.blix.toolbox.addInstance(instance);
   }
-
-  // async runCommand(command: string) {
-  //   this._blix.commandRegistry.runCommand(command);
-  // }
 
   async getNodes() {
-    return this._blix.toolbox.getNodes();
+    return this.blix.toolbox.getNodes();
   }
 }

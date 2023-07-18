@@ -44,38 +44,38 @@ const commands = {
 
         return context.create();
     },
-    "import": (context) => {
-        // TODO: Work this out
-        // E.g. Could get context.command.inputs for instance for additional values
+    // "import": (context) => {
+    //     // TODO: Work this out
+    //     // E.g. Could get context.command.inputs for instance for additional values
     
-        context.setDescription("import a picture");
+    //     context.setDescription("import a picture");
 
-        context.setIcon("testing/image.jpg");
+    //     context.setIcon("testing/image.jpg");
 
-        context.setDisplayName("Import Project");
+    //     context.setDisplayName("Import Project");
 
-        context.addCommand(() => {
-            console.log("Import project");
-        })
+    //     context.addCommand(() => {
+    //         console.log("Import project");
+    //     })
 
-        return context.create();
-    },
-    "export": (context) => {
-        // TODO: Work this out
-        // E.g. Could get context.command.inputs for instance for additional values
+    //     return context.create();
+    // },
+    // "export": (context) => {
+    //     // TODO: Work this out
+    //     // E.g. Could get context.command.inputs for instance for additional values
     
-        context.setDescription("import a picture");
+    //     context.setDescription("import a picture");
 
-        context.setIcon("testing/image.jpg");
+    //     context.setIcon("testing/image.jpg");
 
-        context.setDisplayName("Export project");
+    //     context.setDisplayName("Export project");
 
-        context.addCommand(() => {
-            console.log("Export picture");
-        })
+    //     context.addCommand(() => {
+    //         console.log("Export picture");
+    //     })
 
-        return context.create();
-    }
+    //     return context.create();
+    // }
 }
 
 // Here we define custom tiles for the UI

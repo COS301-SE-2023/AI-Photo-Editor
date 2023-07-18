@@ -1,4 +1,4 @@
-import { type UUID } from "@shared/utils/UniqueEntity";
+import { type UUID } from "../../shared/utils/UniqueEntity";
 
 export type GraphUUID = UUID;
 export type GraphNodeUUID = UUID;

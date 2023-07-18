@@ -3,7 +3,7 @@ import type { LayoutPanel } from "./layout";
 
 export interface SharedProject {
   id: UUID;
-  name: string;
-  layout: LayoutPanel;
-  graphs: UUID[];
+  name?: string;
+  layout?: LayoutPanel;
+  graphs?: UUID[];
 }

@@ -39,14 +39,14 @@
   //     activeProjectStore = null;
   //   }
   // })A;
-  $: {
-    if($projectsStore.activeProject) {
-      console.log("New active project")
-      $projectsStore.activeProject.layout;
-      console.log("New layout")
-      projectsStore.updateLayout($projectsStore.activeProject.id);
-    }
-  }
+  // $: {
+  //   if($projectsStore.activeProject) {
+  //     console.log("New active project")
+  //     $projectsStore.activeProject.layout;
+  //     console.log("New layout")
+  //     projectsStore.updateLayout($projectsStore.activeProject.id);
+  //   }
+  // }
 </script>
 
 <!-- {#if activeLayout && activeProjectStore}

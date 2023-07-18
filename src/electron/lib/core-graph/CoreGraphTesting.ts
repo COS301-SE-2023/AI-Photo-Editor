@@ -650,49 +650,49 @@ export class TestGraph {
   }
 }
 
-export function testStuffies(blix: Blix) {
-  const inputs: InputAnchorInstance[] = [];
-  const outputs: OutputAnchorInstance[] = [];
-  const tempNodes: NodeInstance[] = [];
+// export function testStuffies(blix: Blix) {
+//   const inputs: InputAnchorInstance[] = [];
+//   const outputs: OutputAnchorInstance[] = [];
+//   const tempNodes: NodeInstance[] = [];
 
-  inputs.push(
-    new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.0", "input_anchor1"),
-    new InputAnchorInstance("number", "hello-plugin.hello.input_anchor2.1", "input_anchor2"),
-    new InputAnchorInstance("number", "hello-plugin.hello.input_anchor3.2", "input_anchor3")
-  );
-  outputs.push(
-    new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.3", "output_anchor1"),
-    new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.4", "output_anchor2")
-  );
+//   inputs.push(
+//     new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.0", "input_anchor1"),
+//     new InputAnchorInstance("number", "hello-plugin.hello.input_anchor2.1", "input_anchor2"),
+//     new InputAnchorInstance("number", "hello-plugin.hello.input_anchor3.2", "input_anchor3")
+//   );
+//   outputs.push(
+//     new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.3", "output_anchor1"),
+//     new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.4", "output_anchor2")
+//   );
 
-  for (let i = 1; i < 7; i++) {
-    tempNodes.push(
-      new NodeInstance(
-        `hello-plugin.hello`,
-        `hello`,
-        `hello-plugin`,
-        `title`,
-        `description`,
-        `icon`,
-        inputs,
-        outputs
-      )
-    );
-  }
+//   for (let i = 1; i < 7; i++) {
+//     tempNodes.push(
+//       new NodeInstance(
+//         `hello-plugin.hello`,
+//         `hello`,
+//         `hello-plugin`,
+//         `title`,
+//         `description`,
+//         `icon`,
+//         inputs,
+//         outputs
+//       )
+//     );
+//   }
 
-  const project = blix.projectManager.createProject("Test Project");
-  const graph = blix.graphManager.createGraph();
-  project.addGraph(graph);
-  const g = blix.graphManager.getGraph(graph);
-  g.addNode(tempNodes[0]);
-  g.addNode(tempNodes[1]);
-  return project.uuid;
+//   const project = blix.projectManager.createProject("Test Project");
+//   const graph = blix.graphManager.createGraph();
+//   project.addGraph(graph);
+//   const g = blix.graphManager.getGraph(graph);
+//   g.addNode(tempNodes[0]);
+//   g.addNode(tempNodes[1]);
+//   return project.uuid;
 
-  // const table: { [key: number]: string} = {};
-  // table[0] = "test";
-  // table[2] = "test3";
-  // table[1] = "test2";
-  // for(const key in table) {
-  //   logger.info(key + "\n");
-  // }
-}
+//   // const table: { [key: number]: string} = {};
+//   // table[0] = "test";
+//   // table[2] = "test3";
+//   // table[1] = "test2";
+//   // for(const key in table) {
+//   //   logger.info(key + "\n");
+//   // }
+// }

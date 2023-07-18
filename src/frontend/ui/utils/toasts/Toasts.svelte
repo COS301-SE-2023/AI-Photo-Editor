@@ -5,6 +5,7 @@
   import { flip } from "svelte/animate";
 
   let hoveredId: string | null = null;
+  const maxToasts = 5;
 
   function onMouseEnter(id: string) {
     toastStore.freeze(id);
@@ -18,8 +19,8 @@
 </script>
 
 {#if $toastStore}
-  <section class="fixed bottom-5 right-5 w-96 space-y-3">
-    {#each $toastStore.slice(0, 3) as toast (toast.id)}
+  <section class="fixed bottom-5 right-5 z-[10000] w-96 space-y-3">
+    {#each $toastStore.slice(0, maxToasts) as toast (toast.id)}
       <div
         animate:flip="{{ duration: 250 }}"
         in:fade

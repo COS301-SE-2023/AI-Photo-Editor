@@ -5,10 +5,6 @@ import { app } from "electron";
 import type { PathLike } from "fs";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
-import type { SharedProject, LayoutPanel } from "../../../shared/types";
-import { dialog } from "electron";
-import type { IpcResponse } from "../api/MainApi";
-import type { ProjectFile } from "./CoreProject";
 import { readFile } from "fs/promises";
 import { z } from "zod";
 
@@ -29,20 +25,12 @@ export class ProjectManager {
    *	@returns The newly created project.
    */
   public createProject(name = "Untitled"): CoreProject {
-    const starterLayout: LayoutPanel = {
-      panels: [
-        {
-          content: "debug",
-        },
-        {
-          content: "graph",
-        },
-      ],
-    };
-    const project = new CoreProject(name, starterLayout);
+    const project = new CoreProject(name);
     this._projects[project.uuid] = project;
+    this.onProjectCreated(project.uuid);
     return project;
   }
+
   /**
    * This function will load a project that is stored on a user's device.
    *
@@ -51,10 +39,11 @@ export class ProjectManager {
    * @param path Path to project file
    * @returns UUID of new CoreProject
    */
-  public loadProject(fileName: string, fileContent: ProjectFile, path: PathLike): UUID {
-    const project = new CoreProject(fileName, fileContent.layout);
+  public loadProject(fileName: string, path: PathLike): UUID {
+    const project = new CoreProject(fileName);
     project.location = path;
     this._projects[project.uuid] = project;
+    this.onProjectCreated(project.uuid);
     return project.uuid;
   }
 
@@ -64,6 +53,7 @@ export class ProjectManager {
 
   public removeProject(uuid: UUID) {
     delete this._projects[uuid];
+    this.onProjectRemoved(uuid);
   }
 
   public getOpenProjects() {
@@ -89,55 +79,20 @@ export class ProjectManager {
     }
   }
 
-  // loadRecentProjects(): void {
-  //   const projects = fs.readdirSync(this._path);
-  //   if (!projects) {
-  //     return;
-  //   }
-  //   const recentProjects: SharedProject[] = [];
-  //   for (const project of projects) {
-  //     if (project === ".DS_Store") continue; // Some File returned when using readdirSync on mac
-  //     const data = JSON.parse(fs.readFileSync(join(this._path, project)).toString());
-  //     // TODO:
-  //     // At the moment we just create a project with the name, we dont actually load the graphs or layout
-  //     const newProject: CoreProject = this.createProject(data.name as string);
-  //     this._projects[newProject.uuid] = newProject;
-  //     recentProjects.push(newProject.toSharedProject());
-  //     fs.unlinkSync(join(this._path, project));
-  //   }
-
-  //   // console.log(this._mainWindow?.apis.clientProjectApi)
-  //   this._mainWindow.apis.projectClientApi.loadProjects(recentProjects);
-  // }
-
-  // async loadProject(options: "openFile" | "openDirectory" | "multiSelections") {
-  //   const result = await this.createDialogBox(options);
-  //   if (!(result && !result.canceled && result.filePaths.length > 0)) return;
-
-  //   const project = fs.readFileSync(result.filePaths[0]);
-  //   if (!project) {
-  //     return;
-  //   }
-
-  //   const data = JSON.parse(project.toString());
-
-  //   if (!this.validateProjectFile(data)) return; // Some sort of error
-
-  //   this._mainWindow.apis.projectClientApi.loadProject(
-  //     this.createProject(data.name as string).toSharedProject()
-  //   );
-  // }
-
-  async createDialogBox(options: "openFile" | "openDirectory" | "multiSelections") {
-    if (!this._mainWindow) return;
-    return await dialog.showOpenDialog(this._mainWindow, {
-      properties: [options],
-      filters: [{ name: "Projects", extensions: ["blx"] }],
-    });
+  public onProjectCreated(projectId: UUID) {
+    const project = this._projects[projectId];
+    if (!project) return;
+    this._mainWindow.apis.projectClientApi.onProjectCreated(project.toSharedProject());
   }
 
-  async updateLayout(id: UUID, layout: LayoutPanel) {
-    this._projects[id].layout = layout;
+  public onProjectChanged(projectId: UUID) {
+    const project = this._projects[projectId];
+    if (!project) return;
+    this._mainWindow.apis.projectClientApi.onProjectChanged(project.toSharedProject());
+  }
+
+  public onProjectRemoved(projectId: UUID) {
+    this._mainWindow.apis.projectClientApi.onProjectRemoved(projectId);
   }
 
   validateProjectFile(data: any): boolean {
@@ -156,7 +111,7 @@ export class ProjectManager {
 
     if (project) {
       project.addGraph(graphId);
-      // TODO: Notify frontend of project change
+      this.onProjectChanged(project.uuid);
       return true;
     }
 

@@ -1,10 +1,11 @@
 import { writable, derived, type Readable, get } from "svelte/store";
 import { type UUID } from "@shared/utils/UniqueEntity";
-import { Project } from "../Project";
+import { constructLayout, layoutTemplate, type UIProject } from "../Project";
+import type { SharedProject } from "@shared/types";
 
 type ProjectsStoreState = {
-  projects: Project[];
-  activeProject: Project | null;
+  projects: UIProject[];
+  activeProject: UIProject | null;
 };
 
 /**
@@ -30,13 +31,22 @@ class ProjectsStore {
   });
 
   /**
-   * Adds a project to the store. Use when project is opened in the backend
-   * and UI has to reflect the new state.
+   * Adds a project to the store. Use when project is created in the backend
+   * and UI has show the new state.
    */
-  public addProject(project: Project): void {
+  public handleProjectCreated(projectState: SharedProject, setAsActive = false): void {
+    const { id, name, layout, graphs } = projectState;
+
+    const project: UIProject = {
+      id,
+      name: name ?? "Untitled",
+      layout: layout ? constructLayout(layout) : constructLayout(layoutTemplate),
+      graphs: graphs ? graphs : [],
+    };
+
     this.store.update((state) => {
       state.projects.push(project);
-      if (!state.activeProject) {
+      if (!state.activeProject || setAsActive) {
         state.activeProject = project;
       }
       return state;
@@ -44,49 +54,61 @@ class ProjectsStore {
   }
 
   /**
-   * Adds a list of projects to the store. Use when projects are opened in the
-   * backend and UI has to reflect the new state.
+   * Updates the frontend project store whenever a change to a project has been
+   * somewhere else in the system.
+   *
+   * @param changeState Object containing changed project state
    */
-  public addProjects(projects: Project[]): void {
-    if (projects.length) {
-      this.store.update((state) => {
-        state.projects.push(...projects);
-        if (!state.activeProject) {
-          state.activeProject = projects[0];
-        }
-        return state;
-      });
-    }
+  public handleProjectChanged(changedState: Partial<SharedProject>): void {
+    if (!changedState.id) return;
+
+    this.store.update((state) => {
+      const index = state.projects.findIndex((p) => p.id === changedState.id);
+
+      if (index < 0) return state;
+
+      const project = state.projects[index];
+      const { name, layout, graphs } = changedState;
+
+      const newProject: UIProject = {
+        id: project.id,
+        name: name ? name : project.name,
+        layout: layout ? constructLayout(layout) : project.layout,
+        graphs: graphs ? graphs : project.graphs,
+      };
+
+      state.projects[index] = newProject;
+
+      if (state.activeProject?.id === newProject.id) {
+        state.activeProject = newProject;
+      }
+
+      return state;
+    });
   }
 
   /**
-   * Creates a new project in the backend and adds it to the store.
-   */
-  public async createProject(): Promise<void> {
-    const res = await window.apis.projectApi.createProject();
-
-    if (res.success) {
-      const project = Project.createFromSharedProject(res.data);
-      this.addProject(project);
-      this.setActiveProject(project.id);
-    }
-  }
-
-  /**
-   * Removes a projects to the store. Use when projected is closed in the
+   * Removes a project from the store. Use when project is closed in the
    * backend and UI has to reflect the new state.
    *
    * @param id ID of specific Project
    */
-  public removeProject(id: UUID): void {
+  public handleProjectRemoved(projectId: UUID): void {
     this.store.update((state) => {
       state.activeProject =
-        state.activeProject?.id === id
+        state.activeProject?.id === projectId
           ? this.getNextActiveProject(state.projects, state.activeProject)
           : state.activeProject;
-      state.projects = state.projects.filter((p) => p.id !== id);
+      state.projects = state.projects.filter((p) => p.id !== projectId);
       return state;
     });
+  }
+
+  /**
+   * Creates a new project in the backend.
+   */
+  public async createProject(): Promise<void> {
+    await window.apis.projectApi.createProject();
   }
 
   /**
@@ -94,9 +116,8 @@ class ProjectsStore {
    *
    * @param id ID of specific Project
    */
-  public async closeProject(id: UUID): Promise<void> {
-    this.removeProject(id);
-    await window.apis.projectApi.closeProject(id);
+  public async closeProject(projectId: UUID): Promise<void> {
+    await window.apis.projectApi.closeProject(projectId);
   }
 
   /**
@@ -116,31 +137,6 @@ class ProjectsStore {
   }
 
   /**
-   * @param newState
-   */
-  public updateProject(newState: Project) {
-    // TODO: This method is supposed to take the new state of a project
-    // which might have been changed by the backend or frontend it should
-    // then update the project. So, the parameter might have to change from
-    // a Project to a CommonProject. Data flow will also have to be thought
-    // about, because assume we changed the name of Project on the UI then
-    // it should update in the store optimistically but then it should also
-    // update the name in the backend. But then then backend should not send
-    // an event to the store to be updated cause it kinda was already just
-    // updated optimistically.
-  }
-
-  public changeName(newName: string, id: UUID) {
-    this.store.update((state) => {
-      const project = state.projects.find((p) => p.id === id);
-      if (project) {
-        project.name = newName;
-      }
-      return state;
-    });
-  }
-
-  /**
    * DISCLAIMER: At the moment this actually does not return an independent
    * readable store. If some data is changed in this main store then all the
    * derived stores will be notified as well even if their state did not
@@ -155,7 +151,7 @@ class ProjectsStore {
    * @param id ID of specific Project
    * @returns Derived readable ProjectStore
    */
-  public getProjectStore(id: UUID): Readable<Project | null> {
+  public getProjectStore(id: UUID): Readable<UIProject | null> {
     return derived(this.store, ($store) => {
       return $store.projects.find((p) => p.id === id) || null;
     });
@@ -165,34 +161,17 @@ class ProjectsStore {
     return this.store.subscribe;
   }
 
-  private getNextActiveProject(projects: Project[], currentProject: Project | null): Project {
+  private getNextActiveProject(projects: UIProject[], currentProject: UIProject | null): UIProject {
     const currentIndex = projects.findIndex((p) => p.id === currentProject?.id);
     const nextIndex = currentIndex === projects.length - 1 ? currentIndex - 1 : currentIndex + 1;
     return projects[nextIndex] || null;
   }
-  /**
-   * This function searches for a project and reuturns the jsonified layout
-   * so that the backend may export the project
-   *
-   * @param id The id of the project to get the layout from
-   * @returns JSON formatted layout
-   */
-  public async updateLayout(id: UUID): Promise<void> {
-    const project = get(this.store).projects.find((p) => p.id === id);
-    if (!project) return;
-    await window.apis.projectApi.updateLayout(project.id, project.layout.saveLayout());
+
+  public get activeProjectGraphIds() {
+    return derived(this.store, ($store) => {
+      return $store.activeProject?.graphs || [];
+    });
   }
-
-  // public getAllProjectLayouts(): ProjectSavedState[] {
-  //   const projects = get(this.store).projects;
-  //   return projects.map((p) => ({  name: p.name, uuid: p.id, layout: p.layout.saveLayout() }));
-  // }
 }
-
-// export interface ProjectSavedState {
-//   name: string;
-//   uuid: UUID;
-//   layout: panel;
-// }
 
 export const projectsStore = new ProjectsStore();
