@@ -5,6 +5,7 @@ import { CoreGraph } from "./CoreGraph";
 import { CoreGraphSubscriber } from "./CoreGraphInteractors";
 import { NodeInstance } from "../registries/ToolboxRegistry";
 import { Blix } from "../Blix";
+import { type QueryResponse, QueryResponseStatus } from "../../../shared/types/QueryResponse";
 
 // This class stores all the graphs amongst all open projects
 // Projects index into this store at runtime to get their graphs
@@ -42,36 +43,41 @@ export class CoreGraphManager {
     // }, 5000);
   }
 
-  addNode(graphUUID: UUID, node: NodeInstance): boolean {
-    if (this._graphs[graphUUID] === undefined) return false;
+  addNode(graphUUID: UUID, node: NodeInstance): QueryResponse {
+    if (this._graphs[graphUUID] === undefined)
+      return { status: QueryResponseStatus.error, message: "Graph does not exist" };
     const res = this._graphs[graphUUID].addNode(node);
-    if (res) this.onGraphUpdated(graphUUID);
+    if (res.status) this.onGraphUpdated(graphUUID);
     return res;
   }
 
-  addEdge(graphUUID: UUID, anchorA: UUID, anchorB: UUID): boolean {
-    if (this._graphs[graphUUID] === undefined) return false;
+  addEdge(graphUUID: UUID, anchorA: UUID, anchorB: UUID): QueryResponse {
+    if (this._graphs[graphUUID] === undefined)
+      return { status: QueryResponseStatus.error, message: "Graph does not exist" };
     const res = this._graphs[graphUUID].addEdge(anchorA, anchorB);
-    if (res) this.onGraphUpdated(graphUUID);
+    if (res.status) this.onGraphUpdated(graphUUID);
     return res;
   }
 
-  removeNode(graphUUID: UUID, nodeUUID: UUID): boolean {
-    if (this._graphs[graphUUID] === undefined) return false;
+  removeNode(graphUUID: UUID, nodeUUID: UUID): QueryResponse {
+    if (this._graphs[graphUUID] === undefined)
+      return { status: QueryResponseStatus.error, message: "Graph does not exist" };
     const res = this._graphs[graphUUID].removeNode(nodeUUID);
-    if (res) this.onGraphUpdated(graphUUID);
+    if (res.status) this.onGraphUpdated(graphUUID);
     return res;
   }
 
-  removeEdge(graphUUID: UUID, anchorTo: UUID): boolean {
-    if (this._graphs[graphUUID] === undefined) return false;
+  removeEdge(graphUUID: UUID, anchorTo: UUID): QueryResponse {
+    if (this._graphs[graphUUID] === undefined)
+      return { status: QueryResponseStatus.error, message: "Graph does not exist" };
     const res = this._graphs[graphUUID].removeEdge(anchorTo);
-    if (res) this.onGraphUpdated(graphUUID);
+    if (res.status) this.onGraphUpdated(graphUUID);
     return res;
   }
 
-  setPos(graphUUID: UUID, nodeUUID: UUID, x: number, y: number): boolean {
-    if (this._graphs[graphUUID] === undefined) return false;
+  setPos(graphUUID: UUID, nodeUUID: UUID, x: number, y: number): QueryResponse {
+    if (this._graphs[graphUUID] === undefined)
+      return { status: QueryResponseStatus.error, message: "Graph does not exist" };
     const res = this._graphs[graphUUID].setNodePos(nodeUUID, { x, y });
     // if (res) this.onGraphUpdated(graphUUID);
     // Style changes shouldn't update the subscribers

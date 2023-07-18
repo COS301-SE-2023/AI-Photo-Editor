@@ -7,7 +7,7 @@ import type {
   NodeInstance,
   OutputAnchorInstance,
 } from "../registries/ToolboxRegistry";
-
+import { type QueryResponse, QueryResponseStatus } from "../../../shared/types/QueryResponse";
 // =========================================
 // Explicit types for type safety
 // =========================================
@@ -134,22 +134,26 @@ export class CoreGraph extends UniqueEntity {
   }
 
   // We need to pass in node name and plugin name
-  public addNode(node: NodeInstance): boolean {
-    // Create New Node
-    const n: Node = new Node(node.name, node.plugin, node.inputs, node.outputs);
-    // Add Node to Graph
-    this.nodes[n.uuid] = n;
-    // Add Nodes's Anchors to Graph
-    for (const anchor in n.getAnchors) {
-      if (!n.getAnchors.hasOwnProperty(anchor)) continue;
-      this.anchors[anchor] = n.getAnchors[anchor];
+  public addNode(node: NodeInstance): QueryResponse {
+    try {
+      // Create New Node
+      const n: Node = new Node(node.name, node.plugin, node.inputs, node.outputs);
+      // Add Node to Graph
+      this.nodes[n.uuid] = n;
+      // Add Nodes's Anchors to Graph
+      for (const anchor in n.getAnchors) {
+        if (!n.getAnchors.hasOwnProperty(anchor)) continue;
+        this.anchors[anchor] = n.getAnchors[anchor];
+      }
+      // console.log(QueryResponseStatus.success)
+      return { status: QueryResponseStatus.success, data: { nodeId: n._uuid } };
+    } catch (error) {
+      return { status: QueryResponseStatus.error, message: error as string };
     }
-
     // TODO: Add Node Styling
-    return true;
   }
 
-  public addEdge(anchorA: UUID, anchorB: UUID): boolean {
+  public addEdge(anchorA: UUID, anchorB: UUID): QueryResponse {
     // Edge can start either from an output or input anchor
     const ancFrom =
       this.anchors[anchorA].ioType === AnchorIO.output
@@ -162,22 +166,28 @@ export class CoreGraph extends UniqueEntity {
 
     // Edge must flow from output anchor to input anchor
     if (ancFrom.ioType !== AnchorIO.output || ancTo.ioType !== AnchorIO.input) {
-      return false;
+      return {
+        status: QueryResponseStatus.error,
+        message: "Edge must flow between 2 different anchors",
+      };
     }
 
     // Data flowing through edge must be of same type for both anchors
     if (ancFrom.type !== ancTo.type) {
-      return false;
+      return {
+        status: QueryResponseStatus.error,
+        message: "Data flowing through edge must be of same type for both anchors",
+      };
     }
 
     // Check for cycles
     if (this.checkForCycles(ancFrom, ancTo)) {
-      return false;
+      return { status: QueryResponseStatus.error, message: "Edge cannot create a cycle" };
     }
 
     // Check for duplicate edgeDest
     if (this.checkForDuplicateEdges(ancFrom, ancTo)) {
-      return false;
+      return { status: QueryResponseStatus.error, message: "Edge already exists" };
     }
 
     // Add edge to graph
@@ -187,7 +197,7 @@ export class CoreGraph extends UniqueEntity {
     if (!(ancFrom.uuid in this.edgeSrc)) this.edgeSrc[ancFrom.uuid] = [];
     this.edgeSrc[ancFrom.uuid].push(ancTo.uuid);
 
-    return true;
+    return { status: QueryResponseStatus.success, data: { edgeId: edge._uuid } };
   }
 
   public checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
@@ -216,41 +226,48 @@ export class CoreGraph extends UniqueEntity {
     return false;
   }
 
-  public removeNode(nodeToDelete: UUID): boolean {
+  public removeNode(nodeToDelete: UUID): QueryResponse {
     const node: Node = this.nodes[nodeToDelete];
-    if (!node) return false;
+    if (!node)
+      return { status: QueryResponseStatus.error, message: "Node to be deleted does not exist" };
 
-    // Remove all edges from node
-    for (const anchor in node.getAnchors) {
-      if (!node.getAnchors.hasOwnProperty(anchor)) continue;
-      // Remove all edges feeding into node
-      if (this.anchors[anchor]?.ioType === AnchorIO.input) {
-        this.removeEdge(anchor);
-      }
-      // Remove all edges feeding out of node
-      else if (this.anchors[anchor]?.ioType === AnchorIO.output) {
-        if (anchor in this.edgeSrc) {
-          const anchors: AnchorUUID[] = this.edgeSrc[this.anchors[anchor].uuid];
-          const length: number = anchors.length;
-          // Remove all edges feeding out of current output anchor
-          for (let i = 0; i < length; i++) {
-            this.removeEdge(anchors[0]);
+    try {
+      // Remove all edges from node
+      for (const anchor in node.getAnchors) {
+        if (!node.getAnchors.hasOwnProperty(anchor)) continue;
+        // Remove all edges feeding into node
+        if (this.anchors[anchor]?.ioType === AnchorIO.input) {
+          this.removeEdge(anchor);
+        }
+        // Remove all edges feeding out of node
+        else if (this.anchors[anchor]?.ioType === AnchorIO.output) {
+          if (anchor in this.edgeSrc) {
+            const anchors: AnchorUUID[] = this.edgeSrc[this.anchors[anchor].uuid];
+            const length: number = anchors.length;
+            // Remove all edges feeding out of current output anchor
+            for (let i = 0; i < length; i++) {
+              this.removeEdge(anchors[0]);
+            }
           }
         }
+        // Remove node anchor
+        delete this.anchors[anchor];
       }
-      // Remove node anchor
-      delete this.anchors[anchor];
+      // Remove node
+      delete this.nodes[node.uuid];
+      return { status: QueryResponseStatus.success };
+    } catch (error) {
+      return { status: QueryResponseStatus.error, message: error as string };
     }
-    // Remove node
-    delete this.nodes[node.uuid];
-
-    return true;
   }
 
-  public removeEdge(anchorTo: AnchorUUID): boolean {
+  public removeEdge(anchorTo: AnchorUUID): QueryResponse {
     // Check if Anchor doesnt have a connecting edge
     if (!(anchorTo in this.edgeDest)) {
-      return false;
+      return {
+        status: QueryResponseStatus.error,
+        message: "Anchor does not have a connecting edge",
+      };
     }
 
     try {
@@ -267,17 +284,18 @@ export class CoreGraph extends UniqueEntity {
       // Remove connectiong edge correlating to anchor
       delete this.edgeDest[anchorTo];
 
-      return true;
+      return { status: QueryResponseStatus.success };
     } catch (error) {
       logger.error(error);
-      return false;
+      return { status: QueryResponseStatus.error, data: { message: error as string } };
     }
   }
 
-  public setNodePos(node: UUID, pos: { x: number; y: number }): boolean {
-    if (!(node in this.nodes)) return false;
+  public setNodePos(node: UUID, pos: { x: number; y: number }): QueryResponse {
+    if (!(node in this.nodes))
+      return { status: QueryResponseStatus.error, message: "Node does not exist" };
     this.nodes[node].setStyling(new NodeStyling(pos, { w: 0, h: 0 })); // TODO w/h
-    return true;
+    return { status: QueryResponseStatus.success };
   }
 
   private copy() {
