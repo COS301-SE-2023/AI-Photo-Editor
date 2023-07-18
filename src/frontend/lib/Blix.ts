@@ -3,14 +3,17 @@ import { blixStore } from "./stores/BlixStore";
 import { commandStore } from "./stores/CommandStore";
 import { initializeAPIs } from "./api/apiInitializer";
 // import { GraphNode, UIGraph } from "@shared/ui/UIGraph";
-import { nodeStore } from "./stores/NodeStore";
+import { toolboxStore } from "./stores/ToolboxStore";
 /**
  * Runs on app start. Will initialize the IPC APIs and set
  * the initial frontend stores.
  */
 export async function init() {
   await initializeAPIs();
-  await setInitialStores();
+
+  // TODO: This needs to be called on some onBlixReady event
+  // when the backend Blix + apis have all been fully initialized
+  // await setInitialStores();
 }
 
 async function setInitialStores() {
@@ -24,9 +27,9 @@ async function setInitialStores() {
   const command = await window.apis.commandApi.getCommands();
   commandStore.refreshStore(command);
 
-  // Node store
+  // Toolbox store
   const node = await window.apis.toolboxApi.getNodes();
-  nodeStore.refreshStore(node);
+  toolboxStore.refreshStore(node);
 
   // Graph store
   // const allGraphIds = await window.apis.graphApi.getAllGraphUUIDs();

@@ -10,9 +10,15 @@ import type { ToolboxApi } from "@electron/lib/api/apis/ToolboxApi";
 
 // Window APIs
 import { CommandClientApi } from "./apis/CommandClientApi";
+
+// stores
+import { blixStore } from "../stores/BlixStore";
+import { commandStore } from "../stores/CommandStore";
 import { GraphClientApi } from "./apis/GraphClientApi";
 import { ProjectClientApi } from "./apis/ProjectClientApi";
 import { UtilClientApi } from "./apis/UtilClientApi";
+import { toolboxStore } from "../stores/ToolboxStore";
+import { ToolboxClientApi } from "./apis/ToolboxClientApi";
 
 /**
  * Initializes the application by exposing the window IPC APIs to the main
@@ -42,6 +48,7 @@ async function bindMainApis() {
  * If a new window API is created then add it to this method.
  */
 function exposeWindowApis() {
+  exposeWindowApi(new ToolboxClientApi());
   exposeWindowApi(new CommandClientApi());
   exposeWindowApi(new GraphClientApi());
   exposeWindowApi(new ProjectClientApi());

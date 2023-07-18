@@ -1,5 +1,5 @@
 import expect from "expect";
-import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent, NodeUILeaf,ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
+import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, MinAnchor } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
 import { CoreGraph, CoreGraphStore } from "../../../../../src/electron/lib/core-graph/CoreGraph";
 import { UUID } from "../../../../../src/shared/utils/UniqueEntity";
 
@@ -9,8 +9,8 @@ describe("Test Graph", () => {
  describe("Test getters and setters", () => {
   let graph : CoreGraph;
 
-  const inputs: InputAnchorInstance[] = [];
-  const outputs: OutputAnchorInstance[] = [];
+  const inputs: MinAnchor[] = [];
+  const outputs: MinAnchor[] = [];
   let nodes : NodeInstance[] = [];
 
 
@@ -19,7 +19,7 @@ describe("Test Graph", () => {
     graph = new CoreGraph();
 
     for(let i = 0; i < 10; i++){
-      const node = new NodeInstance("Jake.Shark",i.toString(), "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
+      const node = new NodeInstance("Jake.Shark",i.toString(), "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
       nodes.push(node);
       graph.addNode(node);
      }
@@ -27,10 +27,10 @@ describe("Test Graph", () => {
   test("addNode should add correct node", () => {
    graph = new CoreGraph();
 
-    const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", "1149", inputs, outputs);
+    const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
     graph.addNode(node);
     const obs = Object.values(graph.getNodes);
-    expect(obs[0].getPlugin).toEqual(node.getPlugin);
+    expect(obs[0].getPlugin).toEqual(node.plugin);
   });
 
   test("getNodes should get all the nodes properly", () => {
@@ -38,7 +38,7 @@ describe("Test Graph", () => {
     const obs = Object.values(graph.getNodes);
 
     for(let i = 0; i < 10; i++){
-      expect(obs[i].getName).toEqual(nodes[i].getName);
+      expect(obs[i].getName).toEqual(nodes[i].name);
     }
   });
 
@@ -48,10 +48,10 @@ describe("Test Graph", () => {
     graph = new CoreGraph();
 
     for(let i = 0; i < 10; i++){
-      const inAnchor =  new InputAnchorInstance("string",`Jake.Shark.${i}.0`,"in"+i.toString());
-      const outAnchor =  new OutputAnchorInstance("string",`Jake.Shark.${i}.1`,"out"+i.toString());
+      const inAnchor =  { type: "string", displayName: `Jake.Shark.${i}.0`, identifier: "in"+i.toString() };
+      const outAnchor = { type: "string", displayName: `Jake.Shark.${i}.1`, identifier: "out"+i.toString() };
 
-      const node = new NodeInstance("Jake.Shark",i.toString(), "Jake", "The Jake plugin", "This is the Jake plugin", "1149", [inAnchor], [outAnchor]);
+      const node = new NodeInstance("Jake.Shark",i.toString(), "Jake", "The Jake plugin", "This is the Jake plugin", [inAnchor], [outAnchor]);
       graph.addNode(node);
       names.push(inAnchor.displayName);
       names.push(outAnchor.displayName);
@@ -61,7 +61,7 @@ describe("Test Graph", () => {
 
     for(let i = 0; i < 10; i++){
 
-      expect(names).toContain(obs[i].getDisplayName);
+      expect(names).toContain(obs[i].displayName);
     }
   });
 
@@ -97,8 +97,8 @@ describe("Test CoreGraphStore", () => {
 describe("Test CoreGraph", () => {
   let graph : CoreGraph;
 
-  let inputs: InputAnchorInstance[] = [];
-  let outputs: OutputAnchorInstance[] = [];
+  let inputs: MinAnchor[] = [];
+  let outputs: MinAnchor[] = [];
   let nodes : NodeInstance[] = [];
 
 
@@ -121,13 +121,13 @@ describe("Test CoreGraph", () => {
     outputs = [];
 
     inputs.push(
-      new InputAnchorInstance("string", "signature", "input_anchor1"),
-      new InputAnchorInstance("number", "signature", "input_anchor2"),
-      new InputAnchorInstance("string", "signature", "input_anchor2")
+      { type: "string", identifier: "signature", displayName: "input_anchor1"},
+      { type: "number", identifier: "signature", displayName: "input_anchor2"},
+      { type: "string", identifier: "signature", displayName: "input_anchor2"}
     );
     outputs.push(
-      new OutputAnchorInstance("string", "signature", "output_anchor1"),
-      new OutputAnchorInstance("number", "signature", "output_anchor2")
+      { type: "string", identifier: "signature", displayName: "output_anchor1"},
+      { type: "number", identifier: "signature", displayName: "output_anchor2"}
     );
 
   });
@@ -140,7 +140,7 @@ describe("Test CoreGraph", () => {
     const description: string = "This is the Best Node in the world";
     const icon:string = "fa-diagram-project";
 
-    const node = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, icon, inputs, outputs);
+    const node = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, inputs, outputs);
     
     graph.addNode(node);
     expect(Object.values(graph.getNodes)[0]).toBeDefined();
@@ -154,7 +154,7 @@ describe("Test CoreGraph", () => {
     const description: string = "This is the Best Node in the world";
     const icon:string = "fa-diagram-project";
 
-    const node = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, icon, inputs, outputs);
+    const node = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, inputs, outputs);
     
     graph.addNode(node);
     const id: UUID = Object.keys(graph.getNodes)[0];
@@ -169,8 +169,8 @@ describe("Test CoreGraph", () => {
     const description: string = "This is the Best Node in the world";
     const icon:string = "fa-diagram-project";
 
-    const node1Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, icon, inputs, outputs);
-    const node2Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${2}`, `${plugin}`, title, description, icon, inputs, outputs);
+    const node1Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, inputs, outputs);
+    const node2Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${2}`, `${plugin}`, title, description, inputs, outputs);
     
     graph.addNode(node1Instance);
     graph.addNode(node2Instance);
@@ -229,8 +229,8 @@ describe("Test CoreGraph", () => {
     const description: string = "This is the Best Node in the world";
     const icon:string = "fa-diagram-project";
 
-    const node1Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, icon, inputs, outputs);
-    const node2Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${2}`, `${plugin}`, title, description, icon, inputs, outputs);
+    const node1Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, inputs, outputs);
+    const node2Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${2}`, `${plugin}`, title, description, inputs, outputs);
     
     graph.addNode(node1Instance);
     graph.addNode(node2Instance);
@@ -255,10 +255,10 @@ describe("Test CoreGraph", () => {
     const description: string = "This is the Best Node in the world";
     const icon:string = "fa-diagram-project";
 
-    const node1Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, icon, inputs, outputs);
-    const node2Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${2}`, `${plugin}`, title, description, icon, inputs, outputs);
-    const node3Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, icon, inputs, outputs);
-    const node4Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${2}`, `${plugin}`, title, description, icon, inputs, outputs);
+    const node1Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, inputs, outputs);
+    const node2Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${2}`, `${plugin}`, title, description, inputs, outputs);
+    const node3Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, inputs, outputs);
+    const node4Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${2}`, `${plugin}`, title, description, inputs, outputs);
 
     graph.addNode(node1Instance);
     graph.addNode(node2Instance);
@@ -326,10 +326,10 @@ describe("Test CoreGraph", () => {
     const description: string = "This is the Best Node in the world";
     const icon:string = "fa-diagram-project";
 
-    const node1Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, icon, inputs, outputs);
-    const node2Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${2}`, `${plugin}`, title, description, icon, inputs, outputs);
-    const node3Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${3}`, `${plugin}`, title, description, icon, inputs, outputs);
-    const node4Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${4}`, `${plugin}`, title, description, icon, inputs, outputs);
+    const node1Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${1}`, `${plugin}`, title, description, inputs, outputs);
+    const node2Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${2}`, `${plugin}`, title, description, inputs, outputs);
+    const node3Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${3}`, `${plugin}`, title, description, inputs, outputs);
+    const node4Instance = new NodeInstance(`${plugin}.${bestNode}`,`${bestNode}-${4}`, `${plugin}`, title, description, inputs, outputs);
 
     graph.addNode(node1Instance);
     graph.addNode(node2Instance);

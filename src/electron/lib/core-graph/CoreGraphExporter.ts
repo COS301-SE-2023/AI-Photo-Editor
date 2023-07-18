@@ -19,7 +19,7 @@ interface ExportStrategy<T> {
 
 export type GraphToJSON = { nodes: NodeToJSON[]; edges: EdgeToJSON[] };
 export type NodeToJSON = { signature: string; styling: NodeStyling | null };
-export type AnchorToJSON = { parent: number; id: number };
+export type AnchorToJSON = { parent: string; id: string };
 export type EdgeToJSON = {
   anchorFrom: AnchorToJSON;
   anchorTo: AnchorToJSON;
@@ -36,7 +36,7 @@ export class GraphFileExportStrategy implements ExportStrategy<GraphToJSON> {
       if (!graph.getNodes.hasOwnProperty(node)) continue;
       json.push({
         signature: `${graph.getNodes[node].getPlugin}.${graph.getNodes[node].getName}`,
-        styling: graph.getNodes[node].getStyling,
+        styling: graph.getNodes[node].getStyling || null,
       });
     }
 
@@ -51,14 +51,12 @@ export class GraphFileExportStrategy implements ExportStrategy<GraphToJSON> {
       for (const anchorTo of anchorTos) {
         json.push({
           anchorFrom: {
-            parent: Object.keys(graph.getNodes).indexOf(
-              graph.getAnchors[anchorFrom].getParent.uuid
-            ),
-            id: graph.getAnchors[anchorFrom].getLocalAnchorId,
+            parent: graph.getAnchors[anchorFrom].parent.uuid,
+            id: graph.getAnchors[anchorFrom].anchorId,
           },
           anchorTo: {
-            parent: Object.keys(graph.getNodes).indexOf(graph.getAnchors[anchorTo].getParent.uuid),
-            id: graph.getAnchors[anchorTo].getLocalAnchorId,
+            parent: graph.getAnchors[anchorTo].parent.uuid,
+            id: graph.getAnchors[anchorTo].anchorId,
           },
         });
       }

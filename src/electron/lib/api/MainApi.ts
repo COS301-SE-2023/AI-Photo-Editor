@@ -31,6 +31,15 @@ export function exposeMainApis(blix: Blix) {
 
   // @ts-ignore: no-var-requires
   global.mainApis = apis as any;
+
+  // Return callback to initialize APIs
+  // once everything else is ready
+  return async () => {
+    // apis.projectApi.init();
+    // apis.pluginApi.init();
+    apis.graphApi.init();
+    // apis.toolboxApi.init();
+  };
 }
 
 export type MainApis = ReturnType<typeof exposeMainApis>;

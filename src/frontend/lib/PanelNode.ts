@@ -2,7 +2,7 @@
 
 import type { LayoutPanel, PanelType } from "@shared/types/index";
 
-export class PanelNode {
+export abstract class PanelNode {
   static panelCounter = 0;
 
   constructor(id = -1) {

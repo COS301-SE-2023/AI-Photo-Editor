@@ -7,6 +7,8 @@ import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
 import { readFile } from "fs/promises";
 import { z } from "zod";
+import { dialog } from "electron";
+import type { IpcResponse } from "../api/MainApi";
 
 export class ProjectManager {
   private _projects: { [id: string]: CoreProject };

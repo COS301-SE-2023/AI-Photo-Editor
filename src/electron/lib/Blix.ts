@@ -1,5 +1,5 @@
 import { CommandRegistry } from "./registries/CommandRegistry";
-import { ToolboxRegistry } from "./registries/ToolboxRegistry";
+import { NodeInstance, ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
@@ -10,17 +10,20 @@ import type { UUID } from "../../shared/utils/UniqueEntity";
 import type { UIGraph } from "../../shared/ui/UIGraph";
 import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
+import { AiManager } from "./ai/AiManager";
+import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
 export class Blix {
-  private readonly _toolbox: ToolboxRegistry;
-  private readonly _tileRegistry: TileRegistry;
-  private readonly _commandRegistry: CommandRegistry;
+  private _toolboxRegistry!: ToolboxRegistry;
+  private _tileRegistry: TileRegistry;
+  private _commandRegistry: CommandRegistry;
   private _graphManager!: CoreGraphManager;
   private _projectManager!: ProjectManager;
   private _pluginManager!: PluginManager;
   private _mainWindow!: MainWindow;
+  private _aiManager!: AiManager;
 
   // private startTime: Date;
 
@@ -30,7 +33,6 @@ export class Blix {
 
   constructor() {
     // this.startTime = new Date();
-    this._toolbox = new ToolboxRegistry();
     this._commandRegistry = new CommandRegistry(this);
     this._tileRegistry = new TileRegistry();
   }
@@ -44,6 +46,7 @@ export class Blix {
    */
   public async init(mainWindow: MainWindow) {
     this._mainWindow = mainWindow;
+    this._toolboxRegistry = new ToolboxRegistry(mainWindow);
 
     for (const command of blixCommands) {
       this.commandRegistry.addInstance(command);
@@ -53,7 +56,8 @@ export class Blix {
     this._pluginManager = new PluginManager(this);
     await this._pluginManager.loadBasePlugins();
 
-    this._graphManager = new CoreGraphManager(mainWindow, this._toolbox);
+    this._graphManager = new CoreGraphManager(mainWindow, this._toolboxRegistry);
+    // this._aiManager = new AiManager(mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
 
     // Add subscribers
@@ -64,8 +68,23 @@ export class Blix {
     };
 
     this._graphManager.addAllSubscriber(graphSubscriber);
+
+    // testStuffies(this);
+
+    // TESTING ADD NODE TO GRAPH
+    // setInterval(() => {
+    //   const allIds = this._graphManager.getAllGraphUUIDs();
+
+    //   const randId = allIds[Math.floor(Math.random() * allIds.length)];
+    //   const toolbox = this._toolboxRegistry.getRegistry();
+    //   const toolboxKeys = Object.keys(toolbox);
+    //   const randomNode = toolbox[toolboxKeys[Math.floor(Math.random() * toolboxKeys.length)]];
+
+    //   this._graphManager.addNode(randId, randomNode);
+    // }, 3000);
   }
 
+  // TODO: Move these to a Utils.ts or something like that
   sendInformationMessage(message: string) {
     this._mainWindow.apis.utilClientApi.showToast({ message, type: "info" });
   }
@@ -83,7 +102,7 @@ export class Blix {
   }
 
   get toolbox(): ToolboxRegistry {
-    return this._toolbox;
+    return this._toolboxRegistry;
   }
 
   get tileRegistry(): TileRegistry {
@@ -100,6 +119,10 @@ export class Blix {
 
   get projectManager(): ProjectManager {
     return this._projectManager;
+  }
+
+  get aiManager(): AiManager {
+    return this._aiManager;
   }
 
   get mainWindow(): MainWindow | null {

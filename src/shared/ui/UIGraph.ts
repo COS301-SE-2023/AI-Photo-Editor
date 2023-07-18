@@ -1,33 +1,47 @@
 import { type UUID } from "../../shared/utils/UniqueEntity";
+import { type NodeSignature } from "./ToolboxTypes";
+import { type Writable, writable, get } from "svelte/store";
 
 export type GraphUUID = UUID;
 export type GraphNodeUUID = UUID;
 export type GraphAnchorUUID = UUID;
 
 export class UIGraph {
-  nodes: { [key: GraphNodeUUID]: GraphNode } = {};
+  public nodes: { [key: GraphNodeUUID]: GraphNode } = {};
+  public edges: { [key: GraphUUID]: any } = {}; // TODO
 
   constructor(public uuid: GraphUUID) {}
+
+  public updateNodes() {}
 }
 
 export class GraphNode {
-  name = "";
+  displayName = "";
   id = "";
-  public connections: [];
 
-  nodeUI: any; // TODO: Change this to NodeUI
+  signature: NodeSignature = ""; // index in toolbox
 
-  inAnchors: GraphAnchor[] = [];
-  outAnchors: GraphAnchor[] = [];
+  styling?: NodeStylingStore;
 
-  pos: { x: number; y: number } = { x: 0, y: 0 };
-  dims: { w: number; h: number } = { w: 0, h: 0 };
+  // inAnchors: GraphAnchor[] = [];
+  // outAnchors: GraphAnchor[] = [];
 
-  constructor(public uuid: GraphNodeUUID) {
+  constructor(public uuid: GraphNodeUUID, pos?: SvelvetCanvasPos) {
     this.id = uuid;
-    this.name = "Node-" + uuid;
-    this.connections = [];
+    this.displayName = "Node-" + uuid.substring(0, 6);
+    if (pos) {
+      this.styling = new NodeStylingStore();
+      this.styling.pos.set(pos);
+    }
   }
+}
+
+export type SvelvetCanvasPos = { x: number; y: number };
+
+export class NodeStylingStore {
+  pos = writable<SvelvetCanvasPos>({ x: 0, y: 0 });
+  width = writable<number>(0);
+  height = writable<number>(0);
 }
 
 class GraphAnchor {

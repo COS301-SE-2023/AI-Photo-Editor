@@ -2,6 +2,8 @@ import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import type { UUID } from "../../../../shared/utils/UniqueEntity";
 import type { SharedProject, LayoutPanel } from "../../../../shared/types/index";
+import logger from "../../../utils/logger";
+import { ProjectClientApi } from "@frontend/lib/api/apis/ProjectClientApi";
 import type { IpcResponse } from "../MainApi";
 
 export class ProjectApi implements ElectronMainApi<ProjectApi> {

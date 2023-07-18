@@ -1,4 +1,4 @@
-import type { NodeUI } from "../../electron/lib/registries/ToolboxRegistry";
+import type { NodeUI } from "@shared/ui/NodeUITypes";
 
 export interface IAnchor {
   type: string;

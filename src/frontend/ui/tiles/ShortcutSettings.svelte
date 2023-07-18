@@ -7,15 +7,19 @@
 
   function updateShortcut(action: string, index: number, event: KeyboardEvent) {
     console.log(action, event);
-    shortcutsRegistry.updateActionShortcut(
-      action as ShortcutAction,
-      index,
-      ShortcutCombo.fromEvent(event)
-    );
+    const combo: ShortcutCombo | null = ShortcutCombo.fromEvent(event);
+    if (!combo) return;
+
+    shortcutsRegistry.updateActionShortcut(action as ShortcutAction, index, combo);
   }
 
   function addShortcut(action: string, event: KeyboardEvent) {
-    shortcutsRegistry.addActionShortcut(action as ShortcutAction, ShortcutCombo.fromEvent(event));
+    const combo: ShortcutCombo | null = ShortcutCombo.fromEvent(event);
+    if (!combo) return;
+
+    shortcutsRegistry.addActionShortcut(action as ShortcutAction, combo);
+    // Defocus the button
+    (event.target as HTMLButtonElement).blur();
   }
 </script>
 

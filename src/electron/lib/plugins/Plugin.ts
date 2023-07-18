@@ -17,7 +17,6 @@ import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { SharedProject } from "../../../shared/types";
 
 export type PluginSignature = string;
-export type NodeSignature = string;
 
 export class Plugin {
   private hasRequiredSelf: boolean;
@@ -61,24 +60,17 @@ export class Plugin {
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          const inputs: InputAnchorInstance[] = [];
-          const outputs: OutputAnchorInstance[] = [];
-
-          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs);
-
-          const nodeBuilder = new NodeBuilder(nodeInstance);
-
-          const ctx = new NodePluginContext(nodeBuilder);
+          const ctx = new NodePluginContext();
 
           try {
             pluginModule.nodes[node](ctx); // Execute node builder
-            nodeBuilder.validate(); // Ensure the node is properly instantiated
-            blix.toolbox.addInstance(nodeInstance); // Add to registry
+            blix.toolbox.addInstance(ctx.nodeBuilder.build); // Add to registry
           } catch (err) {
             logger.warn(err);
           }
           // console.log(blix.toolbox.getRegistry()[nodeInstance.getSignature])
         }
+        // blix.aiManager.instantiate(blix.toolbox);
       }
 
       if ("commands" in pluginModule && typeof pluginModule.nodes === "object") {
@@ -121,12 +113,21 @@ class PluginContext {
 }
 
 class NodePluginContext extends PluginContext {
-  constructor(private nodeBuilder: NodeBuilder) {
+  private _nodeBuilder!: NodeBuilder;
+  constructor() {
     super();
   }
 
+  public get nodeBuilder() {
+    return this._nodeBuilder;
+  }
+
+  // nodeBuilder = context.instantiate("hello-plugin","hello");
+  // TODO: Change this: it should not be done in the plugin,
+  // but when the plugin loads. The plugin already defines each node name as the key
+  // in the dictionary, and we already know the plugin name in the package.json
   public instantiate(plugin: string, name: string): NodeBuilder {
-    this.nodeBuilder.instantiate(plugin, name);
+    this._nodeBuilder = new NodeBuilder(plugin, name);
     return this.nodeBuilder;
   }
 }
@@ -183,6 +184,10 @@ class CommandPluginContext extends PluginContext {
         icon: this.icon,
       },
     };
+  }
+
+  public sendPrompt() {
+    this.blix.aiManager.sendPrompt();
   }
 }
 

@@ -3,6 +3,7 @@ import type { AwaitedType } from "electron-affinity/main";
 import { bindWindowApi } from "electron-affinity/main";
 
 // Window APIs
+import type { ToolboxClientApi } from "@frontend/lib/api/apis/ToolboxClientApi";
 import type { CommandClientApi } from "@frontend/lib/api/apis/CommandClientApi";
 import type { GraphClientApi } from "@frontend/lib/api/apis/GraphClientApi";
 import type { ProjectClientApi } from "@frontend/lib/api/apis/ProjectClientApi";
@@ -19,6 +20,7 @@ export async function bindMainWindowApis(window: BrowserWindow) {
   return Object.assign(window, {
     apis: {
       commandClientApi: await bindWindowApi<CommandClientApi>(window, "CommandClientApi"),
+      toolboxClientApi: await bindWindowApi<ToolboxClientApi>(window, "ToolboxClientApi"),
       graphClientApi: await bindWindowApi<GraphClientApi>(window, "GraphClientApi"),
       projectClientApi: await bindWindowApi<ProjectClientApi>(window, "ProjectClientApi"),
       utilClientApi: await bindWindowApi<UtilClientApi>(window, "UtilClientApi"),
