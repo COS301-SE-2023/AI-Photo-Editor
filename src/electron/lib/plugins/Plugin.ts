@@ -64,7 +64,7 @@ export class Plugin {
           }
           // console.log(blix.toolbox.getRegistry()[nodeInstance.getSignature])
         }
-        blix.aiManager.instantiate(blix.toolbox);
+        // blix.aiManager.instantiate(blix.toolbox);
       }
 
       if ("commands" in pluginModule && typeof pluginModule.nodes === "object") {
@@ -117,6 +117,9 @@ class NodePluginContext extends PluginContext {
   }
 
   // nodeBuilder = context.instantiate("hello-plugin","hello");
+  // TODO: Change this: it should not be done in the plugin,
+  // but when the plugin loads. The plugin already defines each node name as the key
+  // in the dictionary, and we already know the plugin name in the package.json
   public instantiate(plugin: string, name: string): NodeBuilder {
     this._nodeBuilder = new NodeBuilder(plugin, name);
     return this.nodeBuilder;

@@ -37,8 +37,8 @@
     <hr />
     <b>Project Store</b>: <br />
     <div>
-      Active Project - Name: {$projectsStore.activeProject.name} ID: {$projectsStore.activeProject
-        .id}
+      Active Project - Name: {$projectsStore?.activeProject?.name} ID: {$projectsStore
+        ?.activeProject?.id}
     </div>
     {#each $projectsStore.projects as project (project.id)}
       <div>Name: {project.name} ID: {project.id}</div>

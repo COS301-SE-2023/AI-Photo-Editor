@@ -51,7 +51,7 @@ export class Blix {
     await this._pluginManager.loadBasePlugins();
 
     this._graphManager = new CoreGraphManager(mainWindow, this._toolboxRegistry);
-    this._aiManager = new AiManager(mainWindow);
+    // this._aiManager = new AiManager(mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
     this._projectManager.loadRecentProjects();
 

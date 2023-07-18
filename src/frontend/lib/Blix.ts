@@ -10,7 +10,10 @@ import { toolboxStore } from "./stores/ToolboxStore";
  */
 export async function init() {
   await initializeAPIs();
-  await setInitialStores();
+
+  // TODO: This needs to be called on some onBlixReady event
+  // when the backend Blix + apis have all been fully initialized
+  // await setInitialStores();
 }
 
 async function setInitialStores() {
