@@ -1,6 +1,9 @@
 import { writable } from "svelte/store";
+import { commandStore } from "./CommandStore";
+import { toolboxStore } from "./ToolboxStore";
 
 interface BlixStore {
+  blixReady: boolean;
   systemInfo: {
     nodeVersion: string;
     systemPlatform: string;
@@ -12,6 +15,7 @@ interface BlixStore {
 // Currently used to store some startup config. Can potentially be used to store
 // some other global state in the future.
 export const blixStore = writable<BlixStore>({
+  blixReady: false,
   systemInfo: {
     nodeVersion: "",
     systemPlatform: "",
@@ -19,3 +23,40 @@ export const blixStore = writable<BlixStore>({
     systemVersion: "",
   },
 });
+
+export async function setInitialStores() {
+  // BLix store
+  const res = await window.apis.utilApi.getSystemInfo();
+  blixStore.update((state) => ({ ...state, systemInfo: res }));
+
+  // Command store
+  const command = await window.apis.commandApi.getCommands();
+  commandStore.refreshStore(command);
+
+  // Toolbox store
+  const node = await window.apis.toolboxApi.getNodes();
+  toolboxStore.refreshStore(node);
+
+  // Graph store
+  // const allGraphIds = await window.apis.graphApi.getAllGraphUUIDs();
+  // console.log("ALL GRAPHS", allGraphIds);
+
+  // for (const graphId of allGraphIds) {
+  //   const graph = await window.apis.graphApi.getGraph(graphId);
+  // console.log("BACKEND GRAPH", graph.getNodes);
+
+  // TODO: REMOVE; This is just for testing
+  // const uiGraph = new UIGraph(graphId);
+  // const node1 = new GraphNode("1");
+  // const node2 = new GraphNode("2");
+  // const node3 = new GraphNode("a");
+  // uiGraph.nodes[node1.uuid] = node1;
+  // uiGraph.nodes[node2.uuid] = node2;
+  // uiGraph.nodes[node3.uuid] = node3;
+  // node1.pos.x = 100;
+  // node1.pos.y = 100;
+
+  // graphMall.refreshGraph(uiGraph.uuid, uiGraph);
+  // }
+  // exportLayout()
+}

@@ -10,21 +10,16 @@ import type { ToolboxApi } from "@electron/lib/api/apis/ToolboxApi";
 
 // Window APIs
 import { CommandClientApi } from "./apis/CommandClientApi";
-
-// stores
-import { blixStore } from "../stores/BlixStore";
-import { commandStore } from "../stores/CommandStore";
 import { GraphClientApi } from "./apis/GraphClientApi";
 import { ProjectClientApi } from "./apis/ProjectClientApi";
 import { UtilClientApi } from "./apis/UtilClientApi";
-import { toolboxStore } from "../stores/ToolboxStore";
 import { ToolboxClientApi } from "./apis/ToolboxClientApi";
 
 /**
  * Initializes the application by exposing the window IPC APIs to the main
  * process and binding the main process IPC APIs to the window.
  */
-export async function initializeAPIs() {
+export async function initAPIs() {
   exposeWindowApis();
   window.apis = await bindMainApis();
 }
