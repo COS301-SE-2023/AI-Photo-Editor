@@ -5,12 +5,13 @@ import {
   type MinAnchor,
   NodeInstance,
   OutputAnchorInstance,
+  ToolboxRegistry,
 } from "../registries/ToolboxRegistry";
 
 import logger from "../../utils/logger";
 import { Blix } from "../Blix";
 import type { GraphToJSON } from "./CoreGraphExporter";
-import { CoreGraphExporter, GraphFileExportStrategy } from "./CoreGraphExporter";
+import sharp from "sharp";
 
 export class TestGraph {
   inputs: MinAnchor[] = [];
@@ -63,7 +64,7 @@ export class TestGraph {
     }
   }
 
-  public interpreterTest(): CoreGraph {
+  public interpreterTest(toolboxRegistry: ToolboxRegistry): CoreGraph {
     // =====================================
     // Input -> 2, 2, 2, 2
     // Add2/Mul2 -> 3, 3
@@ -82,27 +83,15 @@ export class TestGraph {
         [
           {
             type: "number",
-            identifier: "hello-plugin.hello.output_anchor1.0",
+            identifier: "out1",
             displayName: "output_anchor1",
           },
-          {
-            type: "number",
-            identifier: "hello-plugin.hello.output_anchor2.1",
-            displayName: "output_anchor2",
-          },
-          {
-            type: "number",
-            identifier: "hello-plugin.hello.output_anchor3.2",
-            displayName: "output_anchor3",
-          },
-          {
-            type: "number",
-            identifier: "hello-plugin.hello.output_anchor4.3",
-            displayName: "output_anchor4",
-          },
         ],
-        ({ x, from }: { x: number[]; from: number }) => {
-          return ["Hello ", "World", 2, 4.4][from];
+        ({ input, from }: { input: any[]; from: string }) => {
+          const img = sharp(
+            "/home/klairgo/Documents/Documents/University of Pretoria/Year 3/Semester 1/COS 301/Capstone Project/Code/AI-Photo-Editor/assets/image.png"
+          );
+          return { out1: img }[from];
         }
       )
     );
@@ -110,7 +99,7 @@ export class TestGraph {
     tempNodesInt.push(
       new NodeInstance(
         `hello-plugin.hello`,
-        `add2/mul2`,
+        `flip`,
         `hello-plugin`,
         `title`,
         `description`,
@@ -120,36 +109,43 @@ export class TestGraph {
             identifier: "hello-plugin.hello.input_anchor1.0",
             displayName: "input_anchor1",
           },
+        ],
+        [
           {
             type: "number",
-            identifier: "hello-plugin.hello.input_anchor1.1",
-            displayName: "input_anchor2",
+            identifier: "out1",
+            displayName: "output_anchor1",
           },
+        ],
+        ({ input, from }: { input: any[]; from: string }) => {
+          return { out1: input[0].flip() }[from];
+        }
+      )
+    );
+
+    tempNodesInt.push(
+      new NodeInstance(
+        `hello-plugin.hello`,
+        `hue`,
+        `hello-plugin`,
+        `title`,
+        `description`,
+        [
           {
             type: "number",
-            identifier: "hello-plugin.hello.input_anchor1.2",
-            displayName: "input_anchor3",
-          },
-          {
-            type: "number",
-            identifier: "hello-plugin.hello.input_anchor1.3",
-            displayName: "input_anchor4",
+            identifier: "hello-plugin.hello.input_anchor1.0",
+            displayName: "input_anchor1",
           },
         ],
         [
           {
             type: "number",
-            identifier: "hello-plugin.hello.output_anchor0.0",
+            identifier: "out1",
             displayName: "output_anchor1",
           },
-          {
-            type: "number",
-            identifier: "hello-plugin.hello.output_anchor0.1",
-            displayName: "output_anchor2",
-          },
         ],
-        ({ input, from }: { input: number[]; from: number }) => {
-          return [input[0] + input[1], input[2] * input[3]][from];
+        ({ input, from }: { input: any[]; from: string }) => {
+          return { out1: input[0].blur(5) }[from];
         }
       )
     );
@@ -167,26 +163,27 @@ export class TestGraph {
             identifier: "hello-plugin.hello.input_anchor1.0",
             displayName: "input_anchor1",
           },
-          {
-            type: "number",
-            identifier: "hello-plugin.hello.input_anchor1.0",
-            displayName: "input_anchor2",
-          },
         ],
         [],
-        (x: number[]) => {
-          logger.info("Add Frist two: ", x[0]);
-          logger.info("Multiply Last two: ", x[1]);
+        ({ input, from }: { input: any[]; from: string }) => {
+          input[0].toFile(
+            "/home/klairgo/Documents/Documents/University of Pretoria/Year 3/Semester 1/COS 301/Capstone Project/Code/AI-Photo-Editor/assets/image3.png"
+          );
         }
       )
     );
+
+    toolboxRegistry.addInstance(tempNodesInt[0]);
+    toolboxRegistry.addInstance(tempNodesInt[1]);
+    toolboxRegistry.addInstance(tempNodesInt[2]);
+    toolboxRegistry.addInstance(tempNodesInt[3]);
 
     const g2: CoreGraph = new CoreGraph();
 
     g2.addNode(tempNodesInt[0]);
     g2.addNode(tempNodesInt[1]);
     g2.addNode(tempNodesInt[2]);
-    // g2.addNode(tempNodesInt[3]);
+    g2.addNode(tempNodesInt[3]);
     // g2.addNode(tempNodesInt[4]);
     // g2.addNode(tempNodesInt[5]);
 
@@ -194,7 +191,7 @@ export class TestGraph {
     const g2Node1 = Object.values(g2Nodes)[0];
     const g2Node2 = Object.values(g2Nodes)[1];
     const g2Node3 = Object.values(g2Nodes)[2];
-    // const g2Node4 = Object.values(g2Nodes)[3];
+    const g2Node4 = Object.values(g2Nodes)[3];
     // const g2Node5 = Object.values(g2Nodes)[4];
     // const g2Node6 = Object.values(g2Nodes)[5];
 
@@ -202,31 +199,18 @@ export class TestGraph {
       Object.values(g2Node1.getAnchors)[0].uuid,
       Object.values(g2Node2.getAnchors)[0].uuid
     );
-    g2.addEdge(
-      Object.values(g2Node1.getAnchors)[1].uuid,
-      Object.values(g2Node2.getAnchors)[1].uuid
-    );
 
     g2.addEdge(
-      Object.values(g2Node1.getAnchors)[2].uuid,
-      Object.values(g2Node2.getAnchors)[2].uuid
-    );
-
-    g2.addEdge(
-      Object.values(g2Node1.getAnchors)[3].uuid,
-      Object.values(g2Node2.getAnchors)[3].uuid
+      Object.values(g2Node2.getAnchors)[1].uuid,
+      Object.values(g2Node3.getAnchors)[0].uuid
     );
 
     // Add output
     g2.addEdge(
-      Object.values(g2Node2.getAnchors)[4].uuid,
-      Object.values(g2Node3.getAnchors)[0].uuid
+      Object.values(g2Node3.getAnchors)[1].uuid,
+      Object.values(g2Node4.getAnchors)[0].uuid
     );
 
-    g2.addEdge(
-      Object.values(g2Node2.getAnchors)[5].uuid,
-      Object.values(g2Node3.getAnchors)[1].uuid
-    );
     // g2.addEdge(
     //   Object.values(g2Node4.getAnchors)[3].uuid,
     //   Object.values(g2Node6.getAnchors)[0].uuid
@@ -242,7 +226,7 @@ export class TestGraph {
     // );
 
     // g2.getOutputNodes.push(g2Node6.uuid);
-    g2.getOutputNodes.push(g2Node3.uuid);
+    g2.getOutputNodes.push(g2Node4.uuid);
     // g2.getOutputNodes.push(g2Node6.uuid);
 
     // Expected output:

@@ -55,7 +55,7 @@ app.on("ready", async () => {
     callback({ path: join(__dirname, "..", "..", url) });
   });
 
-  // const coreGraphInterpreter = new CoreGraphInterpreter();
+  // const coreGraphInterpreter = new CoreGraphInterpreter(new ToolboxRegistry);
   // coreGraphInterpreter.run();
 
   blix = new Blix();
