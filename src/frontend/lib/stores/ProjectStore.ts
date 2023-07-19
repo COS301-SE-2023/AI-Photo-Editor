@@ -59,19 +59,17 @@ class ProjectsStore {
    *
    * @param changeState Object containing changed project state
    */
-  public handleProjectChanged(changedState: Partial<SharedProject>): void {
-    if (!changedState.id) return;
-
+  public handleProjectChanged(changedState: SharedProject): void {
     this.store.update((state) => {
       const index = state.projects.findIndex((p) => p.id === changedState.id);
 
       if (index < 0) return state;
 
       const project = state.projects[index];
-      const { name, layout, graphs } = changedState;
+      const { id, name, layout, graphs } = changedState;
 
       const newProject: UIProject = {
-        id: project.id,
+        id,
         name: name ? name : project.name,
         layout: layout ? constructLayout(layout) : project.layout,
         graphs: graphs ? graphs : project.graphs,

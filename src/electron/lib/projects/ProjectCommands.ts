@@ -9,16 +9,30 @@ import {
 import logger from "../../utils/logger";
 import { readFile, writeFile } from "fs/promises";
 import type { ProjectFile } from "./CoreProject";
-import type { Command, CommandContext } from "../../lib/registries/CommandRegistry";
+import type {
+  Command,
+  CommandContext,
+  CommandDescription,
+} from "../../lib/registries/CommandRegistry";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { SharedProject } from "../../../shared/types";
 import type { LayoutPanel } from "../../../shared/types";
 
-type SaveProjectParams = {
+type SaveProjectArgs = {
   projectId: UUID;
   layout?: LayoutPanel;
   projectPath?: string;
 };
+
+type CommandResponse =
+  | {
+      success: true;
+      message?: string;
+    }
+  | {
+      success: false;
+      error?: string;
+    };
 
 export const saveProjectCommand: Command = {
   id: "blix.projects.save",
@@ -26,8 +40,8 @@ export const saveProjectCommand: Command = {
     name: "Save Project",
     description: "Save project to file system",
   },
-  handler: async (ctx: CommandContext, params: SaveProjectParams) => {
-    const result = await saveProject(ctx, params);
+  handler: async (ctx: CommandContext, args: SaveProjectArgs) => {
+    const result = await saveProject(ctx, args);
     if (result.success) {
       ctx.sendSuccessMessage(result?.message ?? "");
     } else {
@@ -36,6 +50,7 @@ export const saveProjectCommand: Command = {
   },
 };
 
+// TODO: Fix so that it works like the save with the command params system
 export const saveProjectAsCommand: Command = {
   id: "blix.projects.saveAs",
   description: {
@@ -82,8 +97,9 @@ export const projectCommands: Command[] = [
  */
 export async function saveProject(
   ctx: CommandContext,
-  { projectId, layout, projectPath }: SaveProjectParams
-) {
+  args: SaveProjectArgs
+): Promise<CommandResponse> {
+  const { projectId, layout, projectPath } = args;
   const project = ctx.projectManager.getProject(projectId);
 
   if (!project) {
@@ -107,7 +123,10 @@ export async function saveProject(
     project.location = projectPath;
   }
 
+  // I don't really like this, but also can't really think of a nice way to change it
+  // TODO: Rename sets name as path
   project.rename((project.location as string).split(".blix")[0]);
+  ctx.projectManager.onProjectChanged(project.uuid);
 
   const graphs = project.graphs.map((g) => ctx.graphManager.getGraph(g));
   const exporter = new CoreGraphExporter<GraphToJSON>(new GraphFileExportStrategy());
@@ -135,6 +154,7 @@ export async function saveProject(
  *
  * @param id Project to be saved
  */
+// TODO: Fix so that it works like the save with the command params system
 export async function saveProjectAs(ctx: CommandContext, projectId: UUID) {
   const project = ctx.projectManager.getProject(projectId);
   if (!project) {
@@ -177,6 +197,7 @@ export async function openProject(ctx: CommandContext) {
     for (const graph of projectFile.graphs) {
       const coreGraph = ctx.graphManager.importGraph("json", graph);
       ctx.projectManager.addGraph(projectId, coreGraph.uuid);
+      ctx.graphManager.onGraphUpdated(coreGraph.uuid);
     }
 
     ctx.mainWindow?.apis.projectClientApi.onProjectChanged({
