@@ -47,6 +47,13 @@ const blixCommandParams: Record<string, () => any> = {
       layout: project?.layout.saveLayout(),
     };
   },
+  "blix.projects.saveAs": () => {
+    const project = get(projectsStore).activeProject;
+    return {
+      projectId: project?.id,
+      layout: project?.layout.saveLayout(),
+    };
+  },
 };
 
 export const commandStore = createCommandStore();

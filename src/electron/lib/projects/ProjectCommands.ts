@@ -57,8 +57,8 @@ export const saveProjectAsCommand: Command = {
     name: "Save Project As...",
     description: "Save project to file system",
   },
-  handler: async (ctx: CommandContext, projectId: UUID) => {
-    const result = await saveProjectAs(ctx, projectId);
+  handler: async (ctx: CommandContext, args: SaveProjectArgs) => {
+    const result = await saveProjectAs(ctx, args);
     if (result?.success) {
       // ctx.sendSuccessMessage(result?.message ?? "");
     } else {
@@ -125,7 +125,7 @@ export async function saveProject(
 
   // I don't really like this, but also can't really think of a nice way to change it
   // TODO: Rename sets name as path
-  project.rename((project.location as string).split(".blix")[0]);
+  project.rename((project.location as string).split("/").pop()!.split(".blix")[0]);
   ctx.projectManager.onProjectChanged(project.uuid);
 
   const graphs = project.graphs.map((g) => ctx.graphManager.getGraph(g));
@@ -155,8 +155,11 @@ export async function saveProject(
  * @param id Project to be saved
  */
 // TODO: Fix so that it works like the save with the command params system
-export async function saveProjectAs(ctx: CommandContext, projectId: UUID) {
+
+export async function saveProjectAs(ctx: CommandContext, args: SaveProjectArgs) {
+  const { projectId, layout } = args;
   const project = ctx.projectManager.getProject(projectId);
+
   if (!project) {
     return { success: false, error: "Project not found" };
   }
@@ -168,7 +171,7 @@ export async function saveProjectAs(ctx: CommandContext, projectId: UUID) {
   });
   if (!path) return;
   project.location = path;
-  return await saveProject(ctx, { projectId, layout: undefined, projectPath: path });
+  return await saveProject(ctx, { projectId, layout, projectPath: path });
 }
 
 /**
