@@ -60,14 +60,8 @@ export class Blix {
     // this._aiManager = new AiManager(mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
 
-    // Add subscribers
-    const graphSubscriber = new IPCGraphSubscriber();
-
-    graphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
-      mainWindow.apis.graphClientApi.graphChanged(graphId, newGraph);
-    };
-
-    this._graphManager.addAllSubscriber(graphSubscriber);
+    this.initSubscribers();
+    mainWindow.apis.utilClientApi.onBlixReady();
 
     // testStuffies(this);
 
@@ -82,6 +76,16 @@ export class Blix {
 
     //   this._graphManager.addNode(randId, randomNode);
     // }, 3000);
+  }
+
+  private initSubscribers() {
+    const graphSubscriber = new IPCGraphSubscriber();
+
+    graphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
+      this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
+    };
+
+    this._graphManager.addAllSubscriber(graphSubscriber);
   }
 
   // TODO: Move these to a Utils.ts or something like that

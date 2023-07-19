@@ -59,12 +59,11 @@ app.on("ready", async () => {
   // coreGraphInterpreter.run();
 
   blix = new Blix();
-  const initMainApis = exposeMainApis(blix);
+  exposeMainApis(blix);
 
   createMainWindow().then(async () => {
     if (mainWindow) {
       await blix.init(mainWindow);
-      initMainApis();
     } else {
       app.quit();
     }
