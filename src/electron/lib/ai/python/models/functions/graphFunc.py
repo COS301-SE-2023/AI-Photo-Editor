@@ -12,7 +12,7 @@ class signature(BaseModel):
      signature : str =    Field(description="Signature/type of the node e.g 'math-plugin.binary', 'math-plugin.unary'")
 
 class signatures(BaseModel):
-     """The id's of the input and output connected to the edge"""
+     """The id's of the input and output anchors connected to the edge"""
 
      From : str =    Field(description="Id of the output connected to the edge. e.g 'l40plq', 'j5nm33'")
      To : str =    Field(description="Id of the input connected to the edge. e.g 'az22m3', '0lpm5i'")
@@ -51,6 +51,7 @@ class addNodeTool( BaseTool):
         signature: str,
     ) -> str:
             commands.append({ "command": "addNode", "signature": signature })
+            return "addNode command added\n"
 
 
     async def _arun(
@@ -89,6 +90,7 @@ class removeNodeTool( BaseTool):
         signature: str,
     ) -> str:
             commands.append({ "command": "removeNode", "signature": signature })
+            return "removeNode command added\n"
 
 
     async def _arun(
@@ -122,7 +124,7 @@ class addEdgeTool( BaseTool):
         
 
     name: str = "addEdge"
-    description: str = "Adds an edge between an output and input"
+    description: str = "Adds an edge between an output anchor of a node and an input anchor of another node using these anchor id's"
 
     def _run(
         self,
@@ -130,6 +132,7 @@ class addEdgeTool( BaseTool):
         To : str,
     ) -> str:
             commands.append({ "command": "addEdge", "from": From, "to": To })
+            return "addEdge command added\n"
 
 
     async def _arun(
@@ -162,13 +165,14 @@ class removeEdgeTool( BaseTool):
     """
 
     name: str = "removeEdge"
-    description: str = "Removes an edge between an output and input"
+    description: str = "Removes an edge between an output anchor of a node and an input anchor of another node using the edge id"
 
     def _run(
         self,
         signature: str,
     ) -> str:
             commands.append({ "command": "removeEdge", "signature": signature})
+            return "removeEdge command added\n"
 
     async def _arun(
         self,

@@ -8,6 +8,8 @@ The graph consist of nodes and edges. Each node executes some sort of operation 
 Provided is the following graph's nodes : 
 {nodes}
 
+Each node has anchors that are used to provide edges.
+
 Additionally the following edges are provided :
 {edges}
 
