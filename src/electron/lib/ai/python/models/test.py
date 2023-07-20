@@ -8,7 +8,7 @@ from functions import graphFunc
 
 # This is an example of the object that is passed in from the ai Manager to the API
 object = {
-    'prompt': 'I want you to add two nodes to this graph.',
+    'prompt': 'I want you to add two nodes to a new graph',
     'plugin': 
     [
      'hello-plugin.hello: Provides a test slider and button and label for testing purposes, taking two string inputs and returning one string output',
@@ -30,4 +30,4 @@ object = {
     ]
 }
 
-
+open.sendPrompt(object)

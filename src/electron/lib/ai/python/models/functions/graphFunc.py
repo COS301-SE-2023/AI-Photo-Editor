@@ -9,7 +9,7 @@ commands = []
 
 class signature(BaseModel):
 
-     signature : str =    Field(description="Id of the node e.g 'math-plugin.binary', 'math-plugin.unary'")
+     signature : str =    Field(description="Signature/type of the node e.g 'math-plugin.binary', 'math-plugin.unary'")
 
 class signatures(BaseModel):
      """The id's of the input and output connected to the edge"""
@@ -50,7 +50,7 @@ class addNodeTool( BaseTool):
         self,
         signature: str,
     ) -> str:
-            commands.push({ "command": "addNode", "signature": signature })
+            commands.append({ "command": "addNode", "signature": signature })
 
 
     async def _arun(
@@ -88,7 +88,7 @@ class removeNodeTool( BaseTool):
         self,
         signature: str,
     ) -> str:
-            commands.push({ "command": "removeNode", "signature": signature })
+            commands.append({ "command": "removeNode", "signature": signature })
 
 
     async def _arun(
@@ -129,7 +129,7 @@ class addEdgeTool( BaseTool):
         From : str,
         To : str,
     ) -> str:
-            commands.push({ "command": "addEdge", "from": From, "to": To })
+            commands.append({ "command": "addEdge", "from": From, "to": To })
 
 
     async def _arun(
@@ -168,7 +168,7 @@ class removeEdgeTool( BaseTool):
         self,
         signature: str,
     ) -> str:
-            commands.push({ "command": "removeEdge", "signature": signature})
+            commands.append({ "command": "removeEdge", "signature": signature})
 
     async def _arun(
         self,
