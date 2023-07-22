@@ -62,15 +62,19 @@ const nodes = [
 const edges = [
   {
     id: "kadjbg",
-    from: "b3e1f4",
-    to: "4f2e1d",
+    output: "b3e1f4",
+    input: "4f2e1d",
   },
   {
     id: "0d1e2f",
-    from: "b3e1f4",
-    to: "8c7b6a",
+    output: "b3e1f4",
+    input: "8c7b6a",
   },
 ];
+
+type Response = {
+  commands: object[];
+};
 /**
  *
  * Manages ai by storing context and handling prompt input
@@ -108,6 +112,9 @@ export class AiManager {
 
     for (const index of nodes) {
       stringNodes.push(JSON.stringify(index));
+    }
+
+    for (const index of edges) {
       stringEdges.push(JSON.stringify(index));
     }
 
@@ -117,6 +124,62 @@ export class AiManager {
       nodes: stringNodes,
       edges: stringEdges,
     };
+
+    this.dummy();
+    // console.log("Execute!")
+  }
+
+  isResponse(value: unknown): value is Response {
+    if (
+      typeof value === "object" &&
+      value !== null &&
+      !Array.isArray(value) &&
+      "commands" in value
+    ) {
+      return true;
+    } else return false;
+  }
+
+  dummy() {
+    this._promptContext!.prompt =
+      "I want you to add some nodes to this graph. Just add some random ones yourself";
+
+    this._childProcess = spawn("python3", ["src/electron/lib/ai/python/API.py"]);
+
+    const dataToSend2 = JSON.stringify(this._promptContext);
+    this._childProcess.stdin.write(dataToSend2 + "\n");
+
+    this._childProcess.stdin.end();
+
+    // Receive output from the Python script
+    this._childProcess.stdout.on("data", (data) => {
+      const result = data.toString();
+
+      logger.info("Received from Python:", result);
+
+      // We are assuming that the json string is trusted, and in the correct format
+
+      // Disabling eslint here is not ideal, however I am at my wits end , refer to this to see why this cannot be easily fixed :https://github.com/typescript-eslint/typescript-eslint/issues/2118
+
+      /* eslint-disable */
+      const parsed: Response = JSON.parse(result);
+      /* eslint-enable */
+
+      // console.log(parsed.commands);
+    });
+
+    // Handle errors
+    this._childProcess.stderr.on("data", (data) => {
+      const result = data.toString();
+
+      logger.warn("Error executing Python script: ", result);
+    });
+
+    // Handle process exit
+    this._childProcess.on("close", (code) => {
+      if (code == null) logger.warn(`Python script exited with code null`);
+      else logger.warn(`Python script exited with code ${code}`);
+    });
   }
 
   /**
@@ -179,7 +242,7 @@ export class AiManager {
    */
 
   async createInputWindow(): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       prompt(
         {
           title: "AI Prompt",

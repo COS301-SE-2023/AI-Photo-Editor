@@ -1,4 +1,4 @@
-import open
+import electron.lib.ai.python.models.gpt as gpt
 import json
 from functions import graphFunc
 
@@ -8,7 +8,7 @@ from functions import graphFunc
 
 # This is an example of the object that is passed in from the ai Manager to the API
 object = {
-    'prompt': 'I want you to add two nodes to a new graph and then connect some nodes in the graph together.',
+    'prompt': 'I want you to add two nodes to the graph such that the user can input two numbers and the output is the sum of the two numbers.',
     'plugin': 
     [
      'hello-plugin.hello: Provides a test slider and button and label for testing purposes, taking two string inputs and returning one string output',
@@ -26,8 +26,8 @@ object = {
     ], 
     'edges': 
     [
-     '{"id":"kadjbg","from":"b3e1f4","to":"4f2e1d"}', '{"id":"0d1e2f","from":"b3e1f4","to":"8c7b6a"}'
+     '{"id":"kadjbg","output":"b3e1f4","input":"4f2e1d"}', '{"id":"0d1e2f","output":"b3e1f4","input":"8c7b6a"}'
     ]
 }
 
-open.sendPrompt(object)
+# open.sendPrompt(object)

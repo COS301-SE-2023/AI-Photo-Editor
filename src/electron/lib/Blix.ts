@@ -57,7 +57,8 @@ export class Blix {
     await this._pluginManager.loadBasePlugins();
 
     this._graphManager = new CoreGraphManager(mainWindow, this._toolboxRegistry);
-    // this._aiManager = new AiManager(mainWindow);
+    this._aiManager = new AiManager(mainWindow);
+    this.aiManager.instantiate(this.toolbox);
     this._projectManager = new ProjectManager(mainWindow);
 
     // Add subscribers
