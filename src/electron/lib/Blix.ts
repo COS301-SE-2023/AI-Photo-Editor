@@ -57,8 +57,6 @@ export class Blix {
     await this._pluginManager.loadBasePlugins();
 
     this._graphManager = new CoreGraphManager(mainWindow, this._toolboxRegistry);
-    this._aiManager = new AiManager(mainWindow);
-    this.aiManager.instantiate(this.toolbox);
     this._projectManager = new ProjectManager(mainWindow);
 
     // Add subscribers
@@ -83,6 +81,8 @@ export class Blix {
 
     //   this._graphManager.addNode(randId, randomNode);
     // }, 3000);
+
+    this._aiManager = new AiManager(mainWindow, this.toolbox);
   }
 
   // TODO: Move these to a Utils.ts or something like that

@@ -82,23 +82,14 @@ type Response = {
  *
  * */
 export class AiManager {
-  private _mainWindow;
+  private _mainWindow: MainWindow;
   private _pluginContext: string[] = [];
   private _childProcess: ChildProcessWithoutNullStreams | null = null;
   private _promptContext: PromptContext | null = null;
 
-  constructor(mainWindow: MainWindow) {
+  constructor(mainWindow: MainWindow, toolbox: ToolboxRegistry) {
     this._mainWindow = mainWindow;
-  }
 
-  /**
-   *
-   * Initializes context of ai with all the nodes in the toolbox
-   * @param toolbox This is the blix toolbox registry that contains all the nodes
-   *
-   * */
-
-  instantiate(toolbox: ToolboxRegistry): void {
     for (const index in toolbox.getRegistry()) {
       if (!toolbox.hasOwnProperty(index)) {
         const node: NodeInstance = toolbox.getRegistry()[index];
@@ -128,6 +119,12 @@ export class AiManager {
     this.dummy();
     // console.log("Execute!")
   }
+  /**
+   *
+   * Initializes context of ai with all the nodes in the toolbox
+   * @param toolbox This is the blix toolbox registry that contains all the nodes
+   *
+   * */
 
   isResponse(value: unknown): value is Response {
     if (
