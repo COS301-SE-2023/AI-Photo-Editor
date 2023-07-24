@@ -1,14 +1,18 @@
 <script>
-  import { GlobalContextMenuStore } from "../../lib/stores/ContextMenuStore";
-  let { isShowing, windowPos } = $GlobalContextMenuStore;
+  import { graphNodeMenuStore } from "../../lib/stores/ContextMenuStore";
+
+  $: ({ isShowing, windowPos } = $graphNodeMenuStore);
 </script>
 
-<!-- {#if $GlobalContextMenuStore.isShowing} -->
 {#if isShowing}
-  <div class="fixed left-[400px] top-[400px] z-50 h-24 w-24 bg-red-500">Jakes mom</div>
-  <!-- <div id="menu" class="menu" style:left="{$GlobalContextMenuStore.windowPos.x}px",top="{$GlobalContextMenuStore.windowPos.y}px">
-        MENU asdfasdfaf
-    </div> -->
+  <div
+    class="fixed inset-x-0 z-50 h-32 w-32 bg-red-500"
+    style:top="{$graphNodeMenuStore.windowPos.y}px"
+    style:left="{$graphNodeMenuStore.windowPos.x}px"
+  >
+    Jake: [{$graphNodeMenuStore.windowPos.x}][{$graphNodeMenuStore.windowPos
+      .y}][{$graphNodeMenuStore.isShowing}]
+  </div>
 {/if}
 
 <style>

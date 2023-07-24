@@ -1,13 +1,13 @@
 import { writable } from "svelte/store";
-export type coordinates = {
+export type Coordinates = {
   x: number;
   y: number;
 };
 
 export type ContextMenuState = {
   isShowing: boolean;
-  windowPos: coordinates;
-  canvasPos: coordinates;
+  windowPos: Coordinates;
+  canvasPos: Coordinates;
   items: ContextMenuItem[];
 };
 
@@ -51,4 +51,4 @@ class ContextMenuStore {
   }
 }
 
-export const GlobalContextMenuStore = new ContextMenuStore();
+export const graphNodeMenuStore = new ContextMenuStore();

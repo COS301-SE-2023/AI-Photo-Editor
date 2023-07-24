@@ -5,7 +5,7 @@
   import { GraphStore, graphMall } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import { projectsStore } from "lib/stores/ProjectStore";
-  import { GlobalContextMenuStore, type ContextMenuState } from "../../lib/stores/ContextMenuStore";
+  import { graphNodeMenuStore, type ContextMenuState } from "../../lib/stores/ContextMenuStore";
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
   export let panelId = Math.round(10000000.0 * Math.random()).toString();
@@ -52,7 +52,7 @@
 
   function handleLeftClick() {
     console.log("Left Click");
-    GlobalContextMenuStore.hideMenu();
+    graphNodeMenuStore.hideMenu();
   }
 
   function handleRightClick(event: CustomEvent) {
@@ -64,7 +64,8 @@
       windowPos: event.detail.windowPos,
       canvasPos: event.detail.canvasPos,
     };
-    GlobalContextMenuStore.showMenu(state); //
+    graphNodeMenuStore.showMenu(state);
+    console.log("Hi ", state);
   }
 
   // $: console.log("GRAPH MALL UPDATED", $graphMall);
