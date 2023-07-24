@@ -70,3 +70,64 @@ class YamlExportStrategy implements ExportStrategy<string> {
     throw Error("YamlExportStrategy not implemented");
   }
 }
+
+type LLMGraph = {
+  graph: {
+    nodes: {
+      id: string;
+      signature: string;
+      inputs: {
+        id: string;
+        type: string;
+      }[];
+      outputs: {
+        id: string;
+        type: string;
+      }[];
+    }[];
+    edges: {
+      id: string;
+      input: string;
+      output: string;
+    }[];
+  };
+  nodeMap: Record<string, string>;
+  edgeMap: Record<string, string>;
+  anchorMap: Record<string, string>;
+};
+
+class LLMExportStrategy implements ExportStrategy<LLMGraph> {
+  export(graph: CoreGraph): LLMGraph {
+    const llmGraph: LLMGraph = {
+      graph: {
+        nodes: [],
+        edges: [],
+      },
+      nodeMap: {},
+      edgeMap: {},
+      anchorMap: {},
+    };
+
+    Object.values(graph.getNodes).forEach((n) => {
+      const node = {
+        id: n.uuid,
+        signature: n.getSignature,
+        inputs: [],
+        outputs: [],
+      };
+
+      Object.values(n.getAnchors).forEach((a) => {
+        if (a.ioType === 0) {
+          // input
+        } else if (a.ioType === 1) {
+          // output
+        }
+      });
+
+      llmGraph.graph.nodes.push(node);
+      llmGraph.nodeMap[node.id] = node.id.slice(0, 6);
+    });
+
+    return llmGraph;
+  }
+}
