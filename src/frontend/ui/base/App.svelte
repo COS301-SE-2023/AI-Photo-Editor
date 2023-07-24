@@ -5,8 +5,9 @@
   import Layout from "./layout/Layout.svelte";
   import Palette from "./palette/Palette.svelte";
   import Toasts from "../../ui/utils/toasts/Toasts.svelte";
-  import { initAPIs } from "lib/api/apiInitializer";
-
+  import { initAPIs } from "../../lib/api/apiInitializer";
+  // import ContextMenu from "../../ui/utils/ContextMenu.svelte";
+  import { GlobalContextMenuStore } from "lib/stores/ContextMenuStore";
   import Test from "./Test.svelte";
 
   const testing = false;
@@ -17,6 +18,13 @@
 </script>
 
 <Toasts />
+<!-- <ContextMenu /> -->
+
+<div
+  class="fixed inset-x-0 h-32 w-32 bg-red-500 top-[{$GlobalContextMenuStore.windowPos.x.toString()}px] left-[600px] z-50"
+>
+  Jake
+</div>
 
 {#if testing}
   {#if $blixStore.blixReady}

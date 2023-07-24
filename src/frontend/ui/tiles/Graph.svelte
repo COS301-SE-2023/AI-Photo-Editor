@@ -1,11 +1,11 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Node, Svelvet } from "blix_svelvet";
+  import { Svelvet } from "blix_svelvet";
   import { type Readable } from "svelte/store";
-  import { GraphStore, graphMall } from "lib/stores/GraphStore";
+  import { GraphStore, graphMall } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import { projectsStore } from "lib/stores/ProjectStore";
-
+  import { GlobalContextMenuStore, type ContextMenuState } from "../../lib/stores/ContextMenuStore";
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
   export let panelId = Math.round(10000000.0 * Math.random()).toString();
@@ -50,6 +50,23 @@
     };
   }
 
+  function handleLeftClick() {
+    console.log("Left Click");
+    GlobalContextMenuStore.hideMenu();
+  }
+
+  function handleRightClick(event: CustomEvent) {
+    console.log("Right Click");
+
+    const state: ContextMenuState = {
+      isShowing: true,
+      items: [],
+      windowPos: event.detail.windowPos,
+      canvasPos: event.detail.canvasPos,
+    };
+    GlobalContextMenuStore.showMenu(state); //
+  }
+
   // $: console.log("GRAPH MALL UPDATED", $graphMall);
 </script>
 
@@ -69,6 +86,8 @@
     minimap
     theme="custom-dark"
     bind:graph="{graphData}"
+    on:LeftClick="{handleLeftClick}"
+    on:RightClick="{handleRightClick}"
   >
     {#each $graphNodes || [] as node}
       {#key node}
