@@ -6,8 +6,8 @@
   import Palette from "./palette/Palette.svelte";
   import Toasts from "../../ui/utils/toasts/Toasts.svelte";
   import { initAPIs } from "../../lib/api/apiInitializer";
-  // import ContextMenu from "../../ui/utils/ContextMenu.svelte";
-  import { GlobalContextMenuStore } from "lib/stores/ContextMenuStore";
+  import ContextMenu from "../../ui/utils/ContextMenu.svelte";
+  // import { graphNodeMenuStore } from "lib/stores/ContextMenuStore";
   import Test from "./Test.svelte";
 
   const testing = false;
@@ -18,22 +18,14 @@
 </script>
 
 <Toasts />
-<!-- <ContextMenu /> -->
+<ContextMenu />
 
-<div
-  class="fixed inset-x-0 h-32 w-32 bg-red-500 top-[{$GlobalContextMenuStore.windowPos.x.toString()}px] left-[600px] z-50"
->
-  Jake
-</div>
-
-{#if testing}
-  {#if $blixStore.blixReady}
-    <Test />
-  {:else}
-    <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
-      <span class="text-5xl text-purple-400">Loading</span>
-    </div>
-  {/if}
+{#if $blixStore.blixReady && testing}
+  <Test />
+{:else if !$blixStore.blixReady && testing}
+  <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
+    <span class="text-5xl text-purple-400">Loading</span>
+  </div>
 {:else if $blixStore.blixReady}
   <div class="h-screen w-screen bg-zinc-800 p-0">
     <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">

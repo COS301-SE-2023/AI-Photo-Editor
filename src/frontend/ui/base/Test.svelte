@@ -1,7 +1,7 @@
 <script lang="ts">
   import { projectsStore } from "../../lib/stores/ProjectStore";
   import { toastStore } from "../../lib/stores/ToastStore";
-  import { GlobalContextMenuStore } from "../../lib/stores/ContextMenuStore";
+  import { graphNodeMenuStore } from "../../lib/stores/ContextMenuStore";
 
   let logs: any[] = [];
   let count = 0;
@@ -57,7 +57,7 @@
       </span>
       <span
         class="rounded-md bg-zinc-400 p-2 hover:cursor-pointer hover:bg-zinc-500"
-        on:click="{() => GlobalContextMenuStore.toggle()}"
+        on:click="{() => graphNodeMenuStore.toggle()}"
         on:keydown="{null}"
       >
         Toggle context menu
