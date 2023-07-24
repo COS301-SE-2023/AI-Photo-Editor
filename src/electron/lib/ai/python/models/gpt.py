@@ -17,12 +17,10 @@ from prompts import generic
 
 load_dotenv()
 
-class gpt: 
+class GPT: 
 
     def __init__(self, api):
         Functions.api = api
-        print("GPT INIT", Functions.api)
-        print("NEW AGENT CREATED")
 
     def sendPrompt(self, body):
         llm = ChatOpenAI(temperature=0.1,openai_api_key=os.getenv("OPENAI_API_KEY"))
@@ -30,11 +28,9 @@ class gpt:
                             llm,
                             agent=AgentType.OPENAI_FUNCTIONS,
                             model="gpt-3.5-turbo-0613",
-                            verbose=True,
+                            # verbose=True,
                             debug=True,                   
         )
-    
-        print(Functions.api)
         
         prompt = generic.prompt_template.format(prompt=body["prompt"],nodes=body["nodes"],edges=body["edges"],plugins=body["plugin"])
     
@@ -42,9 +38,8 @@ class gpt:
     
         temp = open_ai_agent.run(prompt)
     
-        output = {
-            "response" : temp
-        }
+        Functions.api.commands.sendResponse(temp)
+        
     
-        json_object = json.dumps(output, indent = 8) 
-        print(json_object)
+        # json_object = json.dumps(output, indent = 4) 
+        # print(json_object)

@@ -73,8 +73,8 @@ const edges = [
 ];
 
 type Response = {
-  commands: object[];
-  response: string;
+  command: string;
+  args: JSON;
 };
 /**
  *
@@ -132,7 +132,7 @@ export class AiManager {
       typeof value === "object" &&
       value !== null &&
       !Array.isArray(value) &&
-      "commands" in value
+      "command" in value
     ) {
       return true;
     } else return false;
@@ -142,7 +142,7 @@ export class AiManager {
     this._promptContext!.prompt =
       "I want you to add some nodes to this graph. Just add some random ones yourself";
 
-    this._childProcess = spawn("python3", ["src/electron/lib/ai/python/API.py"]);
+    this._childProcess = spawn("python3", ["src/electron/lib/ai/python/api.py"]);
 
     const dataToSend2 = JSON.stringify(this._promptContext);
     this._childProcess.stdin.write(dataToSend2 + "\n");
@@ -163,8 +163,8 @@ export class AiManager {
       const parsed: Response = JSON.parse(result);
       /* eslint-enable */
 
-      // console.log(parsed.commands);
-      // console.log(parsed.response);
+      // console.log(parsed.command);
+      // console.log(parsed.args);
     });
 
     // Handle errors

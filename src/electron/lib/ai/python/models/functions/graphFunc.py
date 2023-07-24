@@ -22,12 +22,12 @@ class removeNodeInput(BaseModel):
 
 
 class addEdgeInput(BaseModel):
-    output : str =    Field(description="Id of the output connected to the edge. e.g 'l40plq', 'j5nm33'")
-    input : str =    Field(description="Id of the input connected to the edge. e.g 'az22m3', '0lpm5i'")
+    output : str =    Field(description="Id of the output anchor connected to the edge. e.g 'l40plq', 'j5nm33'")
+    input : str =    Field(description="Id of the input anchor connected to the edge. e.g 'az22m3', '0lpm5i'")
 
 class removeEdgeInput(BaseModel):
     
-    ids : str =    Field(description="Id of the edge to be removed. e.g '8kn5la', '1m9j0kl'")
+    id : str =    Field(description="Id of the edge to be removed. e.g '8kn5la', '1m9j0kl'")
 
 class addNodesInput(BaseModel):
     signatures: List[str] = Field(
@@ -56,7 +56,6 @@ class removeEdgesInput(BaseModel):
 class Functions:
 
     api = None
-    # functions = [format_tool_to_openai_function(t) for t in tools]
 
     class addNodeTool(BaseTool):
         """
@@ -87,8 +86,7 @@ class Functions:
             self,
             signature: str,
         ) -> str:
-                print(Functions.api.hello())
-                # self.commands.append({ "command": "addNode", "signature": signature })
+                Functions.api.commands.addNode(signature)
                 return "addNode command added\n"
 
 
@@ -127,7 +125,7 @@ class Functions:
             self,
             id: str,
         ) -> str:
-                # commands.append({ "command": "removeNode", "id": id })
+                Functions.api.commands.removeNode(id)
                 return "removeNode command added\n"
 
 
@@ -168,7 +166,7 @@ class Functions:
             output : str,
             input : str,
         ) -> str:
-                # commands.append({ "command": "addEdge", "from": From, "to": To })
+                Functions.api.commands.addEdge(output,input)
                 return "addEdge command added\n"
 
 
@@ -206,9 +204,9 @@ class Functions:
 
         def _run(
             self,
-            ids: str,
+            id: str,
         ) -> str:
-                # commands.append({ "command": "removeEdge", "ids": ids})
+                Functions.api.commands.removeEdge(id)
                 return "removeEdge command added\n"
 
         async def _arun(
