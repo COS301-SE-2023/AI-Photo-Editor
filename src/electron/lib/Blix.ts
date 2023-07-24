@@ -12,7 +12,7 @@ import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
 import { AiManager } from "./ai/AiManager";
 import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
-
+import { testStuffies } from "./core-graph/CoreGraphTesting";
 // Encapsulates the backend representation for
 // the entire running Blix application
 export class Blix {

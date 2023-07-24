@@ -1,5 +1,6 @@
+import { Anchor } from "blix_svelvet";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";
-import { type AnchorUUID, CoreGraph } from "./CoreGraph";
+import { type AnchorUUID, CoreGraph, AnchorIO } from "./CoreGraph";
 import { NodeStyling } from "./CoreGraph";
 
 /**
@@ -71,7 +72,7 @@ class YamlExportStrategy implements ExportStrategy<string> {
   }
 }
 
-type LLMGraph = {
+export type LLMGraph = {
   graph: {
     nodes: {
       id: string;
@@ -96,7 +97,7 @@ type LLMGraph = {
   anchorMap: Record<string, string>;
 };
 
-class LLMExportStrategy implements ExportStrategy<LLMGraph> {
+export class LLMExportStrategy implements ExportStrategy<LLMGraph> {
   export(graph: CoreGraph): LLMGraph {
     const llmGraph: LLMGraph = {
       graph: {
@@ -107,25 +108,34 @@ class LLMExportStrategy implements ExportStrategy<LLMGraph> {
       edgeMap: {},
       anchorMap: {},
     };
-
+    // Nodes
     Object.values(graph.getNodes).forEach((n) => {
-      const node = {
-        id: n.uuid,
+      const node: LLMGraph["graph"]["nodes"][0] = {
+        id: n.uuid.slice(0, 6),
         signature: n.getSignature,
         inputs: [],
         outputs: [],
       };
-
+      // Anchors for Node
       Object.values(n.getAnchors).forEach((a) => {
-        if (a.ioType === 0) {
-          // input
-        } else if (a.ioType === 1) {
-          // output
+        if (a.ioType === AnchorIO.input) {
+          node.inputs.push({ id: a.uuid.slice(0, 6), type: a.type });
+        } else if (a.ioType === AnchorIO.output) {
+          node.outputs.push({ id: a.uuid.slice(0, 6), type: a.type });
         }
+        llmGraph.anchorMap[a.uuid.slice(0, 6)] = a.uuid;
       });
-
       llmGraph.graph.nodes.push(node);
-      llmGraph.nodeMap[node.id] = node.id.slice(0, 6);
+      llmGraph.nodeMap[n.uuid.slice(0, 6)] = n.uuid;
+    });
+    // Edges
+    Object.values(graph.getEdgeDest).forEach((e) => {
+      llmGraph.graph.edges.push({
+        id: e.uuid.slice(0, 6),
+        input: e.getAnchorTo.slice(0, 6),
+        output: e.getAnchorFrom.slice(0, 6),
+      });
+      llmGraph.edgeMap[e.uuid.slice(0, 6)] = e.uuid;
     });
 
     return llmGraph;
