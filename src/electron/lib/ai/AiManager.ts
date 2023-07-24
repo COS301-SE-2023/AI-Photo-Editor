@@ -74,6 +74,7 @@ const edges = [
 
 type Response = {
   commands: object[];
+  response: string;
 };
 /**
  *
@@ -163,6 +164,7 @@ export class AiManager {
       /* eslint-enable */
 
       // console.log(parsed.commands);
+      // console.log(parsed.response);
     });
 
     // Handle errors
