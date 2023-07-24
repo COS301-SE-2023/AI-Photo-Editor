@@ -1,0 +1,24 @@
+\contentsline {section}{\numberline {1}Design Strategy}{3}{section.1}%
+\contentsline {section}{\numberline {2}Quality Requirements}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Performance}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Security}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Customizability}{4}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Usability}{4}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Compatibility}{4}{subsection.2.5}%
+\contentsline {section}{\numberline {3}Architectural Design \& Patterns}{5}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Model-View-Controller (MVC)}{5}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Publish-Subscribe}{6}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Service-Oriented}{6}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Constraints}{7}{section.4}%
+\contentsline {section}{\numberline {5}Technology Choices}{7}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Svelte}{7}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Tailwind CSS}{8}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Electron}{8}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Firebase}{9}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}LangChain}{9}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}PineCone}{10}{subsection.5.6}%
+\contentsline {subsection}{\numberline {5.7}typescript}{10}{subsection.5.7}%
+\contentsline {subsection}{\numberline {5.8}Nodejs}{11}{subsection.5.8}%
+\contentsline {subsection}{\numberline {5.9}Python}{11}{subsection.5.9}%
+\contentsline {subsection}{\numberline {5.10}AI Models}{12}{subsection.5.10}%
+\contentsline {subsection}{\numberline {5.11}GPT-3.5 Turbo}{12}{subsection.5.11}%
