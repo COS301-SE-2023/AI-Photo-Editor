@@ -82,7 +82,7 @@ export class Blix {
     //   this._graphManager.addNode(randId, randomNode);
     // }, 3000);
 
-    this._aiManager = new AiManager(mainWindow, this.toolbox);
+    this._aiManager = new AiManager(this.toolbox, this._graphManager);
   }
 
   // TODO: Move these to a Utils.ts or something like that
