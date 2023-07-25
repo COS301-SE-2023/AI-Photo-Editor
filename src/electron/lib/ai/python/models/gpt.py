@@ -1,6 +1,5 @@
 import sys
 import os
-import json
 
 # Get the parent directory
 parent_dir = os.path.dirname(os.path.realpath(__file__))
@@ -29,7 +28,8 @@ class GPT:
                             agent=AgentType.OPENAI_FUNCTIONS,
                             model="gpt-3.5-turbo-0613",
                             # verbose=True,
-                            debug=True,                   
+                            debug=True,    
+                                       
         )
         
         prompt = generic.prompt_template.format(prompt=body["prompt"],nodes=body["nodes"],edges=body["edges"],plugins=body["plugin"])
@@ -38,8 +38,6 @@ class GPT:
     
         temp = open_ai_agent.run(prompt)
     
-        Functions.api.commands.sendResponse(temp)
+        Functions.api.commands.sendResponse(temp,Functions.api.logs)
         
-    
-        # json_object = json.dumps(output, indent = 4) 
-        # print(json_object)
+

@@ -1,11 +1,11 @@
-import Main from "electron/main";
+import logger from "../../utils/logger";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
 import { CoreGraph } from "./CoreGraph";
 import { CoreGraphSubscriber } from "./CoreGraphInteractors";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphImporter } from "./CoreGraphImporter";
-import { CoreGraphExporter, type GraphToJSON } from "./CoreGraphExporter";
+import { type GraphToJSON } from "./CoreGraphExporter";
 import { NodeInstance } from "../registries/ToolboxRegistry";
 
 // This class stores all the graphs amongst all open projects
@@ -54,7 +54,7 @@ export class CoreGraphManager {
   }
 
   addNode(graphUUID: UUID, node: NodeInstance): boolean {
-    // console.log("Adding node to graph in manager...")
+    logger.info("Adding node to graph in manager...");
     if (this._graphs[graphUUID] === undefined) return false;
     const res = this._graphs[graphUUID].addNode(node);
     if (res) this.onGraphUpdated(graphUUID);
@@ -62,7 +62,7 @@ export class CoreGraphManager {
   }
 
   addEdge(graphUUID: UUID, anchorA: UUID, anchorB: UUID): boolean {
-    // console.log("Adding edge to graph in manager...")
+    logger.warn("Adding edge to graph in manager...");
     if (this._graphs[graphUUID] === undefined) return false;
     const res = this._graphs[graphUUID].addEdge(anchorA, anchorB);
     if (res) this.onGraphUpdated(graphUUID);
@@ -70,7 +70,7 @@ export class CoreGraphManager {
   }
 
   removeNode(graphUUID: UUID, nodeUUID: UUID): boolean {
-    // console.log("Removing node from graph in manager...")
+    logger.warn("Removing node from graph in manager...");
     if (this._graphs[graphUUID] === undefined) return false;
     const res = this._graphs[graphUUID].removeNode(nodeUUID);
     if (res) this.onGraphUpdated(graphUUID);
@@ -78,7 +78,7 @@ export class CoreGraphManager {
   }
 
   removeEdge(graphUUID: UUID, anchorTo: UUID): boolean {
-    // console.log("Removing edge from graph in manager...")
+    logger.warn("Removing edge from graph in manager...");
     if (this._graphs[graphUUID] === undefined) return false;
     const res = this._graphs[graphUUID].removeEdge(anchorTo);
     if (res) this.onGraphUpdated(graphUUID);

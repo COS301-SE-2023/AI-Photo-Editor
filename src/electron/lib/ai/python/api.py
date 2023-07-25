@@ -12,39 +12,30 @@ parent_dir = os.path.dirname(os.path.realpath(__file__))
 # Add the parent directory to sys.path
 sys.path.append(parent_dir)
 
-output = ""
 
+
+output = ""
 for line in sys.stdin:
-    # Process each line of input
-    processed_line = line
-    output += processed_line
+    if(line == "end of transmission\n"):
+        break
+    output += line
 object = json.loads(output)
 
-# object: {
-#     "prompt": "...",
-#     "nodes": "...",
-#     "edges": "...",
-#     "plugin": "...",
-# }
-
-
-# print("\n")
-# print(object["prompt"])
-# opengpt.sendPrompt(object["prompt"])
-
-# Send the processed line to stdout
-# print(object["nodes"])
-
-
-
-# def write_dict_to_file(dict, path):
-#     with open(path, "w") as f:
-#         f.write(json.dumps(dict, indent=2))
-
-# write_dict_to_file(object, "output.json")
 
 
 class API:
+    """
+    Provides an interface for the AI agent to communicate with the electron app
+
+    attributes:
+        commands - the communication strategy for the interface
+        agent - the AI agent that uses a model
+    methods:
+        sendPrompt(body) - sends the user prompt to the AI agent
+    
+    """
+
+    logs = []
 
     commands = BASE()
 
@@ -57,6 +48,7 @@ class API:
 
     def hello(self):
         print("hello")
+
 
 # try:
 api = API()

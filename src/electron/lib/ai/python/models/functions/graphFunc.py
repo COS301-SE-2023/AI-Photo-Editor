@@ -86,8 +86,12 @@ class Functions:
             self,
             signature: str,
         ) -> str:
-                Functions.api.commands.addNode(signature)
-                return "addNode command added\n"
+                Functions.api.logs.append("addNode command added\n")
+                response = Functions.api.commands.addNode(signature)
+                Functions.api.logs.append("response: " + response + "\n")
+
+                return response
+               
 
 
         async def _arun(
@@ -125,8 +129,8 @@ class Functions:
             self,
             id: str,
         ) -> str:
-                Functions.api.commands.removeNode(id)
-                return "removeNode command added\n"
+                Functions.api.logs.append("removeNode command added\n")
+                return Functions.api.commands.removeNode(id)
 
 
         async def _arun(
@@ -166,8 +170,8 @@ class Functions:
             output : str,
             input : str,
         ) -> str:
-                Functions.api.commands.addEdge(output,input)
-                return "addEdge command added\n"
+                Functions.api.logs.append("addEdge command added\n")
+                return Functions.api.commands.addEdge(output,input)
 
 
         async def _arun(
@@ -206,8 +210,8 @@ class Functions:
             self,
             id: str,
         ) -> str:
-                Functions.api.commands.removeEdge(id)
-                return "removeEdge command added\n"
+                Functions.api.logs.append("removeEdge command added\n")
+                return Functions.api.commands.removeEdge(id)
 
         async def _arun(
             self,

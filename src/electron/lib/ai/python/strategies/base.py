@@ -4,6 +4,24 @@ import sys
 
 class BASE:
    
+   def receive(self):
+        """
+        Receives a response string  through stdin
+        ...
+        Returns response
+        -------
+        response 
+            response string
+        """
+
+        output = ""
+        for line in sys.stdin:
+            if(line == "end of transmission\n"):
+                break
+            output += line
+
+        return output
+   
 
    def addNode(self, signature):
         """
@@ -25,6 +43,8 @@ class BASE:
         json_object = json.dumps(output, indent = 4) 
         print(json_object)
         sys.stdout.flush()
+        value =  self.receive()
+        return value
 
    def removeNode(self, id):
         """
@@ -46,6 +66,8 @@ class BASE:
         json_object = json.dumps(output, indent = 4) 
         print(json_object)
         sys.stdout.flush()
+        return self.receive()
+
 
    def addEdge(self, output,input):
         """
@@ -70,6 +92,8 @@ class BASE:
         json_object = json.dumps(output, indent = 4) 
         print(json_object)
         sys.stdout.flush()
+        return self.receive()
+
 
    def removeEdge(self, id):
         """
@@ -91,8 +115,12 @@ class BASE:
         json_object = json.dumps(output, indent = 4) 
         print(json_object)
         sys.stdout.flush()
+        return self.receive()
 
-   def sendResponse(self,temp):
+
+   def sendResponse(self,temp,logs):
+        sys.stdout.flush()
+
         """
         Sends a response command to blix as a json string object through stdin
         ...
@@ -103,12 +131,14 @@ class BASE:
         """
 
         output = {
-            "command" : "response",
+            "command" : "response", 
             "args" : {
-                "response" : temp
+                "response" : temp,
+                "logs" : logs
             }
         }
     
         json_object = json.dumps(output, indent = 4) 
-        print(json_object)
+        print(json_object,flush=True)
         sys.stdout.flush()
+

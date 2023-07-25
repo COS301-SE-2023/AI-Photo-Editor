@@ -3,6 +3,7 @@ import type { ChildProcessWithoutNullStreams } from "child_process";
 import { spawn } from "child_process";
 import logger from "../../utils/logger";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
+import { exit } from "process";
 // Refer to .env for api keys
 
 //  TODO : Provide the graph context that will be given to ai as context
@@ -194,13 +195,11 @@ export class AiManager {
 
     const dataToSend2 = JSON.stringify(this._promptContext);
     this._childProcess.stdin.write(dataToSend2 + "\n");
-
-    this._childProcess.stdin.end();
+    this._childProcess.stdin.write("end of transmission\n");
 
     // Receive output from the Python script
     this._childProcess.stdout.on("data", (data) => {
       const result = data.toString();
-
       logger.info("Received from Python:", result);
 
       // We are assuming that the json string is trusted, and in the correct format
@@ -211,6 +210,12 @@ export class AiManager {
       const parsed: Response = JSON.parse(result) as unknown as Response;
       /* eslint-enable */
 
+      if (parsed.command === "response") {
+        logger.info("Response from python : ", parsed.args);
+        this._childProcess?.stdin.end();
+        return;
+      }
+
       const magicWand: { [K: string]: (args: JSON) => string } = {
         addNode: this.addNode,
         removeNode: this.removeNode,
@@ -220,9 +225,12 @@ export class AiManager {
 
       if (magicWand[parsed.command]) {
         const response = magicWand[parsed.command](parsed.args);
-        this._childProcess?.stdin.write(response);
+        logger.info("blix response:", response);
+        this._childProcess?.stdin.write(response + "\n");
+        this._childProcess?.stdin.write("end of transmission\n");
       } else {
         this._childProcess?.stdin.write("Execution Error: Command does not exist");
+        this._childProcess?.stdin.write("end of transmission\n");
       }
 
       // console.log(parsed);
