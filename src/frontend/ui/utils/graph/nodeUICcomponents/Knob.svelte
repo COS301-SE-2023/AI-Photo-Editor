@@ -1,7 +1,10 @@
 <script lang="ts">
   import { writable } from "svelte/store";
   import { Knob } from "blix_svelvet";
-  const knob = writable(0);
+  import type { AnchorValueStore } from "@shared/ui/UIGraph";
+
+  export let inputStore: AnchorValueStore;
+  if (!inputStore.inputs["knob"]) inputStore.inputs["knob"] = writable(0);
 </script>
 
-<Knob parameterStore="{knob}" />
+<Knob parameterStore="{inputStore.inputs['knob']}" />
