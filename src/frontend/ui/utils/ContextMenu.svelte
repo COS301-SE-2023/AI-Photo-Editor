@@ -17,47 +17,91 @@
 </script>
 
 <script lang="ts">
-  import { graphNodeMenuStore } from "../../lib/stores/ContextMenuStore";
+  import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import { graphMall } from "../../lib/stores/GraphStore";
-  import type { ItemGroup, Item, Action } from "../../lib/stores/ContextMenuStore";
+  import type { ItemGroup, Item, Action } from "../../lib/stores/GraphContextMenuStore";
   import ContextMenuItem from "./ContextMenuItem.svelte";
   import ContextMenuGroup from "./ContextMenuGroup.svelte";
   import { get, writable } from "svelte/store";
-  import { setContext } from "svelte";
+  import { onMount, setContext } from "svelte";
 
   const searchPlaceholder = "Search for nodes...";
   let searchTerm = "";
-
-  let items: (ItemGroup | Item)[] = [
-    {
-      label: "Blix",
-      items: [
-        { label: "Brightness", action: { type: "addNode", signature: "brightness" } },
-        { label: "Hue", action: { type: "addNode", signature: "hue" } },
-        { label: "Rotate", action: { type: "addNode", signature: "rotate" } },
-        { label: "Crop", action: { type: "addNode", signature: "crop" } },
-      ],
-    },
-    {
-      label: "Test",
-      action: { type: "addNode", signature: "test" },
-    },
-    {
-      label: "Pillow",
-      items: [
-        { label: "Rotate", action: { type: "addNode", signature: "rotate" } },
-        { label: "Crop", action: { type: "addNode", signature: "crop" } },
-        { label: "Brightness", action: { type: "addNode", signature: "brightness" } },
-        { label: "Hue", action: { type: "addNode", signature: "hue" } },
-      ],
-    },
-  ];
-
-  let children = convertToNodes(items);
-  let nodeIds = getNodeIds(children);
-  let filteredNodes = filterNodes(children, searchTerm);
+  let children: Node[] = [];
+  let filteredNodes: Node[] = [];
   let expandedNodeIds = writable<string[]>([]);
+  let searchBox: HTMLInputElement;
+  let menuContainer: HTMLElement;
+  let isShowing = false;
 
+  $: ({ items } = $graphMenuStore);
+  $: children = convertToNodes(items);
+  $: filteredNodes = filterNodes(children, searchTerm);
+  $: {
+    isShowing = $graphMenuStore.isShowing;
+    if (isShowing) {
+      searchBox?.focus();
+    } else {
+      searchTerm = "";
+    }
+  }
+
+  // TODO: Make sure menu stays on graph canvas when window resized
+
+  setContext<MenuContext>("menu", {
+    // List with expanded nodes get updated when group is toggled
+    toggleExpand: (node: Node, expanded: boolean) => {
+      if (expanded) {
+        expandedNodeIds.update((ids) => [...ids, node.id]);
+      } else {
+        expandedNodeIds.update((ids) => ids.filter((id) => id != node.id));
+      }
+    },
+    onNodeClick: (node: Node) => {
+      graphMenuStore.hideMenu();
+
+      const { action } = node;
+
+      if (!action) return;
+
+      const graphMenuState = get(graphMenuStore);
+      const graphStore = graphMall.getGraph(graphMenuState.graphId);
+
+      if (!graphStore) return;
+
+      if (action.type === "addNode") {
+        graphStore.addNode(action.signature, {
+          x: graphMenuState.canvasPos.x,
+          y: graphMenuState.canvasPos.y,
+        });
+      }
+    },
+    expandedNodeIds,
+  });
+
+  onMount(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // TODO: Fix where when chevron is clicked on the it closes the menu when it shouldn't
+      // .contains say the svg Node is not contained within the container for some reason
+      if (event.target instanceof Node && !menuContainer?.contains(event.target)) {
+        graphMenuStore.hideMenu();
+      }
+    };
+
+    const handleResize = () => {
+      graphMenuStore.setScreenDimensions(window.innerWidth, window.innerHeight);
+    };
+
+    window.addEventListener("click", handleClickOutside);
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+      window.removeEventListener("resize", handleResize);
+    };
+  });
+
+  // TODO: Remove item interfaces at stage and just keep the Node interface
   function convertToNodes(items: (ItemGroup | Item)[]): Node[] {
     let nodes: Node[] = [];
 
@@ -107,31 +151,6 @@
     return Math.random().toString(36).substring(2, 9);
   }
 
-  setContext<MenuContext>("menu", {
-    toggleExpand: (node: Node, expanded: boolean) => {
-      if (expanded) {
-        expandedNodeIds.update((ids) => [...ids, node.id]);
-      } else {
-        expandedNodeIds.update((ids) => ids.filter((id) => id != node.id));
-      }
-    },
-    onNodeClick: (node: Node) => {
-      const { action } = node;
-      if (action) {
-        console.log(action);
-        const graphMenuState = get(graphNodeMenuStore);
-        const graphStore = graphMall.getGraph(graphMenuState.graphId);
-        if (action.type === "addNode") {
-          graphStore.addNode(action.signature, {
-            x: graphMenuState.canvasPos.x,
-            y: graphMenuState.canvasPos.y,
-          });
-        }
-      }
-    },
-    expandedNodeIds,
-  });
-
   function expandAll() {
     expandedNodeIds.set(getNodeIds(children, false));
   }
@@ -171,71 +190,54 @@
       collapseAll();
     }
   }
-
-  $: children = convertToNodes(items);
-  $: nodeIds = getNodeIds(children);
-  $: filteredNodes = filterNodes(children, searchTerm);
 </script>
 
-{#if $graphNodeMenuStore.isShowing}
+{#if $graphMenuStore.isShowing}
   <div
-    class="fixed inset-x-0 z-50 h-64 w-48"
-    style:top="{$graphNodeMenuStore.windowPos.y}px"
-    style:left="{$graphNodeMenuStore.windowPos.x}px"
+    class="graph-context-menu fixed z-50 flex h-[256px] w-[192px] flex-col items-center overflow-hidden rounded-lg bg-zinc-800/80 ring-2 ring-zinc-600 backdrop-blur-md"
+    style:top="{$graphMenuStore.cursorPos.y}px"
+    style:left="{$graphMenuStore.cursorPos.x}px"
+    bind:this="{menuContainer}"
   >
-    <section
-      class="fixed z-50 flex h-[256px] w-[192px] flex-col items-center overflow-hidden rounded-lg bg-zinc-800/80 ring-2 ring-zinc-600 backdrop-blur-md"
-    >
-      <section class="flex items-center border-b-2 border-zinc-500 p-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="h-6 w-6 stroke-zinc-400"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
-        </svg>
-        <input
-          type="text"
-          placeholder="{searchPlaceholder}"
-          bind:value="{searchTerm}"
-          on:input="{handleInput}"
-          class="text-md mr-auto h-7 w-full border-none bg-transparent p-2 text-zinc-200 caret-purple-300 outline-none"
-        />
-      </section>
-      <section class="flex h-full w-full select-none flex-col overflow-y-auto p-1">
-        {#if filteredNodes.length > 0}
-          <ul>
-            {#each filteredNodes as node (node.id)}
-              {#if node.children}
-                <ContextMenuGroup root="{node}" />
-              {:else}
-                <ContextMenuItem node="{node}" />
-              {/if}
-            {/each}
-          </ul>
-        {:else}
-          <span class="flex h-full w-full items-center justify-center text-zinc-400"
-            >No results</span
-          >
-        {/if}
-      </section>
+    <section class="flex items-center border-b-2 border-zinc-500 p-1">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="h-6 w-6 stroke-zinc-400"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+      </svg>
+      <input
+        type="text"
+        placeholder="{searchPlaceholder}"
+        bind:value="{searchTerm}"
+        on:input="{handleInput}"
+        bind:this="{searchBox}"
+        class="text-md mr-auto h-7 w-full select-none border-none bg-transparent p-2 text-zinc-200 caret-purple-300 outline-none"
+      />
+    </section>
+    <section class="flex h-full w-full select-none flex-col overflow-y-auto p-1">
+      {#if filteredNodes.length > 0}
+        <ul>
+          {#each filteredNodes as node (node.id)}
+            {#if node.children}
+              <ContextMenuGroup root="{node}" />
+            {:else}
+              <ContextMenuItem node="{node}" />
+            {/if}
+          {/each}
+        </ul>
+      {:else}
+        <span class="flex h-full w-full items-center justify-center text-zinc-400">No results</span>
+      {/if}
     </section>
   </div>
-
-  <!-- <div
-    class="fixed inset-x-0 z-50 h-32 w-32 bg-red-500"
-    style:top="{$graphNodeMenuStore.windowPos.y}px"
-    style:left="{$graphNodeMenuStore.windowPos.x}px"
-  >
-    Jake: [{$graphNodeMenuStore.windowPos.x}][{$graphNodeMenuStore.windowPos
-      .y}][{$graphNodeMenuStore.isShowing}]
-  </div> -->
 {/if}
 
 <style lang="postcss">

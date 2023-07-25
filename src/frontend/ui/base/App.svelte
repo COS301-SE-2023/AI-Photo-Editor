@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { blixStore } from "../../lib/stores/BlixStore";
   import Navbar from "./Navbar.svelte";
   import Layout from "./layout/Layout.svelte";
@@ -8,21 +8,11 @@
   import { initAPIs } from "../../lib/api/apiInitializer";
   import ContextMenu from "../../ui/utils/ContextMenu.svelte";
   import Test from "./Test.svelte";
-  import { graphNodeMenuStore } from "lib/stores/ContextMenuStore";
 
   const testing = false;
 
-  const handleResize = () => {
-    graphNodeMenuStore.setScreenDimensions(window.innerWidth, window.innerHeight);
-  };
-
   onMount(async () => {
     await initAPIs();
-    window.addEventListener("resize", handleResize);
-  });
-
-  onDestroy(() => {
-    window.removeEventListener("resize", handleResize);
   });
 </script>
 

@@ -5,7 +5,7 @@
   import { GraphStore, graphMall } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import { projectsStore } from "lib/stores/ProjectStore";
-  import { graphNodeMenuStore, type ContextMenuState } from "../../lib/stores/ContextMenuStore";
+  import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
   export let panelId = Math.round(10000000.0 * Math.random()).toString();
@@ -50,27 +50,17 @@
     };
   }
 
-  function handleLeftClick() {
-    console.log("Left Click");
-    graphNodeMenuStore.hideMenu();
-  }
-
   function handleRightClick(event: CustomEvent) {
-    const state: ContextMenuState = {
-      isShowing: true,
-      windowPos: event.detail.windowPos,
-      canvasPos: event.detail.canvasPos,
-      graphId,
-      items: [],
-    };
-    graphNodeMenuStore.showMenu(state);
+    // TODO: Add typing to Svelvet for this custom event
+    // TODO: Change the variable `windowPos` to `cursorPos` cause its confusing
+    const { windowPos, canvasPos } = event.detail;
+    graphMenuStore.showMenu(windowPos, canvasPos, graphId);
   }
 
   // $: console.log("GRAPH MALL UPDATED", $graphMall);
 </script>
 
 <div class="hoverElements">
-  <button on:click="{addNode}">Add Node</button>
   <select name="graphPicker" class="dropdown" bind:value="{graphId}">
     {#each $graphIds as id}
       <option value="{id}">{id.slice(0, 8)}</option>
@@ -85,7 +75,6 @@
     minimap
     theme="custom-dark"
     bind:graph="{graphData}"
-    on:LeftClick="{handleLeftClick}"
     on:RightClick="{handleRightClick}"
   >
     {#each $graphNodes || [] as node}

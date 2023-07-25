@@ -1,7 +1,6 @@
 <script lang="ts">
   import { projectsStore } from "../../lib/stores/ProjectStore";
   import { toastStore } from "../../lib/stores/ToastStore";
-  import { graphNodeMenuStore } from "../../lib/stores/ContextMenuStore";
 
   let logs: any[] = [];
   let count = 0;
@@ -54,13 +53,6 @@
         on:keydown="{null}"
       >
         Add toast info
-      </span>
-      <span
-        class="rounded-md bg-zinc-400 p-2 hover:cursor-pointer hover:bg-zinc-500"
-        on:click="{() => graphNodeMenuStore.toggle()}"
-        on:keydown="{null}"
-      >
-        Toggle context menu
       </span>
     </div>
   </section>
