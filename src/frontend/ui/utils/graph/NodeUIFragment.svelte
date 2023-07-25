@@ -24,13 +24,13 @@
     <ul>
       {#each ui.params as child}
         <li class="component">
-          <svelte:self inputStore="{inputStore}" ui="{child}" />
+          <svelte:self {inputStore} ui="{child}" />
         </li>
       {/each}
     </ul>
   {:else if ui.type === "leaf"}
     <p>
-      <NodeUiComponent inputStore="{inputStore}" leafUI="{toLeafRepresentation(ui)}" />
+      <NodeUiComponent {inputStore} leafUI="{toLeafRepresentation(ui)}" />
     </p>
   {/if}
 {/if}
