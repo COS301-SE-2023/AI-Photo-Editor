@@ -67,9 +67,6 @@
   <section class="flex h-[400px] min-w-[150px] flex-col items-center">
     <span class="pb-3 text-xl text-purple-700">Log</span>
     <div class="no-scrollbar flex flex-col items-center space-y-2 overflow-y-auto text-zinc-400">
-      <!-- {#each logs as log}
-				<span>{log}</span>	
-			{/each} -->
       {#each $projectsStore.projects as project (project.id)}
         <span>{project.id}</span>
       {/each}
