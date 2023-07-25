@@ -56,16 +56,14 @@
   }
 
   function handleRightClick(event: CustomEvent) {
-    console.log("Right Click");
-
     const state: ContextMenuState = {
       isShowing: true,
-      items: [],
       windowPos: event.detail.windowPos,
       canvasPos: event.detail.canvasPos,
+      graphId,
+      items: [],
     };
     graphNodeMenuStore.showMenu(state);
-    console.log("Hi ", state);
   }
 
   // $: console.log("GRAPH MALL UPDATED", $graphMall);
