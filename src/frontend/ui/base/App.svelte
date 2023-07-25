@@ -8,24 +8,22 @@
   import { initAPIs } from "../../lib/api/apiInitializer";
   import ContextMenu from "../../ui/utils/ContextMenu.svelte";
   // import { graphNodeMenuStore } from "lib/stores/ContextMenuStore";
-  import Test from "./Test.svelte";
+  // import Test from "./Test.svelte";
 
-  const testing = false;
+  const testing = true;
 
   onMount(async () => {
     await initAPIs();
   });
 </script>
 
-<Toasts />
-<ContextMenu />
-
 {#if $blixStore.blixReady && testing}
-  <Test />
+  <!-- <Test /> -->
 {:else if !$blixStore.blixReady && testing}
-  <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
+  <!-- <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
     <span class="text-5xl text-purple-400">Loading</span>
-  </div>
+  </div> -->
+  <div></div>
 {:else if $blixStore.blixReady}
   <div class="h-screen w-screen bg-zinc-800 p-0">
     <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
@@ -35,10 +33,17 @@
     <Palette />
   </div>
 {:else}
-  <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
+  <!-- <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
     <span class="text-5xl text-purple-400">Loading</span>
-  </div>
+  </div> -->
+  <div></div>
 {/if}
+
+<Toasts />
+
+<div class="flex h-screen w-screen items-center justify-center bg-zinc-700">
+  <ContextMenu />
+</div>
 
 <style lang="postcss" global>
   @tailwind base;

@@ -8,14 +8,22 @@ export type ContextMenuState = {
   isShowing: boolean;
   windowPos: Coordinates;
   canvasPos: Coordinates;
-  items: ContextMenuItem[];
+  items: (ItemGroup | Item)[];
 };
 
-export type ContextMenuItem = {
+export type ItemGroup = {
+  label: string;
+  items: (ItemGroup | Item)[];
+};
+
+export type Item = {
   label: string;
   icon?: string;
-  action?: () => null;
+  action: Action;
 };
+
+export type CustomEvent = { action: Item };
+export type Action = { type: "addNode"; signature: string };
 
 class ContextMenuStore {
   private readonly store = writable<ContextMenuState>({
