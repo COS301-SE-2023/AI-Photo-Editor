@@ -8,6 +8,7 @@ export type ContextMenuState = {
   isShowing: boolean;
   windowPos: Coordinates;
   canvasPos: Coordinates;
+  graphId: string;
   items: (ItemGroup | Item)[];
 };
 
@@ -30,6 +31,7 @@ class ContextMenuStore {
     isShowing: false,
     windowPos: { x: 0, y: 0 },
     canvasPos: { x: 0, y: 0 },
+    graphId: "",
     items: [],
   });
 
@@ -47,6 +49,7 @@ class ContextMenuStore {
       isShowing: false,
       windowPos: { x: 0, y: 0 },
       canvasPos: { x: 0, y: 0 },
+      graphId: "",
       items: [],
     });
   }

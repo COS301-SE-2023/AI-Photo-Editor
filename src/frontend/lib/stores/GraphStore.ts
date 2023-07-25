@@ -59,6 +59,7 @@ export class GraphStore {
   }
 
   async addNode(nodeSignature: NodeSignature, pos?: SvelvetCanvasPos) {
+    // console.log("Adding node", nodeSignature)
     const thisUUID = get(this.graphStore).uuid;
     const res = await window.apis.graphApi.addNode(thisUUID, nodeSignature);
 

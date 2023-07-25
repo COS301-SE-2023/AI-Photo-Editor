@@ -1,22 +1,27 @@
 <script lang="ts">
-  import type { ItemGroup } from "../../lib/stores/ContextMenuStore";
+  //   import type { ItemGroup } from "../../lib/stores/ContextMenuStore";
   import ContextMenuItem from "./ContextMenuItem.svelte";
   import { slide } from "svelte/transition";
+  import type { Node, MenuContext } from "./ContextMenu.svelte";
+  import { getContext } from "svelte";
 
-  export let group: ItemGroup;
+  export let root: Node;
   export let indent = 0;
   let expanded = false;
 
-  function toggleExpansion() {
-    expanded = !expanded;
-  }
+  const { toggleExpand, expandedNodeIds } = getContext<MenuContext>("menu");
+
+  $: expanded = $expandedNodeIds.includes(root.id);
 </script>
 
 <ul>
   <li>
     <div
-      class="flex cursor-pointer items-center rounded-md p-1 hover:bg-pink-200/5"
-      on:click="{toggleExpansion}"
+      class="flex cursor-pointer items-center rounded-md p-1 hover:bg-pink-200/5 focus:bg-pink-200"
+      on:click="{() => {
+        expanded = !expanded;
+        toggleExpand(root, expanded);
+      }}"
       on:keydown="{null}"
     >
       {#if expanded}
@@ -43,18 +48,18 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
         </svg>
       {/if}
-      <div class="text-zinc-400">{group.label}</div>
+      <div class="text-zinc-400">{root.label}</div>
     </div>
-    {#if expanded}
+    {#if expanded && root.children}
       <ul
         class="ml-[17px] border-l-[0.8px] border-zinc-400 px-2 text-zinc-500"
-        transition:slide="{{ duration: 100 }}"
+        transition:slide="{{ duration: 150 }}"
       >
-        {#each group.items as item (item)}
-          {#if "items" in item}
-            <svelte:self item="{item}" indent="{indent + 10}" />
+        {#each root.children as node (node.id)}
+          {#if node.children}
+            <svelte:self root="{node}" indent="{indent + 10}" />
           {:else}
-            <ContextMenuItem item="{item}" />
+            <ContextMenuItem node="{node}" />
           {/if}
         {/each}
       </ul>

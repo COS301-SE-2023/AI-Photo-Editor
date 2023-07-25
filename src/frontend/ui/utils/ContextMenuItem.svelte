@@ -1,16 +1,16 @@
 <script lang="ts">
-  import type { Item, CustomEvent } from "../../lib/stores/ContextMenuStore";
-  import { createEventDispatcher } from "svelte";
+  import { getContext } from "svelte";
+  import type { MenuContext, Node } from "./ContextMenu.svelte";
 
-  const dispatch = createEventDispatcher<CustomEvent>();
+  export let node: Node;
 
-  export let item: Item;
+  const { onNodeClick } = getContext<MenuContext>("menu");
 </script>
 
 <li
   class="cursor-pointer rounded-md p-1 text-zinc-400 hover:bg-pink-200/5"
-  on:click="{() => dispatch('action', item)}"
+  on:click="{() => onNodeClick(node)}"
   on:keydown="{null}"
 >
-  {item.label}
+  {node.label}
 </li>
