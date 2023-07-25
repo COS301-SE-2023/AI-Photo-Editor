@@ -60,7 +60,7 @@ class BASE:
         """
 
         output = {
-            "command" : "addNode",
+            "command" : "addEdge",
             "args" : {
                 "output" : output,
                 "input" : input,
@@ -71,7 +71,7 @@ class BASE:
         print(json_object)
         sys.stdout.flush()
 
-   def removeEdge(self, signature):
+   def removeEdge(self, id):
         """
         Sends a remove edge command to blix as a json string object through stdin
         ...
@@ -82,9 +82,9 @@ class BASE:
         """
 
         output = {
-            "command" : "addNode",
+            "command" : "removeEdge",
             "args" : {
-                "signature" : signature
+                "id" : id
             }
         }
     

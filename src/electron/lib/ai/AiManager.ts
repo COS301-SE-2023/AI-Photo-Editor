@@ -14,6 +14,12 @@ interface PromptContext {
   edges: string[];
 }
 
+interface Edge {
+  id: string;
+  input: string;
+  output: string;
+}
+
 /* eslint-disable */
 const object = {
   graph: {
@@ -81,6 +87,11 @@ const object = {
         input: "dc5ea7",
         output: "7d3c2a",
       },
+      {
+        id: "k56227",
+        input: "b5c22f",
+        output: "f04bc3",
+      },
     ],
   },
   nodeMap: {
@@ -109,6 +120,10 @@ type Response = {
   command: string;
   args: JSON;
 };
+
+const nodeMap: { [K: string]: string } = object.nodeMap;
+const anchorMap: { [K: string]: string } = object.anchorMap;
+const edgeMap: { [K: string]: string } = object.edgeMap;
 
 /**
  *
@@ -173,7 +188,7 @@ export class AiManager {
 
   async sendPrompt() {
     this._promptContext!.prompt =
-      "I want you to add some nodes to this graph. Just add some random ones yourself";
+      "I want you to add a node to the graph, then remove a random node. Also add an edge to the graph and remove another random edge";
 
     this._childProcess = spawn("python3", ["src/electron/lib/ai/python/api.py"]);
 
@@ -228,7 +243,16 @@ export class AiManager {
     });
   }
 
-  // TODO : Document these functions and finish other functions
+  /**
+   * Calls addNode from coreGraphManager to add a node to the graph
+   * @param args Json object that contains the arguments for the addNode function :
+   * interface :
+   * Args {
+   * signature : string
+   * }
+   *
+   * @returns Returns a string that contains the response from the graphManager
+   * */
   addNode(args: JSON): string {
     try {
       interface Args {
@@ -242,8 +266,7 @@ export class AiManager {
           "a9e57b3c8b694e249f7a1f057d4ca17f5d43ef8c9c2f6d8e0c478f6c542e5a1b",
           node
         );
-        // console.log("Added node to graph")
-        return "Success, graph added successfully";
+        return "Success, node added successfully";
       } catch (error) {
         return error as string;
       }
@@ -253,22 +276,131 @@ export class AiManager {
     }
   }
 
+  /**
+   *
+   * Calls removeNode from coreGraphManager to remove a node from the graph
+   * @param args Json object that contains the arguments for the removeNode function :
+   * interface :
+   * Args {
+   * id : string
+   * }
+   *
+   * @returns Returns a string that contains the response from the graphManager
+   * */
+
   removeNode(args: JSON): string {
-    interface Args {
-      signature: string;
+    try {
+      interface Args {
+        id: string;
+      }
+
+      const obj = args as unknown as Args;
+
+      const fullId = nodeMap[obj.id];
+      if (fullId)
+        try {
+          this._graphManager.removeNode(
+            "a9e57b3c8b694e249f7a1f057d4ca17f5d43ef8c9c2f6d8e0c478f6c542e5a1b",
+            fullId
+          );
+          return "Success, node removed successfully";
+        } catch (error) {
+          return error as string;
+        }
+      else return "The provided node id is invalid :  node does not exist";
+    } catch (error) {
+      // Manual error to give ai
+      return "Critical error : Something went completely wrong, terminate execution.";
     }
-
-    const obj = args as unknown as Args;
-    const node = this._toolboxRegistry.getNodeInstance(obj.signature);
-
-    return "Critical error : Something went completely wrong, terminate execution.";
   }
+
+  /**
+   *
+   * Calls addEdge from coreGraphManager to add an edge to the graph
+   * @param args Json object that contains the arguments for the addEdge function :
+   * interface :
+   * Args {
+   * output : string
+   * input : string
+   * }
+   *
+   * @returns Returns a string that contains the response from the graphManager
+   * */
 
   addEdge(args: JSON): string {
-    return "Critical error : Something went completely wrong, terminate execution.";
+    try {
+      interface Args {
+        output: string;
+        input: string;
+      }
+
+      const obj = args as unknown as Args;
+      const output = anchorMap[obj.output];
+      const input = anchorMap[obj.input];
+
+      try {
+        this._graphManager.addEdge(
+          "a9e57b3c8b694e249f7a1f057d4ca17f5d43ef8c9c2f6d8e0c478f6c542e5a1b",
+          output,
+          input
+        );
+        return "Success, edge added successfully";
+      } catch (error) {
+        return error as string;
+      }
+    } catch (error) {
+      // Manual error to give ai
+      return "Critical error : Something went completely wrong, terminate execution.";
+    }
   }
 
+  /**
+   * Finds an edge object based on its id
+   * @param edges Interface that holds edge id, input anchor id and output anchor id
+   * @param id Id of the edge to be found
+   * @returns The edge that was found, or returns undefined
+   * */
+
+  findEdgeById(edges: Edge[], id: string): Edge | undefined {
+    return edges.find((edge) => edge.id === id);
+  }
+
+  /**
+   *
+   * Calls removeEdge from coreGraphManager to remove an edge from the graph, id of edge is provided.
+   * @param args Json object that contains the arguments for the removeEdge function :
+   * interface :
+   * Args {
+   * id : string
+   * }
+   *
+   * @returns Returns a string that contains the response from the graphManager
+   * */
+
   removeEdge(args: JSON): string {
-    return "Critical error : Something went completely wrong, terminate execution.";
+    try {
+      interface Args {
+        id: string;
+      }
+
+      const obj = args as unknown as Args;
+      const edge = this.findEdgeById(object.graph.edges, obj.id);
+
+      if (edge) {
+        const anchor = anchorMap[edge?.input];
+        try {
+          this._graphManager.removeEdge(
+            "a9e57b3c8b694e249f7a1f057d4ca17f5d43ef8c9c2f6d8e0c478f6c542e5a1b",
+            anchor
+          );
+          return "Success, edge removed successfully";
+        } catch (error) {
+          return error as string;
+        }
+      } else return "The given edge does not exist";
+    } catch (error) {
+      // Manual error to give ai
+      return "Critical error : Something went completely wrong, terminate execution.";
+    }
   }
 }

@@ -55,10 +55,6 @@ class API:
     def sendPrompt(self, body):
         self.agent.sendPrompt(body)
 
-    def addNode(self, inputs):
-        print("hello")
-
-
     def hello(self):
         print("hello")
 
