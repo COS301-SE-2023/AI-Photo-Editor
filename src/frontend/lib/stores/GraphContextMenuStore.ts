@@ -51,17 +51,11 @@ class ContextMenuStore {
    * @param height New screen height
    */
   public setScreenDimensions(width: number, height: number) {
-    const deltaX = this.screenDimensions.width - width;
-    const deltaY = this.screenDimensions.height - height;
     this.screenDimensions.width = width;
     this.screenDimensions.height = height;
 
-    this.store.update((state) => {
-      const { x, y } = state.cursorPos;
-      state.cursorPos.x = x - deltaX;
-      state.cursorPos.y = y - deltaY;
-      return state;
-    });
+    // Hides menu when window gets resized
+    this.hideMenu();
   }
 
   public get subscribe() {
