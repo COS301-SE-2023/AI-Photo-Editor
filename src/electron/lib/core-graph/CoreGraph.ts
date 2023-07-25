@@ -78,7 +78,7 @@ export class CoreGraph extends UniqueEntity {
         if (!n.getAnchors.hasOwnProperty(anchor)) continue;
 
         const a: Anchor = n.getAnchors[anchor];
-        const reducedAnchor: ReducedAnchor = new ReducedAnchor(a.uuid, a.type, a.displayName);
+        const reducedAnchor: ReducedAnchor = new ReducedAnchor(a.anchorId, a.type, a.displayName);
 
         (a.ioType === AnchorIO.input ? inputs : outputs)[a.uuid] = reducedAnchor;
       }
@@ -109,8 +109,8 @@ export class CoreGraph extends UniqueEntity {
         edge.uuid,
         edgeAnchorFrom.parent.uuid,
         edgeAnchorTo.parent.uuid,
-        edgeAnchorFrom.uuid,
-        edgeAnchorTo.uuid
+        edgeAnchorFrom.anchorId,
+        edgeAnchorTo.anchorId
       );
     }
 
@@ -371,11 +371,11 @@ class Node extends UniqueEntity {
     this.anchors = {};
 
     inputAnchors.forEach((anchor) => {
-      const anc = new Anchor(this, AnchorIO.input, anchor.type, anchor.displayName);
+      const anc = new Anchor(this, AnchorIO.input, anchor.id, anchor.type, anchor.displayName);
       this.anchors[anc.uuid] = anc;
     });
     outputAnchors.forEach((anchor) => {
-      const anc = new Anchor(this, AnchorIO.output, anchor.type, anchor.displayName);
+      const anc = new Anchor(this, AnchorIO.output, anchor.id, anchor.type, anchor.displayName);
       this.anchors[anc.uuid] = anc;
     });
   }
@@ -414,6 +414,9 @@ class Anchor extends UniqueEntity {
   constructor(
     readonly parent: Node,
     readonly ioType: AnchorIO,
+    // `anchorId` IS NOT THE UUID, this is the string assigned by the plugin
+    // to identify the anchor _within the node_
+    readonly anchorId: string,
     readonly type: AnchorType,
     readonly displayName: string
   ) {
@@ -482,19 +485,19 @@ class ReducedNode {
 class ReducedEdge {
   constructor(
     readonly id: UUID,
-    readonly nodeFrom: UUID,
-    readonly nodeTo: UUID,
-    readonly anchorFrom: UUID,
-    readonly anchorTo: UUID
+    readonly nodeUUIDFrom: UUID,
+    readonly nodeUUIDTo: UUID,
+    readonly anchorIdFrom: string,
+    readonly anchorIdTo: string
   ) {}
 }
 
 class ReducedAnchor {
-  constructor(readonly id: UUID, readonly type: AnchorType, readonly displayName: string) {}
+  constructor(readonly id: string, readonly type: AnchorType, readonly displayName: string) {}
 }
 
 // A set of nodes with input anchors, output anchors point directly to other nodes' input anchors
-export class NodesToNodes implements GraphRepresentation {
+export class NodeOutToNodeIn implements GraphRepresentation {
   // TODO
   constructor(public graphId: UUID) {}
 }

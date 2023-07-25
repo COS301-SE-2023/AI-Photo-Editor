@@ -1,9 +1,12 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Node, Svelvet } from "blix_svelvet";
+  import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
   import { type Readable } from "svelte/store";
   import { GraphStore, graphMall } from "lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
+  import type { UUID } from "@shared/utils/UniqueEntity";
+  import type { GraphEdge, GraphNode } from "@shared/ui/UIGraph";
+  // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
@@ -13,7 +16,8 @@
   let graphId = $graphIds[0];
 
   let thisGraphStore: Readable<GraphStore | null>;
-  let graphNodes: Readable<any[]>;
+  let graphNodes: Readable<GraphNode[]>;
+  let graphEdges: Readable<GraphEdge[]>;
 
   let graphData: any;
 
@@ -22,19 +26,69 @@
   $: zoom = graphData?.transforms?.scale;
   $: dimensions = graphData?.dimensions;
 
+  // Hooks exposed by <Svelvet />
+  let connectAnchorIds: (
+    sourceNode: NodeKey,
+    sourceAnchor: AnchorKey,
+    targetNode: NodeKey,
+    targetAnchor: AnchorKey
+  ) => boolean;
+  let clearAllGraphEdges: () => void;
+
+  // Swap out the graph when the user makes a selection in the dropdown
   function updateOnGraphId(graphId: string) {
     thisGraphStore = graphMall.getGraphReactive(graphId);
     if ($thisGraphStore) {
       graphNodes = $thisGraphStore.getNodesReactive();
+      graphEdges = $thisGraphStore.getEdgesReactive();
     }
   }
 
+  // $: graphData?.nodes.subscribe((nodes: GraphNode[]) => {
+  //   console.log(`(${panelId}) SVELVET NODES`, nodes);
+  // });
+  // $: graphData?.edges.subscribe((edges: GraphEdge[]) => {
+  //   console.log(`(${panelId}) SVELVET EDGES`, edges);
+  // });
+
+  function updateOnGraphEdges(graphEdges: GraphEdge[]) {
+    if (clearAllGraphEdges) clearAllGraphEdges();
+
+    for (let edge in graphEdges) {
+      if (!graphEdges.hasOwnProperty(edge)) continue;
+      const edgeData = graphEdges[edge];
+
+      // console.log("EDGE", edge);
+
+      // Skip if nodes don't exist
+      // const fromNode = $graphNodes.find(node => node.id === edgeData.nodeFrom)
+      // const toNode   = $graphNodes.find(node => node.id === edgeData.nodeTo);
+      // if (!fromNode || !toNode) continue;
+
+      if (connectAnchorIds) {
+        const res = connectAnchorIds(
+          `N-${panelId}_${edgeData.nodeUUIDFrom}`,
+          // E.g. A-4_in2/N-4_IxExhIof-npSfn0dnO-VRSW4_kqn2z5bcCPCcflY_MA
+          `A-${panelId}_${edgeData.anchorIdFrom}`,
+          `N-${panelId}_${edgeData.nodeUUIDTo}`,
+          `A-${panelId}_${edgeData.anchorIdTo}`
+        );
+
+        // console.log(
+        //   `N-${panelId}_${edgeData.nodeUUIDFrom}`, "\n",
+        //   `A-${panelId}_${edgeData.anchorIdFrom}`, "\n",
+        //   `N-${panelId}_${edgeData.nodeUUIDTo}`, "\n",
+        //   `A-${panelId}_${edgeData.anchorIdTo}`, "\n",
+        //   "RES", res
+        // );
+      }
+    }
+  }
+
+  $: updateOnGraphEdges($graphEdges);
+
   // Only updates when _graphId_ changes
   $: updateOnGraphId(graphId);
-
-  // function edgeDropped(...e: any) {
-  //   console.log(e);
-  // }
 
   function addNode() {
     $thisGraphStore?.addNode("hello-plugin.hello", getGraphCenter());
@@ -48,6 +102,63 @@
     };
   }
 
+  // Svelvet id's are of the following format:
+  // <panelId>_<anchorId>/<panelId>_<nodeUUID>
+  // Entities include nodes and anchors
+  function splitCompositeAnchorId(entityId: string): { anchorUUID: UUID; nodeUUID: UUID } | null {
+    if (!$thisGraphStore) return null;
+    try {
+      const [anchorKey, nodeKye] = entityId.split("/");
+
+      const [_1, anchorId] = anchorKey.split("_");
+      const [_2, ...nodeUUIDParts] = nodeKye.split("_");
+      const nodeUUID = nodeUUIDParts.join("_");
+
+      // console.log("NODE", $thisGraphStore.getNode(nodeUUID));
+      const anchorUUID = $thisGraphStore.getNode(nodeUUID).anchorUUIDs[anchorId];
+
+      if (!anchorUUID || !nodeUUID) return null;
+      return { anchorUUID, nodeUUID };
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  }
+
+  function edgeConnected(e: CustomEvent<any>) {
+    console.log("CONNECTION EVENT");
+    const fromAnchor = splitCompositeAnchorId(e.detail.sourceAnchor.id);
+    const toAnchor = splitCompositeAnchorId(e.detail.targetAnchor.id);
+
+    if (!fromAnchor || !toAnchor) return;
+    $thisGraphStore?.addEdge(fromAnchor.anchorUUID, toAnchor.anchorUUID);
+  }
+
+  function edgeDisconnected(e: CustomEvent<any>) {
+    console.log("DISCONNECTION EVENT");
+    const toUUID = splitCompositeAnchorId(e.detail.targetAnchor.id);
+
+    if (!toUUID) return;
+    $thisGraphStore?.removeEdge(toUUID.anchorUUID);
+  }
+
+  // function addRandomConn() {
+  // 	const node1 = Math.floor(Math.random() * 5);
+  // 	let node2 = node1;
+  // 	while (node1 == node2) node2 = Math.floor(Math.random() * 5);
+
+  // 	if (connectAnchorIds) {
+  // 		const res = connectAnchorIds(`N-n-${node1}`, `A-a-${node1}`, `N-n-${node2}`, `A-a-${node2}`);
+  // 		console.log('RES', res);
+  // 	}
+  // }
+
+  // function clearEdges() {
+  // 	if (clearAllGraphEdges) {
+  // 		clearAllGraphEdges();
+  // 	}
+  // }
+
   // $: console.log("GRAPH MALL UPDATED", $graphMall);
 </script>
 
@@ -58,6 +169,8 @@
       <option value="{id}">{id.slice(0, 8)}</option>
     {/each}
   </select>
+  <!-- <button style:float="right" on:click={addRandomConn}>Add random conn</button> -->
+  <!-- <button style:float="right" on:click={clearEdges}>Clear edges</button> -->
 </div>
 
 {#if thisGraphStore}
@@ -67,22 +180,24 @@
     minimap
     theme="custom-dark"
     bind:graph="{graphData}"
+    on:connection="{edgeConnected}"
+    on:disconnection="{edgeDisconnected}"
+    bind:connectAnchorIds="{connectAnchorIds}"
+    bind:clearAllGraphEdges="{clearAllGraphEdges}"
   >
     {#each $graphNodes || [] as node}
-      {#key node}
+      {#key node.uuid}
         <PluginNode panelId="{panelId}" graphId="{graphId}" node="{node}" />
       {/key}
     {/each}
 
     <!-- Testing graph center -->
-    {#key [$translation, $dimensions]}
-      <Node position="{getGraphCenter()}">
-        <div class="z-50 text-white">
-          {JSON.stringify($translation)}<br />
-          {JSON.stringify($zoom)}
-        </div>
-      </Node>
-    {/key}
+    <!-- <Node position="{$translation && getGraphCenter()}">
+      <div class="z-50 text-white">
+        {JSON.stringify($translation)}<br />
+        {JSON.stringify($zoom)}
+      </div>
+    </Node> -->
   </Svelvet>
 {:else}
   <div>Graph store not found</div>

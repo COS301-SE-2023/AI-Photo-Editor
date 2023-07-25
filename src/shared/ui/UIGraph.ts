@@ -4,11 +4,12 @@ import { type Writable, writable, get } from "svelte/store";
 
 export type GraphUUID = UUID;
 export type GraphNodeUUID = UUID;
+export type GraphEdgeUUID = UUID;
 export type GraphAnchorUUID = UUID;
 
 export class UIGraph {
   public nodes: { [key: GraphNodeUUID]: GraphNode } = {};
-  public edges: { [key: GraphUUID]: any } = {}; // TODO
+  public edges: { [key: GraphAnchorUUID]: GraphEdge } = {};
 
   constructor(public uuid: GraphUUID) {}
 
@@ -17,23 +18,33 @@ export class UIGraph {
 
 export class GraphNode {
   displayName = "";
-  id = "";
 
   signature: NodeSignature = ""; // index in toolbox
 
   styling?: NodeStylingStore;
 
-  // inAnchors: GraphAnchor[] = [];
-  // outAnchors: GraphAnchor[] = [];
+  // Maps toolbox anchor id's (local to node) to their backend UUIDs (global in graph)
+  anchorUUIDs: { [key: string]: GraphAnchorUUID } = {};
 
-  constructor(public uuid: GraphNodeUUID, pos?: SvelvetCanvasPos) {
-    this.id = uuid;
+  constructor(public readonly uuid: GraphNodeUUID, pos?: SvelvetCanvasPos) {
     this.displayName = "Node-" + uuid.substring(0, 6);
     if (pos) {
       this.styling = new NodeStylingStore();
       this.styling.pos.set(pos);
     }
   }
+}
+
+export class GraphEdge {
+  label = "";
+
+  constructor(
+    public readonly uuid: GraphEdgeUUID,
+    readonly nodeUUIDFrom: GraphNodeUUID,
+    readonly nodeUUIDTo: GraphNodeUUID,
+    readonly anchorIdFrom: GraphAnchorUUID,
+    readonly anchorIdTo: GraphAnchorUUID
+  ) {}
 }
 
 export type SvelvetCanvasPos = { x: number; y: number };

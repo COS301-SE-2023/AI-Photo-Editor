@@ -1,3 +1,4 @@
+import type { AnchorUUID } from "@electron/lib/core-graph/CoreGraph";
 import type { NodeSignature } from "@shared/ui/ToolboxTypes";
 import {
   UIGraph,
@@ -5,7 +6,6 @@ import {
   type GraphNodeUUID,
   type GraphUUID,
   type SvelvetCanvasPos,
-  NodeStylingStore,
 } from "@shared/ui/UIGraph";
 import { writable, get, derived, type Writable, type Readable } from "svelte/store";
 
@@ -33,7 +33,7 @@ export class GraphStore {
     this.graphStore = writable<UIGraph>(new UIGraph(uuid));
   }
 
-  // Called by CoreGraphApi when the command registry changes
+  // Called by GraphClientApi when the command registry changes
   public refreshStore(newGraph: UIGraph) {
     this.graphStore.update((graph) => {
       graph.edges = newGraph.edges;
@@ -52,12 +52,6 @@ export class GraphStore {
     });
   }
 
-  async addEdge() {
-    // TODO
-    const res = await window.apis.graphApi.addEdge("");
-    return false;
-  }
-
   async addNode(nodeSignature: NodeSignature, pos?: SvelvetCanvasPos) {
     const thisUUID = get(this.graphStore).uuid;
     const res = await window.apis.graphApi.addNode(thisUUID, nodeSignature);
@@ -67,7 +61,26 @@ export class GraphStore {
     //   const posRes = await window.apis.graphApi.setNodePos(thisUUID, res, pos);
     // }
 
-    return true;
+    return res.status;
+  }
+
+  async addEdge(anchorA: AnchorUUID, anchorB: AnchorUUID) {
+    const thisUUID = get(this.graphStore).uuid;
+    const res = await window.apis.graphApi.addEdge(thisUUID, anchorA, anchorB);
+
+    return res.status;
+  }
+
+  async removeNode(nodeUUID: GraphNodeUUID) {
+    const thisUUID = get(this.graphStore).uuid;
+    const res = await window.apis.graphApi.removeNode(thisUUID, nodeUUID);
+    return false;
+  }
+
+  async removeEdge(anchorTo: AnchorUUID) {
+    const thisUUID = get(this.graphStore).uuid;
+    const res = await window.apis.graphApi.removeEdge(thisUUID, anchorTo);
+    return false;
   }
 
   public get update() {
@@ -78,19 +91,20 @@ export class GraphStore {
     return this.graphStore.subscribe;
   }
 
+  public getNode(nodeUUID: GraphNodeUUID): GraphNode {
+    return get(this.graphStore).nodes[nodeUUID];
+  }
+
   public getNodesReactive() {
     return derived(this.graphStore, (graph) => {
       return Object.values(graph.nodes);
     });
   }
 
-  async removeEdge() {
-    const res = await window.apis.graphApi.removeEdge("");
-    return false;
-  }
-  async removeNode() {
-    const res = await window.apis.graphApi.removeNode("");
-    return false;
+  public getEdgesReactive() {
+    return derived(this.graphStore, (graph) => {
+      return Object.values(graph.edges);
+    });
   }
 }
 

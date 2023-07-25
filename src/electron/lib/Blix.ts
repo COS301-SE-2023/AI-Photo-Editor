@@ -35,16 +35,16 @@ export class Blix {
     this._projectManager = new ProjectManager(mainWindow);
 
     // TESTING ADD NODE TO GRAPH
-    setInterval(() => {
-      const allIds = this._graphManager.getAllGraphUUIDs();
+    // setInterval(() => {
+    //   const allIds = this._graphManager.getAllGraphUUIDs();
 
-      const randId = allIds[Math.floor(Math.random() * allIds.length)];
-      const toolbox = this._toolboxRegistry.getRegistry();
-      const toolboxKeys = Object.keys(toolbox);
-      const randomNode = toolbox[toolboxKeys[Math.floor(Math.random() * toolboxKeys.length)]];
+    //   const randId = allIds[Math.floor(Math.random() * allIds.length)];
+    //   const toolbox = this._toolboxRegistry.getRegistry();
+    //   const toolboxKeys = Object.keys(toolbox);
+    //   const randomNode = toolbox[toolboxKeys[Math.floor(Math.random() * toolboxKeys.length)]];
 
-      this._graphManager.addNode(randId, randomNode);
-    }, 3000);
+    //   this._graphManager.addNode(randId, randomNode);
+    // }, 3000);
   }
 
   get toolbox(): ToolboxRegistry {
