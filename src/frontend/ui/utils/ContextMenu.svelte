@@ -184,7 +184,7 @@
     style:left="{$graphNodeMenuStore.windowPos.x}px"
   >
     <section
-      class="fixed z-50 flex h-64 w-48 flex-col items-center overflow-hidden rounded-lg bg-zinc-800/80 ring-2 ring-zinc-600 backdrop-blur-md"
+      class="fixed z-50 flex h-[256px] w-[192px] flex-col items-center overflow-hidden rounded-lg bg-zinc-800/80 ring-2 ring-zinc-600 backdrop-blur-md"
     >
       <section class="flex items-center border-b-2 border-zinc-500 p-1">
         <svg
