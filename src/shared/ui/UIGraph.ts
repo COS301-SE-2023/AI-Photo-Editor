@@ -23,6 +23,8 @@ export class GraphNode {
 
   styling?: NodeStylingStore;
 
+  inputUIValues: AnchorValueStore;
+
   // inAnchors: GraphAnchor[] = [];
   // outAnchors: GraphAnchor[] = [];
 
@@ -33,6 +35,7 @@ export class GraphNode {
       this.styling = new NodeStylingStore();
       this.styling.pos.set(pos);
     }
+    this.inputUIValues = new AnchorValueStore();
   }
 }
 
@@ -42,6 +45,10 @@ export class NodeStylingStore {
   pos = writable<SvelvetCanvasPos>({ x: 0, y: 0 });
   width = writable<number>(0);
   height = writable<number>(0);
+}
+
+export class AnchorValueStore {
+  inputs: { [key: string]: Writable<any> } = {};
 }
 
 class GraphAnchor {

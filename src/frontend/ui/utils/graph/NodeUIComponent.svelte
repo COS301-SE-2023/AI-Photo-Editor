@@ -4,8 +4,10 @@
   import Slider from "./nodeUICcomponents/Slider.svelte";
   import ColorPicker from "./nodeUICcomponents/ColorPicker.svelte";
   import Knob from "./nodeUICcomponents/Knob.svelte";
+  import type { AnchorValueStore } from "@shared/ui/UIGraph";
 
   export let leafUI: NodeUILeaf | null = null;
+  export let inputStore: AnchorValueStore;
 
   const mapToSvelteComponent: { [key in NodeUIComponent]: any } = {
     Button: Button,
@@ -24,6 +26,6 @@
 
 {#if leafUI}
   {#if mapToSvelteComponent[leafUI.category] !== null}
-    <svelte:component this="{mapToSvelteComponent[leafUI.category]}" />
+    <svelte:component this="{mapToSvelteComponent[leafUI.category]}" inputStore="{inputStore}" />
   {/if}
 {/if}

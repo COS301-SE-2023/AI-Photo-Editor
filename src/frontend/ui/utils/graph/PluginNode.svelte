@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Anchor, Node } from "blix_svelvet";
   import { GraphNode, NodeStylingStore } from "@shared/ui/UIGraph";
+  import { Anchor, Node } from "blix_svelvet";
   import { toolboxStore } from "lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";
   import PluginEdge from "./PluginEdge.svelte";
@@ -20,6 +20,9 @@
   if (!node.styling) {
     node.styling = new NodeStylingStore();
   }
+
+  // node.inputUIValues = new AnchorValueStore();
+
   const nodePos = node.styling.pos;
 </script>
 
@@ -48,7 +51,7 @@ height="{graphNode.dims.h}" -->
         {JSON.stringify({ ...$toolboxNode, ui: undefined })}
       </div>
       <div class="node-body" style="max-width: 400px">
-        <NodeUiFragment ui="{$toolboxNode?.ui}" />
+        <NodeUiFragment inputStore="{node.inputUIValues}" ui="{$toolboxNode?.ui}" />
       </div>
 
       {#if $toolboxNode}

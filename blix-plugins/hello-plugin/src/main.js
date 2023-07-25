@@ -13,6 +13,7 @@ const nodes = {
        ui.addButton("Execute order 66","return 66;")
        .addSlider("Slide along",0,100,0.1,50)
        .addColorPicker("Massacre", "red")
+       .addKnob("Knob",0,100,0.1,50)
        .addDropdown("Orphanage",nodeBuilder.createUIBuilder()
        .addLabel("Label1"));   
 

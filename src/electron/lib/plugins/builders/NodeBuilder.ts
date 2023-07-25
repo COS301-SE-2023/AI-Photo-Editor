@@ -133,6 +133,20 @@ export class NodeUIBuilder {
     this.node = new NodeUIParent("", null);
   }
 
+  public addKnob(
+    label: string,
+    min: number,
+    max: number,
+    step: number,
+    defautlVal: number
+  ): NodeUIBuilder {
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.Knob, label, [min, max, step, defautlVal])
+    );
+
+    return this;
+  }
+
   /**
    *
    * @param label Label for the button
