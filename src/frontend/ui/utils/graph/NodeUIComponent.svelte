@@ -26,6 +26,6 @@
 
 {#if leafUI}
   {#if mapToSvelteComponent[leafUI.category] !== null}
-    <svelte:component this="{mapToSvelteComponent[leafUI.category]}" inputStore="{inputStore}" />
+    <svelte:component this="{mapToSvelteComponent[leafUI.category]}" {inputStore} />
   {/if}
 {/if}
