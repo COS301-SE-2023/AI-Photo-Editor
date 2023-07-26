@@ -14,15 +14,6 @@ sys.path.append(parent_dir)
 
 
 
-output = ""
-for line in sys.stdin:
-    if(line == "end of transmission\n"):
-        break
-    output += line
-object = json.loads(output)
-
-
-
 class API:
     """
     Provides an interface for the AI agent to communicate with the electron app
@@ -37,6 +28,7 @@ class API:
 
     logs = []
 
+    # You can swap this out for a different strategy
     commands = BASE()
 
     def __init__(self):
@@ -52,6 +44,8 @@ class API:
 
 # try:
 api = API()
+object = api.commands.receive()
+object = json.loads(object)
 api.sendPrompt(object)
 # except Exception as e:
     # print(e)
