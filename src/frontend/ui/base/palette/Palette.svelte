@@ -157,6 +157,12 @@
       const item = categories[selectedCategory].items[selectedItem];
       handleAction(item);
     },
+    "blix.palette.prompt": () => {
+      if (searchTerm.trim() != "") {
+        window.apis.utilApi.sendPrompt(searchTerm.trim());
+        closePalette();
+      }
+    },
   };
 
   function handleAction(item: ICommand) {
@@ -181,7 +187,7 @@
     class="fixed inset-x-0 top-48 z-50 m-auto flex w-[40%] min-w-[400px] flex-col items-center overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
   >
     <!-- Header -->
-    <header class="flex w-full items-center px-3">
+    <header class="flex w-full select-none items-center px-3">
       <input
         type="text"
         placeholder="Search for tools and commands..."
@@ -190,6 +196,14 @@
         bind:value="{searchTerm}"
         on:input="{onSearch}"
       />
+      {#if searchTerm !== ""}
+        <div class="float-right flex min-w-max items-center space-x-2">
+          <span class="text-sm font-medium text-zinc-500">Send prompt</span>
+          <span class="rounded-md p-1 text-xs font-semibold text-zinc-500 ring-1 ring-zinc-500"
+            >Tab</span
+          >
+        </div>
+      {/if}
     </header>
 
     <!-- Results -->

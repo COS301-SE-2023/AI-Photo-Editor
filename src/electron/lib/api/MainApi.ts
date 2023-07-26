@@ -18,7 +18,7 @@ import { ToolboxApi } from "./apis/ToolboxApi";
  */
 export function exposeMainApis(blix: Blix) {
   const apis = {
-    utilApi: new UtilApi(),
+    utilApi: new UtilApi(blix),
     projectApi: new ProjectApi(blix),
     pluginApi: new CommandApi(blix),
     graphApi: new GraphApi(blix),

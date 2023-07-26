@@ -90,16 +90,6 @@ export class Blix {
     this._graphManager.addAllSubscriber(graphSubscriber);
   }
 
-  private initSubscribers() {
-    const graphSubscriber = new IPCGraphSubscriber();
-
-    graphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
-      this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
-    };
-
-    this._graphManager.addAllSubscriber(graphSubscriber);
-  }
-
   // TODO: Move these to a Utils.ts or something like that
   sendInformationMessage(message: string) {
     this._mainWindow.apis.utilClientApi.showToast({ message, type: "info" });
