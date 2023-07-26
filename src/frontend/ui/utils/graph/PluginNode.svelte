@@ -4,12 +4,15 @@
   import { toolboxStore } from "lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";
   import PluginEdge from "./PluginEdge.svelte";
+  import { createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
 
   export let panelId: string;
   export let graphId: string;
   export let node: GraphNode;
 
-  $: svelvetNodeId = `${panelId}_${graphId.substring(0, 6)}_${node.id.substring(0, 6)}`;
+  $: svelvetNodeId = `${panelId}_${node.uuid}`;
   $: toolboxNode = toolboxStore.getNodeReactive(node.signature);
 
   // Parameter store
@@ -46,6 +49,7 @@ height="{graphNode.dims.h}" -->
         <h1>{$toolboxNode?.title || node.displayName}</h1>
       </div>
       <div class="node-body" style="max-width: 400px">
+        <h2>{Math.floor(Math.random() * 100000000)}</h2>
         <h2>Signature: {node.signature}</h2>
         <h2>SvelvetNodeId: {svelvetNodeId}</h2>
         {JSON.stringify({ ...$toolboxNode, ui: undefined })}
@@ -57,13 +61,26 @@ height="{graphNode.dims.h}" -->
       {#if $toolboxNode}
         <div class="anchors inputs">
           {#each $toolboxNode.inputs as input}
-            <Anchor id="{svelvetNodeId}_{input.id}" direction="west" edge="{PluginEdge}" input />
+            <Anchor
+              on:connection="{() => dispatch('connection', { input })}"
+              on:disconnection="{() => dispatch('disconnection', { input })}"
+              id="{panelId}_{input.id}"
+              direction="west"
+              edge="{PluginEdge}"
+              input
+            />
             <!-- bind:connections={$nodeConns} -->
           {/each}
         </div>
         <div class="anchors outputs">
           {#each $toolboxNode.outputs as output}
-            <Anchor id="{svelvetNodeId}_{output.id}" direction="east" edge="{PluginEdge}" output />
+            <Anchor
+              on:connection="{() => dispatch('connection', { output })}"
+              on:disconnection="{() => dispatch('disconnection', { output })}"
+              id="{panelId}_{output.id}"
+              direction="east"
+              output
+            />
           {/each}
         </div>
       {/if}

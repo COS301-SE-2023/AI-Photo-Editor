@@ -18,6 +18,9 @@ export abstract class PanelNode {
   parent: PanelGroup | null;
   index: number;
   id: number; // Unique ID for each panel, helps Svelte with keying
+  // IMPORTANT: If id is replaced with a string at some point,
+  //            that string _cannot_ contain the "_" character because
+  //            we use that to do string splitting in Graph.svelte
   size?: number;
 }
 

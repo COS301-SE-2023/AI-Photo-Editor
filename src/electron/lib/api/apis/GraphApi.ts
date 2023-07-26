@@ -23,20 +23,20 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
     );
   }
 
+  async addEdge(graphUUID: UUID, anchorA: UUID, anchorB: UUID) {
+    return this._blix.graphManager.addEdge(graphUUID, anchorA, anchorB);
+  }
+
+  async removeNode(graphUUID: UUID, nodeUUID: UUID) {
+    return this._blix.graphManager.removeNode(graphUUID, nodeUUID);
+  }
+
+  async removeEdge(graphUUID: UUID, anchorTo: UUID) {
+    return this._blix.graphManager.removeEdge(graphUUID, anchorTo);
+  }
+
   async setNodePos(graphUUID: UUID, nodeUUID: UUID, pos: { x: number; y: number }) {
     return this._blix.graphManager.setPos(graphUUID, nodeUUID, pos.x, pos.y);
-  }
-
-  async addEdge(graphUUID: UUID) {
-    return this._blix.graphManager.addEdge(graphUUID, "asdf", "asdf");
-  }
-
-  async removeNode(graphUUID: UUID) {
-    return this._blix.graphManager.removeNode(graphUUID, "asdf");
-  }
-
-  async removeEdge(graphUUID: UUID) {
-    return this._blix.graphManager.removeEdge(graphUUID, "asdf");
   }
 
   async getGraph(uuid: UUID) {
