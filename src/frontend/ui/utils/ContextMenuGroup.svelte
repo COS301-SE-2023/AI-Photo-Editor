@@ -17,7 +17,7 @@
 <ul>
   <li>
     <div
-      class="flex cursor-pointer items-center rounded-md p-1 hover:bg-pink-200/5 focus:bg-pink-200"
+      class="flex cursor-pointer items-center rounded-md p-1 hover:bg-pink-200/5"
       on:click="{() => {
         expanded = !expanded;
         toggleExpand(root, expanded);
@@ -31,25 +31,29 @@
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="h-4 w-4 stroke-purple-500"
+          class="pointer-events-none h-4 w-4 stroke-purple-500"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-          ></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+            class="pointer-events-none"></path>
         </svg>
       {:else}
-        <div class="z-1">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="h-4 w-4 stroke-purple-500"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"
-            ></path>
-          </svg>
-        </div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="pointer-events-none h-4 w-4 stroke-purple-500"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M8.25 4.5l7.5 7.5-7.5 7.5"
+            class="pointer-events-none"></path>
+        </svg>
       {/if}
       <div class="text-zinc-400">{root.label}</div>
     </div>
