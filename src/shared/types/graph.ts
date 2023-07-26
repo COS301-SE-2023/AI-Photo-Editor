@@ -15,3 +15,15 @@ export interface INode {
   outputs: IAnchor[];
   ui: NodeUI | null;
 }
+
+export type QueryResponse<S = unknown, E = unknown> =
+  | {
+      status: "error";
+      message: string;
+      data?: E;
+    }
+  | {
+      status: "success";
+      message?: string;
+      data?: S;
+    };
