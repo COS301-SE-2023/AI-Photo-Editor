@@ -24,7 +24,7 @@ export class NodeBuilder implements PluginContextBuilder {
     this.partialNode = {
       name,
       plugin,
-      displayName: "",
+      displayName: name,
       description: "",
       icon: "",
       inputs: [],

@@ -1,8 +1,8 @@
 import { CoreGraph, Node, Anchor, AnchorIO } from "./CoreGraph";
 import { TestGraph } from "./CoreGraphTesting";
 import logger from "./../../utils/logger";
-import { UUID } from "@shared/utils/UniqueEntity";
-import { ToolboxRegistry } from "lib/registries/ToolboxRegistry";
+import { type UUID } from "@shared/utils/UniqueEntity";
+import { ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { commandStore } from "@frontend/lib/stores/CommandStore";
 
 /*
@@ -13,32 +13,38 @@ Assumptions:
 */
 
 export class CoreGraphInterpreter {
-  private coreGraph: CoreGraph;
   private toolboxRegistry: ToolboxRegistry;
-  private memo: { [key: string]: any };
-  private context: { [key: string]: any };
+  // private memo: { [key: string]: any };
 
   constructor(toolboxRegistry: ToolboxRegistry) {
     this.toolboxRegistry = toolboxRegistry;
-    this.memo = {};
+    // this.memo = {};
   }
 
-  public run() {
-    const test = new TestGraph();
-    this.coreGraph = test.interpreterTest(this.toolboxRegistry);
-
-    this.coreGraph.getOutputNodes.forEach(async (uuid) => {
-      try {
-        await this.traverse(
-          this.coreGraph.getNodes[uuid],
-          Object.entries(this.coreGraph.getNodes[uuid].getAnchors)[0][1]
-        ).catch((err) => {
-          logger.error(err);
-        });
-      } catch (err) {
+  public run(graph: CoreGraph, node: UUID) {
+    // this.graph.getOutputNodes.forEach(async (uuid) => {
+    //   try {
+    //     await this.traverse(
+    //       this.graph.getNodes[uuid],
+    //       Object.entries(this.graph.getNodes[uuid].getAnchors)[0][1]
+    //     ).catch((err) => {
+    //       logger.error(err);
+    //     });
+    //   } catch (err) {
+    //     logger.error(err);
+    //   }
+    // });
+    try {
+      this.traverse(
+        graph,
+        graph.getNodes[node],
+        Object.entries(graph.getNodes[node].getAnchors)[0][1]
+      ).catch((err) => {
         logger.error(err);
-      }
-    });
+      });
+    } catch (err) {
+      logger.error(err);
+    }
   }
 
   // public async traverse<T>(curr: Node, anchorIn: Anchor): Promise<T> {
@@ -96,19 +102,20 @@ export class CoreGraphInterpreter {
   // }
 
   // USING PROMISES
-  public async traverse<T>(curr: Node, anhcorIn: Anchor): Promise<T> {
+  public async traverse<T>(graph: CoreGraph, curr: Node, anhcorIn: Anchor): Promise<T> {
     const inputPromises: Promise<T>[] = [];
 
     // Get all input values
     for (const anchor in curr.getAnchors) {
       // Only check input anchors
-      if (this.coreGraph.getAnchors[anchor].ioType !== AnchorIO.output) {
+      if (graph.getAnchors[anchor].ioType !== AnchorIO.output) {
         // If input was given
-        if (anchor in this.coreGraph.getEdgeDest) {
+        if (anchor in graph.getEdgeDest) {
           inputPromises.push(
             this.traverse(
-              this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom].parent,
-              this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom]
+              graph,
+              graph.getAnchors[graph.getEdgeDest[anchor].getAnchorFrom].parent,
+              graph.getAnchors[graph.getEdgeDest[anchor].getAnchorFrom]
             )
           );
         }
