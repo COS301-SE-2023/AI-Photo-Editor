@@ -41,10 +41,6 @@
 <Toasts />
 <ContextMenu />
 
-<!-- <div class="flex h-screen w-screen items-center justify-center bg-zinc-700">
-  <ContextMenu />
-</div> -->
-
 <style lang="postcss" global>
   @tailwind base;
   @tailwind components;

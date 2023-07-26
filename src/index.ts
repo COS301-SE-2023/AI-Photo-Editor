@@ -39,7 +39,7 @@ protocol.registerSchemesAsPrivileged([
 
 let mainWindow: MainWindow | null = null;
 let notification: Notification | null = null;
-let blix: Blix;
+let blix: Blix | null = null;
 
 /**
  * Will run when Electron has finished initializing. 1. Blix is instantiated
@@ -62,8 +62,11 @@ app.on("ready", async () => {
   exposeMainApis(blix);
 
   createMainWindow().then(async () => {
-    if (mainWindow) {
+    if (mainWindow && blix) {
       await blix.init(mainWindow);
+      if (blix.isReady) {
+        mainWindow.apis.utilClientApi.onBlixReady();
+      }
     } else {
       app.quit();
     }
@@ -106,6 +109,12 @@ async function createMainWindow() {
 
   mainWindow.on("closed", () => {
     mainWindow = null;
+  });
+
+  mainWindow.on("ready-to-show", () => {
+    if (blix?.isReady) {
+      mainWindow?.apis.utilClientApi.onBlixReady();
+    }
   });
 }
 

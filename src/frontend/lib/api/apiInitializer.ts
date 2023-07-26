@@ -28,7 +28,7 @@ export async function initAPIs() {
  * Bind the main process APIs to the window.
  * If a new main process API is created then add it to this method.
  */
-async function bindMainApis() {
+export async function bindMainApis() {
   return {
     utilApi: await bindMainApi<UtilApi>("UtilApi"),
     projectApi: await bindMainApi<ProjectApi>("ProjectApi"),

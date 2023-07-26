@@ -24,6 +24,7 @@ export class Blix {
   private _pluginManager!: PluginManager;
   private _mainWindow!: MainWindow;
   private _aiManager!: AiManager;
+  private _isReady = false;
 
   // private startTime: Date;
 
@@ -61,7 +62,7 @@ export class Blix {
     this._projectManager = new ProjectManager(mainWindow);
 
     this.initSubscribers();
-    mainWindow.apis.utilClientApi.onBlixReady();
+    this._isReady = true;
 
     // testStuffies(this);
 
@@ -131,5 +132,9 @@ export class Blix {
 
   get mainWindow(): MainWindow | null {
     return this._mainWindow;
+  }
+
+  get isReady() {
+    return this._isReady;
   }
 }
