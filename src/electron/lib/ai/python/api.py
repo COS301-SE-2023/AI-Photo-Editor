@@ -45,7 +45,6 @@ class API:
 # try:
 api = API()
 object = api.commands.receive()
-object = json.loads(object)
 api.sendPrompt(object)
 # except Exception as e:
     # print(e)

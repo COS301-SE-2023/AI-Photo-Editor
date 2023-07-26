@@ -20,6 +20,8 @@ class BASE:
                 break
             output += line
 
+        output = json.loads(output)
+
         return output
    
 

@@ -55,7 +55,10 @@ export class CoreGraphManager {
     return graph; // For testing purposes, dont know what to do with this yet
   }
 
-  addNode(graphUUID: UUID, node: NodeInstance): QueryResponse<{ nodeId: UUID }> {
+  addNode(
+    graphUUID: UUID,
+    node: NodeInstance
+  ): QueryResponse<{ nodeId: UUID; inputs: string[]; outputs: string[] }> {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };
     const res = this._graphs[graphUUID].addNode(node);

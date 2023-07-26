@@ -28,8 +28,8 @@ class GPT:
                             agent=AgentType.OPENAI_FUNCTIONS,
                             model="gpt-3.5-turbo-0613",
                             # verbose=True,
-                            debug=True,    
-                                       
+                            debug=True,     
+                            # max_iterations=3,              
         )
         
         prompt = generic.prompt_template.format(prompt=body["prompt"],nodes=body["nodes"],edges=body["edges"],plugins=body["plugin"])

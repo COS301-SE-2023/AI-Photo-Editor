@@ -185,10 +185,6 @@ class CommandPluginContext extends PluginContext {
       },
     };
   }
-
-  public sendPrompt() {
-    this.blix.aiManager.sendPrompt();
-  }
 }
 
 class TilePluginContext extends PluginContext {}

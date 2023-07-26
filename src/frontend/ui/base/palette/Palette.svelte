@@ -4,7 +4,7 @@
   import type { ICommand } from "../../../../shared/types/index";
   import { onDestroy } from "svelte";
   import Shortcuts from "../../utils/Shortcuts.svelte";
-
+  import { graphMall } from "lib/stores/GraphStore";
   let showPalette = false;
   let expanded = true;
   let inputElement: HTMLInputElement;
@@ -159,7 +159,8 @@
     },
     "blix.palette.prompt": () => {
       if (searchTerm.trim() != "") {
-        window.apis.utilApi.sendPrompt(searchTerm.trim());
+        // TODO remove and refactor how we get graphID ,hecker man shark said no to this, he very right
+        window.apis.utilApi.sendPrompt(searchTerm.trim(), graphMall.getAllGraphUUIDs()[0]);
         closePalette();
       }
     },

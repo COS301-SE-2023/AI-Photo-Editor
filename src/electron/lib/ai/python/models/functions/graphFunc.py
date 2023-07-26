@@ -80,19 +80,21 @@ class Functions:
 
 
         name: str = "addNode"
-        description: str = "Add a new node to the graph"
+        description: str = "Adds a new node to the graph"
 
         def _run(
             self,
-            signature: str,
+            signature: str = "hello-plugin.Jake",
         ) -> str:
-                Functions.api.logs.append("addNode command added\n")
                 response = Functions.api.commands.addNode(signature)
-                Functions.api.logs.append("response: " + response + "\n")
+                # Functions.api.logs.append(response["message"] + "\n Parameters: input anchor ids: " + ''.join(response["data"]["inputs"]) +"\n output anchor ids: "+''.join(response["data"]["outputs"])+"\n")
 
-                return response
-               
-
+                if(response["status"] == "error"):
+                    return response["message"]
+                else:
+                    inputs = [elem[:6] for elem in response["data"]["inputs"]]
+                    outputs = [elem[:6] for elem in response["data"]["outputs"]]
+                    return response["message"] + "\n Parameters: input anchor ids: " + ''.join(inputs) +"\n output anchor ids: "+''.join(outputs)+"\n"
 
         async def _arun(
             self,
@@ -170,8 +172,15 @@ class Functions:
             output : str,
             input : str,
         ) -> str:
-                Functions.api.logs.append("addEdge command added\n")
-                return Functions.api.commands.addEdge(output,input)
+
+                response =  Functions.api.commands.addEdge(output,input)
+                # Functions.api.logs.append(response["message"] + "\n Parameters: nodeids :  " + ''.join(response["data"]["edgeId"]) +"\n")
+                if(response["status"] == "error"):
+                    return response["message"]
+                else:
+                    Functions.api.logs.append(response["message"] + "\n Parameters: nodeids :  " + ''.join(response["data"]["edgeId"]) +"\n")
+                    return response["message"] + "\n Parameters: nodeids :  " + ''.join(response["data"]["edgeId"]) +"\n"
+
 
 
         async def _arun(

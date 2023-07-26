@@ -3,6 +3,7 @@ import type { Blix } from "../../Blix";
 
 import { platform, type, release } from "os";
 import logger from "../../../utils/logger";
+import { type UUID } from "@shared/utils/UniqueEntity";
 
 // Exposes basic system information
 export class UtilApi implements ElectronMainApi<UtilApi> {
@@ -26,7 +27,9 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     };
   }
 
-  async sendPrompt(prompt: string) {
+  async sendPrompt(prompt: string, id: UUID) {
     this.blix.sendInformationMessage(prompt);
+    this.blix.sendInformationMessage(id);
+    this.blix.aiManager.sendPrompt(prompt, id);
   }
 }

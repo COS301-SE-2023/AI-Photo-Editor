@@ -4,6 +4,7 @@ import { spawn } from "child_process";
 import logger from "../../utils/logger";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
 import { exit } from "process";
+import { type QueryResponse } from "@shared/types";
 // Refer to .env for api keys
 
 //  TODO : Provide the graph context that will be given to ai as context
@@ -138,6 +139,7 @@ export class AiManager {
   private _pluginContext: string[] = [];
   private _childProcess: ChildProcessWithoutNullStreams | null = null;
   private _promptContext: PromptContext | null = null;
+  private currentGraph = "";
 
   /**
    *
@@ -183,13 +185,15 @@ export class AiManager {
     this.addEdge = this.addEdge.bind(this);
     this.removeEdge = this.removeEdge.bind(this);
 
-    this.sendPrompt();
+    // this.sendPrompt();
     // console.log("Execute!")
+    // console.log(this._graphManager.getAllGraphUUIDs());
   }
 
-  async sendPrompt() {
-    this._promptContext!.prompt =
-      "I want you to add a node to the graph, then remove a random node. Also add an edge to the graph and remove another random edge";
+  async sendPrompt(prompt: string, id: string) {
+    this.currentGraph = id;
+    this._promptContext!.prompt = prompt;
+    // "I want you to add a node to the graph, if an error occurs handle it according to the observation.";
 
     this._childProcess = spawn("python3", ["src/electron/lib/ai/python/api.py"]);
 
@@ -269,18 +273,17 @@ export class AiManager {
 
       const obj = args as unknown as Args;
       const node = this._toolboxRegistry.getNodeInstance(obj.signature);
-      try {
-        this._graphManager.addNode(
-          "a9e57b3c8b694e249f7a1f057d4ca17f5d43ef8c9c2f6d8e0c478f6c542e5a1b",
-          node
-        );
-        return "Success, node added successfully";
-      } catch (error) {
-        return error as string;
-      }
+
+      const response = this._graphManager.addNode(this.currentGraph, node);
+
+      return JSON.stringify(response);
     } catch (error) {
       // Manual error to give ai
-      return "Critical error : Something went completely wrong, terminate execution.";
+      const response: QueryResponse = {
+        status: "error",
+        message: "A node with this id does not exist, retry with a valid node id",
+      };
+      return JSON.stringify(response);
     }
   }
 
@@ -307,10 +310,7 @@ export class AiManager {
       const fullId = nodeMap[obj.id];
       if (fullId)
         try {
-          this._graphManager.removeNode(
-            "a9e57b3c8b694e249f7a1f057d4ca17f5d43ef8c9c2f6d8e0c478f6c542e5a1b",
-            fullId
-          );
+          this._graphManager.removeNode(this.currentGraph, fullId);
           return "Success, node removed successfully";
         } catch (error) {
           return error as string;
@@ -346,19 +346,15 @@ export class AiManager {
       const output = anchorMap[obj.output];
       const input = anchorMap[obj.input];
 
-      try {
-        this._graphManager.addEdge(
-          "a9e57b3c8b694e249f7a1f057d4ca17f5d43ef8c9c2f6d8e0c478f6c542e5a1b",
-          output,
-          input
-        );
-        return "Success, edge added successfully";
-      } catch (error) {
-        return error as string;
-      }
+      const response = this._graphManager.addEdge(this.currentGraph, output, input);
+      return JSON.stringify(response);
     } catch (error) {
       // Manual error to give ai
-      return "Critical error : Something went completely wrong, terminate execution.";
+      const response: QueryResponse = {
+        status: "error",
+        message: "Invalid input or output anchor id, retry with valid anchor ids",
+      };
+      return JSON.stringify(response);
     }
   }
 
@@ -397,10 +393,7 @@ export class AiManager {
       if (edge) {
         const anchor = anchorMap[edge?.input];
         try {
-          this._graphManager.removeEdge(
-            "a9e57b3c8b694e249f7a1f057d4ca17f5d43ef8c9c2f6d8e0c478f6c542e5a1b",
-            anchor
-          );
+          this._graphManager.removeEdge(this.currentGraph, anchor);
           return "Success, edge removed successfully";
         } catch (error) {
           return error as string;
