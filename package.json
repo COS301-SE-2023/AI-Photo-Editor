@@ -69,7 +69,7 @@
   "dependencies": {
     "@electron/remote": "^2.0.10",
     "@popperjs/core": "^2.11.8",
-    "blix_svelvet": "^1.0.7",
+    "blix_svelvet": "^1.0.10",
     "child_process": "^1.0.2",
     "chokidar": "^3.5.3",
     "cohere-ai": "^5.1.0",
