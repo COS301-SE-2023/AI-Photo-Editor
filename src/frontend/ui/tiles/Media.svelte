@@ -37,7 +37,7 @@
         }}"
         on:keydown="{null}"
       >
-        <Image src="images/svelte-so-hot.jpg" />
+        <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" />
       </div>
     {/if}
   </div>

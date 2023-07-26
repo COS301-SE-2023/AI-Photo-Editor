@@ -33,7 +33,6 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
   onGraphChanged(graphId: UUID, graphData: CoreGraph): void {
     const uiGraph: UIGraph = new UIGraph(graphId);
     const nodesAndEdges: NodesAndEdgesGraph = graphData.exportNodesAndEdges();
-    // console.log(nodesAndEdges);
 
     for (const node in nodesAndEdges.nodes) {
       if (!nodesAndEdges.nodes.hasOwnProperty(node)) continue;
@@ -48,7 +47,6 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
         if (!nodesAndEdges.nodes[node].inputs.hasOwnProperty(anchor)) continue;
         const reducedAnchor = nodesAndEdges.nodes[node].inputs[anchor];
 
-        // console.log("REDUCED ANCHOR", reducedAnchor, anchor);
         uiGraph.nodes[node].anchorUUIDs[reducedAnchor.id] = anchor;
       }
 
@@ -69,7 +67,7 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
       if (!nodesAndEdges.edges.hasOwnProperty(edge)) continue;
       const edgeData = nodesAndEdges.edges[edge];
 
-      uiGraph.edges[edgeData.anchorIdFrom] = new GraphEdge(
+      uiGraph.edges[edge] = new GraphEdge(
         edge,
         edgeData.nodeUUIDFrom,
         edgeData.nodeUUIDTo,
@@ -78,7 +76,7 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
       );
     }
 
-    // TODO: Convert nodesAndEdges to UIGraph
+    // console.log("UIGRAPH EDGES", uiGraph.edges);
 
     if (this._notifyee) this._notifyee(graphId, uiGraph);
   }

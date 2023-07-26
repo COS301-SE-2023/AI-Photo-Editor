@@ -44,21 +44,13 @@
     }
   }
 
-  // $: graphData?.nodes.subscribe((nodes: GraphNode[]) => {
-  //   console.log(`(${panelId}) SVELVET NODES`, nodes);
-  // });
-  // $: graphData?.edges.subscribe((edges: GraphEdge[]) => {
-  //   console.log(`(${panelId}) SVELVET EDGES`, edges);
-  // });
-
   function updateOnGraphEdges(graphEdges: GraphEdge[]) {
     if (clearAllGraphEdges) clearAllGraphEdges();
 
     for (let edge in graphEdges) {
+      console.log("EDGE", edge, graphEdges[edge]);
       if (!graphEdges.hasOwnProperty(edge)) continue;
       const edgeData = graphEdges[edge];
-
-      // console.log("EDGE", edge);
 
       // Skip if nodes don't exist
       // const fromNode = $graphNodes.find(node => node.id === edgeData.nodeFrom)
@@ -73,14 +65,6 @@
           `N-${panelId}_${edgeData.nodeUUIDTo}`,
           `A-${panelId}_${edgeData.anchorIdTo}`
         );
-
-        // console.log(
-        //   `N-${panelId}_${edgeData.nodeUUIDFrom}`, "\n",
-        //   `A-${panelId}_${edgeData.anchorIdFrom}`, "\n",
-        //   `N-${panelId}_${edgeData.nodeUUIDTo}`, "\n",
-        //   `A-${panelId}_${edgeData.anchorIdTo}`, "\n",
-        //   "RES", res
-        // );
       }
     }
   }
@@ -114,6 +98,7 @@
       const [_2, ...nodeUUIDParts] = nodeKye.split("_");
       const nodeUUID = nodeUUIDParts.join("_");
 
+      // removing console logs + commit + merge <=====================================
       // console.log("NODE", $thisGraphStore.getNode(nodeUUID));
       const anchorUUID = $thisGraphStore.getNode(nodeUUID).anchorUUIDs[anchorId];
 
@@ -141,25 +126,6 @@
     if (!toUUID) return;
     $thisGraphStore?.removeEdge(toUUID.anchorUUID);
   }
-
-  // function addRandomConn() {
-  // 	const node1 = Math.floor(Math.random() * 5);
-  // 	let node2 = node1;
-  // 	while (node1 == node2) node2 = Math.floor(Math.random() * 5);
-
-  // 	if (connectAnchorIds) {
-  // 		const res = connectAnchorIds(`N-n-${node1}`, `A-a-${node1}`, `N-n-${node2}`, `A-a-${node2}`);
-  // 		console.log('RES', res);
-  // 	}
-  // }
-
-  // function clearEdges() {
-  // 	if (clearAllGraphEdges) {
-  // 		clearAllGraphEdges();
-  // 	}
-  // }
-
-  // $: console.log("GRAPH MALL UPDATED", $graphMall);
 </script>
 
 <div class="hoverElements">
