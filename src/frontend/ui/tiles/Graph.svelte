@@ -52,9 +52,8 @@
 
   function handleRightClick(event: CustomEvent) {
     // TODO: Add typing to Svelvet for this custom event
-    // TODO: Change the variable `windowPos` to `cursorPos` cause its confusing
-    const { windowPos, canvasPos } = event.detail;
-    graphMenuStore.showMenu(windowPos, canvasPos, graphId);
+    const { cursorPos, canvasPos } = event.detail;
+    graphMenuStore.showMenu(cursorPos, canvasPos, graphId);
   }
 
   // $: console.log("GRAPH MALL UPDATED", $graphMall);
@@ -75,7 +74,7 @@
     minimap
     theme="custom-dark"
     bind:graph="{graphData}"
-    on:RightClick="{handleRightClick}"
+    on:rightClick="{handleRightClick}"
   >
     {#each $graphNodes || [] as node}
       {#key node}
