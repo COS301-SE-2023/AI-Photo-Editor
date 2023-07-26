@@ -24,6 +24,7 @@
   import ContextMenuGroup from "./ContextMenuGroup.svelte";
   import { get, writable } from "svelte/store";
   import { onMount, setContext } from "svelte";
+  import Shortcuts from "./Shortcuts.svelte";
 
   const searchPlaceholder = "Search for nodes...";
   let searchTerm = "";
@@ -190,6 +191,25 @@
       collapseAll();
     }
   }
+
+  const shortcuts = {
+    "blix.contextMenu.show": () => {
+      // TODO: This might have to be moved to Graph.svelte instead
+      // graphMenuStore.showMenu(...);
+    },
+    "blix.contextMenu.hide": () => {
+      graphMenuStore.hideMenu();
+    },
+    "blix.contextMenu.scrollDown": () => {
+      // TODO
+    },
+    "blix.contextMenu.scrollUp": () => {
+      // TODO
+    },
+    "blix.contextMenu.selectItem": () => {
+      // TODO
+    },
+  };
 </script>
 
 {#if $graphMenuStore.isShowing}
@@ -239,6 +259,8 @@
     </section>
   </div>
 {/if}
+
+<Shortcuts shortcuts="{shortcuts}" />
 
 <style lang="postcss">
   /* Chrome, Edge, and Safari */
