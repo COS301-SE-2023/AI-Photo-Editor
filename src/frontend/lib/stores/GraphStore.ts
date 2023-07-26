@@ -45,9 +45,9 @@ export class GraphStore {
       for (const node of Object.keys(oldNodes)) {
         if (graph.nodes[node]) {
           graph.nodes[node].styling = oldNodes[node].styling;
+          graph.nodes[node].inputUIValues = oldNodes[node].inputUIValues;
         }
       }
-
       return graph;
     });
   }
