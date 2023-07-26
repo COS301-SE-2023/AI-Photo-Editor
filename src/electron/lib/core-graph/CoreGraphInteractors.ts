@@ -1,4 +1,4 @@
-import { GraphNode, NodeStylingStore, UIGraph } from "../../../shared/ui/UIGraph";
+import { GraphEdge, GraphNode, NodeStylingStore, UIGraph } from "../../../shared/ui/UIGraph";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph, NodesAndEdgesGraph } from "./CoreGraph";
 
@@ -33,17 +33,50 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
   onGraphChanged(graphId: UUID, graphData: CoreGraph): void {
     const uiGraph: UIGraph = new UIGraph(graphId);
     const nodesAndEdges: NodesAndEdgesGraph = graphData.exportNodesAndEdges();
-    // console.log(nodesAndEdges);
 
     for (const node in nodesAndEdges.nodes) {
       if (!nodesAndEdges.nodes.hasOwnProperty(node)) continue;
 
       uiGraph.nodes[node] = new GraphNode(node);
-      // console.log(uiGraph.nodes[node])
       uiGraph.nodes[node].signature = nodesAndEdges.nodes[node].signature;
+
+      // Provide mapping from toolbox anchor id's (local to node) to their backend UUIDs (global in graph)
+      // TODO: This implememntation assumes that an input anchor cannot have the same id as an output anchor.
+      //       We might wanna change this in the future
+      for (const anchor in nodesAndEdges.nodes[node].inputs) {
+        if (!nodesAndEdges.nodes[node].inputs.hasOwnProperty(anchor)) continue;
+        const reducedAnchor = nodesAndEdges.nodes[node].inputs[anchor];
+
+        uiGraph.nodes[node].anchorUUIDs[reducedAnchor.id] = anchor;
+      }
+
+      for (const anchor in nodesAndEdges.nodes[node].outputs) {
+        if (!nodesAndEdges.nodes[node].outputs.hasOwnProperty(anchor)) continue;
+        const reducedAnchor = nodesAndEdges.nodes[node].outputs[anchor];
+
+        uiGraph.nodes[node].anchorUUIDs[reducedAnchor.id] = anchor;
+      }
+
+      // for (const anchor in nodesAndEdges.nodes[node].anchorUUIDs) {
+      //   if (!nodesAndEdges.nodes[node].anchorUUIDs.hasOwnProperty(anchor)) continue;
+      //   uiGraph.nodes[node].anchorUUIDs
+      // }
     }
 
-    // TODO: Convert nodesAndEdges to UIGraph
+    for (const edge in nodesAndEdges.edges) {
+      if (!nodesAndEdges.edges.hasOwnProperty(edge)) continue;
+      const edgeData = nodesAndEdges.edges[edge];
+
+      uiGraph.edges[edge] = new GraphEdge(
+        edge,
+        edgeData.nodeUUIDFrom,
+        edgeData.nodeUUIDTo,
+        edgeData.anchorIdFrom,
+        edgeData.anchorIdTo
+      );
+    }
+
+    // console.log("UIGRAPH EDGES", uiGraph.edges);
 
     if (this._notifyee) this._notifyee(graphId, uiGraph);
   }

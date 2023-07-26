@@ -24,6 +24,7 @@ export class Blix {
   private _pluginManager!: PluginManager;
   private _mainWindow!: MainWindow;
   private _aiManager!: AiManager;
+  private _isReady = false;
 
   // private startTime: Date;
 
@@ -60,7 +61,7 @@ export class Blix {
     this._projectManager = new ProjectManager(mainWindow);
 
     this.initSubscribers();
-    mainWindow.apis.utilClientApi.onBlixReady();
+    this._isReady = true;
 
     // testStuffies(this);
 
@@ -77,6 +78,16 @@ export class Blix {
     // }, 3000);
 
     this._aiManager = new AiManager(this.toolbox, this._graphManager);
+  }
+
+  private initSubscribers() {
+    const graphSubscriber = new IPCGraphSubscriber();
+
+    graphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
+      this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
+    };
+
+    this._graphManager.addAllSubscriber(graphSubscriber);
   }
 
   private initSubscribers() {
@@ -132,5 +143,9 @@ export class Blix {
 
   get mainWindow(): MainWindow | null {
     return this._mainWindow;
+  }
+
+  get isReady() {
+    return this._isReady;
   }
 }

@@ -94,6 +94,11 @@ class ShortcutStore {
     "blix.palette.scrollDown": ["[ArrowDown]", "ctrl+[KeyJ]", "[Tab]"],
     "blix.palette.scrollUp": ["[ArrowUp]", "ctrl+[KeyK]", "shift+[Tab]"],
     "blix.palette.selectItem": ["[Enter]"],
+    "blix.contextMenu.hide": ["[Escape]"],
+    "blix.contextMenu.show": [],
+    "blix.contextMenu.scrollDown": ["ctrl+[KeyJ]"],
+    "blix.contextMenu.scrollUp": ["ctrl+[KeyK]"],
+    "blix.contextMenu.selectItem": ["[Enter]"],
   });
 
   public addActionShortcut(action: ShortcutAction, combo: ShortcutCombo) {

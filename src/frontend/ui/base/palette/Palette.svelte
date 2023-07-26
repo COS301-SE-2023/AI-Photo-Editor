@@ -6,7 +6,7 @@
   import Shortcuts from "../../utils/Shortcuts.svelte";
 
   let showPalette = false;
-  let expanded = false;
+  let expanded = true;
   let inputElement: HTMLInputElement;
   let searchTerm = "";
 
@@ -118,15 +118,31 @@
     }
   }
 
+  function openPalette() {
+    showPalette = true;
+    searchTerm = "";
+    selectedCategory = 0;
+    selectedItem = 0;
+    categories = categoriesOriginals;
+  }
+
+  function closePalette() {
+    showPalette = false;
+  }
+
   const shortcuts = {
     "blix.palette.toggle": () => {
-      showPalette = !showPalette;
+      if (showPalette) {
+        closePalette();
+      } else {
+        openPalette();
+      }
     },
     "blix.palette.show": () => {
-      showPalette = true;
+      openPalette();
     },
     "blix.palette.hide": () => {
-      showPalette = false;
+      closePalette();
     },
     "blix.palette.scrollDown": () => {
       selectedItem++;
@@ -151,16 +167,11 @@
     commandStore.runCommand(item.id);
   }
 
-  $: if (showPalette && inputElement) {
-    inputElement.focus();
-  }
+  $: inputElement?.focus();
 
-  $: if (showPalette) {
-    searchTerm = "";
-    expanded = true;
-    selectedCategory = 0;
-    selectedItem = 0;
-    categories = categoriesOriginals;
+  $: {
+    selectedCategory;
+    selectedItem;
     repairItemIndex();
   }
 </script>
