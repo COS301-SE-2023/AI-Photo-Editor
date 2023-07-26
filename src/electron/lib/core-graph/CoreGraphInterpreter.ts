@@ -3,6 +3,7 @@ import { TestGraph } from "./CoreGraphTesting";
 import logger from "./../../utils/logger";
 import { UUID } from "@shared/utils/UniqueEntity";
 import { ToolboxRegistry } from "lib/registries/ToolboxRegistry";
+import { commandStore } from "@frontend/lib/stores/CommandStore";
 
 /*
 Assumptions:
@@ -11,85 +12,91 @@ Assumptions:
   - Every node returns an array of output values
 */
 
-class Monad<T> {
-  private value: T;
-
-  private constructor(value: T) {
-    this.value = value;
-  }
-
-  static of<T>(value: T): Monad<T> {
-    return new Monad<T>(value);
-  }
-
-  bind<U>(fn: (value: T) => Monad<U>): Monad<U> {
-    return fn(this.value);
-  }
-
-  getValue(): T {
-    return this.value;
-  }
-}
-
 export class CoreGraphInterpreter {
   private coreGraph: CoreGraph;
   private toolboxRegistry: ToolboxRegistry;
-  private monads: { [key: string]: Monad<number> } = {};
+  private memo: { [key: string]: any };
   private context: { [key: string]: any };
 
-  // constructor(coreGraph: CoreGraph){
-  //     this.coreGraph = coreGraph;
-  // }
+  constructor(toolboxRegistry: ToolboxRegistry) {
+    this.toolboxRegistry = toolboxRegistry;
+    this.memo = {};
+  }
 
   public run() {
     const test = new TestGraph();
-    this.coreGraph = test.interpreterTest();
+    this.coreGraph = test.interpreterTest(this.toolboxRegistry);
 
-    this.coreGraph.getOutputNodes.forEach((uuid) => {
+    this.coreGraph.getOutputNodes.forEach(async (uuid) => {
       try {
-        // this.traverse(this.coreGraph.getNodes[uuid], 0).catch((err) => {
-        //   logger.error(err);
-        // });
+        await this.traverse(
+          this.coreGraph.getNodes[uuid],
+          Object.entries(this.coreGraph.getNodes[uuid].getAnchors)[0][1]
+        ).catch((err) => {
+          logger.error(err);
+        });
       } catch (err) {
         logger.error(err);
       }
     });
-
-    // const monad = Monad.of("hello");
-    // const newMonad = monad.bind((value) => Monad.of(value + "bey"));
-    // console.log(newMonad.getValue());
-    //
-    // const anotherMonad = monad.bind((value) => newMonad.bind((value2) => Monad.of(value + value2)));
-    // console.log(anotherMonad.getValue());
   }
 
-  // USING MONADS
+  // public async traverse<T>(curr: Node, anchorIn: Anchor): Promise<T> {
 
-  // public traverse<T>(curr: Node, input: T): Monad<T> {
-  //   // For each anchor in the current node
-  //   const currMonad = Monad.of(curr.execute(input));
+  //   const getInputValue = async (anchor: string): Promise<T> => {
+  //     // If input was given
+  //     if (anchor in this.coreGraph.getEdgeDest) {
+  //       const inputAnchor = this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom];
+  //       const inputNode = inputAnchor.parent;
 
+  //       // Check if the input value is already memoized
+  //       // console.log(this.memo, inputAnchor.uuid);
+  //       if (this.memo[inputAnchor.uuid]) {
+  //         console.log("Cache hit");
+  //         return this.memo[inputAnchor.uuid];
+  //       }
+
+  //       // Traverse the input node and memoize the result
+  //       const inputValue = await this.traverse(inputNode, inputAnchor);
+  //       this.memo[inputAnchor.uuid] = inputValue;
+  //       return inputValue as T;
+  //     }
+
+  //     // Return a resolved promise for inputs that are not connected
+  //     return Promise.resolve(null) as Promise<T>;
+  //   };
+
+  //   // Get all input values
+  //   const inputPromises: Promise<T>[] = [];
   //   for (const anchor in curr.getAnchors) {
   //     // Only check input anchors
-  //     if (this.coreGraph.getAnchors[anchor].getIOType !== AnchorIO.output) {
-  //       if (anchor in this.coreGraph.getEdgeDest) {
-  //         // Bind the next monad to curr
-  //         return currMonad.bind((value) =>
-  //           this.traverse(
-  //             this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom].getParent,
-  //             value
-  //           )
-  //         );
-  //       }
+  //     if (this.coreGraph.getAnchors[anchor].ioType !== AnchorIO.output) {
+  //       inputPromises.push(getInputValue(anchor));
   //     }
   //   }
-  //   // Last node / monad in the chain
-  //   return currMonad;
+
+  //   // Resolve all input values (functions)
+  //   const inputs: T[] = await Promise.all(inputPromises).catch((err) => {
+  //     throw err;
+  //   });
+
+  //   // Check if the current node's output is already memoized
+  //   if (this.memo[anchorIn.uuid]) {
+  //     return this.memo[anchorIn.uuid];
+  //   }
+
+  //   // Resolve the current node's output and memoize the result
+  //   const output: T = await Promise.resolve(
+  //     this.toolboxRegistry.getNodeInstance(curr.getSignature).func({ input: inputs, from: anchorIn.anchorId })
+  //   );
+
+  //   this.memo[anchorIn.uuid] = output;
+
+  //   return output;
   // }
 
   // USING PROMISES
-
-  public async traverse<T>(curr: Node, anhcorIn: UUID): Promise<T> {
+  public async traverse<T>(curr: Node, anhcorIn: Anchor): Promise<T> {
     const inputPromises: Promise<T>[] = [];
 
     // Get all input values
@@ -101,7 +108,7 @@ export class CoreGraphInterpreter {
           inputPromises.push(
             this.traverse(
               this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom].parent,
-              this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom].anchorId
+              this.coreGraph.getAnchors[this.coreGraph.getEdgeDest[anchor].getAnchorFrom]
             )
           );
         }
@@ -114,7 +121,9 @@ export class CoreGraphInterpreter {
     });
     // const output: T = await Promise.resolve(curr.execute(inputs, anhcorIn));
     const output: T = await Promise.resolve(
-      this.toolboxRegistry.getNodeInstance(curr.getSignature).func({ inputs, anhcorIn })
+      this.toolboxRegistry
+        .getNodeInstance(curr.getSignature)
+        .func({ input: inputs, from: anhcorIn.anchorId })
     );
 
     return output;
