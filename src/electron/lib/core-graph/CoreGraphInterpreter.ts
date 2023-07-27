@@ -104,7 +104,6 @@ export class CoreGraphInterpreter {
   // USING PROMISES
   public async traverse<T>(graph: CoreGraph, curr: Node, anhcorIn: Anchor): Promise<T> {
     const inputPromises: Promise<T>[] = [];
-
     // Get all input values
     for (const anchor in curr.getAnchors) {
       // Only check input anchors

@@ -59,7 +59,11 @@ export class Blix {
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
 
-    tempNodeBuilder.addInput("", "in", "In");
+    tempNodeBuilder.define(({ input, from }: { input: any[]; from: string }) => {
+      logger.info("Result: ", input[0]);
+    });
+
+    tempNodeBuilder.addInput("Number", "in", "In");
     tempNodeBuilder.setUI(tempUIBuilder);
     this._toolboxRegistry.addInstance(tempNodeBuilder.build);
 

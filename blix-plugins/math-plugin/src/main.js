@@ -113,7 +113,24 @@ const nodes ={
         nodeBuilder.addInput("Number", "num1", "Num1");
         nodeBuilder.addInput("Number", "num2", "Num2");
         nodeBuilder.addOutput("Number", "res1", "Result");
-      }
+      },
+
+      // Testing nodes
+    "add": (context) => {
+        nodeBuilder = context.instantiate("math-plugin","add");
+        nodeBuilder.setTitle("Add");
+        nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output");
+
+        nodeBuilder.define((data) => {
+          return {
+            "res": data.input[0] + data.input[0],
+          }[data.from];
+
+          });
+          
+       nodeBuilder.addInput("Number", "num","Num");
+       nodeBuilder.addOutput("Number", "res","Result");
+    },
     // TO BE DEVELOPED   
     // "ternary": (context) => {
     //     nodeBuilder = context.instantiate("math-plugin","add");

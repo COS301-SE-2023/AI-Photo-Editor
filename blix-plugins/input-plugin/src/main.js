@@ -5,7 +5,7 @@ const nodes ={
         nodeBuilder.setDescription("Provides a number input and returns a single number output");
 
         nodeBuilder.define((num1) => {
-            return num1;
+            return 3;
         });
        nodeBuilder.addOutput("Number", "res", "Result");
 
