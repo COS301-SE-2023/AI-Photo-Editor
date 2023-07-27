@@ -4,12 +4,13 @@ import { spawn } from "child_process";
 import logger from "../../utils/logger";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
 import {
-  CoreGraphExporter,
-  LLMExportStrategy,
-  type LLMGraph,
-} from "../core-graph/CoreGraphExporter";
-import { type QueryResponse } from "@shared/types";
-import { cookUnsafeResponse, addNode } from "./ai-cookbook";
+  cookUnsafeResponse,
+  addNode,
+  getGraph,
+  removeNode,
+  addEdge,
+  removeEdge,
+} from "./ai-cookbook";
 import type { Response, ResponseFunctions } from "./ai-cookbook";
 // Refer to .env for api keys
 
@@ -22,12 +23,6 @@ interface PromptContext {
   edges: string[];
 }
 
-interface Edge {
-  id: string;
-  input: string;
-  output: string;
-}
-
 /**
  *
  * Manages ai by storing context and handling prompt input
@@ -37,11 +32,7 @@ interface Edge {
 export class AiManager {
   private graphManager: CoreGraphManager;
   private toolboxRegistry: ToolboxRegistry;
-  private _pluginContext: string[] = [];
   private _childProcess: ChildProcessWithoutNullStreams | null = null;
-  private _promptContext: PromptContext | null = null;
-  private currentGraph = "";
-  private _exporter = new LLMExportStrategy();
 
   /**
    *
@@ -76,11 +67,16 @@ export class AiManager {
     return pluginNodes;
   }
 
+  /**
+   * Sends prompt to ai and returns response
+   * @param prompt Prompt to send to ai
+   * @param graphId Id of the graph to send to ai
+   * @returns Response from ai
+   * */
+
   async sendPrompt(prompt: string, graphId: string) {
-    this.currentGraph = graphId;
     let finalResponse = "";
-    const graphExporter = new CoreGraphExporter(new LLMExportStrategy());
-    const llmGraph = graphExporter.exportGraph(this.graphManager.getGraph(graphId));
+    const llmGraph = getGraph(this.graphManager, graphId);
 
     const promptContext = {
       prompt,
@@ -113,7 +109,9 @@ export class AiManager {
         } else if (res.type === "function") {
           const operationRes = this.executeMagicWand(res, graphId);
           const operationResStr = JSON.stringify(operationRes);
+
           logger.info("Blix response: ", operationResStr);
+
           childProcess.stdin.write(`${operationResStr}\n`);
           childProcess.stdin.write("end of transmission\n");
         }
@@ -145,11 +143,11 @@ export class AiManager {
     if (name === "addNode") {
       return addNode(this.graphManager, this.toolboxRegistry, graphId, args);
     } else if (name === "removeNode") {
-      // Call cookbook method to removeNode here
+      return removeNode(this.graphManager, graphId, args);
     } else if (name === "addEdge") {
-      // Call cookbook method to addEdge here
+      return addEdge(this.graphManager, graphId, args);
     } else if (name === "removeEdge") {
-      // Call cookbook method to removeEdge here
+      return removeEdge(this.graphManager, graphId, args);
     }
 
     // It should never reach here
@@ -157,141 +155,5 @@ export class AiManager {
       status: "error",
       message: "Something went wrong in magic wand",
     };
-  }
-
-  // TODO: Move to the cookbook
-  removeNode(args: JSON): string {
-    try {
-      interface Args {
-        id: string;
-      }
-
-      const obj = args as unknown as Args;
-
-      const graph = this.getGraph();
-      const { nodeMap } = graph;
-
-      const fullId = nodeMap[obj.id];
-      if (fullId === undefined)
-        return this.errorResponse("The provided id is invalid :  id does not exist");
-
-      this.graphManager.removeNode(this.currentGraph, fullId);
-      return "Success, node removed successfully";
-    } catch (error) {
-      return this.errorResponse(error as string);
-    }
-  }
-
-  /**
-   *
-   * Calls addEdge from coreGraphManager to add an edge to the graph
-   * @param args Json object that contains the arguments for the addEdge function :
-   * interface :
-   * Args {
-   * output : string
-   * input : string
-   * }
-   *
-   * @returns Returns a string that contains the response from the graphManager
-   * */
-
-  // TODO: Move to the cookbook
-  addEdge(args: JSON): string {
-    try {
-      interface Args {
-        output: string;
-        input: string;
-      }
-
-      const obj = args as unknown as Args;
-      const graph = this.getGraph();
-
-      const { anchorMap } = graph;
-
-      const output = anchorMap[obj.output];
-
-      if (output === undefined) {
-        throw new Error("Output anchor does not exist");
-      }
-      const input = anchorMap[obj.input];
-
-      const response = this.graphManager.addEdge(this.currentGraph, input, output);
-      return JSON.stringify(response);
-    } catch (error) {
-      // Manual error to give ai
-      return this.errorResponse(error as string);
-    }
-  }
-
-  /**
-   * Finds an edge object based on its id
-   * @param edges Interface that holds edge id, input anchor id and output anchor id
-   * @param id Id of the edge to be found
-   * @returns The edge that was found, or returns undefined
-   * */
-
-  // TODO: Move to the cookbook
-  findEdgeById(edges: Edge[], id: string): Edge | undefined {
-    return edges.find((edge) => edge.id === id);
-  }
-
-  /**
-   *
-   * Calls removeEdge from coreGraphManager to remove an edge from the graph, id of edge is provided.
-   * @param args Json object that contains the arguments for the removeEdge function :
-   * interface :
-   * Args {
-   * id : string
-   * }
-   *
-   * @returns Returns a string that contains the response from the graphManager
-   * */
-
-  // TODO: Move to the cookbook
-  removeEdge(args: JSON): string {
-    try {
-      interface Args {
-        id: string;
-      }
-
-      const obj = args as unknown as Args;
-      const graph = this.getGraph();
-      const edge = this.findEdgeById(graph.graph.edges, obj.id);
-
-      if (edge) {
-        const graph = this.getGraph();
-
-        const { anchorMap } = graph;
-        const anchor = anchorMap[edge?.input];
-        try {
-          this.graphManager.removeEdge(this.currentGraph, anchor);
-          return "Success, edge removed successfully";
-        } catch (error) {
-          return error as string;
-        }
-      } else return "The given edge does not exist";
-    } catch (error) {
-      // Manual error to give ai
-      return "Critical error : Something went completely wrong, terminate execution.";
-    }
-  }
-
-  // TODO: Move to the cookbook
-  getGraph(): LLMGraph {
-    return this._exporter.export(this.graphManager.getGraph(this.currentGraph));
-  }
-
-  // TODO: Move to the cookbook
-  truncId(arr: string[]): string[] {
-    return arr.map((str) => str.slice(0, 6));
-  }
-
-  // TODO: Move to the cookbook
-  errorResponse(message: string): string {
-    const response: QueryResponse = {
-      status: "error",
-      message,
-    };
-    return JSON.stringify(response);
   }
 }

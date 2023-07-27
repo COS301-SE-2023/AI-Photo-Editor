@@ -8,10 +8,13 @@ import {
 import { ToolboxRegistry } from "../../lib/registries/ToolboxRegistry";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { QueryResponse } from "../../../shared/types";
+import { error } from "console";
 
 // ==================================================================
 //  Zod Types
 // ==================================================================
+
+const _exporter = new LLMExportStrategy();
 
 export const addNodeSchema = z.object({
   type: z.literal("function"),
@@ -96,11 +99,29 @@ type ExtractResponseFunctions<T> = T extends { type: "function" } ? T : never;
 //  Cookbook Functions
 // ==================================================================
 
+/**
+ * Cooks a response object to be sent to the ai
+ * @param data Data to be sent to the ai
+ * @returns Cooked response object
+ * */
+
 export function cookUnsafeResponse(data: any) {
   return responseSchema.parse(data);
 }
 
 // All the LLM methods should return some JS object which can be stringified
+
+/**
+ * Calls addNode from coreGraphManager to add a node to the graph
+ * @param graphManager CoreGraphManager instance
+ * @param toolboxRegistry ToolboxRegistry instance
+ * @param graphId Id of the graph to which the node is to be added
+ * @param args zod object that contains the arguments for the addNode function :
+ * {
+ * signature : string
+ * }
+ * @returns Returns response from the graphManager
+ * */
 
 export function addNode(
   graphManager: CoreGraphManager,
@@ -127,9 +148,139 @@ export function addNode(
   }
 }
 
+/**
+ * Calls removeNode from coreGraphManager to remove a node from the graph, id of node is provided.
+ * @param graphManager CoreGraphManager instance
+ * @param graphId Id of the graph from which the node is to be removed
+ * @param args zod object that contains the arguments for the removeNode function :
+ * {
+ * id : string
+ * }
+ * @returns Returns response from the graphManager
+ * */
+
+export function removeNode(
+  graphManager: CoreGraphManager,
+  graphId: UUID,
+  args: RemoveNodeConfig["args"]
+) {
+  try {
+    const graph = _exporter.export(graphManager.getGraph(graphId));
+    const { nodeMap } = graph;
+
+    const fullId = nodeMap[args.id];
+    if (fullId === undefined)
+      return errorResponse("The provided id is invalid :  id does not exist");
+
+    const response = graphManager.removeNode(graphId, fullId);
+    return response;
+  } catch (error) {
+    return errorResponse(error as string);
+  }
+}
+
+/**
+ *
+ * Calls addEdge from coreGraphManager to add an edge to the graph
+ * @param graphManager CoreGraphManager instance
+ * @param graphId Id of the graph to which the edge is to be added
+ * @param args zod object that contains the arguments for the addEdge function :
+ * {
+ * output : string
+ * input : string
+ * }
+ *
+ * @returns Returns response from the graphManager
+ * */
+
+export function addEdge(
+  graphManager: CoreGraphManager,
+  graphId: UUID,
+  args: AddEdgeConfig["args"]
+) {
+  try {
+    const graph = _exporter.export(graphManager.getGraph(graphId));
+    const { anchorMap } = graph;
+    const output = anchorMap[args.output];
+    const input = anchorMap[args.input];
+    if (output === undefined)
+      return errorResponse("Output anchor" + args.output + "does not exist");
+    if (input === undefined) return errorResponse("Input anchor" + args.input + "does not exist");
+
+    const response = graphManager.addEdge(graphId, input, output);
+    return response;
+  } catch (error) {
+    // Manual error to give ai
+    return errorResponse(error as string);
+  }
+}
+
+/**
+ *
+ * Calls removeEdge from coreGraphManager to remove an edge from the graph, id of edge is provided.
+ * @param graphManager CoreGraphManager instance
+ * @param graphId Id of the graph from which the edge is to be removed
+ * @param args zod object that contains the arguments for the removeEdge function :
+ * {
+ * id : string
+ * }
+ *
+ * @returns Returns response from the graphManager
+ * */
+
+export function removeEdge(
+  graphManager: CoreGraphManager,
+  graphId: UUID,
+  args: RemoveEdgeConfig["args"]
+) {
+  try {
+    const graph = getGraph(graphManager, graphId);
+
+    const edge = findEdgeById(graph.graph.edges, args.id);
+
+    if (edge === undefined) return errorResponse("The provided id is invalid :  id does not exist");
+
+    const { anchorMap } = graph;
+    const anchor = anchorMap[edge?.input];
+
+    if (anchor === undefined)
+      return errorResponse("The provided id is invalid :  id does not exist");
+
+    const response = graphManager.removeEdge(graphId, anchor);
+    return response;
+  } catch (error) {
+    // Manual error to give ai
+    return errorResponse(error as string);
+  }
+}
+
 // ==================================================================
 //  Helper Functions
 // ==================================================================
+
+// Make this a zod object
+interface Edge {
+  id: string;
+  input: string;
+  output: string;
+}
+
+/**
+ * Finds an edge object based on its id
+ * @param edges Interface that holds edge id, input anchor id and output anchor id
+ * @param id Id of the edge to be found
+ * @returns The edge that was found, or returns undefined
+ * */
+
+export function findEdgeById(edges: Edge[], id: string): Edge | undefined {
+  return edges.find((edge) => edge.id === id);
+}
+
+/**
+ * Returns an error response object
+ * @param message Error message to be sent
+ * @returns Error response object
+ * */
 
 export function errorResponse(message: string) {
   const response: QueryResponse = {
@@ -138,6 +289,22 @@ export function errorResponse(message: string) {
   };
   return response;
 }
+
+/**
+ * Returns a debug response object
+ * @param message Debug message to be sent
+ * @returns Debug response object
+ * */
+
+export function getGraph(graphManager: CoreGraphManager, id: UUID): LLMGraph {
+  return _exporter.export(graphManager.getGraph(id));
+}
+
+/**
+ * Returns a debug response object
+ * @param message Debug message to be sent
+ * @returns Debug response object
+ * */
 
 export function truncId(arr: string[]): string[] {
   return arr.map((str) => str.slice(0, 6));
