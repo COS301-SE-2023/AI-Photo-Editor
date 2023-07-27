@@ -4,6 +4,7 @@ import logger from "./../../utils/logger";
 import { type UUID } from "@shared/utils/UniqueEntity";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { commandStore } from "@frontend/lib/stores/CommandStore";
+import type { MediaOutput } from "@shared/types/media";
 
 /*
 Assumptions:
@@ -102,7 +103,7 @@ export class CoreGraphInterpreter {
   // }
 
   // USING PROMISES
-  public async traverse<T>(graph: CoreGraph, curr: Node, anhcorIn: Anchor): Promise<T> {
+  public async traverse<T>(graph: CoreGraph, curr: Node, anchorIn: Anchor): Promise<T> {
     const inputPromises: Promise<T>[] = [];
     // Get all input values
     for (const anchor in curr.getAnchors) {
@@ -125,11 +126,20 @@ export class CoreGraphInterpreter {
     const inputs: T[] = await Promise.all(inputPromises).catch((err) => {
       throw err;
     });
+
+    // Construct the media output to get passed to the frontend
+    const mediaOutput: MediaOutput = {
+      content: inputs[0] || null,
+      dataType: "Number",
+      outputId: "TODO",
+      outputNodeUUID: curr.uuid,
+    };
+
     // const output: T = await Promise.resolve(curr.execute(inputs, anhcorIn));
     const output: T = await Promise.resolve(
       this.toolboxRegistry
         .getNodeInstance(curr.getSignature)
-        .func({ input: inputs, from: anhcorIn.anchorId })
+        .func({ input: mediaOutput, from: anchorIn.anchorId })
     );
 
     return output;

@@ -11,9 +11,12 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
 
   async createProject(): Promise<IpcResponse<string>> {
     const project = this.blix.projectManager.createProject();
-    const graphId = this.blix.graphManager.createGraph();
-    this.blix.projectManager.addGraph(project.uuid, graphId);
-    this.blix.graphManager.onGraphUpdated(graphId);
+
+    for (let i = 0; i < 3; i++) {
+      const graphId = this.blix.graphManager.createGraph();
+      this.blix.projectManager.addGraph(project.uuid, graphId);
+      this.blix.graphManager.onGraphUpdated(graphId);
+    }
 
     return {
       success: true,

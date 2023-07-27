@@ -102,6 +102,16 @@ export class GraphStore {
     });
   }
 
+  public getOutputNodesByIdReactive(): Readable<{ [key: GraphNodeUUID]: GraphNode }> {
+    return derived(this.graphStore, (graph) => {
+      return Object.values(graph.nodes)
+        .filter((node) => {
+          return node.signature === "blix.output";
+        })
+        .reduce((dict, obj) => ({ ...dict, [obj.uuid]: obj }), {});
+    });
+  }
+
   public getEdgesReactive() {
     return derived(this.graphStore, (graph) => {
       return Object.values(graph.edges);

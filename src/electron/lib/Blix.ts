@@ -13,6 +13,7 @@ import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
 import { AiManager } from "./ai/AiManager";
 import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
+import type { MediaOutput } from "../../shared/types/media";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -53,14 +54,19 @@ export class Blix {
     this._graphInterpreter = new CoreGraphInterpreter(this._toolboxRegistry);
 
     // Create Output node
-    const tempNodeBuilder = new NodeBuilder("blix", "Output");
+    const tempNodeBuilder = new NodeBuilder("blix", "output");
     const tempUIBuilder = tempNodeBuilder.createUIBuilder();
     tempUIBuilder.addButton("Testing", null);
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
 
-    tempNodeBuilder.define(({ input, from }: { input: any[]; from: string }) => {
-      logger.info("Result: ", input[0]);
+    tempNodeBuilder.setTitle("Output");
+    tempNodeBuilder.setDescription(
+      "This is the global output node which accepts data of any type, and presents the final value to the user"
+    );
+    tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
+      logger.info("Result: ", input);
+      mainWindow.apis.mediaClientApi.outputChanged(input);
     });
 
     tempNodeBuilder.addInput("Number", "in", "In");
@@ -106,6 +112,8 @@ export class Blix {
     };
 
     this._graphManager.addAllSubscriber(graphSubscriber);
+
+    const mediaSubscriber = new IPCGraphSubscriber();
   }
 
   // TODO: Move these to a Utils.ts or something like that
