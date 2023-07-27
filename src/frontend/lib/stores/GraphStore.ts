@@ -116,11 +116,13 @@ class GraphMall {
   private mall = writable<GraphDict>({});
 
   public refreshGraph(graphUUID: GraphUUID, newGraph: UIGraph) {
+    // console.log("REFRESH GRAPH", newGraph)
     this.mall.update((stores) => {
       if (!stores[graphUUID]) {
         stores[graphUUID] = new GraphStore(graphUUID);
       }
       stores[graphUUID].refreshStore(newGraph);
+
       return stores;
     });
 

@@ -3,7 +3,7 @@ import type { ChildProcessWithoutNullStreams } from "child_process";
 import { spawn } from "child_process";
 import logger from "../../utils/logger";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
-import { exit } from "process";
+import { LLMExportStrategy, type LLMGraph } from "../core-graph/CoreGraphExporter";
 import { type QueryResponse } from "@shared/types";
 // Refer to .env for api keys
 
@@ -123,10 +123,6 @@ type Response = {
   args: JSON;
 };
 
-const nodeMap: { [K: string]: string } = object.nodeMap;
-const anchorMap: { [K: string]: string } = object.anchorMap;
-const edgeMap: { [K: string]: string } = object.edgeMap;
-
 /**
  *
  * Manages ai by storing context and handling prompt input
@@ -140,6 +136,7 @@ export class AiManager {
   private _childProcess: ChildProcessWithoutNullStreams | null = null;
   private _promptContext: PromptContext | null = null;
   private currentGraph = "";
+  private _exporter = new LLMExportStrategy();
 
   /**
    *
@@ -272,16 +269,24 @@ export class AiManager {
       }
 
       const obj = args as unknown as Args;
+      const graph = this.getGraph();
+
       const node = this._toolboxRegistry.getNodeInstance(obj.signature);
+      if (node === undefined) throw new Error("Node does not exist");
 
       const response = this._graphManager.addNode(this.currentGraph, node);
+
+      if (response.status === "success") {
+        const graph = this.getGraph();
+        //  const {nodeMap,anchorMap,edgeMap } = graph;
+      }
 
       return JSON.stringify(response);
     } catch (error) {
       // Manual error to give ai
       const response: QueryResponse = {
         status: "error",
-        message: "A node with this id does not exist, retry with a valid node id",
+        message: "A node with this signature does not exist, retry with a valid node id",
       };
       return JSON.stringify(response);
     }
@@ -306,6 +311,9 @@ export class AiManager {
       }
 
       const obj = args as unknown as Args;
+
+      const graph = this.getGraph();
+      const { nodeMap } = graph;
 
       const fullId = nodeMap[obj.id];
       if (fullId)
@@ -343,10 +351,18 @@ export class AiManager {
       }
 
       const obj = args as unknown as Args;
+      const graph = this.getGraph();
+
+      const { anchorMap } = graph;
+
       const output = anchorMap[obj.output];
+
+      if (output === undefined) {
+        throw new Error("Output anchor does not exist");
+      }
       const input = anchorMap[obj.input];
 
-      const response = this._graphManager.addEdge(this.currentGraph, output, input);
+      const response = this._graphManager.addEdge(this.currentGraph, input, output);
       return JSON.stringify(response);
     } catch (error) {
       // Manual error to give ai
@@ -388,9 +404,13 @@ export class AiManager {
       }
 
       const obj = args as unknown as Args;
-      const edge = this.findEdgeById(object.graph.edges, obj.id);
+      const graph = this.getGraph();
+      const edge = this.findEdgeById(graph.graph.edges, obj.id);
 
       if (edge) {
+        const graph = this.getGraph();
+
+        const { anchorMap } = graph;
         const anchor = anchorMap[edge?.input];
         try {
           this._graphManager.removeEdge(this.currentGraph, anchor);
@@ -403,5 +423,9 @@ export class AiManager {
       // Manual error to give ai
       return "Critical error : Something went completely wrong, terminate execution.";
     }
+  }
+
+  getGraph(): LLMGraph {
+    return this._exporter.export(this._graphManager.getGraph(this.currentGraph));
   }
 }

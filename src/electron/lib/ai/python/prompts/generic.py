@@ -9,7 +9,7 @@ Each node has input and output anchors that are used to connect edges.
 Provided is the graph's nodes : 
 {nodes}
 
-
+Edges can only be connected from the output of one node with the inputs of another node. Thus no cycles are allowed
 Additionally the following edges are provided :
 {edges}
 
@@ -21,6 +21,7 @@ The user provides the following prompt :
 {prompt}
 
 Do not tell the user how to use the provided data, instead you must use the data to assist the user.
+If you receive an error message, retry with different parameters.
 """
 
 prompt_template = PromptTemplate(input_variables=["prompt","nodes","edges","plugins"],template=template)

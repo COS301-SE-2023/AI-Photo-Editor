@@ -10,7 +10,13 @@ import {
 
 import logger from "../../utils/logger";
 import { Blix } from "../Blix";
-import type { GraphToJSON } from "./CoreGraphExporter";
+import {
+  type GraphToJSON,
+  type LLMGraph,
+  CoreGraphExporter,
+  GraphFileExportStrategy,
+  LLMExportStrategy,
+} from "./CoreGraphExporter";
 import sharp from "sharp";
 
 export class TestGraph {
@@ -117,8 +123,11 @@ export class TestGraph {
             displayName: "output_anchor1",
           },
         ],
-        ({ input, from }: { input: any[]; from: string }) => {
-          return { out1: input[0].flip() }[from];
+        // ({ x, from }: { x: number[]; from: number }) => {
+        //   return ["Hello ", "World", 2, 4.4][from];
+        // }
+        ({ from }: { x: number[]; from: number }) => {
+          return ["Hello ", "World", 2, 4.4][from];
         }
       )
     );
@@ -850,53 +859,81 @@ export class TestGraph {
     // this.test5();
     // this.test6();
     // this.test7();
-    return this.test8();
+    this.test8();
   }
 }
 
-// export function testStuffies(blix: Blix) {
-//   const inputs: InputAnchorInstance[] = [];
-//   const outputs: OutputAnchorInstance[] = [];
-//   const tempNodes: NodeInstance[] = [];
+export function testStuffies(blix: Blix) {
+  const inputs: MinAnchor[] = [];
+  const outputs: MinAnchor[] = [];
+  const tempNodes: NodeInstance[] = [];
 
-//   inputs.push(
-//     new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.0", "input_anchor1"),
-//     new InputAnchorInstance("number", "hello-plugin.hello.input_anchor2.1", "input_anchor2"),
-//     new InputAnchorInstance("number", "hello-plugin.hello.input_anchor3.2", "input_anchor3")
-//   );
-//   outputs.push(
-//     new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.3", "output_anchor1"),
-//     new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.4", "output_anchor2")
-//   );
+  inputs.push(
+    {
+      type: "number",
+      identifier: "hello-plugin.hello.input_anchor1.0",
+      displayName: "input_anchor1",
+    },
+    {
+      type: "number",
+      identifier: "hello-plugin.hello.input_anchor2.1",
+      displayName: "input_anchor2",
+    },
+    {
+      type: "number",
+      identifier: "hello-plugin.hello.input_anchor3.2",
+      displayName: "input_anchor3",
+    }
+  );
+  outputs.push(
+    {
+      type: "number",
+      identifier: "hello-plugin.hello.output_anchor3.3",
+      displayName: "output_anchor1",
+    },
+    {
+      type: "number",
+      identifier: "hello-plugin.hello.output_anchor3.4",
+      displayName: "output_anchor2",
+    }
+  );
 
-//   for (let i = 1; i < 7; i++) {
-//     tempNodes.push(
-//       new NodeInstance(
-//         `hello-plugin.hello`,
-//         `hello`,
-//         `hello-plugin`,
-//         `title`,
-//         `description`,
-//         `icon`,
-//         inputs,
-//         outputs
-//       )
-//     );
-//   }
+  for (let i = 1; i < 7; i++) {
+    tempNodes.push(
+      new NodeInstance(
+        `hello`,
+        `hello-plugin`,
+        `hello-plugin-node-${i}`,
+        `description`,
+        `icon`,
+        inputs,
+        outputs
+      )
+    );
+  }
 
-//   const project = blix.projectManager.createProject("Test Project");
-//   const graph = blix.graphManager.createGraph();
-//   project.addGraph(graph);
-//   const g = blix.graphManager.getGraph(graph);
-//   g.addNode(tempNodes[0]);
-//   g.addNode(tempNodes[1]);
-//   return project.uuid;
+  const project = blix.projectManager.createProject("Test Project");
+  const graph = blix.graphManager.createGraph();
+  project.addGraph(graph);
+  const g = blix.graphManager.getGraph(graph);
+  g.addNode(tempNodes[0]);
+  g.addNode(tempNodes[1]);
 
-//   // const table: { [key: number]: string} = {};
-//   // table[0] = "test";
-//   // table[2] = "test3";
-//   // table[1] = "test2";
-//   // for(const key in table) {
-//   //   logger.info(key + "\n");
-//   // }
-// }
+  const nodes = g.getNodes;
+  const node1 = Object.values(nodes)[0];
+  const node2 = Object.values(nodes)[1];
+
+  g.addEdge(Object.values(node1.getAnchors)[3].uuid, Object.values(node2.getAnchors)[0].uuid);
+
+  const exporter = new CoreGraphExporter<LLMGraph>(new LLMExportStrategy());
+  const exportedGraph = exporter.exportGraph(g);
+  // console.log(JSON.stringify(exportedGraph, null, 2));
+
+  // const table: { [key: number]: string} = {};
+  // table[0] = "test";
+  // table[2] = "test3";
+  // table[1] = "test2";
+  // for(const key in table) {
+  //   logger.info(key + "\n");
+  // }
+}

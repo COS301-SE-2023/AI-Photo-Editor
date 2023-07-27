@@ -73,6 +73,7 @@ export class CoreGraphManager {
     const res = this._graphs[graphUUID].addEdge(anchorA, anchorB);
 
     if (res.status === "success") {
+      // console.log("Pandas print statement")
       this.onGraphUpdated(graphUUID);
     }
 
