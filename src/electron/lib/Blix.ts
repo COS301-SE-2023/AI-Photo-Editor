@@ -61,9 +61,10 @@ export class Blix {
 
     tempNodeBuilder.define(({ input, from }: { input: any[]; from: string }) => {
       logger.info("Result: ", input[0]);
+      return input[0];
     });
 
-    tempNodeBuilder.addInput("Number", "in", "In");
+    tempNodeBuilder.addInput("", "in", "In");
     tempNodeBuilder.setUI(tempUIBuilder);
     this._toolboxRegistry.addInstance(tempNodeBuilder.build);
 

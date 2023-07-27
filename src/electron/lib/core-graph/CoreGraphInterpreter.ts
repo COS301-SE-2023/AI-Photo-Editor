@@ -21,7 +21,7 @@ export class CoreGraphInterpreter {
     // this.memo = {};
   }
 
-  public run(graph: CoreGraph, node: UUID) {
+  public async run(graph: CoreGraph, node: UUID) {
     // this.graph.getOutputNodes.forEach(async (uuid) => {
     //   try {
     //     await this.traverse(
@@ -35,13 +35,15 @@ export class CoreGraphInterpreter {
     //   }
     // });
     try {
-      this.traverse(
+      const res = this.traverse(
         graph,
         graph.getNodes[node],
         Object.entries(graph.getNodes[node].getAnchors)[0][1]
       ).catch((err) => {
         logger.error(err);
       });
+
+      // console.log(await Promise.resolve(res));
     } catch (err) {
       logger.error(err);
     }
