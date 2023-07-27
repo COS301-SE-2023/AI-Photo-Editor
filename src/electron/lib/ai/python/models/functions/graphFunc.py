@@ -92,9 +92,7 @@ class Functions:
                 if(response["status"] == "error"):
                     return response["message"]
                 else:
-                    inputs = [elem[:6] for elem in response["data"]["inputs"]]
-                    outputs = [elem[:6] for elem in response["data"]["outputs"]]
-                    return response["message"] + "\n Parameters: input anchor ids: " + ','.join(inputs) +"\n output anchor ids: "+','.join(outputs)+"\n"
+                    return response["message"] + "\n Parameters: input anchor ids: " + ','.join(response["data"]["inputs"]) +"\n output anchor ids: "+','.join(response["data"]["outputs"])+"\n"
 
         async def _arun(
             self,

@@ -269,26 +269,23 @@ export class AiManager {
       }
 
       const obj = args as unknown as Args;
-      const graph = this.getGraph();
 
       const node = this._toolboxRegistry.getNodeInstance(obj.signature);
-      if (node === undefined) throw new Error("Node does not exist");
+      if (node === undefined)
+        return this.errorResponse("The provided signature is invalid :  node does not exist");
 
       const response = this._graphManager.addNode(this.currentGraph, node);
 
       if (response.status === "success") {
-        const graph = this.getGraph();
-        //  const {nodeMap,anchorMap,edgeMap } = graph;
+        // Truncate ids
+        response.data!.inputs = this.truncId(response.data!.inputs);
+        response.data!.outputs = this.truncId(response.data!.outputs);
+        response.data!.nodeId = this.truncId([response.data!.nodeId])[0];
       }
 
       return JSON.stringify(response);
     } catch (error) {
-      // Manual error to give ai
-      const response: QueryResponse = {
-        status: "error",
-        message: "A node with this signature does not exist, retry with a valid node id",
-      };
-      return JSON.stringify(response);
+      return this.errorResponse(error as string);
     }
   }
 
@@ -316,17 +313,13 @@ export class AiManager {
       const { nodeMap } = graph;
 
       const fullId = nodeMap[obj.id];
-      if (fullId)
-        try {
-          this._graphManager.removeNode(this.currentGraph, fullId);
-          return "Success, node removed successfully";
-        } catch (error) {
-          return error as string;
-        }
-      else return "The provided node id is invalid :  node does not exist";
+      if (fullId === undefined)
+        return this.errorResponse("The provided id is invalid :  id does not exist");
+
+      this._graphManager.removeNode(this.currentGraph, fullId);
+      return "Success, node removed successfully";
     } catch (error) {
-      // Manual error to give ai
-      return "Critical error : Something went completely wrong, terminate execution.";
+      return this.errorResponse(error as string);
     }
   }
 
@@ -366,11 +359,7 @@ export class AiManager {
       return JSON.stringify(response);
     } catch (error) {
       // Manual error to give ai
-      const response: QueryResponse = {
-        status: "error",
-        message: "Invalid input or output anchor id, retry with valid anchor ids",
-      };
-      return JSON.stringify(response);
+      return this.errorResponse(error as string);
     }
   }
 
@@ -427,5 +416,17 @@ export class AiManager {
 
   getGraph(): LLMGraph {
     return this._exporter.export(this._graphManager.getGraph(this.currentGraph));
+  }
+
+  truncId(arr: string[]): string[] {
+    return arr.map((str) => str.slice(0, 6));
+  }
+
+  errorResponse(message: string): string {
+    const response: QueryResponse = {
+      status: "error",
+      message,
+    };
+    return JSON.stringify(response);
   }
 }
