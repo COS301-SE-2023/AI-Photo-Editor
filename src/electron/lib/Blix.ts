@@ -4,6 +4,7 @@ import { TileRegistry } from "./registries/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
+import { CoreGraphInterpreter } from "./core-graph/CoreGraphInterpreter";
 import { PluginManager } from "./plugins/PluginManager";
 import { IPCGraphSubscriber } from "./core-graph/CoreGraphInteractors";
 import type { UUID } from "../../shared/utils/UniqueEntity";
@@ -24,6 +25,7 @@ export class Blix {
   private _pluginManager!: PluginManager;
   private _mainWindow!: MainWindow;
   private _aiManager!: AiManager;
+  private _graphInterpreter!: CoreGraphInterpreter;
   private _isReady = false;
 
   // private startTime: Date;
@@ -48,12 +50,29 @@ export class Blix {
   public async init(mainWindow: MainWindow) {
     this._mainWindow = mainWindow;
     this._toolboxRegistry = new ToolboxRegistry(mainWindow);
+    this._graphInterpreter = new CoreGraphInterpreter(this._toolboxRegistry);
+
+    // Create Output node
+    const tempNodeBuilder = new NodeBuilder("blix", "Output");
+    const tempUIBuilder = tempNodeBuilder.createUIBuilder();
+    tempUIBuilder.addButton("Testing", null);
+    // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
+    // .addLabel("Label1"));
+
+    tempNodeBuilder.define(({ input, from }: { input: any[]; from: string }) => {
+      logger.info("Result: ", input[0]);
+    });
+
+    tempNodeBuilder.addInput("Number", "in", "In");
+    tempNodeBuilder.setUI(tempUIBuilder);
+    this._toolboxRegistry.addInstance(tempNodeBuilder.build);
 
     for (const command of blixCommands) {
       this.commandRegistry.addInstance(command);
     }
 
     // Load plugins before instantiating any managers
+
     this._pluginManager = new PluginManager(this);
     await this._pluginManager.loadBasePlugins();
 
@@ -125,6 +144,10 @@ export class Blix {
 
   get projectManager(): ProjectManager {
     return this._projectManager;
+  }
+
+  get graphInterpreter(): CoreGraphInterpreter {
+    return this._graphInterpreter;
   }
 
   get aiManager(): AiManager {

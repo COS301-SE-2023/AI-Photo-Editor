@@ -2,15 +2,40 @@
 <script lang="ts">
   import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
   import { type Readable } from "svelte/store";
-  import { GraphStore, graphMall } from "../../lib/stores/GraphStore";
+  import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import { projectsStore } from "lib/stores/ProjectStore";
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import type { UUID } from "@shared/utils/UniqueEntity";
-  import type { GraphEdge, GraphNode } from "@shared/ui/UIGraph";
+  import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
+  import { tick } from "svelte";
+  import { focusedPanelStore } from "lib/PanelNode";
+  import { onDestroy } from "svelte";
+  import { fade } from "svelte/transition";
+  import { mediaStore } from "../../lib/stores/MediaStore";
+  // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
+
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
-  export let panelId = Math.round(10000000.0 * Math.random()).toString();
+  export let panelId = Math.round(10000000.0 * Math.random());
+  /**
+   * When a new panel is focussed on (the panel is clicked),
+   * the focusedPanelStore is updated through Panel.svelte. If the panel clicked is the panel
+   * that houses the current graph, the store holidng the last graph is set to the current graph.
+   *
+   * If a user clicks off onto a panel that does not house a graph, the last focussed graph will retain its
+   * indicator as the indicator subscribes to the value of the focusedGraphStore, no the focusedPanelStore.
+   */
+  const unsubscribe = focusedPanelStore.subscribe((state) => {
+    if (panelId === state) {
+      focusedGraphStore.set(panelId);
+    }
+  });
+
+  onDestroy(() => {
+    unsubscribe();
+  });
+
   let graphIds = projectsStore.activeProjectGraphIds;
   // let graphIds = graphMall.getAllGraphUUIDsReactive();
   let graphId = $graphIds[0];
@@ -41,16 +66,19 @@
     if ($thisGraphStore) {
       graphNodes = $thisGraphStore.getNodesReactive();
       graphEdges = $thisGraphStore.getEdgesReactive();
+      updateOnGraphEdges($graphEdges);
     }
   }
 
-  function updateOnGraphEdges(graphEdges: GraphEdge[]) {
+  async function updateOnGraphEdges(edges: GraphEdge[]) {
+    // When the tile first loads, `clearAllGraphEdges` and `connectAnchorIds`
+    // only work after the tick - when the new graph anchors have been created
+    await tick();
     if (clearAllGraphEdges) clearAllGraphEdges();
 
-    for (let edge in graphEdges) {
-      console.log("EDGE", edge, graphEdges[edge]);
-      if (!graphEdges.hasOwnProperty(edge)) continue;
-      const edgeData = graphEdges[edge];
+    for (let edge in edges) {
+      if (!edges.hasOwnProperty(edge)) continue;
+      const edgeData = edges[edge];
 
       // Skip if nodes don't exist
       // const fromNode = $graphNodes.find(node => node.id === edgeData.nodeFrom)
@@ -73,11 +101,6 @@
 
   // Only updates when _graphId_ changes
   $: updateOnGraphId(graphId);
-
-  function addNode() {
-    $thisGraphStore?.addNode("hello-plugin.hello", getGraphCenter());
-    // $thisGraphStore?.addNode();
-  }
 
   function getGraphCenter() {
     return {
@@ -119,11 +142,21 @@
 
   function edgeConnected(e: CustomEvent<any>) {
     console.log("CONNECTION EVENT");
+    if (!$thisGraphStore) return;
     const fromAnchor = splitCompositeAnchorId(e.detail.sourceAnchor.id);
     const toAnchor = splitCompositeAnchorId(e.detail.targetAnchor.id);
 
     if (!fromAnchor || !toAnchor) return;
+
+    const toNode = $thisGraphStore.getNode(toAnchor.nodeUUID);
+
     $thisGraphStore?.addEdge(fromAnchor.anchorUUID, toAnchor.anchorUUID);
+
+    if (toNode.signature === "blix.Output") {
+      console.log("Output Connection");
+      mediaStore.compute(graphId, toNode.uuid);
+      //window.apis.mediaApi.compute(graphId, toNode.uuid);
+    }
   }
 
   function edgeDisconnected(e: CustomEvent<any>) {
@@ -136,6 +169,14 @@
 </script>
 
 <div class="hoverElements">
+  <div class="mr-2 inline-block h-[10px] w-[10px]">
+    {#if panelId === $focusedGraphStore}
+      <div
+        transition:fade="{{ duration: 300 }}"
+        class="z-1000000 h-full w-full rounded-full border-[1px] border-rose-700 bg-rose-500"
+      ></div>
+    {/if}
+  </div>
   <select name="graphPicker" class="dropdown" bind:value="{graphId}">
     {#each $graphIds as id}
       <option value="{id}">{id.slice(0, 8)}</option>

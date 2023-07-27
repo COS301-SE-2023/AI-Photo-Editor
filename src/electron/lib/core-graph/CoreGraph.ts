@@ -1,11 +1,12 @@
 import logger from "../../utils/logger";
 import { type UUID, UniqueEntity } from "../../../shared/utils/UniqueEntity";
 import type { CoreGraphSubscriber } from "./CoreGraphInteractors";
-import type {
-  AnchorType,
+import {
+  type AnchorType,
   InputAnchorInstance,
   NodeInstance,
   OutputAnchorInstance,
+  checkEdgeDataTypesCompatible,
 } from "../registries/ToolboxRegistry";
 import { get } from "http";
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
@@ -178,6 +179,7 @@ export class CoreGraph extends UniqueEntity {
     }
 
     if (!anchorA) {
+      // Data flowing through edge must be of same type for both anchors
       return {
         status: "error",
         message: `AnchorA does not exist`,
@@ -198,22 +200,16 @@ export class CoreGraph extends UniqueEntity {
       };
     }
 
-    if (anchorA.ioType === AnchorIO.input && anchorB.ioType === AnchorIO.input) {
-      return {
-        status: "error",
-        message: "Edge cannot be connected from one input to another input",
-      };
-    }
-
-    if (anchorA.type !== anchorB.type) {
-      return {
-        status: "error",
-        message: "Output and input does not have the same type",
-      };
-    }
-
     const ancFrom = anchorA.ioType === AnchorIO.output ? anchorA : anchorB;
     const ancTo = anchorB.ioType === AnchorIO.input ? anchorB : anchorA;
+
+    // Data flowing through edge must be of same type for both anchors
+    if (!checkEdgeDataTypesCompatible(ancFrom.type, ancTo.type)) {
+      return {
+        status: "error",
+        message: "Data flowing through edge must be of same type for both anchors",
+      };
+    }
 
     if (this.checkForCycles(ancFrom, ancTo)) {
       return { status: "error", message: "Edge creates a cycle" };
