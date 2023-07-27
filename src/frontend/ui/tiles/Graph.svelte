@@ -2,19 +2,38 @@
 <script lang="ts">
   import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
   import { type Readable } from "svelte/store";
-  import { GraphStore, graphMall } from "../../lib/stores/GraphStore";
-  import { mediaStore } from "../../lib/stores/MediaStore";
+  import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import { projectsStore } from "lib/stores/ProjectStore";
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import type { UUID } from "@shared/utils/UniqueEntity";
   import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
   import { tick } from "svelte";
+  import { focusedPanelStore } from "lib/PanelNode";
+  import { onDestroy } from "svelte";
+  import { fade } from "svelte/transition";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
-  export let panelId = Math.round(10000000.0 * Math.random()).toString();
+  export let panelId = Math.round(10000000.0 * Math.random());
+  /**
+   * When a new panel is focussed on (the panel is clicked),
+   * the focusedPanelStore is updated through Panel.svelte. If the panel clicked is the panel
+   * that houses the current graph, the store holidng the last graph is set to the current graph.
+   *
+   * If a user clicks off onto a panel that does not house a graph, the last focussed graph will retain its
+   * indicator as the indicator subscribes to the value of the focusedGraphStore, no the focusedPanelStore.
+   */
+  const unsubscribe = focusedPanelStore.subscribe((state) => {
+    if (panelId === state) {
+      focusedGraphStore.set(panelId);
+    }
+  });
+
+  onDestroy(() => {
+    unsubscribe();
+  });
 
   let graphIds = projectsStore.activeProjectGraphIds;
   // let graphIds = graphMall.getAllGraphUUIDsReactive();
@@ -149,6 +168,14 @@
 </script>
 
 <div class="hoverElements">
+  <div class="mr-2 inline-block h-[10px] w-[10px]">
+    {#if panelId === $focusedGraphStore}
+      <div
+        transition:fade="{{ duration: 300 }}"
+        class="z-1000000 h-full w-full rounded-full border-[1px] border-rose-700 bg-rose-500"
+      ></div>
+    {/if}
+  </div>
   <select name="graphPicker" class="dropdown" bind:value="{graphId}">
     {#each $graphIds as id}
       <option value="{id}">{id.slice(0, 8)}</option>

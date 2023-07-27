@@ -184,3 +184,8 @@ class GraphMall {
 
 // export const graphMall = writable<GraphMall>(new GraphMall());
 export const graphMall = new GraphMall();
+
+/**
+ * Writable store used to house the panel that house the last used graph.
+ */
+export const focusedGraphStore = writable<number>(-1);

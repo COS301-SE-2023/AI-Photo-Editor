@@ -1,6 +1,7 @@
 // N-way tree of panels
 
 import type { LayoutPanel, PanelType } from "@shared/types/index";
+import { writable } from "svelte/store";
 
 export abstract class PanelNode {
   static panelCounter = 0;
@@ -148,3 +149,19 @@ export class PanelLeaf extends PanelNode {
     this.parent = null;
   }
 }
+/**
+ * This store house the last panel clicked by the user.
+ */
+class FocusedPanelStore {
+  private readonly store = writable<number>(-1);
+
+  public focusOnPanel(id: number) {
+    this.store.set(id);
+  }
+
+  public get subscribe() {
+    return this.store.subscribe;
+  }
+}
+
+export const focusedPanelStore = new FocusedPanelStore();

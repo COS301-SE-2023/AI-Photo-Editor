@@ -20,6 +20,7 @@
   import ShortcutSettings from "../../tiles/ShortcutSettings.svelte";
   import { PanelGroup, PanelLeaf, type PanelNode } from "@frontend/lib/PanelNode";
   import type { PanelType } from "@shared/types";
+  import { focusedPanelStore } from "../../../lib/PanelNode";
 
   // import { scale } from "svelte/transition";
 
@@ -230,7 +231,14 @@
   <!-- </div> -->
 {:else if layout instanceof PanelLeaf}
   <!-- Actual panel content goes here -->
-  <div class="fullPanel">
+  <!-- When a panel is clicked, a store is updated to hold the focussed panel -->
+  <div
+    class="fullPanel"
+    on:click="{() => {
+      focusedPanelStore.focusOnPanel(layout.id);
+    }}"
+    on:keydown="{null}"
+  >
     <!-- {#if layout.content === "graph"}
       <Graph />
     {:else if layout.content === "image"}

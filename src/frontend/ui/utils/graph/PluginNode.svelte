@@ -7,7 +7,7 @@
 
   const dispatch = createEventDispatcher();
 
-  export let panelId: string;
+  export let panelId: number;
   export let graphId: string;
   export let node: GraphNode;
 
