@@ -52,11 +52,23 @@ export class Blix {
     this._toolboxRegistry = new ToolboxRegistry(mainWindow);
     this._graphInterpreter = new CoreGraphInterpreter(this._toolboxRegistry);
 
+    // Create Output node
+    const tempNodeBuilder = new NodeBuilder("blix", "Output");
+    const tempUIBuilder = tempNodeBuilder.createUIBuilder();
+    tempUIBuilder.addButton("Testing", null);
+    // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
+    // .addLabel("Label1"));
+
+    tempNodeBuilder.addInput("", "in", "In");
+    tempNodeBuilder.setUI(tempUIBuilder);
+    this._toolboxRegistry.addInstance(tempNodeBuilder.build);
+
     for (const command of blixCommands) {
       this.commandRegistry.addInstance(command);
     }
 
     // Load plugins before instantiating any managers
+
     this._pluginManager = new PluginManager(this);
     await this._pluginManager.loadBasePlugins();
 
