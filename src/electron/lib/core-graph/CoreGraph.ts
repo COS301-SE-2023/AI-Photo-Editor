@@ -1,11 +1,12 @@
 import logger from "../../utils/logger";
 import { type UUID, UniqueEntity } from "../../../shared/utils/UniqueEntity";
 import type { CoreGraphSubscriber } from "./CoreGraphInteractors";
-import type {
-  AnchorType,
+import {
+  type AnchorType,
   InputAnchorInstance,
   NodeInstance,
   OutputAnchorInstance,
+  checkEdgeDataTypesCompatible,
 } from "../registries/ToolboxRegistry";
 import { get } from "http";
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
@@ -179,7 +180,7 @@ export class CoreGraph extends UniqueEntity {
     }
 
     // Data flowing through edge must be of same type for both anchors
-    if (ancFrom.type !== ancTo.type) {
+    if (!checkEdgeDataTypesCompatible(ancFrom.type, ancTo.type)) {
       return {
         status: "error",
         message: "Data flowing through edge must be of same type for both anchors",

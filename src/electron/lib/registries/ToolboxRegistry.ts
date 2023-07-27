@@ -126,3 +126,10 @@ export class InputAnchorInstance implements AnchorInstance {
 export class OutputAnchorInstance implements AnchorInstance {
   constructor(readonly type: AnchorType, readonly id: string, readonly displayName: string) {}
 }
+
+export function checkEdgeDataTypesCompatible(sourceDataType: string, targetDataType: string) {
+  const dataTypeA = sourceDataType.trim().split(/\s+/).join(" ") || "";
+  const dataTypeB = targetDataType.trim().split(/\s+/).join(" ") || "";
+
+  return dataTypeA === "" || dataTypeB === "" || dataTypeA === dataTypeB;
+}

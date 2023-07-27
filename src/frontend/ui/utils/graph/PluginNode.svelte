@@ -77,7 +77,7 @@ height="{graphNode.dims.h}" -->
             {@const color = stringToColor(input.type)}
             <Anchor
               input
-              dataType="{input.type}"
+              dataType="{input.type || ''}"
               bgColor="{color}"
               id="{panelId}_{input.id}"
               direction="west"
@@ -88,7 +88,7 @@ height="{graphNode.dims.h}" -->
             >
               {#if hovering}
                 <div class="anchorTooltip">
-                  {input.type}
+                  {input.type || "any"}
                 </div>
               {/if}
               <DefaultAnchor
@@ -108,7 +108,7 @@ height="{graphNode.dims.h}" -->
             {@const color = stringToColor(output.type)}
             <Anchor
               output
-              dataType="{output.type}"
+              dataType="{output.type || ''}"
               bgColor="{color}"
               id="{panelId}_{output.id}"
               direction="east"
@@ -119,7 +119,7 @@ height="{graphNode.dims.h}" -->
             >
               {#if hovering}
                 <div class="anchorTooltip">
-                  {output.type}
+                  {output.type || "any"}
                 </div>
               {/if}
               <DefaultAnchor
