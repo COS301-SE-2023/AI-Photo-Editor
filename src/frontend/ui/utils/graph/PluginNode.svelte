@@ -1,9 +1,8 @@
 <script lang="ts">
   import { GraphNode, NodeStylingStore } from "@shared/ui/UIGraph";
-  import { Anchor, Node } from "blix_svelvet";
+  import { Anchor, DefaultAnchor, Node, type CSSColorString } from "blix_svelvet";
   import { toolboxStore } from "lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";
-  import PluginEdge from "./PluginEdge.svelte";
   import { createEventDispatcher } from "svelte";
 
   const dispatch = createEventDispatcher();
@@ -27,6 +26,22 @@
   // node.inputUIValues = new AnchorValueStore();
 
   const nodePos = node.styling.pos;
+
+  function stringToColor(str: string): CSSColorString {
+    let hash = 0;
+    str.split("").forEach((char) => {
+      hash = char.charCodeAt(0) + ((hash << 5) - hash);
+    });
+
+    let colour = "#";
+
+    for (let i = 0; i < 3; i++) {
+      const value = (hash >> (i * 8)) & 0xff;
+      colour += value.toString(16).padStart(2, "0");
+    }
+
+    return colour as CSSColorString;
+  }
 </script>
 
 {#if svelvetNodeId !== ""}
@@ -41,8 +56,6 @@ height="{graphNode.dims.h}" -->
     borderColor="#ffffff"
     borderWidth="{3}"
     borderRadius="{10}"
-    inputs="{2}"
-    outputs="{1}"
   >
     <div class="node">
       <div class="header">
@@ -61,26 +74,63 @@ height="{graphNode.dims.h}" -->
       {#if $toolboxNode}
         <div class="anchors inputs">
           {#each $toolboxNode.inputs as input}
+            {@const color = stringToColor(input.type)}
             <Anchor
-              on:connection="{() => dispatch('connection', { input })}"
-              on:disconnection="{() => dispatch('disconnection', { input })}"
+              input
+              dataType="{input.type}"
+              bgColor="{color}"
               id="{panelId}_{input.id}"
               direction="west"
-              edge="{PluginEdge}"
-              input
-            />
+              on:connection="{() => dispatch('connection', { input })}"
+              on:disconnection="{() => dispatch('disconnection', { input })}"
+              let:connecting
+              let:hovering
+            >
+              {#if hovering}
+                <div class="anchorTooltip">
+                  {input.type}
+                </div>
+              {/if}
+              <DefaultAnchor
+                input="{true}"
+                output="{false}"
+                connecting="{connecting}"
+                hovering="{false}"
+                bgColor="{color}"
+                connected="{false}"
+              />
+            </Anchor>
             <!-- bind:connections={$nodeConns} -->
           {/each}
         </div>
         <div class="anchors outputs">
           {#each $toolboxNode.outputs as output}
+            {@const color = stringToColor(output.type)}
             <Anchor
-              on:connection="{() => dispatch('connection', { output })}"
-              on:disconnection="{() => dispatch('disconnection', { output })}"
+              output
+              dataType="{output.type}"
+              bgColor="{color}"
               id="{panelId}_{output.id}"
               direction="east"
-              output
-            />
+              on:connection="{() => dispatch('connection', { output })}"
+              on:disconnection="{() => dispatch('disconnection', { output })}"
+              let:connecting
+              let:hovering
+            >
+              {#if hovering}
+                <div class="anchorTooltip">
+                  {output.type}
+                </div>
+              {/if}
+              <DefaultAnchor
+                input="{true}"
+                output="{false}"
+                connecting="{connecting}"
+                hovering="{false}"
+                bgColor="{color}"
+                connected="{false}"
+              />
+            </Anchor>
           {/each}
         </div>
       {/if}
@@ -134,6 +184,15 @@ height="{graphNode.dims.h}" -->
   .outputs {
     right: -24px;
     top: 40px;
+  }
+
+  .anchorTooltip {
+    position: absolute;
+    background: #444444;
+    color: white;
+    border-radius: 2px;
+    padding: 0.2em;
+    top: -1.5em;
   }
   .header {
     display: flex;
