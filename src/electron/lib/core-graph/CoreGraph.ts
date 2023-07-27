@@ -46,6 +46,7 @@ export class CoreGraph extends UniqueEntity {
   // E.g. we can do (source anchor) ---[edgeSrc]--> (destination anchors) ---[edgeDest]--> (Edges)
   //      to get all the edges that flow from a source anchor
   private outputNodes: string[];
+  public shortIdRes = false;
 
   // private subscribers: CoreGraphSubscriber[];
   private static nodeTracker = 0;
@@ -159,39 +160,59 @@ export class CoreGraph extends UniqueEntity {
     // TODO: Add Node Styling
   }
 
-  public addEdge(anchorA: UUID, anchorB: UUID): QueryResponse<{ edgeId: UUID }> {
-    // Edge can start either from an output or input anchor
-    const ancFrom =
-      this.anchors[anchorA].ioType === AnchorIO.output
-        ? this.anchors[anchorA]
-        : this.anchors[anchorB];
-    const ancTo =
-      this.anchors[anchorB].ioType === AnchorIO.input
-        ? this.anchors[anchorB]
-        : this.anchors[anchorA];
+  public addEdge(anchorIdA: UUID, anchorIdB: UUID): QueryResponse<{ edgeId: UUID }> {
+    const anchorA = this.anchors[anchorIdA];
+    const anchorB = this.anchors[anchorIdB];
 
-    // Edge must flow from output anchor to input anchor
-    if (ancFrom.ioType !== AnchorIO.output || ancTo.ioType !== AnchorIO.input) {
+    if (!(anchorA || anchorB)) {
       return {
         status: "error",
-        message: "Edge must flow between 2 different anchors",
+        message: `Anchors with ids ${formatIds([anchorIdA, anchorIdB], this.shortIdRes)} does not exist`,
       };
     }
 
-    // Data flowing through edge must be of same type for both anchors
-    if (ancFrom.type !== ancTo.type) {
+    if (!anchorA) {
       return {
         status: "error",
-        message: "Data flowing through edge must be of same type for both anchors",
+        message: `Anchor with id ${formatIds([anchorIdA], this.shortIdRes)} does not exist`,
       };
     }
 
-    // Check for cycles
+    if (!anchorB) {
+      return {
+        status: "error",
+        message: `Anchor with id ${formatIds([anchorIdB], this.shortIdRes)} does not exist`,
+      };
+    }
+
+    if (anchorA.ioType === AnchorIO.output && anchorB.ioType === AnchorIO.output) {
+      return {
+        status: "error",
+        message: "Edge cannot be connected from one output to another output",
+      };
+    }
+
+    if (anchorA.ioType === AnchorIO.input && anchorB.ioType === AnchorIO.input) {
+      return {
+        status: "error",
+        message: "Edge cannot be connected from one input to another input",
+      };
+    }
+
+    if (anchorA.type !== anchorB.type) {
+      return {
+        status: "error",
+        message: "Output and input does not have the same type",
+      };
+    }
+
+    const ancFrom = anchorA.ioType === AnchorIO.output ? anchorA : anchorB;
+    const ancTo = anchorB.ioType === AnchorIO.input ? anchorB : anchorA;
+
     if (this.checkForCycles(ancFrom, ancTo)) {
-      return { status: "error", message: "Edge cannot create a cycle" };
+      return { status: "error", message: "Edge creates a cycle" };
     }
 
-    // Check for duplicate edgeDest
     if (this.checkForDuplicateEdges(ancFrom, ancTo)) {
       return { status: "error", message: "Edge already exists" };
     }
@@ -515,4 +536,16 @@ class ReducedAnchor {
 export class NodeOutToNodeIn implements GraphRepresentation {
   // TODO
   constructor(public graphId: UUID) {}
+}
+
+// ==================================================================
+// Helper Methods
+// ==================================================================
+
+function formatIds(ids: string[], shortIds: boolean) {
+  const filteredIds = ids.filter((id) => id);
+  const formattedIds = filteredIds.map((id) => {
+    return shortIds ? id.slice(0, 6) : id;
+  })
+  return formattedIds.join(", ");
 }

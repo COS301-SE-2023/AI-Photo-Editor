@@ -1,4 +1,4 @@
-[{"status":"success","newGraph":{"nodes":[{"id":"oQq_gS","signature":"sharp-plugin.brightness","inputs":[{"id":"tPywaD","type":"Sharp"}],"outputs":[{"id":"TQ3cEN","type":"Sharp"}]},{"id":"pD_3QN","signature":"sharp-plugin.hue","inputs":[{"id":"3Tlooi","type":"Sharp"}],"outputs":[{"id":"O8mpgL","type":"Sharp"}]}],"edges":[]}}
+[{"status":"success","newGraph":{"nodes":[{"id":"oCQhmd","signature":"sharp-plugin.brightness","inputs":[{"id":"kfFFgc","type":"Sharp"}],"outputs":[{"id":"rgT6YX","type":"Sharp"}]},{"id":"PIK0q2","signature":"sharp-plugin.hue","inputs":[{"id":"q1g9d7","type":"Sharp"}],"outputs":[{"id":"yB4h7P","type":"Sharp"}]}],"edges":[]}}
  System: When asked for help or to perform a task you will act as an AI assistant
 for node-based AI photo editing application. Your main role is to help the user
 manipulate a node based graph. If a question is asked that does not involve the

@@ -2,7 +2,11 @@ import { CoreGraph } from "../../lib/core-graph/CoreGraph";
 import { NodePluginContext } from "../../lib/plugins/Plugin";
 import { type NodeInstance } from "../../lib/registries/ToolboxRegistry";
 import { spawn } from "child_process";
-import { CoreGraphExporter, LLMExportStrategy } from "../../lib/core-graph/CoreGraphExporter";
+import {
+  CoreGraphExporter,
+  LLMExportStrategy,
+  LLMGraph,
+} from "../../lib/core-graph/CoreGraphExporter";
 import { join } from "path";
 import { object } from "zod";
 
@@ -13,8 +17,7 @@ import { object } from "zod";
 const PLUGINS = ["sharp-plugin"];
 const PLUGIN_DIRECTORY = join(__dirname, "../../../../blix-plugins");
 const PYTHON_SCRIPT_PATH = join(__dirname, "../../../../src/electron/lib/ai/python/main.py");
-const SYSTEM_PROMPT = 
-`System: When asked for help or to perform a task you will act as an AI assistant
+const SYSTEM_PROMPT = `System: When asked for help or to perform a task you will act as an AI assistant
 for node-based AI photo editing application. Your main role is to help the user
 manipulate a node based graph. If a question is asked that does not involve the
 graph or image editing then remind the user of your main role. Don't make
@@ -23,9 +26,7 @@ user request is ambiguous. Outputs of nodes can only be connected to inputs of
 other nodes. Do not try to connect inputs to inputs or outputs to outputs.
 
 System: Your very final response should be a one sentence summary without any
-JSON.`
-
-
+JSON.`;
 
 function main() {
   const prompt = "Add a brightness and hue node. Then connect the hue to the brightness node";
@@ -57,17 +58,21 @@ function execute(userPrompt: string, verbose = false) {
   pythonProcess.stdout.on("data", (data) => {
     const command = JSON.parse(data);
     console.log(data.toString());
-	if (!(command.function))
-		return
+    if (!command.function) return;
     const res = runCommandOnGraph(coreGraph, command);
     console.log(JSON.stringify(res));
 
-	if (res.status === "success") {
-		pythonProcess.stdin.write(`${JSON.stringify({status: "success", newGraph: convertGraph(coreGraph).graph})}\n ${SYSTEM_PROMPT}\nend of transmission\n`);
-	} else {
-		pythonProcess.stdin.write(`${JSON.stringify(res)}\nend of transmission\n`);
-	}
-	console.log(JSON.stringify(convertGraph(coreGraph).graph, null, 2))
+    if (res.status === "success") {
+      pythonProcess.stdin.write(
+        `${JSON.stringify({
+          status: "success",
+          newGraph: convertGraph(coreGraph).graph,
+        })}\n ${SYSTEM_PROMPT}\nend of transmission\n`
+      );
+    } else {
+      pythonProcess.stdin.write(`${JSON.stringify(res)}\nend of transmission\n`);
+    }
+    console.log(JSON.stringify(convertGraph(coreGraph).graph, null, 2));
   });
 
   pythonProcess.stderr.on("data", (data) => {
@@ -136,11 +141,15 @@ function createGraph() {
 }
 
 function runCommandOnGraph(graph: CoreGraph, command: LLMFunctions) {
+  graph.shortIdRes = true;
+  const llmGraph = convertGraph(graph);
+
   if (command.function === "addNode") {
     const toolbox = createToolbox(PLUGINS);
     return graph.addNode(toolbox[command.args.signature]);
   } else if (command.function === "addEdge") {
-    return graph.addEdge(command.args.output, command.args.input);
+    const { anchorMap } = llmGraph;
+    return graph.addEdge(anchorMap[command.args.output], anchorMap[command.args.input]);
   }
 
   return { status: "success" };
