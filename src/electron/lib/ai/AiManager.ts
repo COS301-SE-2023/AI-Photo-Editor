@@ -96,12 +96,12 @@ export class AiManager {
     childProcess.stdin.write("end of transmission\n");
 
     // Receive output from the Python script
-    childProcess.stdout.on("data", (data: Buffer) => {
-      const dataStr = data.toString();
+    childProcess.stdout.on("data", (buffer: Buffer) => {
+      const data = buffer.toString();
       logger.info("Received from Python: ", data);
 
       try {
-        const res = cookUnsafeResponse(JSON.parse(dataStr));
+        const res = cookUnsafeResponse(JSON.parse(data));
 
         if (res.type === "exit") {
           logger.info("Response from python : ", res.message);
