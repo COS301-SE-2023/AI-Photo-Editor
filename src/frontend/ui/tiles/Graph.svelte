@@ -8,6 +8,7 @@
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import type { UUID } from "@shared/utils/UniqueEntity";
   import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
+  import { tick } from "svelte";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
@@ -44,16 +45,19 @@
     if ($thisGraphStore) {
       graphNodes = $thisGraphStore.getNodesReactive();
       graphEdges = $thisGraphStore.getEdgesReactive();
+      updateOnGraphEdges($graphEdges);
     }
   }
 
-  function updateOnGraphEdges(graphEdges: GraphEdge[]) {
+  async function updateOnGraphEdges(edges: GraphEdge[]) {
+    // When the tile first loads, `clearAllGraphEdges` and `connectAnchorIds`
+    // only work after the tick - when the new graph anchors have been created
+    await tick();
     if (clearAllGraphEdges) clearAllGraphEdges();
 
-    for (let edge in graphEdges) {
-      console.log("EDGE", edge, graphEdges[edge]);
-      if (!graphEdges.hasOwnProperty(edge)) continue;
-      const edgeData = graphEdges[edge];
+    for (let edge in edges) {
+      if (!edges.hasOwnProperty(edge)) continue;
+      const edgeData = edges[edge];
 
       // Skip if nodes don't exist
       // const fromNode = $graphNodes.find(node => node.id === edgeData.nodeFrom)
@@ -76,11 +80,6 @@
 
   // Only updates when _graphId_ changes
   $: updateOnGraphId(graphId);
-
-  function addNode() {
-    $thisGraphStore?.addNode("hello-plugin.hello", getGraphCenter());
-    // $thisGraphStore?.addNode();
-  }
 
   function getGraphCenter() {
     return {
