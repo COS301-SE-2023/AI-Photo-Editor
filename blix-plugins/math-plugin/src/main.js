@@ -123,27 +123,28 @@ const nodes ={
 
         nodeBuilder.define((data) => {
           return {
-            "res": data.input[0] + data.input[0],
+            "res": data.input[0] + data.input[1],
           }[data.from];
 
           });
           
-       nodeBuilder.addInput("Number", "num","Num");
+       nodeBuilder.addInput("Number", "num1","Num");
+       nodeBuilder.addInput("Number", "num2","Num")
        nodeBuilder.addOutput("Number", "res","Result");
     },
-    // TO BE DEVELOPED   
-    // "ternary": (context) => {
-    //     nodeBuilder = context.instantiate("math-plugin","add");
-    //     nodeBuilder.setTitle("Addition");
-    //     nodeBuilder.define((num1 ,num2) => {
-    //         return num1+num2;
-    //     });
+    // Testing ternary
+    "ternary": (context) => {
+        nodeBuilder = context.instantiate("math-plugin","ternary");
+        nodeBuilder.setTitle("Ternary");
+        nodeBuilder.define((data) => {
+            return { "res" : data.input[0] + data.input[1] + data.input[2] }[data.from];
+        });
 
-    //    nodeBuilder.addInput("string","In1");
-    //    nodeBuilder.addInput("string","In2");
-
-    //    nodeBuilder.addOutput("string","Out1");
-    // }
+      nodeBuilder.addInput("Number","num1", "Num");
+      nodeBuilder.addInput("Number","num2", "Num");
+      nodeBuilder.addInput("Number","num3", "Num");
+      nodeBuilder.addOutput("Number","res", "Num");
+    }
 }
 
 

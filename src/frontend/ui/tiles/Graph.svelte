@@ -12,6 +12,7 @@
   import { focusedPanelStore } from "lib/PanelNode";
   import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";
+  import { mediaStore } from "../../lib/stores/MediaStore";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID

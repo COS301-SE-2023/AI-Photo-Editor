@@ -41,7 +41,7 @@
       </div>
     {/if}
   </div>
-  <button on:click="{compute}">Testing</button>
+  <button on:click="{null}">Testing</button>
 </div>
 
 <style>
