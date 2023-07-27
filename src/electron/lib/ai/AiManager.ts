@@ -16,13 +16,6 @@ import type { Response, ResponseFunctions } from "./ai-cookbook";
 
 //  TODO : Provide the graph context that will be given to ai as context
 
-interface PromptContext {
-  prompt: string;
-  plugin: string[];
-  nodes: string[];
-  edges: string[];
-}
-
 /**
  *
  * Manages ai by storing context and handling prompt input

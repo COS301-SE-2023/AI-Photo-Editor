@@ -10,12 +10,6 @@ import {
 import type { Command } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
-import Main from "electron/main";
-import type { MainWindow } from "../api/apis/WindowApi";
-import { dialog } from "electron";
-import type { UUID } from "../../../shared/utils/UniqueEntity";
-import type { SharedProject } from "../../../shared/types";
-
 export type PluginSignature = string;
 
 export class Plugin {

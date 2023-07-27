@@ -258,7 +258,7 @@ export function removeEdge(
 //  Helper Functions
 // ==================================================================
 
-// Make this a zod object
+// Do we want to make this a zod object?
 interface Edge {
   id: string;
   input: string;

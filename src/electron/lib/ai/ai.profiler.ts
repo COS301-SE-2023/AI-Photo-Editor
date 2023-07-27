@@ -9,13 +9,16 @@ import {
 } from "../../lib/core-graph/CoreGraphExporter";
 import { join } from "path";
 import { object } from "zod";
+import logger from "../../utils/logger";
+import { app } from "electron";
+import { readdirSync } from "fs";
 
 // ==================================================================
 // Config
 // ==================================================================
 
-const PLUGINS = ["sharp-plugin"];
 const PLUGIN_DIRECTORY = join(__dirname, "../../../../blix-plugins");
+const PLUGINS = readdirSync(PLUGIN_DIRECTORY);
 const PYTHON_SCRIPT_PATH = join(__dirname, "../../../../src/electron/lib/ai/python/main.py");
 const SYSTEM_PROMPT = `System: When asked for help or to perform a task you will act as an AI assistant
 for node-based AI photo editing application. Your main role is to help the user
@@ -41,7 +44,7 @@ main();
 
 function execute(userPrompt: string, verbose = false) {
   const pythonProcess = spawn("python3", [PYTHON_SCRIPT_PATH]);
-  const toolbox = createToolbox(PLUGINS);
+  const toolbox = createToolbox();
   const llmToolbox = convertToolbox(toolbox);
   const coreGraph = createGraph();
   const llmGraph = convertGraph(coreGraph);
@@ -49,7 +52,8 @@ function execute(userPrompt: string, verbose = false) {
   const context = {
     prompt: userPrompt,
     toolbox: llmToolbox,
-    graph: llmGraph.graph,
+    nodes: llmGraph.graph.nodes,
+    edges: llmGraph.graph.edges,
   };
 
   const data = JSON.stringify(context);
@@ -58,6 +62,8 @@ function execute(userPrompt: string, verbose = false) {
   pythonProcess.stdout.on("data", (buffer: Buffer) => {
     const data = buffer.toString();
     const command = JSON.parse(data) as LLMFunctions;
+    logger.info("Received from Python: ", command);
+
     // console.log(data.toString());
     if (!command.function) return;
     const res = runCommandOnGraph(coreGraph, command);
@@ -86,8 +92,10 @@ function execute(userPrompt: string, verbose = false) {
 // Helper methods
 // ==================================================================
 
-function createToolbox(plugins: string[]) {
+function createToolbox() {
   const toolbox: Record<string, NodeInstance> = {};
+
+  const plugins = readdirSync(PLUGIN_DIRECTORY);
 
   for (const plugin of plugins) {
     const pluginPath = join(PLUGIN_DIRECTORY, plugin);
@@ -110,8 +118,19 @@ function createToolbox(plugins: string[]) {
     }
   }
 
+  // console.log(toolbox)
   return toolbox;
 }
+
+//  function  loadPlugins(paths : string[]) {
+//     paths.forEach((path) => {
+//       const plugins = readdirSync(path);
+
+//       plugins.forEach((plugin) => {
+//         this.loadPlugin(plugin, path);
+//       });
+//     });
+//   }
 
 function convertToolbox(toolbox: Record<string, NodeInstance>) {
   const convertedToolbox: LLMToolbox = {};
@@ -146,7 +165,7 @@ function runCommandOnGraph(graph: CoreGraph, command: LLMFunctions) {
   const llmGraph = convertGraph(graph);
 
   if (command.function === "addNode") {
-    const toolbox = createToolbox(PLUGINS);
+    const toolbox = createToolbox();
     return graph.addNode(toolbox[command.args.signature]);
   } else if (command.function === "addEdge") {
     const { anchorMap } = llmGraph;
