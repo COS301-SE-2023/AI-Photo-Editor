@@ -54,6 +54,12 @@ const blixCommandParams: Record<string, () => any> = {
       layout: project?.layout.saveLayout(),
     };
   },
+  "blix.graphs.create": () => {
+    const project = get(projectsStore).activeProject;
+    return {
+      projectId: project?.id,
+    };
+  },
 };
 
 export const commandStore = createCommandStore();

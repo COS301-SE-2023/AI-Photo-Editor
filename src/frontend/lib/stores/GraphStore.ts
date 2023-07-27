@@ -188,4 +188,7 @@ export const graphMall = new GraphMall();
 /**
  * Writable store used to house the panel that house the last used graph.
  */
-export const focusedGraphStore = writable<number>(-1);
+export const focusedGraphStore = writable<{ panelId: number; graphUUID: GraphUUID }>({
+  panelId: -1,
+  graphUUID: "",
+});

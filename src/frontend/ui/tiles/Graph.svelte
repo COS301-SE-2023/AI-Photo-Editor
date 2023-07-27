@@ -13,11 +13,16 @@
   import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";
   import { mediaStore } from "../../lib/stores/MediaStore";
+  import { commandStore } from "../../lib/stores/CommandStore";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
   export let panelId = Math.round(10000000.0 * Math.random());
+
+  let graphIds = projectsStore.activeProjectGraphIds;
+  let graphId = $graphIds[0];
+
   /**
    * When a new panel is focussed on (the panel is clicked),
    * the focusedPanelStore is updated through Panel.svelte. If the panel clicked is the panel
@@ -28,7 +33,7 @@
    */
   const unsubscribe = focusedPanelStore.subscribe((state) => {
     if (panelId === state) {
-      focusedGraphStore.set(panelId);
+      focusedGraphStore.set({ panelId: panelId, graphUUID: graphId });
     }
   });
 
@@ -36,14 +41,9 @@
     unsubscribe();
   });
 
-  let graphIds = projectsStore.activeProjectGraphIds;
-  // let graphIds = graphMall.getAllGraphUUIDsReactive();
-  let graphId = $graphIds[0];
-
   let thisGraphStore: Readable<GraphStore | null>;
   let graphNodes: Readable<GraphNode[]>;
   let graphEdges: Readable<GraphEdge[]>;
-
   let graphData: any;
 
   // Svelvet graph data
@@ -170,7 +170,7 @@
 
 <div class="hoverElements">
   <div class="mr-2 inline-block h-[10px] w-[10px]">
-    {#if panelId === $focusedGraphStore}
+    {#if panelId === $focusedGraphStore.panelId}
       <div
         transition:fade="{{ duration: 300 }}"
         class="z-1000000 h-full w-full rounded-full border-[1px] border-rose-700 bg-rose-500"
@@ -182,6 +182,20 @@
       <option value="{id}">{id.slice(0, 8)}</option>
     {/each}
   </select>
+
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke-width="1.5"
+    stroke="currentColor"
+    class="mb-2 inline-block h-6 w-6 rounded-md stroke-zinc-200 hover:bg-zinc-700"
+    on:click="{() => commandStore.runCommand('blix.graphs.create')}"
+    on:keydown="{null}"
+  >
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+  </svg>
+
   <!-- <button style:float="right" on:click={addRandomConn}>Add random conn</button> -->
   <!-- <button style:float="right" on:click={clearEdges}>Clear edges</button> -->
 </div>
