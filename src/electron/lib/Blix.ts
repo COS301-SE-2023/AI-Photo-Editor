@@ -57,7 +57,7 @@ export class Blix {
     this._pluginManager = new PluginManager(this);
     await this._pluginManager.loadBasePlugins();
 
-    this._graphManager = new CoreGraphManager(mainWindow, this._toolboxRegistry);
+    this._graphManager = new CoreGraphManager();
     this._projectManager = new ProjectManager(mainWindow);
 
     this.initSubscribers();

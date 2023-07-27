@@ -1,9 +1,16 @@
 <script lang="ts">
   import { projectsStore } from "@frontend/lib/stores/ProjectStore";
+  import Shortcuts from "../utils/Shortcuts.svelte";
 
   function createProject() {
     projectsStore.createProject();
   }
+
+  const shortcuts = {
+    "blix.projects.newProject": () => {
+      createProject();
+    },
+  };
 
   // TODO: Fix when shortcuts is fixed
   // registerShortcuts({
@@ -52,6 +59,8 @@
     </svg>
   </div>
 </div>
+
+<Shortcuts shortcuts="{shortcuts}" />
 
 <!-- <Shortcuts {shortcuts} /> -->
 

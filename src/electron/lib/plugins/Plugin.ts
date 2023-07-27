@@ -112,7 +112,7 @@ class PluginContext {
   }
 }
 
-class NodePluginContext extends PluginContext {
+export class NodePluginContext extends PluginContext {
   private _nodeBuilder!: NodeBuilder;
   constructor() {
     super();

@@ -30,6 +30,7 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
   async sendPrompt(prompt: string, id: UUID) {
     this.blix.sendInformationMessage(prompt);
     this.blix.sendInformationMessage(id);
-    this.blix.aiManager.sendPrompt(prompt, id);
+    const res = await this.blix.aiManager.sendPrompt(prompt, id);
+    this.blix.sendWarnMessage(JSON.stringify(res));
   }
 }

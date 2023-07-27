@@ -17,42 +17,17 @@ import type { QueryResponse } from "../../../shared/types";
 
 export class CoreGraphManager {
   private _graphs: { [id: UUID]: CoreGraph };
-  private _mainWindow: MainWindow;
   private _subscribers: { [key: UUID]: CoreGraphSubscriber<any>[] };
-  private _toolbox: ToolboxRegistry;
-  private _importer: CoreGraphImporter;
 
-  constructor(mainWindow: MainWindow, toolbox: ToolboxRegistry) {
-    this._mainWindow = mainWindow;
+  constructor() {
     this._graphs = {};
     this._subscribers = {};
-    this._toolbox = toolbox;
-    this._importer = new CoreGraphImporter(this._toolbox);
-    // Test send dummy graph to frontend
-    this.testingSendToClient();
   }
 
-  testingSendToClient() {
-    this.createGraph(); // TODO: REMOVE; This is just for testing
-    this.createGraph();
-    this.createGraph();
-    this.createGraph();
-
-    // There currently isn't proper implementation to map the CoreGraph to a
-    // UIGraph with the frontend nodes and anchors. Sorry that I didn't do this,
-    // not sure if Jake can help with this cause he made the CoreGraph
-    // setTimeout(() => {
-    //   setInterval(() => {
-    //     if (this._mainWindow)
-    //       this._mainWindow?.apis.clientGraphApi.graphChanged(ids[0], { uuid: ids[0] } as UIGraph);
-    //   }, 5000);
-    // }, 5000);
-  }
-
-  importGraph(format: string, data: GraphToJSON | string) {
-    const graph: CoreGraph = this._importer.import(format, data);
-    this._graphs[graph.uuid] = graph;
-    return graph; // For testing purposes, dont know what to do with this yet
+  addGraph(coreGraph: CoreGraph) {
+    if (coreGraph) {
+      this._graphs[coreGraph.uuid] = coreGraph;
+    }
   }
 
   addNode(

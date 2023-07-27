@@ -100,6 +100,7 @@ class ShortcutStore {
     "blix.contextMenu.scrollDown": ["ctrl+[KeyJ]"],
     "blix.contextMenu.scrollUp": ["ctrl+[KeyK]"],
     "blix.contextMenu.selectItem": ["[Enter]"],
+    "blix.projects.newProject": ["meta+[KeyN]", "ctrl+[KeyN]"],
   });
 
   public addActionShortcut(action: ShortcutAction, combo: ShortcutCombo) {

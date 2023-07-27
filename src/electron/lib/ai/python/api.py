@@ -1,56 +1,61 @@
+import socket
 import json
 import sys
-import os
-from models.gpt import GPT
-from models.functions.graphFunc import Functions
-from strategies.base import BASE
-    
-
-# Get the parent directory
-parent_dir = os.path.dirname(os.path.realpath(__file__))
-
-# Add the parent directory to sys.path
-sys.path.append(parent_dir)
-
-
 
 class API:
-    """
-    Provides an interface for the AI agent to communicate with the electron app
+    def send(self, data: dict):
+        raise NotImplementedError
 
-    attributes:
-        commands - the communication strategy for the interface
-        agent - the AI agent that uses a model
-    methods:
-        sendPrompt(body) - sends the user prompt to the AI agent
-    
-    """
+    def receive(self):
+        raise NotImplementedError
 
-    logs = []
+class SocketAPI(API):
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.socket = None
 
-    # You can swap this out for a different strategy
-    commands = BASE()
+    def connect(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((self.host, self.port))
 
-    def __init__(self):
-        self.agent = GPT(self)
+    def send(self, data):
+        self.socket.sendall(data.encode())
 
-    # Pass user prompt input to AI agent
-    def sendPrompt(self, body):
-        self.agent.sendPrompt(body)
+    def receive(self):
+        raise NotImplementedError
 
-    def hello(self):
-        print("hello")
+    def disconnect(self):
+        self.socket.close()
 
+class StdioAPI(API):
+    def send(self, data):
+        if isinstance(data, dict):
+            data = json.dumps(data)
 
-# try:
-api = API()
-object = api.commands.receive()
-api.sendPrompt(object)
-# except Exception as e:
-    # print(e)
+        sys.stdout.write(data)
+        sys.stdout.flush()
 
+    def receive(self):
+        data = ""
+        for line in sys.stdin:
+            if(line == "end of transmission\n"):
+                break
+            data += line
 
-# output: {
-#     "commands" : Functions.commands,
-#     "response" : temp
-# }
+        return data
+
+# ========== API Config ==========
+
+api = None
+
+def set_api(a: API):
+    global api
+    api = a
+
+def get_api() -> API:
+    global api
+    if not api:
+        api = StdioAPI()
+
+    return api
