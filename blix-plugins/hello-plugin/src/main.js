@@ -30,6 +30,7 @@ const nodes = {
     }
     ,"Jake": (context) => {
         nodeBuilder = context.instantiate("hello-plugin","Jake");
+        nodeBuilder.setTitle("Jake");
         nodeBuilder.setDescription("This is currently a useless node that does nothing.");
 
     }

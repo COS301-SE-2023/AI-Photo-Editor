@@ -1,11 +1,11 @@
-import Main from "electron/main";
+import logger from "../../utils/logger";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
 import { CoreGraph } from "./CoreGraph";
 import { CoreGraphSubscriber } from "./CoreGraphInteractors";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphImporter } from "./CoreGraphImporter";
-import { CoreGraphExporter, type GraphToJSON } from "./CoreGraphExporter";
+import { type GraphToJSON } from "./CoreGraphExporter";
 import { NodeInstance } from "../registries/ToolboxRegistry";
 import { Blix } from "../Blix";
 import type { QueryResponse } from "../../../shared/types";
@@ -17,27 +17,23 @@ import type { QueryResponse } from "../../../shared/types";
 
 export class CoreGraphManager {
   private _graphs: { [id: UUID]: CoreGraph };
-  private _mainWindow: MainWindow;
   private _subscribers: { [key: UUID]: CoreGraphSubscriber<any>[] };
-  private _toolbox: ToolboxRegistry;
-  private _importer: CoreGraphImporter;
 
-  constructor(mainWindow: MainWindow, toolbox: ToolboxRegistry) {
-    this._mainWindow = mainWindow;
+  constructor() {
     this._graphs = {};
     this._subscribers = {};
-    this._toolbox = toolbox;
-    this._importer = new CoreGraphImporter(this._toolbox);
-    // Test send dummy graph to frontend
   }
 
-  importGraph(format: string, data: GraphToJSON | string) {
-    const graph: CoreGraph = this._importer.import(format, data);
-    this._graphs[graph.uuid] = graph;
-    return graph; // For testing purposes, dont know what to do with this yet
+  addGraph(coreGraph: CoreGraph) {
+    if (coreGraph) {
+      this._graphs[coreGraph.uuid] = coreGraph;
+    }
   }
 
-  addNode(graphUUID: UUID, node: NodeInstance): QueryResponse<{ nodeId: UUID }> {
+  addNode(
+    graphUUID: UUID,
+    node: NodeInstance
+  ): QueryResponse<{ nodeId: UUID; inputs: string[]; outputs: string[] }> {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };
     const res = this._graphs[graphUUID].addNode(node);
@@ -52,6 +48,7 @@ export class CoreGraphManager {
     const res = this._graphs[graphUUID].addEdge(anchorA, anchorB);
 
     if (res.status === "success") {
+      // console.log("Pandas print statement")
       this.onGraphUpdated(graphUUID);
     }
 

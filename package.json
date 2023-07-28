@@ -59,7 +59,8 @@
     "lint": "npm-run-all -s lint:electron lint:svelte",
     "prepublishOnly": "npm-run-all -s test lint",
     "preversion": "npm-run-all -s lint format",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "profile:llm": "npm run build:electron:dev && node build/electron/lib/ai/ai.profiler.js"
   },
   "lint-staged": {
     "src/electron/**/*.{js,ts}": "eslint -c eslint.electron.json",

@@ -24,7 +24,6 @@ export async function initAPIs() {
   exposeWindowApis();
   window.apis = await bindMainApis();
 }
-
 /**
  * Bind the main process APIs to the window.
  * If a new main process API is created then add it to this method.

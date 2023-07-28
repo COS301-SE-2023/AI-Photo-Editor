@@ -13,7 +13,7 @@ import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
 import { AiManager } from "./ai/AiManager";
 import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
-
+import { testStuffies } from "./core-graph/CoreGraphTesting";
 // Encapsulates the backend representation for
 // the entire running Blix application
 export class Blix {
@@ -63,7 +63,7 @@ export class Blix {
       logger.info("Result: ", input[0]);
     });
 
-    tempNodeBuilder.addInput("Number", "in", "In");
+    tempNodeBuilder.addInput("", "in", "In");
     tempNodeBuilder.setUI(tempUIBuilder);
     this._toolboxRegistry.addInstance(tempNodeBuilder.build);
 
@@ -76,8 +76,7 @@ export class Blix {
     this._pluginManager = new PluginManager(this);
     await this._pluginManager.loadBasePlugins();
 
-    this._graphManager = new CoreGraphManager(mainWindow, this._toolboxRegistry);
-    // this._aiManager = new AiManager(mainWindow);
+    this._graphManager = new CoreGraphManager();
     this._projectManager = new ProjectManager(mainWindow);
 
     this.initSubscribers();
@@ -96,6 +95,8 @@ export class Blix {
 
     //   this._graphManager.addNode(randId, randomNode);
     // }, 3000);
+
+    this._aiManager = new AiManager(this.toolbox, this._graphManager);
   }
 
   private initSubscribers() {

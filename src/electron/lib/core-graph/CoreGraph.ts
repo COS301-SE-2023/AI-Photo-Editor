@@ -138,7 +138,9 @@ export class CoreGraph extends UniqueEntity {
   }
 
   // We need to pass in node name and plugin name
-  public addNode(node: NodeInstance): QueryResponse<{ nodeId: UUID }> {
+  public addNode(
+    node: NodeInstance
+  ): QueryResponse<{ nodeId: UUID; inputs: string[]; outputs: string[] }> {
     try {
       // Create New Node
       const n: Node = new Node(node.name, node.plugin, node.inputs, node.outputs);
@@ -153,31 +155,53 @@ export class CoreGraph extends UniqueEntity {
       // TODO: Check if node is an output node and add it to the outputNode list
 
       // console.log(QueryResponseStatus.success)
-      return { status: "success", data: { nodeId: n._uuid } };
+      const anchors: AiAnchors = n.returnAnchors();
+      return {
+        status: "success",
+        message: "Node added succesfully",
+        data: { nodeId: n._uuid, inputs: anchors.inputAnchors, outputs: anchors.outputAnchors },
+      };
     } catch (error) {
       return { status: "error", message: error as string };
     }
     // TODO: Add Node Styling
   }
 
-  public addEdge(anchorA: UUID, anchorB: UUID): QueryResponse<{ edgeId: UUID }> {
-    // Edge can start either from an output or input anchor
-    const ancFrom =
-      this.anchors[anchorA].ioType === AnchorIO.output
-        ? this.anchors[anchorA]
-        : this.anchors[anchorB];
-    const ancTo =
-      this.anchors[anchorB].ioType === AnchorIO.input
-        ? this.anchors[anchorB]
-        : this.anchors[anchorA];
+  public addEdge(anchorIdA: UUID, anchorIdB: UUID): QueryResponse<{ edgeId: UUID }> {
+    const anchorA = this.anchors[anchorIdA];
+    const anchorB = this.anchors[anchorIdB];
 
-    // Edge must flow from output anchor to input anchor
-    if (ancFrom.ioType !== AnchorIO.output || ancTo.ioType !== AnchorIO.input) {
+    if (!(anchorA || anchorB)) {
       return {
         status: "error",
-        message: "Edge must flow between 2 different anchors",
+        message: `Both anchors does not exist`,
       };
     }
+
+    if (!anchorA) {
+      // Data flowing through edge must be of same type for both anchors
+      return {
+        status: "error",
+        message: `AnchorA does not exist`,
+      };
+    }
+
+    if (!anchorB) {
+      return {
+        status: "error",
+        message: `AnchorB does not exist`,
+      };
+    }
+
+    if (anchorA.ioType === AnchorIO.output && anchorB.ioType === AnchorIO.output) {
+      return {
+        status: "error",
+        message: "Edge cannot be connected from one output to another output",
+      };
+    }
+
+    const ancFrom = anchorA.ioType === AnchorIO.output ? anchorA : anchorB;
+    const ancTo = anchorB.ioType === AnchorIO.input ? anchorB : anchorA;
 
     // Data flowing through edge must be of same type for both anchors
     if (!checkEdgeDataTypesCompatible(ancFrom.type, ancTo.type)) {
@@ -187,12 +211,10 @@ export class CoreGraph extends UniqueEntity {
       };
     }
 
-    // Check for cycles
     if (this.checkForCycles(ancFrom, ancTo)) {
-      return { status: "error", message: "Edge cannot create a cycle" };
+      return { status: "error", message: "Edge creates a cycle" };
     }
 
-    // Check for duplicate edgeDest
     if (this.checkForDuplicateEdges(ancFrom, ancTo)) {
       return { status: "error", message: "Edge already exists" };
     }
@@ -204,7 +226,7 @@ export class CoreGraph extends UniqueEntity {
     if (!(ancFrom.uuid in this.edgeSrc)) this.edgeSrc[ancFrom.uuid] = [];
     this.edgeSrc[ancFrom.uuid].push(ancTo.uuid);
 
-    return { status: "success", data: { edgeId: edge._uuid } };
+    return { status: "success", message: "Edge added succesfully", data: { edgeId: edge._uuid } };
   }
 
   public checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
@@ -357,6 +379,11 @@ export class CoreGraph extends UniqueEntity {
   }
 }
 
+interface AiAnchors {
+  inputAnchors: string[];
+  outputAnchors: string[];
+}
+
 // This Node representation effectively 'stands-in'
 // as a reference to the plugin's functional implementation.
 // When we interpret the graph we dereference back to the plugin
@@ -387,6 +414,20 @@ export class Node extends UniqueEntity {
       const anc = new Anchor(this, AnchorIO.output, anchor.id, anchor.type, anchor.displayName);
       this.anchors[anc.uuid] = anc;
     });
+  }
+
+  public returnAnchors(): AiAnchors {
+    const inputAnchors: string[] = [];
+    const outputAnchors: string[] = [];
+    for (const anchor in this.anchors) {
+      if (!this.anchors.hasOwnProperty(anchor)) continue;
+      if (this.anchors[anchor].ioType === AnchorIO.input) {
+        inputAnchors.push(anchor);
+      } else {
+        outputAnchors.push(anchor);
+      }
+    }
+    return { inputAnchors, outputAnchors };
   }
 
   public setStyling(styling: NodeStyling) {
@@ -516,4 +557,16 @@ class ReducedAnchor {
 export class NodeOutToNodeIn implements GraphRepresentation {
   // TODO
   constructor(public graphId: UUID) {}
+}
+
+// ==================================================================
+// Helper Methods
+// ==================================================================
+
+function formatIds(ids: string[], shortIds: boolean) {
+  const filteredIds = ids.filter((id) => id);
+  const formattedIds = filteredIds.map((id) => {
+    return shortIds ? id.slice(0, 6) : id;
+  });
+  return formattedIds.join(", ");
 }
