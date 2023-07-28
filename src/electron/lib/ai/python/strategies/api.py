@@ -54,9 +54,6 @@ def receive():
 
 
 
-with open("log.txt", "w") as f:
-    f.write(receive())
-
 # data = receive()
 sys.stdout.write()
 sys.stdout.flush()

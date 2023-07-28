@@ -63,7 +63,7 @@ export class Blix {
       logger.info("Result: ", input[0]);
     });
 
-    tempNodeBuilder.addInput("Number", "in", "In");
+    tempNodeBuilder.addInput("", "in", "In");
     tempNodeBuilder.setUI(tempUIBuilder);
     this._toolboxRegistry.addInstance(tempNodeBuilder.build);
 

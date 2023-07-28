@@ -17,7 +17,9 @@ import type { Response, ResponseFunctions } from "./ai-cookbook";
 /**
  *
  * Manages ai by storing context and handling prompt input
- * @param mainWindow Main window of blix application
+ * @param toolbox This is the blix toolbox registry that contains all the nodes
+ * @param graphManager This is the graph manager that manages the current graph
+ * @param childProcess This is the child process that runs the python script
  *
  * */
 export class AiManager {
@@ -47,6 +49,7 @@ export class AiManager {
 
   pluginContext() {
     const pluginNodes: string[] = [];
+    // console.log(this.toolboxRegistry)
 
     for (const index in this.toolboxRegistry.getRegistry()) {
       if (!this.toolboxRegistry.hasOwnProperty(index)) {

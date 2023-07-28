@@ -6,7 +6,7 @@ import {
   type LLMGraph,
 } from "../../lib/core-graph/CoreGraphExporter";
 import { NodeInstance } from "../../lib/registries/ToolboxRegistry";
-import { NodeSignature } from "../../../shared/ui/ToolboxTypes";
+import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { QueryResponse } from "../../../shared/types";
 

@@ -28,7 +28,7 @@ class GPT:
             model="gpt-3.5-turbo-0613",
             # verbose=True,
             debug=True,
-            max_iterations=10,
+            max_iterations=20,
         )
 
         prompt = generic.prompt_template.format(
