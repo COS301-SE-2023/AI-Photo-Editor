@@ -42,6 +42,16 @@
 
     return colour as CSSColorString;
   }
+
+  async function nodeClicked(e: CustomEvent) {
+    if (e.detail.e.button === 2) {
+      console.log("DELETE NODE EVENT");
+
+      const [_2, ...nodeUUIDParts] = e.detail.node.id.split("_");
+      const nodeUUID = nodeUUIDParts.join("_");
+      await window.apis.graphApi.removeNode(graphId, nodeUUID);
+    }
+  }
 </script>
 
 {#if svelvetNodeId !== ""}
@@ -56,6 +66,7 @@ height="{graphNode.dims.h}" -->
     borderColor="#ffffff"
     borderWidth="{3}"
     borderRadius="{10}"
+    on:nodeClicked="{nodeClicked}"
   >
     <div class="node">
       <div class="header">

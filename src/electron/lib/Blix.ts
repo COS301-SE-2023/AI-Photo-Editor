@@ -67,9 +67,10 @@ export class Blix {
     tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
       logger.info("Result: ", input);
       mainWindow.apis.mediaClientApi.outputChanged(input);
+      return input;
     });
 
-    tempNodeBuilder.addInput("Number", "in", "In");
+    tempNodeBuilder.addInput("", "in", "In");
     tempNodeBuilder.setUI(tempUIBuilder);
     this._toolboxRegistry.addInstance(tempNodeBuilder.build);
 
