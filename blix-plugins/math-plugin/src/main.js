@@ -107,14 +107,16 @@ const nodes ={
         nodeBuilder.setTitle("Add");
         nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output");
 
-        nodeBuilder.define((data) => {
+        nodeBuilder.define((input, uiInput, from) => {
+          console.log(input);
           return {
-            "res": data.input[0] + data.input[0],
-          }[data.from];
+            "res": input["num1"] + input["num2"],
+          };
 
           });
           
-       nodeBuilder.addInput("Number", "num","Num");
+       nodeBuilder.addInput("Number", "num1","Num");
+       nodeBuilder.addInput("Number", "num2","Num");
        nodeBuilder.addOutput("Number", "res","Result");
     },
     // TO BE DEVELOPED   

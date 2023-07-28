@@ -67,12 +67,12 @@ export class Blix {
     // tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
     tempNodeBuilder.define(
       (
-        inputAnchors: { [key: string]: any },
+        mediaOutput: { [key: string]: any },
         inputUI: { [key: string]: any },
         requiredOutputs: string[]
       ) => {
-        logger.info("Result: ", inputAnchors.in);
-        mainWindow.apis.mediaClientApi.outputChanged(inputAnchors.in as MediaOutput);
+        logger.info("Result: ", mediaOutput);
+        mainWindow.apis.mediaClientApi.outputChanged(mediaOutput as MediaOutput);
         return {};
       }
     );

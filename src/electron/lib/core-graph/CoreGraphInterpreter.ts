@@ -13,6 +13,11 @@ Assumptions:
   - Every node returns an array of output values
 */
 
+type MediaValue = {
+  content: any;
+  dataType: string;
+};
+
 export class CoreGraphInterpreter {
   private toolboxRegistry: ToolboxRegistry;
   // private memo: { [key: string]: any };
@@ -133,23 +138,44 @@ export class CoreGraphInterpreter {
       throw err;
     });
 
-    // Construct the media output to get passed to the frontend
-    const mediaOutput: MediaOutput = {
-      content: inputs[0] || null,
-      dataType: "Number",
-      outputId: "TODO",
-      outputNodeUUID: curr.uuid,
-      graphUUID: graph.uuid,
-    };
+    if (curr.getSignature === "blix.output") {
+      // Output node will always have one input
+      const mediaOutput: MediaOutput = {
+        content: inputs[0] ? Object.values(inputs[0])[0] : null,
+        dataType: "Number",
+        outputId: "TODO",
+        outputNodeUUID: curr.uuid,
+        graphUUID: graph.uuid,
+      };
 
-    const output: { [key: string]: T } = await Promise.resolve(
-      this.toolboxRegistry
-        .getNodeInstance(curr.getSignature)
-        // OLD: .func({ input: mediaOutput, from: anchorIn.anchorId })
-        // TODO: Move to new system
-        .func({}, {}, [])
-    );
+      const output: { [key: string]: T } = await Promise.resolve(
+        this.toolboxRegistry
+          .getNodeInstance(curr.getSignature)
+          // OLD: .func({ input: mediaOutput, from: anchorIn.anchorId })
+          // TODO: Move to new system
+          .func(mediaOutput, {}, [])
+      );
 
-    return output;
+      return output;
+    } else {
+      const inputDict: { [key: string]: any } = {};
+
+      Object.values(curr.getAnchors).forEach((anchor, index) => {
+        if (index < inputs.length) {
+          inputDict[anchor.anchorId] =
+            inputs[index][graph.getAnchors[graph.getEdgeDest[anchor._uuid].getAnchorFrom].anchorId];
+        }
+      });
+
+      const output: { [key: string]: T } = await Promise.resolve(
+        this.toolboxRegistry
+          .getNodeInstance(curr.getSignature)
+          // OLD: .func({ input: mediaOutput, from: anchorIn.anchorId })
+          // TODO: Move to new system
+          .func(inputDict, {}, [anchorIn.anchorId])
+      );
+
+      return output;
+    }
   }
 }
