@@ -1,4 +1,4 @@
-import { bindMainApi, exposeWindowApi, setIpcBindingTimeout } from "electron-affinity/window";
+import { bindMainApi, exposeWindowApi } from "electron-affinity/window";
 import type { AwaitedType } from "electron-affinity/window";
 
 // Main APIs
@@ -21,11 +21,9 @@ import { MediaClientApi } from "./apis/MediaClientApi";
  * process and binding the main process IPC APIs to the window.
  */
 export async function initAPIs() {
-  setIpcBindingTimeout(100000);
   exposeWindowApis();
   window.apis = await bindMainApis();
 }
-
 /**
  * Bind the main process APIs to the window.
  * If a new main process API is created then add it to this method.

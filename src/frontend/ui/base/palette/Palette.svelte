@@ -4,7 +4,7 @@
   import type { ICommand } from "../../../../shared/types/index";
   import { onDestroy } from "svelte";
   import Shortcuts from "../../utils/Shortcuts.svelte";
-  import { graphMall } from "lib/stores/GraphStore";
+  import { graphMall } from "../../../lib/stores/GraphStore";
   let showPalette = false;
   let expanded = true;
   let inputElement: HTMLInputElement;

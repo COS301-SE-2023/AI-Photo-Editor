@@ -8,7 +8,6 @@
   const dispatch = createEventDispatcher();
 
   export let panelId: number;
-  export let graphId: string;
   export let node: GraphNode;
 
   $: svelvetNodeId = `${panelId}_${node.uuid}`;
