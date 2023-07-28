@@ -16,6 +16,12 @@ export interface INode {
   ui: NodeUI | null;
 }
 
+export type UIValue = unknown;
+
+export interface INodeUIInputs {
+  inputs: { [key: string]: UIValue };
+}
+
 export type QueryResponse<S = unknown, E = unknown> =
   | {
       status: "error";

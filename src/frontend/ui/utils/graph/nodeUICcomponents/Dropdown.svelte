@@ -1,6 +1,6 @@
 <script lang="ts">
   import { writable } from "svelte/store";
-  import { AnchorValueStore } from "@shared/ui/UIGraph";
+  import { UIValueStore } from "@shared/ui/UIGraph";
 
   export let params: any[];
   console.log(params);
@@ -8,7 +8,7 @@
   let items: { [key: string]: any } = params[0];
   let defaultItem: string = params[1];
 
-  export let inputStore: AnchorValueStore;
+  export let inputStore: UIValueStore;
   if (!inputStore.inputs["dropdown"]) {
     if (!defaultItem) defaultItem = Object.keys(items)[0];
     inputStore.inputs["dropdown"] = writable(items[defaultItem]);

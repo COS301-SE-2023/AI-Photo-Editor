@@ -1,12 +1,12 @@
 <script lang="ts">
   import { NodeUILeaf, type NodeUI } from "@shared/ui/NodeUITypes";
-  import type { AnchorValueStore } from "@shared/ui/UIGraph";
+  import type { UIValueStore } from "@shared/ui/UIGraph";
   import NodeUiComponent from "./NodeUIComponent.svelte";
   // import { writable } from "svelte/store";
   // import { ColorPicker, RadioGroup, type CSSColorString } from "blix_svelvet";
 
   export let ui: NodeUI | null = null;
-  export let inputStore: AnchorValueStore;
+  export let inputStore: UIValueStore;
 
   // const colorPicker = writable("red" as CSSColorString);
   // const radio = writable("a");
@@ -24,13 +24,13 @@
     <ul>
       {#each ui.params as child}
         <li class="component">
-          <svelte:self {inputStore} ui="{child}" />
+          <svelte:self inputStore="{inputStore}" ui="{child}" />
         </li>
       {/each}
     </ul>
   {:else if ui.type === "leaf"}
     <p>
-      <NodeUiComponent {inputStore} leafUI="{toLeafRepresentation(ui)}" />
+      <NodeUiComponent inputStore="{inputStore}" leafUI="{toLeafRepresentation(ui)}" />
     </p>
   {/if}
 {/if}

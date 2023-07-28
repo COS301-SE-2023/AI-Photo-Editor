@@ -1,9 +1,9 @@
 <script lang="ts">
   import { writable } from "svelte/store";
   import { Slider } from "blix_svelvet";
-  import { AnchorValueStore } from "@shared/ui/UIGraph";
+  import { UIValueStore } from "@shared/ui/UIGraph";
 
-  export let inputStore: AnchorValueStore;
+  export let inputStore: UIValueStore;
   if (!inputStore.inputs["slider"]) inputStore.inputs["slider"] = writable(0);
 </script>
 

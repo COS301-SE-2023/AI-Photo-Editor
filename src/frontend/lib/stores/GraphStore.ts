@@ -1,4 +1,5 @@
 import type { AnchorUUID } from "@electron/lib/core-graph/CoreGraph";
+import type { INodeUIInputs } from "@shared/types";
 import type { NodeSignature } from "@shared/ui/ToolboxTypes";
 import {
   UIGraph,
@@ -70,6 +71,21 @@ export class GraphStore {
     const res = await window.apis.graphApi.addEdge(thisUUID, anchorA, anchorB);
 
     return res.status;
+  }
+
+  async updateUIInputs(nodeUUID: GraphNodeUUID) {
+    const thisUUID = get(this.graphStore).uuid;
+    const node = get(this.graphStore).nodes[nodeUUID];
+    const nodeInputs = node.inputUIValues;
+
+    // Extract values from stores
+    const payload: INodeUIInputs = { inputs: {} };
+
+    for (const input of Object.keys(nodeInputs.inputs)) {
+      payload.inputs[input] = get(nodeInputs.inputs[input]);
+    }
+
+    const res = await window.apis.graphApi.updateUIInputs(thisUUID, nodeUUID, payload);
   }
 
   async removeNode(nodeUUID: GraphNodeUUID) {

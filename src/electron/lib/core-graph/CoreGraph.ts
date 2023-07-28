@@ -11,7 +11,7 @@ import {
 import { get } from "http";
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
 import { type NodeSignature } from "@shared/ui/ToolboxTypes";
-import type { QueryResponse } from "../../../shared/types";
+import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
 
 // =========================================
 // Explicit types for type safety
@@ -48,6 +48,9 @@ export class CoreGraph extends UniqueEntity {
   //      to get all the edges that flow from a source anchor
   private outputNodes: string[];
 
+  // Maps a node UUID to a list of UI inputs
+  private uiInputs: { [key: UUID]: CoreNodeUIInputs };
+
   // private subscribers: CoreGraphSubscriber[];
   private static nodeTracker = 0;
   constructor() {
@@ -57,6 +60,7 @@ export class CoreGraph extends UniqueEntity {
     this.edgeDest = {};
     this.edgeSrc = {};
     this.outputNodes = [];
+    this.uiInputs = {};
     // this.nodeList = [];
   }
 
@@ -205,6 +209,12 @@ export class CoreGraph extends UniqueEntity {
     this.edgeSrc[ancFrom.uuid].push(ancTo.uuid);
 
     return { status: "success", data: { edgeId: edge._uuid } };
+  }
+
+  public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs): QueryResponse {
+    this.uiInputs[nodeUUID] = new CoreNodeUIInputs(nodeUIInputs);
+
+    return { status: "success" };
   }
 
   public checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
@@ -463,6 +473,13 @@ export class NodeStyling {
 
   get getSize() {
     return this.size;
+  }
+}
+
+export class CoreNodeUIInputs {
+  private readonly inputs: { [key: string]: UIValue };
+  constructor(nodeUIInpust: INodeUIInputs) {
+    this.inputs = nodeUIInpust.inputs;
   }
 }
 

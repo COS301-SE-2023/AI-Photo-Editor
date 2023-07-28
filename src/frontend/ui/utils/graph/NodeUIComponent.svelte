@@ -4,11 +4,11 @@
   import Slider from "./nodeUICcomponents/Slider.svelte";
   import ColorPicker from "./nodeUICcomponents/ColorPicker.svelte";
   import Knob from "./nodeUICcomponents/Knob.svelte";
-  import type { AnchorValueStore } from "@shared/ui/UIGraph";
+  import type { UIValueStore } from "@shared/ui/UIGraph";
   import Dropdown from "./nodeUICcomponents/Dropdown.svelte";
 
   export let leafUI: NodeUILeaf | null = null;
-  export let inputStore: AnchorValueStore;
+  export let inputStore: UIValueStore;
 
   console.log(leafUI);
 

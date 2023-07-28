@@ -8,7 +8,7 @@ import { CoreGraphImporter } from "./CoreGraphImporter";
 import { CoreGraphExporter, type GraphToJSON } from "./CoreGraphExporter";
 import { NodeInstance } from "../registries/ToolboxRegistry";
 import { Blix } from "../Blix";
-import type { QueryResponse } from "../../../shared/types";
+import type { INodeUIInputs, QueryResponse } from "../../../shared/types";
 
 // This class stores all the graphs amongst all open projects
 // Projects index into this store at runtime to get their graphs
@@ -71,6 +71,15 @@ export class CoreGraphManager {
       return { status: "error", message: "Graph does not exist" };
     const res = this._graphs[graphUUID].removeEdge(anchorTo);
     if (res.status === "success") this.onGraphUpdated(graphUUID);
+    return res;
+  }
+
+  updateUIInputs(graphUUID: UUID, nodeUUID: UUID, nodeUIInputs: INodeUIInputs): QueryResponse {
+    if (this._graphs[graphUUID] === undefined)
+      return { status: "error", message: "Graph does not exist" };
+
+    const res = this._graphs[graphUUID].updateUIInputs(nodeUUID, nodeUIInputs);
+    // if (res.status === "success") this.onGraphUpdated(graphUUID);
     return res;
   }
 

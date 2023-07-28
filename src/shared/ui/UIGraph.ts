@@ -1,6 +1,7 @@
+import type { UIValue } from "@shared/types";
 import { type UUID } from "../../shared/utils/UniqueEntity";
 import { type NodeSignature } from "./ToolboxTypes";
-import { type Writable, writable, get } from "svelte/store";
+import { type Writable, writable } from "svelte/store";
 
 export type GraphUUID = UUID;
 export type GraphNodeUUID = UUID;
@@ -23,7 +24,7 @@ export class GraphNode {
 
   styling?: NodeStylingStore;
 
-  inputUIValues: AnchorValueStore;
+  inputUIValues: UIValueStore;
 
   // inAnchors: GraphAnchor[] = [];
   // outAnchors: GraphAnchor[] = [];
@@ -37,7 +38,7 @@ export class GraphNode {
       this.styling = new NodeStylingStore();
       this.styling.pos.set(pos);
     }
-    this.inputUIValues = new AnchorValueStore();
+    this.inputUIValues = new UIValueStore();
   }
 }
 
@@ -61,8 +62,8 @@ export class NodeStylingStore {
   height = writable<number>(0);
 }
 
-export class AnchorValueStore {
-  inputs: { [key: string]: Writable<any> } = {};
+export class UIValueStore {
+  inputs: { [key: string]: Writable<UIValue> } = {};
 }
 
 class GraphAnchor {
