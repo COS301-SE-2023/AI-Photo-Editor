@@ -2,8 +2,6 @@ from dotenv import load_dotenv
 from api import get_api
 from models.gpt import GPT
 import json
-import os
-
 load_dotenv()
 
 def main():

@@ -10,8 +10,17 @@ import {
 import { join } from "path";
 import { object } from "zod";
 import logger from "../../utils/logger";
-import { app } from "electron";
+import { ChildProcessWithoutNullStreams } from "child_process";
 import { readdirSync } from "fs";
+import {
+  ResponseFunctions,
+  addEdge,
+  addNode,
+  cookUnsafeResponse,
+  removeEdge,
+  removeNode,
+} from "./ai-cookbook";
+import { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
 
 // ==================================================================
 // Config
@@ -20,72 +29,114 @@ import { readdirSync } from "fs";
 const PLUGIN_DIRECTORY = join(__dirname, "../../../../blix-plugins");
 const PLUGINS = readdirSync(PLUGIN_DIRECTORY);
 const PYTHON_SCRIPT_PATH = join(__dirname, "../../../../src/electron/lib/ai/python/main.py");
-const SYSTEM_PROMPT = `System: When asked for help or to perform a task you will act as an AI assistant
-for node-based AI photo editing application. Your main role is to help the user
-manipulate a node based graph. If a question is asked that does not involve the
-graph or image editing then remind the user of your main role. Don't make
-assumptions about what values to plug into functions. Ask for clarification if a
-user request is ambiguous. Outputs of nodes can only be connected to inputs of
-other nodes. Do not try to connect inputs to inputs or outputs to outputs.
 
-System: Your very final response should be a one sentence summary without any
-JSON.`;
+class Profiler {
+  toolbox: Record<string, NodeInstance>;
+  coreGraph: CoreGraph;
+  llmToolbox: LLMToolbox;
+  pythonProcess: ChildProcessWithoutNullStreams;
+  llmGraph: LLMGraph;
 
-function main() {
-  const prompt = "Add a brightness and hue node. Then connect the hue to the brightness node";
-  execute(prompt, true);
-}
+  constructor() {
+    this.toolbox = createToolbox();
+    this.coreGraph = createGraph();
+    this.llmToolbox = convertToolbox(this.toolbox);
+    this.pythonProcess = spawn("python3", [PYTHON_SCRIPT_PATH]);
+    this.llmGraph = convertGraph(this.coreGraph);
+  }
 
-main();
+  main() {
+    const prompt = "Add a brightness and hue node. Then connect the hue to the brightness node";
+    this.execute(prompt, false);
+  }
 
-// ==================================================================
-//	Main methods
-// ==================================================================
+  // ==================================================================
+  //	Main methods
+  // ==================================================================
 
-function execute(userPrompt: string, verbose = false) {
-  const pythonProcess = spawn("python3", [PYTHON_SCRIPT_PATH]);
-  const toolbox = createToolbox();
-  const llmToolbox = convertToolbox(toolbox);
-  const coreGraph = createGraph();
-  const llmGraph = convertGraph(coreGraph);
+  execute(userPrompt: string, verbose = false) {
+    let finalResponse = "";
 
-  const context = {
-    prompt: userPrompt,
-    toolbox: llmToolbox,
-    nodes: llmGraph.graph.nodes,
-    edges: llmGraph.graph.edges,
-  };
+    const context = {
+      prompt: userPrompt,
+      // toolbox : llmToolbox,
+      plugin: pluginContext(this.toolbox), // basically the plugins from toolbox
+      nodes: this.llmGraph.graph.nodes,
+      edges: this.llmGraph.graph.edges,
+    };
 
-  const data = JSON.stringify(context);
-  pythonProcess.stdin.write(`${data.trim()}\nend of transmission\n`);
+    const data = JSON.stringify(context);
+    this.pythonProcess.stdin.write(`${data}\nend of transmission\n`);
+    // console.log(":)")
 
-  pythonProcess.stdout.on("data", (buffer: Buffer) => {
-    const data = buffer.toString();
-    const command = JSON.parse(data) as LLMFunctions;
-    logger.info("Received from Python: ", command);
+    // Handle responses
+    this.pythonProcess.stdout.on("data", (buffer: Buffer) => {
+      const data = buffer.toString();
+      // console.log("Received from Python: ", data);
+      // console.log(this.coreGraph)
 
-    // console.log(data.toString());
-    if (!command.function) return;
-    const res = runCommandOnGraph(coreGraph, command);
-    // console.log(JSON.stringify(res));
+      try {
+        const res = cookUnsafeResponse(JSON.parse(data));
 
-    if (res.status === "success") {
-      pythonProcess.stdin.write(
-        `${JSON.stringify({
-          status: "success",
-          newGraph: convertGraph(coreGraph).graph,
-        })}\n ${SYSTEM_PROMPT}\nend of transmission\n`
-      );
-    } else {
-      pythonProcess.stdin.write(`${JSON.stringify(res)}\nend of transmission\n`);
+        if (res.type === "exit") {
+          logger.info("Response from python : ", res.message);
+          finalResponse = res.message;
+        } else if (res.type === "error") {
+          throw res.message;
+        } else if (res.type === "debug") {
+          // Do something with debugging info
+        } else if (res.type === "function") {
+          const operationRes = this.executeMagicWand(res, this.coreGraph.uuid);
+          const operationResStr = JSON.stringify(operationRes);
+
+          logger.info("Blix response: ", operationResStr);
+
+          this.pythonProcess.stdin.write(`${operationResStr}\n`);
+          this.pythonProcess.stdin.write("end of transmission\n");
+        }
+      } catch (error) {
+        // Something went horribly wrong
+        this.pythonProcess?.kill();
+        finalResponse = "Oops. Something went horribly wrong🫡The LLM is clearly a bot";
+        // console.log("Python script error: ", JSON.stringify(error));
+      }
+    });
+
+    // Handle errors
+    this.pythonProcess.stderr.on("data", (data: Buffer) => {
+      const result = data.toString();
+      // console.log("Error executing Python script: ", result);
+    });
+
+    // Handle process exit
+    this.pythonProcess.on("close", (data: Buffer) => {
+      const code = data.toString();
+      if (code == null) logger.warn(`Python script exited with code null`);
+      else logger.warn(`Python script exited with code ${code}`);
+    });
+  }
+
+  executeMagicWand(config: ResponseFunctions, graphId: string) {
+    const { name, args } = config;
+    const graphManager = new CoreGraphManager();
+    graphManager.addGraph(this.coreGraph);
+
+    if (name === "addNode") {
+      return addNode(graphManager, this.toolbox, graphId, args);
+    } else if (name === "removeNode") {
+      return removeNode(graphManager, graphId, args);
+    } else if (name === "addEdge") {
+      return addEdge(graphManager, graphId, args);
+    } else if (name === "removeEdge") {
+      return removeEdge(graphManager, graphId, args);
     }
-    // console.log(JSON.stringify(convertGraph(coreGraph).graph, null, 2));
-  });
 
-  pythonProcess.stderr.on("data", (buffer: Buffer) => {
-    const result = buffer.toString();
-    // console.log(result);
-  });
+    // It should never reach here
+    return {
+      status: "error",
+      message: "Something went wrong in magic wand",
+    };
+  }
 }
 
 // ==================================================================
@@ -122,16 +173,6 @@ function createToolbox() {
   return toolbox;
 }
 
-//  function  loadPlugins(paths : string[]) {
-//     paths.forEach((path) => {
-//       const plugins = readdirSync(path);
-
-//       plugins.forEach((plugin) => {
-//         this.loadPlugin(plugin, path);
-//       });
-//     });
-//   }
-
 function convertToolbox(toolbox: Record<string, NodeInstance>) {
   const convertedToolbox: LLMToolbox = {};
 
@@ -161,18 +202,17 @@ function createGraph() {
   return coreGraph;
 }
 
-function runCommandOnGraph(graph: CoreGraph, command: LLMFunctions) {
-  const llmGraph = convertGraph(graph);
+function pluginContext(toolbox: Record<string, NodeInstance>) {
+  const pluginNodes: string[] = [];
 
-  if (command.function === "addNode") {
-    const toolbox = createToolbox();
-    return graph.addNode(toolbox[command.args.signature]);
-  } else if (command.function === "addEdge") {
-    const { anchorMap } = llmGraph;
-    return graph.addEdge(anchorMap[command.args.output], anchorMap[command.args.input]);
+  for (const index in toolbox) {
+    if (index in toolbox && toolbox.hasOwnProperty(index)) {
+      const node: NodeInstance = toolbox[index];
+      pluginNodes.push(node.signature + ": " + node.description);
+    }
   }
 
-  return { status: "success" };
+  return pluginNodes;
 }
 
 // ==================================================================
@@ -189,30 +229,78 @@ type LLMToolbox = Record<
   }
 >;
 
-type LLMFunctions =
-  | {
-      function: "addNode";
-      args: {
-        signature: "string";
-      };
-    }
-  | {
-      function: "removeNode";
-      args: {
-        id: "string";
-      };
-    }
-  | {
-      function: "addEdge";
-      args: {
-        input: "string";
-        output: "string";
-      };
-    }
-  | {
-      function: "removeEdge";
-      args: {
-        input: "string";
-        output: "string";
-      };
-    };
+// ======================================================================
+// Execution
+// ======================================================================
+
+const profiler = new Profiler();
+profiler.main();
+
+// ======================================================================
+// Old Code
+// ======================================================================
+
+// this.pythonProcess.stdout.on("data", (buffer: Buffer) => {
+//   const data = buffer.toString();
+//   const command = JSON.parse(data) as LLMFunctions;
+//   logger.info("Received from Python: ", command);
+
+//   console.log(data.toString());
+//   if (!command.function) return;
+//   const res = runCommandOnGraph(this.coreGraph, command);
+//   // console.log(JSON.stringify(res));
+
+//   if (res.status === "success") {
+//     this.pythonProcess.stdin.write(
+//       `${JSON.stringify({
+//         status: "success",
+//         newGraph: convertGraph(this.coreGraph).graph,
+//       })}\n ${"REPLACE"}\nend of transmission\n`
+//     );
+//   } else {
+//     this.pythonProcess.stdin.write(`${JSON.stringify(res)}\nend of transmission\n`);
+//   }
+//   // console.log(JSON.stringify(convertGraph(coreGraph).graph, null, 2));
+// });
+
+// function runCommandOnGraph(graph: CoreGraph, command: LLMFunctions) {
+//   const llmGraph = convertGraph(graph);
+
+//   if (command.function === "addNode") {
+//     const toolbox = createToolbox();
+//     return graph.addNode(toolbox[command.args.signature]);
+//   } else if (command.function === "addEdge") {
+//     const { anchorMap } = llmGraph;
+//     return graph.addEdge(anchorMap[command.args.output], anchorMap[command.args.input]);
+//   }
+
+//   return { status: "success" };
+// }
+
+// type LLMFunctions =
+//   | {
+//       function: "addNode";
+//       args: {
+//         signature: "string";
+//       };
+//     }
+//   | {
+//       function: "removeNode";
+//       args: {
+//         id: "string";
+//       };
+//     }
+//   | {
+//       function: "addEdge";
+//       args: {
+//         input: "string";
+//         output: "string";
+//       };
+//     }
+//   | {
+//       function: "removeEdge";
+//       args: {
+//         input: "string";
+//         output: "string";
+//       };
+//     };

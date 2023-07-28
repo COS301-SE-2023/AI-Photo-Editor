@@ -14,8 +14,6 @@ import {
 import type { Response, ResponseFunctions } from "./ai-cookbook";
 // Refer to .env for api keys
 
-//  TODO : Provide the graph context that will be given to ai as context
-
 /**
  *
  * Manages ai by storing context and handling prompt input
@@ -87,7 +85,7 @@ export class AiManager {
     // Receive output from the Python script
     childProcess.stdout.on("data", (buffer: Buffer) => {
       const data = buffer.toString();
-      logger.info("Received from Python: ", data);
+      // console.log("Received from Python: ", data);
 
       try {
         const res = cookUnsafeResponse(JSON.parse(data));
@@ -134,7 +132,7 @@ export class AiManager {
     const { name, args } = config;
 
     if (name === "addNode") {
-      return addNode(this.graphManager, this.toolboxRegistry, graphId, args);
+      return addNode(this.graphManager, this.toolboxRegistry.getRegistry(), graphId, args);
     } else if (name === "removeNode") {
       return removeNode(this.graphManager, graphId, args);
     } else if (name === "addEdge") {

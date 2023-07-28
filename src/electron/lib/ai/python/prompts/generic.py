@@ -9,7 +9,7 @@ Each node has input and output anchors that are used to connect edges.
 Provided is the graph's nodes : 
 {nodes}
 
-Edges can only be connected from the output of one node with the inputs of another node. Thus no cycles are allowed
+Edges can only be connected from the output anchors of one node with the input anchors of another node, provided they are of the same type. Thus no cycles are allowed
 Additionally the following edges are provided :
 {edges}
 

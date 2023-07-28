@@ -5,10 +5,10 @@ import {
   LLMExportStrategy,
   type LLMGraph,
 } from "../../lib/core-graph/CoreGraphExporter";
-import { ToolboxRegistry } from "../../lib/registries/ToolboxRegistry";
+import { NodeInstance } from "../../lib/registries/ToolboxRegistry";
+import { NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { QueryResponse } from "../../../shared/types";
-import { error } from "console";
 
 // ==================================================================
 //  Zod Types
@@ -125,12 +125,12 @@ export function cookUnsafeResponse(data: any) {
 
 export function addNode(
   graphManager: CoreGraphManager,
-  toolboxRegistry: ToolboxRegistry,
+  registry: { [key: NodeSignature]: NodeInstance },
   graphId: UUID,
   args: AddNodeConfig["args"]
 ) {
   try {
-    const node = toolboxRegistry.getNodeInstance(args.signature);
+    const node = registry[args.signature];
     if (!node) return errorResponse("The provided signature is invalid :  node does not exist");
 
     const response = graphManager.addNode(graphId, node);
