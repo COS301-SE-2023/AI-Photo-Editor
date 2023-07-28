@@ -4,12 +4,12 @@
   import { type Readable } from "svelte/store";
   import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
-  import { projectsStore } from "lib/stores/ProjectStore";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import type { UUID } from "@shared/utils/UniqueEntity";
   import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
   import { tick } from "svelte";
-  import { focusedPanelStore } from "lib/PanelNode";
+  import { focusedPanelStore } from "../../lib/PanelNode";
   import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";
   import { mediaStore } from "../../lib/stores/MediaStore";
