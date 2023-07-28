@@ -1,5 +1,5 @@
 import { UniqueEntity } from "../../../shared/utils/UniqueEntity";
-import type { SharedProject, LayoutPanel } from "../../../shared/types";
+import type { SharedProject, LayoutPanel, SharedGraph } from "../../../shared/types";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { PathLike } from "fs";
 import type { GraphToJSON } from "../../lib/core-graph/CoreGraphExporter";

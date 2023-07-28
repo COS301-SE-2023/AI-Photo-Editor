@@ -1,4 +1,4 @@
-import { GraphEdge, GraphNode, NodeStylingStore, UIGraph } from "../../../shared/ui/UIGraph";
+import { GraphEdge, GraphNode, UIGraph } from "../../../shared/ui/UIGraph";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph, NodesAndEdgesGraph } from "./CoreGraph";
 

@@ -8,10 +8,13 @@ export type GraphEdgeUUID = UUID;
 export type GraphAnchorUUID = UUID;
 
 export class UIGraph {
+  public displayName;
   public nodes: { [key: GraphNodeUUID]: GraphNode } = {};
   public edges: { [key: GraphAnchorUUID]: GraphEdge } = {};
 
-  constructor(public uuid: GraphUUID) {}
+  constructor(public uuid: GraphUUID) {
+    this.displayName = "Graph-" + uuid.substring(0, 6);
+  }
 
   public updateNodes() {}
 }

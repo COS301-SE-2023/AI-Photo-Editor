@@ -1,7 +1,7 @@
 <script lang="ts">
   import { graphMall } from "@frontend/lib/stores/GraphStore";
   import { projectsStore } from "@frontend/lib/stores/ProjectStore";
-  import { toolboxStore } from "lib/stores/ToolboxStore";
+  import { toolboxStore } from "../../lib/stores/ToolboxStore";
   import { get } from "svelte/store";
 
   let graphIds = graphMall.getAllGraphUUIDsReactive();

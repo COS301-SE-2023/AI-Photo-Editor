@@ -25,7 +25,7 @@ type SaveProjectArgs = {
   projectPath?: string;
 };
 
-type CommandResponse =
+export type CommandResponse =
   | {
       success: true;
       message?: string;

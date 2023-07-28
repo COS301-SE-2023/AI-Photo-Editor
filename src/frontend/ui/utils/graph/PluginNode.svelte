@@ -1,7 +1,7 @@
 <script lang="ts">
   import { GraphNode, NodeStylingStore } from "@shared/ui/UIGraph";
   import { Anchor, DefaultAnchor, Node, type CSSColorString } from "blix_svelvet";
-  import { toolboxStore } from "lib/stores/ToolboxStore";
+  import { toolboxStore } from "../../../lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";
   import { createEventDispatcher } from "svelte";
 

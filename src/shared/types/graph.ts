@@ -1,4 +1,5 @@
 import type { NodeUI } from "@shared/ui/NodeUITypes";
+import type { GraphUUID } from "@shared/ui/UIGraph";
 
 export interface IAnchor {
   type: string;
@@ -27,3 +28,8 @@ export type QueryResponse<S = unknown, E = unknown> =
       message?: string;
       data?: S;
     };
+
+export interface SharedGraph {
+  uuid: GraphUUID;
+  displayName: string;
+}
