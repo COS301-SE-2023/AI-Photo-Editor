@@ -212,7 +212,7 @@ Projects can be permanently removed from your workspace as follows :
 
 Images can be added to the graph as input. This can be done using the input plugin : 
 \begin{itemize}
-  \item[\textbullet] Select the Image input node.
+  \item[\textbullet] Select the Image input node using the toolbox or the command palette.
   \item[\textbullet] Place the node in the tile you wish to add the image to.
   \item[\textbullet] Use the interface provided to import the image to the node.
   \item[\textbullet] Connect the image to the graph.
@@ -281,6 +281,7 @@ Blix ensures that every node in the graph is a plugin. This means that all node 
   \item[\textbullet] Plugin files are stored in the blix-plugins folder.
   \item[\textbullet] Users can create their own plugins and share them with other users.
   \item[\textbullet] Every property of the node is defined in the plugin file.
+  \item[\textbullet] The ai system uses all plugins, including your own!
 \end{itemize}
 
 \textbf{Creating plugins}
@@ -293,5 +294,25 @@ Blix allows users to create and customize their own plugins with an elegant and 
   \item[\textbullet] Tiles are created using the dedicated tileBuilders provided in our docs.
 \end{itemize}
 
+\textbf{Using the Artificial Intelligence}
+
+Blix allows users to communicate with an LLM that is fine-tuned to our system. The AI can be used to perform a wide array of tasks and provide the user with a more intuitive and easy to use experience.
+
+
+\textbf{Use Cases}
+
+\begin{itemize}
+  \item[\textbullet] Create a graph to perform  specific tasks based on the user's prompt.
+  \item[\textbullet] Modify an existing graph by adding or removing nodes or editing their connections and properties.
+  \item[\textbullet] Provide the user with valuable information about the graph.
+\end{itemize}
+
+\textbf{How to use}
+
+\begin{itemize}
+  \item[\textbullet] A prompt can be sent to the AI by using the command palette. Pressing TAB after typing a prompt in the command palette will send the prompt to the AI.
+  \item[\textbullet] The AI will then proceed to process the command and perform the neccesary actions based on the user prompt
+  \item[\textbullet] The AI will then return a response to the user, which will be displayed through the information panel in the bottom right corner of the screen.
+\end{itemize}
 
 \end{document}
