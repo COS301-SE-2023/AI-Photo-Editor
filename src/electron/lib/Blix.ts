@@ -95,8 +95,7 @@ export class Blix {
 
     //   this._graphManager.addNode(randId, randomNode);
     // }, 3000);
-
-    this._aiManager = new AiManager(this.toolbox, this._graphManager);
+    this._aiManager = new AiManager(this.toolbox, this._graphManager, mainWindow);
   }
 
   private initSubscribers() {

@@ -12,6 +12,11 @@ import {
   removeEdge,
 } from "./ai-cookbook";
 import type { Response, ResponseFunctions } from "./ai-cookbook";
+import { type MainWindow } from "../api/apis/WindowApi";
+import { app, safeStorage } from "electron";
+import { join } from "path";
+import { readFile, writeFile } from "fs/promises";
+import { existsSync } from "fs";
 // Refer to .env for api keys
 
 /**
@@ -23,10 +28,13 @@ import type { Response, ResponseFunctions } from "./ai-cookbook";
  *
  * */
 export class AiManager {
+  private _mainWindow?: MainWindow;
   private graphManager: CoreGraphManager;
   private toolboxRegistry: ToolboxRegistry;
   private _childProcess: ChildProcessWithoutNullStreams | null = null;
-
+  private filePath = join(app.getPath("userData"), "secrets.json");
+  private supportedModels: string[] = ["OpenAi"];
+  // Maybe we want custom locations for the user? ^^
   /**
    *
    * Initializes context of ai with all the nodes in the toolbox and the graph
@@ -34,9 +42,10 @@ export class AiManager {
    * @param graphManager This is the graph manager that manages the current graph
    *
    * */
-  constructor(toolbox: ToolboxRegistry, graphManager: CoreGraphManager) {
-    this.graphManager = graphManager;
+  constructor(toolbox: ToolboxRegistry, graphManager: CoreGraphManager, mainWindow?: MainWindow) {
     this.toolboxRegistry = toolbox;
+    this.graphManager = graphManager;
+    this._mainWindow = mainWindow;
 
     // console.log(this._pluginContext);
 
@@ -45,6 +54,14 @@ export class AiManager {
     // this.sendPrompt();
     // console.log("Execute!")
     // console.log(this.graphManager.getAllGraphUUIDs());
+  }
+
+  public getSupportedModels() {
+    return this.supportedModels;
+  }
+
+  public getFilePath() {
+    return this.filePath;
   }
 
   pluginContext() {
@@ -62,6 +79,40 @@ export class AiManager {
   }
 
   /**
+   * This function will go to a local saved directory and retrieve encypted keys saved by the user.
+   * If the user has never saved a key the file will then be created for them. The function checks the file to see if
+   * there is a current key for the model and any other keys. These keys are then returned if they exist.
+   *
+   * @param model The model specified by the user
+   * @param displayError Boolean used to decide if notifications must been sent to the user.
+   * @returns An object that specifies if the user had a previous key for the model and their other saved keys
+   */
+  async retrieveKey(model: string, displayError = true): Promise<RetrieveKeyResponse> {
+    let exists = true;
+    // Retrieve locally encrypted keys
+    if (!existsSync(this.filePath)) {
+      // Create empty keys file if the user does not have one
+      await writeFile(this.filePath, JSON.stringify({}));
+    }
+    const secrets: SuperSecretCredentials = JSON.parse(await readFile(this.filePath, "utf-8"));
+    let key = "";
+    if (model === "OPENAI") {
+      key = secrets.OPENAI_API_KEY
+        ? safeStorage.decryptString(Buffer.from(secrets.OPENAI_API_KEY))
+        : "";
+    }
+    if (!key) {
+      exists = false;
+      if (displayError) this.handleNotification(`No ${model} key found`, "warn");
+    }
+    return { oldKey: exists, keys: secrets };
+  }
+
+  async handleNotification(message: string, type: NotificationTypes) {
+    if (this._mainWindow) this._mainWindow.apis.utilClientApi.showToast({ message, type });
+  }
+
+  /**
    * Sends prompt to ai and returns response
    * @param prompt Prompt to send to ai
    * @param graphId Id of the graph to send to ai
@@ -71,6 +122,20 @@ export class AiManager {
   async sendPrompt(prompt: string, graphId: string) {
     let finalResponse = "";
     const llmGraph = getGraph(this.graphManager, graphId);
+
+    const selectedModel = "OpenAi";
+    if (!this.supportedModels.includes(selectedModel))
+      return this.handleNotification(
+        `The ${selectedModel} model is not currently supported`,
+        "warn"
+      );
+
+    const superSecretKey = await this.retrieveKey(selectedModel.toUpperCase(), true);
+    if (!superSecretKey) {
+      finalResponse = `No key found for the ${selectedModel} model.`;
+      logger.warn(`No key found for the ${selectedModel} model.`);
+      return;
+    }
 
     const promptContext = {
       prompt,
@@ -151,3 +216,20 @@ export class AiManager {
     };
   }
 }
+/**
+ * All keys must follow this format used in this interface
+ * {modelName}_API_KEY
+ */
+export interface SuperSecretCredentials {
+  /* eslint-disable @typescript-eslint/naming-convention */
+  OPENAI_API_KEY?: number[];
+  // JAKE_API_KEY? : number[];
+  // MORE_API_KEYS...
+}
+
+export interface RetrieveKeyResponse {
+  oldKey: boolean;
+  keys: SuperSecretCredentials;
+}
+
+export type NotificationTypes = "success" | "error" | "warn" | "info";
