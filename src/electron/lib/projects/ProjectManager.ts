@@ -119,6 +119,14 @@ export class ProjectManager {
 
     return false;
   }
+
+  public removeGraph(graphId: UUID) {
+    for (const project of Object.values(this._projects)) {
+      if (project.removeGraph(graphId)) {
+        this.onProjectChanged(project.uuid);
+      }
+    }
+  }
 }
 
 const recentProjectsSchema = z.object({

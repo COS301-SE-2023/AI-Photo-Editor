@@ -21,11 +21,19 @@ function createCommandStore() {
     // window.apis.pluginApi.addCommand(cmds);
   }
 
-  async function runCommand(id: string) {
+  async function runCommand(id: string, args?: Record<string, any>) {
     if (id in blixCommandParams) {
-      await window.apis.commandApi.runCommand(id, blixCommandParams[id]());
+      if (args) {
+        await window.apis.commandApi.runCommand(id, args);
+      } else {
+        await window.apis.commandApi.runCommand(id, blixCommandParams[id]());
+      }
     } else {
-      await window.apis.commandApi.runCommand(id);
+      if (args) {
+        await window.apis.commandApi.runCommand(id, args);
+      } else {
+        await window.apis.commandApi.runCommand(id);
+      }
     }
   }
 

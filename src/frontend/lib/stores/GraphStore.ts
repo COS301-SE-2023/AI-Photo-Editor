@@ -180,6 +180,17 @@ class GraphMall {
   //     return graph;
   //   });
   // }
+
+  public onGraphRemoved(graphUUID: GraphUUID) {
+    const mallState = get(this.mall);
+
+    if (graphUUID in mallState) {
+      this.mall.update((mall) => {
+        delete mall[graphUUID];
+        return mall;
+      });
+    }
+  }
 }
 
 // export const graphMall = writable<GraphMall>(new GraphMall());

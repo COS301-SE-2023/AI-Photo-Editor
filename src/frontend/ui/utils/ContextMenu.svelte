@@ -82,8 +82,6 @@
 
   onMount(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // TODO: Fix where when chevron is clicked on the it closes the menu when it shouldn't
-      // .contains say the svg Node is not contained within the container for some reason
       if (event.target instanceof Node && !menuContainer?.contains(event.target)) {
         graphMenuStore.hideMenu();
       }

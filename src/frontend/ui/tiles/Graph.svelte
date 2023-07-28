@@ -4,7 +4,6 @@
   import { type Readable } from "svelte/store";
   import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
-  import { projectsStore } from "../../lib/stores/ProjectStore";
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import type { UUID } from "@shared/utils/UniqueEntity";
   import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
@@ -14,14 +13,14 @@
   import { fade } from "svelte/transition";
   import { mediaStore } from "../../lib/stores/MediaStore";
   import { commandStore } from "../../lib/stores/CommandStore";
+  import GraphSelectionBox from "../../ui/utils/graph/GraphSelectionBox.svelte";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
   export let panelId = Math.round(10000000.0 * Math.random());
 
-  let graphIds = projectsStore.activeProjectGraphIds;
-  let graphId = $graphIds[0];
+  let graphId = "";
 
   /**
    * When a new panel is focussed on (the panel is clicked),
@@ -168,7 +167,37 @@
   }
 </script>
 
-<div class="hoverElements">
+<div class="absolute bottom-[15px] left-[15px] z-[100] flex h-7 items-center space-x-2">
+  <div class="flex h-[10px] w-[10px] items-center">
+    {#if panelId === $focusedGraphStore.panelId}
+      <div
+        transition:fade="{{ duration: 300 }}"
+        class="z-1000000 h-full w-full rounded-full border-[1px] border-zinc-600 bg-rose-500"
+      ></div>
+    {/if}
+  </div>
+  <div class="self-end">
+    <GraphSelectionBox bind:selectedGraphId="{graphId}" />
+  </div>
+  <div
+    class="flex h-7 w-7 items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md hover:cursor-pointer hover:bg-zinc-700"
+    on:click="{() => commandStore.runCommand('blix.graphs.create')}"
+    on:keydown="{null}"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="h-6 w-6 stroke-zinc-400"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+    </svg>
+  </div>
+</div>
+
+<!-- <div class="hoverElements">
   <div class="mr-2 inline-block h-[10px] w-[10px]">
     {#if panelId === $focusedGraphStore.panelId}
       <div
@@ -177,12 +206,9 @@
       ></div>
     {/if}
   </div>
-  <select name="graphPicker" class="dropdown" bind:value="{graphId}">
-    {#each $graphIds as id}
-      <option value="{id}">{id.slice(0, 8)}</option>
-    {/each}
-  </select>
-
+  <div class="inline-block">
+    <GraphSelectionBox />
+  </div>
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -196,11 +222,11 @@
     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
   </svg>
 
-  <!-- <button style:float="right" on:click={addRandomConn}>Add random conn</button> -->
-  <!-- <button style:float="right" on:click={clearEdges}>Clear edges</button> -->
-</div>
+  <button style:float="right" on:click={addRandomConn}>Add random conn</button>
+  <button style:float="right" on:click={clearEdges}>Clear edges</button>
+</div> -->
 
-{#if thisGraphStore}
+{#if thisGraphStore && $thisGraphStore}
   <Svelvet
     id="{panelId}-{graphId}"
     zoom="{0.7}"
@@ -230,7 +256,7 @@
     <!-- {/key} -->
   </Svelvet>
 {:else}
-  <div>Graph store not found</div>
+  <div class="flex h-full w-full items-center justify-center text-xl text-zinc-400">No graphs</div>
 {/if}
 
 <style>

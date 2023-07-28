@@ -99,10 +99,21 @@ export class CoreGraphManager {
     return this._graphs[uuid];
   }
 
-  deleteGraphs(uuids: UUID[]) {
+  deleteGraphs(uuids: UUID[]): boolean[] {
+    const flags: boolean[] = [];
+
     uuids.forEach((uuid) => {
-      delete this._graphs[uuid];
+      if (uuid in this._graphs) {
+        delete this._graphs[uuid];
+        delete this._subscribers[uuid];
+        this._mainWindow.apis.graphClientApi.graphRemoved(uuid);
+        flags.push(true);
+      } else {
+        flags.push(false);
+      }
     });
+
+    return flags;
   }
 
   getAllGraphUUIDs() {
