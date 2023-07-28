@@ -113,7 +113,12 @@ export class Blix {
 
     this._graphManager.addAllSubscriber(graphSubscriber);
 
-    const mediaSubscriber = new IPCGraphSubscriber();
+    // REMOVED: In favor of checking for graph changes on the frontend instead
+    // const mediaSubscriber = new BackendSystemGraphSubscriber();
+    // mediaSubscriber.listen = (graphUUID: UUID, newGraph: CoreGraph) => {
+    //   // async compute(graphUUID: UUID, nodeUUID: UUID) {
+    //     this.graphInterpreter.run(this.graphManager.getGraph(graphUUID), nodeUUID);
+    // }
   }
 
   // TODO: Move these to a Utils.ts or something like that

@@ -81,3 +81,9 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
     if (this._notifyee) this._notifyee(graphId, uiGraph);
   }
 }
+
+// export class BackendSystemGraphSubscriber extends CoreGraphSubscriber<CoreGraph> {
+//   onGraphChanged(graphId: UUID, graphData: CoreGraph): void {
+//     if (this._notifyee) this._notifyee(graphId, graphData);
+//   }
+// }

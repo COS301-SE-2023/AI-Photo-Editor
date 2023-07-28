@@ -133,6 +133,7 @@ export class CoreGraphInterpreter {
       dataType: "Number",
       outputId: "TODO",
       outputNodeUUID: curr.uuid,
+      graphUUID: graph.uuid,
     };
 
     // const output: T = await Promise.resolve(curr.execute(inputs, anhcorIn));

@@ -25,21 +25,30 @@
     return res;
   }
 
+  let selectedNode: { graphUUID: GraphUUID; outNode: GraphNodeUUID } | null;
   let media: Readable<MediaOutput | null>;
 
   function handleSelect(e: Event) {
     const value = (e.target as HTMLSelectElement).value;
     if (!value) return;
 
-    const [graphId, nodeUUID] = value.split("/");
+    const [graphUUID, nodeUUID] = value.split("/");
+    selectedNode = { graphUUID, outNode: nodeUUID };
 
-    recomputeMedia(graphId, nodeUUID);
-    media = mediaStore.getMediaReactive(nodeUUID);
-    console.log("MEDIA", $media);
+    // recomputeMedia();
+    media = mediaStore.getMediaReactive(graphUUID, nodeUUID);
+
+    // MOVED: now computed directly in media store
+    // if (prevGraphUnsub) prevGraphUnsub();
+    // const selectedGraph = graphMall.getGraph(graphUUID);
+
+    // prevGraphUnsub = selectedGraph.subscribe((_) => {
+    //   if (selectedNode) recomputeMedia(selectedNode.graphUUID, selectedNode.outNode);
+    // });
   }
 
-  function recomputeMedia(graphId: GraphUUID, outNode: GraphNodeUUID) {
-    mediaStore.compute(graphId, outNode);
+  function recomputeMedia(graphUUID: GraphUUID, outNode: GraphNodeUUID) {
+    mediaStore.compute(graphUUID, outNode);
   }
 
   type MediaDisplay = {
@@ -53,11 +62,18 @@
     },
     Number: {
       component: TextBox,
-      props: (data: number) => ({ content: data?.toString() || "NULL" }),
+      props: (data: number) => ({
+        content: data?.toString() || "NULL",
+        status: !!data ? "normal" : "warning",
+      }),
     },
     string: {
       component: TextBox,
       props: (data: string) => ({ content: data }),
+    },
+    Error: {
+      component: TextBox,
+      props: (data: string) => ({ content: data, status: "error" }),
     },
   };
 </script>
@@ -80,6 +96,7 @@
         {/each}
       {/each}
     </select>
+    <button on:click="{recomputeMedia}" class="bg-white">Refresh</button>
   </div>
 
   <div class="media">

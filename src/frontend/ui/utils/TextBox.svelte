@@ -1,9 +1,10 @@
 <script lang="ts">
   export let content = "";
+  export let status: "normal" | "error" | "warning" = "normal";
 </script>
 
 <div class="content">
-  <div class="output">
+  <div class="output {status}">
     {content}
   </div>
 </div>
@@ -25,7 +26,24 @@
 
     padding: 2em;
     word-break: break-all;
-    background-color: #11111b;
     border-radius: 0.4em;
+  }
+
+  .normal {
+    color: white;
+    background-color: #11111b;
+    border: none;
+  }
+
+  .error {
+    color: red;
+    background-color: #530706;
+    border: 2px solid #6b0000;
+  }
+
+  .warning {
+    color: #ffc06e;
+    background-color: #775000;
+    border: 2px solid #623900;
   }
 </style>
