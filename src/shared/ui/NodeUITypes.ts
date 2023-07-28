@@ -32,6 +32,7 @@ export enum NodeUIComponent {
   Label = "Label",
   Radio = "Radio",
   Dropdown = "Dropdown",
+  Accordion = "Accordion",
   NumberInput = "NumberInput",
   TextInput = "TextInput",
   Checkbox = "Checkbox",

@@ -87,11 +87,16 @@ export class TestGraph {
             displayName: "output_anchor1",
           },
         ],
-        ({ input, from }: { input: any[]; from: string }) => {
+        // ({ input, from }: { input: any[]; from: string }) => {
+        (
+          input: { [key: string]: any },
+          inputUI: { [key: string]: any },
+          requiredOutputs: string[]
+        ) => {
           const img = sharp(
             "/home/klairgo/Documents/Documents/University of Pretoria/Year 3/Semester 1/COS 301/Capstone Project/Code/AI-Photo-Editor/assets/image.png"
           );
-          return { out1: img }[from];
+          return { out1: img };
         }
       )
     );
@@ -117,8 +122,12 @@ export class TestGraph {
             displayName: "output_anchor1",
           },
         ],
-        ({ input, from }: { input: any[]; from: string }) => {
-          return { out1: input[0].flip() }[from];
+        (
+          input: { [key: string]: any },
+          inputUI: { [key: string]: any },
+          requiredOutputs: string[]
+        ) => {
+          return { out1: input[0].flip() };
         }
       )
     );
@@ -144,8 +153,12 @@ export class TestGraph {
             displayName: "output_anchor1",
           },
         ],
-        ({ input, from }: { input: any[]; from: string }) => {
-          return { out1: input[0].blur(5) }[from];
+        (
+          input: { [key: string]: any },
+          inputUI: { [key: string]: any },
+          requiredOutputs: string[]
+        ) => {
+          return { out1: input[0].blur(5) };
         }
       )
     );
@@ -165,10 +178,15 @@ export class TestGraph {
           },
         ],
         [],
-        ({ input, from }: { input: any[]; from: string }) => {
+        (
+          input: { [key: string]: any },
+          inputUI: { [key: string]: any },
+          requiredOutputs: string[]
+        ) => {
           input[0].toFile(
             "/home/klairgo/Documents/Documents/University of Pretoria/Year 3/Semester 1/COS 301/Capstone Project/Code/AI-Photo-Editor/assets/image3.png"
           );
+          return {};
         }
       )
     );

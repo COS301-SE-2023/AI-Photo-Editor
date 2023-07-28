@@ -30,7 +30,7 @@ export class NodeBuilder implements PluginContextBuilder {
       inputs: [],
       outputs: [],
       ui: null,
-      func: () => null,
+      func: () => ({}),
     };
   }
 
@@ -148,19 +148,16 @@ export class NodeUIBuilder {
   }
 
   /**
-   *
    * @param label Label for the button
    * @param param Parameter for the button
    * @returns callback to this NodeUIBuilder
    * */
-
   public addButton(label: string, param: any): NodeUIBuilder {
     this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Button, label, [param]));
     return this;
   }
 
   /**
-   *
    * @param label Label for the slider
    * @param min Minimum value for the slider
    * @param max Maximum value for the slider
@@ -168,7 +165,6 @@ export class NodeUIBuilder {
    * @param defautlVal Default value
    * @returns callback to this NodeUIBuilder
    */
-
   public addSlider(
     label: string,
     min: number,
@@ -183,15 +179,24 @@ export class NodeUIBuilder {
     return this;
   }
 
+  public addDropdown(
+    label: string,
+    options: { [key: string]: any },
+    defaultOption: string
+  ): NodeUIBuilder {
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.Dropdown, label, [options, defaultOption])
+    );
+    return this;
+  }
+
   /**
-   *
-   * @param label Label for the dropdown
-   * @param builder NodeUIBuilder for the dropdown
+   * @param label Label for the accordion
+   * @param builder NodeUIBuilder for the accordion
    * @returns callback to this NodeUIBuilder
-   *
    * */
 
-  public addDropdown(label: string, builder: NodeUIBuilder): NodeUIBuilder {
+  public addAccordion(label: string, builder: NodeUIBuilder): NodeUIBuilder {
     builder.node.label = label;
     builder.node.parent = this.node;
     this.node.params.push(builder.node);
@@ -199,36 +204,27 @@ export class NodeUIBuilder {
   }
 
   /**
-   *
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
-   *
    * */
-
   public addNumberInput(label: string): NodeUIBuilder {
     this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.NumberInput, label, []));
     return this;
   }
 
   /**
-   *
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
-   *
    * */
-
   public addImageInput(label: string): NodeUIBuilder {
     this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.FilePicker, label, []));
     return this;
   }
 
   /**
-   *
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
-   *
    * */
-
   // We need to discuss how to handle color pickers
   public addColorPicker(label: string, param: any): NodeUIBuilder {
     this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, label, [param]));
@@ -241,13 +237,10 @@ export class NodeUIBuilder {
   }
 
   /**
-   *
    * @param label Label for the text input
    * @param param Parameter for the text input
    * @returns callback to this NodeUIBuilder
-   *
    * */
-
   public addLabel(label: string, param: string) {
     this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Label, label, [param]));
     return this;

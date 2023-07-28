@@ -105,8 +105,12 @@ export class CoreGraphInterpreter {
   // }
 
   // USING PROMISES
-  public async traverse<T>(graph: CoreGraph, curr: Node, anchorIn: Anchor): Promise<T> {
-    const inputPromises: Promise<T>[] = [];
+  public async traverse<T>(
+    graph: CoreGraph,
+    curr: Node,
+    anchorIn: Anchor
+  ): Promise<{ [key: string]: T }> {
+    const inputPromises: Promise<{ [key: string]: T }>[] = [];
     // Get all input values
     for (const anchor in curr.getAnchors) {
       // Only check input anchors
@@ -125,7 +129,7 @@ export class CoreGraphInterpreter {
     }
 
     // Resolve all input values (functions)
-    const inputs: T[] = await Promise.all(inputPromises).catch((err) => {
+    const inputs: { [key: string]: T }[] = await Promise.all(inputPromises).catch((err) => {
       throw err;
     });
 
@@ -138,11 +142,12 @@ export class CoreGraphInterpreter {
       graphUUID: graph.uuid,
     };
 
-    // const output: T = await Promise.resolve(curr.execute(inputs, anhcorIn));
-    const output: T = await Promise.resolve(
+    const output: { [key: string]: T } = await Promise.resolve(
       this.toolboxRegistry
         .getNodeInstance(curr.getSignature)
-        .func({ input: mediaOutput, from: anchorIn.anchorId })
+        // OLD: .func({ input: mediaOutput, from: anchorIn.anchorId })
+        // TODO: Move to new system
+        .func({}, {}, [])
     );
 
     return output;

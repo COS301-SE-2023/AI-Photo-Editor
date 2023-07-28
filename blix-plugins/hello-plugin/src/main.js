@@ -5,8 +5,8 @@ const nodes = {
         nodeBuilder = context.instantiate("hello-plugin","hello");
         nodeBuilder.setTitle("Gloria");
         nodeBuilder.setDescription("Provides a test slider and button and label for testing purposes, taking two string inputs and returning one string output");
-        nodeBuilder.define(() => {
-            console.log("konnichi~wa");
+        nodeBuilder.define((anchorInputs, uiInputs) => {
+            console.log("konnichi~wa", "Anchor Inputs:\n", anchorInputs, "UI Inputs:\n", uiInputs);
         });
 
        const ui = nodeBuilder.createUIBuilder();
@@ -15,7 +15,7 @@ const nodes = {
        .addColorPicker("Massacre", "red")
        .addKnob("Knob",0,100,0.1,50)
        .addDropdown("Orphanage",nodeBuilder.createUIBuilder()
-       .addLabel("Label1"));   
+       .addLabel("Label1"));
 
        nodeBuilder.setUI(ui);
 

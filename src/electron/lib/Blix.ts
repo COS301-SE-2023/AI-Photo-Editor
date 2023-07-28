@@ -64,11 +64,18 @@ export class Blix {
     tempNodeBuilder.setDescription(
       "This is the global output node which accepts data of any type, and presents the final value to the user"
     );
-    tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
-      logger.info("Result: ", input);
-      mainWindow.apis.mediaClientApi.outputChanged(input);
-      return input;
-    });
+    // tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
+    tempNodeBuilder.define(
+      (
+        inputAnchors: { [key: string]: any },
+        inputUI: { [key: string]: any },
+        requiredOutputs: string[]
+      ) => {
+        logger.info("Result: ", inputAnchors.in);
+        mainWindow.apis.mediaClientApi.outputChanged(inputAnchors.in as MediaOutput);
+        return {};
+      }
+    );
 
     tempNodeBuilder.addInput("", "in", "In");
     tempNodeBuilder.setUI(tempUIBuilder);
