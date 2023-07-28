@@ -180,7 +180,8 @@
     <GraphSelectionBox bind:selectedGraphId="{graphId}" />
   </div>
   <div
-    class="flex h-7 w-7 items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md hover:cursor-pointer hover:bg-zinc-700"
+    class="flex h-7 w-7 items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md hover:bg-zinc-700"
+    title="Add Graph"
     on:click="{() => commandStore.runCommand('blix.graphs.create')}"
     on:keydown="{null}"
   >
@@ -275,7 +276,7 @@
     --theme-toggle-color: hsl(225, 20%, 27%);
   }
 
-  .hoverElements {
+  /* .hoverElements {
     position: absolute;
     bottom: 10px;
     left: 10px;
@@ -284,5 +285,5 @@
 
   .dropdown {
     color: #11111b;
-  }
+  } */
 </style>
