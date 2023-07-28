@@ -212,12 +212,12 @@
 
 {#if $graphMenuStore.isShowing}
   <div
-    class="graph-context-menu fixed z-50 flex h-[256px] w-[192px] flex-col items-center overflow-hidden rounded-lg bg-zinc-800/80 ring-2 ring-zinc-600 backdrop-blur-md"
+    class="graph-context-menu fixed z-50 flex h-[240px] w-[192px] flex-col items-center overflow-hidden rounded-lg border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
     style:top="{$graphMenuStore.cursorPos.y}px"
     style:left="{$graphMenuStore.cursorPos.x}px"
     bind:this="{menuContainer}"
   >
-    <section class="flex items-center border-b-2 border-zinc-500 p-1">
+    <section class="flex items-center border-b-[1px] border-zinc-600 p-1">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -237,7 +237,7 @@
         bind:value="{searchTerm}"
         on:input="{handleInput}"
         bind:this="{searchBox}"
-        class="text-md mr-auto h-7 w-full select-none border-none bg-transparent p-2 text-zinc-200 caret-purple-300 outline-none"
+        class="mr-auto h-7 w-full select-none border-none bg-transparent p-2 text-sm text-zinc-200 caret-rose-400 outline-none"
       />
     </section>
     <section class="flex h-full w-full select-none flex-col overflow-y-auto p-1">

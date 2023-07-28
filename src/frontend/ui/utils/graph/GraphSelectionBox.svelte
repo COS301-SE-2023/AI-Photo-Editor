@@ -112,7 +112,7 @@
       class="absolute bottom-0 left-0 z-10 flex h-48 w-36 flex-col rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
       transition:slide="{{ duration: 300 }}"
     >
-      <section class="flex items-center border-b-[1px] border-zinc-500 p-1">
+      <section class="flex items-center border-b-[1px] border-zinc-600 p-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -131,7 +131,7 @@
           placeholder="{searchPlaceholder}"
           bind:value="{searchTerm}"
           bind:this="{searchContainer}"
-          class="mr-auto h-7 w-full select-none border-none bg-transparent p-2 text-sm text-zinc-200 caret-rose-300 outline-none"
+          class="mr-auto h-7 w-full select-none border-none bg-transparent p-2 text-sm text-zinc-200 caret-rose-400 outline-none"
         />
       </section>
 
@@ -139,10 +139,10 @@
         <ul class="flex flex-col space-y-1 overflow-y-auto overflow-x-hidden p-1">
           {#each filteredItems as item (item.id)}
             <li
-              class="flex w-full cursor-pointer items-center rounded-md p-1 text-zinc-400 {selectedGraphId ===
+              class="flex w-full cursor-pointer items-center rounded-md p-1 text-zinc-400 active:bg-rose-400/5 {selectedGraphId ===
               item.id
-                ? 'bg-pink-200/[0.08]'
-                : ''} group hover:bg-pink-200/5"
+                ? 'bg-rose-300/[0.08]'
+                : ''} group hover:bg-rose-300/5"
               on:click="{() => selectGraph(item.id)}"
               on:keydown="{null}"
             >
@@ -153,7 +153,7 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.2"
                 stroke="currentColor"
-                class="invisible ml-auto h-4 w-4 hover:stroke-red-400 group-hover:visible"
+                class="invisible ml-auto h-4 w-4 hover:stroke-rose-500 group-hover:visible"
                 on:click="{() => deleteGraph(item.id)}"
                 on:keydown="{null}"
               >
