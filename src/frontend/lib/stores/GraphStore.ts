@@ -7,8 +7,10 @@ import {
   type GraphNodeUUID,
   type GraphUUID,
   type SvelvetCanvasPos,
+  constructUIValueStore,
 } from "@shared/ui/UIGraph";
 import { writable, get, derived, type Writable, type Readable } from "svelte/store";
+import { toolboxStore } from "./ToolboxStore";
 
 // When the the CoreGraphApi type has to be imported into the backend
 // (WindowApi.ts) so that the API can be bound then it tries to import the type
@@ -28,6 +30,7 @@ import { writable, get, derived, type Writable, type Readable } from "svelte/sto
 // TODO: Return a GraphStore in createGraphStore for typing
 export class GraphStore {
   graphStore: Writable<UIGraph>;
+  uiInputUnsubscribers: { [key: GraphNodeUUID]: () => void } = {};
 
   constructor(public uuid: GraphUUID) {
     // Starts with empty graph
@@ -42,19 +45,48 @@ export class GraphStore {
       const oldNodes = graph.nodes;
       graph.nodes = newGraph.nodes;
 
-      // Maintain styling from old graph
-      for (const node of Object.keys(oldNodes)) {
-        if (graph.nodes[node]) {
+      for (const node of Object.keys(graph.nodes)) {
+        if (oldNodes[node]) {
+          // Node carried over from old graph, maintain its styling / UI inputs
           graph.nodes[node].styling = oldNodes[node].styling;
           graph.nodes[node].inputUIValues = oldNodes[node].inputUIValues;
+        } else {
+          // If node has a UI input, create a store and subscribe to it
+          const toolboxNode = toolboxStore.getNode(graph.nodes[node].signature);
+
+          if (toolboxNode.ui) {
+            graph.nodes[node].inputUIValues = constructUIValueStore(toolboxNode.ui);
+
+            const inputs = graph.nodes[node].inputUIValues.inputs;
+
+            for (const input of Object.keys(inputs)) {
+              // console.log("SUB TO", node, "->", input);
+              this.uiInputUnsubscribers[node] = inputs[input].subscribe(() => {
+                // console.log("UPDATE UI INPUTS", node, "->", input);
+                this.updateUIInputs(node).catch((err) => {
+                  /* TODO */
+                });
+              });
+            }
+          }
         }
       }
+
+      // Remove any old UI input unsubscribers
+      for (const node of Object.keys(oldNodes)) {
+        if (!graph.nodes[node] && this.uiInputUnsubscribers[node]) {
+          // Node is no longer in the graph and has an unsub function
+          // console.log("UNSUB FROM", node);
+          this.uiInputUnsubscribers[node]();
+          delete this.uiInputUnsubscribers[node];
+        }
+      }
+
       return graph;
     });
   }
 
   async addNode(nodeSignature: NodeSignature, pos?: SvelvetCanvasPos) {
-    // console.log("Adding node", nodeSignature)
     const thisUUID = get(this.graphStore).uuid;
     const res = await window.apis.graphApi.addNode(thisUUID, nodeSignature);
 

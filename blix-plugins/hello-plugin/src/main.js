@@ -5,28 +5,41 @@ const nodes = {
         nodeBuilder = context.instantiate("hello-plugin","hello");
         nodeBuilder.setTitle("Gloria");
         nodeBuilder.setDescription("Provides a test slider and button and label for testing purposes, taking two string inputs and returning one string output");
-        nodeBuilder.define((anchorInputs, uiInputs) => {
-            console.log("konnichi~wa", "Anchor Inputs:\n", anchorInputs, "UI Inputs:\n", uiInputs);
+
+        nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {
+            console.log(
+                "------------------",
+                "\nANCHOR INPUTS", anchorInputs,
+                "\nUI INPUTS", uiInputs,
+                "\nREQUIRED OUTPUTS", requiredOutputs
+            );
+
+            return {
+                "out1": anchorInputs["in1"] + anchorInputs["in2"],
+                "out2": anchorInputs["in3"],
+                "out3": uiInputs["slideAlong"]
+            };
         });
 
        const ui = nodeBuilder.createUIBuilder();
-       ui.addButton("Execute order 66","return 66;")
-       .addSlider("Slide along",0,100,0.1,50)
-       .addColorPicker("Massacre", "red")
-       .addKnob("Knob",0,100,0.1,50)
-       .addDropdown("Orphanage",nodeBuilder.createUIBuilder()
-       .addLabel("Label1"));
+       ui.addButton("order66","return 66;")
+       .addSlider("slideAlong", 0, 100, 0.1, 50)
+    //    .addColorPicker("massacre", "red")
+    //    .addKnob("yourAKnob",0,100,0.1,50)
+    //    .addDropdown("orphanage",nodeBuilder.createUIBuilder()
+    //    .addLabel("Label1"));
 
        nodeBuilder.setUI(ui);
 
-       nodeBuilder.addInput("string", "in1", "In1");
-       nodeBuilder.addInput("string", "in2", "In2");
-       nodeBuilder.addInput("Number","In3", 2);
+        // addInput(type: string, identifier: string, displayName: string)
+        nodeBuilder.addInput("string", "in1", "In 1");
+        nodeBuilder.addInput("string", "in2", "In 2");
+        nodeBuilder.addInput("Number", "in3", "In 3");
 
-       nodeBuilder.addOutput("string", "out1", "Out1");
-
-       nodeBuilder.addOutput("Number","Out1", 3);
-       nodeBuilder.addOutput("Number","Out2", 4);
+        // addOutput(type: string, identifier: string, displayName: string)
+        nodeBuilder.addOutput("string", "out1", "Concat");
+        nodeBuilder.addOutput("Number", "out2", "Passthrough");
+        nodeBuilder.addOutput("Number", "out3", "Slider");
     }
     ,"Jake": (context) => {
         nodeBuilder = context.instantiate("hello-plugin","Jake");

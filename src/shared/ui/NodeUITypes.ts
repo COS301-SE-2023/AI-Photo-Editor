@@ -1,3 +1,5 @@
+import type { UIValue } from "@shared/types";
+
 export abstract class NodeUI {
   constructor(
     public parent: NodeUI | null,
@@ -19,7 +21,8 @@ export class NodeUILeaf extends NodeUI {
     public readonly parent: NodeUIParent,
     public readonly category: NodeUIComponent,
     public readonly label: string,
-    public readonly params: any[]
+    public readonly params: any[],
+    public readonly defaultValue: UIValue
   ) {
     super(parent, label, params, "leaf");
   }

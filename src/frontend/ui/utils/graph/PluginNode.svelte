@@ -79,6 +79,7 @@ height="{graphNode.dims.h}" -->
         {JSON.stringify({ ...$toolboxNode, ui: undefined })}
       </div>
       <div class="node-body" style="max-width: 400px">
+        <!-- <button on:click={updateUIInputs}>SUBMIT</button> -->
         <NodeUiFragment inputStore="{node.inputUIValues}" ui="{$toolboxNode?.ui}" />
       </div>
 

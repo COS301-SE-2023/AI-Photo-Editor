@@ -96,7 +96,6 @@
         {/each}
       {/each}
     </select>
-    <button on:click="{recomputeMedia}" class="bg-white">Refresh</button>
   </div>
 
   <div class="media">

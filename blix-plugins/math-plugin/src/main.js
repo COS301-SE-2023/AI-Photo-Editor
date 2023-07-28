@@ -6,17 +6,18 @@ const nodes ={
 
         // (anchorInputs: { [key: AnchorId]: any }, uiInputs: { [key: UIComponentId]: any }) => { [key: AnchorId]: any }
         nodeBuilder.define((anchorInputs, uiInputs) => {
+          state = uiInputs?.state ?? 0;
           switch (state) {
-            case 0: return { res: Math.pow(num1, 2) };
-            case 1: return { res: Math.sqrt(num1) };
-            case 2: return { res: Math.abs(num1) };
-            case 3: return { res: factorial(num1) };
-            case 4: return { res: -num1 };
-            case 5: return { res: Math.sin(num1) };
-            case 6: return { res: Math.cos(num1) };
-            case 7: return { res: Math.tan(num1) };
-            default: return { res: "Invalid state" };
+            case 0: return { res: Math.pow(anchorInputs.num, 2) };
+            case 1: return { res: Math.sqrt(anchorInputs.num)   };
+            case 2: return { res: Math.abs(anchorInputs.num)    };
+            case 3: return { res: factorial(anchorInputs.num)   };
+            case 4: return { res: -anchorInputs.num             };
+            case 5: return { res: Math.sin(anchorInputs.num)    };
+            case 6: return { res: Math.cos(anchorInputs.num)    };
+            case 7: return { res: Math.tan(anchorInputs.num)    };
           }
+          return { res: "Invalid state" };
         });
 
         const ui = nodeBuilder.createUIBuilder();

@@ -56,7 +56,7 @@ export class Blix {
     // Create Output node
     const tempNodeBuilder = new NodeBuilder("blix", "output");
     const tempUIBuilder = tempNodeBuilder.createUIBuilder();
-    tempUIBuilder.addButton("Testing", null);
+    tempUIBuilder.addButton("testing", null);
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
 

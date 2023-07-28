@@ -1,5 +1,5 @@
 import type { INode, NodeSignature } from "@shared/ui/ToolboxTypes";
-import { derived, writable } from "svelte/store";
+import { derived, get, writable } from "svelte/store";
 
 type ToolboxDict = { [key: NodeSignature]: INode };
 
@@ -31,6 +31,10 @@ class ToolboxStore {
     return derived(this.store, (toolbox) => {
       return toolbox[signature];
     });
+  }
+
+  public getNode(signature: NodeSignature) {
+    return get(this.store)[signature];
   }
 }
 

@@ -32,6 +32,7 @@
   {#if mapToSvelteComponent[leafUI.category] !== null}
     <svelte:component
       this="{mapToSvelteComponent[leafUI.category]}"
+      label="{leafUI.label}"
       inputStore="{inputStore}"
       params="{leafUI.params}"
     />

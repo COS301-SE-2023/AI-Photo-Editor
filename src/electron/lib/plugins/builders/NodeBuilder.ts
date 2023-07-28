@@ -141,7 +141,7 @@ export class NodeUIBuilder {
     defautlVal: number
   ): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Knob, label, [min, max, step, defautlVal])
+      new NodeUILeaf(this.node, NodeUIComponent.Knob, label, [min, max, step], defautlVal)
     );
 
     return this;
@@ -153,7 +153,7 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   public addButton(label: string, param: any): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Button, label, [param]));
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Button, label, [param], null));
     return this;
   }
 
@@ -173,7 +173,7 @@ export class NodeUIBuilder {
     defautlVal: number
   ): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Slider, label, [min, max, step, defautlVal])
+      new NodeUILeaf(this.node, NodeUIComponent.Slider, label, [min, max, step], defautlVal)
     );
 
     return this;
@@ -185,7 +185,7 @@ export class NodeUIBuilder {
     defaultOption: string
   ): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Dropdown, label, [options, defaultOption])
+      new NodeUILeaf(this.node, NodeUIComponent.Dropdown, label, [options], defaultOption)
     );
     return this;
   }
@@ -208,7 +208,7 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   public addNumberInput(label: string): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.NumberInput, label, []));
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.NumberInput, label, [], 0));
     return this;
   }
 
@@ -217,7 +217,7 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   public addImageInput(label: string): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.FilePicker, label, []));
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.FilePicker, label, [], ""));
     return this;
   }
 
@@ -227,7 +227,9 @@ export class NodeUIBuilder {
    * */
   // We need to discuss how to handle color pickers
   public addColorPicker(label: string, param: any): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, label, [param]));
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, label, [param], "#000000")
+    );
     return this;
   }
 
@@ -242,7 +244,9 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   public addLabel(label: string, param: string) {
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Label, label, [param]));
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.Label, label, [param], "empty")
+    );
     return this;
   }
 }

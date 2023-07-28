@@ -2,6 +2,8 @@ import type { UIValue } from "@shared/types";
 import { type UUID } from "../../shared/utils/UniqueEntity";
 import { type NodeSignature } from "./ToolboxTypes";
 import { type Writable, writable } from "svelte/store";
+import type { NodeUI } from "./NodeUITypes";
+import type { NodeUILeaf } from "./NodeUITypes";
 
 export type GraphUUID = UUID;
 export type GraphNodeUUID = UUID;
@@ -64,6 +66,20 @@ export class NodeStylingStore {
 
 export class UIValueStore {
   inputs: { [key: string]: Writable<UIValue> } = {};
+}
+
+export function constructUIValueStore(ui: NodeUI) {
+  let res = new UIValueStore();
+  if (ui.type === "parent") {
+    for (const child of ui.params) {
+      res = { ...res, ...constructUIValueStore(child) };
+    }
+  } else if (ui.type === "leaf") {
+    const leaf = ui as NodeUILeaf;
+    res.inputs[ui.label] = writable<UIValue>(leaf.defaultValue);
+  }
+
+  return res;
 }
 
 class GraphAnchor {

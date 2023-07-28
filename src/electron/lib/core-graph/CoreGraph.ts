@@ -141,6 +141,10 @@ export class CoreGraph extends UniqueEntity {
     return this.edgeSrc;
   }
 
+  public getUIInputs(nodeUUID: UUID): CoreNodeUIInputs | null {
+    return this.uiInputs[nodeUUID] || null;
+  }
+
   // We need to pass in node name and plugin name
   public addNode(node: NodeInstance): QueryResponse<{ nodeId: UUID }> {
     try {
@@ -212,6 +216,7 @@ export class CoreGraph extends UniqueEntity {
   }
 
   public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs): QueryResponse {
+    // console.log("UPDATE UI INPUTS", nodeUUID, nodeUIInputs);
     this.uiInputs[nodeUUID] = new CoreNodeUIInputs(nodeUIInputs);
 
     return { status: "success" };

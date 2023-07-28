@@ -3,14 +3,10 @@
   import { Slider } from "blix_svelvet";
   import { UIValueStore } from "@shared/ui/UIGraph";
 
+  export let label: string;
   export let inputStore: UIValueStore;
-  if (!inputStore.inputs["slider"]) inputStore.inputs["slider"] = writable(0);
+
+  if (!inputStore.inputs[label]) inputStore.inputs[label] = writable(0);
 </script>
 
-<Slider
-  parameterStore="{inputStore.inputs['slider']}"
-  min="{1}"
-  max="{12}"
-  fixed="{1}"
-  step="{0.1}"
-/>
+<Slider parameterStore="{inputStore.inputs[label]}" min="{1}" max="{12}" fixed="{1}" step="{0.1}" />
