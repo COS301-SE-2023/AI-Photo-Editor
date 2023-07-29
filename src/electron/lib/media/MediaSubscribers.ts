@@ -5,8 +5,6 @@ export class MediaSubscriber {
   protected _subscriberIndex = -1;
   protected _notifyee?: (media: MediaOutput) => void; // Callback when graph changes
 
-  constructor(protected listenOutputs: Set<MediaOutputId>) {}
-
   public set listen(notifyee: (media: MediaOutput) => void) {
     this._notifyee = notifyee;
   }
@@ -17,10 +15,6 @@ export class MediaSubscriber {
 
   public get subscriberIndex() {
     return this._subscriberIndex;
-  }
-
-  public getListenOutputs() {
-    return this.listenOutputs;
   }
 
   // Calls _notifyee with the new media state

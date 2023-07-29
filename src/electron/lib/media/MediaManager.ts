@@ -45,10 +45,10 @@ export class MediaManager {
     for (const nodeUUID of Object.keys(graphOutputNodes)) {
       const mediaId = graphOutputNodes[nodeUUID];
 
-      // Check if there are any subscribers to this media
-      if (this._subscribers[mediaId]) {
-        nodesToRecompute.add(nodeUUID);
-      }
+      // Only update if there are actually subscribers to this media output
+      // if (this._subscribers[mediaId]) {
+      nodesToRecompute.add(nodeUUID);
+      // }
     }
 
     for (const nodeUUID of nodesToRecompute) {

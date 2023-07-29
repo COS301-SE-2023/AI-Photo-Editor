@@ -20,6 +20,7 @@ import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
 import type { MediaOutput } from "../../shared/types/media";
 import { MediaManager } from "./media/MediaManager";
 import { CoreGraph } from "./core-graph/CoreGraph";
+import { MediaSubscriber } from "./media/MediaSubscribers";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -125,11 +126,12 @@ export class Blix {
   }
 
   private initSubscribers() {
-    const ipcSubscriber = new IPCGraphSubscriber();
-    ipcSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
+    // ===== CORE GRAPH SUBSCRIBERS ===== //
+    const ipcGraphSubscriber = new IPCGraphSubscriber();
+    ipcGraphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
       this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
     };
-    this._graphManager.addAllSubscriber(ipcSubscriber);
+    this._graphManager.addAllSubscriber(ipcGraphSubscriber);
 
     const mediaSubscriber = new SystemGraphSubscriber();
     mediaSubscriber.setListenEvents([
@@ -142,12 +144,12 @@ export class Blix {
     };
     this._graphManager.addAllSubscriber(mediaSubscriber);
 
-    // REMOVED: In favor of checking for graph changes on the frontend instead
-    // const mediaSubscriber = new BackendSystemGraphSubscriber();
-    // mediaSubscriber.listen = (graphUUID: UUID, newGraph: CoreGraph) => {
-    //   // async compute(graphUUID: UUID, nodeUUID: UUID) {
-    //     this.graphInterpreter.run(this.graphManager.getGraph(graphUUID), nodeUUID);
-    // }
+    // ===== MEDIA SUBSCRIBERS ===== //
+    const ipcMediaSubscriber = new MediaSubscriber();
+    ipcMediaSubscriber.listen = (media: MediaOutput) => {
+      this.mainWindow?.apis.mediaClientApi.outputChanged(media);
+    };
+    this._mediaManager.addSubscriber("default", ipcMediaSubscriber);
   }
 
   // TODO: Move these to a Utils.ts or something like that
@@ -189,6 +191,10 @@ export class Blix {
 
   get graphInterpreter(): CoreGraphInterpreter {
     return this._graphInterpreter;
+  }
+
+  get mediaManager(): MediaManager {
+    return this._mediaManager;
   }
 
   get aiManager(): AiManager {

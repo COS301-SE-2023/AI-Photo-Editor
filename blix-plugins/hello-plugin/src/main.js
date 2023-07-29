@@ -23,7 +23,7 @@ const nodes = {
 
             let res = {};
             for (const output of requiredOutputs) {
-                res = { ...res, output: computers[output]() }
+                res = { ...res, [output]: computers[output]() }
             }
 
             console.log("RETURNING", res);
@@ -31,7 +31,7 @@ const nodes = {
         });
 
        const ui = nodeBuilder.createUIBuilder();
-       ui.addButton("order66","return 66;")
+       ui.addButton({},"return 66;")
         .addSlider(
             {
                 componentId: "slideAlong",
