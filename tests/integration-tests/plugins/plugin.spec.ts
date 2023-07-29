@@ -166,7 +166,7 @@ describe("Test plugin integrations", () => {
         // Expect the result to match the expected production path
         expect(paths).toEqual(['/path/to/userData/plugins']);
       });
-
+      
 
     test("Plugin should send nodes to toolbox registry", () => {
         plugin.requireSelf(blix);
