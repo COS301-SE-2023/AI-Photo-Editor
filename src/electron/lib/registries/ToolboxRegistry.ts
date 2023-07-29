@@ -1,5 +1,5 @@
 import type { Registry, RegistryInstance } from "./Registry";
-import { NodeUIParent } from "../../../shared/ui/NodeUITypes";
+import { NodeUIParent, type UIComponentConfig } from "../../../shared/ui/NodeUITypes";
 import { IAnchor, INode, type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { MainWindow } from "../api/apis/WindowApi";
 
@@ -50,7 +50,8 @@ export class ToolboxRegistry implements Registry {
           nodeInstance.icon,
           inputAnchors,
           outputAnchors,
-          nodeInstance.ui
+          nodeInstance.ui,
+          nodeInstance.uiConfigs
         );
         commands.push(nodeObject);
       }
@@ -84,7 +85,8 @@ export class NodeInstance implements RegistryInstance {
     inputs: MinAnchor[],
     outputs: MinAnchor[],
     public readonly func: NodeFunc = () => ({}),
-    public readonly ui: NodeUIParent | null = null
+    public readonly ui: NodeUIParent | null = null,
+    public readonly uiConfigs: { [key: string]: UIComponentConfig } = {}
   ) {
     this.inputs = [];
     this.outputs = [];

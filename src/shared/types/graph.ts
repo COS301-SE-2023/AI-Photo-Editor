@@ -20,6 +20,7 @@ export type UIValue = unknown;
 
 export interface INodeUIInputs {
   inputs: { [key: string]: UIValue };
+  changes: string[];
 }
 
 export type QueryResponse<S = unknown, E = unknown> =

@@ -46,7 +46,7 @@ export class CoreGraph extends UniqueEntity {
   private edgeSrc: { [key: AnchorUUID]: AnchorUUID[] }; // Map a source anchor to a list of destination anchors
   // E.g. we can do (source anchor) ---[edgeSrc]--> (destination anchors) ---[edgeDest]--> (Edges)
   //      to get all the edges that flow from a source anchor
-  private outputNodes: string[];
+  private outputNodes: Set<UUID>;
 
   // Maps a node UUID to a list of UI inputs
   private uiInputs: { [key: UUID]: CoreNodeUIInputs };
@@ -59,7 +59,7 @@ export class CoreGraph extends UniqueEntity {
     this.anchors = {};
     this.edgeDest = {};
     this.edgeSrc = {};
-    this.outputNodes = [];
+    this.outputNodes = new Set([]);
     this.uiInputs = {};
     // this.nodeList = [];
   }
@@ -158,7 +158,9 @@ export class CoreGraph extends UniqueEntity {
         this.anchors[anchor] = n.getAnchors[anchor];
       }
 
-      // TODO: Check if node is an output node and add it to the outputNode list
+      if (node.signature === "blix.output") {
+        this.outputNodes.add(n.uuid);
+      }
 
       // console.log(QueryResponseStatus.success)
       return { status: "success", data: { nodeId: n._uuid } };
@@ -216,7 +218,6 @@ export class CoreGraph extends UniqueEntity {
   }
 
   public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs): QueryResponse {
-    // console.log("UPDATE UI INPUTS", nodeUUID, nodeUIInputs);
     this.uiInputs[nodeUUID] = new CoreNodeUIInputs(nodeUIInputs);
 
     return { status: "success" };
@@ -251,6 +252,10 @@ export class CoreGraph extends UniqueEntity {
   public removeNode(nodeToDelete: UUID): QueryResponse {
     const node: Node = this.nodes[nodeToDelete];
     if (!node) return { status: "error", message: "Node to be deleted does not exist" };
+
+    if (this.outputNodes.has(nodeToDelete)) {
+      this.outputNodes.delete(nodeToDelete);
+    }
 
     try {
       // Remove all edges from node

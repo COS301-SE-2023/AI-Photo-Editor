@@ -6,6 +6,7 @@
   import Knob from "./nodeUICcomponents/Knob.svelte";
   import type { UIValueStore } from "@shared/ui/UIGraph";
   import Dropdown from "./nodeUICcomponents/Dropdown.svelte";
+  import TextInput from "./nodeUICcomponents/TextInput.svelte";
 
   export let leafUI: NodeUILeaf | null = null;
   export let inputStore: UIValueStore;
@@ -21,7 +22,7 @@
     Dropdown: Dropdown,
     Accordion: null,
     NumberInput: null,
-    TextInput: null,
+    TextInput: TextInput,
     Checkbox: null,
     ColorPicker: ColorPicker,
     FilePicker: null,

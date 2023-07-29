@@ -86,10 +86,21 @@ export class CoreGraphManager {
     const signature = this._graphs[graphUUID].getNodes[nodeUUID].getSignature;
 
     if (res.status === "success") {
-      // TODO: Determine whether the update should trigger the graph to recompute
-      const doGraphUpdate = this._toolbox.getNodeInstance(signature).ui;
+      // Determine whether the update should trigger the graph to recompute
+      const uiConfigs = this._toolbox.getNodeInstance(signature).uiConfigs;
+      const changes = nodeUIInputs.changes;
 
-      this.onGraphUpdated(graphUUID, ONLY_UI_INPUTS_UPDATED);
+      let shouldUpdate = false;
+      for (const change of changes) {
+        if (uiConfigs[change].updatesBackend) {
+          shouldUpdate = true;
+          break;
+        }
+      }
+
+      if (shouldUpdate) {
+        this.onGraphUpdated(graphUUID, ONLY_UI_INPUTS_UPDATED);
+      }
     }
     return res;
   }

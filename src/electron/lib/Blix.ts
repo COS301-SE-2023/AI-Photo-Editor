@@ -68,10 +68,16 @@ export class Blix {
         componentId: "export",
         label: "Export",
         defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
-        updateBackend: true,
+        updatesBackend: true,
       },
       {}
     );
+    outputUIBuilder.addTextInput({
+      componentId: "outputId",
+      label: "Export",
+      defaultValue: "Output-" + Math.round(10000 * Math.random()).toString(), // SUGGESTION: Use the default value to indicate the command to run?
+      updatesBackend: true,
+    });
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
 
@@ -82,12 +88,14 @@ export class Blix {
     // tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
     outputNodeBuilder.define(
       (
-        mediaOutput: { [key: string]: any },
+        result: { [key: string]: any },
         inputUI: { [key: string]: any },
         requiredOutputs: string[]
       ) => {
-        // logger.info("Result: ", mediaOutput);
-        mainWindow.apis.mediaClientApi.outputChanged(mediaOutput as MediaOutput);
+        // mainWindow.apis.mediaClientApi.outputChanged(mediaOutput as MediaOutput);
+        const mediaOutput: MediaOutput = result.mediaOutput;
+        mediaOutput.outputId = inputUI.outputId;
+        this._mediaManager.updateMedia(mediaOutput);
         return {};
       }
     );
@@ -132,6 +140,7 @@ export class Blix {
       // this._graphInterpreter.run(this._graphManager.getGraph(graphId));
       this._mediaManager.onGraphUpdated(graphId);
     };
+    this._graphManager.addAllSubscriber(mediaSubscriber);
 
     // REMOVED: In favor of checking for graph changes on the frontend instead
     // const mediaSubscriber = new BackendSystemGraphSubscriber();

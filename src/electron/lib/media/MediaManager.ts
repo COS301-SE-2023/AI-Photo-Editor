@@ -13,6 +13,7 @@ export class MediaManager {
 
   // Subscribers that are listening on the MediaManager
   private _subscribers: { [key: MediaOutputId]: MediaSubscriber[] };
+  private _mediaByGraph: { [key: UUID]: MediaOutputId[] };
 
   constructor(
     mainWindow: MainWindow,
@@ -21,21 +22,38 @@ export class MediaManager {
   ) {
     this._mainWindow = mainWindow;
     this._subscribers = {};
+    this._mediaByGraph = {};
     this._graphInterpreter = graphInterpreter;
     this._graphManager = graphManager;
 
     this.media = {};
+
+    // this.addSubscriber();
   }
 
   // addNode(graphMediaId: MediaOutputId, node: NodeInstance): QueryResponse<{ nodeId: MediaOutputId }> {
   //   if (res.status === "success") this.onMediaUpdated(graphUUID);
   // }
 
-  getMedia(uuid: MediaOutputId) {
-    return this.media[uuid];
+  updateMedia(mediaOutput: MediaOutput) {
+    this.media[mediaOutput.outputId] = mediaOutput;
+    this.onMediaUpdated(mediaOutput.outputId);
+  }
+
+  getMedia(mediaOutputId: MediaOutputId) {
+    return this.media[mediaOutputId];
   }
 
   onGraphUpdated(graphUUID: UUID) {
+    // Update media for all nodes that have subscribers
+
+    // Build set of outputs to recompute
+    const outputsToRecompute = new Set<MediaOutputId>();
+
+    // for (const mediaId of this._subscribersByGraph[graphUUID]) {
+    //   const subscribers = this._subscribers[mediaId];
+    // }
+
     // const media = this.computeMedia(graphUUID, nodeUUID, nodeUUID);
     // this.media[media.outputId] = media;
     // this.onMediaUpdated(media.outputId);
@@ -45,28 +63,13 @@ export class MediaManager {
   onMediaUpdated(mediaId: MediaOutputId) {
     if (this._subscribers[mediaId] !== undefined) {
       this._subscribers[mediaId].forEach((subscriber) => {
-        subscriber.onMediaChanged(mediaId, this.media[mediaId]);
-      });
-    }
-    if (this._subscribers.all !== undefined) {
-      this._subscribers.all.forEach((subscriber) => {
-        subscriber.onMediaChanged(mediaId, this.media[mediaId]);
+        subscriber.onMediaChanged(this.media[mediaId]);
       });
     }
   }
 
   computeMedia(graphUUID: UUID, nodeUUID: UUID, nodeMediaId: MediaOutputId) {
     return this._graphInterpreter.run(this._graphManager.getGraph(graphUUID), nodeUUID);
-  }
-
-  // Subscribe to all graph events
-  addAllSubscriber(subscriber: MediaSubscriber) {
-    if (this._subscribers.all === undefined) {
-      this._subscribers.all = [];
-    }
-
-    subscriber.subscriberIndex = this._subscribers.all.length;
-    this._subscribers.all.push(subscriber);
   }
 
   // Subscribe to a specific graph's events

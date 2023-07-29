@@ -56,7 +56,10 @@ export class GraphStore {
           const toolboxNode = toolboxStore.getNode(graph.nodes[node].signature);
 
           if (toolboxNode.ui) {
-            graph.nodes[node].inputUIValues = constructUIValueStore(toolboxNode.ui);
+            graph.nodes[node].inputUIValues = constructUIValueStore(
+              toolboxNode.ui,
+              toolboxNode.uiConfigs
+            );
 
             const inputs = graph.nodes[node].inputUIValues.inputs;
 
@@ -64,7 +67,7 @@ export class GraphStore {
               // console.log("SUB TO", node, "->", input);
               this.uiInputUnsubscribers[node] = inputs[input].subscribe(() => {
                 // console.log("UPDATE UI INPUTS", node, "->", input);
-                this.updateUIInputs(node).catch((err) => {
+                this.updateUIInputs(node, input).catch((err) => {
                   return;
                 });
               });
@@ -106,13 +109,13 @@ export class GraphStore {
     return res.status;
   }
 
-  async updateUIInputs(nodeUUID: GraphNodeUUID) {
+  async updateUIInputs(nodeUUID: GraphNodeUUID, inputId: string) {
     const thisUUID = get(this.graphStore).uuid;
     const node = get(this.graphStore).nodes[nodeUUID];
     const nodeInputs = node.inputUIValues;
 
     // Extract values from stores
-    const payload: INodeUIInputs = { inputs: {} };
+    const payload: INodeUIInputs = { inputs: {}, changes: [inputId] };
 
     for (const input of Object.keys(nodeInputs.inputs)) {
       payload.inputs[input] = get(nodeInputs.inputs[input]);

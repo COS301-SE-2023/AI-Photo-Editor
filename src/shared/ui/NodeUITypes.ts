@@ -1,4 +1,9 @@
-import type { UIValue } from "@shared/types";
+export type UIComponentConfig = {
+  label: string;
+  componentId: string;
+  defaultValue: unknown;
+  updatesBackend: boolean;
+};
 
 export abstract class NodeUI {
   constructor(
@@ -21,8 +26,7 @@ export class NodeUILeaf extends NodeUI {
     public readonly parent: NodeUIParent,
     public readonly category: NodeUIComponent,
     public readonly label: string,
-    public readonly params: any[],
-    public readonly defaultValue: UIValue
+    public readonly params: any[]
   ) {
     super(parent, label, params, "leaf");
   }

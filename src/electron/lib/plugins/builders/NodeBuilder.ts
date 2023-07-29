@@ -1,6 +1,11 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
 import { type MinAnchor, type NodeFunc, NodeInstance } from "../../registries/ToolboxRegistry";
-import { NodeUIComponent, NodeUILeaf, NodeUIParent } from "../../../../shared/ui/NodeUITypes";
+import {
+  NodeUIComponent,
+  NodeUILeaf,
+  NodeUIParent,
+  type UIComponentConfig,
+} from "../../../../shared/ui/NodeUITypes";
 
 type PartialNode = {
   name: string;
@@ -11,6 +16,7 @@ type PartialNode = {
   inputs: MinAnchor[];
   outputs: MinAnchor[];
   ui: NodeUIParent | null;
+  uiConfigs: { [key: string]: UIComponentConfig };
   func: NodeFunc;
 };
 
@@ -30,6 +36,7 @@ export class NodeBuilder implements PluginContextBuilder {
       inputs: [],
       outputs: [],
       ui: null,
+      uiConfigs: {},
       func: () => ({}),
     };
   }
@@ -44,7 +51,8 @@ export class NodeBuilder implements PluginContextBuilder {
       this.partialNode.inputs,
       this.partialNode.outputs,
       this.partialNode.func,
-      this.partialNode.ui
+      this.partialNode.ui,
+      this.partialNode.uiConfigs
     );
   }
 
@@ -117,15 +125,9 @@ export class NodeBuilder implements PluginContextBuilder {
 
   public setUI(ui: NodeUIBuilder) {
     this.partialNode.ui = ui.getUI();
+    this.partialNode.uiConfigs = ui.getUIConfigs();
   }
 }
-
-type UIComponentConfig = {
-  label: string;
-  componentId: string;
-  defaultValue: unknown;
-  updateBackend: boolean;
-};
 
 type ComponentProps = {
   [key: string]: unknown;
@@ -139,22 +141,22 @@ type ComponentProps = {
 
 export class NodeUIBuilder {
   private node: NodeUIParent;
+  private uiConfigs: { [key: string]: UIComponentConfig };
 
   constructor() {
     this.node = new NodeUIParent("", null);
+    this.uiConfigs = {};
   }
 
   public addKnob(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(
-        this.node,
-        NodeUIComponent.Knob,
-        config.componentId,
-        [min, max, step],
-        config.defaultValue ?? 0
-      )
+      new NodeUILeaf(this.node, NodeUIComponent.Knob, config.componentId, [min, max, step])
     );
-
+    this.uiConfigs[config.componentId] = {
+      ...config,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
@@ -165,14 +167,13 @@ export class NodeUIBuilder {
    * */
   public addButton(config: UIComponentConfig, props: ComponentProps): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(
-        this.node,
-        NodeUIComponent.Button,
-        config.componentId,
-        [props],
-        config.defaultValue ?? ""
-      )
+      new NodeUILeaf(this.node, NodeUIComponent.Button, config.componentId, [props])
     );
+    this.uiConfigs[config.componentId] = {
+      ...config,
+      defaultValue: config.defaultValue ?? "",
+      updatesBackend: config.updatesBackend ?? false,
+    };
     return this;
   }
 
@@ -186,28 +187,26 @@ export class NodeUIBuilder {
    */
   public addSlider(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(
-        this.node,
-        NodeUIComponent.Slider,
-        config.componentId,
-        [min, max, step],
-        config.defaultValue ?? 0
-      )
+      new NodeUILeaf(this.node, NodeUIComponent.Slider, config.componentId, [min, max, step])
     );
+    this.uiConfigs[config.componentId] = {
+      ...config,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+    };
 
     return this;
   }
 
   public addDropdown(config: UIComponentConfig, options: { [key: string]: any }): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(
-        this.node,
-        NodeUIComponent.Dropdown,
-        config.componentId,
-        [options],
-        config.defaultValue ?? Object.keys(options)[0]
-      )
+      new NodeUILeaf(this.node, NodeUIComponent.Dropdown, config.componentId, [options])
     );
+    this.uiConfigs[config.componentId] = {
+      ...config,
+      defaultValue: config.defaultValue ?? Object.keys(options)[0],
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
@@ -228,16 +227,31 @@ export class NodeUIBuilder {
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
    * */
+  public addTextInput(config: UIComponentConfig): NodeUIBuilder {
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.TextInput, config.componentId, [])
+    );
+    this.uiConfigs[config.componentId] = {
+      ...config,
+      defaultValue: config.defaultValue ?? "empty",
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
+
+  /**
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   * */
   public addNumberInput(config: UIComponentConfig): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(
-        this.node,
-        NodeUIComponent.NumberInput,
-        config.componentId,
-        [],
-        config.defaultValue ?? 0
-      )
+      new NodeUILeaf(this.node, NodeUIComponent.NumberInput, config.componentId, [])
     );
+    this.uiConfigs[config.componentId] = {
+      ...config,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
@@ -247,14 +261,13 @@ export class NodeUIBuilder {
    * */
   public addImageInput(config: UIComponentConfig): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(
-        this.node,
-        NodeUIComponent.FilePicker,
-        config.componentId,
-        [],
-        config.defaultValue ?? ""
-      )
+      new NodeUILeaf(this.node, NodeUIComponent.FilePicker, config.componentId, [])
     );
+    this.uiConfigs[config.componentId] = {
+      ...config,
+      defaultValue: config.defaultValue ?? "",
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
@@ -265,20 +278,23 @@ export class NodeUIBuilder {
   // We need to discuss how to handle color pickers
   public addColorPicker(config: UIComponentConfig, param: any): NodeUIBuilder {
     this.node.params.push(
-      new NodeUILeaf(
-        this.node,
-        NodeUIComponent.ColorPicker,
-        config.componentId,
-        [param],
-        config.defaultValue ?? "#000000"
-      )
+      new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, config.componentId, [param])
     );
+    this.uiConfigs[config.componentId] = {
+      ...config,
+      defaultValue: config.defaultValue ?? "#000000",
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
   // This needs to get sandboxed! Cant allow user access to getUI
   public getUI() {
     return this.node;
+  }
+
+  public getUIConfigs() {
+    return this.uiConfigs;
   }
 
   /**
@@ -288,14 +304,13 @@ export class NodeUIBuilder {
    * */
   public addLabel(config: UIComponentConfig, param: string) {
     this.node.params.push(
-      new NodeUILeaf(
-        this.node,
-        NodeUIComponent.Label,
-        config.componentId,
-        [param],
-        config.defaultValue ?? "empty"
-      )
+      new NodeUILeaf(this.node, NodeUIComponent.Label, config.componentId, [param])
     );
+    this.uiConfigs[config.componentId] = {
+      ...config,
+      defaultValue: config.defaultValue ?? "empty",
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 }

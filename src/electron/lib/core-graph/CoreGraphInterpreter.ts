@@ -146,7 +146,7 @@ export class CoreGraphInterpreter {
               graph.getEdgeDest[Object.values(curr.getAnchors)[0]._uuid].getAnchorFrom
             ].type
           : "",
-        outputId: "TODO",
+        outputId: "default", // This gets replaced within func()
         outputNodeUUID: curr.uuid,
         graphUUID: graph.uuid,
       };
@@ -156,7 +156,7 @@ export class CoreGraphInterpreter {
           .getNodeInstance(curr.getSignature)
           // OLD: .func({ input: mediaOutput, from: anchorIn.anchorId })
           // TODO: Move to new system
-          .func(mediaOutput, {}, [])
+          .func({ mediaOutput }, {}, [])
       );
 
       return output;
