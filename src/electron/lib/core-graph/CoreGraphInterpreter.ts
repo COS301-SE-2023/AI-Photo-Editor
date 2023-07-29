@@ -156,7 +156,7 @@ export class CoreGraphInterpreter {
           .getNodeInstance(curr.getSignature)
           // OLD: .func({ input: mediaOutput, from: anchorIn.anchorId })
           // TODO: Move to new system
-          .func({ mediaOutput }, {}, [])
+          .func({ mediaOutput }, graph.getUIInputs(curr.uuid) || {}, [])
       );
 
       return output;
