@@ -1,6 +1,10 @@
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
+import { IPCGraphSubscriber } from "../../core-graph/CoreGraphInteractors";
+import { UIGraph } from "@shared/ui/UIGraph";
+import { NodeInstance } from "../../registries/ToolboxRegistry";
+import { type NodeSignature } from "@shared/ui/ToolboxTypes";
 
 // Graphs across projects are stored homogeneously and referenced by UUID
 export class GraphApi implements ElectronMainApi<GraphApi> {
@@ -10,28 +14,29 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
     this._blix = blix;
   }
 
-  async addNode(graphUUID: UUID) {
-    // TODO: This will have to be done through a graph subscriber eventually,
-    //       but for now we'll just modify the graph state directly with the setters.
-    // this._blix.graphManager.getGraph(graphUUID).addNode();
-    return;
+  // TODO: Implement these properly
+  async addNode(graphUUID: UUID, nodeSignature: NodeSignature) {
+    return this._blix.graphManager.addNode(
+      graphUUID,
+      this._blix.toolbox.getNodeInstance(nodeSignature)
+      // new NodeInstance("fdsa2", "fdsa3", "fdsa4", "fdsa5", "fdsa6", [], [])
+    );
   }
 
-  async addEdge(graphUUID: UUID) {
-    // this._blix.graphManager.getGraph(graphUUID).addEdge();
-    return;
+  async addEdge(graphUUID: UUID, anchorA: UUID, anchorB: UUID) {
+    return this._blix.graphManager.addEdge(graphUUID, anchorA, anchorB);
   }
 
-  async removeNode(graphUUID: UUID) {
-    return;
+  async removeNode(graphUUID: UUID, nodeUUID: UUID) {
+    return this._blix.graphManager.removeNode(graphUUID, nodeUUID);
   }
 
-  async removeEdge(graphUUID: UUID) {
-    return;
+  async removeEdge(graphUUID: UUID, anchorTo: UUID) {
+    return this._blix.graphManager.removeEdge(graphUUID, anchorTo);
   }
 
-  async setNodePos(uuid: UUID) {
-    return this._blix.graphManager.getGraph(uuid);
+  async setNodePos(graphUUID: UUID, nodeUUID: UUID, pos: { x: number; y: number }) {
+    return this._blix.graphManager.setPos(graphUUID, nodeUUID, pos.x, pos.y);
   }
 
   async getGraph(uuid: UUID) {

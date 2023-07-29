@@ -1,6 +1,6 @@
 <!-- This pane is for showing media content large-scale -->
 <script lang="ts">
-  import Image from "../utils/Image.svelte";
+  import Image from "../../ui/utils/Image.svelte";
 
   let options = ["None selected"];
   let showSoHot = false;
@@ -37,10 +37,11 @@
         }}"
         on:keydown="{null}"
       >
-        <Image src="images/svelte-so-hot.jpg" />
+        <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" />
       </div>
     {/if}
   </div>
+  <button on:click="{null}">Testing</button>
 </div>
 
 <style>

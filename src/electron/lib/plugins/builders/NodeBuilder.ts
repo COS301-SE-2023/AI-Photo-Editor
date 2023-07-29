@@ -1,82 +1,173 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
-import { NodeInstance, NodeUIParent } from "../../registries/ToolboxRegistry";
+import { type MinAnchor, type NodeFunc, NodeInstance } from "../../registries/ToolboxRegistry";
+import { NodeUIComponent, NodeUILeaf, NodeUIParent } from "../../../../shared/ui/NodeUITypes";
 
+type PartialNode = {
+  name: string;
+  plugin: string;
+  displayName: string;
+  description: string;
+  icon: string;
+  inputs: MinAnchor[];
+  outputs: MinAnchor[];
+  ui: NodeUIParent | null;
+  func: NodeFunc;
+};
+
+// TODO: Verification must be done in all these setter functions
+//       that the type expected at runtime is what's actually being received.
+//       See: [https://stackoverflow.com/a/44078574] / (Runtime type checking)
 export class NodeBuilder implements PluginContextBuilder {
-  constructor(node: NodeInstance) {
-    this.node = node;
-    this.ui = null;
+  private partialNode: PartialNode;
+
+  constructor(plugin: string, name: string) {
+    this.partialNode = {
+      name,
+      plugin,
+      displayName: name,
+      description: "",
+      icon: "",
+      inputs: [],
+      outputs: [],
+      ui: null,
+      func: () => null,
+    };
   }
 
-  private node: NodeInstance;
-  private ui: NodeUIParent | null;
-
-  public validate(): void {
-    if (this.node.getSignature === "" || this.node.getSignature === null) {
-      throw new Error("Node is not instantiated");
-    }
-
-    if (this.ui != null) {
-      this.node.setUI(this.ui);
-    }
-    return;
+  get build(): NodeInstance {
+    return new NodeInstance(
+      this.partialNode.name,
+      this.partialNode.plugin,
+      this.partialNode.displayName,
+      this.partialNode.description,
+      this.partialNode.icon,
+      this.partialNode.inputs,
+      this.partialNode.outputs,
+      this.partialNode.func,
+      this.partialNode.ui
+    );
   }
 
-  get build(): any {
-    return null;
-  }
+  /**
+   *
+   * @param title Title of the node
+   *
+   * */
 
   public setTitle(title: string): void {
-    this.node.setTitle(title);
+    this.partialNode.displayName = title;
   }
 
   public setDescription(description: string): void {
-    this.node.setDescription(description);
+    this.partialNode.description = description;
   }
 
-  public instantiate(plugin: string, name: string): void {
-    if (plugin === "" || name === "") {
-      throw new Error("Plugin or name is not instantiated");
-    }
-
-    this.node.instantiate(plugin, name);
-  }
+  /**
+   *
+   * @param icon Icon to be displayed on the node
+   *
+   */
 
   public addIcon(icon: string): void {
-    this.node.setIcon(icon);
+    this.partialNode.icon = icon;
   }
 
-  public addInput(type: string, anchorname: string): void {
-    this.node.addInput(type, anchorname);
+  /**
+   * @param type type of input
+   * @param identifier  Unique identifier for the node
+   * @param displayName Node name to display
+   */
+
+  public addInput(type: string, identifier: string, displayName: string): void {
+    this.partialNode.inputs.push({ type, identifier, displayName });
   }
 
-  public addOutput(type: string, anchorname: string): void {
-    this.node.addOutput(type, anchorname);
+  /**
+   *
+   * @param type type of output
+   * @param identifier  Unique identifier for the node
+   * @param displayName Node name to display
+   */
+
+  public addOutput(type: string, identifier: string, displayName: string): void {
+    this.partialNode.outputs.push({ type, identifier, displayName });
   }
+
+  /**
+   * Creates a new nodeUIBuilder for the node
+   * @returns NodeUIBuilder
+   */
 
   public createUIBuilder(): NodeUIBuilder {
-    const node = new NodeUIParent("", null);
-    const builder = new NodeUIBuilder(node);
+    const builder = new NodeUIBuilder();
 
-    if (this.ui == null) this.ui = node; // set root node automatically
+    // if (this.ui == null) this.ui = node; // set root node automatically
     return builder;
   }
 
-  public define(code: any) {
-    this.node.setFunction(code);
+  public define(code: NodeFunc) {
+    this.partialNode.func = code;
   }
 
+  /**
+   *
+   * Sets the nodeUIBuilder for the node
+   * @param ui NodeUIBuilder that will be used to build the UI
+   * */
+
   public setUI(ui: NodeUIBuilder) {
-    this.ui = ui.getUI();
+    this.partialNode.ui = ui.getUI();
   }
 }
 
-export class NodeUIBuilder {
-  constructor(private node: NodeUIParent) {}
+/**
+ *
+ * Builds the nodes's ui through restricted interface
+ *
+ * */
 
-  public addButton(label: string, param: any): NodeUIBuilder {
-    this.node.addButton(label, param);
+export class NodeUIBuilder {
+  private node: NodeUIParent;
+
+  constructor() {
+    this.node = new NodeUIParent("", null);
+  }
+
+  public addKnob(
+    label: string,
+    min: number,
+    max: number,
+    step: number,
+    defautlVal: number
+  ): NodeUIBuilder {
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.Knob, label, [min, max, step, defautlVal])
+    );
+
     return this;
   }
+
+  /**
+   *
+   * @param label Label for the button
+   * @param param Parameter for the button
+   * @returns callback to this NodeUIBuilder
+   * */
+
+  public addButton(label: string, param: any): NodeUIBuilder {
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Button, label, [param]));
+    return this;
+  }
+
+  /**
+   *
+   * @param label Label for the slider
+   * @param min Minimum value for the slider
+   * @param max Maximum value for the slider
+   * @param step Change in value for the slider
+   * @param defautlVal Default value
+   * @returns callback to this NodeUIBuilder
+   */
 
   public addSlider(
     label: string,
@@ -85,28 +176,62 @@ export class NodeUIBuilder {
     step: number,
     defautlVal: number
   ): NodeUIBuilder {
-    this.node.addSlider(label, min, max, step, defautlVal);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.Slider, label, [min, max, step, defautlVal])
+    );
+
     return this;
   }
+
+  /**
+   *
+   * @param label Label for the dropdown
+   * @param builder NodeUIBuilder for the dropdown
+   * @returns callback to this NodeUIBuilder
+   *
+   * */
 
   public addDropdown(label: string, builder: NodeUIBuilder): NodeUIBuilder {
-    this.node.addDropdown(label, builder.node);
+    builder.node.label = label;
+    builder.node.parent = this.node;
+    this.node.params.push(builder.node);
     return this;
   }
+
+  /**
+   *
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   *
+   * */
 
   public addNumberInput(label: string): NodeUIBuilder {
-    this.node.addNumberInput(label);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.NumberInput, label, []));
     return this;
   }
 
+  /**
+   *
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   *
+   * */
+
   public addImageInput(label: string): NodeUIBuilder {
-    this.node.addImageInput(label);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.FilePicker, label, []));
     return this;
   }
+
+  /**
+   *
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   *
+   * */
 
   // We need to discuss how to handle color pickers
   public addColorPicker(label: string, param: any): NodeUIBuilder {
-    this.node.addColorPicker(label, param);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, label, [param]));
     return this;
   }
 
@@ -115,8 +240,16 @@ export class NodeUIBuilder {
     return this.node;
   }
 
+  /**
+   *
+   * @param label Label for the text input
+   * @param param Parameter for the text input
+   * @returns callback to this NodeUIBuilder
+   *
+   * */
+
   public addLabel(label: string, param: string) {
-    this.node.addLabel(label, param);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Label, label, [param]));
     return this;
   }
 }

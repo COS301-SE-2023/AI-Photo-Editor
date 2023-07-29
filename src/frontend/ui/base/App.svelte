@@ -1,13 +1,29 @@
 <script lang="ts">
-  import { init } from "../../lib/Blix";
+  import { onMount } from "svelte";
   import { blixStore } from "../../lib/stores/BlixStore";
   import Navbar from "./Navbar.svelte";
-
   import Layout from "./layout/Layout.svelte";
   import Palette from "./palette/Palette.svelte";
+  import Toasts from "../../ui/utils/toasts/Toasts.svelte";
+  import { initAPIs } from "../../lib/api/apiInitializer";
+  import ContextMenu from "../../ui/utils/ContextMenu.svelte";
+  import Test from "./Test.svelte";
+
+  const testing = false;
+
+  onMount(async () => {
+    await initAPIs();
+  });
 </script>
 
-{#await init() then}
+{#if $blixStore.blixReady && testing}
+  <Test />
+{:else if !$blixStore.blixReady && testing}
+  <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
+    <span class="text-5xl text-purple-400">Loading</span>
+  </div>
+  <div></div>
+{:else if $blixStore.blixReady}
   <div class="h-screen w-screen bg-zinc-800 p-0">
     <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
       <Navbar />
@@ -15,7 +31,15 @@
     <div class="layout"><Layout /></div>
     <Palette />
   </div>
-{/await}
+{:else}
+  <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
+    <span class="text-5xl text-purple-400">Loading</span>
+  </div>
+  <div></div>
+{/if}
+
+<Toasts />
+<ContextMenu />
 
 <style lang="postcss" global>
   @tailwind base;

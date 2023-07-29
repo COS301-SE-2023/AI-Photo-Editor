@@ -6,7 +6,7 @@
   import Shortcuts from "../../utils/Shortcuts.svelte";
 
   let showPalette = false;
-  let expanded = false;
+  let expanded = true;
   let inputElement: HTMLInputElement;
   let searchTerm = "";
 
@@ -118,15 +118,31 @@
     }
   }
 
+  function openPalette() {
+    showPalette = true;
+    searchTerm = "";
+    selectedCategory = 0;
+    selectedItem = 0;
+    categories = categoriesOriginals;
+  }
+
+  function closePalette() {
+    showPalette = false;
+  }
+
   const shortcuts = {
     "blix.palette.toggle": () => {
-      showPalette = !showPalette;
+      if (showPalette) {
+        closePalette();
+      } else {
+        openPalette();
+      }
     },
     "blix.palette.show": () => {
-      showPalette = true;
+      openPalette();
     },
     "blix.palette.hide": () => {
-      showPalette = false;
+      closePalette();
     },
     "blix.palette.scrollDown": () => {
       selectedItem++;
@@ -148,26 +164,21 @@
     showPalette = false;
 
     console.log(item);
-    commandStore.runCommand(item.signature);
+    commandStore.runCommand(item.id);
   }
 
-  $: if (showPalette && inputElement) {
-    inputElement.focus();
-  }
+  $: inputElement?.focus();
 
-  $: if (showPalette) {
-    searchTerm = "";
-    expanded = true;
-    selectedCategory = 0;
-    selectedItem = 0;
-    categories = categoriesOriginals;
+  $: {
+    selectedCategory;
+    selectedItem;
     repairItemIndex();
   }
 </script>
 
 {#if showPalette}
   <div
-    class="fixed inset-x-0 top-48 z-50 m-auto flex w-[40%] min-w-[400px] flex-col items-center overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
+    class="fixed inset-x-0 top-48 z-[6969669669696969] m-auto flex w-[40%] min-w-[400px] flex-col items-center overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
   >
     <!-- Header -->
     <header class="flex w-full items-center px-3">
@@ -195,10 +206,8 @@
               <ul>
                 {#each category.items as item, j}
                   <PaletteItem
-                    title="{item.displayName}"
-                    description="{item.signature.split('.')[0] === 'base-plugin'
-                      ? 'Default'
-                      : item.signature.split('.')[0]}"
+                    title="{item.name}"
+                    description="{item.id.split('.')[0]}"
                     selected="{i == selectedCategory && j == selectedItem}"
                     on:itemClicked="{() => handleAction(item)}"
                   />

@@ -18,7 +18,9 @@
   import Debug from "../../tiles/Debug.svelte";
   import WebView from "../../tiles/WebView.svelte";
   import ShortcutSettings from "../../tiles/ShortcutSettings.svelte";
-  import { PanelGroup, PanelLeaf, type PanelNode, type PanelType } from "@frontend/lib/PanelNode";
+  import { PanelGroup, PanelLeaf, type PanelNode } from "@frontend/lib/PanelNode";
+  import type { PanelType } from "@shared/types";
+  import { focusedPanelStore } from "../../../lib/PanelNode";
 
   // import { scale } from "svelte/transition";
 
@@ -171,7 +173,7 @@
   }
 
   // This dict defines mappings from PanelType to the corresponding Svelte component to render
-  const panelTypeToComponent: { [key: PanelType]: ConstructorOfATypedSvelteComponent } = {
+  const panelTypeToComponent: Record<PanelType, ConstructorOfATypedSvelteComponent> = {
     graph: Graph,
     media: Media,
     debug: Debug,
@@ -229,7 +231,14 @@
   <!-- </div> -->
 {:else if layout instanceof PanelLeaf}
   <!-- Actual panel content goes here -->
-  <div class="fullPanel">
+  <!-- When a panel is clicked, a store is updated to hold the focussed panel -->
+  <div
+    class="fullPanel"
+    on:click="{() => {
+      focusedPanelStore.focusOnPanel(layout.id);
+    }}"
+    on:keydown="{null}"
+  >
     <!-- {#if layout.content === "graph"}
       <Graph />
     {:else if layout.content === "image"}

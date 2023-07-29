@@ -1,5 +1,7 @@
 import expect from "expect";
-import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, NodeUIParent, NodeUILeaf,ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
+import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
+import { NodeUIBuilder } from "../../../../../src/electron/lib/plugins/builders/NodeBuilder"
+import { NodeUILeaf, NodeUIParent } from "../../../../../src/shared/ui/NodeUITypes";
 
 describe("Test toolbox", () => {
 
@@ -115,8 +117,8 @@ describe("Test anchors", () => {
 
 
   test("addInputAnchor should add input anchor", () => {
-    node.addInput("string","anchor1");
-    const id = node.getPlugin + "." + node.getName + "." + "anchor1";
+    node.addInput("string","anchor1", 0);
+    const id = node.getPlugin + "." + node.getName + "." + "anchor1." + 0;
 
     expect(node.getInputAnchorInstances[0].displayName).toEqual("anchor1");
     expect(node.getInputAnchorInstances[0].type).toEqual("string");
@@ -125,8 +127,8 @@ describe("Test anchors", () => {
   });
 
   test("addOutputAnchor should add output anchor", () => {
-    node.addOutput("string","anchor2");
-    const id = node.getPlugin + "." + node.getName + "." + "anchor2";
+    node.addOutput("string","anchor2", 0);
+    const id = node.getPlugin + "." + node.getName + "." + "anchor2" + "." + 0;
 
     expect(node.getOutputAnchorInstances[0].displayName).toEqual("anchor2");
     expect(node.getOutputAnchorInstances[0].type).toEqual("string");
@@ -137,10 +139,12 @@ describe("Test anchors", () => {
 
 describe("Test Node ui", () => {
   let node : NodeUIParent;
+  let builder: NodeUIBuilder;
 
   beforeEach(() => {
     jest.clearAllMocks();
     node = new NodeUIParent("Root",null);
+    builder = new NodeUIBuilder(node);
   });
 
   test("nodeParent should be instantiated properly", () => {
@@ -163,7 +167,7 @@ describe("Test Node ui", () => {
   });
 
   test("nodeParent should add button", () => {
-    node.addButton("Button",() => {
+    builder.addButton("Button",() => {
          return 1;
         });
       
@@ -174,7 +178,7 @@ describe("Test Node ui", () => {
   });
 
   test("nodeParent should add Slider", () => {
-    node.addSlider("Slider",0,100,50,1);
+    builder.addSlider("Slider",0,100,50,1);
       
     expect(node.params[0].label).toEqual("Slider");
     expect(node.params[0].parent).toEqual(node);
@@ -188,7 +192,9 @@ describe("Test Node ui", () => {
   test("nodeParent should add Dropdown", () => {
 
     const nod = new NodeUIParent("Root",null);
-    node.addDropdown("My Dropdown",nod);
+    const builder2 = new NodeUIBuilder(nod);
+
+    builder.addDropdown("My Dropdown", builder2);
       
     expect(node.params[0].label).toEqual("My Dropdown");
     expect(node.params[0].parent).toEqual(node);
@@ -197,7 +203,7 @@ describe("Test Node ui", () => {
   });
 
   test("nodeParent should add Label", () => {
-    node.addLabel("My label","Attack the D point!");
+    builder.addLabel("My label","Attack the D point!");
       
     expect(node.params[0].label).toEqual("My label");
     expect(node.params[0].parent).toEqual(node);
@@ -206,7 +212,7 @@ describe("Test Node ui", () => {
   });
 
   test("nodeParent should add numberInput", () => {
-    node.addNumberInput("input number");
+    builder.addNumberInput("input number");
       
     expect(node.params[0].label).toEqual("input number");
     expect(node.params[0].parent).toEqual(node);
@@ -214,7 +220,7 @@ describe("Test Node ui", () => {
   });
 
   test("nodeParent should add imageInput", () => {
-    node.addImageInput("Image input");
+    builder.addImageInput("Image input");
       
     expect(node.params[0].label).toEqual("Image input");
     expect(node.params[0].parent).toEqual(node);
@@ -223,7 +229,7 @@ describe("Test Node ui", () => {
 
 //This must change later to match data type
   test("nodeParent should add colorInput", () => {
-    node.addColorPicker("a color picker",1);
+    builder.addColorPicker("a color picker",1);
       
     expect(node.params[0].label).toEqual("a color picker");
     expect(node.params[0].parent).toEqual(node);

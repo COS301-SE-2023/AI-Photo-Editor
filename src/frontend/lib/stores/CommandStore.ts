@@ -1,6 +1,6 @@
-import { writable } from "svelte/store";
-import type { ICommand } from "../../../shared/types/index";
-import { projectManager } from "./ProjectStore";
+import { writable, get } from "svelte/store";
+import { projectsStore } from "./ProjectStore";
+import type { ICommand } from "@shared/types";
 
 interface CommandStore {
   commands: ICommand[];
@@ -21,15 +21,12 @@ function createCommandStore() {
     // window.apis.pluginApi.addCommand(cmds);
   }
 
-  async function runCommand(cmd: string) {
-    let options: { data: any } = { data: null };
-    // console.log(cmd)
-    // console.log(projectManager.getActiveProject().getId())
-    if (cmd === "base-plugin.saveas") {
-      options = { data: projectManager.getActiveProject().getId() };
+  async function runCommand(id: string) {
+    if (id in blixCommandParams) {
+      await window.apis.commandApi.runCommand(id, blixCommandParams[id]());
+    } else {
+      await window.apis.commandApi.runCommand(id);
     }
-    // console.log(options.data)
-    await window.apis.commandApi.runCommand(cmd, options);
   }
 
   return {
@@ -39,5 +36,30 @@ function createCommandStore() {
     refreshStore,
   };
 }
+
+// ========== Native Command Parameters ==========
+
+const blixCommandParams: Record<string, () => any> = {
+  "blix.projects.save": () => {
+    const project = get(projectsStore).activeProject;
+    return {
+      projectId: project?.id,
+      layout: project?.layout.saveLayout(),
+    };
+  },
+  "blix.projects.saveAs": () => {
+    const project = get(projectsStore).activeProject;
+    return {
+      projectId: project?.id,
+      layout: project?.layout.saveLayout(),
+    };
+  },
+  "blix.graphs.create": () => {
+    const project = get(projectsStore).activeProject;
+    return {
+      projectId: project?.id,
+    };
+  },
+};
 
 export const commandStore = createCommandStore();

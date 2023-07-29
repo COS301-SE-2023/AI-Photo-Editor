@@ -1,8 +1,9 @@
 // N-way tree of panels
 
-export type PanelType = string;
+import type { LayoutPanel, PanelType } from "@shared/types/index";
+import { writable } from "svelte/store";
 
-export class PanelNode {
+export abstract class PanelNode {
   static panelCounter = 0;
 
   constructor(id = -1) {
@@ -18,6 +19,9 @@ export class PanelNode {
   parent: PanelGroup | null;
   index: number;
   id: number; // Unique ID for each panel, helps Svelte with keying
+  // IMPORTANT: If id is replaced with a string at some point,
+  //            that string _cannot_ contain the "_" character because
+  //            we use that to do string splitting in Graph.svelte
   size?: number;
 }
 
@@ -55,6 +59,7 @@ export class PanelGroup extends PanelNode {
         this.parent.removePanel(this.index);
       }
     }
+    this.updateParent(this);
   }
   setPanel(panel: PanelNode, i: number) {
     const tempId = this.panels[i].id;
@@ -68,6 +73,8 @@ export class PanelGroup extends PanelNode {
     this.panels.splice(i, 0, newLeaf);
     newLeaf.parent = this;
     newLeaf.index = i;
+
+    this.updateParent(this);
   }
   addPanelGroup(panelGroup: PanelGroup, i: number) {
     this.panels.splice(i, 0, panelGroup);
@@ -78,8 +85,16 @@ export class PanelGroup extends PanelNode {
     return this.panels[i];
   }
 
+  updateParent(_current: PanelGroup) {
+    let current = _current;
+    while (current.parent != null) {
+      current = current.parent;
+    }
+    current = current;
+  }
+
   // Print tree for debug
-  print(indent = 0): string {
+  public print(indent = 0): string {
     let res;
     if (this.parent) {
       res = `${this.name}[${this.parent?.name}](${this.index})\n`;
@@ -112,6 +127,20 @@ export class PanelGroup extends PanelNode {
       }
     }
   }
+
+  public saveLayout(): LayoutPanel {
+    const p: LayoutPanel = {
+      panels: [],
+    };
+    for (const panel of this.panels) {
+      if (panel instanceof PanelGroup) {
+        p.panels?.push(panel.saveLayout());
+      } else if (panel instanceof PanelLeaf) {
+        p.panels?.push({ content: panel.content });
+      }
+    }
+    return p;
+  }
 }
 
 export class PanelLeaf extends PanelNode {
@@ -120,3 +149,19 @@ export class PanelLeaf extends PanelNode {
     this.parent = null;
   }
 }
+/**
+ * This store house the last panel clicked by the user.
+ */
+class FocusedPanelStore {
+  private readonly store = writable<number>(-1);
+
+  public focusOnPanel(id: number) {
+    this.store.set(id);
+  }
+
+  public get subscribe() {
+    return this.store.subscribe;
+  }
+}
+
+export const focusedPanelStore = new FocusedPanelStore();

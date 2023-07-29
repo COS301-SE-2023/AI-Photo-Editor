@@ -1,38 +1,40 @@
 import type { UUID } from "@shared/utils/UniqueEntity";
 import { PanelGroup } from "./PanelNode";
+import type { LayoutPanel } from "@shared/types/index";
 
-export class Project {
-  private _name: string;
-  private readonly _uuid: UUID;
-  private _layout: PanelGroup;
-
-  constructor(name: string, uuid: UUID) {
-    this._name = name;
-    this._uuid = uuid;
-    this._layout = new PanelGroup("1");
-
-    const group1 = new PanelGroup("2");
-
-    group1.addPanel("media", 0);
-    group1.addPanel("shortcutSettings", 1);
-
-    this._layout.addPanelGroup(group1, 0);
-    this._layout.addPanel("debug", 2);
-    this._layout.addPanel("graph", 3);
-  }
-
-  public get uuid() {
-    return this._uuid;
-  }
-  public set name(name: string) {
-    this._name = name;
-  }
-
-  public get name() {
-    return this._name;
-  }
-
-  public get layout() {
-    return this._layout;
-  }
+export interface UIProject {
+  readonly id: UUID;
+  readonly name: string;
+  readonly layout: PanelGroup;
+  readonly graphs: UUID[];
 }
+
+let groupTest = 0;
+
+export function constructLayout(layout: LayoutPanel): PanelGroup {
+  const group = new PanelGroup((groupTest++).toString());
+  if (layout.panels) {
+    for (const panel of layout.panels) {
+      if (panel.panels) {
+        group.addPanelGroup(constructLayout(panel), panel.panels.length);
+      } else {
+        if (panel.content) {
+          group.addPanel(panel.content, layout.panels.length);
+        }
+      }
+    }
+    return group;
+  }
+  return group;
+}
+
+export const layoutTemplate: LayoutPanel = {
+  panels: [
+    {
+      content: "debug",
+    },
+    {
+      content: "graph",
+    },
+  ],
+};

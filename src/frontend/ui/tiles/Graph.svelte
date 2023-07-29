@@ -1,37 +1,233 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Svelvet } from "svelvet";
+  import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
   import { type Readable } from "svelte/store";
-  import { GraphNode, graphMall } from "@frontend/lib/stores/GraphStore";
+  import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
+  import { projectsStore } from "lib/stores/ProjectStore";
+  import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
+  import type { UUID } from "@shared/utils/UniqueEntity";
+  import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
+  import { tick } from "svelte";
+  import { focusedPanelStore } from "lib/PanelNode";
+  import { onDestroy } from "svelte";
+  import { fade } from "svelte/transition";
+  import { mediaStore } from "../../lib/stores/MediaStore";
+  import { commandStore } from "../../lib/stores/CommandStore";
+  // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
   // export let panelId = 0;
-  export let panelId = Math.round(10000000 * Math.random()).toString();
+  export let panelId = Math.round(10000000.0 * Math.random());
 
-  let graphIds = graphMall.getAllGraphUUIDsReactive();
-  $: graphId = $graphIds[0]; //Always use the first graph
+  let graphIds = projectsStore.activeProjectGraphIds;
+  let graphId = $graphIds[0];
 
-  $: thisGraphStore = graphMall.getGraphReactive(graphId);
-  let graphNodes: Readable<GraphNode[]> | undefined;
-  $: graphNodes = $thisGraphStore?.getNodesReactive();
+  /**
+   * When a new panel is focussed on (the panel is clicked),
+   * the focusedPanelStore is updated through Panel.svelte. If the panel clicked is the panel
+   * that houses the current graph, the store holidng the last graph is set to the current graph.
+   *
+   * If a user clicks off onto a panel that does not house a graph, the last focussed graph will retain its
+   * indicator as the indicator subscribes to the value of the focusedGraphStore, no the focusedPanelStore.
+   */
+  const unsubscribe = focusedPanelStore.subscribe((state) => {
+    if (panelId === state) {
+      focusedGraphStore.set({ panelId: panelId, graphUUID: graphId });
+    }
+  });
+
+  onDestroy(() => {
+    unsubscribe();
+  });
+
+  let thisGraphStore: Readable<GraphStore | null>;
+  let graphNodes: Readable<GraphNode[]>;
+  let graphEdges: Readable<GraphEdge[]>;
+  let graphData: any;
+
+  // Svelvet graph data
+  $: translation = graphData?.transforms?.translation;
+  $: zoom = graphData?.transforms?.scale;
+  $: dimensions = graphData?.dimensions;
+
+  // Hooks exposed by <Svelvet />
+  let connectAnchorIds: (
+    sourceNode: NodeKey,
+    sourceAnchor: AnchorKey,
+    targetNode: NodeKey,
+    targetAnchor: AnchorKey
+  ) => boolean;
+  let clearAllGraphEdges: () => void;
+
+  // Swap out the graph when the user makes a selection in the dropdown
+  function updateOnGraphId(graphId: string) {
+    thisGraphStore = graphMall.getGraphReactive(graphId);
+    if ($thisGraphStore) {
+      graphNodes = $thisGraphStore.getNodesReactive();
+      graphEdges = $thisGraphStore.getEdgesReactive();
+      updateOnGraphEdges($graphEdges);
+    }
+  }
+
+  async function updateOnGraphEdges(edges: GraphEdge[]) {
+    // When the tile first loads, `clearAllGraphEdges` and `connectAnchorIds`
+    // only work after the tick - when the new graph anchors have been created
+    await tick();
+    if (clearAllGraphEdges) clearAllGraphEdges();
+
+    for (let edge in edges) {
+      if (!edges.hasOwnProperty(edge)) continue;
+      const edgeData = edges[edge];
+
+      // Skip if nodes don't exist
+      // const fromNode = $graphNodes.find(node => node.id === edgeData.nodeFrom)
+      // const toNode   = $graphNodes.find(node => node.id === edgeData.nodeTo);
+      // if (!fromNode || !toNode) continue;
+
+      if (connectAnchorIds) {
+        const res = connectAnchorIds(
+          `N-${panelId}_${edgeData.nodeUUIDFrom}`,
+          // E.g. A-4_in2/N-4_IxExhIof-npSfn0dnO-VRSW4_kqn2z5bcCPCcflY_MA
+          `A-${panelId}_${edgeData.anchorIdFrom}`,
+          `N-${panelId}_${edgeData.nodeUUIDTo}`,
+          `A-${panelId}_${edgeData.anchorIdTo}`
+        );
+      }
+    }
+  }
+
+  $: updateOnGraphEdges($graphEdges);
+
+  // Only updates when _graphId_ changes
+  $: updateOnGraphId(graphId);
+
+  function getGraphCenter() {
+    return {
+      x: $dimensions.width / 2 - $translation.x / $zoom,
+      y: $dimensions.height / 2 - $translation.y / $zoom,
+    };
+  }
+
+  function handleRightClick(event: CustomEvent) {
+    // TODO: Add typing to Svelvet for this custom event
+    const { cursorPos, canvasPos } = event.detail;
+    graphMenuStore.showMenu(cursorPos, canvasPos, graphId);
+  }
+
+  // $: console.log("GRAPH MALL UPDATED", $graphMall);
+  // Svelvet id's are of the following format:
+  // <panelId>_<anchorId>/<panelId>_<nodeUUID>
+  // Entities include nodes and anchors
+  function splitCompositeAnchorId(entityId: string): { anchorUUID: UUID; nodeUUID: UUID } | null {
+    if (!$thisGraphStore) return null;
+    try {
+      const [anchorKey, nodeKye] = entityId.split("/");
+
+      const [_1, anchorId] = anchorKey.split("_");
+      const [_2, ...nodeUUIDParts] = nodeKye.split("_");
+      const nodeUUID = nodeUUIDParts.join("_");
+
+      // removing console logs + commit + merge <=====================================
+      // console.log("NODE", $thisGraphStore.getNode(nodeUUID));
+      const anchorUUID = $thisGraphStore.getNode(nodeUUID).anchorUUIDs[anchorId];
+
+      if (!anchorUUID || !nodeUUID) return null;
+      return { anchorUUID, nodeUUID };
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  }
+
+  function edgeConnected(e: CustomEvent<any>) {
+    console.log("CONNECTION EVENT");
+    if (!$thisGraphStore) return;
+    const fromAnchor = splitCompositeAnchorId(e.detail.sourceAnchor.id);
+    const toAnchor = splitCompositeAnchorId(e.detail.targetAnchor.id);
+
+    if (!fromAnchor || !toAnchor) return;
+
+    const toNode = $thisGraphStore.getNode(toAnchor.nodeUUID);
+
+    $thisGraphStore?.addEdge(fromAnchor.anchorUUID, toAnchor.anchorUUID);
+
+    if (toNode.signature === "blix.Output") {
+      console.log("Output Connection");
+      mediaStore.compute(graphId, toNode.uuid);
+      //window.apis.mediaApi.compute(graphId, toNode.uuid);
+    }
+  }
+
+  function edgeDisconnected(e: CustomEvent<any>) {
+    console.log("DISCONNECTION EVENT");
+    const toUUID = splitCompositeAnchorId(e.detail.targetAnchor.id);
+
+    if (!toUUID) return;
+    $thisGraphStore?.removeEdge(toUUID.anchorUUID);
+  }
 </script>
 
 <div class="hoverElements">
-  <button on:click="{() => $thisGraphStore?.addNode()}">Add Node</button>
+  <div class="mr-2 inline-block h-[10px] w-[10px]">
+    {#if panelId === $focusedGraphStore.panelId}
+      <div
+        transition:fade="{{ duration: 300 }}"
+        class="z-1000000 h-full w-full rounded-full border-[1px] border-rose-700 bg-rose-500"
+      ></div>
+    {/if}
+  </div>
   <select name="graphPicker" class="dropdown" bind:value="{graphId}">
     {#each $graphIds as id}
       <option value="{id}">{id.slice(0, 8)}</option>
     {/each}
   </select>
+
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke-width="1.5"
+    stroke="currentColor"
+    class="mb-2 inline-block h-6 w-6 rounded-md stroke-zinc-200 hover:bg-zinc-700"
+    on:click="{() => commandStore.runCommand('blix.graphs.create')}"
+    on:keydown="{null}"
+  >
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+  </svg>
+
+  <!-- <button style:float="right" on:click={addRandomConn}>Add random conn</button> -->
+  <!-- <button style:float="right" on:click={clearEdges}>Clear edges</button> -->
 </div>
 
 {#if thisGraphStore}
-  <!-- {JSON.stringify($graphNodes)} -->
-  <Svelvet id="my-canvas" zoom="{0.7}" minimap theme="custom-dark">
+  <Svelvet
+    id="{panelId}-{graphId}"
+    zoom="{0.7}"
+    minimap
+    theme="custom-dark"
+    bind:graph="{graphData}"
+    on:rightClick="{handleRightClick}"
+    on:connection="{edgeConnected}"
+    on:disconnection="{edgeDisconnected}"
+    bind:connectAnchorIds="{connectAnchorIds}"
+    bind:clearAllGraphEdges="{clearAllGraphEdges}"
+  >
     {#each $graphNodes || [] as node}
-      <PluginNode graphId="{graphId}" node="{node}" svelvetNodeId="{panelId}-{node.id}" />
+      {#key node.uuid}
+        <PluginNode panelId="{panelId}" graphId="{graphId}" node="{node}" />
+      {/key}
     {/each}
+
+    <!-- Testing graph center -->
+    <!-- {#key [$translation, $dimensions]} -->
+    <!-- <Node position="{getGraphCenter()}">
+        <div class="z-50 text-white">
+          {JSON.stringify($translation)}<br />
+          {JSON.stringify($zoom)}
+        </div>
+      </Node> -->
+    <!-- {/key} -->
   </Svelvet>
 {:else}
   <div>Graph store not found</div>

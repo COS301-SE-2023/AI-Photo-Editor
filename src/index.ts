@@ -1,16 +1,18 @@
-import { app, BrowserWindow, Notification, Menu, MenuItem, dialog } from "electron";
+import { app, BrowserWindow, Notification, protocol, Menu, MenuItem, dialog } from "electron";
 import { join } from "path";
-import fs from "fs";
 import { parse } from "url";
 import { autoUpdater } from "electron-updater";
 
 import logger from "./electron/utils/logger";
 import settings from "./electron/utils/settings";
 
-import { PluginManager } from "./electron/lib/plugins/PluginManager";
 import { Blix } from "./electron/lib/Blix";
+import { CoreGraphInterpreter } from "./electron/lib/core-graph/CoreGraphInterpreter";
 import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 //const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 const isProd = true;
@@ -24,22 +26,55 @@ logger.info(
 
 // ========== MAIN PROCESS ========== //
 
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "blix-image",
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      bypassCSP: true,
+    },
+  },
+]);
+
 let mainWindow: MainWindow | null = null;
 let notification: Notification | null = null;
-let blix: Blix;
+let blix: Blix | null = null;
 
-app.on("ready", () => {
-  createMainWindow();
+/**
+ * Will run when Electron has finished initializing. 1. Blix is instantiated
+ * which will bootstrap the registries 2. The main process IPC APIs will be
+ * exposed to the renderer 3. The renderer process is instantiated which will
+ * expose the window IPC APIs and bind to main process IPC APIs 4. The main
+ * process will bind to the window IPC APIs 5. The Blix state is instantiated
+ * and the various managers are initialized.
+ */
+app.on("ready", async () => {
+  protocol.registerFileProtocol("blix-image", (request, callback) => {
+    const url = request.url.slice("blix-image://".length);
+    callback({ path: join(__dirname, "..", "..", url) });
+  });
 
-  if (!mainWindow) return;
+  // const coreGraphInterpreter = new CoreGraphInterpreter(new ToolboxRegistry);
+  // coreGraphInterpreter.run();
 
-  blix = new Blix(mainWindow);
+  blix = new Blix();
   exposeMainApis(blix);
-  const pluginManager = new PluginManager(blix);
-  pluginManager.loadBasePlugins();
+
+  createMainWindow().then(async () => {
+    if (mainWindow && blix) {
+      await blix.init(mainWindow);
+      if (blix.isReady) {
+        mainWindow.apis.utilClientApi.onBlixReady();
+      }
+    } else {
+      app.quit();
+    }
+  });
 });
 
-function createMainWindow() {
+async function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1300,
     height: 1000,
@@ -55,9 +90,8 @@ function createMainWindow() {
     icon: isProd ? join(__dirname, "icon.png") : "public/images/icon.png",
     titleBarStyle: "hidden",
     trafficLightPosition: { x: 10, y: 10 },
+    // show: false,
   }) as MainWindow;
-
-  // Menu.setApplicationMenu(null);
 
   const url =
     // process.env.NODE_ENV === "production"
@@ -67,20 +101,22 @@ function createMainWindow() {
       : // in dev, target the host and port of the local rollup web server
         "http://localhost:5500";
 
-  mainWindow
-    .loadURL(url)
-    .then(async () => {
-      // await bindMainWindowApis(mainWindow!);
-    })
-    .catch((err) => {
-      logger.error(JSON.stringify(err));
-      app.quit();
-    });
-
-  // if (!isProd) mainWindow.webContents.openDevTools();
+  try {
+    await mainWindow.loadURL(url);
+    await bindMainWindowApis(mainWindow);
+  } catch (e) {
+    logger.error(JSON.stringify(e));
+    app.quit();
+  }
 
   mainWindow.on("closed", () => {
     mainWindow = null;
+  });
+
+  mainWindow.on("ready-to-show", () => {
+    if (blix?.isReady) {
+      mainWindow?.apis.utilClientApi.onBlixReady();
+    }
   });
 }
 
@@ -89,12 +125,12 @@ function createMainWindow() {
 // after the user close the last window, instead wait for Command + Q (or equivalent).
 // Noted. Will look into this later.
 app.on("window-all-closed", () => {
-  blix.projectManager.saveAllProjects();
+  // blix.projectManager.saveAllProjects();
   if (process.platform !== "darwin") app.quit();
 });
 
 app.on("will-quit", () => {
-  blix.projectManager.saveAllProjects();
+  // blix.projectManager.saveAllProjects();
 });
 
 app.on("activate", () => {
@@ -104,6 +140,7 @@ app.on("activate", () => {
 app.on("web-contents-created", (e, contents) => {
   logger.info(e);
   // Security of webviews
+
   contents.on("will-attach-webview", (event, webPreferences, params) => {
     logger.info(event, params);
     // Strip away preload scripts if unused or verify their location is legitimate
@@ -186,11 +223,6 @@ autoUpdater.on("error", (err) => {
   });
   notification.show();
 });
-
-// import { TestGraph } from "./lib/core-graph/GraphTesting";
-
-// const t: TestGraph = new TestGraph();
-// t.main();
 
 // // Menu
 // const menuBar = new Menu();

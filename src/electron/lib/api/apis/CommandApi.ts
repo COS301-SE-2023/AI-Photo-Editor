@@ -1,26 +1,24 @@
 import type { ElectronMainApi } from "electron-affinity/main";
-import { CommandInstance, CommandRegistry } from "../../registries/CommandRegistry";
+import type { Command } from "../../registries/CommandRegistry";
 import type { Blix } from "../../Blix";
 import logger from "../../../utils/logger";
 
-// Exposes all possible commands stored in the registry (plugin and blix commands)
 export class CommandApi implements ElectronMainApi<CommandApi> {
-  private _counter = 0;
-  private readonly _blix: Blix;
+  private readonly blix: Blix;
 
   constructor(blix: Blix) {
-    this._blix = blix;
+    this.blix = blix;
   }
 
-  async addCommand(instance: CommandInstance) {
-    this._blix.commandRegistry.addInstance(instance);
+  async addCommand(instance: Command) {
+    this.blix.commandRegistry.addInstance(instance);
   }
 
-  async runCommand(command: string, options?: { data: any }) {
-    this._blix.commandRegistry.runCommand(command, options);
+  async runCommand(id: string, params?: any) {
+    return await this.blix.commandRegistry.runCommand(id, params);
   }
 
   async getCommands() {
-    return this._blix.commandRegistry.getCommands();
+    return this.blix.commandRegistry.getCommands();
   }
 }

@@ -1,43 +1,252 @@
 // == DEV == //
-import { CoreGraph, GraphToJSON } from "./CoreGraph";
+import { CoreGraph } from "./CoreGraph";
 import {
   InputAnchorInstance,
+  type MinAnchor,
   NodeInstance,
   OutputAnchorInstance,
+  ToolboxRegistry,
 } from "../registries/ToolboxRegistry";
 
 import logger from "../../utils/logger";
+import { Blix } from "../Blix";
+import type { GraphToJSON } from "./CoreGraphExporter";
+import sharp from "sharp";
 
 export class TestGraph {
-  inputs: InputAnchorInstance[] = [];
-  outputs: OutputAnchorInstance[] = [];
+  inputs: MinAnchor[] = [];
+  outputs: MinAnchor[] = [];
   tempNodes: NodeInstance[] = [];
 
   constructor() {
     this.inputs.push(
-      new InputAnchorInstance("number", "signature", "input_anchor1"),
-      new InputAnchorInstance("number", "signature", "input_anchor2"),
-      new InputAnchorInstance("number", "signature", "input_anchor3")
+      {
+        type: "number",
+        identifier: "hello-plugin.hello.input_anchor1.0",
+        displayName: "input_anchor1",
+      },
+      {
+        type: "number",
+        identifier: "hello-plugin.hello.input_anchor2.1",
+        displayName: "input_anchor2",
+      },
+      {
+        type: "number",
+        identifier: "hello-plugin.hello.input_anchor3.2",
+        displayName: "input_anchor3",
+      }
     );
     this.outputs.push(
-      new OutputAnchorInstance("number", "signature", "output_anchor1"),
-      new OutputAnchorInstance("number", "signature", "output_anchor2")
+      {
+        type: "number",
+        identifier: "hello-plugin.hello.output_anchor3.3",
+        displayName: "output_anchor1",
+      },
+      {
+        type: "number",
+        identifier: "hello-plugin.hello.output_anchor3.4",
+        displayName: "output_anchor2",
+      }
     );
 
-    // for (let i = 1; i < 7; i++) {
-    //   this.tempNodes.push(
-    // new NodeInstance(
-    //   `hello-plugin/node${i}`,
-    //   `node${i}`,
-    //   `node${i}`,
-    //   `node${i}`,
-    //   this.inputs,
-    //   this.outputs
-    // )
-    //   );
-    // }
+    for (let i = 1; i < 7; i++) {
+      this.tempNodes.push(
+        new NodeInstance(
+          `hello-plugin.hello`,
+          `hello`,
+          `hello-plugin`,
+          `title`,
+          `description`,
+          this.inputs,
+          this.outputs
+        )
+      );
+    }
   }
 
+  public interpreterTest(toolboxRegistry: ToolboxRegistry): CoreGraph {
+    // =====================================
+    // Input -> 2, 2, 2, 2
+    // Add2/Mul2 -> 3, 3
+    // Output ->
+    // =====================================
+    const tempNodesInt: NodeInstance[] = [];
+
+    tempNodesInt.push(
+      new NodeInstance(
+        `hello-plugin.hello`,
+        `input`,
+        `hello-plugin`,
+        `title`,
+        `description`,
+        [],
+        [
+          {
+            type: "number",
+            identifier: "out1",
+            displayName: "output_anchor1",
+          },
+        ],
+        ({ input, from }: { input: any[]; from: string }) => {
+          const img = sharp(
+            "/home/klairgo/Documents/Documents/University of Pretoria/Year 3/Semester 1/COS 301/Capstone Project/Code/AI-Photo-Editor/assets/image.png"
+          );
+          return { out1: img }[from];
+        }
+      )
+    );
+
+    tempNodesInt.push(
+      new NodeInstance(
+        `hello-plugin.hello`,
+        `flip`,
+        `hello-plugin`,
+        `title`,
+        `description`,
+        [
+          {
+            type: "number",
+            identifier: "hello-plugin.hello.input_anchor1.0",
+            displayName: "input_anchor1",
+          },
+        ],
+        [
+          {
+            type: "number",
+            identifier: "out1",
+            displayName: "output_anchor1",
+          },
+        ],
+        ({ input, from }: { input: any[]; from: string }) => {
+          return { out1: input[0].flip() }[from];
+        }
+      )
+    );
+
+    tempNodesInt.push(
+      new NodeInstance(
+        `hello-plugin.hello`,
+        `hue`,
+        `hello-plugin`,
+        `title`,
+        `description`,
+        [
+          {
+            type: "number",
+            identifier: "hello-plugin.hello.input_anchor1.0",
+            displayName: "input_anchor1",
+          },
+        ],
+        [
+          {
+            type: "number",
+            identifier: "out1",
+            displayName: "output_anchor1",
+          },
+        ],
+        ({ input, from }: { input: any[]; from: string }) => {
+          return { out1: input[0].blur(5) }[from];
+        }
+      )
+    );
+
+    tempNodesInt.push(
+      new NodeInstance(
+        `hello-plugin.hello`,
+        `output`,
+        `hello-plugin`,
+        `title`,
+        `description`,
+        [
+          {
+            type: "number",
+            identifier: "hello-plugin.hello.input_anchor1.0",
+            displayName: "input_anchor1",
+          },
+        ],
+        [],
+        ({ input, from }: { input: any[]; from: string }) => {
+          input[0].toFile(
+            "/home/klairgo/Documents/Documents/University of Pretoria/Year 3/Semester 1/COS 301/Capstone Project/Code/AI-Photo-Editor/assets/image3.png"
+          );
+        }
+      )
+    );
+
+    toolboxRegistry.addInstance(tempNodesInt[0]);
+    toolboxRegistry.addInstance(tempNodesInt[1]);
+    toolboxRegistry.addInstance(tempNodesInt[2]);
+    toolboxRegistry.addInstance(tempNodesInt[3]);
+
+    const g2: CoreGraph = new CoreGraph();
+
+    g2.addNode(tempNodesInt[0]);
+    g2.addNode(tempNodesInt[1]);
+    g2.addNode(tempNodesInt[2]);
+    g2.addNode(tempNodesInt[3]);
+    // g2.addNode(tempNodesInt[4]);
+    // g2.addNode(tempNodesInt[5]);
+
+    const g2Nodes = g2.getNodes;
+    const g2Node1 = Object.values(g2Nodes)[0];
+    const g2Node2 = Object.values(g2Nodes)[1];
+    const g2Node3 = Object.values(g2Nodes)[2];
+    const g2Node4 = Object.values(g2Nodes)[3];
+    // const g2Node5 = Object.values(g2Nodes)[4];
+    // const g2Node6 = Object.values(g2Nodes)[5];
+
+    g2.addEdge(
+      Object.values(g2Node1.getAnchors)[0].uuid,
+      Object.values(g2Node2.getAnchors)[0].uuid
+    );
+
+    g2.addEdge(
+      Object.values(g2Node2.getAnchors)[1].uuid,
+      Object.values(g2Node3.getAnchors)[0].uuid
+    );
+
+    // Add output
+    g2.addEdge(
+      Object.values(g2Node3.getAnchors)[1].uuid,
+      Object.values(g2Node4.getAnchors)[0].uuid
+    );
+
+    // g2.addEdge(
+    //   Object.values(g2Node4.getAnchors)[3].uuid,
+    //   Object.values(g2Node6.getAnchors)[0].uuid
+    // );
+    // g2.addEdge(
+    //   Object.values(g2Node5.getAnchors)[3].uuid,
+    //   Object.values(g2Node6.getAnchors)[0].uuid
+    // );
+
+    // g2.addEdge(
+    //   Object.values(g2Node2.getAnchors)[3].uuid,
+    //   Object.values(g2Node5.getAnchors)[0].uuid
+    // );
+
+    // g2.getOutputNodes.push(g2Node6.uuid);
+    g2.getOutputNodes.push(g2Node4.uuid);
+    // g2.getOutputNodes.push(g2Node6.uuid);
+
+    // Expected output:
+    // No cycle detected
+    // true
+    // No cycle detected
+    // true
+    // No cycle detected
+    // true
+    // No cycle detected
+    // true
+    // No cycle detected
+    // true
+    // No cycle detected
+    // true
+
+    // =====================================
+
+    return g2;
+  }
   public test1() {
     // =====================================
     // 1 -> 2
@@ -84,8 +293,8 @@ export class TestGraph {
     // Cycle detected!
     // false
 
-    const json: GraphToJSON = g1.toJSONObject();
-    logger.info(JSON.stringify(json, null, 2));
+    // const json: GraphToJSON = g1.toJSONObject();
+    // logger.info(JSON.stringify(json, null, 2));
 
     // =====================================
 
@@ -627,8 +836,10 @@ export class TestGraph {
     // const src = g6.getEdgeSrc;
     // logger.info(src);
 
-    const json: GraphToJSON = g6.toJSONObject();
-    logger.info(JSON.stringify(json, null, 2));
+    // const json = g6;
+    // logger.info(JSON.stringify(json, null, 2));
+    // return json;
+    return g6;
   }
 
   public main() {
@@ -639,6 +850,53 @@ export class TestGraph {
     // this.test5();
     // this.test6();
     // this.test7();
-    this.test8();
+    return this.test8();
   }
 }
+
+// export function testStuffies(blix: Blix) {
+//   const inputs: InputAnchorInstance[] = [];
+//   const outputs: OutputAnchorInstance[] = [];
+//   const tempNodes: NodeInstance[] = [];
+
+//   inputs.push(
+//     new InputAnchorInstance("number", "hello-plugin.hello.input_anchor1.0", "input_anchor1"),
+//     new InputAnchorInstance("number", "hello-plugin.hello.input_anchor2.1", "input_anchor2"),
+//     new InputAnchorInstance("number", "hello-plugin.hello.input_anchor3.2", "input_anchor3")
+//   );
+//   outputs.push(
+//     new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.3", "output_anchor1"),
+//     new OutputAnchorInstance("number", "hello-plugin.hello.output_anchor3.4", "output_anchor2")
+//   );
+
+//   for (let i = 1; i < 7; i++) {
+//     tempNodes.push(
+//       new NodeInstance(
+//         `hello-plugin.hello`,
+//         `hello`,
+//         `hello-plugin`,
+//         `title`,
+//         `description`,
+//         `icon`,
+//         inputs,
+//         outputs
+//       )
+//     );
+//   }
+
+//   const project = blix.projectManager.createProject("Test Project");
+//   const graph = blix.graphManager.createGraph();
+//   project.addGraph(graph);
+//   const g = blix.graphManager.getGraph(graph);
+//   g.addNode(tempNodes[0]);
+//   g.addNode(tempNodes[1]);
+//   return project.uuid;
+
+//   // const table: { [key: number]: string} = {};
+//   // table[0] = "test";
+//   // table[2] = "test3";
+//   // table[1] = "test2";
+//   // for(const key in table) {
+//   //   logger.info(key + "\n");
+//   // }
+// }
