@@ -177,7 +177,7 @@ describe("Test plugin integrations", () => {
     test("Plugin should send commands to command registry", () => {
         plugin.requireSelf(blix);
         const commands =  Object.values(blix.commandRegistry.getRegistry());
-        expect(commands.length).toEqual(5);
+        expect(commands.length).toEqual(6);  // Find a more extensible solution for this
     })
 
     test("Plugin should be able to run", () => {
