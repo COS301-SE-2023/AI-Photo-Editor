@@ -56,6 +56,10 @@
     props: (data: any) => { [key: string]: any };
   };
   const dataTypeToMediaDisplay: { [key: string]: MediaDisplay } = {
+    [""]: {
+      component: TextBox,
+      props: (_data: any) => ({ content: "NO INPUT", status: "warning" }),
+    },
     Image: {
       component: Image,
       props: (data: string) => ({ src: data }),

@@ -18,8 +18,9 @@ const nodes ={
       nodeBuilder.setTitle("Input image");
       nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
-      nodeBuilder.define((image) => {
-          return image;
+      nodeBuilder.define(async (input, uiInput, from) => {
+
+          return { "res": "/home/klairgo/Desktop/AI-Photo-Editor/assets/image.png"};
       });
      nodeBuilder.addOutput("Image", "res", "Result");
 

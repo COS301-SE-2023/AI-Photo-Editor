@@ -1,0 +1,37 @@
+{
+    "name": "Sharp-plugin",
+    "displayName": "Sharp Plugin",
+    "description": "Performs basic image operations using sharp",
+    "version": "0.0.1",
+
+    "author": "Gekota the Frog",
+    "repository": "",
+
+    "contributes": {
+        "commands": [],
+        "nodes": [
+            {
+                "id": "math",
+                "name": "Math",
+                "interface" : {
+                    "inputs": {
+                    "numA": "int"
+                    },
+                    "outputs": {
+                        "numOut": "int"
+                    }
+                }
+            }
+        ]
+    },
+
+    "main": "src/main.js",
+    "renderer": "src/renderer.js",
+
+    "devDependencies": {
+        "@types/node": "^12.0.0",
+        "typescript": "^3.4.5"
+    },
+
+    "comments": [ "This plugin will be expanded to handle more image operations." ]
+}

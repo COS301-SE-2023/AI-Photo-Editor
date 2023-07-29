@@ -137,12 +137,15 @@ export class CoreGraphInterpreter {
     const inputs: { [key: string]: T }[] = await Promise.all(inputPromises).catch((err) => {
       throw err;
     });
-
     if (curr.getSignature === "blix.output") {
       // Output node will always have one input
       const mediaOutput: MediaOutput = {
         content: inputs[0] ? Object.values(inputs[0])[0] : null,
-        dataType: "Number",
+        dataType: graph.getEdgeDest[Object.values(curr.getAnchors)[0]._uuid]
+          ? graph.getAnchors[
+              graph.getEdgeDest[Object.values(curr.getAnchors)[0]._uuid].getAnchorFrom
+            ].type
+          : "",
         outputId: "TODO",
         outputNodeUUID: curr.uuid,
         graphUUID: graph.uuid,
