@@ -1,5 +1,6 @@
 import ElectronStore from "electron-store";
 import { safeStorage } from "electron";
+import logger from "./logger";
 
 interface Settings {
   check: boolean;
@@ -21,6 +22,8 @@ type DotUnionKeys<T, Prefix extends string = ""> = T extends object
 type SettingKey = DotUnionKeys<Settings>;
 
 type Secret = keyof Settings["secrets"];
+
+type UnencryptedSecrets = Record<string, string>;
 
 // TODO: Perhaps add a schema for validation
 const settings = new ElectronStore<Settings>({
@@ -45,7 +48,44 @@ export function setSecret(key: string, value: string): void {
 export function getSecret(key: string): string {
   const value = settings.get(`secrets.${key}`);
   if (!(typeof value === "string")) return "";
-  return safeStorage.decryptString(Buffer.from(value, "base64"));
+  return decryptWithSafeStorage(value);
+}
+
+/**
+ * Decrypts all the secrets
+ *
+ * @returns Decrypted secrets
+ */
+export function getSecrets(): UnencryptedSecrets {
+  const storeSecrets = settings.get(`secrets`);
+
+  if (!(typeof storeSecrets === "object")) return {};
+
+  const secrets: UnencryptedSecrets = {};
+
+  let key: keyof typeof storeSecrets;
+  for (key in storeSecrets) {
+    if (key in storeSecrets) {
+      const encrypted = storeSecrets[key];
+      secrets[key] = decryptWithSafeStorage(encrypted);
+    }
+  }
+
+  return secrets;
+}
+
+/**
+ *
+ * @param value Base64 encrypted string
+ * @returns Unencrypted string
+ */
+export function decryptWithSafeStorage(value: string) {
+  try {
+    return value ? safeStorage.decryptString(Buffer.from(value, "base64")) : "";
+  } catch (error) {
+    logger.error(error);
+    return "";
+  }
 }
 
 export function clearSecret(key: string): void {

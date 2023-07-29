@@ -9,8 +9,16 @@
   import ContextMenu from "../../ui/utils/ContextMenu.svelte";
   import Test from "./Test.svelte";
   import Settings from "./Settings.svelte";
+  import Shortcuts from "../../ui/utils/Shortcuts.svelte";
 
   const testing = false;
+  let showSettings = false;
+
+  const shortcuts = {
+    "blix.settings.toggle": () => {
+      showSettings = !showSettings;
+    },
+  };
 
   onMount(async () => {
     await initAPIs();
@@ -39,9 +47,13 @@
   <div></div>
 {/if}
 
+{#if showSettings}
+  <Settings />
+{/if}
+
 <Toasts />
 <ContextMenu />
-<Settings />
+<Shortcuts shortcuts="{shortcuts}" />
 
 <style lang="postcss" global>
   @tailwind base;
