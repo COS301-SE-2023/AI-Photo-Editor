@@ -18,10 +18,12 @@ import type { QueryResponse } from "../../../shared/types";
 export class CoreGraphManager {
   private _graphs: { [id: UUID]: CoreGraph };
   private _subscribers: { [key: UUID]: CoreGraphSubscriber<any>[] };
+  private readonly _mainWindow: MainWindow | undefined;
 
-  constructor() {
+  constructor(mainWindow?: MainWindow) {
     this._graphs = {};
     this._subscribers = {};
+    this._mainWindow = mainWindow;
   }
 
   addGraph(coreGraph: CoreGraph) {
@@ -103,7 +105,7 @@ export class CoreGraphManager {
       if (uuid in this._graphs) {
         delete this._graphs[uuid];
         delete this._subscribers[uuid];
-        this._mainWindow.apis.graphClientApi.graphRemoved(uuid);
+        this._mainWindow?.apis.graphClientApi.graphRemoved(uuid);
         flags.push(true);
       } else {
         flags.push(false);
