@@ -9,18 +9,34 @@ import {BrowserWindow} from "electron";
 import { join } from "path";
 import { writeFileSync } from "fs";
 import { NodeUIParent } from "../../../src/shared/ui/NodeUITypes";
+import chokidar from "chokidar";
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
 const mainWindow: MainWindow = {
   apis: {
     commandRegistryApi: jest.fn(),
     clientGraphApi: jest.fn(),
-    clientProjectApi: jest.fn()
+    clientProjectApi: jest.fn(),
+    toolboxClientApi: {
+      registryChanged: jest.fn(),
+    },
+    commandClientApi: {
+      registryChanged: jest.fn(),
+    }
     
   }
 } as any;
 
-jest.mock("chokidar", () => ({}));
+
+jest.mock("chokidar", () => ({
+  default: {
+    watch: jest.fn(() => {
+      return {
+        on: jest.fn()
+      }
+    }),
+  }
+}));
 
 jest.mock("../../../src/electron/lib/projects/ProjectManager");
 
@@ -34,6 +50,9 @@ jest.mock("electron", () => ({
     }),
     getVersion: jest.fn(() => {
       return "v1.1.1";
+    }),
+    getAppPath: jest.fn(() => {
+      return "test/electron";
     })
   },
 }));
@@ -41,6 +60,7 @@ jest.mock("electron", () => ({
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
   readFile: jest.fn((filePath, callback) => callback(null, "mocked_file_data")),
+  readdirSync: jest.fn(() => ["hello-plugin"]),
   existsSync: jest.fn(),
   mkdirSync: jest.fn(),
   writeFileSync: jest.fn(),
@@ -113,29 +133,28 @@ describe("Test plugin integrations", () => {
       jest.clearAllMocks();
       plugin = new Plugin(pack,plugDir,main);
       blix = new Blix();
+      blix.init(mainWindow);
       plugin.requireSelf(blix);
     });
 
     test("Plugin should send nodes to toolbox registry", () => {
-        plugin.requireSelf(blix);
-
+        //plugin.requireSelf(blix);
         const tools =  Object.values(blix.toolbox.getRegistry());
-        expect(tools.length).toEqual(2);
+        expect(tools.length).toEqual(3);
       });
 
     test("Plugin should send commands to command registry", () => {
         plugin.requireSelf(blix);
-
         const commands =  Object.values(blix.commandRegistry.getRegistry());
-        expect(commands.length).toEqual(3);
+        expect(commands.length).toEqual(5);
     })
 
     test("Plugin should be able to run", () => {
       console.log = jest.fn();
       plugin.requireSelf(blix);
 
-      const commands =  blix.commandRegistry.getRegistry()["hello-plugin.import"];
-      commands.run();
+      const commands =  blix.commandRegistry.getRegistry()['hello-plugin.addBrightnessNode'];
+      commands.handler.apply(commands, [{sendSuccessMessage: jest.fn()}]);
       expect(console.log).toHaveBeenCalled();
 
     })
@@ -144,8 +163,10 @@ describe("Test plugin integrations", () => {
       plugin.requireSelf(blix);
 
       const commands =  blix.commandRegistry.getRegistry();
-      expect(commands.hasOwnProperty("hello-plugin.import")).toBeTruthy();
-      expect(commands.hasOwnProperty("hello-plugin.export")).toBeTruthy();
+      expect(commands.hasOwnProperty("blix.projects.save")).toBeTruthy();
+      expect(commands.hasOwnProperty("blix.projects.saveAs")).toBeTruthy();
+      expect(commands.hasOwnProperty("blix.projects.open")).toBeTruthy();
+      expect(commands.hasOwnProperty("blix.graphs.create")).toBeTruthy();
       expect(commands.hasOwnProperty("hello-plugin.addBrightnessNode")).toBeTruthy();
     })
 });

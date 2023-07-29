@@ -42,11 +42,21 @@ export const saveProjectCommand: Command = {
   },
   handler: async (ctx: CommandContext, args: SaveProjectArgs) => {
     const result = await saveProject(ctx, args);
-    if (result.success) {
-      ctx.sendSuccessMessage(result?.message ?? "");
-    } else {
-      ctx.sendErrorMessage(result?.error ?? "");
+    switch (result.success) {
+      case true: {
+        ctx.sendSuccessMessage(result?.message ?? "");
+        break;
+      }
+      case false: {
+        ctx.sendErrorMessage(result?.error ?? "");
+        break;
+      }
     }
+    // if (result.success) {
+    //   ctx.sendSuccessMessage(result?.message ?? "");
+    // } else {
+    //   ctx.sendErrorMessage(result?.error ?? "");
+    // }
   },
 };
 
@@ -59,11 +69,21 @@ export const saveProjectAsCommand: Command = {
   },
   handler: async (ctx: CommandContext, args: SaveProjectArgs) => {
     const result = await saveProjectAs(ctx, args);
-    if (result?.success) {
-      // ctx.sendSuccessMessage(result?.message ?? "");
-    } else {
-      ctx.sendErrorMessage(result?.error ?? "");
+    switch (result.success) {
+      case true: {
+        // ctx.sendSuccessMessage(result?.message ?? "");
+        break;
+      }
+      case false: {
+        ctx.sendErrorMessage(result?.error ?? "");
+        break;
+      }
     }
+    // if (result.success) {
+    //     // ctx.sendSuccessMessage(result?.message ?? "");
+    // } else {
+    //   ctx.sendErrorMessage(result?.error ?? "");
+    // }
   },
 };
 
@@ -169,7 +189,7 @@ export async function saveProjectAs(ctx: CommandContext, args: SaveProjectArgs) 
     filters: [{ name: "Blix Project", extensions: ["blix"] }],
     properties: ["createDirectory"],
   });
-  if (!path) return;
+  if (!path) return { success: false, error: "No path selected" };
   project.location = path;
   return await saveProject(ctx, { projectId, layout, projectPath: path });
 }
