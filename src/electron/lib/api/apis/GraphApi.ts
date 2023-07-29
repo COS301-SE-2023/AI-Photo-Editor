@@ -1,9 +1,6 @@
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
-import { IPCGraphSubscriber } from "../../core-graph/CoreGraphInteractors";
-import { UIGraph } from "@shared/ui/UIGraph";
-import { NodeInstance } from "../../registries/ToolboxRegistry";
 import { type NodeSignature } from "@shared/ui/ToolboxTypes";
 
 // Graphs across projects are stored homogeneously and referenced by UUID

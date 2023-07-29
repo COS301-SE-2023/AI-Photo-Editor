@@ -1,5 +1,5 @@
 import { CommandRegistry } from "./registries/CommandRegistry";
-import { NodeInstance, ToolboxRegistry } from "./registries/ToolboxRegistry";
+import { ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
@@ -12,8 +12,8 @@ import type { UIGraph } from "../../shared/ui/UIGraph";
 import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
 import { AiManager } from "./ai/AiManager";
-import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
-import { testStuffies } from "./core-graph/CoreGraphTesting";
+import { NodeBuilder } from "./plugins/builders/NodeBuilder";
+// import { testStuffies } from "./core-graph/CoreGraphTesting";
 // Encapsulates the backend representation for
 // the entire running Blix application
 export class Blix {
@@ -59,8 +59,9 @@ export class Blix {
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
 
-    tempNodeBuilder.define(({ input, from }: { input: any[]; from: string }) => {
+    tempNodeBuilder.define(({ input , from}: { input: any[]; from: string }) => {
       logger.info("Result: ", input[0]);
+      logger.info("From: ", from)
     });
 
     tempNodeBuilder.addInput("", "in", "In");

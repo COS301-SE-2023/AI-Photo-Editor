@@ -4,14 +4,10 @@ import type { Blix } from "../../Blix";
 import { platform, type, release } from "os";
 import logger from "../../../utils/logger";
 import { type UUID } from "@shared/utils/UniqueEntity";
-import { safeStorage } from "electron";
-import { readFile, writeFile } from "fs/promises";
 import type {
   NotificationTypes,
-  RetrieveKeyResponse,
-  SuperSecretCredentials,
 } from "../../ai/AiManager";
-import { existsSync } from "fs";
+import { getSecret, setSecret, clearSecret } from "../../../utils/settings";
 
 // Exposes basic system information
 export class UtilApi implements ElectronMainApi<UtilApi> {
@@ -48,31 +44,23 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
    * @param model The model specified by the user.
    */
   async saveSuperSecretKey(key: string, model: string) {
-    // On Linux, returns true if the app has emitted the ready event and the secret key is available.
-    // On MacOS, returns true if Keychain is available.
-    // On Windows, returns true once the app has emitted the ready event.
-    if (safeStorage.isEncryptionAvailable()) {
-      const superSecretKey = safeStorage.encryptString(key).toJSON().data;
-      const oldSuperSecretKeys = await this.blix.aiManager.retrieveKey(model, false);
-      const secrets = oldSuperSecretKeys.keys;
-      // TODO: Refactor to make checks generic to set any key in the secrets object
-      if (model === "OPENAI") {
-        if (oldSuperSecretKeys.oldKey) {
-          // if(confirm) Maybe we have prompt the user to confirm they want to replace an old key
-        }
-        secrets.OPENAI_API_KEY = superSecretKey;
+      if(!await this.supportedModel(model)) {
+        return this.handleNotification(`The ${model} model is not currently supported`, "warn");
       }
-      // Update local encrypted keys
-      try {
-        const result = await writeFile(this.blix.aiManager.getFilePath(), JSON.stringify(secrets));
-        this.handleNotification(`${model} key saved successfully`, "success");
+      let confirmation = false;
+      const oldSuperSecretKey = getSecret(`secrets.${model.toUpperCase()}_API_KEY` as any);
+      if(oldSuperSecretKey) {
+        confirmation = true; // TODD: Implement some sort of user confirmation
+      }
+     try { 
+        if(confirmation) { 
+          setSecret(`secrets.${model.toUpperCase()}_API_KEY` as any, key);
+          this.handleNotification(`${model} key saved successfully`, "success");
+        }
       } catch (e) {
         logger.info(e);
-        this.handleNotification(`There was an error saving your new ${model} key.`, "error");
+        this.handleNotification(`There was an error saving your new ${model} model key.`, "error");
       }
-    } else {
-      this.handleNotification(`Internal Error`, "error");
-    }
   }
 
   /**
@@ -81,21 +69,18 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
    * @param model Model of which the key must be removed
    */
   async removeSuperSecretKey(model: string): Promise<void> {
-    const path = this.blix.aiManager.getFilePath();
-    if (!existsSync(path)) this.handleNotification(`No key exists for ${model}`, "warn");
-    const secrets: SuperSecretCredentials = JSON.parse(await readFile(path, "utf-8"));
-
-    const key = `${model}_API_KEY`;
+    if(!await this.supportedModel(model)) {
+      return this.handleNotification(`The ${model} model is not currently supported`, "warn");
+    }
+    const key = getSecret(`secrets.${model.toUpperCase()}_API_KEY`as any);
     let message = "";
     let type: NotificationTypes;
-
-    if (key in secrets) {
-      delete (secrets as any)[key];
-      await writeFile(path, JSON.stringify(secrets));
-      message = `${model} key deleted successfully`;
+    if (key) {
+      clearSecret(`secrets.keys.${model.toUpperCase()}_API_KEY` as any);
+      message = `${model} model key deleted successfully`;
       type = "success";
     } else {
-      message = `No key exists for ${model}`;
+      message = `No key exists for the ${model} model`;
       type = "warn";
     }
     this.handleNotification(message, type);
@@ -108,5 +93,10 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
    */
   async handleNotification(message: string, type: NotificationTypes) {
     if (this.blix.mainWindow) this.blix.mainWindow.apis.utilClientApi.showToast({ message, type });
+  }
+
+  async supportedModel(model: string): Promise<boolean> {
+    const models = this.blix.aiManager.getSupportedModels();
+    return models.includes(model);
   }
 }

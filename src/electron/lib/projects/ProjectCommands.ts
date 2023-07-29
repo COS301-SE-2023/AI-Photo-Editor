@@ -12,10 +12,8 @@ import type { ProjectFile } from "./CoreProject";
 import type {
   Command,
   CommandContext,
-  CommandDescription,
 } from "../../lib/registries/CommandRegistry";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
-import type { SharedProject } from "../../../shared/types";
 import type { LayoutPanel } from "../../../shared/types";
 import { CoreGraphImporter } from "../../lib/core-graph/CoreGraphImporter";
 

@@ -1,6 +1,4 @@
-import logger from "../../utils/logger";
 import { type UUID, UniqueEntity } from "../../../shared/utils/UniqueEntity";
-import type { CoreGraphSubscriber } from "./CoreGraphInteractors";
 import {
   type AnchorType,
   InputAnchorInstance,
@@ -8,7 +6,6 @@ import {
   OutputAnchorInstance,
   checkEdgeDataTypesCompatible,
 } from "../registries/ToolboxRegistry";
-import { get } from "http";
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
 import { type NodeSignature } from "@shared/ui/ToolboxTypes";
 import type { QueryResponse } from "../../../shared/types";
@@ -563,10 +560,10 @@ export class NodeOutToNodeIn implements GraphRepresentation {
 // Helper Methods
 // ==================================================================
 
-function formatIds(ids: string[], shortIds: boolean) {
-  const filteredIds = ids.filter((id) => id);
-  const formattedIds = filteredIds.map((id) => {
-    return shortIds ? id.slice(0, 6) : id;
-  });
-  return formattedIds.join(", ");
-}
+// function formatIds(ids: string[], shortIds: boolean) {
+//   const filteredIds = ids.filter((id) => id);
+//   const formattedIds = filteredIds.map((id) => {
+//     return shortIds ? id.slice(0, 6) : id;
+//   });
+//   return formattedIds.join(", ");
+// }

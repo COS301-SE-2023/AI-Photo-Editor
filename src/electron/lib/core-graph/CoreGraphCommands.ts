@@ -2,7 +2,6 @@ import type { UUID } from "@shared/utils/UniqueEntity";
 import type {
   Command,
   CommandContext,
-  CommandDescription,
 } from "../../lib/registries/CommandRegistry";
 import type { CommandResponse } from "../projects/ProjectCommands";
 

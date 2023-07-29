@@ -1,5 +1,3 @@
-import { Anchor } from "blix_svelvet";
-import { ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { type AnchorUUID, CoreGraph, AnchorIO } from "./CoreGraph";
 import { NodeStyling } from "./CoreGraph";
 
@@ -66,11 +64,11 @@ export class GraphFileExportStrategy implements ExportStrategy<GraphToJSON> {
   }
 }
 
-class YamlExportStrategy implements ExportStrategy<string> {
-  export(graph: CoreGraph): string {
-    throw Error("YamlExportStrategy not implemented");
-  }
-}
+// class YamlExportStrategy implements ExportStrategy<string> {
+//   export(graph: CoreGraph): string {
+//     throw Error("YamlExportStrategy not implemented");
+//   }
+// }
 
 export type LLMGraph = {
   graph: {

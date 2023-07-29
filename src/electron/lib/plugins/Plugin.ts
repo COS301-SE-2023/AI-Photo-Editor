@@ -2,11 +2,6 @@ import type { PathLike } from "fs";
 import type { PackageData } from "./PluginManager";
 import logger from "../../utils/logger";
 import { Blix } from "../Blix";
-import {
-  InputAnchorInstance,
-  NodeInstance,
-  OutputAnchorInstance,
-} from "../registries/ToolboxRegistry";
 import type { Command } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";

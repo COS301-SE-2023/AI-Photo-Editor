@@ -11,12 +11,11 @@ import {
   addEdge,
   removeEdge,
 } from "./ai-cookbook";
-import type { Response, ResponseFunctions } from "./ai-cookbook";
+import type { ResponseFunctions } from "./ai-cookbook";
 import { type MainWindow } from "../api/apis/WindowApi";
-import { app, safeStorage } from "electron";
+import { app } from "electron";
 import { join } from "path";
-import { readFile, writeFile } from "fs/promises";
-import { existsSync } from "fs";
+import { getSecret } from "../../utils/settings"
 // Refer to .env for api keys
 
 /**
@@ -79,33 +78,22 @@ export class AiManager {
   }
 
   /**
-   * This function will go to a local saved directory and retrieve encypted keys saved by the user.
-   * If the user has never saved a key the file will then be created for them. The function checks the file to see if
-   * there is a current key for the model and any other keys. These keys are then returned if they exist.
+   * This function will retrieve a key from the electron storage.
+   * If the user had set a key it will be returned otherwise they will be alerted.
    *
    * @param model The model specified by the user
    * @param displayError Boolean used to decide if notifications must been sent to the user.
    * @returns An object that specifies if the user had a previous key for the model and their other saved keys
    */
-  async retrieveKey(model: string, displayError = true): Promise<RetrieveKeyResponse> {
-    let exists = true;
-    // Retrieve locally encrypted keys
-    if (!existsSync(this.filePath)) {
-      // Create empty keys file if the user does not have one
-      await writeFile(this.filePath, JSON.stringify({}));
-    }
-    const secrets: SuperSecretCredentials = JSON.parse(await readFile(this.filePath, "utf-8"));
-    let key = "";
-    if (model === "OPENAI") {
-      key = secrets.OPENAI_API_KEY
-        ? safeStorage.decryptString(Buffer.from(secrets.OPENAI_API_KEY))
-        : "";
-    }
+  async retrieveKey(model: string, displayError = true): Promise<string> {
+    const key = getSecret(`secrets.${model.toUpperCase()}_API_KEY` as any);
     if (!key) {
-      exists = false;
-      if (displayError) this.handleNotification(`No ${model} key found`, "warn");
+      if (displayError) { 
+        this.handleNotification(`No ${model} key found`, "warn");
+      }
+      return "";
     }
-    return { oldKey: exists, keys: secrets };
+    return key;
   }
 
   async handleNotification(message: string, type: NotificationTypes) {
@@ -119,21 +107,21 @@ export class AiManager {
    * @returns Response from ai
    * */
 
-  async sendPrompt(prompt: string, graphId: string) {
+  async sendPrompt(prompt: string, graphId: string, model?: string) {
     let finalResponse = "";
     const llmGraph = getGraph(this.graphManager, graphId);
 
-    const selectedModel = "OpenAi";
-    if (!this.supportedModels.includes(selectedModel))
+    model = "OpenAi";
+    if (!this.supportedModels.includes(model))
       return this.handleNotification(
-        `The ${selectedModel} model is not currently supported`,
+        `The ${model} model is not currently supported`,
         "warn"
       );
 
-    const superSecretKey = await this.retrieveKey(selectedModel.toUpperCase(), true);
+    const superSecretKey = await this.retrieveKey(model, true);
     if (!superSecretKey) {
-      finalResponse = `No key found for the ${selectedModel} model.`;
-      logger.warn(`No key found for the ${selectedModel} model.`);
+      // finalResponse = `No key found for the ${model} model.`;
+      logger.warn(`No key found for the ${model} model.`);
       return;
     }
 
@@ -221,7 +209,6 @@ export class AiManager {
  * {modelName}_API_KEY
  */
 export interface SuperSecretCredentials {
-  /* eslint-disable @typescript-eslint/naming-convention */
   OPENAI_API_KEY?: number[];
   // JAKE_API_KEY? : number[];
   // MORE_API_KEYS...

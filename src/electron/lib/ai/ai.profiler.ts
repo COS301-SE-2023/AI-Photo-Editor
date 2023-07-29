@@ -8,7 +8,6 @@ import {
   LLMGraph,
 } from "../../lib/core-graph/CoreGraphExporter";
 import { join } from "path";
-import { object } from "zod";
 import logger from "../../utils/logger";
 import { ChildProcessWithoutNullStreams } from "child_process";
 import { readdirSync } from "fs";
@@ -27,7 +26,7 @@ import { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
 // ==================================================================
 
 const PLUGIN_DIRECTORY = join(__dirname, "../../../../blix-plugins");
-const PLUGINS = readdirSync(PLUGIN_DIRECTORY);
+// const PLUGINS = readdirSync(PLUGIN_DIRECTORY);
 const PYTHON_SCRIPT_PATH = join(__dirname, "../../../../src/electron/lib/ai/python/main.py");
 
 class Profiler {

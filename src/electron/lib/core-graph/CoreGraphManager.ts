@@ -1,13 +1,7 @@
-import logger from "../../utils/logger";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
-import type { MainWindow } from "../api/apis/WindowApi";
 import { CoreGraph } from "./CoreGraph";
 import { CoreGraphSubscriber } from "./CoreGraphInteractors";
-import { ToolboxRegistry } from "../registries/ToolboxRegistry";
-import { CoreGraphImporter } from "./CoreGraphImporter";
-import { type GraphToJSON } from "./CoreGraphExporter";
 import { NodeInstance } from "../registries/ToolboxRegistry";
-import { Blix } from "../Blix";
 import type { QueryResponse } from "../../../shared/types";
 
 // This class stores all the graphs amongst all open projects

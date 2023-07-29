@@ -1,7 +1,6 @@
 import { z } from "zod";
 import type { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
 import {
-  CoreGraphExporter,
   LLMExportStrategy,
   type LLMGraph,
 } from "../../lib/core-graph/CoreGraphExporter";
