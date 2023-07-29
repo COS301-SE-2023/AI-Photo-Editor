@@ -5,7 +5,7 @@ import {NodeBuilder,NodeUIBuilder} from "../../../src/electron/lib/plugins/build
 import { Plugin } from "../../../src/electron/lib/plugins/Plugin";
 import { Blix } from "../../../src/electron/lib/Blix";
 import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
-import { NodeUIParent } from "../../../src/shared/ui/NodeUITypes";
+import { NodeUI, NodeUIParent } from "../../../src/shared/ui/NodeUITypes";
 
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
@@ -81,25 +81,23 @@ describe("Test builder propagations", () => {
     });
 
     test("Adding a slider should affect nodeUI's paramaters", () => {
-        const nodeUI = new NodeUIParent("Jake.Shark", null);
         nodeUIBuilder = new NodeUIBuilder();
         nodeUIBuilder.addSlider("shrek",0,100,50,1);
   
-        expect(nodeUI.params[0].label).toEqual("shrek");
-        expect(nodeUI.params[0].parent).toEqual(nodeUI);
-        expect(nodeUI.params[0].type).toEqual("leaf");
-        expect(nodeUI.params[0].params).toEqual([0,100,50,1]);
+        expect(nodeUIBuilder["node"].params[0].label).toEqual("shrek");
+        expect(nodeUIBuilder["node"].params[0].parent).toEqual(nodeUIBuilder["node"]);
+        expect(nodeUIBuilder["node"].params[0].type).toEqual("leaf");
+        expect(nodeUIBuilder["node"].params[0].params).toEqual([0,100,50,1]);
       });
   
       test("addDropdown should affect nodeUi's children", () => {
-        const nodeUI = new NodeUIParent("Jake.Shark", null);
         nodeUIBuilder = new NodeUIBuilder();
         nodeUIBuilder.addDropdown("shrek",nodeBuilder.createUIBuilder().addButton("Shrek",() => {return "Shrek";}));
   
-        expect(nodeUI.params[0].label).toEqual("shrek");
-        expect(nodeUI.params[0].parent).toEqual(nodeUI);
-        expect(nodeUI.params[0].type).toEqual("parent");
-        expect(nodeUI.params[0].params[0].label).toEqual("Shrek");
+        expect(nodeUIBuilder["node"].params[0].label).toEqual("shrek");
+        expect(nodeUIBuilder["node"].params[0].parent).toEqual(nodeUIBuilder["node"]);
+        expect(nodeUIBuilder["node"].params[0].type).toEqual("parent");
+        expect(nodeUIBuilder["node"].params[0].params[0].label).toEqual("Shrek");
       });
 });
 
