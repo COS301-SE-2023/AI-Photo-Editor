@@ -133,6 +133,10 @@ type ComponentProps = {
   [key: string]: unknown;
 };
 
+function getRandomComponentId(type: NodeUIComponent) {
+  return `${type.toString()}-${Math.floor(Math.random() * 16 ** 6).toString(16)}`;
+}
+
 /**
  *
  * Builds the nodes's ui through restricted interface
@@ -149,11 +153,13 @@ export class NodeUIBuilder {
   }
 
   public addKnob(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Knob);
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Knob, config.componentId, [min, max, step])
+      new NodeUILeaf(this.node, NodeUIComponent.Knob, componentId, [min, max, step])
     );
-    this.uiConfigs[config.componentId] = {
-      ...config,
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
       defaultValue: config.defaultValue ?? 0,
       updatesBackend: config.updatesBackend ?? true,
     };
@@ -166,11 +172,11 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   public addButton(config: UIComponentConfig, props: ComponentProps): NodeUIBuilder {
-    this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Button, config.componentId, [props])
-    );
-    this.uiConfigs[config.componentId] = {
-      ...config,
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Button);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Button, componentId, [props]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
       defaultValue: config.defaultValue ?? "",
       updatesBackend: config.updatesBackend ?? false,
     };
@@ -186,11 +192,13 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    */
   public addSlider(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Slider);
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Slider, config.componentId, [min, max, step])
+      new NodeUILeaf(this.node, NodeUIComponent.Slider, componentId, [min, max, step])
     );
-    this.uiConfigs[config.componentId] = {
-      ...config,
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
       defaultValue: config.defaultValue ?? 0,
       updatesBackend: config.updatesBackend ?? true,
     };
@@ -199,11 +207,13 @@ export class NodeUIBuilder {
   }
 
   public addDropdown(config: UIComponentConfig, options: { [key: string]: any }): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Dropdown);
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Dropdown, config.componentId, [options])
+      new NodeUILeaf(this.node, NodeUIComponent.Dropdown, componentId, [options])
     );
-    this.uiConfigs[config.componentId] = {
-      ...config,
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
       defaultValue: config.defaultValue ?? Object.keys(options)[0],
       updatesBackend: config.updatesBackend ?? true,
     };
@@ -228,11 +238,11 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   public addTextInput(config: UIComponentConfig): NodeUIBuilder {
-    this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.TextInput, config.componentId, [])
-    );
-    this.uiConfigs[config.componentId] = {
-      ...config,
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.TextInput);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.TextInput, componentId, []));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
       defaultValue: config.defaultValue ?? "empty",
       updatesBackend: config.updatesBackend ?? true,
     };
@@ -244,11 +254,11 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   public addNumberInput(config: UIComponentConfig): NodeUIBuilder {
-    this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.NumberInput, config.componentId, [])
-    );
-    this.uiConfigs[config.componentId] = {
-      ...config,
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.NumberInput);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.NumberInput, componentId, []));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
       defaultValue: config.defaultValue ?? 0,
       updatesBackend: config.updatesBackend ?? true,
     };
@@ -260,11 +270,11 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   public addImageInput(config: UIComponentConfig): NodeUIBuilder {
-    this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.FilePicker, config.componentId, [])
-    );
-    this.uiConfigs[config.componentId] = {
-      ...config,
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.FilePicker);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.FilePicker, componentId, []));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
       defaultValue: config.defaultValue ?? "",
       updatesBackend: config.updatesBackend ?? true,
     };
@@ -277,11 +287,13 @@ export class NodeUIBuilder {
    * */
   // We need to discuss how to handle color pickers
   public addColorPicker(config: UIComponentConfig, param: any): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.ColorPicker);
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, config.componentId, [param])
+      new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, componentId, [param])
     );
-    this.uiConfigs[config.componentId] = {
-      ...config,
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
       defaultValue: config.defaultValue ?? "#000000",
       updatesBackend: config.updatesBackend ?? true,
     };
@@ -303,11 +315,11 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   public addLabel(config: UIComponentConfig, param: string) {
-    this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Label, config.componentId, [param])
-    );
-    this.uiConfigs[config.componentId] = {
-      ...config,
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Label);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Label, componentId, [param]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
       defaultValue: config.defaultValue ?? "empty",
       updatesBackend: config.updatesBackend ?? true,
     };

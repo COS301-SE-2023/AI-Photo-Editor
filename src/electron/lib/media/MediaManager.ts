@@ -13,7 +13,6 @@ export class MediaManager {
 
   // Subscribers that are listening on the MediaManager
   private _subscribers: { [key: MediaOutputId]: MediaSubscriber[] };
-  private _mediaByGraph: { [key: UUID]: MediaOutputId[] };
 
   constructor(
     mainWindow: MainWindow,
@@ -22,18 +21,11 @@ export class MediaManager {
   ) {
     this._mainWindow = mainWindow;
     this._subscribers = {};
-    this._mediaByGraph = {};
     this._graphInterpreter = graphInterpreter;
     this._graphManager = graphManager;
 
     this.media = {};
-
-    // this.addSubscriber();
   }
-
-  // addNode(graphMediaId: MediaOutputId, node: NodeInstance): QueryResponse<{ nodeId: MediaOutputId }> {
-  //   if (res.status === "success") this.onMediaUpdated(graphUUID);
-  // }
 
   updateMedia(mediaOutput: MediaOutput) {
     this.media[mediaOutput.outputId] = mediaOutput;
@@ -46,17 +38,24 @@ export class MediaManager {
 
   onGraphUpdated(graphUUID: UUID) {
     // Update media for all nodes that have subscribers
+    const graphOutputNodes = this._graphManager.getGraph(graphUUID).getOutputNodes;
 
-    // Build set of outputs to recompute
-    const outputsToRecompute = new Set<MediaOutputId>();
+    const nodesToRecompute = new Set<UUID>();
 
-    // for (const mediaId of this._subscribersByGraph[graphUUID]) {
-    //   const subscribers = this._subscribers[mediaId];
-    // }
+    for (const nodeUUID of Object.keys(graphOutputNodes)) {
+      const mediaId = graphOutputNodes[nodeUUID];
 
-    // const media = this.computeMedia(graphUUID, nodeUUID, nodeUUID);
-    // this.media[media.outputId] = media;
-    // this.onMediaUpdated(media.outputId);
+      // Check if there are any subscribers to this media
+      if (this._subscribers[mediaId]) {
+        nodesToRecompute.add(nodeUUID);
+      }
+    }
+
+    for (const nodeUUID of nodesToRecompute) {
+      this.computeMedia(graphUUID, nodeUUID);
+      // The output node after each computation will call updateMedia()
+      // which then alerts all subscribers of the media change
+    }
   }
 
   // Notify all subscribers of media change
@@ -68,7 +67,7 @@ export class MediaManager {
     }
   }
 
-  computeMedia(graphUUID: UUID, nodeUUID: UUID, nodeMediaId: MediaOutputId) {
+  computeMedia(graphUUID: UUID, nodeUUID: UUID) {
     return this._graphInterpreter.run(this._graphManager.getGraph(graphUUID), nodeUUID);
   }
 

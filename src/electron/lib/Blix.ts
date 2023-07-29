@@ -75,8 +75,8 @@ export class Blix {
     outputUIBuilder.addTextInput({
       componentId: "outputId",
       label: "Export",
-      defaultValue: "Output-" + Math.round(10000 * Math.random()).toString(), // SUGGESTION: Use the default value to indicate the command to run?
-      updatesBackend: true,
+      defaultValue: "default", // TODO: Make this a random id to start with
+      updatesBackend: false,
     });
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));

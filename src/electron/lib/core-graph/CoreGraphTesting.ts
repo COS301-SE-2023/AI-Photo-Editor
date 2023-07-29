@@ -244,7 +244,7 @@ export class TestGraph {
     // );
 
     // g2.getOutputNodes.push(g2Node6.uuid);
-    g2.getOutputNodes.add(g2Node4.uuid);
+    g2.getOutputNodes[g2Node4.uuid] = "default";
     // g2.getOutputNodes.push(g2Node6.uuid);
 
     // Expected output:

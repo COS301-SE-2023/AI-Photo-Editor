@@ -12,6 +12,7 @@ import { get } from "http";
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
 import { type NodeSignature } from "@shared/ui/ToolboxTypes";
 import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
+import { type MediaOutputId } from "@shared/types/media";
 
 // =========================================
 // Explicit types for type safety
@@ -46,7 +47,7 @@ export class CoreGraph extends UniqueEntity {
   private edgeSrc: { [key: AnchorUUID]: AnchorUUID[] }; // Map a source anchor to a list of destination anchors
   // E.g. we can do (source anchor) ---[edgeSrc]--> (destination anchors) ---[edgeDest]--> (Edges)
   //      to get all the edges that flow from a source anchor
-  private outputNodes: Set<UUID>;
+  private outputNodes: { [key: UUID]: MediaOutputId };
 
   // Maps a node UUID to a list of UI inputs
   private uiInputs: { [key: UUID]: CoreNodeUIInputs };
@@ -59,7 +60,7 @@ export class CoreGraph extends UniqueEntity {
     this.anchors = {};
     this.edgeDest = {};
     this.edgeSrc = {};
-    this.outputNodes = new Set([]);
+    this.outputNodes = {};
     this.uiInputs = {};
     // this.nodeList = [];
   }
@@ -159,7 +160,7 @@ export class CoreGraph extends UniqueEntity {
       }
 
       if (node.signature === "blix.output") {
-        this.outputNodes.add(n.uuid);
+        this.outputNodes[n.uuid] = "default"; // TODO: set this to a unique id and propagate to the frontend
       }
 
       // console.log(QueryResponseStatus.success)
@@ -220,6 +221,11 @@ export class CoreGraph extends UniqueEntity {
   public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs): QueryResponse {
     this.uiInputs[nodeUUID] = new CoreNodeUIInputs(nodeUIInputs);
 
+    // If output node, update output node id
+    if (this.outputNodes[nodeUUID]) {
+      this.outputNodes[nodeUUID] = nodeUIInputs.inputs.outputId as MediaOutputId;
+    }
+
     return { status: "success" };
   }
 
@@ -253,8 +259,8 @@ export class CoreGraph extends UniqueEntity {
     const node: Node = this.nodes[nodeToDelete];
     if (!node) return { status: "error", message: "Node to be deleted does not exist" };
 
-    if (this.outputNodes.has(nodeToDelete)) {
-      this.outputNodes.delete(nodeToDelete);
+    if (this.outputNodes[nodeToDelete]) {
+      delete this.outputNodes[nodeToDelete];
     }
 
     try {
