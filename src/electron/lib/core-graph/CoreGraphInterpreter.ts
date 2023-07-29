@@ -1,5 +1,4 @@
 import { CoreGraph, Node, Anchor, AnchorIO } from "./CoreGraph";
-import { TestGraph } from "./CoreGraphTesting";
 import logger from "./../../utils/logger";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";

@@ -30,6 +30,16 @@ jest.mock("electron", () => ({
   },
 }));
 
+jest.mock("chokidar", () => ({
+  default: {
+    watch: jest.fn(() => {
+      return {
+        on: jest.fn()
+      }
+    }),
+  }
+}));
+
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
   readFile: jest.fn((filePath, callback) => callback(null, "mocked_file_data")),
@@ -86,7 +96,7 @@ describe("Test plugin integrations", () => {
     beforeEach(() => {
       jest.clearAllMocks();
       plugin = new Plugin(pack,plugDir,main);
-      blix = new Blix(mainWindow);
+      blix = new Blix();
       plugin.requireSelf(blix);
     });
 
