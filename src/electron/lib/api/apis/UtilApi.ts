@@ -4,7 +4,6 @@ import { platform, type, release } from "os";
 import logger from "../../../utils/logger";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
 import { getSecret, setSecret, clearSecret } from "../../../utils/settings";
-import type { ToastType } from "../../../../shared/types";
 
 // Exposes basic system information
 export class UtilApi implements ElectronMainApi<UtilApi> {

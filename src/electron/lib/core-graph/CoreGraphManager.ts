@@ -1,4 +1,5 @@
 import { type UUID } from "../../../shared/utils/UniqueEntity";
+import type { MainWindow } from "../api/apis/WindowApi";
 import { CoreGraph } from "./CoreGraph";
 import { CoreGraphSubscriber } from "./CoreGraphInteractors";
 import { NodeInstance } from "../registries/ToolboxRegistry";

@@ -8,6 +8,7 @@
   import { initAPIs } from "../../lib/api/apiInitializer";
   import ContextMenu from "../../ui/utils/ContextMenu.svelte";
   import Test from "./Test.svelte";
+  import Settings from "./Settings.svelte";
 
   const testing = false;
 
@@ -40,6 +41,7 @@
 
 <Toasts />
 <ContextMenu />
+<Settings />
 
 <style lang="postcss" global>
   @tailwind base;

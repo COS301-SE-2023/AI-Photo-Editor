@@ -121,11 +121,11 @@ export class AiManager {
 
     const superSecretKey = this.retrieveKey(model, true);
 
-    if (!superSecretKey) {
-      // finalResponse = `No key found for the ${model} model.`;
-      logger.warn(`No key found for the ${model} model.`);
-      return;
-    }
+    // if (!superSecretKey) {
+    //   // finalResponse = `No key found for the ${model} model.`;
+    //   logger.warn(`No key found for the ${model} model.`);
+    //   return;
+    // }
 
     const promptContext = {
       prompt,
