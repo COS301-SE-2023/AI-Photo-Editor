@@ -39,6 +39,16 @@ jest.mock("fs", () => ({
 }));
 
 
+jest.mock("chokidar", () => ({
+  default: {
+    watch: jest.fn(() => {
+      return {
+        on: jest.fn()
+      }
+    }),
+  }
+}));
+
 describe("Test plugin integrations", () => {
     let plugin : Plugin;
     let blix : Blix;

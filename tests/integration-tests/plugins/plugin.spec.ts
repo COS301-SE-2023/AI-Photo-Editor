@@ -6,6 +6,7 @@ import { Plugin } from "../../../src/electron/lib/plugins/Plugin";
 import { Blix } from "../../../src/electron/lib/Blix";
 import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
 import { NodeUI, NodeUIParent } from "../../../src/shared/ui/NodeUITypes";
+import {app} from "electron";
 
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
@@ -132,8 +133,42 @@ describe("Test plugin integrations", () => {
       plugin.requireSelf(blix);
     });
 
+
+jest.mock('electron', () => ({
+  app: {
+    getAppPath: jest.fn(),
+    getPath: jest.fn(),
+    isPackaged: true, // Mock app.isPackaged to return true
+  },
+}));
+ describe('pluginPaths', () => {
+
+
+      test('should return the correct production path', () => {
+        // Mock the return values of the functions being used in the pluginPaths function
+        app.getAppPath = jest.fn().mockReturnValue('/path/to/app');
+        app.getPath = jest.fn().mockReturnValue('/path/to/userData');
+
+        Object.defineProperty(app, "isPackaged", {
+        value: true,
+        writable: false,
+      });
+
+        
+        plugin = new Plugin(pack,plugDir,main);
+        blix = new Blix();
+        blix.init(mainWindow);
+        plugin.requireSelf(blix);
+        // Call the function being tested
+        const paths = blix.pluginManager.pluginPaths;
+
+        // Expect the result to match the expected production path
+        expect(paths).toEqual(['/path/to/userData/plugins']);
+      });
+    });
+
     test("Plugin should send nodes to toolbox registry", () => {
-        //plugin.requireSelf(blix);
+        plugin.requireSelf(blix);
         const tools =  Object.values(blix.toolbox.getRegistry());
         expect(tools.length).toEqual(3);
       });
