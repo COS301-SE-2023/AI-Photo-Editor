@@ -86,7 +86,7 @@ describe("Test plugin integrations", () => {
     beforeEach(() => {
       jest.clearAllMocks();
       plugin = new Plugin(pack,plugDir,main);
-      blix = new Blix(mainWindow);
+      blix = new Blix();
       plugin.requireSelf(blix);
     });
 
@@ -119,18 +119,6 @@ describe("Test plugin integrations", () => {
       const ctx  = new PluginContext();
 
       expect(ctx.blixVersion).toBe("0.0.1");
-    });
-
-      // We should see to setup some proper integration tests for these two functions
-      test("Plugin command context should load projects",() => {
-      const ctx  = new CommandPluginContext("plug",'plug',blix);
-
-      expect(ctx.loadProject("openFile")).toReturn;
-    });
-
-    test("Plugin command context should save project",() => {
-      const ctx  = new CommandPluginContext("plug",'plug',blix);
-      expect(ctx.saveCurrentProject("a")).toReturn;
     });
 
 

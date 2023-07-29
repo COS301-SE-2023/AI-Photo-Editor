@@ -5,11 +5,8 @@ import {NodeBuilder,NodeUIBuilder} from "../../../src/electron/lib/plugins/build
 import { Plugin } from "../../../src/electron/lib/plugins/Plugin";
 import { Blix } from "../../../src/electron/lib/Blix";
 import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
-import {BrowserWindow} from "electron";
-import { join } from "path";
-import { writeFileSync } from "fs";
 import { NodeUIParent } from "../../../src/shared/ui/NodeUITypes";
-import chokidar from "chokidar";
+
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
 const mainWindow: MainWindow = {
