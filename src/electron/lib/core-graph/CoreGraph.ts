@@ -161,6 +161,14 @@ export class CoreGraph extends UniqueEntity {
   }
 
   public addEdge(anchorA: UUID, anchorB: UUID): QueryResponse<{ edgeId: UUID }> {
+    // Both Anchors must exist
+    if (!this.anchors[anchorA] || !this.anchors[anchorB]) {
+      return {
+        status: "error",
+        message: "Edge must flow between two existing anchors",
+      };
+    }
+
     // Edge can start either from an output or input anchor
     const ancFrom =
       this.anchors[anchorA].ioType === AnchorIO.output
@@ -208,7 +216,10 @@ export class CoreGraph extends UniqueEntity {
   }
 
   public checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
-    // TODO
+    if (this.edgeSrc[ancFrom._uuid]) {
+      return this.edgeSrc[ancFrom._uuid].includes(ancTo._uuid);
+    }
+
     if (ancFrom.uuid === ancTo.uuid) return true; // Needs to be changed
     return false;
   }
@@ -301,26 +312,6 @@ export class CoreGraph extends UniqueEntity {
     this.nodes[node].setStyling(new NodeStyling(pos, { w: 0, h: 0 })); // TODO w/h
     return { status: "success" };
   }
-
-  private copy() {
-    // TODO
-  }
-
-  // public printGraph() {
-  //   for (const edge in this.edgeDest) {
-  //     if (!this.edgeDest.hasOwnProperty(edge)) continue;
-  //     logger.info("Edge (same as anchorTo): " + edge);
-  //     logger.info("Node From: " + this.anchors[this.edgeDest[edge].getAnchorFrom].parent.uuid);
-  //     logger.info("Node To: " + this.anchors[this.edgeDest[edge].getAnchorTo].parent.uuid);
-  //     logger.info("Anchor from -> Anchor to:");
-  //     logger.info(
-  //       this.anchors[this.edgeDest[edge].getAnchorFrom].getParent.getName +
-  //         " -> " +
-  //         this.anchors[this.edgeDest[edge].getAnchorTo].getParent.getName +
-  //         "\n"
-  //     );
-  //   }
-  // }
 
   public exportJSON(): GraphToJSON {
     return { nodes: this.nodesToJSONObject(), edges: this.edgesToJSONObject() };
@@ -488,7 +479,7 @@ export class NodesAndEdgesGraph implements GraphRepresentation {
   ) {}
 }
 
-class ReducedNode {
+export class ReducedNode {
   constructor(
     readonly id: UUID,
     readonly signature: `${string}.${string}`,
@@ -498,7 +489,7 @@ class ReducedNode {
   ) {}
 }
 
-class ReducedEdge {
+export class ReducedEdge {
   constructor(
     readonly id: UUID,
     readonly nodeUUIDFrom: UUID,
@@ -508,7 +499,7 @@ class ReducedEdge {
   ) {}
 }
 
-class ReducedAnchor {
+export class ReducedAnchor {
   constructor(readonly id: string, readonly type: AnchorType, readonly displayName: string) {}
 }
 
