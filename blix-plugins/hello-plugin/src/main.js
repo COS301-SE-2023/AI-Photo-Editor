@@ -14,16 +14,34 @@ const nodes = {
                 "\nREQUIRED OUTPUTS", requiredOutputs
             );
 
-            return {
-                "out1": anchorInputs["in1"] + anchorInputs["in2"],
-                "out2": anchorInputs["in3"],
-                "out3": uiInputs["slideAlong"]
+            // Doing it this way allows us to only compute the outputs that are required
+            const computers = {
+                "out1": () => anchorInputs["in1"] + anchorInputs["in2"],
+                "out2": () => anchorInputs["in3"],
+                "out3": () => uiInputs["slideAlong"]
             };
+
+            let res = {};
+            for (const output of requiredOutputs) {
+                res = { ...res, output: computers[output]() }
+            }
+
+            console.log("RETURNING", res);
+            return res;
         });
 
        const ui = nodeBuilder.createUIBuilder();
        ui.addButton("order66","return 66;")
-       .addSlider("slideAlong", 0, 100, 0.1, 50)
+        .addSlider(
+            {
+                componentId: "slideAlong",
+                label: "Slide Along",
+                defaultValue: 0,
+                updateBackend: true,
+            },
+            { min: 0, max: 100, set: 0.1 }
+        );
+
     //    .addColorPicker("massacre", "red")
     //    .addKnob("yourAKnob",0,100,0.1,50)
     //    .addDropdown("orphanage",nodeBuilder.createUIBuilder()

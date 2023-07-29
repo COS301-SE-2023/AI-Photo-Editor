@@ -141,8 +141,8 @@ export class CoreGraph extends UniqueEntity {
     return this.edgeSrc;
   }
 
-  public getUIInputs(nodeUUID: UUID): CoreNodeUIInputs | null {
-    return this.uiInputs[nodeUUID] || null;
+  public getUIInputs(nodeUUID: UUID): { [key: string]: UIValue } | null {
+    return this.uiInputs[nodeUUID].getInputs || null;
   }
 
   // We need to pass in node name and plugin name
@@ -485,6 +485,10 @@ export class CoreNodeUIInputs {
   private readonly inputs: { [key: string]: UIValue };
   constructor(nodeUIInpust: INodeUIInputs) {
     this.inputs = nodeUIInpust.inputs;
+  }
+
+  public get getInputs() {
+    return this.inputs;
   }
 }
 

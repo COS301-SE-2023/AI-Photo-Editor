@@ -56,7 +56,15 @@ export class Blix {
     // Create Output node
     const tempNodeBuilder = new NodeBuilder("blix", "output");
     const tempUIBuilder = tempNodeBuilder.createUIBuilder();
-    tempUIBuilder.addButton("testing", null);
+    tempUIBuilder.addButton(
+      {
+        componentId: "export",
+        label: "Export",
+        defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+        updateBackend: true,
+      },
+      {}
+    );
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
 

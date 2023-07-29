@@ -79,7 +79,15 @@ export class CoreGraphManager {
       return { status: "error", message: "Graph does not exist" };
 
     const res = this._graphs[graphUUID].updateUIInputs(nodeUUID, nodeUIInputs);
-    // if (res.status === "success") this.onGraphUpdated(graphUUID);
+
+    const signature = this._graphs[graphUUID].getNodes[nodeUUID].getSignature;
+
+    // TODO: Determine whether the update should trigger the graph to recompute
+    const doGraphUpdate = this._toolbox.getNodeInstance(signature).ui;
+
+    if (res.status === "success") {
+      // this.onGraphUpdated(graphUUID);
+    }
     return res;
   }
 

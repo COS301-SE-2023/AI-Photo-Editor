@@ -21,7 +21,12 @@ const nodes ={
         });
 
         const ui = nodeBuilder.createUIBuilder();
-        ui.addDropdown("state", {
+        ui.addDropdown({
+            componentId: "state",
+            label: "State",
+            defaultValue: 0,
+            updateBackend: true,
+        }, {
           "Square": 0,
           "Square Root": 1,
           "Absolute": 2,
@@ -30,7 +35,7 @@ const nodes ={
           "Sine": 5,
           "Cosine": 6,
           "Tangent": 7
-        }, "Square");
+        });
 
         nodeBuilder.setUI(ui);
 
