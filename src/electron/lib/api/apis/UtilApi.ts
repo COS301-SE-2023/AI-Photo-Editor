@@ -39,63 +39,31 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
    * This function takes in a key and then will save the key for the specified model to local storage.
    * Electron's safeStorage is used to encrypt/decrypt these keys.
    *
-   * @param model The model specified by the user.
+   * @param key Value mapped to a key in the ElctronStore settings configuration.
+   * @param value Value to be store at the index of key in the ElectronStore settings configuration.
    */
-  async saveSuperSecretKey(key: string, model: string) {
-    if (!(await this.supportedModel(model))) {
-      return this.handleNotification(`The ${model} model is not currently supported`, "warn");
-    }
-    let confirmation = false;
-    const oldSuperSecretKey = getSecret(`secrets.${model.toUpperCase()}_API_KEY`);
-    if (oldSuperSecretKey) {
-      confirmation = true; // TODD: Implement some sort of user confirmation
-    }
+  async saveSecret(key: string, value: string) {
     try {
-      if (confirmation) {
-        setSecret(`secrets.${model.toUpperCase()}_API_KEY`, key);
-        this.handleNotification(`${model} key saved successfully`, "success");
-      }
+      setSecret(key, value);
+      this.blix.sendSuccessMessage(`${key} setting saved successfully.`);
     } catch (e) {
       logger.info(e);
-      this.handleNotification(`There was an error saving your new ${model} model key.`, "error");
+      this.blix.sendErrorMessage(`There was an error saving your new ${key} setting.`);
     }
   }
 
   /**
-   * This function will if a key exists from local storage for the passed in model
+   * This function will take in a key and request for it to be removed in the ElectronStore.
    *
-   * @param model Model of which the key must be removed
+   * @param key Value mapped to a key in the ElectronStore settings configuration.
    */
-  async removeSuperSecretKey(model: string): Promise<void> {
-    if (!(await this.supportedModel(model))) {
-      return this.handleNotification(`The ${model} model is not currently supported`, "warn");
+  async resetSecret(key: string): Promise<void> {
+    try {
+      clearSecret(key);
+      this.blix.sendSuccessMessage(`${key} setting removed successfully.`);
+    } catch (e) {
+      logger.info(e);
+      this.blix.sendErrorMessage(`There was an error removing your ${key} setting.`);
     }
-    const key = getSecret(`secrets.${model.toUpperCase()}_API_KEY`);
-    let message = "";
-    let type: ToastType;
-    if (key) {
-      clearSecret(`secrets.keys.${model.toUpperCase()}_API_KEY`);
-      message = `${model} model key deleted successfully`;
-      type = "success";
-    } else {
-      message = `No key exists for the ${model} model`;
-      type = "warn";
-    }
-    this.handleNotification(message, type);
-  }
-
-  /**
-   * This function handles any responses needed to be sent to the user.
-   *
-   * @param message Content to be displayed
-   * @param type Type to style the message
-   */
-  async handleNotification(message: string, type: ToastType) {
-    if (this.blix.mainWindow) this.blix.mainWindow.apis.utilClientApi.showToast({ message, type });
-  }
-
-  async supportedModel(model: string): Promise<boolean> {
-    const models = this.blix.aiManager.getSupportedModels();
-    return model in models;
   }
 }
