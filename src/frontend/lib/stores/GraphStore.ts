@@ -31,6 +31,7 @@ import { toolboxStore } from "./ToolboxStore";
 export class GraphStore {
   graphStore: Writable<UIGraph>;
   uiInputUnsubscribers: { [key: GraphNodeUUID]: () => void } = {};
+  uiInputSubscribers: { [key: GraphNodeUUID]: () => void } = {};
 
   constructor(public uuid: GraphUUID) {
     // Starts with empty graph
@@ -64,7 +65,7 @@ export class GraphStore {
               this.uiInputUnsubscribers[node] = inputs[input].subscribe(() => {
                 // console.log("UPDATE UI INPUTS", node, "->", input);
                 this.updateUIInputs(node).catch((err) => {
-                  /* TODO */
+                  return;
                 });
               });
             }
@@ -118,6 +119,8 @@ export class GraphStore {
     }
 
     const res = await window.apis.graphApi.updateUIInputs(thisUUID, nodeUUID, payload);
+
+    // Notify our UI subscribers
   }
 
   async removeNode(nodeUUID: GraphNodeUUID) {
@@ -138,6 +141,11 @@ export class GraphStore {
 
   public get subscribe() {
     return this.graphStore.subscribe;
+  }
+
+  public addUISubscriber(callback: () => null) {
+    // TODO
+    return;
   }
 
   public getNode(nodeUUID: GraphNodeUUID): GraphNode {

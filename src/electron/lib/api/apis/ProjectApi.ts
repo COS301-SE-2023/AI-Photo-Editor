@@ -5,6 +5,7 @@ import type { SharedProject, LayoutPanel } from "../../../../shared/types/index"
 import logger from "../../../utils/logger";
 import { ProjectClientApi } from "@frontend/lib/api/apis/ProjectClientApi";
 import type { IpcResponse } from "../MainApi";
+import { CoreGraphUpdateEvent } from "../../core-graph/CoreGraphInteractors";
 
 export class ProjectApi implements ElectronMainApi<ProjectApi> {
   constructor(private readonly blix: Blix) {}
@@ -15,7 +16,7 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
     for (let i = 0; i < 3; i++) {
       const graphId = this.blix.graphManager.createGraph();
       this.blix.projectManager.addGraph(project.uuid, graphId);
-      this.blix.graphManager.onGraphUpdated(graphId);
+      this.blix.graphManager.onGraphUpdated(graphId, new Set([CoreGraphUpdateEvent.graphUpdated]));
     }
 
     return {

@@ -6,7 +6,11 @@ import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 import { CoreGraphInterpreter } from "./core-graph/CoreGraphInterpreter";
 import { PluginManager } from "./plugins/PluginManager";
-import { IPCGraphSubscriber } from "./core-graph/CoreGraphInteractors";
+import {
+  CoreGraphUpdateEvent,
+  IPCGraphSubscriber,
+  SystemGraphSubscriber,
+} from "./core-graph/CoreGraphInteractors";
 import type { UUID } from "../../shared/utils/UniqueEntity";
 import type { UIGraph } from "../../shared/ui/UIGraph";
 import { blixCommands } from "./BlixCommands";
@@ -14,6 +18,8 @@ import logger from "../utils/logger";
 import { AiManager } from "./ai/AiManager";
 import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
 import type { MediaOutput } from "../../shared/types/media";
+import { MediaManager } from "./media/MediaManager";
+import { CoreGraph } from "./core-graph/CoreGraph";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -27,6 +33,7 @@ export class Blix {
   private _mainWindow!: MainWindow;
   private _aiManager!: AiManager;
   private _graphInterpreter!: CoreGraphInterpreter;
+  private _mediaManager!: MediaManager;
   private _isReady = false;
 
   // private startTime: Date;
@@ -54,9 +61,9 @@ export class Blix {
     this._graphInterpreter = new CoreGraphInterpreter(this._toolboxRegistry);
 
     // Create Output node
-    const tempNodeBuilder = new NodeBuilder("blix", "output");
-    const tempUIBuilder = tempNodeBuilder.createUIBuilder();
-    tempUIBuilder.addButton(
+    const outputNodeBuilder = new NodeBuilder("blix", "output");
+    const outputUIBuilder = outputNodeBuilder.createUIBuilder();
+    outputUIBuilder.addButton(
       {
         componentId: "export",
         label: "Export",
@@ -68,12 +75,12 @@ export class Blix {
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
 
-    tempNodeBuilder.setTitle("Output");
-    tempNodeBuilder.setDescription(
+    outputNodeBuilder.setTitle("Output");
+    outputNodeBuilder.setDescription(
       "This is the global output node which accepts data of any type, and presents the final value to the user"
     );
     // tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
-    tempNodeBuilder.define(
+    outputNodeBuilder.define(
       (
         mediaOutput: { [key: string]: any },
         inputUI: { [key: string]: any },
@@ -85,9 +92,9 @@ export class Blix {
       }
     );
 
-    tempNodeBuilder.addInput("", "in", "In");
-    tempNodeBuilder.setUI(tempUIBuilder);
-    this._toolboxRegistry.addInstance(tempNodeBuilder.build);
+    outputNodeBuilder.addInput("", "in", "In");
+    outputNodeBuilder.setUI(outputUIBuilder);
+    this._toolboxRegistry.addInstance(outputNodeBuilder.build);
 
     for (const command of blixCommands) {
       this.commandRegistry.addInstance(command);
@@ -101,32 +108,30 @@ export class Blix {
     // this._aiManager = new AiManager(mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
 
+    this._mediaManager = new MediaManager(mainWindow, this._graphInterpreter, this._graphManager);
+
     this.initSubscribers();
     this._isReady = true;
 
     // testStuffies(this);
-
-    // TESTING ADD NODE TO GRAPH
-    // setInterval(() => {
-    //   const allIds = this._graphManager.getAllGraphUUIDs();
-
-    //   const randId = allIds[Math.floor(Math.random() * allIds.length)];
-    //   const toolbox = this._toolboxRegistry.getRegistry();
-    //   const toolboxKeys = Object.keys(toolbox);
-    //   const randomNode = toolbox[toolboxKeys[Math.floor(Math.random() * toolboxKeys.length)]];
-
-    //   this._graphManager.addNode(randId, randomNode);
-    // }, 3000);
   }
 
   private initSubscribers() {
-    const graphSubscriber = new IPCGraphSubscriber();
-
-    graphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
+    const ipcSubscriber = new IPCGraphSubscriber();
+    ipcSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
       this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
     };
+    this._graphManager.addAllSubscriber(ipcSubscriber);
 
-    this._graphManager.addAllSubscriber(graphSubscriber);
+    const mediaSubscriber = new SystemGraphSubscriber();
+    mediaSubscriber.setListenEvents([
+      CoreGraphUpdateEvent.graphUpdated,
+      CoreGraphUpdateEvent.uiInputsUpdated,
+    ]);
+    mediaSubscriber.listen = (graphId: UUID, newGraph: CoreGraph) => {
+      // this._graphInterpreter.run(this._graphManager.getGraph(graphId));
+      this._mediaManager.onGraphUpdated(graphId);
+    };
 
     // REMOVED: In favor of checking for graph changes on the frontend instead
     // const mediaSubscriber = new BackendSystemGraphSubscriber();

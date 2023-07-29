@@ -2,13 +2,16 @@ import Main from "electron/main";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
 import { CoreGraph } from "./CoreGraph";
-import { CoreGraphSubscriber } from "./CoreGraphInteractors";
+import { CoreGraphSubscriber, CoreGraphUpdateEvent } from "./CoreGraphInteractors";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphImporter } from "./CoreGraphImporter";
 import { CoreGraphExporter, type GraphToJSON } from "./CoreGraphExporter";
 import { NodeInstance } from "../registries/ToolboxRegistry";
 import { Blix } from "../Blix";
 import type { INodeUIInputs, QueryResponse } from "../../../shared/types";
+
+const ONLY_GRAPH_UPDATED = new Set([CoreGraphUpdateEvent.graphUpdated]);
+const ONLY_UI_INPUTS_UPDATED = new Set([CoreGraphUpdateEvent.uiInputsUpdated]);
 
 // This class stores all the graphs amongst all open projects
 // Projects index into this store at runtime to get their graphs
@@ -41,7 +44,7 @@ export class CoreGraphManager {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };
     const res = this._graphs[graphUUID].addNode(node);
-    if (res.status === "success") this.onGraphUpdated(graphUUID);
+    if (res.status === "success") this.onGraphUpdated(graphUUID, ONLY_GRAPH_UPDATED);
     return res;
   }
 
@@ -52,7 +55,7 @@ export class CoreGraphManager {
     const res = this._graphs[graphUUID].addEdge(anchorA, anchorB);
 
     if (res.status === "success") {
-      this.onGraphUpdated(graphUUID);
+      this.onGraphUpdated(graphUUID, ONLY_GRAPH_UPDATED);
     }
 
     return res;
@@ -62,7 +65,7 @@ export class CoreGraphManager {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };
     const res = this._graphs[graphUUID].removeNode(nodeUUID);
-    if (res.status === "success") this.onGraphUpdated(graphUUID);
+    if (res.status === "success") this.onGraphUpdated(graphUUID, ONLY_GRAPH_UPDATED);
     return res;
   }
 
@@ -70,7 +73,7 @@ export class CoreGraphManager {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };
     const res = this._graphs[graphUUID].removeEdge(anchorTo);
-    if (res.status === "success") this.onGraphUpdated(graphUUID);
+    if (res.status === "success") this.onGraphUpdated(graphUUID, ONLY_GRAPH_UPDATED);
     return res;
   }
 
@@ -82,11 +85,11 @@ export class CoreGraphManager {
 
     const signature = this._graphs[graphUUID].getNodes[nodeUUID].getSignature;
 
-    // TODO: Determine whether the update should trigger the graph to recompute
-    const doGraphUpdate = this._toolbox.getNodeInstance(signature).ui;
-
     if (res.status === "success") {
-      // this.onGraphUpdated(graphUUID);
+      // TODO: Determine whether the update should trigger the graph to recompute
+      const doGraphUpdate = this._toolbox.getNodeInstance(signature).ui;
+
+      this.onGraphUpdated(graphUUID, ONLY_UI_INPUTS_UPDATED);
     }
     return res;
   }
@@ -127,15 +130,19 @@ export class CoreGraphManager {
   }
 
   // Notify all subscribers of change
-  onGraphUpdated(graphUUID: UUID) {
+  onGraphUpdated(graphUUID: UUID, events: Set<CoreGraphUpdateEvent>) {
     if (this._subscribers[graphUUID] !== undefined) {
       this._subscribers[graphUUID].forEach((subscriber) => {
-        subscriber.onGraphChanged(graphUUID, this._graphs[graphUUID]);
+        if (checkForCommonElement(events, subscriber.getSubscriberEvents())) {
+          subscriber.onGraphChanged(graphUUID, this._graphs[graphUUID]);
+        }
       });
     }
     if (this._subscribers.all !== undefined) {
       this._subscribers.all.forEach((subscriber) => {
-        subscriber.onGraphChanged(graphUUID, this._graphs[graphUUID]);
+        if (checkForCommonElement(events, subscriber.getSubscriberEvents())) {
+          subscriber.onGraphChanged(graphUUID, this._graphs[graphUUID]);
+        }
       });
     }
   }
@@ -163,4 +170,11 @@ export class CoreGraphManager {
   removeSubscriber() {
     return;
   }
+}
+
+function checkForCommonElement<T>(setA: Set<T>, setB: Set<T>) {
+  for (const elem of setA) {
+    if (setB.has(elem)) return true;
+  }
+  return false;
 }

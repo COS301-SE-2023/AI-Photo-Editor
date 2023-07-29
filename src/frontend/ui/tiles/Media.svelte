@@ -36,6 +36,7 @@
     selectedNode = { graphUUID, outNode: nodeUUID };
 
     // recomputeMedia();
+    mediaStore.stopMediaReactive(graphUUID, nodeUUID);
     media = mediaStore.getMediaReactive(graphUUID, nodeUUID);
 
     // MOVED: now computed directly in media store

@@ -9,11 +9,6 @@ export class MediaApi implements ElectronMainApi<MediaApi> {
     this._blix = blix;
   }
 
-  async computeAll(graphUUID: UUID) {
-    // TODO: Find all output nodes and run them one by one
-    // return this._blix.graphInterpreter.runAll(this._blix.graphManager.getGraph(graphUUID));
-  }
-
   // TODO: Implement these properly
   async compute(graphUUID: UUID, nodeUUID: UUID) {
     return this._blix.graphInterpreter.run(this._blix.graphManager.getGraph(graphUUID), nodeUUID);

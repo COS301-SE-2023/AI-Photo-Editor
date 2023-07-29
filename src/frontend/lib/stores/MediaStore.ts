@@ -24,6 +24,12 @@ class MediaStore {
     await window.apis.mediaApi.compute(graphUUID, nodeUUID);
   }
 
+  // Stop listening for graph changes
+  public stopMediaReactive(graphUUID: GraphUUID, outputNodeUUID: GraphNodeUUID) {
+    // TODO
+    return;
+  }
+
   public getMediaReactive(graphUUID: GraphUUID, outputNodeUUID: GraphNodeUUID) {
     const media = get(mediaStore)[outputNodeUUID];
 
@@ -35,21 +41,21 @@ class MediaStore {
       // TODO: Enable and properly handle this when graphs can be deleted
       // if (this.graphUnsubscribers[media.graphUUID]) this.graphUnsubscribers[media.graphUUID]();
 
-      this.graphUnsubscribers[graphUUID] = selectedGraph.subscribe((_) => {
-        this.compute(graphUUID, outputNodeUUID).catch((err) => {
-          // TODO: Handle this properly
-          // this.mediaStore.update((mediaOutputs) => {
-          //   mediaOutputs[outputNodeUUID] = {
-          //     outputId: outputNodeUUID,
-          //     outputNodeUUID,
-          //     graphUUID,
-          //     content: err,
-          //     dataType: "Error",
-          //   };
-          //   return mediaOutputs;
-          // });
-        });
-      });
+      // this.graphUnsubscribers[graphUUID] = selectedGraph.subscribe((_) => {
+      //   this.compute(graphUUID, outputNodeUUID).catch((err) => {
+      //     // TODO: Handle this properly
+      //     // this.mediaStore.update((mediaOutputs) => {
+      //     //   mediaOutputs[outputNodeUUID] = {
+      //     //     outputId: outputNodeUUID,
+      //     //     outputNodeUUID,
+      //     //     graphUUID,
+      //     //     content: err,
+      //     //     dataType: "Error",
+      //     //   };
+      //     //   return mediaOutputs;
+      //     // });
+      //   });
+      // });
     }
 
     // TODO: Optimize this with a proper subscription system

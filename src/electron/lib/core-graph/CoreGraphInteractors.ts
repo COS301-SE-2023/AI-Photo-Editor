@@ -2,11 +2,19 @@ import { GraphEdge, GraphNode, NodeStylingStore, UIGraph } from "../../../shared
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph, NodesAndEdgesGraph } from "./CoreGraph";
 
+export enum CoreGraphUpdateEvent {
+  graphUpdated, // When nodes / edges change
+  uiInputsUpdated, // When UI inputs change
+}
+
 // Implement this interface to communicate with a CoreGraph instance
 export abstract class CoreGraphSubscriber<T> {
   // Index of the subscriber in CoreGraphManager's _subscribers list
   protected _subscriberIndex = -1;
   protected _notifyee?: (graphId: UUID, newGraph: T) => void; // Callback when graph changes
+
+  // The subscriber can choose which events it wants to listen to
+  protected listenEvents: Set<CoreGraphUpdateEvent> = new Set([CoreGraphUpdateEvent.graphUpdated]);
 
   public set listen(notifyee: (graphId: UUID, newGraph: T) => void) {
     this._notifyee = notifyee;
@@ -18,6 +26,18 @@ export abstract class CoreGraphSubscriber<T> {
 
   public get subscriberIndex() {
     return this._subscriberIndex;
+  }
+
+  public addListenEvents(events: CoreGraphUpdateEvent[]) {
+    this.listenEvents = new Set([...this.listenEvents, ...events]);
+  }
+
+  public setListenEvents(events: CoreGraphUpdateEvent[]) {
+    this.listenEvents = new Set(events);
+  }
+
+  public getSubscriberEvents() {
+    return this.listenEvents;
   }
 
   // Calls _notifyee with the new graph state
@@ -82,8 +102,9 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
   }
 }
 
-// export class BackendSystemGraphSubscriber extends CoreGraphSubscriber<CoreGraph> {
-//   onGraphChanged(graphId: UUID, graphData: CoreGraph): void {
-//     if (this._notifyee) this._notifyee(graphId, graphData);
-//   }
-// }
+// For core systems that need to access the CoreGraph directly
+export class SystemGraphSubscriber extends CoreGraphSubscriber<CoreGraph> {
+  onGraphChanged(graphId: UUID, graphData: CoreGraph): void {
+    if (this._notifyee) this._notifyee(graphId, graphData);
+  }
+}
