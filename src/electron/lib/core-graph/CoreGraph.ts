@@ -10,7 +10,7 @@ import {
 } from "../registries/ToolboxRegistry";
 import { get } from "http";
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
-import { type NodeSignature } from "@shared/ui/ToolboxTypes";
+import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { QueryResponse } from "../../../shared/types";
 
 // =========================================

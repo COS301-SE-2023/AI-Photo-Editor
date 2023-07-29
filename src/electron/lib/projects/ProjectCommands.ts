@@ -9,13 +9,8 @@ import {
 import logger from "../../utils/logger";
 import { readFile, writeFile } from "fs/promises";
 import type { ProjectFile } from "./CoreProject";
-import type {
-  Command,
-  CommandContext,
-  CommandDescription,
-} from "../../lib/registries/CommandRegistry";
+import type { Command, CommandContext } from "../../lib/registries/CommandRegistry";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
-import type { SharedProject } from "../../../shared/types";
 import type { LayoutPanel } from "../../../shared/types";
 
 type SaveProjectArgs = {
@@ -45,7 +40,7 @@ export const saveProjectCommand: Command = {
     if (result.success) {
       ctx.sendSuccessMessage(result?.message ?? "");
     } else {
-      ctx.sendErrorMessage(result?.error ?? "");
+      if ("error" in result) ctx.sendErrorMessage(result?.error ?? "");
     }
   },
 };
@@ -62,7 +57,7 @@ export const saveProjectAsCommand: Command = {
     if (result?.success) {
       // ctx.sendSuccessMessage(result?.message ?? "");
     } else {
-      ctx.sendErrorMessage(result?.error ?? "");
+      if ("error" in result!) ctx.sendErrorMessage(result?.error ?? "");
     }
   },
 };

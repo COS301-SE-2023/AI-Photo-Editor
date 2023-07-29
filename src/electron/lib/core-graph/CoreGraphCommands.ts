@@ -1,4 +1,4 @@
-import type { UUID } from "@shared/utils/UniqueEntity";
+import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type {
   Command,
   CommandContext,
@@ -22,7 +22,7 @@ export const createGraphCommand: Command = {
     if (result.success) {
       ctx.sendSuccessMessage(result?.message ?? "");
     } else {
-      ctx.sendErrorMessage(result?.error ?? "");
+      if ("error" in result) ctx.sendErrorMessage(result?.error ?? "");
     }
   },
 };
