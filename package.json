@@ -59,7 +59,8 @@
     "lint": "npm-run-all -s lint:electron lint:svelte",
     "prepublishOnly": "npm-run-all -s test lint",
     "preversion": "npm-run-all -s lint format",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "profile:llm": "npm run build:electron:dev && node build/electron/lib/ai/ai.profiler.js"
   },
   "lint-staged": {
     "src/electron/**/*.{js,ts}": "eslint -c eslint.electron.json",
@@ -84,6 +85,7 @@
     "flowbite-svelte": "^0.39.2",
     "langchain": "^0.0.104",
     "sharp": "^0.32.1",
+    "svelte": "^3.59.0",
     "tailwind-merge": "^1.13.2",
     "tinykeys": "^1.4.0",
     "zod": "^3.21.4"
@@ -135,7 +137,6 @@
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-serve": "^2.0.2",
     "rollup-plugin-svelte": "^7.1.4",
-    "svelte": "^3.59.0",
     "svelte-check": "^3.3.1",
     "svelte-fa": "^3.0.4",
     "svelte-jester": "^2.3.2",

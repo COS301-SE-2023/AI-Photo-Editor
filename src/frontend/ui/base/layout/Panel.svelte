@@ -268,6 +268,17 @@
   .splitpanes.main-theme .splitpanes__splitter {
     background-color: #11111b;
     border: none;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .splitpanes.main-theme .splitpanes__splitter:active {
+    background-color: rgb(244 63 94 / 0.7);
+    border: none;
+  }
+
+  .splitpanes.main-theme .splitpanes__splitter:hover {
+    background-color: rgb(244 63 94 / 0.7);
+    border: none;
   }
 
   .splitpanes.main-theme .splitpanes__pane {

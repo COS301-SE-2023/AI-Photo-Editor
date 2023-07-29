@@ -115,23 +115,23 @@ const nodes ={
         nodeBuilder.addOutput("Number", "res1", "Result");
       },
 
-      // Testing nodes
-    "add": (context) => {
-        nodeBuilder = context.instantiate("math-plugin","add");
-        nodeBuilder.setTitle("Add");
-        nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output");
+    //   // Testing nodes
+    // "add": (context) => {
+    //     nodeBuilder = context.instantiate("math-plugin","add");
+    //     nodeBuilder.setTitle("Add");
+    //     nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output");
 
-        nodeBuilder.define((data) => {
-          return {
-            "res": data.input[0] + data.input[1],
-          }[data.from];
+    //     nodeBuilder.define((data) => {
+    //       return {
+    //         "res": data.input[0] + data.input[1],
+    //       }[data.from];
 
-          });
+    //       });
           
-       nodeBuilder.addInput("Number", "num1","Num");
-       nodeBuilder.addInput("Number", "num2","Num")
-       nodeBuilder.addOutput("Number", "res","Result");
-    },
+    //    nodeBuilder.addInput("Number", "num1","Num");
+    //    nodeBuilder.addInput("Number", "num2","Num")
+    //    nodeBuilder.addOutput("Number", "res","Result");
+    // },
     // Testing ternary
     "ternary": (context) => {
         nodeBuilder = context.instantiate("math-plugin","ternary");

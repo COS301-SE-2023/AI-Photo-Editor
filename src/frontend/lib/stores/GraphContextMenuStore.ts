@@ -32,7 +32,7 @@ class ContextMenuStore {
   // Pixel Dimensions of Screen as numbers
   private screenDimensions = { width: 0, height: 0 };
   // Pixel Dimensions of Menu as numbers
-  private menuDimensions = { width: 192, height: 256 };
+  private menuDimensions = { width: 192, height: 240 };
   // Pixel count Padding between Menu and Screen as number
   private screenPadding = 15;
 

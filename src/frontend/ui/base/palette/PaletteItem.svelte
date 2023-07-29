@@ -18,15 +18,15 @@
 </script>
 
 <li
-  class="text-md my-2 rounded-md p-2 text-zinc-100 {selected
-    ? 'bg-pink-200/10'
-    : 'hover:bg-pink-200/5'} hover:cursor-pointer"
+  class="text-md my-2 flex items-center rounded-md p-2 text-zinc-100 {selected
+    ? 'bg-rose-300/10'
+    : 'hover:bg-rose-300/5'} hover:cursor-pointer"
   bind:this="{itemRef}"
   on:click="{clicked}"
   on:keydown="{clicked}"
 >
-  <span>{title}</span>
+  <span class="truncate" title="{title}">{title}</span>
   {#if selected}
-    <span class="float-right ml-2 text-xs text-zinc-400">{description}</span>
+    <span class="ml-auto text-xs text-zinc-400">{description}</span>
   {/if}
 </li>

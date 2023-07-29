@@ -13,4 +13,8 @@ export class GraphClientApi implements ElectronWindowApi<GraphClientApi> {
 
     graphMall.refreshGraph(graphUUID, newState);
   }
+
+  graphRemoved(graphUUID: UUID): void {
+    graphMall.onGraphRemoved(graphUUID);
+  }
 }

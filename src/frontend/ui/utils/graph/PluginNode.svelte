@@ -1,14 +1,13 @@
 <script lang="ts">
   import { GraphNode, NodeStylingStore } from "@shared/ui/UIGraph";
   import { Anchor, DefaultAnchor, Node, type CSSColorString } from "blix_svelvet";
-  import { toolboxStore } from "lib/stores/ToolboxStore";
+  import { toolboxStore } from "../../../lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";
   import { createEventDispatcher } from "svelte";
 
   const dispatch = createEventDispatcher();
 
   export let panelId: number;
-  export let graphId: string;
   export let node: GraphNode;
 
   $: svelvetNodeId = `${panelId}_${node.uuid}`;
@@ -56,6 +55,7 @@ height="{graphNode.dims.h}" -->
     borderColor="#ffffff"
     borderWidth="{3}"
     borderRadius="{10}"
+    on:selected="{() => console.log('selected')}"
   >
     <div class="node">
       <div class="header">

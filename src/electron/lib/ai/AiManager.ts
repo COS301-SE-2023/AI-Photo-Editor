@@ -1,208 +1,162 @@
-import type { MainWindow } from "../api/apis/WindowApi";
-import prompt from "electron-prompt";
-import { error } from "console";
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import type { ChildProcessWithoutNullStreams } from "child_process";
 import { spawn } from "child_process";
 import logger from "../../utils/logger";
+import { CoreGraphManager } from "../core-graph/CoreGraphManager";
+import {
+  cookUnsafeResponse,
+  addNode,
+  getGraph,
+  removeNode,
+  addEdge,
+  removeEdge,
+} from "./ai-cookbook";
+import {
+  type AddEdgeConfig,
+  type AddNodeConfig,
+  type RemoveEdgeConfig,
+  type RemoveNodeConfig,
+} from "./ai-cookbook";
+import type { Response, ResponseFunctions } from "./ai-cookbook";
 // Refer to .env for api keys
 
-//  TODO : Provide the graph context that will be given to ai as context
-
-interface PromptContext {
-  prompt: string;
-  plugin: string[];
-  nodes: string[];
-  edges: string[];
-}
-
-const nodes = [
-  {
-    id: "jakd14",
-    signature: "math-plugin.binary",
-    inputs: [
-      {
-        id: "d2b6f0",
-        type: "number",
-      },
-      {
-        id: "7a8c9e",
-        type: "number",
-      },
-    ],
-    outputs: [
-      {
-        id: "b3e1f4",
-        type: "number",
-      },
-    ],
-  },
-  {
-    id: "3a2b1c",
-    signature: "math-plugin.binary",
-    inputs: [
-      {
-        id: "4f2e1d",
-        type: "number",
-      },
-      {
-        id: "8c7b6a",
-        type: "number",
-      },
-    ],
-    outputs: [
-      {
-        id: "e9d8c7",
-        type: "number",
-      },
-    ],
-  },
-];
-
-const edges = [
-  {
-    id: "kadjbg",
-    from: "b3e1f4",
-    to: "4f2e1d",
-  },
-  {
-    id: "0d1e2f",
-    from: "b3e1f4",
-    to: "8c7b6a",
-  },
-];
 /**
  *
  * Manages ai by storing context and handling prompt input
- * @param mainWindow Main window of blix application
+ * @param toolbox This is the blix toolbox registry that contains all the nodes
+ * @param graphManager This is the graph manager that manages the current graph
+ * @param childProcess This is the child process that runs the python script
  *
  * */
 export class AiManager {
-  private _mainWindow;
-  private _pluginContext: string[] = [];
+  private graphManager: CoreGraphManager;
+  private toolboxRegistry: ToolboxRegistry;
   private _childProcess: ChildProcessWithoutNullStreams | null = null;
-  private _promptContext: PromptContext | null = null;
-
-  constructor(mainWindow: MainWindow) {
-    this._mainWindow = mainWindow;
-  }
 
   /**
    *
-   * Initializes context of ai with all the nodes in the toolbox
+   * Initializes context of ai with all the nodes in the toolbox and the graph
    * @param toolbox This is the blix toolbox registry that contains all the nodes
+   * @param graphManager This is the graph manager that manages the current graph
    *
    * */
+  constructor(toolbox: ToolboxRegistry, graphManager: CoreGraphManager) {
+    this.graphManager = graphManager;
+    this.toolboxRegistry = toolbox;
 
-  instantiate(toolbox: ToolboxRegistry): void {
-    for (const index in toolbox.getRegistry()) {
-      if (!toolbox.hasOwnProperty(index)) {
-        const node: NodeInstance = toolbox.getRegistry()[index];
-        this._pluginContext.push(node.signature + ": " + node.description);
+    // console.log(this._pluginContext);
+
+    // Need to bind dynamic function calls
+
+    // this.sendPrompt();
+    // console.log("Execute!")
+    // console.log(this.graphManager.getAllGraphUUIDs());
+  }
+
+  pluginContext() {
+    const pluginNodes: string[] = [];
+    // console.log(this.toolboxRegistry)
+
+    for (const index in this.toolboxRegistry.getRegistry()) {
+      if (!this.toolboxRegistry.hasOwnProperty(index)) {
+        const node: NodeInstance = this.toolboxRegistry.getRegistry()[index];
+        pluginNodes.push(node.signature + ": " + node.description);
       }
     }
-    //  console.log(this._pluginContext)
 
-    const stringNodes: string[] = [];
-    const stringEdges: string[] = [];
-
-    for (const index of nodes) {
-      stringNodes.push(JSON.stringify(index));
-      stringEdges.push(JSON.stringify(index));
-    }
-
-    this._promptContext = {
-      prompt: "This is a test prompt",
-      plugin: this._pluginContext,
-      nodes: stringNodes,
-      edges: stringEdges,
-    };
+    return pluginNodes;
   }
 
   /**
-   *
-   * Creates prompt window for the user to input a prompt for the AI to respond to
-   * @returns A promise that resolves with the prompt value
-   */
-
-  async getPrompt(): Promise<string> {
-    //  Creates a prompt window for the user to input a prompt for the AI to respond to
-    const request = await this.createInputWindow();
-    if (request === "undefined") return "null";
-    else return request;
-  }
-
-  /**
-   *
-   * Sends prompt to langchain and handles responses.
-   *
+   * Sends prompt to ai and returns response
+   * @param prompt Prompt to send to ai
+   * @param graphId Id of the graph to send to ai
+   * @returns Response from ai
    * */
-  async sendPrompt() {
-    if (this._promptContext === null) throw new Error("Prompt context is null");
 
-    const request = await this.getPrompt();
+  async sendPrompt(prompt: string, graphId: string) {
+    let finalResponse = "";
+    const llmGraph = getGraph(this.graphManager, graphId);
 
-    if (request === "null") return;
+    const promptContext = {
+      prompt,
+      nodes: llmGraph.graph.nodes,
+      edges: llmGraph.graph.edges,
+      plugin: this.pluginContext(),
+    };
 
-    this._promptContext.prompt = request;
+    const childProcess = spawn("python3", ["src/electron/lib/ai/python/main.py"]);
 
-    //  Creates a prompt window for the user to input a prompt for the AI to respond to
-    this._childProcess = spawn("python3", ["src/electron/lib/ai/API.py"]);
-
-    const dataToSend2 = JSON.stringify(this._promptContext);
-    this._childProcess.stdin.write(dataToSend2 + "\n");
-
-    this._childProcess.stdin.end();
+    const dataToSend = JSON.stringify(promptContext);
+    childProcess.stdin.write(dataToSend + "\n");
+    childProcess.stdin.write("end of transmission\n");
 
     // Receive output from the Python script
-    this._childProcess.stdout.on("data", (data) => {
-      const result = data.toString();
-      logger.info("Received from Python:", result);
+    childProcess.stdout.on("data", (buffer: Buffer) => {
+      const data = buffer.toString();
+      // console.log("Received from Python: ", data);
+
+      try {
+        const res = cookUnsafeResponse(JSON.parse(data));
+
+        if (res.type === "exit") {
+          logger.info("Response from python : ", res.message);
+          finalResponse = res.message;
+        } else if (res.type === "error") {
+          throw res.message;
+        } else if (res.type === "debug") {
+          // Do something with debugging info
+        } else if (res.type === "function") {
+          const operationRes = this.executeMagicWand(res, graphId);
+          const operationResStr = JSON.stringify(operationRes);
+
+          logger.info("Blix response: ", operationResStr);
+
+          childProcess.stdin.write(`${operationResStr}\n`);
+          childProcess.stdin.write("end of transmission\n");
+        }
+      } catch (error) {
+        // Something went horribly wrong
+        this._childProcess?.kill();
+        finalResponse = "Oops. Something went horribly wrong🫡The LLM is clearly a bot";
+        logger.info("Python script error: ", JSON.stringify(error));
+      }
     });
 
     // Handle errors
-    this._childProcess.stderr.on("data", (data) => {
+    childProcess.stderr.on("data", (data: Buffer) => {
       const result = data.toString();
       logger.warn("Error executing Python script: ", result);
     });
 
     // Handle process exit
-    this._childProcess.on("close", (code) => {
+    childProcess.on("close", (data: Buffer) => {
+      const code = data.toString();
       if (code == null) logger.warn(`Python script exited with code null`);
       else logger.warn(`Python script exited with code ${code}`);
     });
   }
 
-  /**
-   *
-   * @returns A promise that resolves with the prompt value
-   */
+  executeMagicWand(
+    config: AddNodeConfig | RemoveNodeConfig | AddEdgeConfig | RemoveEdgeConfig,
+    graphId: string
+  ) {
+    const { name, args } = config;
 
-  async createInputWindow(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      prompt(
-        {
-          title: "AI Prompt",
-          label: "Prompt:",
-          value: "",
-          inputAttrs: {
-            type: "text",
-          },
-          type: "input",
-          customStylesheet: "./assets/promptWindow.css",
-          menuBarVisible: true,
-          alwaysOnTop: true,
-        },
-        this._mainWindow
-      )
-        .then((r) => {
-          if (r === null || r === "") {
-            resolve("undefined"); // User cancelled
-          } else {
-            resolve(r); // Resolve with the prompt value
-          }
-        })
-        .catch(error);
-    });
+    if (name === "addNode") {
+      return addNode(this.graphManager, this.toolboxRegistry.getRegistry(), graphId, args);
+    } else if (name === "removeNode") {
+      return removeNode(this.graphManager, graphId, args);
+    } else if (name === "addEdge") {
+      return addEdge(this.graphManager, graphId, args);
+    } else if (name === "removeEdge") {
+      return removeEdge(this.graphManager, graphId, args);
+    }
+
+    // It should never reach here
+    return {
+      status: "error",
+      message: "Something went wrong in magic wand",
+    };
   }
 }

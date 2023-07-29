@@ -4,7 +4,7 @@
   import type { ICommand } from "../../../../shared/types/index";
   import { onDestroy } from "svelte";
   import Shortcuts from "../../utils/Shortcuts.svelte";
-
+  import { graphMall } from "../../../lib/stores/GraphStore";
   let showPalette = false;
   let expanded = true;
   let inputElement: HTMLInputElement;
@@ -157,6 +157,13 @@
       const item = categories[selectedCategory].items[selectedItem];
       handleAction(item);
     },
+    "blix.palette.prompt": () => {
+      if (searchTerm.trim() != "") {
+        // TODO remove and refactor how we get graphID ,hecker man shark said no to this, he very right
+        window.apis.utilApi.sendPrompt(searchTerm.trim(), graphMall.getAllGraphUUIDs()[0]);
+        closePalette();
+      }
+    },
   };
 
   function handleAction(item: ICommand) {
@@ -178,10 +185,10 @@
 
 {#if showPalette}
   <div
-    class="fixed inset-x-0 top-48 z-[6969669669696969] m-auto flex w-[40%] min-w-[400px] flex-col items-center overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
+    class="fixed inset-x-0 top-48 z-[6969669669] m-auto flex w-[40%] min-w-[300px] max-w-[600px] flex-col items-center overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
   >
     <!-- Header -->
-    <header class="flex w-full items-center px-3">
+    <header class="flex w-full select-none items-center px-3">
       <input
         type="text"
         placeholder="Search for tools and commands..."
@@ -190,6 +197,14 @@
         bind:value="{searchTerm}"
         on:input="{onSearch}"
       />
+      {#if searchTerm !== ""}
+        <div class="float-right flex min-w-max items-center space-x-2">
+          <span class="text-sm font-medium text-zinc-500">Send prompt</span>
+          <span class="rounded-md p-1 text-xs font-semibold text-zinc-500 ring-1 ring-zinc-500"
+            >Tab</span
+          >
+        </div>
+      {/if}
     </header>
 
     <!-- Results -->

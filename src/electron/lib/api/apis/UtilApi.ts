@@ -1,16 +1,16 @@
 import type { ElectronMainApi } from "electron-affinity/main";
-// import type { Blix } from "../Blix"
+import type { Blix } from "../../Blix";
 
 import { platform, type, release } from "os";
 import logger from "../../../utils/logger";
+import { type UUID } from "@shared/utils/UniqueEntity";
 
 // Exposes basic system information
 export class UtilApi implements ElectronMainApi<UtilApi> {
-  private _counter = 0;
-  // private _blix: Blix
+  private blix: Blix;
 
-  constructor() {
-    // this._blix = blix;
+  constructor(blix: Blix) {
+    this.blix = blix;
   }
 
   async getSystemInfo() {
@@ -27,8 +27,10 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     };
   }
 
-  async count() {
-    logger.log("Handling invoke call");
-    return this._counter++;
+  async sendPrompt(prompt: string, id: UUID) {
+    this.blix.sendInformationMessage(prompt);
+    this.blix.sendInformationMessage(id);
+    const res = await this.blix.aiManager.sendPrompt(prompt, id);
+    this.blix.sendWarnMessage(JSON.stringify(res));
   }
 }

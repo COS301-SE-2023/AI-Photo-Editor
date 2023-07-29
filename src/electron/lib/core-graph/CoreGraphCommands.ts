@@ -37,6 +37,20 @@ export const createGraphCommand: Command = {
   },
 };
 
+export const deleteGraphCommand: Command = {
+  id: "blix.graphs.deleteGraph",
+  description: {
+    name: "Delete graph",
+    description: "Delete the current graph",
+  },
+  handler: async (ctx: CommandContext, args: { id: UUID }) => {
+    if (args && typeof args === "object" && args.id) {
+      ctx.projectManager.removeGraph(args.id);
+      ctx.graphManager.deleteGraphs([args.id]);
+    }
+  },
+};
+
 export async function createGraph(
   ctx: CommandContext,
   args: CreateGraphArgs
@@ -44,16 +58,12 @@ export async function createGraph(
   const { projectId, name } = args;
   const project = ctx.projectManager.getProject(projectId);
   if (!project) return { success: false, error: "Project not found" };
-  const graph = ctx.graphManager.getGraph(ctx.graphManager.createGraph());
-  if (!graph) return { success: false, error: "Graph not found" };
 
-  project.addGraph(graph.uuid);
-  ctx.graphManager.onGraphUpdated(graph.uuid);
-  ctx.mainWindow?.apis.projectClientApi.onProjectChanged({
-    id: projectId,
-    graphs: [...project.graphs],
-  });
+  const graphId = ctx.graphManager.createGraph();
+  ctx.graphManager.onGraphUpdated(graphId);
+  ctx.projectManager.addGraph(projectId, graphId);
+
   return { success: true, message: "Graph created successfully" };
 }
 
-export const coreGraphCommands: Command[] = [createGraphCommand];
+export const coreGraphCommands: Command[] = [createGraphCommand, deleteGraphCommand];

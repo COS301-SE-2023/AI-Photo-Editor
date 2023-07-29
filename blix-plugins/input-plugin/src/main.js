@@ -21,7 +21,7 @@ const nodes ={
       nodeBuilder.define((image) => {
           return image;
       });
-     nodeBuilder.addOutput("Image", "res", "Result");
+     nodeBuilder.addOutput("Sharp", "res", "Result");
 
      ui = nodeBuilder.createUIBuilder();
      ui.addImageInput("input image");

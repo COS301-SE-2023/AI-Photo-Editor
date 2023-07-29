@@ -116,11 +116,13 @@ class GraphMall {
   private mall = writable<GraphDict>({});
 
   public refreshGraph(graphUUID: GraphUUID, newGraph: UIGraph) {
+    // console.log("REFRESH GRAPH", newGraph)
     this.mall.update((stores) => {
       if (!stores[graphUUID]) {
         stores[graphUUID] = new GraphStore(graphUUID);
       }
       stores[graphUUID].refreshStore(newGraph);
+
       return stores;
     });
 
@@ -180,6 +182,17 @@ class GraphMall {
   //     return graph;
   //   });
   // }
+
+  public onGraphRemoved(graphUUID: GraphUUID) {
+    const mallState = get(this.mall);
+
+    if (graphUUID in mallState) {
+      this.mall.update((mall) => {
+        delete mall[graphUUID];
+        return mall;
+      });
+    }
+  }
 }
 
 // export const graphMall = writable<GraphMall>(new GraphMall());

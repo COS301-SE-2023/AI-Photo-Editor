@@ -72,7 +72,7 @@ describe("Test CommandRegistry", () => {
       blix = new Blix();
       blix.init(mainWindow);
 
-      commandRegistry = new CommandRegistry(blix);
+      commandRegistry =  new CommandRegistry(blix);
        description = {
         name: "name",
         displayName: "displayName",

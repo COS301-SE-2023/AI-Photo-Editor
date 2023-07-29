@@ -1,7 +1,7 @@
 <script lang="ts">
   import Toast from "./Toast.svelte";
   import { toastStore } from "../../../lib/stores/ToastStore";
-  import { fade } from "svelte/transition";
+  import { fade, fly } from "svelte/transition";
   import { flip } from "svelte/animate";
 
   let hoveredId: string | null = null;
@@ -24,7 +24,7 @@
       <div
         animate:flip="{{ duration: 250 }}"
         in:fade
-        out:fade
+        out:fly
         on:mouseenter="{() => onMouseEnter(toast.id)}"
         on:mouseleave="{() => onMouseLeave(toast.id)}"
       >

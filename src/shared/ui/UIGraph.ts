@@ -13,7 +13,7 @@ export class UIGraph {
   public edges: { [key: GraphAnchorUUID]: GraphEdge } = {};
 
   constructor(public uuid: GraphUUID) {
-    this.displayName = "Graph-" + uuid.substring(0, 6);
+    this.displayName = "Graph";
   }
 
   public updateNodes() {}

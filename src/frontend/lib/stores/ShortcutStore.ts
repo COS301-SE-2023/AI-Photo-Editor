@@ -91,14 +91,16 @@ class ShortcutStore {
     "blix.palette.toggle": ["ctrl+[KeyP]", "meta+[KeyP]"],
     "blix.palette.show": [],
     "blix.palette.hide": ["[Escape]"],
-    "blix.palette.scrollDown": ["[ArrowDown]", "ctrl+[KeyJ]", "[Tab]"],
-    "blix.palette.scrollUp": ["[ArrowUp]", "ctrl+[KeyK]", "shift+[Tab]"],
+    "blix.palette.scrollDown": ["[ArrowDown]", "ctrl+[KeyJ]"],
+    "blix.palette.scrollUp": ["[ArrowUp]", "ctrl+[KeyK]"],
     "blix.palette.selectItem": ["[Enter]"],
+    "blix.palette.prompt": ["[Tab]"],
     "blix.contextMenu.hide": ["[Escape]"],
     "blix.contextMenu.show": [],
     "blix.contextMenu.scrollDown": ["ctrl+[KeyJ]"],
     "blix.contextMenu.scrollUp": ["ctrl+[KeyK]"],
     "blix.contextMenu.selectItem": ["[Enter]"],
+    "blix.projects.newProject": ["meta+[KeyN]", "ctrl+[KeyN]"],
   });
 
   public addActionShortcut(action: ShortcutAction, combo: ShortcutCombo) {

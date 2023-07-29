@@ -12,6 +12,7 @@ import type { ProjectFile } from "./CoreProject";
 import type { Command, CommandContext } from "../../lib/registries/CommandRegistry";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { LayoutPanel } from "../../../shared/types";
+import { CoreGraphImporter } from "../../lib/core-graph/CoreGraphImporter";
 
 type SaveProjectArgs = {
   projectId: UUID;
@@ -212,8 +213,11 @@ export async function openProject(ctx: CommandContext) {
     const projectName = path.split("/").pop()?.split(".blix")[0];
     const projectId = ctx.projectManager.loadProject(projectName!, path);
 
+    const coreGraphImporter = new CoreGraphImporter(ctx.toolbox);
+
     for (const graph of projectFile.graphs) {
-      const coreGraph = ctx.graphManager.importGraph("json", graph);
+      const coreGraph = coreGraphImporter.import("json", graph);
+      ctx.graphManager.addGraph(coreGraph);
       ctx.projectManager.addGraph(projectId, coreGraph.uuid);
       ctx.graphManager.onGraphUpdated(coreGraph.uuid);
     }
