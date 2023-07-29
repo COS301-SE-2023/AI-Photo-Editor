@@ -71,7 +71,7 @@ export class Blix {
         inputUI: { [key: string]: any },
         requiredOutputs: string[]
       ) => {
-        logger.info("Result: ", mediaOutput);
+        // logger.info("Result: ", mediaOutput);
         mainWindow.apis.mediaClientApi.outputChanged(mediaOutput as MediaOutput);
         return {};
       }
@@ -86,7 +86,6 @@ export class Blix {
     }
 
     // Load plugins before instantiating any managers
-
     this._pluginManager = new PluginManager(this);
     await this._pluginManager.loadBasePlugins();
 
