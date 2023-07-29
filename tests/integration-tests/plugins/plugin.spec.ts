@@ -134,17 +134,18 @@ describe("Test plugin integrations", () => {
     });
 
 
-jest.mock('electron', () => ({
-  app: {
-    getAppPath: jest.fn(),
-    getPath: jest.fn(),
-    isPackaged: true, // Mock app.isPackaged to return true
-  },
-}));
- describe('pluginPaths', () => {
+
 
 
       test('should return the correct production path', () => {
+
+        jest.mock('electron', () => ({
+        app: {
+          getAppPath: jest.fn(),
+          getPath: jest.fn(),
+          isPackaged: true, // Mock app.isPackaged to return true
+        },
+      }));
         // Mock the return values of the functions being used in the pluginPaths function
         app.getAppPath = jest.fn().mockReturnValue('/path/to/app');
         app.getPath = jest.fn().mockReturnValue('/path/to/userData');
@@ -165,7 +166,7 @@ jest.mock('electron', () => ({
         // Expect the result to match the expected production path
         expect(paths).toEqual(['/path/to/userData/plugins']);
       });
-    });
+
 
     test("Plugin should send nodes to toolbox registry", () => {
         plugin.requireSelf(blix);
