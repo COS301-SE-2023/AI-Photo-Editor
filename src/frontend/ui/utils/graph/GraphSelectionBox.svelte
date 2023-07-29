@@ -12,8 +12,9 @@
 
   export let selectedGraphId = "";
   let selectedGraphName = "";
+  let selectedGraphIndex = -1;
+  let searchContainer: HTMLInputElement;
   let graphIdsStore = projectsStore.getReactiveActiveProjectGraphIds();
-  let searchContainer: HTMLElement;
   let container: HTMLElement;
   let filteredItems: Item[] = [];
   let graphs: string[] = [];
@@ -49,7 +50,7 @@
 
   function getSelectedGraphName(graphId: string) {
     const graph = items.find((g) => g.id === graphId);
-    return graph?.name ? graph.name : "-";
+    return graph?.name ? graph.name : "";
   }
 
   function filterItems(filter: string, items: Item[]) {
@@ -61,16 +62,27 @@
 
   function getItems(graphIds: string[]) {
     const items: Item[] = [];
+
     graphIds.forEach((id) => {
-      console.log(id);
       items.push({
         id,
         name: graphMall.getGraphState(id)?.displayName || "",
       });
     });
+
     if (selectedGraphId === "" && items.length > 0) {
-      selectedGraphId = items[0].id;
+      selectedGraphIndex = 0;
+      selectedGraphId = items[selectedGraphIndex].id;
     }
+    if (items.length === 0) {
+      selectedGraphId = "";
+      selectedGraphIndex = -1;
+    }
+    if (items.length !== 0 && !graphIds.includes(selectedGraphId)) {
+      selectedGraphIndex = selectedGraphIndex === 0 ? 1 : selectedGraphIndex - 1;
+      selectedGraphId = graphs[selectedGraphIndex];
+    }
+
     return items;
   }
 
@@ -86,12 +98,11 @@
 
     if (index < 0) return;
 
-    console.log("here");
     if (selectedGraphId === graphId) {
       if (graphs.length > 1) {
-        selectedGraphId = index === 0 ? graphs[1] : graphs[index - 1];
+        selectedGraphIndex = selectedGraphIndex === 0 ? 1 : selectedGraphIndex - 1;
+        selectedGraphId = graphs[selectedGraphIndex];
       } else {
-        console.log("here");
         selectedGraphId = "";
       }
     }
@@ -146,7 +157,12 @@
               on:click="{() => selectGraph(item.id)}"
               on:keydown="{null}"
             >
-              <span class="mr-1 truncate text-sm" title="{item.name}">{item.name}</span>
+              <div
+                class="mr-1 w-full truncate text-sm caret-rose-400 outline-none"
+                title="{item.name}"
+              >
+                {item.name}
+              </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

@@ -178,7 +178,7 @@
 
 {#if showPalette}
   <div
-    class="fixed inset-x-0 top-48 z-[6969669669696969] m-auto flex w-[40%] min-w-[400px] flex-col items-center overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
+    class="fixed inset-x-0 top-48 z-[6969669669] m-auto flex w-[40%] min-w-[300px] max-w-[600px] flex-col items-center overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
   >
     <!-- Header -->
     <header class="flex w-full items-center px-3">

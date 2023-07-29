@@ -109,6 +109,9 @@
   }
 
   function handleRightClick(event: CustomEvent) {
+    // TODO: Fix this at a stage, on initial load context menu does not show
+    // unless resize event trigged
+    window.dispatchEvent(new Event("resize"));
     // TODO: Add typing to Svelvet for this custom event
     const { cursorPos, canvasPos } = event.detail;
     graphMenuStore.showMenu(cursorPos, canvasPos, graphId);

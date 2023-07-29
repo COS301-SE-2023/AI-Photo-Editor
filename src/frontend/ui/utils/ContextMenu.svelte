@@ -47,8 +47,6 @@
     }
   }
 
-  // TODO: Make sure menu stays on graph canvas when window resized
-
   setContext<MenuContext>("menu", {
     // List with expanded nodes get updated when group is toggled
     toggleExpand: (node: Node, expanded: boolean) => {
@@ -212,7 +210,7 @@
 
 {#if $graphMenuStore.isShowing}
   <div
-    class="graph-context-menu fixed z-50 flex h-[240px] w-[192px] flex-col items-center overflow-hidden rounded-lg border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
+    class="graph-context-menu fixed z-[2147483647] flex h-[240px] w-[192px] flex-col items-center overflow-hidden rounded-lg border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
     style:top="{$graphMenuStore.cursorPos.y}px"
     style:left="{$graphMenuStore.cursorPos.x}px"
     bind:this="{menuContainer}"
