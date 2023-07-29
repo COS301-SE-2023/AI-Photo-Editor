@@ -98,6 +98,10 @@ export class CoreGraphManager {
     return this._graphs[uuid];
   }
 
+  getSubscribers(graphUUID: UUID) {
+    return this._subscribers[graphUUID];
+  }
+
   deleteGraphs(uuids: UUID[]): boolean[] {
     const flags: boolean[] = [];
 
