@@ -17,7 +17,7 @@
 <ul>
   <li>
     <div
-      class="flex cursor-pointer items-center rounded-md p-1 hover:bg-pink-200/5"
+      class="flex cursor-pointer items-center rounded-md p-1 hover:bg-rose-300/5 active:bg-rose-400/5"
       on:click="{() => {
         expanded = !expanded;
         toggleExpand(root, expanded);
@@ -31,7 +31,7 @@
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="pointer-events-none h-4 w-4 stroke-purple-500"
+          class="pointer-events-none h-4 w-4 stroke-rose-500"
         >
           <path
             stroke-linecap="round"
@@ -46,7 +46,7 @@
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="pointer-events-none h-4 w-4 stroke-purple-500"
+          class="pointer-events-none h-4 w-4 stroke-rose-500"
         >
           <path
             stroke-linecap="round"
@@ -55,11 +55,11 @@
             class="pointer-events-none"></path>
         </svg>
       {/if}
-      <div class="text-zinc-400">{root.label}</div>
+      <div class="truncate text-zinc-400" title="{root.label}">{root.label}</div>
     </div>
     {#if expanded && root.children}
       <ul
-        class="ml-[17px] border-l-[0.8px] border-zinc-400 px-2 text-zinc-500"
+        class="ml-[17px] border-l-[0.8px] border-zinc-600 px-2 text-zinc-400"
         transition:slide="{{ duration: 150 }}"
       >
         {#each root.children as node (node.id)}

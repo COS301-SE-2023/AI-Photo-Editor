@@ -1,6 +1,7 @@
 <script lang="ts">
   import { projectsStore } from "../../lib/stores/ProjectStore";
   import { toastStore } from "../../lib/stores/ToastStore";
+  import GraphSelectionBox from "../../ui/utils/graph/GraphSelectionBox.svelte";
 
   let logs: any[] = [];
   let count = 0;
@@ -15,7 +16,7 @@
   };
 </script>
 
-<section class="flex h-full w-full flex-row items-center justify-center space-x-8 bg-zinc-800">
+<section class="flex h-full w-full flex-row items-center justify-center space-x-8 bg-gray-800">
   <section class="flex min-h-[400px] min-w-[150px] flex-col items-center">
     <span class="pb-3 text-xl text-purple-700">Actions</span>
     <div class="flex flex-col items-center space-y-2">
@@ -64,6 +65,7 @@
       {/each}
     </div>
   </section>
+  <GraphSelectionBox />
 </section>
 
 <style lang="postcss">
