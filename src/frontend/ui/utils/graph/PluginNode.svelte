@@ -55,6 +55,7 @@ height="{graphNode.dims.h}" -->
     borderColor="#ffffff"
     borderWidth="{3}"
     borderRadius="{10}"
+    on:selected="{() => console.log('selected')}"
   >
     <div class="node">
       <div class="header">

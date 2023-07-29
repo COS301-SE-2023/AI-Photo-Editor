@@ -155,6 +155,12 @@ class ProjectsStore {
     });
   }
 
+  public getReactiveActiveProjectGraphIds(): Readable<string[]> {
+    return derived(this.store, ($store) => {
+      return $store.activeProject?.graphs || [];
+    });
+  }
+
   public get subscribe() {
     return this.store.subscribe;
   }

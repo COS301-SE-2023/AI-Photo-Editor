@@ -23,7 +23,7 @@
 </script>
 
 <div
-  class="mb-r flex w-full max-w-sm items-center rounded-lg bg-zinc-800 p-2 text-zinc-400 shadow ring-2 ring-zinc-400 {hovered &&
+  class="mb-r flex w-full max-w-sm items-center rounded-lg border-[1px] border-zinc-600 bg-zinc-800 p-2 text-zinc-400 shadow {hovered &&
   freezable
     ? 'scale-[101%]'
     : ''}"
@@ -52,14 +52,12 @@
       {/if}
     </svg>
   </div>
-  <div class="ml-3 text-sm font-normal">{message}</div>
-  <button
-    type="button"
-    class="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border-none bg-zinc-800 p-1.5 text-zinc-500 hover:bg-zinc-700 hover:text-white focus:ring-2 focus:ring-gray-300"
-    aria-label="Close"
+  <div class="pointer-events-none ml-3 select-none text-sm font-normal">{message}</div>
+  <div
+    class="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border-none bg-zinc-800 p-1.5 text-zinc-400 hover:bg-zinc-700 hover:text-rose-500/70 active:bg-zinc-600"
     on:click="{() => dispatch('dismiss')}"
+    on:keydown="{null}"
   >
-    <span class="sr-only">Close</span>
     <svg
       class="h-3 w-3"
       aria-hidden="true"
@@ -74,5 +72,5 @@
         stroke-width="2"
         d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"></path>
     </svg>
-  </button>
+  </div>
 </div>
