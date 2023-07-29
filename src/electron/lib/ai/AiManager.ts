@@ -15,8 +15,16 @@ import type { ResponseFunctions } from "./ai-cookbook";
 import { type MainWindow } from "../api/apis/WindowApi";
 import { app } from "electron";
 import { join } from "path";
-import { getSecret } from "../../utils/settings"
+import { getSecret } from "../../utils/settings";
+import type { ToastType } from "../../../shared/types";
 // Refer to .env for api keys
+
+const supportedLanguageModels = {
+  OpenAI: "OpenAI",
+} as const;
+
+type Values<T> = T[keyof T];
+type SupportedLanguageModel = Values<typeof supportedLanguageModels>;
 
 /**
  *
@@ -31,9 +39,7 @@ export class AiManager {
   private graphManager: CoreGraphManager;
   private toolboxRegistry: ToolboxRegistry;
   private _childProcess: ChildProcessWithoutNullStreams | null = null;
-  private filePath = join(app.getPath("userData"), "secrets.json");
-  private supportedModels: string[] = ["OpenAi"];
-  // Maybe we want custom locations for the user? ^^
+
   /**
    *
    * Initializes context of ai with all the nodes in the toolbox and the graph
@@ -56,11 +62,7 @@ export class AiManager {
   }
 
   public getSupportedModels() {
-    return this.supportedModels;
-  }
-
-  public getFilePath() {
-    return this.filePath;
+    return supportedLanguageModels;
   }
 
   pluginContext() {
@@ -85,10 +87,11 @@ export class AiManager {
    * @param displayError Boolean used to decide if notifications must been sent to the user.
    * @returns An object that specifies if the user had a previous key for the model and their other saved keys
    */
-  async retrieveKey(model: string, displayError = true): Promise<string> {
-    const key = getSecret(`secrets.${model.toUpperCase()}_API_KEY` as any);
+  retrieveKey(model: SupportedLanguageModel, displayError = true): string {
+    const modelUpperCase = model.toUpperCase() as Uppercase<typeof model>;
+    const key = getSecret(`${modelUpperCase}_API_KEY`);
     if (!key) {
-      if (displayError) { 
+      if (displayError) {
         this.handleNotification(`No ${model} key found`, "warn");
       }
       return "";
@@ -96,8 +99,8 @@ export class AiManager {
     return key;
   }
 
-  async handleNotification(message: string, type: NotificationTypes) {
-    if (this._mainWindow) this._mainWindow.apis.utilClientApi.showToast({ message, type });
+  handleNotification(message: string, type: ToastType) {
+    this._mainWindow?.apis.utilClientApi.showToast({ message, type });
   }
 
   /**
@@ -106,19 +109,18 @@ export class AiManager {
    * @param graphId Id of the graph to send to ai
    * @returns Response from ai
    * */
-
-  async sendPrompt(prompt: string, graphId: string, model?: string) {
+  async sendPrompt(prompt: string, graphId: string, model?: SupportedLanguageModel) {
     let finalResponse = "";
     const llmGraph = getGraph(this.graphManager, graphId);
 
-    model = "OpenAi";
-    if (!this.supportedModels.includes(model))
-      return this.handleNotification(
-        `The ${model} model is not currently supported`,
-        "warn"
-      );
+    model = "OpenAI";
 
-    const superSecretKey = await this.retrieveKey(model, true);
+    if (!supportedLanguageModels[model]) {
+      return this.handleNotification(`The ${model} model is not currently supported`, "warn");
+    }
+
+    const superSecretKey = this.retrieveKey(model, true);
+
     if (!superSecretKey) {
       // finalResponse = `No key found for the ${model} model.`;
       logger.warn(`No key found for the ${model} model.`);
@@ -204,19 +206,3 @@ export class AiManager {
     };
   }
 }
-/**
- * All keys must follow this format used in this interface
- * {modelName}_API_KEY
- */
-export interface SuperSecretCredentials {
-  OPENAI_API_KEY?: number[];
-  // JAKE_API_KEY? : number[];
-  // MORE_API_KEYS...
-}
-
-export interface RetrieveKeyResponse {
-  oldKey: boolean;
-  keys: SuperSecretCredentials;
-}
-
-export type NotificationTypes = "success" | "error" | "warn" | "info";

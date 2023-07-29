@@ -1,8 +1,9 @@
 import { writable } from "svelte/store";
+import type { ToastType } from "@shared/types";
 
 export interface ToastOptions {
   message: string;
-  type: "success" | "error" | "info" | "warn";
+  type: ToastType;
   autohide: boolean;
   timeout: number;
   freezable: boolean;
