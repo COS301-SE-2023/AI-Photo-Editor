@@ -202,7 +202,7 @@
     on:pane-remove="{(e) => e.stopPropagation()}"
     on:resize="{triggerWindowResize}"
   >
-    {layout.id}
+    <!-- {layout.id} -->
     {#each layout.panels as panel, i (panel.id)}
       <!-- TODO: Fix; look into using svelte animations -->
       {#key layout}
