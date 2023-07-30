@@ -53,7 +53,7 @@ export class Blix {
     this._graphInterpreter = new CoreGraphInterpreter(this._toolboxRegistry);
 
     // Create Output node
-    const tempNodeBuilder = new NodeBuilder("blix", "Output");
+    const tempNodeBuilder = new NodeBuilder("blix", "output");
     const tempUIBuilder = tempNodeBuilder.createUIBuilder();
     tempUIBuilder.addButton("Testing", null);
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
