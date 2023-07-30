@@ -8,8 +8,9 @@ const {
   unlinkSync,
   rmdirSync,
   mkdirSync,
+  copyFileSync,
 } = require("fs");
-const { join } = require("path");
+const { join, basename } = require("path");
 
 const Terser = require("terser");
 const HTMLMinifier = require("html-minifier");
@@ -36,7 +37,8 @@ const getAllJSFiles = (dirPath, arrayOfFiles) => {
   }
 
   files.forEach((file) => {
-    if (statSync(join(dirPath, file)).isDirectory()) {
+    // Ensure that API files are not minified
+    if (statSync(join(dirPath, file)).isDirectory() && file !== "api") {
       arrayOfFiles = getAllJSFiles(join(dirPath, file), arrayOfFiles);
     } else {
       arrayOfFiles.push(join(dirPath, file));
@@ -89,15 +91,16 @@ const copyPublicFolderAndMinify = (folderPath, destinationPath) => {
       copyPublicFolderAndMinify(curPath, newPath);
     } else {
       if (/\.js$/.exec(curPath)) {
-        const unminified = readFileSync(curPath, "utf8");
-        Terser.minify(unminified, minifyJSOptions)
-          .then((minified) => {
-            writeFileSync(newPath, minified.code);
-          })
-          .catch((err) => {
-            process.emitWarning(err);
-            process.abort();
-          });
+        // const unminified = readFileSync(curPath, "utf8");
+        // Terser.minify(unminified, minifyJSOptions)
+        //   .then((minified) => {
+        //     writeFileSync(newPath, minified.code);
+        //   })
+        //   .catch((err) => {
+        //     process.emitWarning(err);
+        //     process.abort();
+        //   });
+        writeFileSync(newPath, readFileSync(curPath, "utf8"));
       } else if (/\.html$/.exec(curPath)) {
         const unminified = readFileSync(curPath, "utf8");
 
@@ -145,10 +148,44 @@ const cleanTsconfig = () => {
   if (existsSync(tsconfigElectronJSONPath)) unlinkSync(tsconfigElectronJSONPath);
 };
 
+const copyDirectory = (sourceDir, targetDir, extension = "") => {
+  // Create the target directory if it doesn't exist
+  if (!existsSync(targetDir)) {
+    mkdirSync(targetDir);
+  }
+
+  // Get the list of files and directories in the source directory
+  const files = readdirSync(sourceDir);
+
+  // Copy each file/directory to the target directory
+  files.forEach((file) => {
+    const sourcePath = join(sourceDir, file);
+    const targetPath = join(targetDir, file);
+
+    // Check if the current item is a directory
+    if (lstatSync(sourcePath).isDirectory()) {
+      // Recursively copy the subdirectory
+      copyDirectory(sourcePath, targetPath);
+    } else {
+      // Copy the file
+      if (sourcePath.endsWith(extension))
+        copyFileSync(sourcePath, targetPath);
+    }
+  });
+};
+
+const copyFile = (sourceFile, targetDir) => {
+  const fileName = basename(sourceFile);
+  const targetPath = join(targetDir, fileName);
+  copyFileSync(sourceFile, targetPath);
+};
+
 const bundledElectronPath = join(__dirname, "..", "build");
 
 const jsFiles = getAllJSFiles(bundledElectronPath);
 minifyJSFiles(jsFiles);
 
 copyPublicFolderAndMinify(join(__dirname, "..", "public"), join(bundledElectronPath, "public"));
+copyDirectory(join(__dirname, "../blix-plugins"), join(bundledElectronPath, "blix-plugins"));
+copyFile(join(__dirname, "../public/images/icon.png"), bundledElectronPath);
 cleanTsconfig();

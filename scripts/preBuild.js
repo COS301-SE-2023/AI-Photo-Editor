@@ -43,10 +43,27 @@ const generateProdTSConfig = () => {
   const tsconfigElectronJSON = JSON.parse(tsconfigElectronJSONRaw); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
 
   tsconfigSvelteJSON.compilerOptions.sourceMap = false;
-  tsconfigSvelteJSON.include = [join(__dirname, "..", "src", "frontend")];
+  tsconfigSvelteJSON.include = [
+    join(__dirname, "..", "src", "frontend"),
+    join(__dirname, "..", "src", "global.d.ts"),
+  ];
+  tsconfigSvelteJSON.compilerOptions.paths = {
+    "@shared/*": [join(__dirname, "..", "src", "shared/*")],
+    "@electron/*": [join(__dirname, "..", "src", "electron/*")],
+    "@frontend/*": [join(__dirname, "..", "src", "frontend/*")],
+  };
   tsconfigElectronJSON.compilerOptions.sourceMap = false;
   tsconfigElectronJSON.compilerOptions.outDir = "build";
-  tsconfigElectronJSON.include = [join(__dirname, "..", "src", "electron")];
+  tsconfigElectronJSON.include = [
+    join(__dirname, "..", "src", "electron"),
+    join(__dirname, "..", "src", "global.d.ts"),
+    join(__dirname, "..", "src", "index.ts"),
+  ];
+  tsconfigElectronJSON.compilerOptions.paths = {
+    "@shared/*": [join(__dirname, "..", "src", "shared/*")],
+    "@electron/*": [join(__dirname, "..", "src", "electron/*")],
+    "@frontend/*": [join(__dirname, "..", "src", "frontend/*")],
+  };
 
   const newTsconfigSvelteJSONPath = join(__dirname, "..", "tsconfig.svelte.prod.json");
   const newTsconfigElectronJSONPath = join(__dirname, "..", "tsconfig.electron.prod.json");

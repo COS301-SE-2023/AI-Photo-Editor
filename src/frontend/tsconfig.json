@@ -1,9 +1,15 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../shared/*"],
+      "@electron/*": ["../electron/*"],
+      "@frontend/*": ["../frontend/*"]
+    },
     "types": ["node", "svelte", "jest"],
     "sourceMap": true,
-    "target": "ESNext",
+    "target": "ES2015",
     "stripInternal": true,
     "strict": true,
     "noImplicitAny": true,
@@ -21,6 +27,6 @@
     "esModuleInterop": true,
     "isolatedModules": true
   },
-  "include": ["."],
+  "include": [".", "../global.d.ts"],
   "exclude": ["node_modules/*", "__sapper__/*", "public/*"]
 }

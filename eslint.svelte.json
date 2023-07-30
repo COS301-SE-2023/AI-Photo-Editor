@@ -65,7 +65,22 @@
         }
       }
     ],
-    "@typescript-eslint/naming-convention": "error",
+     "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "property",
+        "format": ["camelCase", "snake_case"],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": "objectLiteralProperty",
+        "format": null,
+        "filter": {
+          "regex": "^[a-zA-Z_][a-zA-Z0-9\\.\\-_]*$",
+          "match": true
+        }
+      }
+    ],
     "@typescript-eslint/no-empty-function": "error",
     "@typescript-eslint/no-empty-interface": "error",
     "@typescript-eslint/no-explicit-any": "off",
@@ -90,6 +105,7 @@
     ],
     "@typescript-eslint/type-annotation-spacing": "off",
     "@typescript-eslint/unified-signatures": "error",
+    "@typescript-eslint/ban-ts-comment": "off",
     "arrow-parens": ["off", "always"],
     "brace-style": ["off", "off"],
     "comma-dangle": "off",
@@ -140,13 +156,13 @@
     "no-throw-literal": "error",
     "no-trailing-spaces": "off",
     "no-undef-init": "error",
-    "no-underscore-dangle": "error",
+    "no-underscore-dangle": "off",
     "no-unsafe-finally": "error",
     "no-unused-labels": "error",
     "no-var": "error",
     "object-shorthand": "error",
     "one-var": ["error", "never"],
-    "prefer-arrow/prefer-arrow-functions": "error",
+    "prefer-arrow/prefer-arrow-functions": "off",
     "prefer-const": "error",
     "quote-props": "off",
     "radix": "error",

@@ -10,27 +10,6 @@ import css from "rollup-plugin-css-only";
 
 const production = !process.env.ROLLUP_WATCH;
 
-// function serve() {
-//   let server;
-
-//   function toExit() {
-//     if (server) server.kill(0);
-//   }
-
-//   return {
-//     writeBundle() {
-//       if (server) return;
-//       server = require("child_process").spawn("npm", ["run", "start:frontend"], {
-//         stdio: ["ignore", "inherit", "inherit"],
-//         shell: true,
-//       });
-
-//       process.on("SIGTERM", toExit);
-//       process.on("exit", toExit);
-//     },
-//   };
-// }
-
 export default {
   input: "src/frontend/main.ts",
   output: {
@@ -55,8 +34,7 @@ export default {
         dev: !production,
       },
     }),
-    // we'll extract any component CSS out into
-    // a separate file - better for performance
+    // Extract component CSS out into separate file for better performance
     css({
       output: "bundle.css",
       mangle: production ? true : false,
@@ -77,6 +55,9 @@ export default {
       tsconfig: production ? "./tsconfig.svelte.prod.json" : "./tsconfig.svelte.json",
       sourceMap: !production,
       inlineSources: !production,
+      compilerOptions: {
+        noUnusedLocals: false
+      }
     }),
 
     // In dev mode, call `npm run start` once
@@ -97,12 +78,15 @@ export default {
         // verbose: true,
       }),
 
-    // If we're building for production (npm run build
-    // instead of npm run dev), minify
+    // Whe building for production generate a minified bundle of the code but
+    // prevent mangling of class names and function names so that Electron
+    // Affinity can work
     production &&
       terser({
         compress: true,
         mangle: true,
+        keep_classnames: true,
+        keep_fnames: true
       }),
   ],
   watch: {
