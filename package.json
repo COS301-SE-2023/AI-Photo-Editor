@@ -179,7 +179,14 @@
       "package.json"
     ],
     "extraResources": [
-      "assets/**"
+      "assets/**",
+      {
+        "from": "src/electron/lib/ai/python",
+        "to": "python",
+        "filter": [
+          "**/*.py"
+        ]
+      }
     ],
     "publish": [
       {

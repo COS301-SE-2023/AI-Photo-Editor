@@ -148,7 +148,7 @@ const cleanTsconfig = () => {
   if (existsSync(tsconfigElectronJSONPath)) unlinkSync(tsconfigElectronJSONPath);
 };
 
-const copyDirectory = (sourceDir, targetDir) => {
+const copyDirectory = (sourceDir, targetDir, extension = "") => {
   // Create the target directory if it doesn't exist
   if (!existsSync(targetDir)) {
     mkdirSync(targetDir);
@@ -168,7 +168,8 @@ const copyDirectory = (sourceDir, targetDir) => {
       copyDirectory(sourcePath, targetPath);
     } else {
       // Copy the file
-      copyFileSync(sourcePath, targetPath);
+      if (sourcePath.endsWith(extension))
+        copyFileSync(sourcePath, targetPath);
     }
   });
 };

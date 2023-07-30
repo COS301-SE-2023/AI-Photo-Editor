@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import type { UserSettingsCategory, Setting } from "../../../shared/types";
   import SecureInput from "../../ui/utils/SecureInput.svelte";
-  import { toastStore } from "lib/stores/ToastStore";
+  import { toastStore } from "./../../lib/stores/ToastStore";
 
   let selectedCategoryId = "";
   let selectedCategory: UserSettingsCategory | undefined;

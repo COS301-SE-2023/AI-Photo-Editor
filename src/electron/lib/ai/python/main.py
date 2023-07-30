@@ -13,4 +13,6 @@ def main():
 
     api.send({"type": "exit", "message": finalResponse})
 
-main()
+
+if __name__ == "__main__":
+    main()

@@ -11,14 +11,15 @@ import {
   addEdge,
   removeEdge,
   splitStringIntoJSONObjects,
-  errorResponseSchema
+  errorResponseSchema,
 } from "./ai-cookbook";
 import type { ResponseFunctions } from "./ai-cookbook";
 import { type MainWindow } from "../api/apis/WindowApi";
 import { app } from "electron";
-import { join } from "path";
+import path, { join } from "path";
 import { getSecret } from "../../utils/settings";
 import type { QueryResponse, ToastType } from "../../../shared/types";
+import { existsSync } from "fs";
 // Refer to .env for api keys
 
 const supportedLanguageModels = {
@@ -101,7 +102,7 @@ export class AiManager {
   }
 
   handleNotification(message: string, type: ToastType, autohide = true) {
-    this._mainWindow?.apis.utilClientApi.showToast({ message, type, autohide});
+    this._mainWindow?.apis.utilClientApi.showToast({ message, type, autohide });
   }
 
   /**
@@ -139,7 +140,7 @@ export class AiManager {
       plugin: this.pluginContext(),
     };
 
-    const childProcess = spawn("python3", ["src/electron/lib/ai/python/main.py"]);
+    const childProcess = spawn("python3", [this.findPythonScriptPath()]);
 
     const dataToSend = JSON.stringify(promptContext);
     childProcess.stdin.write(dataToSend + "\n");
@@ -180,12 +181,12 @@ export class AiManager {
       }
     });
 
-
     // Handle errors
     childProcess.stderr.on("data", (data: Buffer) => {
       if (data) {
         const result = data.toString();
         logger.warn("Error executing Python script: ", result);
+        this.handleNotification("AI prompts not currently available.", "warn");
       }
     });
 
@@ -198,7 +199,6 @@ export class AiManager {
         logger.info(`Python script exited with code null`);
       }
     });
-
   }
 
   executeMagicWand(config: ResponseFunctions, graphId: string) {
@@ -238,14 +238,21 @@ export class AiManager {
     logger.error(error);
   }
 
-  private sendData() {
+  private findPythonScriptPath() {
+    const possibilities = [
+      // In packaged app
+      path.join(process.resourcesPath, "python/main.py"),
+      // In development
+      path.join(__dirname, "../../../../src/electron/lib/ai/python/main.py"),
+    ];
+    for (const path of possibilities) {
+      if (existsSync(path)) {
+        return path;
+      }
+    }
+    return "";
   }
 
-  private processResponse(
-    data: string,
-    childProcess: ChildProcessWithoutNullStreams,
-    graphId: string
-  ) {}
 }
 
 interface Connection {
@@ -253,6 +260,4 @@ interface Connection {
   receive(): string;
 }
 
-class StdioAPI {
-
-}
+class StdioAPI {}
