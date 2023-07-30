@@ -104,6 +104,11 @@ export class CoreGraphManager {
     return res;
   }
 
+  updateUIInputsTest(graphUUID: UUID, nodeUUID: UUID, changedUIInputs: Record<string, unknown>) {
+    const graph = this._graphs[graphUUID];
+    return graph.updateUIInputsTest(nodeUUID, changedUIInputs);
+  }
+
   setPos(graphUUID: UUID, nodeUUID: UUID, x: number, y: number): QueryResponse {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };

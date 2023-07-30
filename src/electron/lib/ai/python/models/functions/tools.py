@@ -1,4 +1,4 @@
-from typing import Optional, Type
+from typing import Optional, Type, Dict, Union
 from langchain.tools import format_tool_to_openai_function
 from pydantic import BaseModel, Field
 from typing import Type, List
@@ -23,8 +23,9 @@ class addNodeInput(BaseModel):
 
 
 class removeNodeInput(BaseModel):
-
-    id: str = Field(description="id of the node to be deleted e.g '15s2k3', '1m9j0kl'")
+    id: str = Field(
+        ..., description="Id of the node to be deleted e.g '15s2k3', '1m9j0kl'"
+    )
 
 
 class addEdgeInput(BaseModel):
@@ -42,6 +43,19 @@ class removeEdgeInput(BaseModel):
     id: str = Field(
         ..., description="Id of the edge to be removed. e.g '8kn5la', '1m9j0kl'"
     )
+
+
+class updateInputValuesInput(BaseModel):
+    nodeId: str = Field(..., description="Id of the node related to the input values")
+    changedInputValues: Dict[str, float] = Field(
+        ...,
+        description="Map of input values to change. e.g. {'slider1`: 5.9, 'input2': 'hello'}",
+    )
+
+class updateInputValueInput(BaseModel):
+    nodeId: str = Field(..., description="Id of the node related to the input values")
+    inputValueId: str = Field(..., description="Id of the input value")
+    newInputValue: Union[str, int, float] = Field(..., description="New input value")
 
 
 class addNodesInput(BaseModel):
@@ -124,7 +138,11 @@ class addEdgeTool(BaseTool):
         output: str,
         input: str,
     ) -> str:
-        data = {"type": "function", "name": "addEdge", "args": {"output": output, "input": input}}
+        data = {
+            "type": "function",
+            "name": "addEdge",
+            "args": {"output": output, "input": input},
+        }
         api = get_api()
         api.send(data)
         res = api.receive()
@@ -146,6 +164,58 @@ class removeEdgeTool(BaseTool):
         id: str,
     ) -> str:
         data = {"type": "function", "name": "removeEdge", "args": {"id": id}}
+        api = get_api()
+        api.send(data)
+        res = api.receive()
+        return res
+
+    async def _arun(
+        self,
+    ) -> str:
+        raise NotImplementedError("This tool does not support async execution yet")
+
+
+class updateInputValuesTool(BaseTool):
+    name: str = "updateInputValues"
+    description: str = "Useful when the input values of nodes have to changed"
+    args_schema: Type[BaseModel] = updateInputValuesInput
+
+    def _run(
+        self,
+        nodeId: str,
+        changedInputValues: Dict[str, float],
+    ) -> str:
+        data = {
+            "type": "function",
+            "name": "updateInputValues",
+            "args": {"nodeId": nodeId, "changedInputValues": changedInputValues},
+        }
+        api = get_api()
+        api.send(data)
+        res = api.receive()
+        return res
+
+    async def _arun(
+        self,
+    ) -> str:
+        raise NotImplementedError("This tool does not support async execution yet")
+
+class updateInputValueTool(BaseTool):
+    name: str = "updateInputValue"
+    description: str = "Useful when the input value of a node has to be changed"
+    args_schema: Type[BaseModel] = updateInputValueInput
+
+    def _run(
+        self,
+        nodeId: str,
+        inputValueId: str,
+        newInputValue: str
+    ) -> str:
+        data = {
+            "type": "function",
+            "name": "updateInputValue",
+            "args": {"nodeId": nodeId, "inputValueId": inputValueId, "newInputValue": newInputValue},
+        }
         api = get_api()
         api.send(data)
         res = api.receive()
@@ -309,4 +379,4 @@ class removeEdges(BaseTool):
         raise NotImplementedError("This tool does not support async execution")
 
 
-tools = [addNodeTool(), removeNodeTool(), addEdgeTool(), removeEdgeTool()]
+tools = [addNodeTool(), removeNodeTool(), addEdgeTool(), removeEdgeTool(), updateInputValueTool()]

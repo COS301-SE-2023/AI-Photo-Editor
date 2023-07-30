@@ -1,9 +1,6 @@
 import { z } from "zod";
 import type { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
-import {
-  LLMExportStrategy,
-  type LLMGraph,
-} from "../../lib/core-graph/CoreGraphExporter";
+import { LLMExportStrategy, type LLMGraph } from "../../lib/core-graph/CoreGraphExporter";
 import { NodeInstance } from "../../lib/registries/ToolboxRegistry";
 import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
@@ -56,6 +53,29 @@ export const removeEdgeSchema = z.object({
 
 export type RemoveEdgeConfig = z.infer<typeof removeEdgeSchema>;
 
+export const updateInputValuesSchema = z.object({
+  type: z.literal("function"),
+  name: z.literal("updateInputValues"),
+  args: z.object({
+    nodeId: z.string(),
+    changedInputValues: z.record(z.string(), z.union([z.string(), z.number()])),
+  }),
+});
+
+export type UpdateInputValuesConfig = z.infer<typeof updateInputValuesSchema>;
+
+export const updateInputValueSchema = z.object({
+  type: z.literal("function"),
+  name: z.literal("updateInputValue"),
+  args: z.object({
+    nodeId: z.string(),
+    inputValueId: z.string(),
+    newInputValue: z.union([z.string(), z.number()]),
+  }),
+});
+
+export type UpdateInputValueConfig = z.infer<typeof updateInputValueSchema>;
+
 export const exitResponseSchema = z.object({
   type: z.literal("exit"),
   message: z.string(),
@@ -85,6 +105,8 @@ export const responseSchema = z.union([
   addEdgeSchema,
   removeEdgeSchema,
   addEdgeSchema,
+  updateInputValuesSchema,
+  updateInputValueSchema,
   exitResponseSchema,
   errorResponseSchema,
   debugResponseSchema,
@@ -254,6 +276,30 @@ export function removeEdge(
   }
 }
 
+export function updateInputValues(
+  graphManager: CoreGraphManager,
+  graphId: string,
+  args: UpdateInputValuesConfig["args"]
+) {
+  const graph = _exporter.export(graphManager.getGraph(graphId));
+  const { nodeMap } = graph;
+  return graphManager.updateUIInputsTest(graphId, nodeMap[args.nodeId], args.changedInputValues);
+}
+
+export function updateInputValue(
+  graphManager: CoreGraphManager,
+  graphId: string,
+  args: UpdateInputValueConfig["args"]
+) {
+  const graph = _exporter.export(graphManager.getGraph(graphId));
+  const { nodeMap } = graph;
+  const { inputValueId, newInputValue } = args;
+
+  return graphManager.updateUIInputsTest(graphId, nodeMap[args.nodeId], {
+    [inputValueId]: newInputValue,
+  });
+}
+
 // ==================================================================
 //  Helper Functions
 // ==================================================================
@@ -335,4 +381,3 @@ export function splitStringIntoJSONObjects(input: string) {
 
   return jsonObjects;
 }
-

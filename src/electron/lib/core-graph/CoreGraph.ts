@@ -248,6 +248,47 @@ export class CoreGraph extends UniqueEntity {
     return { status: "success" };
   }
 
+  public updateUIInputsTest(
+    nodeUUID: UUID,
+    changedUIInputs: Record<string, unknown>
+  ): QueryResponse {
+    const currentInputValues = this.uiInputs[nodeUUID];
+
+    if (!currentInputValues) {
+      return {
+        status: "error",
+        message: "Node does not exist",
+      };
+    }
+
+    const nodeUIInputs: INodeUIInputs = {
+        inputs: currentInputValues.getInputs,
+        changes: []
+    };
+
+    for (const key in changedUIInputs) {
+      if (key in changedUIInputs) {
+        if (key in currentInputValues.getInputs) {
+          nodeUIInputs.inputs[key] = changedUIInputs[key];
+          nodeUIInputs.changes.push(key);
+        } else {
+          return {
+            status: "error",
+            message: `Input value with id ${key} does not exist`,
+          };
+        }
+      }
+    }
+
+    // Add some extra checks here
+    this.updateUIInputs(nodeUUID, nodeUIInputs);
+
+    return {
+      status: "success",
+      message: `Input values updated successfully. Current input values: ${JSON.stringify(nodeUIInputs.inputs)}`
+    }
+  }
+
   public checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
     // TODO
     if (ancFrom.uuid === ancTo.uuid) return true; // Needs to be changed
