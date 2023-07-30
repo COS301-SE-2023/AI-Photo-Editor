@@ -1,12 +1,7 @@
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraph } from "./CoreGraph";
-import {
-  type AnchorToJSON,
-  type EdgeToJSON,
-  type GraphToJSON,
-  type NodeToJSON,
-} from "./CoreGraphExporter";
+import { type AnchorToJSON, type GraphToJSON } from "./CoreGraphExporter";
 
 export class CoreGraphImporter {
   private _toolbox: ToolboxRegistry;
@@ -24,10 +19,10 @@ export class CoreGraphImporter {
    */
   import(format: string, data: string | GraphToJSON): CoreGraph {
     switch (format) {
-      case "yaml":
-        return this.importYAML(data as string);
-      case "xml":
-        return this.importXML(data as string);
+      // case "yaml":
+      //   return this.importYAML(data as string);
+      // case "xml":
+      //   return this.importXML(data as string);
       case "json":
         return this.importJSON(data as GraphToJSON);
       default:
@@ -39,17 +34,17 @@ export class CoreGraphImporter {
   // YAML
   // ===============================================
 
-  importYAML(graph: string) {
-    return new CoreGraph();
-  }
+  // importYAML(graph: string) {
+  //   return new CoreGraph();
+  // }
 
   // ===============================================
   // XML
   // ===============================================
 
-  importXML(graph: string) {
-    return new CoreGraph();
-  }
+  // importXML(graph: string) {
+  //   return new CoreGraph();
+  // }
 
   // ===============================================
   // JSON

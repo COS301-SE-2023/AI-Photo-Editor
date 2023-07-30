@@ -1,6 +1,4 @@
-import logger from "../../utils/logger";
 import { type UUID, UniqueEntity } from "../../../shared/utils/UniqueEntity";
-import type { CoreGraphSubscriber } from "./CoreGraphInteractors";
 import {
   type AnchorType,
   InputAnchorInstance,
@@ -8,10 +6,10 @@ import {
   OutputAnchorInstance,
   checkEdgeDataTypesCompatible,
 } from "../registries/ToolboxRegistry";
-import { get } from "http";
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
 import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
-import type { QueryResponse } from "../../../shared/types";
+import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
+import { type MediaOutputId } from "../../../shared/types/media";
 
 // =========================================
 // Explicit types for type safety
@@ -46,7 +44,10 @@ export class CoreGraph extends UniqueEntity {
   private edgeSrc: { [key: AnchorUUID]: AnchorUUID[] }; // Map a source anchor to a list of destination anchors
   // E.g. we can do (source anchor) ---[edgeSrc]--> (destination anchors) ---[edgeDest]--> (Edges)
   //      to get all the edges that flow from a source anchor
-  private outputNodes: string[];
+  private outputNodes: { [key: UUID]: MediaOutputId };
+
+  // Maps a node UUID to a list of UI inputs
+  private uiInputs: { [key: UUID]: CoreNodeUIInputs };
 
   // private subscribers: CoreGraphSubscriber[];
   private static nodeTracker = 0;
@@ -56,7 +57,8 @@ export class CoreGraph extends UniqueEntity {
     this.anchors = {};
     this.edgeDest = {};
     this.edgeSrc = {};
-    this.outputNodes = [];
+    this.outputNodes = {};
+    this.uiInputs = {};
     // this.nodeList = [];
   }
 
@@ -137,10 +139,21 @@ export class CoreGraph extends UniqueEntity {
     return this.edgeSrc;
   }
 
+  public get getAllUIInputs() {
+    return this.uiInputs;
+  }
+
+  public getUIInputs(nodeUUID: UUID): { [key: string]: UIValue } | null {
+    return this.uiInputs[nodeUUID]?.getInputs || null;
+  }
+
   // We need to pass in node name and plugin name
-  public addNode(
-    node: NodeInstance
-  ): QueryResponse<{ nodeId: UUID; inputs: string[]; outputs: string[] }> {
+  public addNode(node: NodeInstance): QueryResponse<{
+    nodeId: UUID;
+    inputs: string[];
+    outputs: string[];
+    inputValues: Record<string, unknown>;
+  }> {
     try {
       // Create New Node
       const n: Node = new Node(node.name, node.plugin, node.inputs, node.outputs);
@@ -152,14 +165,26 @@ export class CoreGraph extends UniqueEntity {
         this.anchors[anchor] = n.getAnchors[anchor];
       }
 
-      // TODO: Check if node is an output node and add it to the outputNode list
+      if (node.signature === "blix.output") {
+        this.outputNodes[n.uuid] = "default"; // TODO: set this to a unique id and propagate to the frontend
+      }
+
+      const inputValues: Record<string, unknown> = {};
+      Object.values(node.uiConfigs).forEach((config) => {
+        inputValues[config.componentId] = config.defaultValue;
+      });
 
       // console.log(QueryResponseStatus.success)
       const anchors: AiAnchors = n.returnAnchors();
       return {
         status: "success",
         message: "Node added succesfully",
-        data: { nodeId: n._uuid, inputs: anchors.inputAnchors, outputs: anchors.outputAnchors },
+        data: {
+          nodeId: n.uuid,
+          inputs: anchors.inputAnchors,
+          outputs: anchors.outputAnchors,
+          inputValues,
+        },
       };
     } catch (error) {
       return { status: "error", message: error as string };
@@ -167,35 +192,41 @@ export class CoreGraph extends UniqueEntity {
     // TODO: Add Node Styling
   }
 
-  public addEdge(anchorA: UUID, anchorB: UUID): QueryResponse<{ edgeId: UUID }> {
-    // Both Anchors must exist
-    if (!this.anchors[anchorA] || !this.anchors[anchorB]) {
+  public addEdge(anchorIdA: UUID, anchorIdB: UUID): QueryResponse<{ edgeId: UUID }> {
+    const anchorA = this.anchors[anchorIdA];
+    const anchorB = this.anchors[anchorIdB];
+
+    if (!(anchorA || anchorB)) {
       return {
         status: "error",
-        message: "Edge must flow between two existing anchors",
+        message: `Both anchors does not exist`,
       };
     }
 
-    // Edge can start either from an output or input anchor
-    const ancFrom =
-      this.anchors[anchorA].ioType === AnchorIO.output
-        ? this.anchors[anchorA]
-        : this.anchors[anchorB];
-    const ancTo =
-      this.anchors[anchorB].ioType === AnchorIO.input
-        ? this.anchors[anchorB]
-        : this.anchors[anchorA];
+    if (!anchorA) {
+      // Data flowing through edge must be of same type for both anchors
+      return {
+        status: "error",
+        message: `AnchorA does not exist`,
+      };
+    }
 
-    // Edge must flow from output anchor to input anchor
-    if (ancFrom.ioType !== AnchorIO.output || ancTo.ioType !== AnchorIO.input) {
+    if (!anchorB) {
+      return {
+        status: "error",
+        message: `AnchorB does not exist`,
+      };
+    }
+
+    if (anchorA.ioType === AnchorIO.output && anchorB.ioType === AnchorIO.output) {
       return {
         status: "error",
         message: "Edge cannot be connected from one output to another output",
       };
     }
 
-    // const ancFrom = anchorA.ioType === AnchorIO.output ? anchorA : anchorB;
-    // const ancTo = anchorB.ioType === AnchorIO.input ? anchorB : anchorA;
+    const ancFrom = anchorA.ioType === AnchorIO.output ? anchorA : anchorB;
+    const ancTo = anchorB.ioType === AnchorIO.input ? anchorB : anchorA;
 
     // Data flowing through edge must be of same type for both anchors
     if (!checkEdgeDataTypesCompatible(ancFrom.type, ancTo.type)) {
@@ -220,12 +251,58 @@ export class CoreGraph extends UniqueEntity {
     if (!(ancFrom.uuid in this.edgeSrc)) this.edgeSrc[ancFrom.uuid] = [];
     this.edgeSrc[ancFrom.uuid].push(ancTo.uuid);
 
-    return { status: "success", message: "Edge added succesfully", data: { edgeId: edge._uuid } };
+    return { status: "success", message: "Edge added succesfully", data: { edgeId: edge.uuid } };
+  }
+
+  public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs): QueryResponse {
+    this.uiInputs[nodeUUID] = new CoreNodeUIInputs(nodeUIInputs);
+
+    // If output node, update output node id
+    if (this.outputNodes[nodeUUID]) {
+      this.outputNodes[nodeUUID] = nodeUIInputs.inputs.outputId as MediaOutputId;
+    }
+
+    return { status: "success" };
+  }
+
+  public getUpdatedUIInputs(nodeUUID: UUID, changedUIInputs: Record<string, unknown>) {
+    const currentInputValues = this.uiInputs[nodeUUID];
+
+    if (!currentInputValues) {
+      return {
+        status: "error",
+        message: "Node does not exist",
+      } satisfies QueryResponse;
+    }
+
+    const nodeUIInputs: INodeUIInputs = {
+      inputs: currentInputValues.getInputs,
+      changes: [],
+    };
+
+    for (const key in changedUIInputs) {
+      if (key in changedUIInputs) {
+        if (key in currentInputValues.getInputs) {
+          nodeUIInputs.inputs[key] = changedUIInputs[key];
+          nodeUIInputs.changes.push(key);
+        } else {
+          return {
+            status: "error",
+            message: `Input value with id ${key} does not exist`,
+          } satisfies QueryResponse;
+        }
+      }
+    }
+
+    return {
+      status: "success",
+      data: nodeUIInputs,
+    } satisfies QueryResponse;
   }
 
   public checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
-    if (this.edgeSrc[ancFrom._uuid]) {
-      return this.edgeSrc[ancFrom._uuid].includes(ancTo._uuid);
+    if (this.edgeSrc[ancFrom.uuid]) {
+      return this.edgeSrc[ancFrom.uuid].includes(ancTo.uuid);
     }
 
     if (ancFrom.uuid === ancTo.uuid) return true; // Needs to be changed
@@ -255,6 +332,10 @@ export class CoreGraph extends UniqueEntity {
   public removeNode(nodeToDelete: UUID): QueryResponse {
     const node: Node = this.nodes[nodeToDelete];
     if (!node) return { status: "error", message: "Node to be deleted does not exist" };
+
+    if (this.outputNodes[nodeToDelete]) {
+      delete this.outputNodes[nodeToDelete];
+    }
 
     try {
       // Remove all edges from node
@@ -484,6 +565,17 @@ export class NodeStyling {
   }
 }
 
+export class CoreNodeUIInputs {
+  private readonly inputs: { [key: string]: UIValue };
+  constructor(nodeUIInpust: INodeUIInputs) {
+    this.inputs = nodeUIInpust.inputs;
+  }
+
+  public get getInputs() {
+    return this.inputs;
+  }
+}
+
 // ========== EXPORTED GRAPH REPRESENTATIONS ========== //
 // Some reduced graph representations for exporting without trinkets for optimization
 
@@ -540,10 +632,10 @@ export class NodeOutToNodeIn implements GraphRepresentation {
 // Helper Methods
 // ==================================================================
 
-function formatIds(ids: string[], shortIds: boolean) {
-  const filteredIds = ids.filter((id) => id);
-  const formattedIds = filteredIds.map((id) => {
-    return shortIds ? id.slice(0, 6) : id;
-  });
-  return formattedIds.join(", ");
-}
+// function formatIds(ids: string[], shortIds: boolean) {
+//   const filteredIds = ids.filter((id) => id);
+//   const formattedIds = filteredIds.map((id) => {
+//     return shortIds ? id.slice(0, 6) : id;
+//   });
+//   return formattedIds.join(", ");
+// }

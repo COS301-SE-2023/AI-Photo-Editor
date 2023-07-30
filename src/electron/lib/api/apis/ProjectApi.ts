@@ -1,19 +1,27 @@
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import type { UUID } from "../../../../shared/utils/UniqueEntity";
-import type { SharedProject, LayoutPanel } from "../../../../shared/types/index";
-import logger from "../../../utils/logger";
-import { ProjectClientApi } from "@frontend/lib/api/apis/ProjectClientApi";
 import type { IpcResponse } from "../MainApi";
+import {
+  CoreGraphUpdateEvent,
+  CoreGraphUpdateParticipant,
+} from "../../core-graph/CoreGraphInteractors";
 
 export class ProjectApi implements ElectronMainApi<ProjectApi> {
   constructor(private readonly blix: Blix) {}
 
   async createProject(): Promise<IpcResponse<string>> {
     const project = this.blix.projectManager.createProject();
-    const graphId = this.blix.graphManager.createGraph();
-    this.blix.graphManager.onGraphUpdated(graphId);
-    this.blix.projectManager.addGraph(project.uuid, graphId);
+
+    for (let i = 0; i < 3; i++) {
+      const graphId = this.blix.graphManager.createGraph();
+      this.blix.graphManager.onGraphUpdated(
+        graphId,
+        new Set([CoreGraphUpdateEvent.graphUpdated]),
+        CoreGraphUpdateParticipant.system
+      );
+      this.blix.projectManager.addGraph(project.uuid, graphId);
+    }
 
     return {
       success: true,

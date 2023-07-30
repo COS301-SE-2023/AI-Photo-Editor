@@ -23,6 +23,10 @@ logger.info(
 
 // ========== MAIN PROCESS ========== //
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 protocol.registerSchemesAsPrivileged([
   {
     scheme: "blix-image",
@@ -58,17 +62,16 @@ app.on("ready", async () => {
 
   blix = new Blix();
   exposeMainApis(blix);
+  await createMainWindow();
 
-  createMainWindow().then(async () => {
-    if (mainWindow && blix) {
-      await blix.init(mainWindow);
-      if (blix.isReady) {
-        mainWindow.apis.utilClientApi.onBlixReady();
-      }
-    } else {
-      app.quit();
+  if (mainWindow && blix) {
+    await blix.init(mainWindow);
+    if (blix.isReady) {
+      mainWindow.apis.utilClientApi.onBlixReady();
     }
-  });
+  } else {
+    app.quit();
+  }
 });
 
 async function createMainWindow() {

@@ -1,8 +1,6 @@
-from dotenv import load_dotenv
 from api import get_api
 from models.gpt import GPT
 import json
-load_dotenv()
 
 def main():
     api = get_api()
@@ -15,4 +13,6 @@ def main():
 
     api.send({"type": "exit", "message": finalResponse})
 
-main()
+
+if __name__ == "__main__":
+    main()

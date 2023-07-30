@@ -8,6 +8,7 @@ parent_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(parent_dir)
 
 from langchain.chat_models import ChatOpenAI
+
 # from functions.graphFunc import Functions
 from functions.tools import tools
 from dotenv import load_dotenv
@@ -20,23 +21,44 @@ load_dotenv()
 
 class GPT:
     def sendPrompt(self, body) -> str:
-        llm = ChatOpenAI(temperature=0.1, openai_api_key=os.getenv("OPENAI_API_KEY"))
-        open_ai_agent = initialize_agent(
-            tools,
-            llm,
-            agent=AgentType.OPENAI_FUNCTIONS,
-            model="gpt-3.5-turbo-0613",
-            # verbose=True,
-            debug=True,
-            max_iterations=20,
-        )
+        try:
+            llm = ChatOpenAI(temperature=0.1, openai_api_key=body["config"]["key"])
 
-        prompt = generic.prompt_template.format(
-            prompt=body["prompt"],
-            nodes=body["nodes"],
-            edges=body["edges"],
-            plugins=body["plugin"],
-        )
+            open_ai_agent = initialize_agent(
+                tools,
+                llm,
+                agent=AgentType.OPENAI_FUNCTIONS,
+                model="gpt-3.5-turbo-0613",
+                # verbose=True,
+                debug=True,
+                max_iterations=20,
+            )
 
-        finalResponse = open_ai_agent.run(prompt)
-        return finalResponse
+            prompt = generic.prompt_template.format(
+                prompt=body["prompt"],
+                nodes=body["nodes"],
+                edges=body["edges"],
+                plugins=body["plugin"],
+            )
+
+            finalResponse = open_ai_agent.run(prompt)
+            return finalResponse
+        except Exception as e:
+            api = get_api()
+            error_type = type(e).__name__
+            message = "Something went wrong while processing your request🫠"
+            error = str(e)
+
+            if error_type == "AuthenticationError":
+                message = "Invalid Open AI key. Make sure to add a valid key in your user settings."
+                error = "Open AI AuthenticationError"
+
+            api.send(
+                {
+                    "type": "error",
+                    "error": error,
+                    "message": message,
+                }
+            )
+
+            return ""

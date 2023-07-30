@@ -8,8 +8,21 @@
   import { initAPIs } from "../../lib/api/apiInitializer";
   import ContextMenu from "../../ui/utils/ContextMenu.svelte";
   import Test from "./Test.svelte";
+  import Settings from "./Settings.svelte";
+  import Shortcuts from "../../ui/utils/Shortcuts.svelte";
+  import { settingsStore } from "../../lib/stores/SettingsStore";
 
   const testing = false;
+  let showSettings = false;
+
+  const shortcuts = {
+    "blix.settings.toggle": () => {
+      settingsStore.toggleSettings();
+    },
+    "blix.settings.hide": () => {
+      settingsStore.hideSettings();
+    },
+  };
 
   onMount(async () => {
     await initAPIs();
@@ -38,8 +51,13 @@
   <div></div>
 {/if}
 
+{#if $settingsStore.showing}
+  <Settings />
+{/if}
+
 <Toasts />
 <ContextMenu />
+<Shortcuts shortcuts="{shortcuts}" />
 
 <style lang="postcss" global>
   @tailwind base;

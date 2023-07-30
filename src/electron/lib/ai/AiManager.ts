@@ -10,15 +10,26 @@ import {
   removeNode,
   addEdge,
   removeEdge,
+  updateInputValues,
+  splitStringIntoJSONObjects,
+  errorResponseSchema,
+  updateInputValue,
 } from "./ai-cookbook";
-import {
-  type AddEdgeConfig,
-  type AddNodeConfig,
-  type RemoveEdgeConfig,
-  type RemoveNodeConfig,
-} from "./ai-cookbook";
-import type { Response, ResponseFunctions } from "./ai-cookbook";
+import type { ResponseFunctions } from "./ai-cookbook";
+import { type MainWindow } from "../api/apis/WindowApi";
+import { app } from "electron";
+import path, { join } from "path";
+import { getSecret } from "../../utils/settings";
+import type { QueryResponse, ToastType } from "../../../shared/types";
+import { existsSync } from "fs";
 // Refer to .env for api keys
+
+const supportedLanguageModels = {
+  OpenAI: "OpenAI",
+} as const;
+
+type Values<T> = T[keyof T];
+type SupportedLanguageModel = Values<typeof supportedLanguageModels>;
 
 /**
  *
@@ -29,9 +40,9 @@ import type { Response, ResponseFunctions } from "./ai-cookbook";
  *
  * */
 export class AiManager {
+  private _mainWindow?: MainWindow;
   private graphManager: CoreGraphManager;
   private toolboxRegistry: ToolboxRegistry;
-  private _childProcess: ChildProcessWithoutNullStreams | null = null;
 
   /**
    *
@@ -40,9 +51,10 @@ export class AiManager {
    * @param graphManager This is the graph manager that manages the current graph
    *
    * */
-  constructor(toolbox: ToolboxRegistry, graphManager: CoreGraphManager) {
-    this.graphManager = graphManager;
+  constructor(toolbox: ToolboxRegistry, graphManager: CoreGraphManager, mainWindow?: MainWindow) {
     this.toolboxRegistry = toolbox;
+    this.graphManager = graphManager;
+    this._mainWindow = mainWindow;
 
     // console.log(this._pluginContext);
 
@@ -51,6 +63,10 @@ export class AiManager {
     // this.sendPrompt();
     // console.log("Execute!")
     // console.log(this.graphManager.getAllGraphUUIDs());
+  }
+
+  public getSupportedModels() {
+    return supportedLanguageModels;
   }
 
   pluginContext() {
@@ -68,24 +84,65 @@ export class AiManager {
   }
 
   /**
+   * This function will retrieve a key from the electron storage.
+   * If the user had set a key it will be returned otherwise they will be alerted.
+   *
+   * @param model The model specified by the user
+   * @param displayError Boolean used to decide if notifications must been sent to the user.
+   * @returns An object that specifies if the user had a previous key for the model and their other saved keys
+   */
+  retrieveKey(model: SupportedLanguageModel, displayError = true): string {
+    const modelUpperCase = model.toUpperCase() as Uppercase<typeof model>;
+    const key = getSecret(`${modelUpperCase}_API_KEY`);
+    if (!key) {
+      if (displayError) {
+        this.handleNotification(`No ${model} key found, add it in user settings`, "warn");
+      }
+      return "";
+    }
+    return key;
+  }
+
+  handleNotification(message: string, type: ToastType, autohide = true) {
+    this._mainWindow?.apis.utilClientApi.showToast({ message, type, autohide });
+  }
+
+  /**
    * Sends prompt to ai and returns response
    * @param prompt Prompt to send to ai
    * @param graphId Id of the graph to send to ai
    * @returns Response from ai
    * */
-
-  async sendPrompt(prompt: string, graphId: string) {
-    let finalResponse = "";
+  async sendPrompt(prompt: string, graphId: string, model?: SupportedLanguageModel) {
+    const finalResponse = "";
     const llmGraph = getGraph(this.graphManager, graphId);
 
+    model = "OpenAI";
+
+    if (!supportedLanguageModels[model]) {
+      return this.handleNotification(`The ${model} model is not currently supported`, "warn");
+    }
+
+    const superSecretKey = this.retrieveKey(model, true);
+
+    if (!superSecretKey) {
+      // finalResponse = `No key found for the ${model} model.`;
+      logger.warn(`No key found for the ${model} model.`);
+      return;
+    }
+
     const promptContext = {
+      config: {
+        model,
+        key: superSecretKey,
+      },
       prompt,
       nodes: llmGraph.graph.nodes,
       edges: llmGraph.graph.edges,
       plugin: this.pluginContext(),
     };
 
-    const childProcess = spawn("python3", ["src/electron/lib/ai/python/main.py"]);
+    const childProcess = spawn("python3", [this.findPythonScriptPath()]);
 
     const dataToSend = JSON.stringify(promptContext);
     childProcess.stdin.write(dataToSend + "\n");
@@ -94,53 +151,59 @@ export class AiManager {
     // Receive output from the Python script
     childProcess.stdout.on("data", (buffer: Buffer) => {
       const data = buffer.toString();
-      // console.log("Received from Python: ", data);
+      const messages = splitStringIntoJSONObjects(data);
 
-      try {
-        const res = cookUnsafeResponse(JSON.parse(data));
+      for (const message of messages) {
+        try {
+          const res = cookUnsafeResponse(JSON.parse(message));
 
-        if (res.type === "exit") {
-          logger.info("Response from python : ", res.message);
-          finalResponse = res.message;
-        } else if (res.type === "error") {
-          throw res.message;
-        } else if (res.type === "debug") {
-          // Do something with debugging info
-        } else if (res.type === "function") {
-          const operationRes = this.executeMagicWand(res, graphId);
-          const operationResStr = JSON.stringify(operationRes);
+          if (res.type === "exit") {
+            logger.info("Response from python : ", res.message);
 
-          logger.info("Blix response: ", operationResStr);
+            if (res.message) {
+              this.handleNotification(res.message, "success");
+            }
+          } else if (res.type === "error") {
+            throw res;
+          } else if (res.type === "debug") {
+            // Do something with debugging info
+          } else if (res.type === "function") {
+            const operationRes = this.executeMagicWand(res, graphId);
+            const operationResStr = JSON.stringify(operationRes);
 
-          childProcess.stdin.write(`${operationResStr}\n`);
-          childProcess.stdin.write("end of transmission\n");
+            logger.info("Blix response: ", operationResStr);
+
+            childProcess.stdin.write(`${operationResStr}\n`);
+            childProcess.stdin.write("end of transmission\n");
+          }
+        } catch (error) {
+          childProcess?.kill();
+          this.handleApiErrorResponse(error);
         }
-      } catch (error) {
-        // Something went horribly wrong
-        this._childProcess?.kill();
-        finalResponse = "Oops. Something went horribly wrong🫡The LLM is clearly a bot";
-        logger.info("Python script error: ", JSON.stringify(error));
       }
     });
 
     // Handle errors
     childProcess.stderr.on("data", (data: Buffer) => {
-      const result = data.toString();
-      logger.warn("Error executing Python script: ", result);
+      if (data) {
+        const result = data.toString();
+        logger.warn("Error executing Python script: ", result);
+        this.handleNotification("AI prompts not currently available.", "warn");
+      }
     });
 
     // Handle process exit
     childProcess.on("close", (data: Buffer) => {
-      const code = data.toString();
-      if (code == null) logger.warn(`Python script exited with code null`);
-      else logger.warn(`Python script exited with code ${code}`);
+      if (data) {
+        const code = data.toString();
+        logger.warn(`Python script exited with code ${code}`);
+      } else {
+        logger.info(`Python script exited with code null`);
+      }
     });
   }
 
-  executeMagicWand(
-    config: AddNodeConfig | RemoveNodeConfig | AddEdgeConfig | RemoveEdgeConfig,
-    graphId: string
-  ) {
+  executeMagicWand(config: ResponseFunctions, graphId: string) {
     const { name, args } = config;
 
     if (name === "addNode") {
@@ -151,12 +214,55 @@ export class AiManager {
       return addEdge(this.graphManager, graphId, args);
     } else if (name === "removeEdge") {
       return removeEdge(this.graphManager, graphId, args);
+    } else if (name === "updateInputValues") {
+      return updateInputValues(this.graphManager, graphId, args);
+    } else if (name === "updateInputValue") {
+      return updateInputValue(this.graphManager, graphId, args);
     }
 
     // It should never reach here
     return {
       status: "error",
       message: "Something went wrong in magic wand",
-    };
+    } satisfies QueryResponse;
+  }
+
+  private handleApiErrorResponse(data: any) {
+    let response = "Oops. Something went horribly wrong🫡The LLM is clearly a bot";
+    let error = "";
+
+    const parsed = errorResponseSchema.safeParse(data);
+
+    if (parsed.success) {
+      response = parsed.data.message;
+      error = parsed.data.error;
+    } else {
+      error = data;
+    }
+
+    this.handleNotification(response, "error", false);
+    logger.error(error);
+  }
+
+  private findPythonScriptPath() {
+    const possibilities = [
+      // In packaged app
+      path.join(process.resourcesPath, "python/main.py"),
+      // In development
+      path.join(__dirname, "../../../../src/electron/lib/ai/python/main.py"),
+    ];
+    for (const path of possibilities) {
+      if (existsSync(path)) {
+        return path;
+      }
+    }
+    return "";
   }
 }
+
+interface Connection {
+  send(data: any): void;
+  receive(): string;
+}
+
+class StdioAPI {}

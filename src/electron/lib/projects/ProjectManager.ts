@@ -95,10 +95,10 @@ export class ProjectManager {
     this._mainWindow.apis.projectClientApi.onProjectRemoved(projectId);
   }
 
-  validateProjectFile(data: any): boolean {
-    // if(!data.id || !data.name || !data.layout) return false;
-    return true;
-  }
+  // validateProjectFile(data: any): boolean {
+  //   // if(!data.id || !data.name || !data.layout) return false;
+  //   return true;
+  // }
 
   /**
    * Adds a graph to a project.

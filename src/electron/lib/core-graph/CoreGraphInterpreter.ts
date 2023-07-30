@@ -2,7 +2,8 @@ import { CoreGraph, Node, Anchor, AnchorIO } from "./CoreGraph";
 import logger from "./../../utils/logger";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";
-// import { commandStore } from "@frontend/lib/stores/CommandStore";
+import { commandStore } from "../../../frontend/lib/stores/CommandStore";
+import type { MediaOutput } from "../../../shared/types/media";
 
 /*
 Assumptions:
@@ -10,6 +11,11 @@ Assumptions:
   - Functions in nodes have two parameters: (input: T[], anchor: number) (anchor: which tells the user which anchor is being used sothat the correct value can be returned)
   - Every node returns an array of output values
 */
+
+type MediaValue = {
+  content: any;
+  dataType: string;
+};
 
 export class CoreGraphInterpreter {
   private toolboxRegistry: ToolboxRegistry;
@@ -20,7 +26,7 @@ export class CoreGraphInterpreter {
     // this.memo = {};
   }
 
-  public run(graph: CoreGraph, node: UUID) {
+  public async run(graph: CoreGraph, node: UUID) {
     // this.graph.getOutputNodes.forEach(async (uuid) => {
     //   try {
     //     await this.traverse(
@@ -34,13 +40,27 @@ export class CoreGraphInterpreter {
     //   }
     // });
     try {
-      this.traverse(
+      const res = this.traverse(
         graph,
         graph.getNodes[node],
         Object.entries(graph.getNodes[node].getAnchors)[0][1]
       ).catch((err) => {
-        logger.error(err);
+        const mediaOutput: MediaOutput = {
+          content: err.message,
+          dataType: "Error",
+          outputId: "default", // This gets replaced within func()
+          outputNodeUUID: graph.getNodes[node].uuid,
+          graphUUID: graph.uuid,
+        };
+
+        this.toolboxRegistry
+          .getNodeInstance(graph.getNodes[node].getSignature)
+          .func({ mediaOutput }, graph.getUIInputs(graph.getNodes[node].uuid) || {}, []);
+
+        // logger.error(err);
       });
+
+      // console.log(await Promise.resolve(res));
     } catch (err) {
       logger.error(err);
     }
@@ -101,8 +121,12 @@ export class CoreGraphInterpreter {
   // }
 
   // USING PROMISES
-  public async traverse<T>(graph: CoreGraph, curr: Node, anhcorIn: Anchor): Promise<T> {
-    const inputPromises: Promise<T>[] = [];
+  public async traverse<T>(
+    graph: CoreGraph,
+    curr: Node,
+    anchorIn: Anchor
+  ): Promise<{ [key: string]: T }> {
+    const inputPromises: Promise<{ [key: string]: T }>[] = [];
     // Get all input values
     for (const anchor in curr.getAnchors) {
       // Only check input anchors
@@ -121,16 +145,52 @@ export class CoreGraphInterpreter {
     }
 
     // Resolve all input values (functions)
-    const inputs: T[] = await Promise.all(inputPromises).catch((err) => {
+    const inputs: { [key: string]: T }[] = await Promise.all(inputPromises).catch((err) => {
       throw err;
     });
-    // const output: T = await Promise.resolve(curr.execute(inputs, anhcorIn));
-    const output: T = await Promise.resolve(
-      this.toolboxRegistry
-        .getNodeInstance(curr.getSignature)
-        .func({ input: inputs, from: anhcorIn.anchorId })
-    );
+    if (curr.getSignature === "blix.output") {
+      // Output node will always have one input
+      const mediaOutput: MediaOutput = {
+        content: inputs[0] ? Object.values(inputs[0])[0] : null,
+        dataType: graph.getEdgeDest[Object.values(curr.getAnchors)[0].uuid]
+          ? graph.getAnchors[
+              graph.getEdgeDest[Object.values(curr.getAnchors)[0].uuid].getAnchorFrom
+            ].type
+          : "",
+        outputId: "default", // This gets replaced within func()
+        outputNodeUUID: curr.uuid,
+        graphUUID: graph.uuid,
+      };
 
-    return output;
+      const output: { [key: string]: T } = await Promise.resolve(
+        this.toolboxRegistry
+          .getNodeInstance(curr.getSignature)
+          // OLD: .func({ input: mediaOutput, from: anchorIn.anchorId })
+          // TODO: Move to new system
+          .func({ mediaOutput }, graph.getUIInputs(curr.uuid) || {}, [])
+      );
+
+      return output;
+    } else {
+      const inputDict: { [key: string]: any } = {};
+
+      Object.values(curr.getAnchors).forEach((anchor, index) => {
+        if (index < inputs.length) {
+          inputDict[anchor.anchorId] = graph.getEdgeDest[anchor.uuid]
+            ? inputs[index][graph.getAnchors[graph.getEdgeDest[anchor.uuid].getAnchorFrom].anchorId]
+            : null;
+        }
+      });
+
+      const output: { [key: string]: T } = await Promise.resolve(
+        this.toolboxRegistry
+          .getNodeInstance(curr.getSignature)
+          // OLD: .func({ input: mediaOutput, from: anchorIn.anchorId })
+          // TODO: Move to new system
+          .func(inputDict, graph.getUIInputs(curr.uuid) || {}, [anchorIn.anchorId])
+      );
+
+      return output;
+    }
   }
 }

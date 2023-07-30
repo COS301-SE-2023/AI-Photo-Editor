@@ -1,10 +1,8 @@
 import { UniqueEntity } from "../../../shared/utils/UniqueEntity";
-import type { SharedProject, LayoutPanel, SharedGraph } from "../../../shared/types";
+import type { SharedProject, LayoutPanel } from "../../../shared/types";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { PathLike } from "fs";
 import type { GraphToJSON } from "../../lib/core-graph/CoreGraphExporter";
-import { CoreGraph } from "../core-graph/CoreGraph";
-
 // Encapsulates the backend state for one of the open Blix projects
 export class CoreProject extends UniqueEntity {
   private _name: string;
