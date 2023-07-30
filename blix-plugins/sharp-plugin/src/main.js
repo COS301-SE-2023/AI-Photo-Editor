@@ -6,15 +6,28 @@ const nodes ={
         nodeBuilder.setTitle("Brightness");
         nodeBuilder.setDescription("Adjusts the brighness of an image taking one image as input and returning one image as output");
 
+       const ui = nodeBuilder.createUIBuilder();
+       ui
+        .addSlider(
+            {
+                componentId: "brightness",
+                label: "Slide Along",
+                defaultValue: 0,
+                updateBackend: true,
+            },
+            { min: 0, max: 10, set: 0.1 }
+        );
+
         nodeBuilder.define(async (input, uiInput, from) => {
             return {
                 "res": await input["img"].modulate({
-                    brightness: 2
+                    brightness: uiInput["brightness"]
                 }),
             }
             //TODO: implement
           });
           
+        nodeBuilder.setUI(ui);
         nodeBuilder.addInput("Sharp", "img","Img");
         nodeBuilder.addOutput("Sharp", "res","Result");
     },
@@ -22,16 +35,30 @@ const nodes ={
         const nodeBuilder = context.instantiate("sharp-plugin", "saturation");
         nodeBuilder.setTitle("Saturation");
         nodeBuilder.setDescription("Adjusts the saturation of an image taking one image as input and returning one image as output");
+
+       const ui = nodeBuilder.createUIBuilder();
+       ui
+        .addSlider(
+            {
+                componentId: "saturation",
+                label: "Slide Along",
+                defaultValue: 0,
+                updateBackend: true,
+            },
+            { min: 0, max: 10, set: 0.1 }
+        );
+
       
         nodeBuilder.define(async (input, uiInput, from) => {
             return {
                 "res": await input["img"].modulate({
-                    saturation: 0.5
+                    saturation: uiInput["saturation"]
                 }),
             }
             //TODO: implement
         });
       
+        nodeBuilder.setUI(ui);
        nodeBuilder.addInput("Sharp", "img","Img");
        nodeBuilder.addOutput("Sharp", "res","Result");
       },
@@ -39,16 +66,28 @@ const nodes ={
         const nodeBuilder = context.instantiate("sharp-plugin", "hue");
         nodeBuilder.setTitle("Hue");
         nodeBuilder.setDescription("Adjusts the hue of an image taking one image as input and returning one image as output");
+       const ui = nodeBuilder.createUIBuilder();
+       ui
+        .addSlider(
+            {
+                componentId: "hue",
+                label: "Slide Along",
+                defaultValue: 0,
+                updateBackend: true,
+            },
+            { min: 0, max: 360, step: 5 }
+        );
       
         nodeBuilder.define( async (input, uiInput, from) => {
             //TODO: implement
             return {
                 "res": await input["img"].modulate({
-                    hue: 90
+                    hue: Math.round(uiInput["hue"])
                 }),
             }
         });
       
+        nodeBuilder.setUI(ui);
         nodeBuilder.addInput("Sharp", "img","Img");
         nodeBuilder.addOutput("Sharp", "res","Result");
       },
@@ -56,26 +95,63 @@ const nodes ={
         const nodeBuilder = context.instantiate("sharp-plugin", "rotate");
         nodeBuilder.setTitle("Rotate");
         nodeBuilder.setDescription("Rotates an image by an explicit angle taking one image as input and returning one image as output");
+       const ui = nodeBuilder.createUIBuilder();
+       ui
+        .addSlider(
+            {
+                componentId: "rotate",
+                label: "Slide Along",
+                defaultValue: 0,
+                updateBackend: true,
+            },
+            { min: 0, max: 360, step: 0.1 }
+        );
       
-        nodeBuilder.define((input, uiInput, from) => {
+        nodeBuilder.define(async (input, uiInput, from) => {
             //TODO: implement
             return {
-                "res": input["img"].rotate(90),
+                "res": await input["img"].rotate(uiInput["rotate"]),
             }
         });
       
+        nodeBuilder.setUI(ui);
         nodeBuilder.addInput("Sharp", "img","Img");
         nodeBuilder.addOutput("Sharp", "res","Result");
       },
     "sharpen": (context) => {
         const nodeBuilder = context.instantiate("sharp-plugin", "sharpen");
-        nodeBuilder.setTitle("sharpen");
+        nodeBuilder.setTitle("Sharpen");
         nodeBuilder.setDescription("Sharpens an image taking one image as input and returning one image as output");
+        ui
+         .addSlider(
+             {
+                 componentId: "sigma",
+                 label: "Sigma",
+                 defaultValue: 0,
+                 updateBackend: true,
+             },
+             { min: 0, max: 10, step: 0.1 }
+         );
+        ui.addSlider(
+             {
+                 componentId: "m1",
+                 label: "M1",
+                 defaultValue: 0,
+                 updateBackend: true,
+             },
+             { min: 0, max: 10, step: 0.1 }
+         );
       
-        nodeBuilder.define((input, uiInput, from) => {
-            //TODO: implement
+        nodeBuilder.define(async (input, uiInput, from) => {
+            return {
+            "res": await input["img"].sharpen({
+                  sigma: uiInput["sigma"],
+                  m1: uiInput["m1"]
+                })
+            }
         });
       
+        nodeBuilder.setUI(ui);
         nodeBuilder.addInput("Sharp", "img","Img");
         nodeBuilder.addOutput("Sharp", "res","Result");
       },
@@ -84,7 +160,10 @@ const nodes ={
         nodeBuilder.setTitle("Normalise");
         nodeBuilder.setDescription("Enhance image contrast by stretching its luminance to cover a full dynamic range taking one image as input and returning one image as output");
       
-        nodeBuilder.define(() => {
+        nodeBuilder.define(async (input, uiInput, from) => {
+            return {
+                "res": await input["img"].normalise()
+            }
             //TODO: implement
         });
       
@@ -112,7 +191,7 @@ const nodes ={
       
         nodeBuilder.define(async (input, uiInput, from ) => {
             //TODO: implement
-            return {"res": sharp(input["img"])};
+            return {"res": await sharp(input["img"])};
         });
       
         nodeBuilder.addInput("Image", "img","Img");

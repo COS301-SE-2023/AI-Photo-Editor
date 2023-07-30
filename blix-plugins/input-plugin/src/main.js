@@ -20,7 +20,7 @@ const nodes ={
 
       nodeBuilder.define(async (input, uiInput, from) => {
 
-          return { "res": "/home/klairgo/Desktop/AI-Photo-Editor/assets/image.png"};
+          return { "res": "/home/klairgo/Pictures/Wallpapers/fa179b9d86c74ec7bbd2ac095f7ed4d7.jpeg"};
       });
      nodeBuilder.addOutput("Image", "res", "Result");
 
