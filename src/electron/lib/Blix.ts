@@ -6,14 +6,23 @@ import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 import { CoreGraphInterpreter } from "./core-graph/CoreGraphInterpreter";
 import { PluginManager } from "./plugins/PluginManager";
-import { IPCGraphSubscriber } from "./core-graph/CoreGraphInteractors";
+import {
+  CoreGraphUpdateEvent,
+  IPCGraphSubscriber,
+  SystemGraphSubscriber,
+} from "./core-graph/CoreGraphInteractors";
 import type { UUID } from "../../shared/utils/UniqueEntity";
 import type { UIGraph } from "../../shared/ui/UIGraph";
 import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
 import { AiManager } from "./ai/AiManager";
-import { NodeBuilder } from "./plugins/builders/NodeBuilder";
 // import { testStuffies } from "./core-graph/CoreGraphTesting";
+import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
+import type { MediaOutput } from "../../shared/types/media";
+import { MediaManager } from "./media/MediaManager";
+import { CoreGraph } from "./core-graph/CoreGraph";
+import { MediaSubscriber } from "./media/MediaSubscribers";
+
 // Encapsulates the backend representation for
 // the entire running Blix application
 export class Blix {
@@ -26,6 +35,7 @@ export class Blix {
   private _mainWindow!: MainWindow;
   private _aiManager!: AiManager;
   private _graphInterpreter!: CoreGraphInterpreter;
+  private _mediaManager!: MediaManager;
   private _isReady = false;
 
   // private startTime: Date;
@@ -53,60 +63,95 @@ export class Blix {
     this._graphInterpreter = new CoreGraphInterpreter(this._toolboxRegistry);
 
     // Create Output node
-    const tempNodeBuilder = new NodeBuilder("blix", "Output");
-    const tempUIBuilder = tempNodeBuilder.createUIBuilder();
-    tempUIBuilder.addButton("Testing", null);
+    const outputNodeBuilder = new NodeBuilder("blix", "output");
+    const outputUIBuilder = outputNodeBuilder.createUIBuilder();
+    outputUIBuilder.addButton(
+      {
+        componentId: "export",
+        label: "Export",
+        defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+        updatesBackend: false,
+      },
+      {}
+    );
+    outputUIBuilder.addTextInput({
+      componentId: "outputId",
+      label: "Export",
+      defaultValue: "default", // TODO: Make this a random id to start with
+      updatesBackend: true,
+    });
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
 
-    tempNodeBuilder.define(({ input , from}: { input: any[]; from: string }) => {
-      logger.info("Result: ", input[0]);
-      logger.info("From: ", from)
-    });
+    outputNodeBuilder.setTitle("Output");
+    outputNodeBuilder.setDescription(
+      "This is the global output node which accepts data of any type, and presents the final value to the user"
+    );
+    // tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
+    outputNodeBuilder.define(
+      (
+        result: { [key: string]: any },
+        inputUI: { [key: string]: any },
+        requiredOutputs: string[]
+      ) => {
+        // mainWindow.apis.mediaClientApi.outputChanged(mediaOutput as MediaOutput);
+        const mediaOutput: MediaOutput = result.mediaOutput;
+        mediaOutput.outputId = inputUI.outputId;
+        this._mediaManager.updateMedia(mediaOutput);
+        return {};
+      }
+    );
 
-    tempNodeBuilder.addInput("", "in", "In");
-    tempNodeBuilder.setUI(tempUIBuilder);
-    this._toolboxRegistry.addInstance(tempNodeBuilder.build);
+    outputNodeBuilder.addInput("", "in", "In");
+    outputNodeBuilder.setUI(outputUIBuilder);
+    this._toolboxRegistry.addInstance(outputNodeBuilder.build);
 
     for (const command of blixCommands) {
       this.commandRegistry.addInstance(command);
     }
 
     // Load plugins before instantiating any managers
-
     this._pluginManager = new PluginManager(this);
     await this._pluginManager.loadBasePlugins();
 
-    this._graphManager = new CoreGraphManager(mainWindow);
+    this._graphManager = new CoreGraphManager(this._toolboxRegistry, mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
+
+    this._mediaManager = new MediaManager(mainWindow, this._graphInterpreter, this._graphManager);
 
     this.initSubscribers();
     this._isReady = true;
 
     // testStuffies(this);
-
-    // TESTING ADD NODE TO GRAPH
-    // setInterval(() => {
-    //   const allIds = this._graphManager.getAllGraphUUIDs();
-
-    //   const randId = allIds[Math.floor(Math.random() * allIds.length)];
-    //   const toolbox = this._toolboxRegistry.getRegistry();
-    //   const toolboxKeys = Object.keys(toolbox);
-    //   const randomNode = toolbox[toolboxKeys[Math.floor(Math.random() * toolboxKeys.length)]];
-
-    //   this._graphManager.addNode(randId, randomNode);
-    // }, 3000);
     this._aiManager = new AiManager(this.toolbox, this._graphManager, mainWindow);
   }
 
   private initSubscribers() {
-    const graphSubscriber = new IPCGraphSubscriber();
-
-    graphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
+    // ===== CORE GRAPH SUBSCRIBERS ===== //
+    const ipcGraphSubscriber = new IPCGraphSubscriber();
+    ipcGraphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
       this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
     };
+    this._graphManager.addAllSubscriber(ipcGraphSubscriber);
 
-    this._graphManager.addAllSubscriber(graphSubscriber);
+    const mediaSubscriber = new SystemGraphSubscriber();
+    mediaSubscriber.setListenEvents([
+      CoreGraphUpdateEvent.graphUpdated,
+      CoreGraphUpdateEvent.uiInputsUpdated,
+    ]);
+    mediaSubscriber.listen = (graphId: UUID, newGraph: CoreGraph) => {
+      // this._graphInterpreter.run(this._graphManager.getGraph(graphId));
+      this._mediaManager.onGraphUpdated(graphId);
+    };
+    this._graphManager.addAllSubscriber(mediaSubscriber);
+
+    // ===== MEDIA SUBSCRIBERS ===== //
+    // REMOVED: The MediaApi now handles creating MediaSubscribers directly
+    // const ipcMediaSubscriber = new MediaSubscriber();
+    // ipcMediaSubscriber.listen = (media: MediaOutput) => {
+    //   this.mainWindow?.apis.mediaClientApi.outputChanged(media);
+    // };
+    // this._mediaManager.addSubscriber("default", ipcMediaSubscriber);
   }
 
   // TODO: Move these to a Utils.ts or something like that
@@ -148,6 +193,10 @@ export class Blix {
 
   get graphInterpreter(): CoreGraphInterpreter {
     return this._graphInterpreter;
+  }
+
+  get mediaManager(): MediaManager {
+    return this._mediaManager;
   }
 
   get aiManager(): AiManager {

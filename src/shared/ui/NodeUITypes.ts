@@ -1,3 +1,10 @@
+export type UIComponentConfig = {
+  label: string;
+  componentId: string;
+  defaultValue: unknown;
+  updatesBackend: boolean;
+};
+
 export abstract class NodeUI {
   constructor(
     public parent: NodeUI | null,
@@ -32,6 +39,7 @@ export enum NodeUIComponent {
   Label = "Label",
   Radio = "Radio",
   Dropdown = "Dropdown",
+  Accordion = "Accordion",
   NumberInput = "NumberInput",
   TextInput = "TextInput",
   Checkbox = "Checkbox",

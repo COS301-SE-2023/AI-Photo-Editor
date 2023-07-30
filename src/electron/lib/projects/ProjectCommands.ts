@@ -9,13 +9,11 @@ import {
 import logger from "../../utils/logger";
 import { readFile, writeFile } from "fs/promises";
 import type { ProjectFile } from "./CoreProject";
-import type {
-  Command,
-  CommandContext,
-} from "../../lib/registries/CommandRegistry";
+import type { Command, CommandContext } from "../../lib/registries/CommandRegistry";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { LayoutPanel } from "../../../shared/types";
 import { CoreGraphImporter } from "../../lib/core-graph/CoreGraphImporter";
+import { CoreGraphUpdateEvent } from "../core-graph/CoreGraphInteractors";
 
 type SaveProjectArgs = {
   projectId: UUID;
@@ -202,7 +200,7 @@ export async function openProject(ctx: CommandContext) {
       const coreGraph = coreGraphImporter.import("json", graph);
       ctx.graphManager.addGraph(coreGraph);
       ctx.projectManager.addGraph(projectId, coreGraph.uuid);
-      ctx.graphManager.onGraphUpdated(coreGraph.uuid);
+      ctx.graphManager.onGraphUpdated(coreGraph.uuid, new Set([CoreGraphUpdateEvent.graphUpdated]));
     }
 
     ctx.mainWindow?.apis.projectClientApi.onProjectChanged({

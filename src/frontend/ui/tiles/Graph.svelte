@@ -11,7 +11,6 @@
   import { focusedPanelStore } from "../../lib/PanelNode";
   import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";
-  import { mediaStore } from "../../lib/stores/MediaStore";
   import { commandStore } from "../../lib/stores/CommandStore";
   import GraphSelectionBox from "../../ui/utils/graph/GraphSelectionBox.svelte";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
@@ -85,6 +84,7 @@
       // if (!fromNode || !toNode) continue;
 
       if (connectAnchorIds) {
+        // TODO: Handle if this fails
         const res = connectAnchorIds(
           `N-${panelId}_${edgeData.nodeUUIDFrom}`,
           // E.g. A-4_in2/N-4_IxExhIof-npSfn0dnO-VRSW4_kqn2z5bcCPCcflY_MA
@@ -149,16 +149,7 @@
     const toAnchor = splitCompositeAnchorId(e.detail.targetAnchor.id);
 
     if (!fromAnchor || !toAnchor) return;
-
-    const toNode = $thisGraphStore.getNode(toAnchor.nodeUUID);
-
     $thisGraphStore?.addEdge(fromAnchor.anchorUUID, toAnchor.anchorUUID);
-
-    if (toNode.signature === "blix.Output") {
-      console.log("Output Connection");
-      mediaStore.compute(graphId, toNode.uuid);
-      //window.apis.mediaApi.compute(graphId, toNode.uuid);
-    }
   }
 
   function edgeDisconnected(e: CustomEvent<any>) {

@@ -2,6 +2,7 @@ import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
 import { type NodeSignature } from "@shared/ui/ToolboxTypes";
+import { type INodeUIInputs } from "@shared/types";
 
 // Graphs across projects are stored homogeneously and referenced by UUID
 export class GraphApi implements ElectronMainApi<GraphApi> {
@@ -30,6 +31,10 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
 
   async removeEdge(graphUUID: UUID, anchorTo: UUID) {
     return this._blix.graphManager.removeEdge(graphUUID, anchorTo);
+  }
+
+  async updateUIInputs(graphUUID: UUID, nodeUUID: UUID, nodeUIInputs: INodeUIInputs) {
+    return this._blix.graphManager.updateUIInputs(graphUUID, nodeUUID, nodeUIInputs);
   }
 
   async setNodePos(graphUUID: UUID, nodeUUID: UUID, pos: { x: number; y: number }) {

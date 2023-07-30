@@ -7,6 +7,7 @@
 
   const dispatch = createEventDispatcher();
 
+  export let graphId: string;
   export let panelId: number;
   export let node: GraphNode;
 
@@ -41,6 +42,16 @@
 
     return colour as CSSColorString;
   }
+
+  async function nodeClicked(e: CustomEvent) {
+    if (e.detail.e.button === 2) {
+      console.log("DELETE NODE EVENT");
+
+      const [_2, ...nodeUUIDParts] = e.detail.node.id.split("_");
+      const nodeUUID = nodeUUIDParts.join("_");
+      await window.apis.graphApi.removeNode(graphId, nodeUUID);
+    }
+  }
 </script>
 
 {#if svelvetNodeId !== ""}
@@ -56,6 +67,7 @@ height="{graphNode.dims.h}" -->
     borderWidth="{3}"
     borderRadius="{10}"
     on:selected="{() => console.log('selected')}"
+    on:nodeClicked="{nodeClicked}"
   >
     <div class="node">
       <div class="header">
@@ -68,6 +80,7 @@ height="{graphNode.dims.h}" -->
         {JSON.stringify({ ...$toolboxNode, ui: undefined })}
       </div>
       <div class="node-body" style="max-width: 400px">
+        <!-- <button on:click={updateUIInputs}>SUBMIT</button> -->
         <NodeUiFragment inputStore="{node.inputUIValues}" ui="{$toolboxNode?.ui}" />
       </div>
 

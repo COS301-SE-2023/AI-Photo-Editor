@@ -4,8 +4,8 @@ const nodes ={
         nodeBuilder.setTitle("Input number");
         nodeBuilder.setDescription("Provides a number input and returns a single number output");
 
-        nodeBuilder.define((num1) => {
-            return 3;
+        nodeBuilder.define((input, uiInput, from) => {
+            return {"res": 3};
         });
        nodeBuilder.addOutput("Number", "res", "Result");
 
@@ -18,8 +18,9 @@ const nodes ={
       nodeBuilder.setTitle("Input image");
       nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
-      nodeBuilder.define((image) => {
-          return image;
+      nodeBuilder.define(async (input, uiInput, from) => {
+
+          return { "res": "/home/klairgo/Desktop/AI-Photo-Editor/assets/image.png"};
       });
      nodeBuilder.addOutput("Sharp", "res", "Result");
 

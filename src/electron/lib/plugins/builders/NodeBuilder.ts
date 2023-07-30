@@ -1,6 +1,11 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
 import { type MinAnchor, type NodeFunc, NodeInstance } from "../../registries/ToolboxRegistry";
-import { NodeUIComponent, NodeUILeaf, NodeUIParent } from "../../../../shared/ui/NodeUITypes";
+import {
+  NodeUIComponent,
+  NodeUILeaf,
+  NodeUIParent,
+  type UIComponentConfig,
+} from "../../../../shared/ui/NodeUITypes";
 
 type PartialNode = {
   name: string;
@@ -11,6 +16,7 @@ type PartialNode = {
   inputs: MinAnchor[];
   outputs: MinAnchor[];
   ui: NodeUIParent | null;
+  uiConfigs: { [key: string]: UIComponentConfig };
   func: NodeFunc;
 };
 
@@ -30,7 +36,8 @@ export class NodeBuilder implements PluginContextBuilder {
       inputs: [],
       outputs: [],
       ui: null,
-      func: () => null,
+      uiConfigs: {},
+      func: () => ({}),
     };
   }
 
@@ -44,7 +51,8 @@ export class NodeBuilder implements PluginContextBuilder {
       this.partialNode.inputs,
       this.partialNode.outputs,
       this.partialNode.func,
-      this.partialNode.ui
+      this.partialNode.ui,
+      this.partialNode.uiConfigs
     );
   }
 
@@ -117,7 +125,16 @@ export class NodeBuilder implements PluginContextBuilder {
 
   public setUI(ui: NodeUIBuilder) {
     this.partialNode.ui = ui.getUI();
+    this.partialNode.uiConfigs = ui.getUIConfigs();
   }
+}
+
+type ComponentProps = {
+  [key: string]: unknown;
+};
+
+function getRandomComponentId(type: NodeUIComponent) {
+  return `${type.toString()}-${Math.floor(Math.random() * 16 ** 6).toString(16)}`;
 }
 
 /**
@@ -128,39 +145,45 @@ export class NodeBuilder implements PluginContextBuilder {
 
 export class NodeUIBuilder {
   private node: NodeUIParent;
+  private uiConfigs: { [key: string]: UIComponentConfig };
 
   constructor() {
     this.node = new NodeUIParent("", null);
+    this.uiConfigs = {};
   }
 
-  public addKnob(
-    label: string,
-    min: number,
-    max: number,
-    step: number,
-    defautlVal: number
-  ): NodeUIBuilder {
+  public addKnob(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Knob);
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Knob, label, [min, max, step, defautlVal])
+      new NodeUILeaf(this.node, NodeUIComponent.Knob, componentId, [min, max, step])
     );
-
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
   /**
-   *
    * @param label Label for the button
    * @param param Parameter for the button
    * @returns callback to this NodeUIBuilder
    * */
-
-  public addButton(label: string, param: any): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Button, label, [param]));
+  public addButton(config: UIComponentConfig, props: ComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Button);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Button, componentId, [props]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "",
+      updatesBackend: config.updatesBackend ?? false,
+    };
     return this;
   }
 
   /**
-   *
    * @param label Label for the slider
    * @param min Minimum value for the slider
    * @param max Maximum value for the slider
@@ -168,70 +191,112 @@ export class NodeUIBuilder {
    * @param defautlVal Default value
    * @returns callback to this NodeUIBuilder
    */
-
-  public addSlider(
-    label: string,
-    min: number,
-    max: number,
-    step: number,
-    defautlVal: number
-  ): NodeUIBuilder {
+  public addSlider(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Slider);
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Slider, label, [min, max, step, defautlVal])
+      new NodeUILeaf(this.node, NodeUIComponent.Slider, componentId, [min, max, step])
     );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+    };
 
     return this;
   }
 
+  public addDropdown(config: UIComponentConfig, options: { [key: string]: any }): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Dropdown);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.Dropdown, componentId, [options])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? Object.keys(options)[0],
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
+
   /**
-   *
-   * @param label Label for the dropdown
-   * @param builder NodeUIBuilder for the dropdown
+   * @param label Label for the accordion
+   * @param builder NodeUIBuilder for the accordion
    * @returns callback to this NodeUIBuilder
-   *
    * */
 
-  public addDropdown(label: string, builder: NodeUIBuilder): NodeUIBuilder {
-    builder.node.label = label;
+  public addAccordion(config: UIComponentConfig, builder: NodeUIBuilder): NodeUIBuilder {
+    builder.node.label = config.label;
     builder.node.parent = this.node;
     this.node.params.push(builder.node);
     return this;
   }
 
   /**
-   *
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
-   *
    * */
-
-  public addNumberInput(label: string): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.NumberInput, label, []));
+  public addTextInput(config: UIComponentConfig): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.TextInput);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.TextInput, componentId, []));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "empty",
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
   /**
-   *
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
-   *
    * */
-
-  public addImageInput(label: string): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.FilePicker, label, []));
+  public addNumberInput(config: UIComponentConfig): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.NumberInput);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.NumberInput, componentId, []));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
   /**
-   *
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
-   *
    * */
+  public addImageInput(config: UIComponentConfig): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.FilePicker);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.FilePicker, componentId, []));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "",
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
 
+  /**
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   * */
   // We need to discuss how to handle color pickers
-  public addColorPicker(label: string, param: any): NodeUIBuilder {
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, label, [param]));
+  public addColorPicker(config: UIComponentConfig, param: any): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.ColorPicker);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, componentId, [param])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "#000000",
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
@@ -240,16 +305,24 @@ export class NodeUIBuilder {
     return this.node;
   }
 
+  public getUIConfigs() {
+    return this.uiConfigs;
+  }
+
   /**
-   *
    * @param label Label for the text input
    * @param param Parameter for the text input
    * @returns callback to this NodeUIBuilder
-   *
    * */
-
-  public addLabel(label: string, param: string) {
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Label, label, [param]));
+  public addLabel(config: UIComponentConfig, param: string) {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Label);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Label, componentId, [param]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "empty",
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 }

@@ -1,6 +1,6 @@
 import { CoreGraph } from "../../lib/core-graph/CoreGraph";
 import { NodePluginContext } from "../../lib/plugins/Plugin";
-import { type NodeInstance } from "../../lib/registries/ToolboxRegistry";
+import { ToolboxRegistry, type NodeInstance } from "../../lib/registries/ToolboxRegistry";
 import { spawn } from "child_process";
 import {
   CoreGraphExporter,
@@ -117,7 +117,7 @@ class Profiler {
 
   executeMagicWand(config: ResponseFunctions, graphId: string) {
     const { name, args } = config;
-    const graphManager = new CoreGraphManager();
+    const graphManager = new CoreGraphManager(new ToolboxRegistry());
     graphManager.addGraph(this.coreGraph);
 
     if (name === "addNode") {

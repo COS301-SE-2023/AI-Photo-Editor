@@ -1,9 +1,7 @@
 import type { UUID } from "@shared/utils/UniqueEntity";
-import type {
-  Command,
-  CommandContext,
-} from "../../lib/registries/CommandRegistry";
+import type { Command, CommandContext } from "../../lib/registries/CommandRegistry";
 import type { CommandResponse } from "../projects/ProjectCommands";
+import { CoreGraphUpdateEvent } from "./CoreGraphInteractors";
 
 type CreateGraphArgs = {
   projectId: UUID;
@@ -49,7 +47,7 @@ export async function createGraph(
   if (!project) return { success: false, error: "Project not found" };
 
   const graphId = ctx.graphManager.createGraph();
-  ctx.graphManager.onGraphUpdated(graphId);
+  ctx.graphManager.onGraphUpdated(graphId, new Set([CoreGraphUpdateEvent.graphUpdated]));
   ctx.projectManager.addGraph(projectId, graphId);
 
   return { success: true, message: "Graph created successfully" };

@@ -8,7 +8,8 @@ import {
 } from "../registries/ToolboxRegistry";
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
 import { type NodeSignature } from "@shared/ui/ToolboxTypes";
-import type { QueryResponse } from "../../../shared/types";
+import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
+import { type MediaOutputId } from "@shared/types/media";
 
 // =========================================
 // Explicit types for type safety
@@ -43,7 +44,10 @@ export class CoreGraph extends UniqueEntity {
   private edgeSrc: { [key: AnchorUUID]: AnchorUUID[] }; // Map a source anchor to a list of destination anchors
   // E.g. we can do (source anchor) ---[edgeSrc]--> (destination anchors) ---[edgeDest]--> (Edges)
   //      to get all the edges that flow from a source anchor
-  private outputNodes: string[];
+  private outputNodes: { [key: UUID]: MediaOutputId };
+
+  // Maps a node UUID to a list of UI inputs
+  private uiInputs: { [key: UUID]: CoreNodeUIInputs };
 
   // private subscribers: CoreGraphSubscriber[];
   private static nodeTracker = 0;
@@ -53,7 +57,8 @@ export class CoreGraph extends UniqueEntity {
     this.anchors = {};
     this.edgeDest = {};
     this.edgeSrc = {};
-    this.outputNodes = [];
+    this.outputNodes = {};
+    this.uiInputs = {};
     // this.nodeList = [];
   }
 
@@ -134,6 +139,10 @@ export class CoreGraph extends UniqueEntity {
     return this.edgeSrc;
   }
 
+  public getUIInputs(nodeUUID: UUID): { [key: string]: UIValue } | null {
+    return this.uiInputs[nodeUUID]?.getInputs || null;
+  }
+
   // We need to pass in node name and plugin name
   public addNode(
     node: NodeInstance
@@ -149,14 +158,16 @@ export class CoreGraph extends UniqueEntity {
         this.anchors[anchor] = n.getAnchors[anchor];
       }
 
-      // TODO: Check if node is an output node and add it to the outputNode list
+      if (node.signature === "blix.output") {
+        this.outputNodes[n.uuid] = "default"; // TODO: set this to a unique id and propagate to the frontend
+      }
 
       // console.log(QueryResponseStatus.success)
       const anchors: AiAnchors = n.returnAnchors();
       return {
         status: "success",
         message: "Node added succesfully",
-        data: { nodeId: n._uuid, inputs: anchors.inputAnchors, outputs: anchors.outputAnchors },
+        data: { nodeId: n.uuid, inputs: anchors.inputAnchors, outputs: anchors.outputAnchors },
       };
     } catch (error) {
       return { status: "error", message: error as string };
@@ -223,7 +234,18 @@ export class CoreGraph extends UniqueEntity {
     if (!(ancFrom.uuid in this.edgeSrc)) this.edgeSrc[ancFrom.uuid] = [];
     this.edgeSrc[ancFrom.uuid].push(ancTo.uuid);
 
-    return { status: "success", message: "Edge added succesfully", data: { edgeId: edge._uuid } };
+    return { status: "success", message: "Edge added succesfully", data: { edgeId: edge.uuid } };
+  }
+
+  public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs): QueryResponse {
+    this.uiInputs[nodeUUID] = new CoreNodeUIInputs(nodeUIInputs);
+
+    // If output node, update output node id
+    if (this.outputNodes[nodeUUID]) {
+      this.outputNodes[nodeUUID] = nodeUIInputs.inputs.outputId as MediaOutputId;
+    }
+
+    return { status: "success" };
   }
 
   public checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
@@ -255,6 +277,10 @@ export class CoreGraph extends UniqueEntity {
   public removeNode(nodeToDelete: UUID): QueryResponse {
     const node: Node = this.nodes[nodeToDelete];
     if (!node) return { status: "error", message: "Node to be deleted does not exist" };
+
+    if (this.outputNodes[nodeToDelete]) {
+      delete this.outputNodes[nodeToDelete];
+    }
 
     try {
       // Remove all edges from node
@@ -501,6 +527,17 @@ export class NodeStyling {
 
   get getSize() {
     return this.size;
+  }
+}
+
+export class CoreNodeUIInputs {
+  private readonly inputs: { [key: string]: UIValue };
+  constructor(nodeUIInpust: INodeUIInputs) {
+    this.inputs = nodeUIInpust.inputs;
+  }
+
+  public get getInputs() {
+    return this.inputs;
   }
 }
 

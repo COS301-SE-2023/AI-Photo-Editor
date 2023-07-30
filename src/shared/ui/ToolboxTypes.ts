@@ -1,5 +1,5 @@
 import type { UUID } from "../utils/UniqueEntity";
-import { NodeUI } from "./NodeUITypes";
+import { NodeUI, type UIComponentConfig } from "./NodeUITypes";
 
 export type NodeSignature = string;
 
@@ -21,7 +21,8 @@ export class INode {
     readonly icon: string,
     readonly inputs: IAnchor[],
     readonly outputs: IAnchor[],
-    readonly ui: NodeUI | null
+    readonly ui: NodeUI | null,
+    readonly uiConfigs: { [key: string]: UIComponentConfig }
   ) {}
 }
 
