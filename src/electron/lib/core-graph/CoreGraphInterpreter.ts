@@ -141,9 +141,9 @@ export class CoreGraphInterpreter {
       // Output node will always have one input
       const mediaOutput: MediaOutput = {
         content: inputs[0] ? Object.values(inputs[0])[0] : null,
-        dataType: graph.getEdgeDest[Object.values(curr.getAnchors)[0]._uuid]
+        dataType: graph.getEdgeDest[Object.values(curr.getAnchors)[0].uuid]
           ? graph.getAnchors[
-              graph.getEdgeDest[Object.values(curr.getAnchors)[0]._uuid].getAnchorFrom
+              graph.getEdgeDest[Object.values(curr.getAnchors)[0].uuid].getAnchorFrom
             ].type
           : "",
         outputId: "default", // This gets replaced within func()
@@ -166,7 +166,7 @@ export class CoreGraphInterpreter {
       Object.values(curr.getAnchors).forEach((anchor, index) => {
         if (index < inputs.length) {
           inputDict[anchor.anchorId] =
-            inputs[index][graph.getAnchors[graph.getEdgeDest[anchor._uuid].getAnchorFrom].anchorId];
+            inputs[index][graph.getAnchors[graph.getEdgeDest[anchor.uuid].getAnchorFrom].anchorId];
         }
       });
 

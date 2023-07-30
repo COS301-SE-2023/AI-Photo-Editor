@@ -5,8 +5,9 @@
   import { mediaStore } from "../../lib/stores/MediaStore";
   import type { GraphNode, GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
   import { graphMall } from "lib/stores/GraphStore";
-  import { get, type Readable } from "svelte/store";
+  import { get, writable, type Readable } from "svelte/store";
   import type { MediaOutput } from "@shared/types/media";
+  import { onDestroy } from "svelte";
 
   const graphUUIDs = graphMall.getAllGraphUUIDsReactive();
 
@@ -25,19 +26,47 @@
     return res;
   }
 
+  let mediaId = writable("default");
+  let oldMediaId: string | null = null;
+
+  const unsubMedia = mediaId.subscribe((newMediaId) => {
+    console.log("SUBSCRIBE MEDIA ID", oldMediaId, newMediaId);
+    connectNewMedia(oldMediaId, newMediaId);
+    oldMediaId = newMediaId;
+  });
+
   let selectedNode: { graphUUID: GraphUUID; outNode: GraphNodeUUID } | null;
   let media: Readable<MediaOutput | null>;
 
+  async function connectNewMedia(oldMediaId: string | null, mediaId: string) {
+    if (oldMediaId !== null) {
+      console.log("STOPPING OLD", oldMediaId);
+      await mediaStore.stopMediaReactive(oldMediaId);
+    }
+    media = await mediaStore.getMediaReactive(mediaId);
+    console.log("CONNECT NEW MEDIA", mediaId, media);
+  }
+
+  onDestroy(async () => {
+    console.log("ON DESTROY");
+    await mediaStore.stopMediaReactive($mediaId);
+    unsubMedia();
+  });
+
   function handleSelect(e: Event) {
+    return;
     const value = (e.target as HTMLSelectElement).value;
     if (!value) return;
 
     const [graphUUID, nodeUUID] = value.split("/");
     selectedNode = { graphUUID, outNode: nodeUUID };
 
+    // mediaStore.stopMediaReactive($mediaId);
+    // media = mediaStore.getMediaReactive($mediaId);
+
     // recomputeMedia();
-    mediaStore.stopMediaReactive(graphUUID, nodeUUID);
-    media = mediaStore.getMediaReactive(graphUUID, nodeUUID);
+    // t mediaStore.stopMediaReactive(graphUUID, nodeUUID);
+    // media = mediaStore.getMediaReactive(graphUUID, nodeUUID);
 
     // MOVED: now computed directly in media store
     // if (prevGraphUnsub) prevGraphUnsub();
@@ -46,10 +75,6 @@
     // prevGraphUnsub = selectedGraph.subscribe((_) => {
     //   if (selectedNode) recomputeMedia(selectedNode.graphUUID, selectedNode.outNode);
     // });
-  }
-
-  function recomputeMedia(graphUUID: GraphUUID, outNode: GraphNodeUUID) {
-    mediaStore.compute(graphUUID, outNode);
   }
 
   type MediaDisplay = {
@@ -85,6 +110,7 @@
 
 <div class="fullPane">
   <div class="hover">
+    <input type="text" bind:value="{$mediaId}" />
     <select on:change="{handleSelect}">
       <option selected disabled value> --- </option>
       {#each Object.keys(outputNodesByGraphUUID) as graphUUID}

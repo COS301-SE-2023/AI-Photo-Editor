@@ -143,7 +143,7 @@ export class CoreGraph extends UniqueEntity {
   }
 
   public getUIInputs(nodeUUID: UUID): { [key: string]: UIValue } | null {
-    return this.uiInputs[nodeUUID].getInputs || null;
+    return this.uiInputs[nodeUUID]?.getInputs || null;
   }
 
   // We need to pass in node name and plugin name
@@ -164,7 +164,7 @@ export class CoreGraph extends UniqueEntity {
       }
 
       // console.log(QueryResponseStatus.success)
-      return { status: "success", data: { nodeId: n._uuid } };
+      return { status: "success", data: { nodeId: n.uuid } };
     } catch (error) {
       return { status: "error", message: error as string };
     }
@@ -215,7 +215,7 @@ export class CoreGraph extends UniqueEntity {
     if (!(ancFrom.uuid in this.edgeSrc)) this.edgeSrc[ancFrom.uuid] = [];
     this.edgeSrc[ancFrom.uuid].push(ancTo.uuid);
 
-    return { status: "success", data: { edgeId: edge._uuid } };
+    return { status: "success", data: { edgeId: edge.uuid } };
   }
 
   public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs): QueryResponse {

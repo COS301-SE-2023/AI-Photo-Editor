@@ -69,7 +69,7 @@ export class Blix {
         componentId: "export",
         label: "Export",
         defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
-        updatesBackend: true,
+        updatesBackend: false,
       },
       {}
     );
@@ -145,11 +145,12 @@ export class Blix {
     this._graphManager.addAllSubscriber(mediaSubscriber);
 
     // ===== MEDIA SUBSCRIBERS ===== //
-    const ipcMediaSubscriber = new MediaSubscriber();
-    ipcMediaSubscriber.listen = (media: MediaOutput) => {
-      this.mainWindow?.apis.mediaClientApi.outputChanged(media);
-    };
-    this._mediaManager.addSubscriber("default", ipcMediaSubscriber);
+    // REMOVED: The MediaApi now handles creating MediaSubscribers directly
+    // const ipcMediaSubscriber = new MediaSubscriber();
+    // ipcMediaSubscriber.listen = (media: MediaOutput) => {
+    //   this.mainWindow?.apis.mediaClientApi.outputChanged(media);
+    // };
+    // this._mediaManager.addSubscriber("default", ipcMediaSubscriber);
   }
 
   // TODO: Move these to a Utils.ts or something like that

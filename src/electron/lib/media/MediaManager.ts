@@ -12,7 +12,7 @@ export class MediaManager {
   private _graphManager: CoreGraphManager;
 
   // Subscribers that are listening on the MediaManager
-  private _subscribers: { [key: MediaOutputId]: MediaSubscriber[] };
+  private _subscribers: { [key: MediaOutputId]: { [key: UUID]: MediaSubscriber } };
 
   constructor(
     mainWindow: MainWindow,
@@ -61,8 +61,8 @@ export class MediaManager {
   // Notify all subscribers of media change
   onMediaUpdated(mediaId: MediaOutputId) {
     if (this._subscribers[mediaId] !== undefined) {
-      this._subscribers[mediaId].forEach((subscriber) => {
-        subscriber.onMediaChanged(this.media[mediaId]);
+      Object.keys(this._subscribers[mediaId]).forEach((subscriberUUID) => {
+        this._subscribers[mediaId][subscriberUUID].onMediaChanged(this.media[mediaId]);
       });
     }
   }
@@ -71,17 +71,21 @@ export class MediaManager {
     return this._graphInterpreter.run(this._graphManager.getGraph(graphUUID), nodeUUID);
   }
 
+  removeSubscriber(mediaId: MediaOutputId, subscriberUUID: UUID) {
+    if (this._subscribers[mediaId] !== undefined) {
+      delete this._subscribers[mediaId][subscriberUUID];
+    }
+    if (Object.keys(this._subscribers[mediaId]).length === 0) {
+      delete this._subscribers[mediaId];
+    }
+  }
+
   // Subscribe to a specific graph's events
   addSubscriber(mediaId: MediaOutputId, subscriber: MediaSubscriber) {
     if (this._subscribers[mediaId] === undefined) {
-      this._subscribers[mediaId] = [];
+      this._subscribers[mediaId] = {};
     }
 
-    subscriber.subscriberIndex = this._subscribers[mediaId].length;
-    this._subscribers[mediaId].push(subscriber);
-  }
-
-  removeSubscriber() {
-    return;
+    this._subscribers[mediaId][subscriber.uuid] = subscriber;
   }
 }

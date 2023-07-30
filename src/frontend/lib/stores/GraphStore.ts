@@ -11,6 +11,7 @@ import {
 } from "@shared/ui/UIGraph";
 import { writable, get, derived, type Writable, type Readable } from "svelte/store";
 import { toolboxStore } from "./ToolboxStore";
+import type { MediaOutputId } from "@shared/types/media";
 
 // When the the CoreGraphApi type has to be imported into the backend
 // (WindowApi.ts) so that the API can be bound then it tries to import the type
@@ -183,6 +184,7 @@ type GraphDict = { [key: GraphUUID]: GraphStore };
 // The public area with all the cool stores 😎
 class GraphMall {
   private mall = writable<GraphDict>({});
+  private outputNodes = writable<{ [key: GraphNodeUUID]: MediaOutputId }>();
 
   public refreshGraph(graphUUID: GraphUUID, newGraph: UIGraph) {
     this.mall.update((stores) => {
