@@ -1,9 +1,9 @@
 import expect from "expect";
 // import { ProjectManager } from "../../../src/electron/lib/projects/ProjectManager";
-import { Plugin,PluginContext,CommandPluginContext } from "../../../../../../src/electron/lib/plugins/Plugin";
-import { Blix } from "../../../../../../src/electron/lib/Blix";
-import { MainWindow } from "../../../../../../src/electron/lib/api/apis/WindowApi";
-import logger from "../../../../../../src/electron/utils/logger"
+import { Plugin,PluginContext,CommandPluginContext } from "../../../../../src/electron/lib/plugins/Plugin";
+import { Blix } from "../../../../../src/electron/lib/Blix";
+import { MainWindow } from "../../../../../src/electron/lib/api/apis/WindowApi";
+import logger from "../../../../../src/electron/utils/logger"
 
 const mainWindow: MainWindow = {
   apis: {

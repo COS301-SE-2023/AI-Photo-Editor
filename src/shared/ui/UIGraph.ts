@@ -68,6 +68,6 @@ export class AnchorValueStore {
   inputs: { [key: string]: Writable<any> } = {};
 }
 
-class GraphAnchor {
+export class GraphAnchor {
   constructor(public uuid: GraphAnchorUUID, public type: string) {}
 }
