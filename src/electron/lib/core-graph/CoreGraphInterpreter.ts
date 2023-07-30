@@ -45,7 +45,19 @@ export class CoreGraphInterpreter {
         graph.getNodes[node],
         Object.entries(graph.getNodes[node].getAnchors)[0][1]
       ).catch((err) => {
-        logger.error(err);
+        const mediaOutput: MediaOutput = {
+          content: err.message,
+          dataType: "Error",
+          outputId: "default", // This gets replaced within func()
+          outputNodeUUID: graph.getNodes[node].uuid,
+          graphUUID: graph.uuid,
+        };
+
+        this.toolboxRegistry
+          .getNodeInstance(graph.getNodes[node].getSignature)
+          .func({ mediaOutput }, graph.getUIInputs(graph.getNodes[node].uuid) || {}, []);
+
+        // logger.error(err);
       });
 
       // console.log(await Promise.resolve(res));
@@ -164,8 +176,9 @@ export class CoreGraphInterpreter {
 
       Object.values(curr.getAnchors).forEach((anchor, index) => {
         if (index < inputs.length) {
-          inputDict[anchor.anchorId] =
-            inputs[index][graph.getAnchors[graph.getEdgeDest[anchor.uuid].getAnchorFrom].anchorId];
+          inputDict[anchor.anchorId] = graph.getEdgeDest[anchor.uuid]
+            ? inputs[index][graph.getAnchors[graph.getEdgeDest[anchor.uuid].getAnchorFrom].anchorId]
+            : null;
         }
       });
 

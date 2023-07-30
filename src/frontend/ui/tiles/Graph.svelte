@@ -132,7 +132,9 @@
 
       // removing console logs + commit + merge <=====================================
       // console.log("NODE", $thisGraphStore.getNode(nodeUUID));
-      const anchorUUID = $thisGraphStore.getNode(nodeUUID).anchorUUIDs[anchorId];
+      const anchorUUID = $thisGraphStore.getNode(nodeUUID)
+        ? $thisGraphStore.getNode(nodeUUID).anchorUUIDs[anchorId]
+        : null;
 
       if (!anchorUUID || !nodeUUID) return null;
       return { anchorUUID, nodeUUID };
@@ -157,6 +159,8 @@
     const toUUID = splitCompositeAnchorId(e.detail.targetAnchor.id);
 
     if (!toUUID) return;
+    console.log("DISCONNECTING", toUUID);
+
     $thisGraphStore?.removeEdge(toUUID.anchorUUID);
   }
 </script>

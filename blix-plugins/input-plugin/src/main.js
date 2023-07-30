@@ -22,7 +22,7 @@ const nodes ={
 
           return { "res": "/home/klairgo/Desktop/AI-Photo-Editor/assets/image.png"};
       });
-     nodeBuilder.addOutput("Sharp", "res", "Result");
+     nodeBuilder.addOutput("Image", "res", "Result");
 
      ui = nodeBuilder.createUIBuilder();
      ui.addImageInput("input image");

@@ -23,9 +23,9 @@ const nodes ={
         nodeBuilder.setTitle("Saturation");
         nodeBuilder.setDescription("Adjusts the saturation of an image taking one image as input and returning one image as output");
       
-        nodeBuilder.define((input, uiInput, from) => {
+        nodeBuilder.define(async (input, uiInput, from) => {
             return {
-                "res": input["img"].modulate({
+                "res": await input["img"].modulate({
                     saturation: 0.5
                 }),
             }
@@ -40,10 +40,10 @@ const nodes ={
         nodeBuilder.setTitle("Hue");
         nodeBuilder.setDescription("Adjusts the hue of an image taking one image as input and returning one image as output");
       
-        nodeBuilder.define((input, uiInput, from) => {
+        nodeBuilder.define( async (input, uiInput, from) => {
             //TODO: implement
             return {
-                "res": input["img"].modulate({
+                "res": await input["img"].modulate({
                     hue: 90
                 }),
             }
