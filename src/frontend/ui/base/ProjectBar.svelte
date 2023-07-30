@@ -27,7 +27,7 @@
   {#each $projectsStore.projects as project (project.id)}
     <div
       class="no-drag group flex h-full shrink basis-48 items-center overflow-hidden rounded-t-xl px-2 text-sm font-medium text-zinc-200
-      {$projectsStore.activeProject?.id === project.id ? 'bg-zinc-900' : 'hover:bg-zinc-700'}"
+        {$projectsStore.activeProject?.id === project.id ? 'bg-zinc-900' : 'hover:bg-zinc-700'}"
       title="{project.name}"
       on:click="{() => projectsStore.setActiveProject(project.id)}"
       on:keypress="{() => projectsStore.setActiveProject(project.id)}"

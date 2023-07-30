@@ -3,6 +3,7 @@ import type { Blix } from "../../Blix";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
 import { type NodeSignature } from "@shared/ui/ToolboxTypes";
 import { type INodeUIInputs } from "@shared/types";
+import { CoreGraphUpdateParticipant } from "../../core-graph/CoreGraphInteractors";
 
 // Graphs across projects are stored homogeneously and referenced by UUID
 export class GraphApi implements ElectronMainApi<GraphApi> {
@@ -16,29 +17,45 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
   async addNode(graphUUID: UUID, nodeSignature: NodeSignature) {
     return this._blix.graphManager.addNode(
       graphUUID,
-      this._blix.toolbox.getNodeInstance(nodeSignature)
-      // new NodeInstance("fdsa2", "fdsa3", "fdsa4", "fdsa5", "fdsa6", [], [])
+      this._blix.toolbox.getNodeInstance(nodeSignature),
+      CoreGraphUpdateParticipant.user
     );
   }
 
   async addEdge(graphUUID: UUID, anchorA: UUID, anchorB: UUID) {
-    return this._blix.graphManager.addEdge(graphUUID, anchorA, anchorB);
+    return this._blix.graphManager.addEdge(
+      graphUUID,
+      anchorA,
+      anchorB,
+      CoreGraphUpdateParticipant.user
+    );
   }
 
   async removeNode(graphUUID: UUID, nodeUUID: UUID) {
-    return this._blix.graphManager.removeNode(graphUUID, nodeUUID);
+    return this._blix.graphManager.removeNode(graphUUID, nodeUUID, CoreGraphUpdateParticipant.user);
   }
 
   async removeEdge(graphUUID: UUID, anchorTo: UUID) {
-    return this._blix.graphManager.removeEdge(graphUUID, anchorTo);
+    return this._blix.graphManager.removeEdge(graphUUID, anchorTo, CoreGraphUpdateParticipant.user);
   }
 
   async updateUIInputs(graphUUID: UUID, nodeUUID: UUID, nodeUIInputs: INodeUIInputs) {
-    return this._blix.graphManager.updateUIInputs(graphUUID, nodeUUID, nodeUIInputs);
+    return this._blix.graphManager.updateUIInputs(
+      graphUUID,
+      nodeUUID,
+      nodeUIInputs,
+      CoreGraphUpdateParticipant.user
+    );
   }
 
   async setNodePos(graphUUID: UUID, nodeUUID: UUID, pos: { x: number; y: number }) {
-    return this._blix.graphManager.setPos(graphUUID, nodeUUID, pos.x, pos.y);
+    return this._blix.graphManager.setPos(
+      graphUUID,
+      nodeUUID,
+      pos.x,
+      pos.y,
+      CoreGraphUpdateParticipant.user
+    );
   }
 
   async getGraph(uuid: UUID) {

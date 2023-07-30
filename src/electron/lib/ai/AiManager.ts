@@ -10,8 +10,10 @@ import {
   removeNode,
   addEdge,
   removeEdge,
+  updateInputValues,
   splitStringIntoJSONObjects,
   errorResponseSchema,
+  updateInputValue
 } from "./ai-cookbook";
 import type { ResponseFunctions } from "./ai-cookbook";
 import { type MainWindow } from "../api/apis/WindowApi";
@@ -212,6 +214,10 @@ export class AiManager {
       return addEdge(this.graphManager, graphId, args);
     } else if (name === "removeEdge") {
       return removeEdge(this.graphManager, graphId, args);
+    } else if (name === "updateInputValues") {
+      return updateInputValues(this.graphManager, graphId, args);
+    } else if (name === "updateInputValue") {
+      return updateInputValue(this.graphManager, graphId, args);
     }
 
     // It should never reach here

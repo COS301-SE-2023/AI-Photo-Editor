@@ -10,7 +10,17 @@ const nodes ={
        nodeBuilder.addOutput("Number", "res", "Result");
 
        ui = nodeBuilder.createUIBuilder();
-       ui.addNumberInput("input number",0);
+    //    ui.addNumberInput("input number",0);
+       ui.addButton({},"return 66;")
+        .addSlider(
+            {
+                componentId: "slideAlong",
+                label: "Slide Along",
+                defaultValue: 0,
+                updateBackend: true,
+            },
+            { min: 0, max: 100, set: 0.1 }
+        );
 
     },
     "inputImage": (context) => {
@@ -20,9 +30,9 @@ const nodes ={
 
       nodeBuilder.define(async (input, uiInput, from) => {
 
-          return { "res": "/home/klairgo/Desktop/AI-Photo-Editor/assets/image.png"};
+          return { "res": "/home/klairgo/Pictures/Wallpapers/fa179b9d86c74ec7bbd2ac095f7ed4d7.jpeg"};
       });
-     nodeBuilder.addOutput("Sharp", "res", "Result");
+     nodeBuilder.addOutput("Image", "res", "Result");
 
      ui = nodeBuilder.createUIBuilder();
      ui.addImageInput("input image");

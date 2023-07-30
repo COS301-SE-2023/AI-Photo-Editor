@@ -139,6 +139,10 @@ export class CoreGraph extends UniqueEntity {
     return this.edgeSrc;
   }
 
+  public get getAllUIInputs() {
+    return this.uiInputs;
+  }
+
   public getUIInputs(nodeUUID: UUID): { [key: string]: UIValue } | null {
     return this.uiInputs[nodeUUID]?.getInputs || null;
   }
@@ -146,7 +150,12 @@ export class CoreGraph extends UniqueEntity {
   // We need to pass in node name and plugin name
   public addNode(
     node: NodeInstance
-  ): QueryResponse<{ nodeId: UUID; inputs: string[]; outputs: string[] }> {
+  ): QueryResponse<{
+    nodeId: UUID;
+    inputs: string[];
+    outputs: string[];
+    inputValues: Record<string, unknown>;
+  }> {
     try {
       // Create New Node
       const n: Node = new Node(node.name, node.plugin, node.inputs, node.outputs);
@@ -162,12 +171,22 @@ export class CoreGraph extends UniqueEntity {
         this.outputNodes[n.uuid] = "default"; // TODO: set this to a unique id and propagate to the frontend
       }
 
+      const inputValues: Record<string, unknown> = {};
+      Object.values(node.uiConfigs).forEach((config) => {
+        inputValues[config.componentId] = config.defaultValue;
+      });
+
       // console.log(QueryResponseStatus.success)
       const anchors: AiAnchors = n.returnAnchors();
       return {
         status: "success",
         message: "Node added succesfully",
-        data: { nodeId: n.uuid, inputs: anchors.inputAnchors, outputs: anchors.outputAnchors },
+        data: {
+          nodeId: n.uuid,
+          inputs: anchors.inputAnchors,
+          outputs: anchors.outputAnchors,
+          inputValues,
+        },
       };
     } catch (error) {
       return { status: "error", message: error as string };
@@ -246,6 +265,41 @@ export class CoreGraph extends UniqueEntity {
     }
 
     return { status: "success" };
+  }
+
+  public getUpdatedUIInputs(nodeUUID: UUID, changedUIInputs: Record<string, unknown>) {
+    const currentInputValues = this.uiInputs[nodeUUID];
+
+    if (!currentInputValues) {
+      return {
+        status: "error",
+        message: "Node does not exist",
+      } satisfies QueryResponse;
+    }
+
+    const nodeUIInputs: INodeUIInputs = {
+      inputs: currentInputValues.getInputs,
+      changes: [],
+    };
+
+    for (const key in changedUIInputs) {
+      if (key in changedUIInputs) {
+        if (key in currentInputValues.getInputs) {
+          nodeUIInputs.inputs[key] = changedUIInputs[key];
+          nodeUIInputs.changes.push(key);
+        } else {
+          return {
+            status: "error",
+            message: `Input value with id ${key} does not exist`,
+          } satisfies QueryResponse;
+        }
+      }
+    }
+
+    return {
+      status: "success",
+      data: nodeUIInputs,
+    } satisfies QueryResponse;
   }
 
   public checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
