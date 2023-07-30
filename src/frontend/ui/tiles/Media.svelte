@@ -60,21 +60,6 @@
 
     const [graphUUID, nodeUUID] = value.split("/");
     selectedNode = { graphUUID, outNode: nodeUUID };
-
-    // mediaStore.stopMediaReactive($mediaId);
-    // media = mediaStore.getMediaReactive($mediaId);
-
-    // recomputeMedia();
-    // t mediaStore.stopMediaReactive(graphUUID, nodeUUID);
-    // media = mediaStore.getMediaReactive(graphUUID, nodeUUID);
-
-    // MOVED: now computed directly in media store
-    // if (prevGraphUnsub) prevGraphUnsub();
-    // const selectedGraph = graphMall.getGraph(graphUUID);
-
-    // prevGraphUnsub = selectedGraph.subscribe((_) => {
-    //   if (selectedNode) recomputeMedia(selectedNode.graphUUID, selectedNode.outNode);
-    // });
   }
 
   type MediaDisplay = {

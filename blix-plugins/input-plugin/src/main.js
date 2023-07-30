@@ -10,7 +10,17 @@ const nodes ={
        nodeBuilder.addOutput("Number", "res", "Result");
 
        ui = nodeBuilder.createUIBuilder();
-       ui.addNumberInput("input number",0);
+    //    ui.addNumberInput("input number",0);
+       ui.addButton({},"return 66;")
+        .addSlider(
+            {
+                componentId: "slideAlong",
+                label: "Slide Along",
+                defaultValue: 0,
+                updateBackend: true,
+            },
+            { min: 0, max: 100, set: 0.1 }
+        );
 
     },
     "inputImage": (context) => {

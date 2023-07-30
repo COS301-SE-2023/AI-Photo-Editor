@@ -5,6 +5,7 @@
 
   export let label: string;
   export let inputStore: UIValueStore;
+  $: console.log(inputStore);
 
   if (!inputStore.inputs[label]) inputStore.inputs[label] = writable(0);
 </script>

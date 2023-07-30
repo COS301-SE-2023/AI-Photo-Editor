@@ -5,6 +5,7 @@ import { NodeInstance } from "../../lib/registries/ToolboxRegistry";
 import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { QueryResponse } from "../../../shared/types";
+import { CoreGraphUpdateParticipant } from "../../lib/core-graph/CoreGraphInteractors";
 
 // ==================================================================
 //  Zod Types
@@ -155,7 +156,7 @@ export function addNode(
     const node = registry[args.signature];
     if (!node) return errorResponse("The provided signature is invalid :  node does not exist");
 
-    const response = graphManager.addNode(graphId, node);
+    const response = graphManager.addNode(graphId, node, CoreGraphUpdateParticipant.ai);
 
     if (response.status === "success" && response.data) {
       // Truncate ids
@@ -194,7 +195,7 @@ export function removeNode(
     if (fullId === undefined)
       return errorResponse("The provided id is invalid :  id does not exist");
 
-    const response = graphManager.removeNode(graphId, fullId);
+    const response = graphManager.removeNode(graphId, fullId, CoreGraphUpdateParticipant.ai);
     return response;
   } catch (error) {
     return errorResponse(error as string);
@@ -229,7 +230,7 @@ export function addEdge(
       return errorResponse("Output anchor" + args.output + "does not exist");
     if (input === undefined) return errorResponse("Input anchor" + args.input + "does not exist");
 
-    const response = graphManager.addEdge(graphId, input, output);
+    const response = graphManager.addEdge(graphId, input, output, CoreGraphUpdateParticipant.ai);
     return response;
   } catch (error) {
     // Manual error to give ai
@@ -268,7 +269,7 @@ export function removeEdge(
     if (anchor === undefined)
       return errorResponse("The provided id is invalid :  id does not exist");
 
-    const response = graphManager.removeEdge(graphId, anchor);
+    const response = graphManager.removeEdge(graphId, anchor, CoreGraphUpdateParticipant.ai);
     return response;
   } catch (error) {
     // Manual error to give ai
@@ -281,9 +282,10 @@ export function updateInputValues(
   graphId: string,
   args: UpdateInputValuesConfig["args"]
 ) {
-  const graph = _exporter.export(graphManager.getGraph(graphId));
-  const { nodeMap } = graph;
-  return graphManager.updateUIInputsTest(graphId, nodeMap[args.nodeId], args.changedInputValues);
+  // const graph = _exporter.export(graphManager.getGraph(graphId));
+  // const { nodeMap } = graph;
+  // return graphManager.updateUIInputsTest(graphId, nodeMap[args.nodeId], args.changedInputValues);
+  return { status: "error", message: "Not implemented" } satisfies QueryResponse;
 }
 
 export function updateInputValue(
@@ -291,13 +293,31 @@ export function updateInputValue(
   graphId: string,
   args: UpdateInputValueConfig["args"]
 ) {
-  const graph = _exporter.export(graphManager.getGraph(graphId));
-  const { nodeMap } = graph;
-  const { inputValueId, newInputValue } = args;
+  const graph = graphManager.getGraph(graphId);
 
-  return graphManager.updateUIInputsTest(graphId, nodeMap[args.nodeId], {
-    [inputValueId]: newInputValue,
-  });
+  if (!graph) {
+    return {
+      status: "error",
+      message: "Graph does not exist",
+    };
+  }
+
+  const llmGraph = _exporter.export(graph);
+  const { nodeMap } = llmGraph;
+  const { inputValueId, newInputValue, nodeId } = args;
+  const changedUIInputs = { [inputValueId]: newInputValue };
+  const updatedInputValues = graph.getUpdatedUIInputs(nodeMap[nodeId], changedUIInputs);
+
+  if (updatedInputValues.status === "error") {
+    return updatedInputValues;
+  }
+
+  return graphManager.updateUIInputs(
+    graphId,
+    nodeMap[nodeId],
+    updatedInputValues.data,
+    CoreGraphUpdateParticipant.ai
+  );
 }
 
 // ==================================================================

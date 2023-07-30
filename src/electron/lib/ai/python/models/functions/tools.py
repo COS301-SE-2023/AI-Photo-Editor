@@ -55,7 +55,7 @@ class updateInputValuesInput(BaseModel):
 class updateInputValueInput(BaseModel):
     nodeId: str = Field(..., description="Id of the node related to the input values")
     inputValueId: str = Field(..., description="Id of the input value")
-    newInputValue: Union[str, int, float] = Field(..., description="New input value")
+    newInputValue: float = Field(..., description="New input value")
 
 
 class addNodesInput(BaseModel):
@@ -209,7 +209,7 @@ class updateInputValueTool(BaseTool):
         self,
         nodeId: str,
         inputValueId: str,
-        newInputValue: str
+        newInputValue: float
     ) -> str:
         data = {
             "type": "function",
