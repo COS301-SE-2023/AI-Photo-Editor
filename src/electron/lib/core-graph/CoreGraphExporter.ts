@@ -66,7 +66,7 @@ export class GraphFileExportStrategy implements ExportStrategy<GraphToJSON> {
   }
 }
 
-class YamlExportStrategy implements ExportStrategy<string> {
+export class YamlExportStrategy implements ExportStrategy<string> {
   export(graph: CoreGraph): string {
     throw Error("YamlExportStrategy not implemented");
   }

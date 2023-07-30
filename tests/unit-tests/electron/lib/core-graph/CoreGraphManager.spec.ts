@@ -75,7 +75,6 @@ jest.mock("fs", () => ({
    let graph : CoreGraph;
     const inputs: MinAnchor[] = [];
     const outputs: MinAnchor[] = [];
-      let blix : Blix;
 
     beforeEach(() => {
         graphManager = new CoreGraphManager(mainWindow);
