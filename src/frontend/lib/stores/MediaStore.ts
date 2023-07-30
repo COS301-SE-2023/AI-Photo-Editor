@@ -1,5 +1,4 @@
 import type { MediaOutput, MediaOutputId } from "@shared/types/media";
-import type { GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
 import { derived, get, writable } from "svelte/store";
 import { graphMall } from "./GraphStore";
 

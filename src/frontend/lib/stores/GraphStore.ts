@@ -1,5 +1,5 @@
 import type { AnchorUUID } from "@electron/lib/core-graph/CoreGraph";
-import type { INodeUIInputs } from "@shared/types";
+import type { IGraphUIInputs, INodeUIInputs } from "@shared/types";
 import type { NodeSignature } from "@shared/ui/ToolboxTypes";
 import {
   UIGraph,
@@ -37,6 +37,20 @@ export class GraphStore {
   constructor(public uuid: GraphUUID) {
     // Starts with empty graph
     this.graphStore = writable<UIGraph>(new UIGraph(uuid));
+  }
+
+  public refreshUIInputs(newUIInputs: IGraphUIInputs) {
+    this.graphStore.update((graph) => {
+      for (const node of Object.keys(newUIInputs)) {
+        if (!graph.nodes[node]) continue;
+
+        for (const input of Object.keys(newUIInputs[node].inputs)) {
+          graph.nodes[node].inputUIValues.inputs[input].set(newUIInputs[node].inputs[input]);
+        }
+      }
+
+      return graph;
+    });
   }
 
   // Called by GraphClientApi when the command registry changes
@@ -192,6 +206,18 @@ class GraphMall {
         stores[graphUUID] = new GraphStore(graphUUID);
       }
       stores[graphUUID].refreshStore(newGraph);
+      return stores;
+    });
+
+    const val = get(this.mall);
+  }
+
+  public refreshGraphUIInputs(graphUUID: GraphUUID, newUIInputs: IGraphUIInputs) {
+    this.mall.update((stores) => {
+      if (!stores[graphUUID]) {
+        stores[graphUUID] = new GraphStore(graphUUID);
+      }
+      stores[graphUUID].refreshUIInputs(newUIInputs);
       return stores;
     });
 

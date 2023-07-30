@@ -1,4 +1,5 @@
 import type { NodeUI } from "@shared/ui/NodeUITypes";
+import type { GraphNodeUUID } from "@shared/ui/UIGraph";
 
 export interface IAnchor {
   type: string;
@@ -18,6 +19,7 @@ export interface INode {
 
 export type UIValue = unknown;
 
+export type IGraphUIInputs = { [key: GraphNodeUUID]: INodeUIInputs };
 export interface INodeUIInputs {
   inputs: { [key: string]: UIValue };
   changes: string[];

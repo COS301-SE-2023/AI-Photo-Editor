@@ -1,10 +1,18 @@
+import { type IGraphUIInputs, type INodeUIInputs } from "@shared/types";
 import { GraphEdge, GraphNode, NodeStylingStore, UIGraph } from "../../../shared/ui/UIGraph";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph, NodesAndEdgesGraph } from "./CoreGraph";
 
 export enum CoreGraphUpdateEvent {
   graphUpdated, // When nodes / edges change
-  uiInputsUpdated, // When UI inputs change
+  uiInputsUpdated, // When UI inputs are changed
+}
+
+// These correspond to parties that can update the CoreGraph
+export enum CoreGraphUpdateParticipant {
+  system, // The backend system (E.g. A command will trigger this regardless of who called it)
+  user, // The frontend user
+  ai, // The AI communicating through the backend
 }
 
 // Implement this interface to communicate with a CoreGraph instance
@@ -15,6 +23,11 @@ export abstract class CoreGraphSubscriber<T> {
 
   // The subscriber can choose which events it wants to listen to
   protected listenEvents: Set<CoreGraphUpdateEvent> = new Set([CoreGraphUpdateEvent.graphUpdated]);
+  protected listenParticipants: Set<CoreGraphUpdateParticipant> = new Set([
+    CoreGraphUpdateParticipant.system,
+    CoreGraphUpdateParticipant.user,
+    CoreGraphUpdateParticipant.ai,
+  ]);
 
   public set listen(notifyee: (graphId: UUID, newGraph: T) => void) {
     this._notifyee = notifyee;
@@ -26,6 +39,18 @@ export abstract class CoreGraphSubscriber<T> {
 
   public get subscriberIndex() {
     return this._subscriberIndex;
+  }
+
+  public addListenParticipants(participants: CoreGraphUpdateParticipant[]) {
+    this.listenParticipants = new Set([...this.listenParticipants, ...participants]);
+  }
+
+  public setListenParticipants(participants: CoreGraphUpdateParticipant[]) {
+    this.listenParticipants = new Set(participants);
+  }
+
+  public getSubscriberParticipants() {
+    return this.listenParticipants;
   }
 
   public addListenEvents(events: CoreGraphUpdateEvent[]) {
@@ -47,6 +72,24 @@ export abstract class CoreGraphSubscriber<T> {
 
 export abstract class CoreGraphUpdater {
   protected _updaterIndex = -1;
+}
+
+export class UIInputsGraphSubscriber extends CoreGraphSubscriber<IGraphUIInputs> {
+  onGraphChanged(graphId: UUID, graphData: CoreGraph): void {
+    const coreUIInputs = graphData.getAllUIInputs;
+    const graphUIInputs: IGraphUIInputs = {};
+
+    // Convert core UI inputs to graph UI inputs
+    for (const node in coreUIInputs) {
+      if (!coreUIInputs.hasOwnProperty(node)) continue;
+
+      graphUIInputs[node] = {} as INodeUIInputs;
+      graphUIInputs[node].inputs = coreUIInputs[node].getInputs;
+      graphUIInputs[node].changes = []; // TODO: Potentially tell the frontend exactly what changed
+    }
+
+    if (this._notifyee) this._notifyee(graphId, graphUIInputs);
+  }
 }
 
 export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
