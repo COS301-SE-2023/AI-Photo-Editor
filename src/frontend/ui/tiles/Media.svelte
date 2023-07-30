@@ -4,7 +4,7 @@
   import TextBox from "../../ui/utils/TextBox.svelte";
   import { mediaStore } from "../../lib/stores/MediaStore";
   import type { GraphNode, GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
-  import { graphMall } from "lib/stores/GraphStore";
+  import { graphMall } from "../../lib/stores/GraphStore";
   import { get, writable, type Readable } from "svelte/store";
   import type { MediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
