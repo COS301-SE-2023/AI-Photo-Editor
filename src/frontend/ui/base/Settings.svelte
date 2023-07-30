@@ -3,8 +3,8 @@
   import type { UserSettingsCategory, Setting } from "../../../shared/types";
   import SecureInput from "../../ui/utils/SecureInput.svelte";
   import { toastStore } from "./../../lib/stores/ToastStore";
+  import { settingsStore } from "../../lib/stores/SettingsStore";
 
-  export let show: boolean;
   let selectedCategoryId = "";
   let selectedCategory: UserSettingsCategory | undefined;
   let categories: UserSettingsCategory[] = [];
@@ -39,7 +39,7 @@
 <div class="absolute left-0 top-0 h-full w-full">
   <div
     class="absolute left-0 top-0 h-full w-full bg-black opacity-40"
-    on:click="{() => (show = false)}"
+    on:click="{() => settingsStore.hideSettings()}"
     on:keydown="{null}"
   ></div>
   <div
@@ -47,7 +47,7 @@
   >
     <div
       class="group absolute right-2 top-2 flex items-center justify-center rounded-md hover:bg-zinc-700"
-      on:click="{() => (show = false)}"
+      on:click="{() => settingsStore.hideSettings()}"
       on:keydown="{null}"
     >
       <svg

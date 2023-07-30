@@ -10,16 +10,17 @@
   import Test from "./Test.svelte";
   import Settings from "./Settings.svelte";
   import Shortcuts from "../../ui/utils/Shortcuts.svelte";
+  import { settingsStore } from "../../lib/stores/SettingsStore";
 
   const testing = false;
   let showSettings = false;
 
   const shortcuts = {
     "blix.settings.toggle": () => {
-      showSettings = !showSettings;
+      settingsStore.toggleSettings();
     },
-    "blix.settings.close": () => {
-      showSettings = false;
+    "blix.settings.hide": () => {
+      settingsStore.hideSettings();
     },
   };
 
@@ -50,8 +51,8 @@
   <div></div>
 {/if}
 
-{#if showSettings}
-  <Settings bind:show="{showSettings}" />
+{#if $settingsStore.showing}
+  <Settings />
 {/if}
 
 <Toasts />
