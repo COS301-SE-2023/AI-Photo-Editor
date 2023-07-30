@@ -10,7 +10,7 @@ export interface Command {
   description?: CommandDescription | null;
 }
 
-export type CommandHandler = (ctx: CommandContext, params: any) => void;
+export type CommandHandler = (ctx: CommandContext, params?: any) => void;
 
 export interface CommandDescription {
   readonly name: string;

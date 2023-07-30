@@ -14,7 +14,7 @@ import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { LayoutPanel } from "../../../shared/types";
 import { CoreGraphImporter } from "../../lib/core-graph/CoreGraphImporter";
 
-type SaveProjectArgs = {
+export type SaveProjectArgs = {
   projectId: UUID;
   layout?: LayoutPanel;
   projectPath?: string;
@@ -37,7 +37,7 @@ export const saveProjectCommand: Command = {
     description: "Save project to file system",
   },
   handler: async (ctx: CommandContext, args: SaveProjectArgs) => {
-    const result = await saveProject(ctx, args);
+    const result: CommandResponse = await saveProject(ctx, args);
     switch (result.success) {
       case true: {
         ctx.sendSuccessMessage(result?.message ?? "");
@@ -64,10 +64,10 @@ export const saveProjectAsCommand: Command = {
     description: "Save project to file system",
   },
   handler: async (ctx: CommandContext, args: SaveProjectArgs) => {
-    const result = await saveProjectAs(ctx, args);
+    const result: CommandResponse = await saveProjectAs(ctx, args);
     switch (result.success) {
       case true: {
-        // ctx.sendSuccessMessage(result?.message ?? "");
+        ctx.sendSuccessMessage(result?.message ?? "");
         break;
       }
       case false: {
