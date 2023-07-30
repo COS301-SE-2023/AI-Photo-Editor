@@ -21,6 +21,9 @@ const mainWindow: MainWindow = {
     },
     commandClientApi: {
       registryChanged: jest.fn(),
+    },
+    graphClientApi: {
+        graphRemoved: jest.fn(),
     }
     
   }
@@ -63,17 +66,16 @@ jest.mock("fs", () => ({
 }));
 
 
-describe("Test CoreGraphManager", () => {
-  const inputs: MinAnchor[] = [];
-  const outputs: MinAnchor[] = [];
 
-  let blix : Blix;
 
-  describe("Test CommandRegistry", () => {
+  describe("Test CoreGraphManager", () => {
    let graphs       : { [id: UUID]: CoreGraph };
    let subscribers  : { [key: UUID]: CoreGraphSubscriber<any>[] };
    let graphManager : CoreGraphManager
    let graph : CoreGraph;
+    const inputs: MinAnchor[] = [];
+    const outputs: MinAnchor[] = [];
+      let blix : Blix;
 
     beforeEach(() => {
         graphManager = new CoreGraphManager(mainWindow);
@@ -120,10 +122,7 @@ describe("Test CoreGraphManager", () => {
             anchors.push(key);
         }
 
-        console.log(anchors)
-
         const response: QueryResponse<{ edgeId: string }> = graphManager.addEdge(graph.uuid,anchors[0],anchors[1]);
-                console.log(response.message);    
 
         expect(response.status).toBe("success"); 
     })
@@ -135,5 +134,116 @@ describe("Test CoreGraphManager", () => {
         expect(graphManager.getSubscribers(graph.uuid)).toContain(subscriber);
     })
 
+    test("Test removeNode", () => {
+        const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
+        graphManager.addGraph(graph);
+        graphManager.addNode(graph.uuid,node);
+
+        let nodes : string[] = [];
+        for(const key in graphManager.getGraph(graph._uuid).getNodes){
+            nodes.push(key);
+        }
+
+        graphManager.removeNode(graph.uuid,nodes[0]);
+        expect(Object.keys(graphManager.getGraph(graph.uuid).getNodes).length).toBe(0);
+    })
+
+    test("Test removeEdge", () => {
+        //Add Edge to graph
+        const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
+        const node2 = new NodeInstance("Finn", "Human", "Human.Finn", "This is the Finn plugin :)", "1150", inputs, outputs);
+
+        node.inputs.push(new InputAnchorInstance("number","aaaa","aaaa.number"));
+        node2.outputs.push(new OutputAnchorInstance("number","bbbb","bbbb.number"));
+
+        graphManager.addGraph(graph);
+        graphManager.addNode(graph.uuid,node);
+        graphManager.addNode(graph.uuid,node2);
+
+
+        const node1Node = Object.values(graph.getNodes)[0];
+        const node2Node = Object.values(graph.getNodes)[1];
+
+        const anchorFrom: UUID = Object.keys(node2Node.getAnchors)[0]; 
+        const anchorTo: UUID = Object.keys(node1Node.getAnchors)[0]; 
+
+
+        let result: QueryResponse<{ edgeId: string }> = graph.addEdge(anchorFrom, anchorTo);
+        expect(result.status).toBe("success");
+        
+        let result2: QueryResponse = graphManager.removeEdge(graph._uuid,anchorTo);
+        expect(result2.status).toBe("success");
+        expect(Object.keys(graph.getEdgeSrc).length).toBe(0);
+        expect(Object.keys(graph.getEdgeDest).length).toBe(0);
   });
+
+  test("Test setPos", () => {
+
+    const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
+    graphManager.addGraph(graph);
+    graphManager.addNode(graph.uuid,node);
+
+    let nodes : string[] = [];
+    for(const key in graphManager.getGraph(graph._uuid).getNodes){
+        nodes.push(key);
+    }
+  const response : QueryResponse  =  graphManager.setPos(graph.uuid,nodes[0],0,0);
+  expect(response.status).toBe("success");
+  })
+
+  test(" Test createGraph", () => {
+    const response : string  =  graphManager.createGraph();
+    expect(response).toBeDefined();
+  })
+
+  test("Test loadGraph", () => {
+    graphManager.loadGraph(graph);
+    expect(graphManager.getGraph(graph.uuid)._uuid).toBe(graph._uuid);
+  });
+
+  test("Delete graphs", () => {
+    const graph2 = new CoreGraph();
+    graphManager.addGraph(graph2);
+    graphManager.addGraph(graph);
+
+    graphManager.deleteGraphs([graph.uuid,graph2.uuid]);
+    expect(graphManager.getGraph(graph.uuid)).toBeUndefined();
+    expect(graphManager.getAllGraphUUIDs()).toEqual([]);
+  })
+
+    test("Test removeSubscriber", () => {
+        expect(graphManager.removeSubscriber()).toBeUndefined();
+    })
+
+    test("Test undefined values", () => {
+        expect(graphManager.getGraph("")).toBeUndefined();
+
+        const result = graphManager.addEdge("","","");
+        expect(result.status).toBe("error");
+
+        const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
+        const result2 = graphManager.addNode("",node);
+        expect(result2.status).toBe("error");
+
+        const result3 = graphManager.removeNode("","");
+        expect(result3.status).toBe("error");
+
+        const result4 = graphManager.removeEdge("","");
+        expect(result4.status).toBe("error");
+
+        const result5 = graphManager.setPos("","",0,0);
+        expect(result5.status).toBe("error");
+
+        graphManager.addGraph(graph);
+        const result6 = graphManager.deleteGraphs([""]);
+        expect(result6).toStrictEqual([false]);
+
+        const subscriber = new IPCGraphSubscriber();
+        subscriber.onGraphChanged = jest.fn();
+        graphManager["_subscribers"].all = [subscriber];
+        graphManager.addSubscriber(graph.uuid,subscriber);
+
+        graphManager.onGraphUpdated(graph.uuid);
+        expect(subscriber.onGraphChanged).toBeCalled()
+    })
 });
