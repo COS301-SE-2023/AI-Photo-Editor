@@ -3,28 +3,12 @@
   import Image from "../../ui/utils/Image.svelte";
   import TextBox from "../../ui/utils/TextBox.svelte";
   import { mediaStore } from "../../lib/stores/MediaStore";
-  import type { GraphNode, GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
-  import { graphMall } from "lib/stores/GraphStore";
-  import { get, writable, type Readable } from "svelte/store";
+  import type { GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
+  import { writable, type Readable } from "svelte/store";
   import type { MediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
 
-  const graphUUIDs = graphMall.getAllGraphUUIDsReactive();
-
-  $: outputNodesByGraphUUID = getAllOutputNodesByGraphUUID($graphUUIDs);
-  type NodesByUUID = Readable<{ [key: GraphNodeUUID]: GraphNode }>;
-
-  function getAllOutputNodesByGraphUUID(graphUUIDs: GraphUUID[]): {
-    [key: GraphUUID]: NodesByUUID;
-  } {
-    let res: { [key: GraphUUID]: NodesByUUID } = {};
-
-    for (let uuid of graphUUIDs) {
-      res[uuid] = graphMall.getGraph(uuid)?.getOutputNodesByIdReactive();
-    }
-
-    return res;
-  }
+  const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
 
   let mediaId = writable("default");
   let oldMediaId: string | null = null;
@@ -53,14 +37,14 @@
     unsubMedia();
   });
 
-  function handleSelect(e: Event) {
-    return;
-    const value = (e.target as HTMLSelectElement).value;
-    if (!value) return;
+  // function handleSelect(e: Event) {
+  //   return;
+  //   const value = (e.target as HTMLSelectElement).value;
+  //   if (!value) return;
 
-    const [graphUUID, nodeUUID] = value.split("/");
-    selectedNode = { graphUUID, outNode: nodeUUID };
-  }
+  //   const [graphUUID, nodeUUID] = value.split("/");
+  //   selectedNode = { graphUUID, outNode: nodeUUID };
+  // }
 
   type MediaDisplay = {
     component: any;
@@ -96,21 +80,14 @@
 <div class="fullPane">
   <div class="hover">
     <input type="text" bind:value="{$mediaId}" />
-    <select on:change="{handleSelect}">
-      <option selected disabled value> --- </option>
-      {#each Object.keys(outputNodesByGraphUUID) as graphUUID}
-        {@const outputNodes = get(outputNodesByGraphUUID[graphUUID])}
-        <option value="{graphUUID}" disabled>
-          --- {graphUUID.slice(0, 6)} ---
-        </option>
-
-        {#each Object.keys(outputNodes) as outputId}
-          {@const output = outputNodes[outputId]}
-          <option value="{graphUUID}/{output.uuid}">
-            {output.uuid.slice(0, 6)}
-          </option>
+    <select bind:value="{$mediaId}">
+      {#if $mediaOutputIds}
+        {#each Array.from($mediaOutputIds) as id}
+          <option value="{id}">{id}</option>
         {/each}
-      {/each}
+      {:else}
+        <option selected disabled value>No Outputs</option>
+      {/if}
     </select>
   </div>
 
