@@ -38,7 +38,7 @@
 <div class="absolute left-0 top-0 h-full w-full">
   <div class="absolute left-0 top-0 h-full w-full bg-black opacity-40"></div>
   <div
-    class="fixed inset-0 m-auto flex h-[85%] w-[75%] select-none overflow-hidden rounded-lg border border-zinc-600 bg-zinc-800"
+    class="fixed inset-0 m-auto flex h-[75%] w-[60%] select-none overflow-hidden rounded-lg border border-zinc-600 bg-zinc-800"
   >
     <div class="flex h-full w-52 flex-col border-r border-r-zinc-600 bg-zinc-900 p-3">
       <div class="flex flex-col space-y-2">

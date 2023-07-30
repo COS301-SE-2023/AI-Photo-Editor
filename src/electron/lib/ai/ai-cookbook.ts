@@ -66,6 +66,7 @@ export type ExitResponse = z.infer<typeof exitResponseSchema>;
 
 export const errorResponseSchema = z.object({
   type: z.literal("error"),
+  error: z.string(),
   message: z.string(),
 });
 
@@ -308,3 +309,30 @@ export function getGraph(graphManager: CoreGraphManager, id: UUID): LLMGraph {
 export function truncId(arr: string[]): string[] {
   return arr.map((str) => str.slice(0, 6));
 }
+
+export function splitStringIntoJSONObjects(input: string) {
+  if (input.trim() === "") {
+    return [];
+  }
+
+  const jsonObjects = [];
+  let currentIndex = 0;
+  let openBrackets = 0;
+
+  for (let i = 0; i < input.length; i++) {
+    if (input[i] === "{") {
+      openBrackets++;
+    } else if (input[i] === "}") {
+      openBrackets--;
+    }
+
+    if (openBrackets === 0 && input[i] === "}") {
+      const substring = input.substring(currentIndex, i + 1);
+      jsonObjects.push(substring);
+      currentIndex = i + 1;
+    }
+  }
+
+  return jsonObjects;
+}
+
