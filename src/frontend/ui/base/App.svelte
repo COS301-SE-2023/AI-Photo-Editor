@@ -18,6 +18,9 @@
     "blix.settings.toggle": () => {
       showSettings = !showSettings;
     },
+    "blix.settings.close": () => {
+      showSettings = false;
+    },
   };
 
   onMount(async () => {
@@ -48,7 +51,7 @@
 {/if}
 
 {#if showSettings}
-  <Settings />
+  <Settings bind:show="{showSettings}" />
 {/if}
 
 <Toasts />
