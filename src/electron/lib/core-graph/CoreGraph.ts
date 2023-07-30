@@ -139,6 +139,10 @@ export class CoreGraph extends UniqueEntity {
     return this.edgeSrc;
   }
 
+  public get getAllUIInputs() {
+    return this.uiInputs;
+  }
+
   public getUIInputs(nodeUUID: UUID): { [key: string]: UIValue } | null {
     return this.uiInputs[nodeUUID]?.getInputs || null;
   }

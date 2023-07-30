@@ -9,7 +9,9 @@ import { PluginManager } from "./plugins/PluginManager";
 import {
   CoreGraphUpdateEvent,
   IPCGraphSubscriber,
+  UIInputsGraphSubscriber,
   SystemGraphSubscriber,
+  CoreGraphUpdateParticipant,
 } from "./core-graph/CoreGraphInteractors";
 import type { UUID } from "../../shared/utils/UniqueEntity";
 import type { UIGraph } from "../../shared/ui/UIGraph";
@@ -22,6 +24,7 @@ import type { MediaOutput } from "../../shared/types/media";
 import { MediaManager } from "./media/MediaManager";
 import { CoreGraph } from "./core-graph/CoreGraph";
 import { MediaSubscriber } from "./media/MediaSubscribers";
+import type { IGraphUIInputs } from "../../shared/types";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -128,12 +131,27 @@ export class Blix {
 
   private initSubscribers() {
     // ===== CORE GRAPH SUBSCRIBERS ===== //
+    // Subscribes to graph updates and alerts the frontend
     const ipcGraphSubscriber = new IPCGraphSubscriber();
     ipcGraphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
       this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
     };
     this._graphManager.addAllSubscriber(ipcGraphSubscriber);
 
+    // Subscribes to backend UI input updates and alerts the frontend
+    const ipcUIInputsSubscriber = new UIInputsGraphSubscriber();
+    ipcUIInputsSubscriber.setListenEvents([CoreGraphUpdateEvent.uiInputsUpdated]);
+    ipcUIInputsSubscriber.setListenParticipants([
+      CoreGraphUpdateParticipant.system,
+      CoreGraphUpdateParticipant.ai,
+    ]);
+
+    ipcUIInputsSubscriber.listen = (graphId: UUID, newUIInputs: IGraphUIInputs) => {
+      this.mainWindow?.apis.graphClientApi.uiInputsChanged(graphId, newUIInputs);
+    };
+    this._graphManager.addAllSubscriber(ipcUIInputsSubscriber);
+
+    // Subscribes to all updates and alerts the media manager
     const mediaSubscriber = new SystemGraphSubscriber();
     mediaSubscriber.setListenEvents([
       CoreGraphUpdateEvent.graphUpdated,

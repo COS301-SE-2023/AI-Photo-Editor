@@ -1,13 +1,11 @@
 import { z } from "zod";
 import type { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
-import {
-  LLMExportStrategy,
-  type LLMGraph,
-} from "../../lib/core-graph/CoreGraphExporter";
+import { LLMExportStrategy, type LLMGraph } from "../../lib/core-graph/CoreGraphExporter";
 import { NodeInstance } from "../../lib/registries/ToolboxRegistry";
 import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { QueryResponse } from "../../../shared/types";
+import { CoreGraphUpdateParticipant } from "../../lib/core-graph/CoreGraphInteractors";
 
 // ==================================================================
 //  Zod Types
@@ -133,7 +131,7 @@ export function addNode(
     const node = registry[args.signature];
     if (!node) return errorResponse("The provided signature is invalid :  node does not exist");
 
-    const response = graphManager.addNode(graphId, node);
+    const response = graphManager.addNode(graphId, node, CoreGraphUpdateParticipant.ai);
 
     if (response.status === "success" && response.data) {
       // Truncate ids
@@ -172,7 +170,7 @@ export function removeNode(
     if (fullId === undefined)
       return errorResponse("The provided id is invalid :  id does not exist");
 
-    const response = graphManager.removeNode(graphId, fullId);
+    const response = graphManager.removeNode(graphId, fullId, CoreGraphUpdateParticipant.ai);
     return response;
   } catch (error) {
     return errorResponse(error as string);
@@ -207,7 +205,7 @@ export function addEdge(
       return errorResponse("Output anchor" + args.output + "does not exist");
     if (input === undefined) return errorResponse("Input anchor" + args.input + "does not exist");
 
-    const response = graphManager.addEdge(graphId, input, output);
+    const response = graphManager.addEdge(graphId, input, output, CoreGraphUpdateParticipant.ai);
     return response;
   } catch (error) {
     // Manual error to give ai
@@ -246,7 +244,7 @@ export function removeEdge(
     if (anchor === undefined)
       return errorResponse("The provided id is invalid :  id does not exist");
 
-    const response = graphManager.removeEdge(graphId, anchor);
+    const response = graphManager.removeEdge(graphId, anchor, CoreGraphUpdateParticipant.ai);
     return response;
   } catch (error) {
     // Manual error to give ai
@@ -335,4 +333,3 @@ export function splitStringIntoJSONObjects(input: string) {
 
   return jsonObjects;
 }
-
