@@ -14,7 +14,7 @@ const mainWindow: MainWindow = {
   }
 } as any;
 
-jest.mock("../../../../../../src/electron/lib/projects/ProjectManager");
+jest.mock("../../../../../src/electron/lib/projects/ProjectManager");
 
 jest.mock("electron", () => ({
   app: {
