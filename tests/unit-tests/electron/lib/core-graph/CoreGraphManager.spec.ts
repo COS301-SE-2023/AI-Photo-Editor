@@ -6,9 +6,9 @@ import { ICommand } from "../../../../../src/shared/types/command";
 import { UUID } from "../../../../../src/shared/utils/UniqueEntity";
 import { CoreGraph } from "../../../../../src/electron/lib/core-graph/CoreGraph";
 import { CoreGraphManager } from "../../../../../src/electron/lib/core-graph/CoreGraphManager";
-import { CoreGraphSubscriber, IPCGraphSubscriber } from "../../../../../src/electron/lib/core-graph/CoreGraphInteractors";
+import { CoreGraphSubscriber, CoreGraphUpdateEvent, IPCGraphSubscriber ,CoreGraphUpdateParticipant} from "../../../../../src/electron/lib/core-graph/CoreGraphInteractors";
 import { A } from "flowbite-svelte";
-import { NodeInstance, type MinAnchor, InputAnchorInstance, OutputAnchorInstance } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
+import { NodeInstance, type MinAnchor, InputAnchorInstance, OutputAnchorInstance, ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
 import { QueryResponse } from "../../../../../src/shared/types";
 
 const mainWindow: MainWindow = {
@@ -65,19 +65,27 @@ jest.mock("fs", () => ({
   writeFileSync: jest.fn(),
 }));
 
-
+jest.mock("electron-store", () => ({
+    default: jest.fn().mockImplementation(() => {
+      return {}
+    })
+}));
 
 
   describe("Test CoreGraphManager", () => {
    let graphs       : { [id: UUID]: CoreGraph };
    let subscribers  : { [key: UUID]: CoreGraphSubscriber<any>[] };
-   let graphManager : CoreGraphManager
+   let graphManager : CoreGraphManager;
+   let blix : Blix
    let graph : CoreGraph;
     const inputs: MinAnchor[] = [];
     const outputs: MinAnchor[] = [];
 
     beforeEach(() => {
-        graphManager = new CoreGraphManager(mainWindow);
+        blix = new Blix();
+        blix.init(mainWindow);
+
+        graphManager = new CoreGraphManager(blix.toolbox,mainWindow);
         graph = new CoreGraph();
     });
 
@@ -98,7 +106,7 @@ jest.mock("fs", () => ({
         //Add Node to graph
         const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
         graphManager.addGraph(graph);
-        graphManager.addNode(graph.uuid,node);
+        graphManager.addNode(graph.uuid,node,CoreGraphUpdateParticipant.system);
         const nodes = graphManager.getGraph(graph.uuid).getNodes;
         expect(Object.keys(nodes).length).toBe(1);
     })
@@ -112,16 +120,16 @@ jest.mock("fs", () => ({
         node2.outputs.push(new OutputAnchorInstance("number","bbbb","bbbb.number"));
 
         graphManager.addGraph(graph);
-        graphManager.addNode(graph.uuid,node);
-        graphManager.addNode(graph.uuid,node2);
+        graphManager.addNode(graph.uuid,node,CoreGraphUpdateParticipant.system);
+        graphManager.addNode(graph.uuid,node2,CoreGraphUpdateParticipant.system);
 
 
         let anchors : string[] = [];
-        for(const key in graphManager.getGraph(graph._uuid).getAnchors){
+        for(const key in graphManager.getGraph(graph.uuid).getAnchors){
             anchors.push(key);
         }
 
-        const response: QueryResponse<{ edgeId: string }> = graphManager.addEdge(graph.uuid,anchors[0],anchors[1]);
+        const response: QueryResponse<{ edgeId: string }> = graphManager.addEdge(graph.uuid,anchors[0],anchors[1],CoreGraphUpdateParticipant.system);
 
         expect(response.status).toBe("success"); 
     })
@@ -129,21 +137,21 @@ jest.mock("fs", () => ({
     test("Test addSubscriber", () => {
         const subscriber = new IPCGraphSubscriber();
         graphManager.addGraph(graph);
-        graphManager.addSubscriber(graph._uuid,subscriber);
+        graphManager.addSubscriber(graph.uuid,subscriber);
         expect(graphManager.getSubscribers(graph.uuid)).toContain(subscriber);
     })
 
     test("Test removeNode", () => {
         const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
         graphManager.addGraph(graph);
-        graphManager.addNode(graph.uuid,node);
+        graphManager.addNode(graph.uuid,node,CoreGraphUpdateParticipant.system);
 
         let nodes : string[] = [];
-        for(const key in graphManager.getGraph(graph._uuid).getNodes){
+        for(const key in graphManager.getGraph(graph.uuid).getNodes){
             nodes.push(key);
         }
 
-        graphManager.removeNode(graph.uuid,nodes[0]);
+        graphManager.removeNode(graph.uuid,nodes[0],CoreGraphUpdateParticipant.system);
         expect(Object.keys(graphManager.getGraph(graph.uuid).getNodes).length).toBe(0);
     })
 
@@ -156,8 +164,8 @@ jest.mock("fs", () => ({
         node2.outputs.push(new OutputAnchorInstance("number","bbbb","bbbb.number"));
 
         graphManager.addGraph(graph);
-        graphManager.addNode(graph.uuid,node);
-        graphManager.addNode(graph.uuid,node2);
+        graphManager.addNode(graph.uuid,node,CoreGraphUpdateParticipant.system);
+        graphManager.addNode(graph.uuid,node2,CoreGraphUpdateParticipant.system);
 
 
         const node1Node = Object.values(graph.getNodes)[0];
@@ -170,7 +178,7 @@ jest.mock("fs", () => ({
         let result: QueryResponse<{ edgeId: string }> = graph.addEdge(anchorFrom, anchorTo);
         expect(result.status).toBe("success");
         
-        let result2: QueryResponse = graphManager.removeEdge(graph._uuid,anchorTo);
+        let result2: QueryResponse = graphManager.removeEdge(graph.uuid,anchorTo,CoreGraphUpdateParticipant.system);
         expect(result2.status).toBe("success");
         expect(Object.keys(graph.getEdgeSrc).length).toBe(0);
         expect(Object.keys(graph.getEdgeDest).length).toBe(0);
@@ -180,13 +188,13 @@ jest.mock("fs", () => ({
 
     const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
     graphManager.addGraph(graph);
-    graphManager.addNode(graph.uuid,node);
+    graphManager.addNode(graph.uuid,node,CoreGraphUpdateParticipant.system);
 
     let nodes : string[] = [];
-    for(const key in graphManager.getGraph(graph._uuid).getNodes){
+    for(const key in graphManager.getGraph(graph.uuid).getNodes){
         nodes.push(key);
     }
-  const response : QueryResponse  =  graphManager.setPos(graph.uuid,nodes[0],0,0);
+  const response : QueryResponse  =  graphManager.setPos(graph.uuid,nodes[0],0,0,CoreGraphUpdateParticipant.system);
   expect(response.status).toBe("success");
   })
 
@@ -197,7 +205,7 @@ jest.mock("fs", () => ({
 
   test("Test loadGraph", () => {
     graphManager.loadGraph(graph);
-    expect(graphManager.getGraph(graph.uuid)._uuid).toBe(graph._uuid);
+    expect(graphManager.getGraph(graph.uuid).uuid).toBe(graph.uuid);
   });
 
   test("Delete graphs", () => {
@@ -215,22 +223,24 @@ jest.mock("fs", () => ({
     })
 
     test("Test undefined values", () => {
+
+        const GRAPH_UPDATED_EVENT = new Set([CoreGraphUpdateEvent.graphUpdated]);
         expect(graphManager.getGraph("")).toBeUndefined();
 
-        const result = graphManager.addEdge("","","");
+        const result = graphManager.addEdge("","","",CoreGraphUpdateParticipant.system);
         expect(result.status).toBe("error");
 
         const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
-        const result2 = graphManager.addNode("",node);
+        const result2 = graphManager.addNode("",node,CoreGraphUpdateParticipant.system);
         expect(result2.status).toBe("error");
 
-        const result3 = graphManager.removeNode("","");
+        const result3 = graphManager.removeNode("","",CoreGraphUpdateParticipant.system);
         expect(result3.status).toBe("error");
 
-        const result4 = graphManager.removeEdge("","");
+        const result4 = graphManager.removeEdge("","",CoreGraphUpdateParticipant.system);
         expect(result4.status).toBe("error");
 
-        const result5 = graphManager.setPos("","",0,0);
+        const result5 = graphManager.setPos("","",0,0,CoreGraphUpdateParticipant.system);
         expect(result5.status).toBe("error");
 
         graphManager.addGraph(graph);
@@ -242,7 +252,7 @@ jest.mock("fs", () => ({
         graphManager["_subscribers"].all = [subscriber];
         graphManager.addSubscriber(graph.uuid,subscriber);
 
-        graphManager.onGraphUpdated(graph.uuid);
+        graphManager.onGraphUpdated(graph.uuid,GRAPH_UPDATED_EVENT,CoreGraphUpdateParticipant.system);
         expect(subscriber.onGraphChanged).toBeCalled()
     })
 });

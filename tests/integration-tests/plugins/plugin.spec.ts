@@ -64,6 +64,11 @@ jest.mock("fs", () => ({
   writeFileSync: jest.fn(),
 }));
 
+jest.mock("electron-store", () => ({
+    default: jest.fn().mockImplementation(() => {
+      return {}
+    })
+}));
 describe("Test builder propagations", () => {
 
     let nodeBuilder : NodeBuilder;

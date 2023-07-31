@@ -20,6 +20,12 @@ const mainWindow: MainWindow = {
   }
 } as any;
 
+jest.mock("electron-store", () => ({
+    default: jest.fn().mockImplementation(() => {
+      return {}
+    })
+}));
+
 jest.mock("chokidar", () => ({
   default: {
     watch: jest.fn(() => {

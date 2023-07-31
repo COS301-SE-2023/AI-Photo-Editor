@@ -14,6 +14,13 @@ const mainWindow: MainWindow = {
   }
 } as any;
 
+jest.mock("electron-store", () => ({
+    default: jest.fn().mockImplementation(() => {
+      return {}
+    })
+}));
+
+
 jest.mock("../../../../../src/electron/lib/projects/ProjectManager");
 
 jest.mock("electron", () => ({

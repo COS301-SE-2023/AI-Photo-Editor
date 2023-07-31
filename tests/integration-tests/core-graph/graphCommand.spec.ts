@@ -42,6 +42,13 @@ jest.mock("chokidar", () => ({
   }
 }));
 
+jest.mock("electron-store", () => ({
+    default: jest.fn().mockImplementation(() => {
+      return {}
+    })
+}));
+
+
 // jest.mock("../../../src/electron/lib/projects/ProjectManager");
 
 jest.mock("electron", () => ({

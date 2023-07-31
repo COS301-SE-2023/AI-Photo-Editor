@@ -15,10 +15,16 @@ import {
   errorResponseSchema,
   updateInputValue,
 } from "./ai-cookbook";
-import type { ResponseFunctions } from "./ai-cookbook";
+import type {
+  AddNodeConfig,
+  RemoveNodeConfig,
+  AddEdgeConfig,
+  RemoveEdgeConfig,
+  UpdateInputValueConfig,
+  UpdateInputValuesConfig,
+} from "./ai-cookbook";
 import { type MainWindow } from "../api/apis/WindowApi";
-import { app } from "electron";
-import path, { join } from "path";
+import path from "path";
 import { getSecret } from "../../utils/settings";
 import type { QueryResponse, ToastType } from "../../../shared/types";
 import { existsSync } from "fs";
@@ -203,7 +209,16 @@ export class AiManager {
     });
   }
 
-  executeMagicWand(config: ResponseFunctions, graphId: string) {
+  executeMagicWand(
+    config:
+      | AddNodeConfig
+      | RemoveNodeConfig
+      | AddEdgeConfig
+      | RemoveEdgeConfig
+      | UpdateInputValueConfig
+      | UpdateInputValuesConfig,
+    graphId: string
+  ) {
     const { name, args } = config;
 
     if (name === "addNode") {
