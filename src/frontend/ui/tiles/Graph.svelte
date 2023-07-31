@@ -53,7 +53,7 @@
   // Sets new graph created as the active graph
   $: {
     const items = $projectGraphItems;
-    if (items.length > lastGraphsAmount) {
+    if (items.length > lastGraphsAmount && $focusedPanelStore === panelId) {
       graphId = items[items.length - 1].id;
     }
     lastGraphsAmount = items.length;
