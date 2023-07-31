@@ -7,6 +7,7 @@ import { Blix } from "../../../src/electron/lib/Blix";
 import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
 import { NodeUI, NodeUIParent } from "../../../src/shared/ui/NodeUITypes";
 import {app} from "electron";
+import { UIComponentConfig } from "../../../src/shared/ui/NodeUITypes";
 
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
@@ -88,22 +89,42 @@ describe("Test builder propagations", () => {
 
     test("Adding a slider should affect nodeUI's paramaters", () => {
         nodeUIBuilder = new NodeUIBuilder();
-        nodeUIBuilder.addSlider("shrek",0,100,50,1);
+        const uiComponentConfig : UIComponentConfig = {
+            label: "slider",
+            componentId: "shrek",
+            defaultValue: 50,
+            updatesBackend: true
+        }
+        nodeUIBuilder.addSlider(uiComponentConfig,{ min: 0, max: 100, step: 0.1 });
   
         expect(nodeUIBuilder["node"].params[0].label).toEqual("shrek");
         expect(nodeUIBuilder["node"].params[0].parent).toEqual(nodeUIBuilder["node"]);
         expect(nodeUIBuilder["node"].params[0].type).toEqual("leaf");
-        expect(nodeUIBuilder["node"].params[0].params).toEqual([0,100,50,1]);
+        expect(nodeUIBuilder["node"].params[0].params).toEqual([0,100,0.1]);
       });
   
       test("addDropdown should affect nodeUi's children", () => {
         nodeUIBuilder = new NodeUIBuilder();
-        nodeUIBuilder.addDropdown("shrek",nodeBuilder.createUIBuilder().addButton("Shrek",() => {return "Shrek";}));
+          const uiComponentConfig : UIComponentConfig = {
+            label: "dropdown",
+            componentId: "SHROK",
+            defaultValue: 50,
+            updatesBackend: true
+        }
+
+        const buttonComponentConfig : UIComponentConfig = {
+            label: "button",
+            componentId: "Shrek",
+            defaultValue: 50,
+            updatesBackend: true
+        }
+        nodeUIBuilder.addDropdown(uiComponentConfig,nodeBuilder.createUIBuilder().addButton(buttonComponentConfig,{ min: 0, max: 100, set: 0.1 }));
   
-        expect(nodeUIBuilder["node"].params[0].label).toEqual("shrek");
+        expect(nodeUIBuilder["node"].params[0].label).toEqual("SHROK");
         expect(nodeUIBuilder["node"].params[0].parent).toEqual(nodeUIBuilder["node"]);
-        expect(nodeUIBuilder["node"].params[0].type).toEqual("parent");
-        expect(nodeUIBuilder["node"].params[0].params[0].label).toEqual("Shrek");
+        expect(nodeUIBuilder["node"].params[0].type).toEqual("leaf");
+        console.log(nodeUIBuilder["node"].params[0])
+        expect(nodeUIBuilder["node"].params[0].params[0]["node"].params[0].label).toEqual("Shrek");
       });
 });
 
