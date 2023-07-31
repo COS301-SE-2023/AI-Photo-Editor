@@ -12,6 +12,7 @@ import { CoreGraphExporter, type GraphToJSON } from "./CoreGraphExporter";
 import { NodeInstance } from "../registries/ToolboxRegistry";
 import { Blix } from "../Blix";
 import type { INodeUIInputs, QueryResponse } from "../../../shared/types";
+import type { MediaOutputId } from "../../../shared/types/media";
 
 const GRAPH_UPDATED_EVENT = new Set([CoreGraphUpdateEvent.graphUpdated]);
 
@@ -25,9 +26,12 @@ export class CoreGraphManager {
   private _subscribers: { [key: UUID]: CoreGraphSubscriber<any>[] };
   private _toolbox: ToolboxRegistry;
   private readonly _mainWindow: MainWindow | undefined;
+  // private _importer: CoreGraphImporter;
+  private _outputIds: { [key: UUID]: MediaOutputId };
 
   constructor(toolbox: ToolboxRegistry, mainWindow?: MainWindow) {
     this._graphs = {};
+    this._outputIds = {};
     this._subscribers = {};
     this._toolbox = toolbox;
     this._mainWindow = mainWindow;
@@ -77,7 +81,10 @@ export class CoreGraphManager {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };
     const res = this._graphs[graphUUID].removeNode(nodeUUID);
-    if (res.status === "success") this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
+    if (res.status === "success") {
+      this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
+      delete this._outputIds[nodeUUID];
+    }
     return res;
   }
 
@@ -112,6 +119,13 @@ export class CoreGraphManager {
       // Determine whether the update should trigger the graph to recompute
       const uiConfigs = this._toolbox.getNodeInstance(signature).uiConfigs;
       const changes = nodeUIInputs.changes;
+
+      if (signature === "blix.output") {
+        this._outputIds[nodeUUID] = nodeUIInputs.inputs.outputId as string;
+        this._mainWindow?.apis.mediaClientApi.onMediaOutputIdsChanged(
+          new Set(Object.values(this._outputIds))
+        );
+      }
 
       let shouldUpdate = false;
       for (const change of changes) {
