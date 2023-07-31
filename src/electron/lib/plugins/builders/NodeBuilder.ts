@@ -213,6 +213,18 @@ export class NodeUIBuilder {
     return this;
   }
 
+  public addRadio(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Radio);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Radio, componentId, [props]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
+
   /**
    * @param label Label for the accordion
    * @param builder NodeUIBuilder for the accordion
@@ -231,7 +243,7 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   public addFilePicker(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
-    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.TextInput);
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.FilePicker);
     this.node.params.push(
       new NodeUILeaf(this.node, NodeUIComponent.FilePicker, componentId, [props])
     );
@@ -284,6 +296,7 @@ export class NodeUIBuilder {
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
    * */
+  // TODO: Remove duplicate, we already have addFilePicker()
   public addImageInput(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.FilePicker);
     this.node.params.push(

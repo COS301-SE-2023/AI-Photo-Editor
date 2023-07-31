@@ -7,12 +7,12 @@ const nodes = {
         nodeBuilder.setDescription("Provides a test slider and button and label for testing purposes, taking two string inputs and returning one string output");
 
         nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {
-            console.log(
-                "------------------",
-                "\nANCHOR INPUTS", anchorInputs,
-                "\nUI INPUTS", uiInputs,
-                "\nREQUIRED OUTPUTS", requiredOutputs
-            );
+            // console.log(
+            //     "------------------",
+            //     "\nANCHOR INPUTS", anchorInputs,
+            //     "\nUI INPUTS", uiInputs,
+            //     "\nREQUIRED OUTPUTS", requiredOutputs
+            // );
 
             // Doing it this way allows us to only compute the outputs that are required
             const computers = {

@@ -54,5 +54,18 @@
 {/if} -->
 
 {#if $projectsStore.activeProject}
-  <Panel layout="{$projectsStore.activeProject.layout}" horizontal="{false}" height="100%" />
+  {#key $projectsStore.activeProject.id}
+    <div class="fullScreen">
+      <Panel layout="{$projectsStore.activeProject.layout}" horizontal="{false}" height="100%" />
+    </div>
+  {/key}
 {/if}
+
+<style>
+  .fullScreen {
+    padding: 0px;
+    margin: 0px;
+    height: 100%;
+    width: 100%;
+  }
+</style>
