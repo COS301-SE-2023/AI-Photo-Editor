@@ -12,7 +12,7 @@ permissions:
 jobs:
   start:
     name: Start State 🚀🚀🚀
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - name: Starting
       id: init
@@ -60,7 +60,7 @@ jobs:
 
   end:
     name: End State ✅✅✅
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: run_all_tests
     steps:
     - name: Ending
