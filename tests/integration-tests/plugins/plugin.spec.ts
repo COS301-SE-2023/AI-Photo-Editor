@@ -189,7 +189,7 @@ describe("Test plugin integrations", () => {
         const paths = blix.pluginManager.pluginPaths;
 
         // Expect the result to match the expected production path
-        expect(paths).toEqual(['((\/|\\\\)\w+)+']);
+        expect(paths).toEqual([/((\/|\\\\)\w+)+/]);
       });
       
 
