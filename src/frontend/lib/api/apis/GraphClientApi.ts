@@ -1,7 +1,7 @@
 import type { UUID } from "@shared/utils/UniqueEntity";
 import type { ElectronWindowApi } from "electron-affinity/window";
 import { graphMall } from "@frontend/lib/stores/GraphStore";
-import type { UIGraph } from "@shared/ui/UIGraph";
+import type { GraphMetadata, UIGraph } from "@shared/ui/UIGraph";
 import type { IGraphUIInputs } from "@shared/types";
 
 export class GraphClientApi implements ElectronWindowApi<GraphClientApi> {
@@ -11,6 +11,10 @@ export class GraphClientApi implements ElectronWindowApi<GraphClientApi> {
 
   uiInputsChanged(graphUUID: UUID, newUIInputs: IGraphUIInputs): void {
     graphMall.refreshGraphUIInputs(graphUUID, newUIInputs);
+  }
+
+  metadataChanged(graphUUID: UUID, newMetadata: GraphMetadata): void {
+    graphMall.refreshGraphMetadata(graphUUID, newMetadata);
   }
 
   graphChanged(graphUUID: UUID, newState: UIGraph): void {

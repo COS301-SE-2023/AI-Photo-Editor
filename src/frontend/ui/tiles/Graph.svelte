@@ -1,7 +1,7 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
   import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
-  import { type Readable } from "svelte/store";
+  import { derived, type Readable } from "svelte/store";
   import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
@@ -12,7 +12,10 @@
   import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";
   import { commandStore } from "../../lib/stores/CommandStore";
-  import GraphSelectionBox from "../../ui/utils/graph/GraphSelectionBox.svelte";
+  import GraphSelectionBox from "../utils/graph/SelectionBox.svelte";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
+  import { get } from "svelte/store";
+  import type { SelectionBoxItem } from "types";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
@@ -20,6 +23,28 @@
   export let panelId = Math.round(10000000.0 * Math.random());
 
   let graphId = "";
+
+  const projectGraphItems = derived([projectsStore, graphMall], ([$projectsStore, $graphMall]) => {
+    if (!$projectsStore.activeProject) {
+      return [];
+    }
+
+    const items: { id: string; title: string }[] = [];
+    const graphIds = $projectsStore.activeProject.graphs;
+
+    for (graphId of graphIds) {
+      const graphStore = $graphMall[graphId];
+      if (graphStore) {
+        const state = get(graphStore);
+        items.push({
+          id: state.uuid,
+          title: state.metadata.displayName,
+        });
+      }
+    }
+
+    return items;
+  });
 
   /**
    * When a new panel is focussed on (the panel is clicked),
@@ -163,6 +188,15 @@
 
     $thisGraphStore?.removeEdge(toUUID.anchorUUID);
   }
+
+  function updateGraphName(newItem: SelectionBoxItem) {
+    const { id, title } = newItem;
+    window.apis.graphApi.updateGraphMetadata(id, { displayName: title });
+  }
+
+  function deleteGraph(id: string) {
+    commandStore.runCommand("blix.graphs.deleteGraph", { id });
+  }
 </script>
 
 <div class="absolute bottom-[15px] left-[15px] z-[100] flex h-7 items-center space-x-2">
@@ -175,7 +209,12 @@
     {/if}
   </div>
   <div class="self-end">
-    <GraphSelectionBox bind:selectedGraphId="{graphId}" />
+    <GraphSelectionBox
+      bind:selectedItemId="{graphId}"
+      items="{$projectGraphItems}"
+      on:editItem="{(event) => updateGraphName(event.detail.newItem)}"
+      on:removeItem="{(event) => deleteGraph(event.detail.id)}"
+    />
   </div>
   <div
     class="flex h-7 w-7 items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md hover:bg-zinc-700"
