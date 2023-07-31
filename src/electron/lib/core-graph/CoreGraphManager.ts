@@ -13,6 +13,7 @@ import { NodeInstance } from "../registries/ToolboxRegistry";
 import { Blix } from "../Blix";
 import type { INodeUIInputs, QueryResponse } from "../../../shared/types";
 import type { MediaOutputId } from "../../../shared/types/media";
+import { type GraphMetadata } from "../../../shared/ui/UIGraph";
 
 const GRAPH_UPDATED_EVENT = new Set([CoreGraphUpdateEvent.graphUpdated]);
 
@@ -193,6 +194,27 @@ export class CoreGraphManager {
 
   getAllGraphUUIDs() {
     return Object.keys(this._graphs).map((uuid) => uuid);
+  }
+
+  updateGraphMetadata(
+    graphUUID: UUID,
+    updatedMetadata: Partial<GraphMetadata>,
+    participant: CoreGraphUpdateParticipant
+  ) {
+    const graph = this._graphs[graphUUID];
+
+    if (!graph) {
+      return {
+        status: "error",
+        message: "Graph does not exist",
+      } satisfies QueryResponse;
+    }
+
+    const res = graph.updateMetadata(updatedMetadata);
+    if (res.status === "success") {
+      this.onGraphUpdated(graphUUID, new Set([CoreGraphUpdateEvent.metadataUpdated]), participant);
+    }
+    return res;
   }
 
   // Notify all subscribers of change

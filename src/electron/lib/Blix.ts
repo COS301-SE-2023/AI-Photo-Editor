@@ -12,9 +12,10 @@ import {
   UIInputsGraphSubscriber,
   SystemGraphSubscriber,
   CoreGraphUpdateParticipant,
+  MetadataGraphSubscriber,
 } from "./core-graph/CoreGraphInteractors";
 import type { UUID } from "../../shared/utils/UniqueEntity";
-import type { UIGraph } from "../../shared/ui/UIGraph";
+import type { GraphMetadata, UIGraph } from "../../shared/ui/UIGraph";
 import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
 import { AiManager } from "./ai/AiManager";
@@ -165,6 +166,18 @@ export class Blix {
       this._mediaManager.onGraphUpdated(graphId);
     };
     this._graphManager.addAllSubscriber(mediaSubscriber);
+
+    const metadataSubscriber = new MetadataGraphSubscriber();
+    metadataSubscriber.setListenEvents([CoreGraphUpdateEvent.metadataUpdated]);
+    metadataSubscriber.setListenParticipants([
+      CoreGraphUpdateParticipant.system,
+      CoreGraphUpdateParticipant.ai,
+      CoreGraphUpdateParticipant.user,
+    ]);
+    metadataSubscriber.listen = (graphId: UUID, newMetadata: GraphMetadata) => {
+      this.mainWindow?.apis.graphClientApi.metadataChanged(graphId, newMetadata);
+    };
+    this._graphManager.addAllSubscriber(metadataSubscriber);
 
     // ===== MEDIA SUBSCRIBERS ===== //
     // REMOVED: The MediaApi now handles creating MediaSubscribers directly

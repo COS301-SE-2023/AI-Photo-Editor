@@ -28,7 +28,7 @@ class GPT:
                 tools,
                 llm,
                 agent=AgentType.OPENAI_FUNCTIONS,
-                model="gpt-3.5-turbo-0613",
+                model="gpt-4-turbo-0613",
                 # verbose=True,
                 debug=True,
                 max_iterations=20,

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { projectsStore } from "../../lib/stores/ProjectStore";
   import { toastStore } from "../../lib/stores/ToastStore";
-  import GraphSelectionBox from "../../ui/utils/graph/GraphSelectionBox.svelte";
+  import GraphSelectionBox from "../utils/graph/SelectionBox.svelte";
 
   let logs: any[] = [];
   let count = 0;

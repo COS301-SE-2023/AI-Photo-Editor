@@ -5,14 +5,13 @@ const nodes ={
         nodeBuilder.setDescription("Provides a number input and returns a single number output");
 
         nodeBuilder.define((input, uiInput, from) => {
-            return {"res": 3};
+            return {"res": uiInput["slideAlong"]};
         });
        nodeBuilder.addOutput("Number", "res", "Result");
 
-       ui = nodeBuilder.createUIBuilder();
+       let ui = nodeBuilder.createUIBuilder();
     //    ui.addNumberInput("input number",0);
-       ui.addButton({},"return 66;")
-        .addSlider(
+       ui.addSlider(
             {
                 componentId: "slideAlong",
                 label: "Slide Along",
@@ -22,6 +21,7 @@ const nodes ={
             { min: 0, max: 100, set: 0.1 }
         );
 
+        nodeBuilder.setUI(ui);
     },
     "inputImage": (context) => {
       nodeBuilder = context.instantiate("input-plugin","inputImage");

@@ -8,6 +8,7 @@ import {
   type GraphUUID,
   type SvelvetCanvasPos,
   constructUIValueStore,
+  type GraphMetadata,
 } from "@shared/ui/UIGraph";
 import { writable, get, derived, type Writable, type Readable } from "svelte/store";
 import { toolboxStore } from "./ToolboxStore";
@@ -54,9 +55,17 @@ export class GraphStore {
     });
   }
 
+  public refreshMetadata(newMetadata: GraphMetadata) {
+    this.graphStore.update((graph) => {
+      graph.metadata = newMetadata;
+      return graph;
+    });
+  }
+
   // Called by GraphClientApi when the command registry changes
   public refreshStore(newGraph: UIGraph) {
     this.graphStore.update((graph) => {
+      graph.metadata = newGraph.metadata;
       graph.edges = newGraph.edges;
 
       const oldNodes = graph.nodes;
@@ -240,6 +249,16 @@ class GraphMall {
     const val = get(this.mall);
   }
 
+  public refreshGraphMetadata(graphUUID: GraphUUID, newMetadata: GraphMetadata) {
+    this.mall.update((stores) => {
+      if (!stores[graphUUID]) {
+        stores[graphUUID] = new GraphStore(graphUUID);
+      }
+      stores[graphUUID].refreshMetadata(newMetadata);
+      return stores;
+    });
+  }
+
   public get subscribe() {
     return this.mall.subscribe;
   }
@@ -264,7 +283,7 @@ class GraphMall {
   }
 
   // Returns the store for the specified graph
-  public getGraph(graphUUID: GraphUUID): GraphStore {
+  public getGraph(graphUUID: GraphUUID) {
     return get(this.mall)[graphUUID];
   }
 
