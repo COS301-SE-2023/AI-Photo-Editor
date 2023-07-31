@@ -128,8 +128,6 @@
       case localDir.pl_i: // add panel at index
         layout.addPanel(thisLeafContent, index);
         layout = layout; // Force update
-
-        // setTimeout(() => { triggerWindowResize(); }, 1000);
         break;
 
       case localDir.pl_o: // remove panel at index-1 if possible
@@ -143,8 +141,6 @@
           // layout = layout;
 
           bubbleToRoot();
-
-          // setTimeout(() => { triggerWindowResize(); }, 1000);
         }
 
         break;
@@ -160,8 +156,6 @@
         layout.setPanel(group, index);
 
         layout = layout; // Force update
-
-        // setTimeout(() => { triggerWindowResize(); }, 1000);
         break;
 
       case localDir.pp_o: // invalid
@@ -169,14 +163,6 @@
       default:
         return;
     }
-  }
-
-  function triggerWindowResize() {
-    // For now this is necessary to force Svelvet
-    // to update the positions of objects on it's canvas
-    // TODO: Hopefully find a more elegant solution
-    // console.log("WINDOW RESIZE");
-    // window.dispatchEvent(new Event("resize"));
   }
 
   // This dict defines mappings from PanelType to the corresponding Svelte component to render
@@ -207,8 +193,6 @@
     style="{height == '' ? '' : 'height: {height}'}"
     dblClickSplitter="{false}"
     on:pane-remove="{(e) => e.stopPropagation()}"
-    on:resize="{triggerWindowResize}"
-    on:resized="{triggerWindowResize}"
   >
     {#each layout.panels as panel, i (panel.id)}
       <!-- TODO: Fix; look into using svelte animations -->
