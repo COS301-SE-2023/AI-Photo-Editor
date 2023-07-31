@@ -61,14 +61,6 @@ export class AiManager {
     this.toolboxRegistry = toolbox;
     this.graphManager = graphManager;
     this._mainWindow = mainWindow;
-
-    // console.log(this._pluginContext);
-
-    // Need to bind dynamic function calls
-
-    // this.sendPrompt();
-    // console.log("Execute!")
-    // console.log(this.graphManager.getAllGraphUUIDs());
   }
 
   public getSupportedModels() {
@@ -266,6 +258,7 @@ export class AiManager {
       // In development
       path.join(__dirname, "../../../../src/electron/lib/ai/python/main.py"),
     ];
+    // console.log(possibilities)
     for (const path of possibilities) {
       if (existsSync(path)) {
         return path;

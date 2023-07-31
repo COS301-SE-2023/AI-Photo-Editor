@@ -76,7 +76,6 @@ jest.mock("fs", () => ({
 
     test("Export CoreGraph to JSON format", () => {
         const json: GraphToJSON = exporter.exportGraph(graph);
-        console.log(JSON.stringify(json, null, 2));
         const format: GraphToJSON = {
             "nodes": [
                 {

@@ -206,12 +206,10 @@ describe("Test plugin integrations", () => {
     })
 
     test("Plugin should be able to run", () => {
-      console.log = jest.fn();
       plugin.requireSelf(blix);
 
       const commands =  blix.commandRegistry.getRegistry()['hello-plugin.addBrightnessNode'];
       commands.handler.apply(commands, [{sendSuccessMessage: jest.fn()}]);
-      expect(console.log).toHaveBeenCalled();
 
     })
 

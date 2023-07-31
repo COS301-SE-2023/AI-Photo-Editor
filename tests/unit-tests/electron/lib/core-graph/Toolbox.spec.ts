@@ -145,7 +145,6 @@ describe("Test Node ui", () => {
       
     expect(builder["node"].params[0].label).toEqual("Dropdown");
     expect(builder["node"].params[0].parent).toEqual(builder["node"]);
-    console.log(builder["node"].params[0])
     expect(builder["node"].params[0].type).toEqual("leaf");
     expect(builder["node"].params[0].params[0]["node"]).toBeDefined();
   });
@@ -239,6 +238,7 @@ describe("Test Toolbox registry", () => {
     box.addInstance(node);
     expect(box.getRegistry()[node.signature]).toEqual(node);
   });
+
 
   });
 
