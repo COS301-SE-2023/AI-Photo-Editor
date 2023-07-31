@@ -402,39 +402,39 @@ export class CoreGraph extends UniqueEntity {
     return { status: "success" };
   }
 
-  public exportJSON(): GraphToJSON {
-    return { nodes: this.nodesToJSONObject(), edges: this.edgesToJSONObject() };
-  }
+  // public exportJSON(): GraphToJSON {
+  //   return { nodes: this.nodesToJSONObject(), edges: this.edgesToJSONObject() };
+  // }
 
-  public nodesToJSONObject(): NodeToJSON[] {
-    const json: NodeToJSON[] = [];
-    for (const node in this.nodes) {
-      if (!this.nodes.hasOwnProperty(node)) continue;
-      json.push(this.nodes[node].exportJSON());
-    }
-    return json;
-  }
+  // public nodesToJSONObject(): NodeToJSON[] {
+  //   const json: NodeToJSON[] = [];
+  //   for (const node in this.nodes) {
+  //     if (!this.nodes.hasOwnProperty(node)) continue;
+  //     json.push(this.nodes[node].exportJSON());
+  //   }
+  //   return json;
+  // }
 
-  public edgesToJSONObject(): EdgeToJSON[] {
-    const json: EdgeToJSON[] = [];
-    for (const anchorFrom in this.edgeSrc) {
-      if (!this.edgeSrc.hasOwnProperty(anchorFrom)) continue;
-      const anchorTos: AnchorUUID[] = this.edgeSrc[anchorFrom];
-      for (const anchorTo of anchorTos) {
-        json.push({
-          anchorFrom: {
-            parent: this.anchors[anchorFrom].parent.uuid,
-            id: anchorFrom,
-          },
-          anchorTo: {
-            parent: this.anchors[anchorTo].parent.uuid,
-            id: anchorTo,
-          },
-        });
-      }
-    }
-    return json;
-  }
+  // public edgesToJSONObject(): EdgeToJSON[] {
+  //   const json: EdgeToJSON[] = [];
+  //   for (const anchorFrom in this.edgeSrc) {
+  //     if (!this.edgeSrc.hasOwnProperty(anchorFrom)) continue;
+  //     const anchorTos: AnchorUUID[] = this.edgeSrc[anchorFrom];
+  //     for (const anchorTo of anchorTos) {
+  //       json.push({
+  //         anchorFrom: {
+  //           parent: this.anchors[anchorFrom].parent.uuid,
+  //           id: anchorFrom,
+  //         },
+  //         anchorTo: {
+  //           parent: this.anchors[anchorTo].parent.uuid,
+  //           id: anchorTo,
+  //         },
+  //       });
+  //     }
+  //   }
+  //   return json;
+  // }
 }
 
 interface AiAnchors {
@@ -536,6 +536,10 @@ export class Anchor extends UniqueEntity {
     readonly displayName: string
   ) {
     super();
+  }
+
+  public getAnchorId() {
+    return this.anchorId;
   }
 }
 

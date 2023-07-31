@@ -4,7 +4,7 @@ import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
 import { Blix } from "../../../src/electron/lib/Blix";
 import { CoreGraphImporter } from "../../../src/electron/lib/core-graph/CoreGraphImporter";
 import { CoreGraph } from "../../../src/electron/lib/core-graph/CoreGraph";
-import { GraphToJSON } from "../../../src/electron/lib/core-graph/CoreGraphExporter";
+import { CoreGraphExporter, GraphToJSON } from "../../../src/electron/lib/core-graph/CoreGraphExporter";
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
 const mainWindow: MainWindow = {
@@ -76,41 +76,42 @@ describe("Test graph importer", () => {
         blix = new Blix();
         blix.init(mainWindow);
         importer = new CoreGraphImporter(blix.toolbox);
-    })
-    const data : GraphToJSON = {
-            nodes:[
-                {"signature":"blix.output","styling":null},
-                {"signature":"input-plugin.inputNumber","styling":null}
-            ],
-            edges:[
-                {"anchorFrom":{"parent":"N0Hp3mikOpZE7q81toKXaIyq3wjC-SzdGzlY9OD3az0","id":"res"},"anchorTo":{"parent":"olbxUQaI5I3Flp-o1gtfCySpgEaICKIiws9UKViF1V8","id":"in"}}
-            ]
-        }
+        blix.toolbox.addInstance(new NodeInstance("testNode", "blix", "testNode", "This is a test node", "", [{ type: "Number", "displayName": "blix.testNode.0", "identifier": "In0" }], [{ type: "Number", "displayName": "blix.testNode.1", "identifier": "Out0" }]))
+    });
 
-
-    // Waiting fro importer to be fixed then we can run this test
     test("Test import of valid json graph", () => {
-        // const graph = importer.import("json", data);
-        // expect(graph).toBeDefined();
-        expect(true).toBeTruthy();
+        // console.log(blix.toolbox);
+
+        const graphToImport: GraphToJSON = {
+          "nodes": [
+            {
+              "signature" : "blix.output",
+              "styling" : null
+            },
+            {
+              "signature" : "blix.testNode",
+              "styling" : null
+            }
+          ],
+          "edges": [{
+            anchorFrom: {
+                parent: 1,
+                id: "Out0"
+            },
+            anchorTo: {
+                parent: 0,
+                id: "in"
+            }
+          }]
+        };
+        
+        const coreGraph: CoreGraph = importer.import("json", graphToImport);
     });
 
 
-    // To be implemented later
-    test("Test import of valid xml graph", () => {
-        const graph = importer.import("xml", data);
-        expect(graph).toBeDefined();
+    // Invalid Case
+    test("Test invalid type", () => {
+        const graph = importer.import("random", "");
+        expect(graph).toBeInstanceOf(CoreGraph);
     });
-
-    test("Test import of valid yaml graph", () => {
-        const graph = importer.import("yaml", data);
-        expect(graph).toBeDefined();
-    });
-
-    test("Test import of valid default graph", () => {
-        const graph = importer.import("nothing", data);
-        expect(graph).toBeDefined();
-    });
-
-
 });

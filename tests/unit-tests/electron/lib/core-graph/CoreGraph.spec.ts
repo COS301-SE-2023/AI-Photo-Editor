@@ -523,165 +523,165 @@ test("Adding a node to a graph", () => {
 
   // })
 
-  test("Converting a node to JSON format", () => {
-    const plugin: string = "Test-Plugin";
-    const name: string = "Node";
-    const description: string = "This is the Best Node in the world";
-    const icon:string = "fa-diagram-project";
+  // test("Converting a node to JSON format", () => {
+  //   const plugin: string = "Test-Plugin";
+  //   const name: string = "Node";
+  //   const description: string = "This is the Best Node in the world";
+  //   const icon:string = "fa-diagram-project";
 
-    const node1Instance = new NodeInstance(`${name}-1`,`${plugin}`, `${name}`, description, icon, inputs, outputs);
-    const response = graph.addNode(node1Instance);
-    const uuid = (response.data! as { nodeId: UUID }).nodeId;
-    const node = graph.getNodes[uuid];
-    const json = node.exportJSON();
+  //   const node1Instance = new NodeInstance(`${name}-1`,`${plugin}`, `${name}`, description, icon, inputs, outputs);
+  //   const response = graph.addNode(node1Instance);
+  //   const uuid = (response.data! as { nodeId: UUID }).nodeId;
+  //   const node = graph.getNodes[uuid];
+  //   const json = node.exportJSON();
 
-    expect(json).toStrictEqual(
-      {
-        signature: `${plugin}.${name}-1`,
-        styling: undefined
-      });
-  });
-  test("Test edge converting to JSON", () => {
-    const plugin: string = "Test-Plugin";
-    const node: string = "Node";
-    const description: string = "This is a node";
-    const icon: string = "fa-diagram-project";
+  //   expect(json).toStrictEqual(
+  //     {
+  //       signature: `${plugin}.${name}-1`,
+  //       styling: undefined
+  //     });
+  // });
+  // test("Test edge converting to JSON", () => {
+  //   const plugin: string = "Test-Plugin";
+  //   const node: string = "Node";
+  //   const description: string = "This is a node";
+  //   const icon: string = "fa-diagram-project";
 
-    let inputs1: MinAnchor[] = [];
-    let inputs2: MinAnchor[] = [];
-    let outputs1: MinAnchor[] = [];
-    let outputs2: MinAnchor[] = [];
+  //   let inputs1: MinAnchor[] = [];
+  //   let inputs2: MinAnchor[] = [];
+  //   let outputs1: MinAnchor[] = [];
+  //   let outputs2: MinAnchor[] = [];
 
-    inputs1.push(
-    { type: "string", displayName: `Test-plugin.Node-1.0`, identifier: `in1` },
-    { type: "string", displayName: `Test-plugin.Node-1.1`, identifier: `in2` },
-    { type: "string", displayName: `Test-plugin.Node-1.2`, identifier: `in3` });
+  //   inputs1.push(
+  //   { type: "string", displayName: `Test-plugin.Node-1.0`, identifier: `in1` },
+  //   { type: "string", displayName: `Test-plugin.Node-1.1`, identifier: `in2` },
+  //   { type: "string", displayName: `Test-plugin.Node-1.2`, identifier: `in3` });
 
-    outputs1.push(
-    { type: "string", displayName: `Test-plugin.Node-1.3`, identifier: `out1` },
-    { type: "number", displayName: `Test-plugin.Node-1.4`, identifier: `out2` }); 
+  //   outputs1.push(
+  //   { type: "string", displayName: `Test-plugin.Node-1.3`, identifier: `out1` },
+  //   { type: "number", displayName: `Test-plugin.Node-1.4`, identifier: `out2` }); 
 
-    inputs2.push(
-    { type: "string", displayName: `Test-plugin.Node-2.0`, identifier: `in1` },
-    { type: "string", displayName: `Test-plugin.Node-2.1`, identifier: `in2` },
-    { type: "string", displayName: `Test-plugin.Node-2.2`, identifier: `in3` });
+  //   inputs2.push(
+  //   { type: "string", displayName: `Test-plugin.Node-2.0`, identifier: `in1` },
+  //   { type: "string", displayName: `Test-plugin.Node-2.1`, identifier: `in2` },
+  //   { type: "string", displayName: `Test-plugin.Node-2.2`, identifier: `in3` });
   
-    outputs2.push(
-    { type: "string", displayName: `Test-plugin.Node-2.3`, identifier: `out1` },
-    { type: "number", displayName: `Test-plugin.Node-2.4`, identifier: `out2` }); 
+  //   outputs2.push(
+  //   { type: "string", displayName: `Test-plugin.Node-2.3`, identifier: `out1` },
+  //   { type: "number", displayName: `Test-plugin.Node-2.4`, identifier: `out2` }); 
   
-    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
-    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
+  //   const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
+  //   const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
     
-    const response = graph.addNode(node1Instance);
-    const uuid1 = (response.data! as { nodeId: UUID }).nodeId;
-    const response2 = graph.addNode(node2Instance);
-    const uuid2 = (response2.data! as { nodeId: UUID }).nodeId;
+  //   const response = graph.addNode(node1Instance);
+  //   const uuid1 = (response.data! as { nodeId: UUID }).nodeId;
+  //   const response2 = graph.addNode(node2Instance);
+  //   const uuid2 = (response2.data! as { nodeId: UUID }).nodeId;
 
-    const node1Node = graph.getNodes[uuid1];
-    const node2Node = graph.getNodes[uuid2];
+  //   const node1Node = graph.getNodes[uuid1];
+  //   const node2Node = graph.getNodes[uuid2];
 
-    const anchorFrom: UUID = Object.keys(node1Node.getAnchors)[3]; // output
-    const anchorTo: UUID = Object.keys(node2Node.getAnchors)[0]; // input
+  //   const anchorFrom: UUID = Object.keys(node1Node.getAnchors)[3]; // output
+  //   const anchorTo: UUID = Object.keys(node2Node.getAnchors)[0]; // input
 
-    let result: QueryResponse<{ edgeId: string }> = graph.addEdge(anchorFrom, anchorTo);
-    expect(result.status).toBe("success");
+  //   let result: QueryResponse<{ edgeId: string }> = graph.addEdge(anchorFrom, anchorTo);
+  //   expect(result.status).toBe("success");
 
-    let edges = graph.edgesToJSONObject();
-    expect(edges).toStrictEqual([
-      {
-        anchorFrom: {
-          parent: uuid1,
-          id: anchorFrom
-        },
-        anchorTo: {
-          parent: uuid2,
-          id: anchorTo
-        }
-      }])
+  //   let edges = graph.edgesToJSONObject();
+  //   expect(edges).toStrictEqual([
+  //     {
+  //       anchorFrom: {
+  //         parent: uuid1,
+  //         id: anchorFrom
+  //       },
+  //       anchorTo: {
+  //         parent: uuid2,
+  //         id: anchorTo
+  //       }
+  //     }])
 
-  });
-  test("Test graph converting to JSON", () => {
-    const plugin: string = "Test-Plugin";
-    const node: string = "Node";
-    const description: string = "This is a node";
-    const icon: string = "fa-diagram-project";
+  // });
+  // test("Test graph converting to JSON", () => {
+  //   const plugin: string = "Test-Plugin";
+  //   const node: string = "Node";
+  //   const description: string = "This is a node";
+  //   const icon: string = "fa-diagram-project";
 
-    let inputs1: MinAnchor[] = [];
-    let inputs2: MinAnchor[] = [];
-    let outputs1: MinAnchor[] = [];
-    let outputs2: MinAnchor[] = [];
+  //   let inputs1: MinAnchor[] = [];
+  //   let inputs2: MinAnchor[] = [];
+  //   let outputs1: MinAnchor[] = [];
+  //   let outputs2: MinAnchor[] = [];
 
-    inputs1.push(
-    { type: "string", displayName: `Test-plugin.Node-1.0`, identifier: `in1` },
-    { type: "string", displayName: `Test-plugin.Node-1.1`, identifier: `in2` },
-    { type: "string", displayName: `Test-plugin.Node-1.2`, identifier: `in3` });
+  //   inputs1.push(
+  //   { type: "string", displayName: `Test-plugin.Node-1.0`, identifier: `in1` },
+  //   { type: "string", displayName: `Test-plugin.Node-1.1`, identifier: `in2` },
+  //   { type: "string", displayName: `Test-plugin.Node-1.2`, identifier: `in3` });
 
-    outputs1.push(
-    { type: "string", displayName: `Test-plugin.Node-1.3`, identifier: `out1` },
-    { type: "number", displayName: `Test-plugin.Node-1.4`, identifier: `out2` }); 
+  //   outputs1.push(
+  //   { type: "string", displayName: `Test-plugin.Node-1.3`, identifier: `out1` },
+  //   { type: "number", displayName: `Test-plugin.Node-1.4`, identifier: `out2` }); 
 
-    inputs2.push(
-    { type: "string", displayName: `Test-plugin.Node-2.0`, identifier: `in1` },
-    { type: "string", displayName: `Test-plugin.Node-2.1`, identifier: `in2` },
-    { type: "string", displayName: `Test-plugin.Node-2.2`, identifier: `in3` });
+  //   inputs2.push(
+  //   { type: "string", displayName: `Test-plugin.Node-2.0`, identifier: `in1` },
+  //   { type: "string", displayName: `Test-plugin.Node-2.1`, identifier: `in2` },
+  //   { type: "string", displayName: `Test-plugin.Node-2.2`, identifier: `in3` });
   
-    outputs2.push(
-    { type: "string", displayName: `Test-plugin.Node-2.3`, identifier: `out1` },
-    { type: "number", displayName: `Test-plugin.Node-2.4`, identifier: `out2` }); 
+  //   outputs2.push(
+  //   { type: "string", displayName: `Test-plugin.Node-2.3`, identifier: `out1` },
+  //   { type: "number", displayName: `Test-plugin.Node-2.4`, identifier: `out2` }); 
   
-    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
-    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
+  //   const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
+  //   const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
     
-    const response = graph.addNode(node1Instance);
-    const uuid1 = (response.data! as { nodeId: UUID }).nodeId;
-    const response2 = graph.addNode(node2Instance);
-    const uuid2 = (response2.data! as { nodeId: UUID }).nodeId;
+  //   const response = graph.addNode(node1Instance);
+  //   const uuid1 = (response.data! as { nodeId: UUID }).nodeId;
+  //   const response2 = graph.addNode(node2Instance);
+  //   const uuid2 = (response2.data! as { nodeId: UUID }).nodeId;
 
-    const node1Node = graph.getNodes[uuid1];
-    const node2Node = graph.getNodes[uuid2];
+  //   const node1Node = graph.getNodes[uuid1];
+  //   const node2Node = graph.getNodes[uuid2];
 
-    const anchorFrom: UUID = Object.keys(node1Node.getAnchors)[3]; // output
-    const anchorTo: UUID = Object.keys(node2Node.getAnchors)[0]; // input
+  //   const anchorFrom: UUID = Object.keys(node1Node.getAnchors)[3]; // output
+  //   const anchorTo: UUID = Object.keys(node2Node.getAnchors)[0]; // input
 
-    let result: QueryResponse<{ edgeId: string }> = graph.addEdge(anchorFrom, anchorTo);
-    expect(result.status).toBe("success");
+  //   let result: QueryResponse<{ edgeId: string }> = graph.addEdge(anchorFrom, anchorTo);
+  //   expect(result.status).toBe("success");
 
-    let graphJSON = graph.exportJSON();
-    expect(graphJSON).toStrictEqual(
-      {
-        nodes: graph.nodesToJSONObject(),
-        edges: graph.edgesToJSONObject(),
-      });
+  //   let graphJSON = graph.exportJSON();
+  //   expect(graphJSON).toStrictEqual(
+  //     {
+  //       nodes: graph.nodesToJSONObject(),
+  //       edges: graph.edgesToJSONObject(),
+  //     });
 
-    // console.log(JSON.stringify(graphJSON, null, 2))
+  //   // console.log(JSON.stringify(graphJSON, null, 2))
 
-    expect(graphJSON).toStrictEqual(
-      {
-        nodes: [
-          {
-            signature: `${plugin}.${node}-1`,
-            styling: undefined
-          },
-          {
-            signature: `${plugin}.${node}-2`,
-            styling: undefined
-          }
-        ],
-        edges: [
-          {
-            anchorFrom: {
-              parent: uuid1,
-              id: anchorFrom
-            },
-            anchorTo: {
-              parent: uuid2,
-              id: anchorTo
-            }
-          }
-        ]
-      });
-  });
+  //   expect(graphJSON).toStrictEqual(
+  //     {
+  //       nodes: [
+  //         {
+  //           signature: `${plugin}.${node}-1`,
+  //           styling: undefined
+  //         },
+  //         {
+  //           signature: `${plugin}.${node}-2`,
+  //           styling: undefined
+  //         }
+  //       ],
+  //       edges: [
+  //         {
+  //           anchorFrom: {
+  //             parent: uuid1,
+  //             id: anchorFrom
+  //           },
+  //           anchorTo: {
+  //             parent: uuid2,
+  //             id: anchorTo
+  //           }
+  //         }
+  //       ]
+  //     });
+  // });
 });
 
 describe("Test NodesAndEdgesGraph Class ", () => {

@@ -48,7 +48,6 @@ const nodes = {
     //    .addLabel("Label1"));
 
        nodeBuilder.setUI(ui);
-
         // addInput(type: string, identifier: string, displayName: string)
         nodeBuilder.addInput("string", "in1", "In 1");
         nodeBuilder.addInput("string", "in2", "In 2");
