@@ -23,6 +23,7 @@
   export let panelId = Math.round(10000000.0 * Math.random());
 
   let graphId = "";
+  let lastGraphsAmount = 0;
 
   const projectGraphItems = derived([projectsStore, graphMall], ([$projectsStore, $graphMall]) => {
     if (!$projectsStore.activeProject) {
@@ -45,6 +46,18 @@
 
     return items;
   });
+
+  // Makes sure that the active graph id is always set correctly
+  $: focusedGraphStore.set({ panelId, graphUUID: graphId });
+
+  // Sets new graph created as the active graph
+  $: {
+    const items = $projectGraphItems;
+    if (items.length > lastGraphsAmount) {
+      graphId = items[items.length - 1].id;
+    }
+    lastGraphsAmount = items.length;
+  }
 
   /**
    * When a new panel is focussed on (the panel is clicked),
@@ -73,10 +86,6 @@
   $: translation = graphData?.transforms?.translation;
   $: zoom = graphData?.transforms?.scale;
   $: dimensions = graphData?.dimensions;
-
-  $: console.log(
-    `Focused graph store: ${$focusedGraphStore.graphUUID} - Selected graph id: ${graphId}`
-  );
 
   // Hooks exposed by <Svelvet />
   let connectAnchorIds: (
