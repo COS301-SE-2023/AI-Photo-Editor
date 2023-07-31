@@ -94,8 +94,6 @@
   $: filteredItems = filterItems(searchTerm, items);
   $: if (showItems) searchContainer?.focus();
   $: if (!selectedItemId && items.length > 0) selectedItemId = items[0].id;
-
-  $: console.log("Selected item id: ", selectedItemId);
 </script>
 
 <div class="relative w-36" bind:this="{container}">
