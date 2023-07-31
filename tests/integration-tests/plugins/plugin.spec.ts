@@ -123,7 +123,6 @@ describe("Test builder propagations", () => {
         expect(nodeUIBuilder["node"].params[0].label).toEqual("SHROK");
         expect(nodeUIBuilder["node"].params[0].parent).toEqual(nodeUIBuilder["node"]);
         expect(nodeUIBuilder["node"].params[0].type).toEqual("leaf");
-        console.log(nodeUIBuilder["node"].params[0])
         expect(nodeUIBuilder["node"].params[0].params[0]["node"].params[0].label).toEqual("Shrek");
       });
 });

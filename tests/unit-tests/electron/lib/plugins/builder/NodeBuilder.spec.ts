@@ -2,6 +2,7 @@ import expect from "expect";
 import { NodeInstance, InputAnchorInstance, OutputAnchorInstance, ToolboxRegistry, MinAnchor } from "../../../../../../src/electron/lib/registries/ToolboxRegistry";
 import {NodeBuilder,NodeUIBuilder} from "../../../../../../src/electron/lib/plugins/builders/NodeBuilder"
 import { NodeUI, NodeUIParent } from "../../../../../../src/shared/ui/NodeUITypes";
+import { UIComponentConfig } from "../../../../../../src/shared/ui/NodeUITypes";
 
 describe("Test NodeBuilder", () => {
 
@@ -37,7 +38,7 @@ describe("Test NodeBuilder", () => {
     const node = new NodeInstance("cool node 1", "testing-plugin", "Jake", "The Jake plugin","", inputs, outputs);
     nodeBuilder.setTitle("Jake");
     nodeBuilder.setDescription("The Jake plugin");
-    nodeBuilder.define(() => null);
+    nodeBuilder.define(() => {return {"res" : "Shrek"}});
     expect(JSON.stringify(nodeBuilder.build)).toEqual(JSON.stringify(node));
   });
 
@@ -54,8 +55,8 @@ describe("Test NodeBuilder", () => {
 
   test("define should set the function", () => {
     nodeBuilder = new NodeBuilder("testing-plugin", "cool node 4");
-    nodeBuilder.define(() => {return "Shrek";});
-    expect(nodeBuilder["partialNode"].func(null)).toEqual("Shrek");
+    nodeBuilder.define(() => {return {"res" : "Shrek"}});
+    expect(nodeBuilder["partialNode"].func({},{},[]).res).toEqual("Shrek");
   });
 
 });
@@ -110,17 +111,28 @@ describe("Test NodeUIBuilder", () => {
 
     test("addButton should add a button", () => {
       nodeUIBuilder = new NodeUIBuilder();
-      nodeUIBuilder.addButton("shrek",() => {return "Shrek";});
+      const uiComponentConfig : UIComponentConfig = {
+            label: "slider",
+            componentId: "shrek",
+            defaultValue: 50,
+            updatesBackend: true
+      }     
+      nodeUIBuilder.addButton(uiComponentConfig,{set : "ayo"});
 
       expect(nodeUIBuilder["node"].params[0].label).toEqual("shrek");
-      expect(nodeUIBuilder["node"].params[0].params[0]()).toEqual("Shrek");
       expect(nodeUIBuilder["node"].params[0].type).toEqual("leaf");
       expect(nodeUIBuilder["node"].params[0].parent).toEqual(nodeUIBuilder["node"]);
     });
 
     test("addNumberInput should add a numberInput", () => {
       nodeUIBuilder = new NodeUIBuilder();
-      nodeUIBuilder.addNumberInput("shrek");
+      const uiComponentConfig : UIComponentConfig = {
+            label: "slider",
+            componentId: "shrek",
+            defaultValue: 50,
+            updatesBackend: true
+      }     
+      nodeUIBuilder.addNumberInput(uiComponentConfig);
 
       expect(nodeUIBuilder["node"].params[0].label).toEqual("shrek");
       expect(nodeUIBuilder["node"].params[0].params).toEqual([]);
@@ -128,7 +140,13 @@ describe("Test NodeUIBuilder", () => {
 
     test("addImageInput should add a ", () => {
       nodeUIBuilder = new NodeUIBuilder();
-      nodeUIBuilder.addImageInput("shrek");
+      const uiComponentConfig : UIComponentConfig = {
+            label: "slider",
+            componentId: "shrek",
+            defaultValue: 50,
+            updatesBackend: true
+      }     
+      nodeUIBuilder.addImageInput(uiComponentConfig);
 
       expect(nodeUIBuilder["node"].params[0].label).toEqual("shrek");
       expect(nodeUIBuilder["node"].params[0].params).toEqual([]);
@@ -136,7 +154,13 @@ describe("Test NodeUIBuilder", () => {
 
     test("addColorPicker should add a color picker", () => {
       nodeUIBuilder = new NodeUIBuilder();
-      nodeUIBuilder.addColorPicker("shrek",["rgb"]);
+      const uiComponentConfig : UIComponentConfig = {
+            label: "slider",
+            componentId: "shrek",
+            defaultValue: 50,
+            updatesBackend: true
+      }     
+      nodeUIBuilder.addColorPicker(uiComponentConfig,["rgb"]);
 
       expect(nodeUIBuilder["node"].params[0].label).toEqual("shrek");
       expect(nodeUIBuilder["node"].params[0].params[0]).toEqual(["rgb"]);
@@ -149,7 +173,13 @@ describe("Test NodeUIBuilder", () => {
 
     test("addLabel should add a label", () => {
       nodeUIBuilder = new NodeUIBuilder();
-      nodeUIBuilder.addLabel("shrek","GET OUT OF MA SWAMP!");
+      const uiComponentConfig : UIComponentConfig = {
+            label: "slider",
+            componentId: "shrek",
+            defaultValue: 50,
+            updatesBackend: true
+      }     
+      nodeUIBuilder.addLabel(uiComponentConfig,"GET OUT OF MA SWAMP!");
 
       expect(nodeUIBuilder['node'].params[0].label).toEqual("shrek");
       expect(nodeUIBuilder['node'].params[0].params[0]).toEqual("GET OUT OF MA SWAMP!");
