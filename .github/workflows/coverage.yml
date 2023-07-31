@@ -12,7 +12,7 @@ permissions:
 jobs:
   start:
     name: Start State 🚀🚀🚀
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Starting
       id: init
@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest, macOS-latest]
     needs: start
     steps:
       - name: Checkout for ${{ runner.os }}
@@ -60,7 +60,7 @@ jobs:
 
   end:
     name: End State ✅✅✅
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: run_all_tests
     steps:
     - name: Ending
