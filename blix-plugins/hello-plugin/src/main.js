@@ -59,7 +59,7 @@ const nodes = {
             label: "Multitudinous seas incarnadine",
             defaultValue: 0,
             updateBackend: true,
-        }, { startColor: "red" })
+        }, {})
 
         // addKnob(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
         .addKnob({
