@@ -1,24 +1,25 @@
 <script lang="ts">
   import { writable } from "svelte/store";
   import { UIValueStore } from "@shared/ui/UIGraph";
+  import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
 
-  export let params: any[];
-  console.log(params);
-
-  let items: { [key: string]: any } = params[0];
-  let defaultItem: string = params[1];
-
+  export let props: UIComponentProps;
   export let inputStore: UIValueStore;
-  if (!inputStore.inputs["dropdown"]) {
+  export let config: UIComponentConfig;
+
+  let items: { [key: string]: any } = props["options"]!;
+  let defaultItem = config.defaultValue as string | undefined;
+
+  if (!inputStore.inputs[config.componentId]) {
     if (!defaultItem) defaultItem = Object.keys(items)[0];
-    inputStore.inputs["dropdown"] = writable(items[defaultItem]);
+    inputStore.inputs[config.componentId] = writable(items[defaultItem]);
   }
 
-  $: valStore = inputStore.inputs["dropdown"];
+  $: valStore = inputStore.inputs[config.componentId];
 </script>
 
 {#if Object.keys(items).length > 0}
-  {#key inputStore.inputs["dropdown"]}
+  {#key inputStore.inputs[config.componentId]}
     <!-- <select bind:value={inputStore.inputs["dropdown"]}> -->
     <select bind:value="{$valStore}">
       {#each Object.keys(items) as itemKey}

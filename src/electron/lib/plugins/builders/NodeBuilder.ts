@@ -4,6 +4,7 @@ import {
   NodeUIComponent,
   NodeUILeaf,
   NodeUIParent,
+  type UIComponentProps,
   type UIComponentConfig,
 } from "../../../../shared/ui/NodeUITypes";
 
@@ -129,10 +130,6 @@ export class NodeBuilder implements PluginContextBuilder {
   }
 }
 
-type ComponentProps = {
-  [key: string]: unknown;
-};
-
 function getRandomComponentId(type: NodeUIComponent) {
   return `${type.toString()}-${Math.floor(Math.random() * 16 ** 6).toString(16)}`;
 }
@@ -152,11 +149,9 @@ export class NodeUIBuilder {
     this.uiConfigs = {};
   }
 
-  public addKnob(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
+  public addKnob(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Knob);
-    this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Knob, componentId, [min, max, step])
-    );
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Knob, componentId, [props]));
     this.uiConfigs[componentId] = {
       componentId,
       label: config.label,
@@ -171,7 +166,7 @@ export class NodeUIBuilder {
    * @param param Parameter for the button
    * @returns callback to this NodeUIBuilder
    * */
-  public addButton(config: UIComponentConfig, props: ComponentProps): NodeUIBuilder {
+  public addButton(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Button);
     this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Button, componentId, [props]));
     this.uiConfigs[componentId] = {
@@ -191,11 +186,9 @@ export class NodeUIBuilder {
    * @param defautlVal Default value
    * @returns callback to this NodeUIBuilder
    */
-  public addSlider(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
+  public addSlider(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Slider);
-    this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Slider, componentId, [min, max, step])
-    );
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Slider, componentId, [props]));
     this.uiConfigs[componentId] = {
       componentId,
       label: config.label,
@@ -206,15 +199,15 @@ export class NodeUIBuilder {
     return this;
   }
 
-  public addDropdown(config: UIComponentConfig, options: { [key: string]: any }): NodeUIBuilder {
+  public addDropdown(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Dropdown);
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.Dropdown, componentId, [options])
+      new NodeUILeaf(this.node, NodeUIComponent.Dropdown, componentId, [props])
     );
     this.uiConfigs[componentId] = {
       componentId,
       label: config.label,
-      defaultValue: config.defaultValue ?? Object.keys(options)[0],
+      defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
       updatesBackend: config.updatesBackend ?? true,
     };
     return this;
@@ -237,9 +230,11 @@ export class NodeUIBuilder {
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
    * */
-  public addTextInput(config: UIComponentConfig): NodeUIBuilder {
+  public addTextInput(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.TextInput);
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.TextInput, componentId, []));
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.TextInput, componentId, [props])
+    );
     this.uiConfigs[componentId] = {
       componentId,
       label: config.label,
@@ -253,9 +248,11 @@ export class NodeUIBuilder {
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
    * */
-  public addNumberInput(config: UIComponentConfig): NodeUIBuilder {
+  public addNumberInput(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.NumberInput);
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.NumberInput, componentId, []));
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.NumberInput, componentId, [props])
+    );
     this.uiConfigs[componentId] = {
       componentId,
       label: config.label,
@@ -269,9 +266,11 @@ export class NodeUIBuilder {
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
    * */
-  public addImageInput(config: UIComponentConfig): NodeUIBuilder {
+  public addImageInput(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.FilePicker);
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.FilePicker, componentId, []));
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.FilePicker, componentId, [props])
+    );
     this.uiConfigs[componentId] = {
       componentId,
       label: config.label,
@@ -286,10 +285,10 @@ export class NodeUIBuilder {
    * @returns callback to this NodeUIBuilder
    * */
   // We need to discuss how to handle color pickers
-  public addColorPicker(config: UIComponentConfig, param: any): NodeUIBuilder {
+  public addColorPicker(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.ColorPicker);
     this.node.params.push(
-      new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, componentId, [param])
+      new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, componentId, [props])
     );
     this.uiConfigs[componentId] = {
       componentId,
@@ -311,12 +310,12 @@ export class NodeUIBuilder {
 
   /**
    * @param label Label for the text input
-   * @param param Parameter for the text input
+   * @props props Parameter for the text input
    * @returns callback to this NodeUIBuilder
    * */
-  public addLabel(config: UIComponentConfig, param: string) {
+  public addLabel(config: UIComponentConfig, props: UIComponentProps) {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Label);
-    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Label, componentId, [param]));
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Label, componentId, [props]));
     this.uiConfigs[componentId] = {
       componentId,
       label: config.label,

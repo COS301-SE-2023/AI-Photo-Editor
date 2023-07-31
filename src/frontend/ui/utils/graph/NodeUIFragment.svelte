@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NodeUILeaf, type NodeUI } from "@shared/ui/NodeUITypes";
+  import { NodeUILeaf, type NodeUI, type UIComponentConfig } from "@shared/ui/NodeUITypes";
   import type { UIValueStore } from "@shared/ui/UIGraph";
   import NodeUiComponent from "./NodeUIComponent.svelte";
   // import { writable } from "svelte/store";
@@ -7,6 +7,7 @@
 
   export let ui: NodeUI | null = null;
   export let inputStore: UIValueStore;
+  export let uiConfigs: { [key: string]: UIComponentConfig };
 
   // const colorPicker = writable("red" as CSSColorString);
   // const radio = writable("a");
@@ -24,13 +25,17 @@
     <ul>
       {#each ui.params as child}
         <li class="component">
-          <svelte:self inputStore="{inputStore}" ui="{child}" />
+          <svelte:self inputStore="{inputStore}" ui="{child}" uiConfigs="{uiConfigs}" />
         </li>
       {/each}
     </ul>
   {:else if ui.type === "leaf"}
     <p>
-      <NodeUiComponent inputStore="{inputStore}" leafUI="{toLeafRepresentation(ui)}" />
+      <NodeUiComponent
+        inputStore="{inputStore}"
+        leafUI="{toLeafRepresentation(ui)}"
+        uiConfigs="{uiConfigs}"
+      />
     </p>
   {/if}
 {/if}

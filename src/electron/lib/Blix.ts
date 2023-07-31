@@ -77,12 +77,15 @@ export class Blix {
       },
       {}
     );
-    outputUIBuilder.addTextInput({
-      componentId: "outputId",
-      label: "Export",
-      defaultValue: "default", // TODO: Make this a random id to start with
-      updatesBackend: true,
-    });
+    outputUIBuilder.addTextInput(
+      {
+        componentId: "outputId",
+        label: "Export",
+        defaultValue: "default", // TODO: Make this a random id to start with
+        updatesBackend: true,
+      },
+      {}
+    );
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
 

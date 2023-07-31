@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NodeUIComponent, type NodeUILeaf } from "@shared/ui/NodeUITypes";
+  import { NodeUIComponent, type NodeUILeaf, type UIComponentConfig } from "@shared/ui/NodeUITypes";
   import Button from "./nodeUICcomponents/Button.svelte";
   import Slider from "./nodeUICcomponents/Slider.svelte";
   import ColorPicker from "./nodeUICcomponents/ColorPicker.svelte";
@@ -10,6 +10,7 @@
 
   export let leafUI: NodeUILeaf | null = null;
   export let inputStore: UIValueStore;
+  export let uiConfigs: { [key: string]: UIComponentConfig };
 
   console.log(leafUI);
 
@@ -33,9 +34,9 @@
   {#if mapToSvelteComponent[leafUI.category] !== null}
     <svelte:component
       this="{mapToSvelteComponent[leafUI.category]}"
-      label="{leafUI.label}"
       inputStore="{inputStore}"
-      params="{leafUI.params}"
+      props="{leafUI.params[0]}"
+      config="{uiConfigs[leafUI.label]}"
     />
   {/if}
 {/if}

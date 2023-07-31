@@ -1,13 +1,18 @@
 <script lang="ts">
   import { writable } from "svelte/store";
   import { UIValueStore } from "@shared/ui/UIGraph";
+  import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
 
-  export let label: string;
+  // export let label: string;
+  // export let inputStore: UIValueStore;
+
+  export let props: UIComponentProps;
   export let inputStore: UIValueStore;
+  export let config: UIComponentConfig;
 
-  if (!inputStore.inputs[label]) inputStore.inputs[label] = writable("");
+  if (!inputStore.inputs[config.componentId]) inputStore.inputs[config.componentId] = writable("");
 
-  $: valStore = inputStore.inputs[label];
+  $: valStore = inputStore.inputs[config.componentId];
 </script>
 
 <input type="text" bind:value="{$valStore}" />

@@ -5,6 +5,10 @@ export type UIComponentConfig = {
   updatesBackend: boolean;
 };
 
+export type UIComponentProps = {
+  [key: string]: unknown;
+};
+
 export abstract class NodeUI {
   constructor(
     public parent: NodeUI | null,
@@ -26,7 +30,7 @@ export class NodeUILeaf extends NodeUI {
     public readonly parent: NodeUIParent,
     public readonly category: NodeUIComponent,
     public readonly label: string,
-    public readonly params: any[]
+    public readonly params: UIComponentProps[]
   ) {
     super(parent, label, params, "leaf");
   }

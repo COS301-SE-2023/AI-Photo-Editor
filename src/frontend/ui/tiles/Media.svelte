@@ -1,13 +1,14 @@
 <!-- This pane is for showing media content large-scale -->
 <script lang="ts">
-  import Image from "../../ui/utils/Image.svelte";
-  import TextBox from "../../ui/utils/TextBox.svelte";
+  import Image from "../utils/mediaDisplays/Image.svelte";
+  import TextBox from "../utils/mediaDisplays/TextBox.svelte";
   import { mediaStore } from "../../lib/stores/MediaStore";
   import type { GraphNode, GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
   import { graphMall } from "lib/stores/GraphStore";
   import { get, writable, type Readable } from "svelte/store";
   import type { MediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
+  import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
 
   const graphUUIDs = graphMall.getAllGraphUUIDsReactive();
 
@@ -85,6 +86,10 @@
     string: {
       component: TextBox,
       props: (data: string) => ({ content: data }),
+    },
+    color: {
+      component: ColorDisplay,
+      props: (data: string) => ({ color: data }),
     },
     Error: {
       component: TextBox,
