@@ -47,6 +47,12 @@
   //   selectedNode = { graphUUID, outNode: nodeUUID };
   // }
 
+  async function exportMedia(e: Event){
+    if($media?.dataType && $media?.content){
+      await mediaStore.exportMedia($media);
+    }
+  }
+
   type MediaDisplay = {
     component: any;
     props: (data: any) => { [key: string]: any };
@@ -110,6 +116,7 @@
       {@const display = dataTypeToMediaDisplay[$media.dataType]}
       {#if display}
         <svelte:component this="{display.component}" {...display.props($media.content)} />
+        <button on:click="{exportMedia}">Export</button>
       {:else}
         {@const errorDisplay = dataTypeToMediaDisplay["Error"]}
         <svelte:component

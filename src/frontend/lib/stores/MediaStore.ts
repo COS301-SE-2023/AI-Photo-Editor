@@ -48,6 +48,12 @@ class MediaStore {
     });
   }
 
+  public async exportMedia(output: MediaOutput){
+
+    return await window.apis.commandApi.runCommand("blix.exportMedia", {type: output.dataType, data: output.content});  
+
+  }
+
   public get subscribe() {
     return this.store.subscribe;
   }
