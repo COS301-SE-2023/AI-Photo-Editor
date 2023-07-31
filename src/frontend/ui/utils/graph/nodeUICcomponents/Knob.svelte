@@ -8,7 +8,26 @@
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
 
+  const { min, max, step } = props as { min: number; max: number; step: number };
+
   if (!inputStore.inputs[config.componentId]) inputStore.inputs[config.componentId] = writable(0);
 </script>
 
-<Knob parameterStore="{inputStore.inputs[config.componentId]}" />
+<div class="knob">
+  <Knob
+    parameterStore="{inputStore.inputs[config.componentId]}"
+    min="{min}"
+    max="{max}"
+    step="{step}"
+    label="{config.label}"
+    knobColor="#1F1F28"
+  />
+</div>
+
+<style>
+  .knob {
+    margin: auto;
+    width: min-content;
+    height: min-content;
+  }
+</style>

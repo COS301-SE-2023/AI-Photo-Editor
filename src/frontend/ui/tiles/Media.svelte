@@ -121,10 +121,16 @@
 
   <div class="media">
     {#if $media}
-      <svelte:component
-        this="{dataTypeToMediaDisplay[$media.dataType].component}"
-        {...dataTypeToMediaDisplay[$media.dataType].props($media.content)}
-      />
+      {@const display = dataTypeToMediaDisplay[$media.dataType]}
+      {#if display}
+        <svelte:component this="{display.component}" {...display.props($media.content)} />
+      {:else}
+        {@const errorDisplay = dataTypeToMediaDisplay["Error"]}
+        <svelte:component
+          this="{errorDisplay.component}"
+          {...errorDisplay.props(`ERROR: Unknown data type: ${JSON.stringify($media)}`)}
+        />
+      {/if}
       <!-- <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" /> -->
     {:else}
       <div class="placeholder">NULL</div>

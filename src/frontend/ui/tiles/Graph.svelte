@@ -121,7 +121,9 @@
   // Svelvet id's are of the following format:
   // <panelId>_<anchorId>/<panelId>_<nodeUUID>
   // Entities include nodes and anchors
-  function splitCompositeAnchorId(entityId: string): { anchorUUID: UUID; nodeUUID: UUID } | null {
+  async function splitCompositeAnchorId(
+    entityId: string
+  ): Promise<{ anchorUUID: UUID; nodeUUID: UUID } | null> {
     if (!$thisGraphStore) return null;
     try {
       const [anchorKey, nodeKye] = entityId.split("/");
@@ -132,6 +134,7 @@
 
       // removing console logs + commit + merge <=====================================
       // console.log("NODE", $thisGraphStore.getNode(nodeUUID));
+      await tick();
       const anchorUUID = $thisGraphStore.getNode(nodeUUID).anchorUUIDs[anchorId];
 
       if (!anchorUUID || !nodeUUID) return null;
@@ -142,19 +145,19 @@
     }
   }
 
-  function edgeConnected(e: CustomEvent<any>) {
+  async function edgeConnected(e: CustomEvent<any>) {
     console.log("CONNECTION EVENT");
     if (!$thisGraphStore) return;
-    const fromAnchor = splitCompositeAnchorId(e.detail.sourceAnchor.id);
-    const toAnchor = splitCompositeAnchorId(e.detail.targetAnchor.id);
+    const fromAnchor = await splitCompositeAnchorId(e.detail.sourceAnchor.id);
+    const toAnchor = await splitCompositeAnchorId(e.detail.targetAnchor.id);
 
     if (!fromAnchor || !toAnchor) return;
     $thisGraphStore?.addEdge(fromAnchor.anchorUUID, toAnchor.anchorUUID);
   }
 
-  function edgeDisconnected(e: CustomEvent<any>) {
+  async function edgeDisconnected(e: CustomEvent<any>) {
     console.log("DISCONNECTION EVENT");
-    const toUUID = splitCompositeAnchorId(e.detail.targetAnchor.id);
+    const toUUID = await splitCompositeAnchorId(e.detail.targetAnchor.id);
 
     if (!toUUID) return;
     $thisGraphStore?.removeEdge(toUUID.anchorUUID);

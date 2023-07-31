@@ -7,7 +7,6 @@
   export let props: UIComponentProps;
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
-  console.log("PROPS", props, "CONFIG", config, "INPUTSTORE", inputStore);
 
   const { min, max, step } = props as { min: number; max: number; step: number };
 
@@ -16,4 +15,13 @@
   $: valStore = inputStore.inputs[config.componentId];
 </script>
 
-<Slider parameterStore="{valStore}" min="{min}" max="{max}" step="{step}" fixed="{1}" />
+<Slider
+  parameterStore="{valStore}"
+  min="{min}"
+  max="{max}"
+  step="{step}"
+  fixed="{1}"
+  bgColor="#1F1F28"
+  barColor="#f43e5c"
+  label="{config.label}"
+/>

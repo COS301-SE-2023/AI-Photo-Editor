@@ -97,12 +97,12 @@ height="{graphNode.dims.h}" -->
       <div class="header">
         <h1>{$toolboxNode?.title || node.displayName}</h1>
       </div>
-      <div class="node-body" style="max-width: 400px">
+      <!-- <div class="node-body" style="max-width: 400px">
         <h2>{Math.floor(Math.random() * 100000000)}</h2>
         <h2>Signature: {node.signature}</h2>
         <h2>SvelvetNodeId: {svelvetNodeId}</h2>
         {JSON.stringify({ ...$toolboxNode, ui: undefined })}
-      </div>
+      </div> -->
       <div class="node-body" style="max-width: 400px">
         <!-- <button on:click={updateUIInputs}>SUBMIT</button> -->
         <NodeUiFragment

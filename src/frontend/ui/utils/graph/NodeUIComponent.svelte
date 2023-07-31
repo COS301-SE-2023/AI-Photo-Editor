@@ -12,8 +12,6 @@
   export let inputStore: UIValueStore;
   export let uiConfigs: { [key: string]: UIComponentConfig };
 
-  console.log(leafUI);
-
   const mapToSvelteComponent: { [key in NodeUIComponent]: any } = {
     Button: Button,
     Slider: Slider,

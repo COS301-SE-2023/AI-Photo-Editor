@@ -12,4 +12,14 @@
     inputStore.inputs[config.componentId] = writable("#BEEF69" as CSSColorString);
 </script>
 
-<ColorPicker parameterStore="{inputStore.inputs[config.componentId]}" />
+<div class="picker">
+  <ColorPicker parameterStore="{inputStore.inputs[config.componentId]}" />
+</div>
+
+<style>
+  .picker {
+    margin: auto;
+    width: min-content;
+    height: min-content;
+  }
+</style>

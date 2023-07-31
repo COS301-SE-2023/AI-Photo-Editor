@@ -72,7 +72,7 @@ const nodes = {
         .addDropdown({
             componentId: "dropdown",
             label: "Rock",
-            defaultValue: 0,
+            defaultValue: "Rock",
             updateBackend: true,
         }, {
             options: {
@@ -83,12 +83,12 @@ const nodes = {
         })
 
         // addTextInput(config: UIComponentConfig): NodeUIBuilder {
-        // .addTextInput({
-        //     componentId: "mxitRevived",
-        //     label: "dms",
-        //     defaultValue: "some text here",
-        //     updateBackend: true,
-        // }, {});
+        .addTextInput({
+            componentId: "mxitRevived",
+            label: "dms",
+            defaultValue: "some text here",
+            updateBackend: true,
+        }, {});
 
         // TODO:
         // - Label
@@ -111,7 +111,7 @@ const nodes = {
         nodeBuilder.addOutput("string", "out1", "Concat");
         nodeBuilder.addOutput("Number", "out2", "Passthrough");
         nodeBuilder.addOutput("Number", "outSlider", "Slide along");
-        nodeBuilder.addOutput("Color",  "outColorPicker", "");
+        nodeBuilder.addOutput("color",  "outColorPicker", "");
         nodeBuilder.addOutput("Number", "outKnob", "Your a knob");
         nodeBuilder.addOutput("string", "outDropdown", "");
         nodeBuilder.addOutput("string", "outTextbox", "");
