@@ -168,8 +168,7 @@ const copyDirectory = (sourceDir, targetDir, extension = "") => {
       copyDirectory(sourcePath, targetPath);
     } else {
       // Copy the file
-      if (sourcePath.endsWith(extension))
-        copyFileSync(sourcePath, targetPath);
+      if (sourcePath.endsWith(extension)) copyFileSync(sourcePath, targetPath);
     }
   });
 };
@@ -186,6 +185,5 @@ const jsFiles = getAllJSFiles(bundledElectronPath);
 minifyJSFiles(jsFiles);
 
 copyPublicFolderAndMinify(join(__dirname, "..", "public"), join(bundledElectronPath, "public"));
-copyDirectory(join(__dirname, "../blix-plugins"), join(bundledElectronPath, "blix-plugins"));
 copyFile(join(__dirname, "../public/images/icon.png"), bundledElectronPath);
 cleanTsconfig();
