@@ -36,6 +36,9 @@
 
 <style>
   select {
-    color: black;
+    color: #cdd6f4;
+    background-color: #1f1f28;
+    border: none;
+    padding: 0.1em;
   }
 </style>

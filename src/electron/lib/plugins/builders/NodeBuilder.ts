@@ -230,6 +230,24 @@ export class NodeUIBuilder {
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
    * */
+  public addFilePicker(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.TextInput);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.FilePicker, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "",
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
+
+  /**
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   * */
   public addTextInput(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.TextInput);
     this.node.params.push(

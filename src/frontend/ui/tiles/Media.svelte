@@ -64,7 +64,7 @@
       component: TextBox,
       props: (data: number) => ({
         content: data?.toString() || "NULL",
-        status: !!data ? "normal" : "warning",
+        status: data == null ? "warning" : "normal",
       }),
     },
     string: {

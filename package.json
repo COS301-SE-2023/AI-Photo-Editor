@@ -41,7 +41,7 @@
     "build:electron:prod": "cross-env NODE_ENV=production tsc --p ./tsconfig.electron.prod.json",
     "validate:svelte": "svelte-check",
     "start:electron:run": "electron .",
-    "start:electron:nodemon": "nodemon --verbose",
+    "start:electron:nodemon": "nodemon --verbose --ext py",
     "start:electron:dev": "npm-run-all -s build:electron:dev start:electron:nodemon",
     "start:electron": "sleep 2 && npm-run-all -p build:electron:dev:watch start:electron:dev",
     "test": "jest --config jest.config.json",
