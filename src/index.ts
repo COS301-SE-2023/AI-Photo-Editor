@@ -13,6 +13,10 @@ import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowAp
 
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 
+if (app.isPackaged) {
+  process.env.NODE_ENV = "production";
+}
+
 logger.info("App starting...");
 settings.set("check", true);
 logger.info("Checking if settings store works correctly.");
