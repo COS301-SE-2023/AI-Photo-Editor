@@ -2,6 +2,8 @@ import { MainWindow } from "../../../../../src/electron/lib/api/apis/WindowApi";
 import { AiManager } from "../../../../../src/electron/lib/ai/AiManager";
 import { Blix } from "../../../../../src/electron/lib/Blix";
 const path = require('path');
+const fs = require('fs');
+const getSecret = require('../../../../../src/electron/utils/settings').getSecret;
 
 const mainWindow: MainWindow = {
   apis: {
@@ -58,7 +60,7 @@ jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
   readFile: jest.fn(),
   readdirSync: jest.fn(() => ["hello-plugin"]),
-  existsSync: jest.fn(),
+  existsSync: jest.fn(() => true),
   mkdirSync: jest.fn(),
   writeFileSync: jest.fn(),
 }));
@@ -123,10 +125,19 @@ describe("Test AI Manager", () => {
 
     // Integration test
     test("Test retrieveKey", () => {
-
         const result = aiManager.retrieveKey("OpenAI");
         expect(result).toBeDefined();
         expect(result).toBe("1234-1234-1234-1234");
+    })
+
+    test("Test retrieveKey empty", () => {
+
+        getSecret.mockReturnValue(undefined,true);
+
+        const result = aiManager.retrieveKey("OpenAI");
+
+        
+        expect(result).toBe("");
     })
 
     test("Handle notification", () => {
@@ -134,11 +145,22 @@ describe("Test AI Manager", () => {
         expect(mainWindow.apis.utilClientApi.showToast).toBeCalled();
     })
 
-    // test("Test findPythonScriptPath", () => {
-    //     const result = aiManager["findPythonScriptPath"]();
-    //     expect(result).toBeDefined();
-    //     expect(result).toBe("/python/main.py");
-    // })
+    test("Test findPythonScriptPath", () => {
+        const result = aiManager["findPythonScriptPath"]();
+        expect(result).toBeDefined();
+        expect(result).toBe("/python/main.py");
+    })
+
+    test("Test findPythonScriptPath", () => {
+
+
+        fs.existsSync.mockReturnValue(false);
+
+
+        const result = aiManager["findPythonScriptPath"]();
+        expect(result).toBeDefined();
+        expect(result).toBe("");
+    });
 
 
   });

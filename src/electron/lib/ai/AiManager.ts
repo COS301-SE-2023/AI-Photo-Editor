@@ -24,7 +24,7 @@ import type {
   UpdateInputValuesConfig,
 } from "./ai-cookbook";
 import { type MainWindow } from "../api/apis/WindowApi";
-import path from "path";
+const path = require("path");
 import { getSecret } from "../../utils/settings";
 import type { QueryResponse, ToastType } from "../../../shared/types";
 import { existsSync } from "fs";
@@ -252,7 +252,7 @@ export class AiManager {
   }
 
   private findPythonScriptPath() {
-    const possibilities = [
+    const possibilities: string[] = [
       // In packaged app
       path.join(process.resourcesPath, "python/main.py"),
       // In development
