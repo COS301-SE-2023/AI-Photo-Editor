@@ -2,6 +2,7 @@ import expect from "expect";
 import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, ToolboxRegistry, MinAnchor } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
 import { NodeUIBuilder } from "../../../../../src/electron/lib/plugins/builders/NodeBuilder"
 import { NodeUIComponent, NodeUILeaf, NodeUIParent } from "../../../../../src/shared/ui/NodeUITypes";
+import { UIComponentConfig } from "../../../../../src/shared/ui/NodeUITypes";
 
 describe("Test toolbox", () => {
 
@@ -47,7 +48,7 @@ describe("Test toolbox", () => {
   });
 
   test("getFunction should return the correct function", () => {
-    expect(node.getFunction()).toEqual(null);
+    expect(node.getFunction()).toEqual({});
   });
 
   test("getUI should return ui", () => {
@@ -96,26 +97,35 @@ describe("Test Node ui", () => {
   });
 
   test("nodeParent should add button", () => {
-    builder.addButton("Button",() => {
-         return 1;
-        });
+    const uiComponentConfig : UIComponentConfig = {
+            label: "button",
+            componentId: "Button",
+            defaultValue: 50,
+            updatesBackend: true
+      }  
+    builder.addButton(uiComponentConfig,{exec : 1});
       
     expect(builder["node"].params[0].label).toEqual("Button");
     expect(builder["node"].params[0].parent).toEqual(builder["node"]);
     expect(builder["node"].params[0].type).toEqual("leaf");
-    expect(builder["node"].params[0].params[0]()).toEqual(1);
+    expect(builder["node"].params[0].params[0]).toEqual({exec :1});
   });
 
   test("nodeParent should add Slider", () => {
-    builder.addSlider("Slider",0,100,50,1);
+          const uiComponentConfig : UIComponentConfig = {
+            label: "slider",
+            componentId: "Slider",
+            defaultValue: 50,
+            updatesBackend: true
+      }  
+    builder.addSlider(uiComponentConfig,{ min: 0, max: 100, step: 0.1 });
       
     expect(builder["node"].params[0].label).toEqual("Slider");
     expect(builder["node"].params[0].parent).toEqual(builder["node"]);
     expect(builder["node"].params[0].type).toEqual("leaf");
     expect(builder["node"].params[0].params[0]).toEqual(0);
     expect(builder["node"].params[0].params[1]).toEqual(100);
-    expect(builder["node"].params[0].params[2]).toEqual(50);
-    expect(builder["node"].params[0].params[3]).toEqual(1);
+    expect(builder["node"].params[0].params[2]).toEqual(0.1);
   });
 
   test("nodeParent should add Dropdown", () => {
@@ -123,44 +133,81 @@ describe("Test Node ui", () => {
     const nod = new NodeUIParent("Root",null);
     const builder2 = new NodeUIBuilder();
 
-    builder.addDropdown("My Dropdown", builder2);
+        const uiComponentConfig : UIComponentConfig = {
+          label: "dropdown",
+          componentId: "Dropdown",
+          defaultValue: 50,
+          updatesBackend: true
+        }
+   
+
+    builder.addDropdown(uiComponentConfig, builder2);
       
-    expect(builder["node"].params[0].label).toEqual("My Dropdown");
+    expect(builder["node"].params[0].label).toEqual("Dropdown");
     expect(builder["node"].params[0].parent).toEqual(builder["node"]);
-    expect(builder["node"].params[0].type).toEqual("parent");
-    expect(builder["node"].params[0].params).toEqual([]);
+    console.log(builder["node"].params[0])
+    expect(builder["node"].params[0].type).toEqual("leaf");
+    expect(builder["node"].params[0].params[0]["node"]).toBeDefined();
   });
 
   test("nodeParent should add Label", () => {
-    builder.addLabel("My label","Attack the D point!");
+      const uiComponentConfig : UIComponentConfig = {
+        label: "label",
+        componentId: "Label",
+        defaultValue: 50,
+        updatesBackend: true
+      }
+
+    builder.addLabel(uiComponentConfig,"Attack the D point!");
       
-    expect(builder["node"].params[0].label).toEqual("My label");
+    expect(builder["node"].params[0].label).toEqual("Label");
     expect(builder["node"].params[0].parent).toEqual(builder["node"]);
     expect(builder["node"].params[0].type).toEqual("leaf");
     expect(builder["node"].params[0].params[0]).toEqual("Attack the D point!");
   });
 
   test("nodeParent should add numberInput", () => {
-    builder.addNumberInput("input number");
+      const uiComponentConfig : UIComponentConfig = {
+        label: "numberInput",
+        componentId: "InputNum",
+        defaultValue: 50,
+        updatesBackend: true
+      }
+
+    builder.addNumberInput(uiComponentConfig);
       
-    expect(builder["node"].params[0].label).toEqual("input number");
+    expect(builder["node"].params[0].label).toEqual("InputNum");
     expect(builder["node"].params[0].parent).toEqual(builder["node"]);
     expect(builder["node"].params[0].type).toEqual("leaf");
   });
 
   test("nodeParent should add imageInput", () => {
-    builder.addImageInput("Image input");
+      const uiComponentConfig : UIComponentConfig = {
+        label: "label",
+        componentId: "InputImg",
+        defaultValue: 50,
+        updatesBackend: true
+      }
+
+    builder.addImageInput(uiComponentConfig);
       
-    expect(builder["node"].params[0].label).toEqual("Image input");
+    expect(builder["node"].params[0].label).toEqual("InputImg");
     expect(builder["node"].params[0].parent).toEqual(builder["node"]);
     expect(builder["node"].params[0].type).toEqual("leaf");
   });
 
 //This must change later to match data type
   test("nodeParent should add colorInput", () => {
-    builder.addColorPicker("a color picker",1);
+      const uiComponentConfig : UIComponentConfig = {
+        label: "label",
+        componentId: "ColorPicker",
+        defaultValue: 50,
+        updatesBackend: true
+      }
+
+    builder.addColorPicker(uiComponentConfig,1);
       
-    expect(builder["node"].params[0].label).toEqual("a color picker");
+    expect(builder["node"].params[0].label).toEqual("ColorPicker");
     expect(builder["node"].params[0].parent).toEqual(builder["node"]);
     expect(builder["node"].params[0].type).toEqual("leaf");
     expect(builder["node"].params[0].params[0]).toEqual(1);
