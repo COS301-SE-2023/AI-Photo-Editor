@@ -61,7 +61,7 @@ export class PluginManager {
    */
   public async loadBasePlugins() {
     const appPath = app.getAppPath();
-    const pluginsPath = join(appPath, app.isPackaged ? "build/blix-plugins" : "blix-plugins");
+    const pluginsPath = join(app.isPackaged ? process.resourcesPath : appPath, "blix-plugins");
     const ignorePatterns = [".DS_Store"];
     const plugins = readdirSync(pluginsPath);
     plugins.filter((plugin) => {

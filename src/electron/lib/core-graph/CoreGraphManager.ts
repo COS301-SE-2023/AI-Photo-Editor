@@ -102,6 +102,8 @@ export class CoreGraphManager {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };
 
+    if (!nodeUIInputs) return { status: "error", message: "No node UI inputs provided" };
+
     const res = this._graphs[graphUUID].updateUIInputs(nodeUUID, nodeUIInputs);
 
     const signature = this._graphs[graphUUID].getNodes[nodeUUID].getSignature;

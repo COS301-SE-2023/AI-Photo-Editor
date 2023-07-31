@@ -1,3 +1,4 @@
+import type { UIValue } from "../../../shared/types";
 import { type AnchorUUID, CoreGraph, AnchorIO } from "./CoreGraph";
 import { NodeStyling } from "./CoreGraph";
 
@@ -83,6 +84,7 @@ export type LLMGraph = {
         id: string;
         type: string;
       }[];
+      inputValues: Record<string, UIValue>;
     }[];
     edges: {
       id: string;
@@ -113,6 +115,7 @@ export class LLMExportStrategy implements ExportStrategy<LLMGraph> {
         signature: n.getSignature,
         inputs: [],
         outputs: [],
+        inputValues: {},
       };
       // Anchors for Node
       Object.values(n.getAnchors).forEach((a) => {
@@ -125,6 +128,7 @@ export class LLMExportStrategy implements ExportStrategy<LLMGraph> {
       });
       llmGraph.graph.nodes.push(node);
       llmGraph.nodeMap[n.uuid.slice(0, 6)] = n.uuid;
+      node.inputValues = graph.getUIInputs(n.uuid) || {};
     });
     // Edges
     Object.values(graph.getEdgeDest).forEach((e) => {

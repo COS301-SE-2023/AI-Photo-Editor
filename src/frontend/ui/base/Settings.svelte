@@ -3,6 +3,7 @@
   import type { UserSettingsCategory, Setting } from "../../../shared/types";
   import SecureInput from "../../ui/utils/SecureInput.svelte";
   import { toastStore } from "./../../lib/stores/ToastStore";
+  import { settingsStore } from "../../lib/stores/SettingsStore";
 
   let selectedCategoryId = "";
   let selectedCategory: UserSettingsCategory | undefined;
@@ -35,11 +36,31 @@
   }
 </script>
 
-<div class="absolute left-0 top-0 h-full w-full">
-  <div class="absolute left-0 top-0 h-full w-full bg-black opacity-40"></div>
+<div class="absolute left-0 top-0 z-[10000000] h-full w-full">
+  <div
+    class="absolute left-0 top-0 h-full w-full bg-black opacity-40"
+    on:click="{() => settingsStore.hideSettings()}"
+    on:keydown="{null}"
+  ></div>
   <div
     class="fixed inset-0 m-auto flex h-[75%] w-[60%] select-none overflow-hidden rounded-lg border border-zinc-600 bg-zinc-800"
   >
+    <div
+      class="group absolute right-2 top-2 flex items-center justify-center rounded-md hover:bg-zinc-700"
+      on:click="{() => settingsStore.hideSettings()}"
+      on:keydown="{null}"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+        class="h-6 w-6 stroke-zinc-400 group-hover:stroke-zinc-300"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </div>
     <div class="flex h-full w-52 flex-col border-r border-r-zinc-600 bg-zinc-900 p-3">
       <div class="flex flex-col space-y-2">
         <span class="px-3 text-sm font-semibold text-zinc-400">General</span>
