@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { blixStore } from "../../lib/stores/BlixStore";
   import Navbar from "./Navbar.svelte";
+  import Splash from "./Splash.svelte";
   import Layout from "./layout/Layout.svelte";
   import Palette from "./palette/Palette.svelte";
   import Toasts from "../../ui/utils/toasts/Toasts.svelte";
@@ -14,6 +15,8 @@
 
   const testing = false;
   let showSettings = false;
+
+  let showSplash = true;
 
   const shortcuts = {
     "blix.settings.toggle": () => {
@@ -38,6 +41,14 @@
   <div></div>
 {:else if $blixStore.blixReady}
   <div class="h-screen w-screen bg-zinc-800 p-0">
+    {#if showSplash}
+      <Splash
+        on:click="{() => {
+          showSplash = false;
+        }}"
+      />
+    {/if}
+
     <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
       <Navbar />
     </div>
@@ -88,5 +99,7 @@
   div.layout {
     width: 100%;
     height: calc(100% - var(--navbar-height));
+    overflow: hidden;
+    background-color: #11111b;
   }
 </style>

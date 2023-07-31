@@ -119,7 +119,7 @@
       {/if}
       <!-- <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" /> -->
     {:else}
-      <div class="placeholder">NULL</div>
+      <div class="placeholder">NO CONTENT</div>
     {/if}
     <!-- <button on:click="{compute}">Testing</button> -->
   </div>
@@ -134,7 +134,11 @@
   }
 
   .media {
-    width: calc(100%-2em);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
     margin: auto;
     height: auto;
     text-align: center;
@@ -145,6 +149,7 @@
     bottom: 1em;
     left: 1em;
     color: black;
+    z-index: 100;
   }
 
   .placeholder {

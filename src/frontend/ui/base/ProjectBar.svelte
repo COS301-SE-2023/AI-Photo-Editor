@@ -1,6 +1,7 @@
 <script lang="ts">
   import { projectsStore } from "@frontend/lib/stores/ProjectStore";
   import Shortcuts from "../utils/Shortcuts.svelte";
+  import { onMount, tick } from "svelte";
 
   function createProject() {
     projectsStore.createProject();
@@ -11,6 +12,11 @@
       createProject();
     },
   };
+
+  onMount(async () => {
+    await tick();
+    createProject();
+  });
 
   // TODO: Fix when shortcuts is fixed
   // registerShortcuts({
