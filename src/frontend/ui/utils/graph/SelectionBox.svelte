@@ -143,7 +143,7 @@
     </div>
   {/if}
   <div
-    class="absolute bottom-0 left-0 flex h-7 w-36 items-center overflow-hidden rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 p-1 font-normal text-zinc-400 backdrop-blur-md"
+    class="absolute bottom-0 left-0 flex h-7 w-36 items-center overflow-hidden rounded-md border border-zinc-600 bg-zinc-800/80 p-1 font-normal text-zinc-400 backdrop-blur-md"
     on:click="{() => (showItems = !showItems)}"
     on:keydown="{null}"
   >

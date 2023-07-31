@@ -94,9 +94,16 @@
 </script>
 
 <div class="fullPane">
-  <div class="hover">
-    <input type="text" bind:value="{$mediaId}" />
-    <select on:change="{handleSelect}">
+  <div class="hover flex items-center space-x-2">
+    <input
+      type="text"
+      bind:value="{$mediaId}"
+      class="h-7 rounded-md border border-zinc-600 bg-zinc-800/80 p-1 font-normal text-zinc-400 outline-none backdrop-blur-md"
+    />
+    <select
+      on:change="{handleSelect}"
+      class="h-7 rounded-md border border-zinc-600 bg-zinc-800/80 p-1 font-normal text-zinc-400 outline-none backdrop-blur-md"
+    >
       <option selected disabled value> --- </option>
       {#each Object.keys(outputNodesByGraphUUID) as graphUUID}
         {@const outputNodes = get(outputNodesByGraphUUID[graphUUID])}
