@@ -1,6 +1,6 @@
-import type { NodeUI } from "@shared/ui/NodeUITypes";
-import type { GraphUUID } from "@shared/ui/UIGraph";
-import type { GraphNodeUUID } from "@shared/ui/UIGraph";
+import type { NodeUI } from "../ui/NodeUITypes";
+import type { GraphUUID } from "../ui/UIGraph";
+import type { GraphNodeUUID } from "../ui/UIGraph";
 
 export interface IAnchor {
   type: string;
