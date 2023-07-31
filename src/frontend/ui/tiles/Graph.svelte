@@ -7,7 +7,7 @@
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import type { UUID } from "@shared/utils/UniqueEntity";
   import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
-  import { tick } from "svelte";
+  import { onMount, tick } from "svelte";
   import { focusedPanelStore } from "../../lib/PanelNode";
   import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";
@@ -15,7 +15,7 @@
   import GraphSelectionBox from "../utils/graph/SelectionBox.svelte";
   import { projectsStore } from "../../lib/stores/ProjectStore";
   import { get } from "svelte/store";
-  import type { SelectionBoxItem } from "types";
+  import type { SelectionBoxItem } from "../../types/selection-box";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
@@ -73,6 +73,10 @@
   $: translation = graphData?.transforms?.translation;
   $: zoom = graphData?.transforms?.scale;
   $: dimensions = graphData?.dimensions;
+
+  $: console.log(
+    `Focused graph store: ${$focusedGraphStore.graphUUID} - Selected graph id: ${graphId}`
+  );
 
   // Hooks exposed by <Svelvet />
   let connectAnchorIds: (

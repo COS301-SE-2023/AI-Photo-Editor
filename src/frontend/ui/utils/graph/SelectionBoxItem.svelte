@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SelectionBoxItem } from "../../../types";
+  import type { SelectionBoxItem } from "../../../types/selection-box";
   import { createEventDispatcher } from "svelte";
 
   type ItemEvents = {
