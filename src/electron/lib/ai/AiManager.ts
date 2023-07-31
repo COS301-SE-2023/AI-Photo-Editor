@@ -142,7 +142,14 @@ export class AiManager {
       plugin: this.pluginContext(),
     };
 
-    const childProcess = spawn("python3", [this.findPythonScriptPath()]);
+    const isProd = app.isPackaged;
+    const path = isProd
+      ? join(process.resourcesPath, "python/bin/python3.10")
+      : join(__dirname, "../../../../python/bin/python3.10");
+    logger.warn(path);
+
+    // const childProcess = spawn("python3", [this.findPythonScriptPath()]);
+    const childProcess = spawn(path, [this.findPythonScriptPath()], { env: { PYTHONPATH: path } });
 
     const dataToSend = JSON.stringify(promptContext);
     childProcess.stdin.write(dataToSend + "\n");
@@ -247,7 +254,7 @@ export class AiManager {
   private findPythonScriptPath() {
     const possibilities = [
       // In packaged app
-      path.join(process.resourcesPath, "python/main.py"),
+      path.join(process.resourcesPath, "python_scripts/main.py"),
       // In development
       path.join(__dirname, "../../../../src/electron/lib/ai/python/main.py"),
     ];

@@ -11,12 +11,12 @@ from langchain.chat_models import ChatOpenAI
 
 # from functions.graphFunc import Functions
 from functions.tools import tools
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from langchain.agents import initialize_agent, AgentType
 from prompts import generic
 from api import get_api
 
-load_dotenv()
+# load_dotenv()
 
 
 class GPT:

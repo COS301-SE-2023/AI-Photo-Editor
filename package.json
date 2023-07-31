@@ -181,9 +181,10 @@
     "extraResources": [
       "assets/**",
       "blix-plugins/**",
+      "python/**",
       {
         "from": "src/electron/lib/ai/python",
-        "to": "python",
+        "to": "python_scripts",
         "filter": [
           "**/*.py"
         ]
