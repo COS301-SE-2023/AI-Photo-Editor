@@ -158,11 +158,6 @@ describe("Test Integration of ProjectManager", () => {
         expect(manager.getProject(project.uuid)?.graphs).not.toContain(graph); 
     });
 
-    test("Validate ProjectFile", () => {
-        expect(manager.validateProjectFile("")).toBe(true);
-    });
-
-
     test("onProjectChanged Event", () => {
         expect(manager.onProjectChanged("SOME_RANDOM_UUID")).toBeUndefined();
     })

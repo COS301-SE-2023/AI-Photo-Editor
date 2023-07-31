@@ -87,7 +87,7 @@ describe("Testing CoreGraphStore", () => {
     const store: CoreGraphStore = new CoreGraphStore(graphs);
     const graphId = store.createGraph();
     expect(graphs[graphId]).toBeDefined();
-    expect(graphs[graphId]._uuid).toBe(graphId);
+    expect(graphs[graphId].uuid).toBe(graphId);
   });
 
   test("Removing a graph from a CoreGrapStore", () => {
@@ -117,7 +117,7 @@ test("Adding a node to a graph", () => {
     const node = new NodeInstance("Node-1",`Test-Plugin`, `Node-1`, `This is node 1`, `fa-duotone fa-bell`, inputs, outputs);
     const response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node);
     const uuid = (response.data! as { nodeId: UUID }).nodeId;
-    expect(uuid).toBe(graph.getNodes[uuid]._uuid);
+    expect(uuid).toBe(graph.getNodes[uuid].uuid);
     const node2 = graph.getNodes[uuid];
     expect(node2.getStyling).toBeUndefined();
     expect(node2.getName).toBe("Node-1");

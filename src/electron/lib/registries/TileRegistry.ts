@@ -4,7 +4,7 @@ export class TileRegistry implements Registry {
   private registry: { [key: string]: TileInstance } = {};
 
   addInstance(instance: TileInstance): void {
-    // this.registry[instance.id] = instance;
+    this.registry[instance.id] = instance;
   }
   getRegistry(): { [key: string]: TileInstance } {
     return this.registry;
