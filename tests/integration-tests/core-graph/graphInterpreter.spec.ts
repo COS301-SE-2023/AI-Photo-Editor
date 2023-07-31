@@ -3,6 +3,7 @@ import { NodeInstance,InputAnchorInstance,OutputAnchorInstance, MinAnchor } from
 import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
 import { Blix } from "../../../src/electron/lib/Blix";
 import { CoreGraph } from "../../../src/electron/lib/core-graph/CoreGraph";
+import exp from "constants";
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
 const mainWindow: MainWindow = {
@@ -20,6 +21,11 @@ const mainWindow: MainWindow = {
   }
 } as any;
 
+jest.mock("electron-store", () => ({
+    default: jest.fn().mockImplementation(() => {
+      return {}
+    })
+}));
 
 jest.mock("chokidar", () => ({
   default: {
@@ -86,9 +92,8 @@ describe("Test graph interpreter", () => {
               displayName: "output_anchor1",
             },
           ],
-          ({ input, from }: { input: any[]; from: string }) => {
-
-            return { out1: 2 }[from];
+          (input: {[key: string]: any}, uiInputs: {[key: string]: any}, requiredOutputs: string[]) => {
+            return { out1: 2 };
           }
         )
       );
@@ -114,7 +119,7 @@ describe("Test graph interpreter", () => {
               displayName: "output_anchor1",
             },
           ],
-          ({ input, from }: { input: {[key: string]: any}; from: string }) => {
+          (input: {[key: string]: any}, uiInputs: {[key: string]: any}, requiredOutputs: string[]) => {
             return { out1: input["in1"] };
           }
         )
@@ -122,20 +127,23 @@ describe("Test graph interpreter", () => {
 
       tempNodesInt.push(
         new NodeInstance(
-          `hello-plugin.hello`,
           `output`,
+          `blix`,
           `hello-plugin`,
           `title`,
           `description`,
           [
             {
               type: "number",
-              identifier: "hello-plugin.hello.input_anchor1.0",
+              identifier: "in1",
               displayName: "input_anchor1",
             },
           ],
           [],
-          ({ input, from }: { input: any[]; from: string }) => {
+          (input: {[key: string]: any}, uiInputs: {[key: string]: any}, requiredOutputs: string[]) => {
+            expect(input["mediaOutput"]["content"]).toEqual(2);
+            expect(input["mediaOutput"]["dataType"]).toEqual('number');
+            return {};
           }
         )
       );
@@ -148,7 +156,7 @@ describe("Test graph interpreter", () => {
 
       g2.addNode(tempNodesInt[0]);
       g2.addNode(tempNodesInt[1]);
-      g2.addNode(blix.toolbox.getRegistry()["blix.output"]);
+      g2.addNode(tempNodesInt[2]);
 
 
       const g2Nodes = g2.getNodes;
@@ -166,8 +174,115 @@ describe("Test graph interpreter", () => {
         Object.values(g2Node3.getAnchors)[0].uuid
       );
 
+      // console.log = jest.fn();
+      blix.graphInterpreter.run(g2, g2Node3.uuid);
+      // expect(console.log).toHaveBeenCalledWith(2);
 
-      blix.graphInterpreter.run(g2, g2Node3._uuid);
+
+    });
+
+    test("Test output of interpreter", () => {
+      const tempNodesInt: NodeInstance[] = [];
+
+
+      tempNodesInt.push(
+        new NodeInstance(
+          `hello-plugin.hello`,
+          `input`,
+          `hello-plugin`,
+          `title`,
+          `description`,
+          [],
+          [
+            {
+              type: "number",
+              identifier: "out1",
+              displayName: "output_anchor1",
+            },
+          ],
+          (input: {[key: string]: any}, uiInputs: {[key: string]: any}, requiredOutputs: string[]) => {
+            return { out1: 2 };
+          }
+        )
+      );
+
+      tempNodesInt.push(
+        new NodeInstance(
+          `hello-plugin.hello`,
+          `flip`,
+          `hello-plugin`,
+          `title`,
+          `description`,
+          [
+            {
+              type: "number",
+              identifier: "in1",
+              displayName: "input_anchor1",
+            },
+          ],
+          [
+            {
+              type: "number",
+              identifier: "out1",
+              displayName: "output_anchor1",
+            },
+          ],
+          (input: {[key: string]: any}, uiInputs: {[key: string]: any}, requiredOutputs: string[]) => {
+            return { out1: input["nothing"].doesNotExist };
+          }
+        )
+      );
+
+      tempNodesInt.push(
+        new NodeInstance(
+          `output`,
+          `blix`,
+          `hello-plugin`,
+          `title`,
+          `description`,
+          [
+            {
+              type: "number",
+              identifier: "in1",
+              displayName: "input_anchor1",
+            },
+          ],
+          [],
+          (input: {[key: string]: any}, uiInputs: {[key: string]: any}, requiredOutputs: string[]) => {
+            expect(input["mediaOutput"]["content"]).toEqual("Cannot read properties of undefined (reading 'doesNotExist')");
+            expect(input["mediaOutput"]["dataType"]).toEqual("Error");
+            return {};
+          }
+        )
+      );
+
+      blix.toolbox.addInstance(tempNodesInt[0]);
+      blix.toolbox.addInstance(tempNodesInt[1]);
+      blix.toolbox.addInstance(tempNodesInt[2]);
+
+      const g2: CoreGraph = new CoreGraph();
+
+      g2.addNode(tempNodesInt[0]);
+      g2.addNode(tempNodesInt[1]);
+      g2.addNode(tempNodesInt[2]);
+
+
+      const g2Nodes = g2.getNodes;
+      const g2Node1 = Object.values(g2Nodes)[0];
+      const g2Node2 = Object.values(g2Nodes)[1];
+      const g2Node3 = Object.values(g2Nodes)[2];
+
+      g2.addEdge(
+        Object.values(g2Node1.getAnchors)[0].uuid,
+        Object.values(g2Node2.getAnchors)[0].uuid
+      );
+
+      g2.addEdge(
+        Object.values(g2Node2.getAnchors)[1].uuid,
+        Object.values(g2Node3.getAnchors)[0].uuid
+      );
+
+      blix.graphInterpreter.run(g2, g2Node3.uuid);
 
 
     });
