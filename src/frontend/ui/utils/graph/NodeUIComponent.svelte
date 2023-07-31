@@ -7,6 +7,7 @@
   import type { UIValueStore } from "@shared/ui/UIGraph";
   import Dropdown from "./nodeUICcomponents/Dropdown.svelte";
   import TextInput from "./nodeUICcomponents/TextInput.svelte";
+  import FilePicker from "./nodeUICcomponents/FilePicker.svelte";
 
   export let leafUI: NodeUILeaf | null = null;
   export let inputStore: UIValueStore;
@@ -24,7 +25,7 @@
     TextInput: TextInput,
     Checkbox: null,
     ColorPicker: ColorPicker,
-    FilePicker: null,
+    FilePicker: FilePicker,
   };
 </script>
 

@@ -22,7 +22,8 @@ const nodes = {
                 "outColorPicker": () => uiInputs["incarnadine"],
                 "outKnob": () => uiInputs["yourAKnob"],
                 "outDropdown": () => uiInputs["dropdown"],
-                "outTextbox": () => uiInputs["mxitRevived"]
+                "outTextbox": () => uiInputs["mxitRevived"],
+                "outFilePicker": () => uiInputs["diamondPick"]
             };
 
             let res = {};
@@ -88,6 +89,14 @@ const nodes = {
             label: "dms",
             defaultValue: "some text here",
             updateBackend: true,
+        }, {})
+
+        // addTextInput(config: UIComponentConfig): NodeUIBuilder {
+        .addFilePicker({
+            componentId: "diamondPick",
+            label: "So we back in the mine",
+            defaultValue: "",
+            updateBackend: true,
         }, {});
 
         // TODO:
@@ -115,6 +124,7 @@ const nodes = {
         nodeBuilder.addOutput("Number", "outKnob", "Your a knob");
         nodeBuilder.addOutput("string", "outDropdown", "");
         nodeBuilder.addOutput("string", "outTextbox", "");
+        nodeBuilder.addOutput("string", "outFilePicker", "");
     }
     , "Jake": (context) => {
         nodeBuilder = context.instantiate("hello-plugin", "Jake");

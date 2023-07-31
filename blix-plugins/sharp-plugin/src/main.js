@@ -11,7 +11,7 @@ const nodes ={
         .addSlider(
             {
                 componentId: "brightness",
-                label: "Slide Along",
+                label: "Brightness",
                 defaultValue: 0,
                 updateBackend: true,
             },
