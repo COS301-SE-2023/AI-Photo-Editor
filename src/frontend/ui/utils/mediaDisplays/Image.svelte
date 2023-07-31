@@ -15,7 +15,8 @@
     align-items: center;
     height: 100%;
     width: 100%;
-    font-size: 2rem;
+    margin-top: 2em;
+    font-size: 1em;
     color: #aaa;
   }
 </style>

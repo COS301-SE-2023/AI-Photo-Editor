@@ -13,7 +13,7 @@ import {
   updateInputValues,
   splitStringIntoJSONObjects,
   errorResponseSchema,
-  updateInputValue
+  updateInputValue,
 } from "./ai-cookbook";
 import type { ResponseFunctions } from "./ai-cookbook";
 import { type MainWindow } from "../api/apis/WindowApi";
@@ -114,7 +114,7 @@ export class AiManager {
    * @returns Response from ai
    * */
   async sendPrompt(prompt: string, graphId: string, model?: SupportedLanguageModel) {
-    let finalResponse = "";
+    const finalResponse = "";
     const llmGraph = getGraph(this.graphManager, graphId);
 
     model = "OpenAI";
@@ -258,7 +258,6 @@ export class AiManager {
     }
     return "";
   }
-
 }
 
 interface Connection {

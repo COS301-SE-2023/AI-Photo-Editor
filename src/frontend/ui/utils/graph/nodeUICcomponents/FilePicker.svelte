@@ -3,9 +3,6 @@
   import { UIValueStore } from "@shared/ui/UIGraph";
   import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
 
-  // export let label: string;
-  // export let inputStore: UIValueStore;
-
   export let props: UIComponentProps;
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
@@ -13,9 +10,17 @@
   if (!inputStore.inputs[config.componentId]) inputStore.inputs[config.componentId] = writable("");
 
   $: valStore = inputStore.inputs[config.componentId];
+
+  let files: FileList | undefined;
+
+  $: if (files) {
+    valStore.set(files[0].path);
+  } else {
+    valStore.set("");
+  }
 </script>
 
-<input type="text" bind:value="{$valStore}" />
+<input type="file" bind:files="{files}" />
 
 <style>
   input {

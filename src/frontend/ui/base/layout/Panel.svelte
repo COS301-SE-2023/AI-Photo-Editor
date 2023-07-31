@@ -137,7 +137,7 @@
         if (toRem >= 0 && toRem < layout.panels.length) {
           layout.getPanel(toRem).size = -1;
 
-          // layout.removePanel(toRem);
+          layout.removePanel(toRem);
           // layout = layout;
 
           bubbleToRoot();
@@ -202,7 +202,6 @@
     on:pane-remove="{(e) => e.stopPropagation()}"
     on:resize="{triggerWindowResize}"
   >
-    <!-- {layout.id} -->
     {#each layout.panels as panel, i (panel.id)}
       <!-- TODO: Fix; look into using svelte animations -->
       {#key layout}

@@ -10,6 +10,7 @@ import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
 import { type NodeSignature } from "@shared/ui/ToolboxTypes";
 import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
 import { type MediaOutputId } from "@shared/types/media";
+import { type GraphMetadata } from "../../../shared/ui/UIGraph";
 
 // =========================================
 // Explicit types for type safety
@@ -45,6 +46,7 @@ export class CoreGraph extends UniqueEntity {
   // E.g. we can do (source anchor) ---[edgeSrc]--> (destination anchors) ---[edgeDest]--> (Edges)
   //      to get all the edges that flow from a source anchor
   private outputNodes: { [key: UUID]: MediaOutputId };
+  private metadata: GraphMetadata;
 
   // Maps a node UUID to a list of UI inputs
   private uiInputs: { [key: UUID]: CoreNodeUIInputs };
@@ -59,6 +61,9 @@ export class CoreGraph extends UniqueEntity {
     this.edgeSrc = {};
     this.outputNodes = {};
     this.uiInputs = {};
+    this.metadata = {
+      displayName: "Graph",
+    };
     // this.nodeList = [];
   }
 
@@ -143,14 +148,16 @@ export class CoreGraph extends UniqueEntity {
     return this.uiInputs;
   }
 
+  public get getMetadata() {
+    return { ...this.metadata };
+  }
+
   public getUIInputs(nodeUUID: UUID): { [key: string]: UIValue } | null {
     return this.uiInputs[nodeUUID]?.getInputs || null;
   }
 
   // We need to pass in node name and plugin name
-  public addNode(
-    node: NodeInstance
-  ): QueryResponse<{
+  public addNode(node: NodeInstance): QueryResponse<{
     nodeId: UUID;
     inputs: string[];
     outputs: string[];
@@ -399,6 +406,28 @@ export class CoreGraph extends UniqueEntity {
     if (!(node in this.nodes)) return { status: "error", message: "Node does not exist" };
     this.nodes[node].setStyling(new NodeStyling(pos, { w: 0, h: 0 })); // TODO w/h
     return { status: "success" };
+  }
+
+  public updateMetadata(updatedMetadata: Partial<GraphMetadata>) {
+    if (!updatedMetadata) {
+      return {
+        status: "error",
+        message: "No metadata provided",
+      } satisfies QueryResponse;
+    }
+
+    const { displayName } = updatedMetadata;
+
+    const newMetadata: GraphMetadata = {
+      displayName: displayName ? displayName : this.metadata.displayName,
+    };
+
+    this.metadata = newMetadata;
+
+    return {
+      status: "success",
+      message: "Metadata updated",
+    } satisfies QueryResponse;
   }
 
   private copy() {

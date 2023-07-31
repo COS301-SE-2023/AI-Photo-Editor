@@ -1,30 +1,15 @@
 <!-- This pane is for showing media content large-scale -->
 <script lang="ts">
-  import Image from "../../ui/utils/Image.svelte";
-  import TextBox from "../../ui/utils/TextBox.svelte";
+  import Image from "../utils/mediaDisplays/Image.svelte";
+  import TextBox from "../utils/mediaDisplays/TextBox.svelte";
   import { mediaStore } from "../../lib/stores/MediaStore";
-  import type { GraphNode, GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
-  import { graphMall } from "../../lib/stores/GraphStore";
-  import { get, writable, type Readable } from "svelte/store";
+  import type { GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
+  import { writable, type Readable } from "svelte/store";
   import type { MediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
+  import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
 
-  const graphUUIDs = graphMall.getAllGraphUUIDsReactive();
-
-  $: outputNodesByGraphUUID = getAllOutputNodesByGraphUUID($graphUUIDs);
-  type NodesByUUID = Readable<{ [key: GraphNodeUUID]: GraphNode }>;
-
-  function getAllOutputNodesByGraphUUID(graphUUIDs: GraphUUID[]): {
-    [key: GraphUUID]: NodesByUUID;
-  } {
-    let res: { [key: GraphUUID]: NodesByUUID } = {};
-
-    for (let uuid of graphUUIDs) {
-      res[uuid] = graphMall.getGraph(uuid)?.getOutputNodesByIdReactive();
-    }
-
-    return res;
-  }
+  const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
 
   let mediaId = writable("default");
   let oldMediaId: string | null = null;
@@ -53,14 +38,14 @@
     unsubMedia();
   });
 
-  function handleSelect(e: Event) {
-    return;
-    const value = (e.target as HTMLSelectElement).value;
-    if (!value) return;
+  // function handleSelect(e: Event) {
+  //   return;
+  //   const value = (e.target as HTMLSelectElement).value;
+  //   if (!value) return;
 
-    const [graphUUID, nodeUUID] = value.split("/");
-    selectedNode = { graphUUID, outNode: nodeUUID };
-  }
+  //   const [graphUUID, nodeUUID] = value.split("/");
+  //   selectedNode = { graphUUID, outNode: nodeUUID };
+  // }
 
   type MediaDisplay = {
     component: any;
@@ -79,12 +64,25 @@
       component: TextBox,
       props: (data: number) => ({
         content: data?.toString() || "NULL",
-        status: !!data ? "normal" : "warning",
+        status: data == null ? "warning" : "normal",
+        fontSize: "large",
+      }),
+    },
+    boolean: {
+      component: TextBox,
+      props: (data: number) => ({
+        content: data?.toString() || "NULL",
+        status: data == null ? "warning" : "normal",
+        fontSize: "large",
       }),
     },
     string: {
       component: TextBox,
       props: (data: string) => ({ content: data }),
+    },
+    color: {
+      component: ColorDisplay,
+      props: (data: string) => ({ color: data }),
     },
     Error: {
       component: TextBox,
@@ -96,30 +94,29 @@
 <div class="fullPane">
   <div class="hover">
     <input type="text" bind:value="{$mediaId}" />
-    <select on:change="{handleSelect}">
-      <option selected disabled value> --- </option>
-      {#each Object.keys(outputNodesByGraphUUID) as graphUUID}
-        {@const outputNodes = get(outputNodesByGraphUUID[graphUUID])}
-        <option value="{graphUUID}" disabled>
-          --- {graphUUID.slice(0, 6)} ---
-        </option>
-
-        {#each Object.keys(outputNodes) as outputId}
-          {@const output = outputNodes[outputId]}
-          <option value="{graphUUID}/{output.uuid}">
-            {output.uuid.slice(0, 6)}
-          </option>
+    <select bind:value="{$mediaId}">
+      {#if $mediaOutputIds}
+        {#each Array.from($mediaOutputIds) as id}
+          <option value="{id}">{id}</option>
         {/each}
-      {/each}
+      {:else}
+        <option selected disabled value>No Outputs</option>
+      {/if}
     </select>
   </div>
 
   <div class="media">
     {#if $media}
-      <svelte:component
-        this="{dataTypeToMediaDisplay[$media.dataType].component}"
-        {...dataTypeToMediaDisplay[$media.dataType].props($media.content)}
-      />
+      {@const display = dataTypeToMediaDisplay[$media.dataType]}
+      {#if display}
+        <svelte:component this="{display.component}" {...display.props($media.content)} />
+      {:else}
+        {@const errorDisplay = dataTypeToMediaDisplay["Error"]}
+        <svelte:component
+          this="{errorDisplay.component}"
+          {...errorDisplay.props(`ERROR: Unknown data type: ${JSON.stringify($media)}`)}
+        />
+      {/if}
       <!-- <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" /> -->
     {:else}
       <div class="placeholder">NULL</div>

@@ -4,6 +4,7 @@ import { type UUID } from "../../../../shared/utils/UniqueEntity";
 import { type NodeSignature } from "@shared/ui/ToolboxTypes";
 import { type INodeUIInputs } from "@shared/types";
 import { CoreGraphUpdateParticipant } from "../../core-graph/CoreGraphInteractors";
+import type { GraphMetadata } from "../../../../shared/ui/UIGraph";
 
 // Graphs across projects are stored homogeneously and referenced by UUID
 export class GraphApi implements ElectronMainApi<GraphApi> {
@@ -64,5 +65,13 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
 
   async getAllGraphUUIDs() {
     return this._blix.graphManager.getAllGraphUUIDs();
+  }
+
+  async updateGraphMetadata(graphUUID: UUID, updatedMetadata: Partial<GraphMetadata>) {
+    return this._blix.graphManager.updateGraphMetadata(
+      graphUUID,
+      updatedMetadata,
+      CoreGraphUpdateParticipant.user
+    );
   }
 }

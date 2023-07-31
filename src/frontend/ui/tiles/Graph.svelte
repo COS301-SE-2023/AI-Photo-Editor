@@ -1,18 +1,21 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
   import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
-  import { type Readable } from "svelte/store";
+  import { derived, type Readable } from "svelte/store";
   import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import type { UUID } from "@shared/utils/UniqueEntity";
   import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
-  import { tick } from "svelte";
+  import { onMount, tick } from "svelte";
   import { focusedPanelStore } from "../../lib/PanelNode";
   import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";
   import { commandStore } from "../../lib/stores/CommandStore";
-  import GraphSelectionBox from "../../ui/utils/graph/GraphSelectionBox.svelte";
+  import GraphSelectionBox from "../utils/graph/SelectionBox.svelte";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
+  import { get } from "svelte/store";
+  import type { SelectionBoxItem } from "../../types/selection-box";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
@@ -20,6 +23,41 @@
   export let panelId = Math.round(10000000.0 * Math.random());
 
   let graphId = "";
+  let lastGraphsAmount = 0;
+
+  const projectGraphItems = derived([projectsStore, graphMall], ([$projectsStore, $graphMall]) => {
+    if (!$projectsStore.activeProject) {
+      return [];
+    }
+
+    const items: { id: string; title: string }[] = [];
+    const graphIds = $projectsStore.activeProject.graphs;
+
+    for (graphId of graphIds) {
+      const graphStore = $graphMall[graphId];
+      if (graphStore) {
+        const state = get(graphStore);
+        items.push({
+          id: state.uuid,
+          title: state.metadata.displayName,
+        });
+      }
+    }
+
+    return items;
+  });
+
+  // Makes sure that the active graph id is always set correctly
+  $: focusedGraphStore.set({ panelId, graphUUID: graphId });
+
+  // Sets new graph created as the active graph
+  $: {
+    const items = $projectGraphItems;
+    if (items.length > lastGraphsAmount && $focusedPanelStore === panelId) {
+      graphId = items[items.length - 1].id;
+    }
+    lastGraphsAmount = items.length;
+  }
 
   /**
    * When a new panel is focussed on (the panel is clicked),
@@ -121,7 +159,9 @@
   // Svelvet id's are of the following format:
   // <panelId>_<anchorId>/<panelId>_<nodeUUID>
   // Entities include nodes and anchors
-  function splitCompositeAnchorId(entityId: string): { anchorUUID: UUID; nodeUUID: UUID } | null {
+  async function splitCompositeAnchorId(
+    entityId: string
+  ): Promise<{ anchorUUID: UUID; nodeUUID: UUID } | null> {
     if (!$thisGraphStore) return null;
     try {
       const [anchorKey, nodeKye] = entityId.split("/");
@@ -132,6 +172,7 @@
 
       // removing console logs + commit + merge <=====================================
       // console.log("NODE", $thisGraphStore.getNode(nodeUUID));
+      await tick();
       const anchorUUID = $thisGraphStore.getNode(nodeUUID)
         ? $thisGraphStore.getNode(nodeUUID).anchorUUIDs[anchorId]
         : null;
@@ -144,24 +185,33 @@
     }
   }
 
-  function edgeConnected(e: CustomEvent<any>) {
+  async function edgeConnected(e: CustomEvent<any>) {
     console.log("CONNECTION EVENT");
     if (!$thisGraphStore) return;
-    const fromAnchor = splitCompositeAnchorId(e.detail.sourceAnchor.id);
-    const toAnchor = splitCompositeAnchorId(e.detail.targetAnchor.id);
+    const fromAnchor = await splitCompositeAnchorId(e.detail.sourceAnchor.id);
+    const toAnchor = await splitCompositeAnchorId(e.detail.targetAnchor.id);
 
     if (!fromAnchor || !toAnchor) return;
     $thisGraphStore?.addEdge(fromAnchor.anchorUUID, toAnchor.anchorUUID);
   }
 
-  function edgeDisconnected(e: CustomEvent<any>) {
+  async function edgeDisconnected(e: CustomEvent<any>) {
     console.log("DISCONNECTION EVENT");
-    const toUUID = splitCompositeAnchorId(e.detail.targetAnchor.id);
+    const toUUID = await splitCompositeAnchorId(e.detail.targetAnchor.id);
 
     if (!toUUID) return;
     console.log("DISCONNECTING", toUUID);
 
     $thisGraphStore?.removeEdge(toUUID.anchorUUID);
+  }
+
+  function updateGraphName(newItem: SelectionBoxItem) {
+    const { id, title } = newItem;
+    window.apis.graphApi.updateGraphMetadata(id, { displayName: title });
+  }
+
+  function deleteGraph(id: string) {
+    commandStore.runCommand("blix.graphs.deleteGraph", { id });
   }
 </script>
 
@@ -175,7 +225,12 @@
     {/if}
   </div>
   <div class="self-end">
-    <GraphSelectionBox bind:selectedGraphId="{graphId}" />
+    <GraphSelectionBox
+      bind:selectedItemId="{graphId}"
+      items="{$projectGraphItems}"
+      on:editItem="{(event) => updateGraphName(event.detail.newItem)}"
+      on:removeItem="{(event) => deleteGraph(event.detail.id)}"
+    />
   </div>
   <div
     class="flex h-7 w-7 items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md hover:bg-zinc-700"

@@ -9,15 +9,18 @@ export type GraphUUID = UUID;
 export type GraphNodeUUID = UUID;
 export type GraphEdgeUUID = UUID;
 export type GraphAnchorUUID = UUID;
+export type GraphMetadata = {
+  displayName: string;
+};
 
 export class UIGraph {
-  public displayName;
   public nodes: { [key: GraphNodeUUID]: GraphNode } = {};
   public edges: { [key: GraphAnchorUUID]: GraphEdge } = {};
+  public metadata: GraphMetadata = {
+    displayName: "Graph",
+  };
 
-  constructor(public uuid: GraphUUID) {
-    this.displayName = "Graph";
-  }
+  constructor(public uuid: GraphUUID) {}
 
   public updateNodes() {}
 }

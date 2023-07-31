@@ -31,11 +31,11 @@ class removeNodeInput(BaseModel):
 class addEdgeInput(BaseModel):
     output: str = Field(
         ...,
-        description="Id of the output anchor connected to the edge. e.g 'l40plq', 'j5nm33'",
+        description="Id of the output anchor of a node to be connected to the edge. e.g 'l40plq', 'j5nm33'",
     )
     input: str = Field(
         ...,
-        description="Id of the input anchor connected to the edge. e.g 'az22m3', '0lpm5i'",
+        description="Id of the input anchor of a node to be connected to the edge. e.g 'az22m3', '0lpm5i'",
     )
 
 
@@ -130,7 +130,7 @@ class removeNodeTool(BaseTool):
 
 class addEdgeTool(BaseTool):
     name: str = "addEdge"
-    description: str = "Adds an edge between an output anchor of a node and an input anchor of another node using these anchor id's"
+    description: str = "Adds an edge between an output anchor of a node and an input anchor of another node using their anchor id's"
     args_schema: Type[BaseModel] = addEdgeInput
 
     def _run(

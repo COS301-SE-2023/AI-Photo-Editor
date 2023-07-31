@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NodeUIComponent, type NodeUILeaf } from "@shared/ui/NodeUITypes";
+  import { NodeUIComponent, type NodeUILeaf, type UIComponentConfig } from "@shared/ui/NodeUITypes";
   import Button from "./nodeUICcomponents/Button.svelte";
   import Slider from "./nodeUICcomponents/Slider.svelte";
   import ColorPicker from "./nodeUICcomponents/ColorPicker.svelte";
@@ -7,11 +7,11 @@
   import type { UIValueStore } from "@shared/ui/UIGraph";
   import Dropdown from "./nodeUICcomponents/Dropdown.svelte";
   import TextInput from "./nodeUICcomponents/TextInput.svelte";
+  import FilePicker from "./nodeUICcomponents/FilePicker.svelte";
 
   export let leafUI: NodeUILeaf | null = null;
   export let inputStore: UIValueStore;
-
-  console.log(leafUI);
+  export let uiConfigs: { [key: string]: UIComponentConfig };
 
   const mapToSvelteComponent: { [key in NodeUIComponent]: any } = {
     Button: Button,
@@ -25,7 +25,7 @@
     TextInput: TextInput,
     Checkbox: null,
     ColorPicker: ColorPicker,
-    FilePicker: null,
+    FilePicker: FilePicker,
   };
 </script>
 
@@ -33,9 +33,9 @@
   {#if mapToSvelteComponent[leafUI.category] !== null}
     <svelte:component
       this="{mapToSvelteComponent[leafUI.category]}"
-      label="{leafUI.label}"
       inputStore="{inputStore}"
-      params="{leafUI.params}"
+      props="{leafUI.params[0]}"
+      config="{uiConfigs[leafUI.label]}"
     />
   {/if}
 {/if}

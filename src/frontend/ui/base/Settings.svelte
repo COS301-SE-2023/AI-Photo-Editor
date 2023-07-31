@@ -36,7 +36,7 @@
   }
 </script>
 
-<div class="absolute left-0 top-0 h-full w-full">
+<div class="absolute left-0 top-0 z-[10000000] h-full w-full">
   <div
     class="absolute left-0 top-0 h-full w-full bg-black opacity-40"
     on:click="{() => settingsStore.hideSettings()}"

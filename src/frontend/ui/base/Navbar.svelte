@@ -19,7 +19,7 @@
       viewBox="0 0 24 24"
       stroke-width="1.5"
       stroke="currentColor"
-      class="no-drag h-6 w-6 stroke-zinc-400 group-hover:stroke-zinc-300"
+      class="no-drag h-6 w-6 stroke-zinc-500 stroke-1 group-hover:stroke-zinc-300"
     >
       <path
         stroke-linecap="round"

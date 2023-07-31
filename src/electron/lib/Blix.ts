@@ -12,9 +12,10 @@ import {
   UIInputsGraphSubscriber,
   SystemGraphSubscriber,
   CoreGraphUpdateParticipant,
+  MetadataGraphSubscriber,
 } from "./core-graph/CoreGraphInteractors";
 import type { UUID } from "../../shared/utils/UniqueEntity";
-import type { UIGraph } from "../../shared/ui/UIGraph";
+import type { GraphMetadata, UIGraph } from "../../shared/ui/UIGraph";
 import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
 import { AiManager } from "./ai/AiManager";
@@ -77,18 +78,21 @@ export class Blix {
       },
       {}
     );
-    outputUIBuilder.addTextInput({
-      componentId: "outputId",
-      label: "Export",
-      defaultValue: "default", // TODO: Make this a random id to start with
-      updatesBackend: true,
-    });
+    outputUIBuilder.addTextInput(
+      {
+        componentId: "outputId",
+        label: "Export",
+        defaultValue: "default", // TODO: Make this a random id to start with
+        updatesBackend: true,
+      },
+      {}
+    );
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
 
     outputNodeBuilder.setTitle("Output");
     outputNodeBuilder.setDescription(
-      "This is the global output node which accepts data of any type, and presents the final value to the user"
+      "Dedicated output node which accepts data of any type, and returns the result to the system"
     );
     // tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
     outputNodeBuilder.define(
@@ -162,6 +166,18 @@ export class Blix {
       this._mediaManager.onGraphUpdated(graphId);
     };
     this._graphManager.addAllSubscriber(mediaSubscriber);
+
+    const metadataSubscriber = new MetadataGraphSubscriber();
+    metadataSubscriber.setListenEvents([CoreGraphUpdateEvent.metadataUpdated]);
+    metadataSubscriber.setListenParticipants([
+      CoreGraphUpdateParticipant.system,
+      CoreGraphUpdateParticipant.ai,
+      CoreGraphUpdateParticipant.user,
+    ]);
+    metadataSubscriber.listen = (graphId: UUID, newMetadata: GraphMetadata) => {
+      this.mainWindow?.apis.graphClientApi.metadataChanged(graphId, newMetadata);
+    };
+    this._graphManager.addAllSubscriber(metadataSubscriber);
 
     // ===== MEDIA SUBSCRIBERS ===== //
     // REMOVED: The MediaApi now handles creating MediaSubscribers directly

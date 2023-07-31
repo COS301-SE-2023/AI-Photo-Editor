@@ -8,10 +8,12 @@ import {
   type GraphUUID,
   type SvelvetCanvasPos,
   constructUIValueStore,
+  type GraphMetadata,
 } from "@shared/ui/UIGraph";
 import { writable, get, derived, type Writable, type Readable } from "svelte/store";
 import { toolboxStore } from "./ToolboxStore";
 import type { MediaOutputId } from "@shared/types/media";
+import { tick } from "svelte";
 
 // When the the CoreGraphApi type has to be imported into the backend
 // (WindowApi.ts) so that the API can be bound then it tries to import the type
@@ -31,7 +33,7 @@ import type { MediaOutputId } from "@shared/types/media";
 // TODO: Return a GraphStore in createGraphStore for typing
 export class GraphStore {
   graphStore: Writable<UIGraph>;
-  uiInputUnsubscribers: { [key: GraphNodeUUID]: () => void } = {};
+  uiInputUnsubscribers: { [key: GraphNodeUUID]: (() => void)[] } = {};
   uiInputSubscribers: { [key: GraphNodeUUID]: () => void } = {};
 
   constructor(public uuid: GraphUUID) {
@@ -53,9 +55,17 @@ export class GraphStore {
     });
   }
 
+  public refreshMetadata(newMetadata: GraphMetadata) {
+    this.graphStore.update((graph) => {
+      graph.metadata = newMetadata;
+      return graph;
+    });
+  }
+
   // Called by GraphClientApi when the command registry changes
   public refreshStore(newGraph: UIGraph) {
     this.graphStore.update((graph) => {
+      graph.metadata = newGraph.metadata;
       graph.edges = newGraph.edges;
 
       const oldNodes = graph.nodes;
@@ -77,16 +87,27 @@ export class GraphStore {
             );
 
             const inputs = graph.nodes[node].inputUIValues.inputs;
-
-            for (const input of Object.keys(inputs)) {
-              // console.log("SUB TO", node, "->", input);
-              this.uiInputUnsubscribers[node] = inputs[input].subscribe(() => {
-                // console.log("UPDATE UI INPUTS", node, "->", input);
-                this.updateUIInputs(node, input).catch((err) => {
-                  return;
-                });
+            // TODO: Investigate this; for some reason not all the keys in `inputs`
+            //       are available off the bat unless you wait for the next tick()
+            tick()
+              .then(() => {
+                this.uiInputUnsubscribers[node] = [];
+                for (const input in inputs) {
+                  if (!inputs.hasOwnProperty(input)) continue;
+                  // console.log("SUB TO", node, "-->>", input)
+                  this.uiInputUnsubscribers[node].push(
+                    inputs[input].subscribe(() => {
+                      // console.log("UPDATE UI INPUTS", node, "->", input);
+                      this.updateUIInputs(node, input).catch((err) => {
+                        return;
+                      });
+                    })
+                  );
+                }
+              })
+              .catch(() => {
+                return;
               });
-            }
           }
         }
       }
@@ -96,7 +117,9 @@ export class GraphStore {
         if (!graph.nodes[node] && this.uiInputUnsubscribers[node]) {
           // Node is no longer in the graph and has an unsub function
           // console.log("UNSUB FROM", node);
-          this.uiInputUnsubscribers[node]();
+          for (const unsub of this.uiInputUnsubscribers[node]) {
+            unsub();
+          }
           delete this.uiInputUnsubscribers[node];
         }
       }
@@ -226,6 +249,16 @@ class GraphMall {
     const val = get(this.mall);
   }
 
+  public refreshGraphMetadata(graphUUID: GraphUUID, newMetadata: GraphMetadata) {
+    this.mall.update((stores) => {
+      if (!stores[graphUUID]) {
+        stores[graphUUID] = new GraphStore(graphUUID);
+      }
+      stores[graphUUID].refreshMetadata(newMetadata);
+      return stores;
+    });
+  }
+
   public get subscribe() {
     return this.mall.subscribe;
   }
@@ -250,7 +283,7 @@ class GraphMall {
   }
 
   // Returns the store for the specified graph
-  public getGraph(graphUUID: GraphUUID): GraphStore {
+  public getGraph(graphUUID: GraphUUID) {
     return get(this.mall)[graphUUID];
   }
 

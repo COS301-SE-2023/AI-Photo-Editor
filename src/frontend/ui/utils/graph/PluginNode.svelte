@@ -43,6 +43,30 @@
     return colour as CSSColorString;
   }
 
+  function changeBrightness(color: CSSColorString, percent: number): CSSColorString {
+    var R = parseInt(color.substring(1, 3), 16);
+    var G = parseInt(color.substring(3, 5), 16);
+    var B = parseInt(color.substring(5, 7), 16);
+
+    R = parseInt(`${(R * (100 + percent)) / 100}`);
+    G = parseInt(`${(G * (100 + percent)) / 100}`);
+    B = parseInt(`${(B * (100 + percent)) / 100}`);
+
+    R = R < 255 ? R : 255;
+    G = G < 255 ? G : 255;
+    B = B < 255 ? B : 255;
+
+    R = Math.round(R);
+    G = Math.round(G);
+    B = Math.round(B);
+
+    var RR = R.toString(16).length == 1 ? "0" + R.toString(16) : R.toString(16);
+    var GG = G.toString(16).length == 1 ? "0" + G.toString(16) : G.toString(16);
+    var BB = B.toString(16).length == 1 ? "0" + B.toString(16) : B.toString(16);
+
+    return ("#" + RR + GG + BB) as CSSColorString;
+  }
+
   async function nodeClicked(e: CustomEvent) {
     if (e.detail.e.button === 2) {
       console.log("DELETE NODE EVENT");
@@ -73,15 +97,19 @@ height="{graphNode.dims.h}" -->
       <div class="header">
         <h1>{$toolboxNode?.title || node.displayName}</h1>
       </div>
-      <div class="node-body" style="max-width: 400px">
+      <!-- <div class="node-body" style="max-width: 400px">
         <h2>{Math.floor(Math.random() * 100000000)}</h2>
         <h2>Signature: {node.signature}</h2>
         <h2>SvelvetNodeId: {svelvetNodeId}</h2>
         {JSON.stringify({ ...$toolboxNode, ui: undefined })}
-      </div>
+      </div> -->
       <div class="node-body" style="max-width: 400px">
         <!-- <button on:click={updateUIInputs}>SUBMIT</button> -->
-        <NodeUiFragment inputStore="{node.inputUIValues}" ui="{$toolboxNode?.ui}" />
+        <NodeUiFragment
+          inputStore="{node.inputUIValues}"
+          ui="{$toolboxNode?.ui}"
+          uiConfigs="{$toolboxNode?.uiConfigs}"
+        />
       </div>
 
       {#if $toolboxNode}
@@ -101,7 +129,11 @@ height="{graphNode.dims.h}" -->
             >
               {#if hovering}
                 <div class="anchorTooltip">
-                  {input.type || "any"}
+                  {#if input.displayName}
+                    {input.displayName}<br />
+                  {/if}
+                  &lt;<span style:color="{changeBrightness(color, 120)}">{input.type || "any"}</span
+                  >&gt;
                 </div>
               {/if}
               <DefaultAnchor
@@ -132,7 +164,13 @@ height="{graphNode.dims.h}" -->
             >
               {#if hovering}
                 <div class="anchorTooltip">
-                  {output.type || "any"}
+                  {#if output.displayName}
+                    {output.displayName}<br />
+                  {/if}
+                  <!-- &lt;{output.type || "any"}&gt; -->
+                  &lt;<span style:color="{changeBrightness(color, 120)}"
+                    >{output.type || "any"}</span
+                  >&gt;
                 </div>
               {/if}
               <DefaultAnchor
@@ -205,7 +243,7 @@ height="{graphNode.dims.h}" -->
     color: white;
     border-radius: 2px;
     padding: 0.2em;
-    top: -1.5em;
+    top: -3.5em;
   }
   .header {
     display: flex;

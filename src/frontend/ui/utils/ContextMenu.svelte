@@ -18,7 +18,7 @@
 
 <script lang="ts">
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
-  import { graphMall } from "../../lib/stores/GraphStore";
+  import { focusedGraphStore, graphMall } from "../../lib/stores/GraphStore";
   import type { ItemGroup, Item, Action } from "../../lib/stores/GraphContextMenuStore";
   import ContextMenuItem from "./ContextMenuItem.svelte";
   import ContextMenuGroup from "./ContextMenuGroup.svelte";
@@ -64,7 +64,7 @@
       if (!action) return;
 
       const graphMenuState = get(graphMenuStore);
-      const graphStore = graphMall.getGraph(graphMenuState.graphId);
+      const graphStore = graphMall.getGraph($focusedGraphStore.graphUUID);
 
       if (!graphStore) return;
 

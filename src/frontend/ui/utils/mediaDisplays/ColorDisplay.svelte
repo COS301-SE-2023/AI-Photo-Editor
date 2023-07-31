@@ -1,11 +1,28 @@
 <script lang="ts">
-  export let content = "";
-  export let status: "normal" | "error" | "warning" = "normal";
+  import type { CSSColorString } from "blix_svelvet";
+
+  export let color: CSSColorString = "black";
+
+  // hsl(301.9, 68.9%, 65.55%)
+  // 45 < h < 190 -> black
+  // 85 < l -> black
+  function getFontColor(color: CSSColorString): string {
+    if (color.startsWith("hsl")) {
+      const [h, _, l] = color
+        .split("(")[1]
+        .split(")")[0]
+        .split(",")
+        .map((v) => parseFloat(v));
+      console.log("LUMINANCE", l);
+      return (45 < h && h < 190) || l > 85 ? "black" : "white";
+    }
+    return "white";
+  }
 </script>
 
 <div class="content">
-  <div class="output {status}">
-    {content}
+  <div class="output" style="background-color: {color}; color: {getFontColor(color)}">
+    {color}
   </div>
 </div>
 
@@ -27,6 +44,7 @@
     padding: 2em;
     word-break: break-all;
     border-radius: 0.4em;
+    color: white;
   }
 
   .normal {

@@ -8,6 +8,7 @@ type MediaOutputs = {
 
 class MediaStore {
   private store = writable<MediaOutputs>({});
+  private outputIds = writable<Set<MediaOutputId>>();
 
   public refreshStore(media: MediaOutput) {
     // Refresh media store
@@ -15,6 +16,10 @@ class MediaStore {
       mediaOutputs[media.outputId] = media;
       return mediaOutputs;
     });
+  }
+
+  public updateOutputIds(ids: Set<MediaOutputId>) {
+    this.outputIds.set(ids);
   }
 
   // Stop listening for graph changes
@@ -37,9 +42,9 @@ class MediaStore {
     });
   }
 
-  public getOutputMediaIdsReactive() {
-    return derived(graphMall, (graph) => {
-      return Object.keys(graph);
+  public getMediaOutputIdsReactive() {
+    return derived(this.outputIds, (store) => {
+      return store;
     });
   }
 
