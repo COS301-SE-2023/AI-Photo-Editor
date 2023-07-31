@@ -211,8 +211,14 @@ Projects can be permanently removed from your workspace as follows :
   \item[\textbullet] Select the project you wish to delete.
 \end{itemize}
 
-\addcontentsline{toc}{subsection}{Photo editing}
+\begin{figure}[H]
+  \centering
+  {\includegraphics[width=1.0\textwidth]{../pics/tutorial-Projects.png}}
+  \caption{Saving projects from the command palette}
+\end{figure}
+
 \subsection*{Photo editing}
+\addcontentsline{toc}{subsection}{Photo Editing}
 
 \textbf{Importing a Photo}
 
@@ -228,9 +234,9 @@ Images can be added to the graph as input. This can be done using the input plug
 
 There are a wide array of nodes that can be added to the workspace area.
 \begin{itemize}
-  \item[\textbullet] Select the node from either the command palette or the nodes pane.
-  \item[\textbullet] Place the node in the tile you wish to add the image to.
-  \item[\textbullet] Connect the node to the graph.
+  \item[\textbullet] Select the node from either the command palette or by the rightclick menu
+  \item[\textbullet] The node will be added to the currently selected workspace area.
+  \item[\textbullet] Connect the node to the graph by dragging the anchors.
 \end{itemize}
 
 \begin{figure}[H]
@@ -256,6 +262,35 @@ Photos can be exported to a format of your choice. This can be done as follows :
   \item[\textbullet] The image of your currently active workspace will be exported to the directory of your choice.
 \end{itemize}
 
+
+\textbf{Viewing modified outputs}
+
+Output can be viewed in the workspace area. This can be done as follows :
+
+\begin{itemize}
+  \item[\textbullet] Create a tile you wish to view the output in.
+  \item[\textbullet] Select the media tile from the layout selection.
+  \item[\textbullet] Select the output node to view from the dropdown menu.
+\end{itemize}
+
+\textbf{Graph Manipulation}
+
+Graphs can be added, removed or selected from the dropdown in the graph tile :
+
+\begin{itemize}
+  \item[\textbullet] Select the desired graph from the dropdown menu.
+  \item[\textbullet] Create a new graph by selecting the + icon next to the dropdown.
+  \item[\textbullet] Delete a graph by selecting the trashbin icon next to the graph name.
+  \item[\textbullet] Rename a graph by double clicking a graph.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  {\includegraphics[width=1.0\textwidth]{../pics/tutorial-Graphs.png}}
+  \caption{Graph Selection and Manipulation}
+\end{figure}
+
+
 \addcontentsline{toc}{subsection}{Layout Customization}
 \subsection*{Layout Customization}
 
@@ -263,7 +298,8 @@ Blix prides itself on its intuitive and user-friendly interface. The layout of t
 
 \textbf{Changing the panels layout}
 
-Blix allows a wide array of customizablity for the panels layout. You can customize the panel layout as follows :
+Blix allows a wide array of customizablity for the panels layout. Blix contains a blip in the corners of the tiles to allow you to modify the layout according to your liking. 
+You can customize the panel layout as follows :
 
 \begin{itemize}
   \item[\textbullet] Panel borders can be changed by dragging the borders of the panels.
@@ -272,6 +308,11 @@ Blix allows a wide array of customizablity for the panels layout. You can custom
   \item[\textbullet] Panels can be duplicated by dragging the blip downwards or sideways.
 \end{itemize}
 
+\begin{figure}[H]
+  \centering
+  {\includegraphics[width=1.0\textwidth]{../pics/tutorial-Layout.png}}
+  \caption{Using multiple tiles to create a custom layout}
+\end{figure}
 
 \addcontentsline{toc}{subsection}{Plugins}
 \subsection*{Plugins}
@@ -300,10 +341,18 @@ Blix allows users to create and customize their own plugins with an elegant and 
   \item[\textbullet] Tiles are created using the dedicated tileBuilders provided in our docs.
 \end{itemize}
 
+\begin{figure}[H]
+  \centering
+  {\includegraphics[width=1.0\textwidth]{../pics/tutorial-Plugins.png}}
+  \caption{Example of a node defined in a plugin}
+\end{figure}
+
+
 \textbf{Using the Artificial Intelligence}
 
-Blix allows users to communicate with an LLM that is fine-tuned to our system. The AI can be used to perform a wide array of tasks and provide the user with a more intuitive and easy to use experience.
-
+Blix allows users to communicate with an LLM that is fine-tuned to our system. 
+The AI can be used to perform a wide array of tasks and provide the user with a more intuitive and easy to use experience.
+you will receive a response from the AI in the information panel in the bottom right corner of the screen.
 
 \textbf{Use Cases}
 
@@ -320,6 +369,12 @@ Blix allows users to communicate with an LLM that is fine-tuned to our system. T
   \item[\textbullet] The AI will then proceed to process the command and perform the neccesary actions based on the user prompt
   \item[\textbullet] The AI will then return a response to the user, which will be displayed through the information panel in the bottom right corner of the screen.
 \end{itemize}
+
+\begin{figure}[H]
+  \centering
+  {\includegraphics[width=0.7 \textwidth]{../pics/tutorial-AI.png}}
+  \caption{Response from the AI}
+\end{figure}
 
 
 \textbf{General prompt guidelines}
