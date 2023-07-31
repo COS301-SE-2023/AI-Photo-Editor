@@ -190,7 +190,7 @@ describe("Test plugin integrations", () => {
 
         // Expect the result to match the expected production path
         paths.forEach((path) => {
-          expect(path).toMatch(/((\/|\\\\)[\w-]+)+/);
+          expect(path).toMatch(/((\/|\\)[\w-]+)+/);
         })
       });
       
