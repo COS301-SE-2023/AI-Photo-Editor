@@ -89,18 +89,18 @@ const nodes ={
         nodeBuilder.addInput("Number", "num2", "Num2");
         nodeBuilder.addOutput("Number", "res", "Result");
       },
-    "ternary": (context) => {
-        nodeBuilder = context.instantiate("math-plugin","ternary");
-        nodeBuilder.setTitle("Ternary");
-        nodeBuilder.define((data) => {
-            return { "res" : data.input[0] + data.input[1] + data.input[2] }[data.from];
-        });
+    // "ternary": (context) => {
+    //     nodeBuilder = context.instantiate("math-plugin","ternary");
+    //     nodeBuilder.setTitle("Ternary");
+    //     nodeBuilder.define((data) => {
+    //         return { "res" : data.input[0] + data.input[1] + data.input[2] }[data.from];
+    //     });
 
-      nodeBuilder.addInput("Number","num1", "Num");
-      nodeBuilder.addInput("Number","num2", "Num");
-      nodeBuilder.addInput("Number","num3", "Num");
-      nodeBuilder.addOutput("Number","res", "Num");
-    }
+    //   nodeBuilder.addInput("Number","num1", "Num");
+    //   nodeBuilder.addInput("Number","num2", "Num");
+    //   nodeBuilder.addInput("Number","num3", "Num");
+    //   nodeBuilder.addOutput("Number","res", "Num");
+    // }
 }
 
 

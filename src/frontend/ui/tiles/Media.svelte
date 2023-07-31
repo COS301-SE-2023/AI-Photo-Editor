@@ -68,6 +68,14 @@
         fontSize: "large",
       }),
     },
+    boolean: {
+      component: TextBox,
+      props: (data: number) => ({
+        content: data?.toString() || "NULL",
+        status: data == null ? "warning" : "normal",
+        fontSize: "large",
+      }),
+    },
     string: {
       component: TextBox,
       props: (data: string) => ({ content: data }),
