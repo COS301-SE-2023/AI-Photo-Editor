@@ -1,8 +1,5 @@
-if (process.env.NODE_ENV === "production") {
-    const sharp = require('../../../app.asar/node_modules/sharp');
-} else {
-    const sharp = require('sharp');
-}
+const isProd = process.env.NODE_ENV === "production";
+const sharp = require(isProd ? "../../../app.asar/node_modules/sharp" : "sharp")
 
 const nodes = {
     "brightness": (context) => {
