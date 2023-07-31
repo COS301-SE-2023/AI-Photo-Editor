@@ -5,7 +5,7 @@ const nodes = {
         nodeBuilder.setDescription("Provides a number input and returns a single number output");
 
         nodeBuilder.define((input, uiInput, from) => {
-            return { "res": uiInput["slideAlong"] };
+            return { "res": uiInput["number"] };
         });
 
         ui = nodeBuilder.createUIBuilder();
