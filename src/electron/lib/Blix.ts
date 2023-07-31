@@ -92,7 +92,7 @@ export class Blix {
 
     outputNodeBuilder.setTitle("Output");
     outputNodeBuilder.setDescription(
-      "This is the global output node which accepts data of any type, and presents the final value to the user"
+      "Dedicated output node which accepts data of any type, and returns the result to the system"
     );
     // tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
     outputNodeBuilder.define(

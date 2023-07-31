@@ -2,7 +2,7 @@ const nodes ={
     "unary": (context) => {
         nodeBuilder = context.instantiate("math-plugin","unary");
         nodeBuilder.setTitle("Unary");
-        nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output");
+        nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output,such as root, negate or square");
 
         // (anchorInputs: { [key: AnchorId]: any }, uiInputs: { [key: UIComponentId]: any }) => { [key: AnchorId]: any }
         nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {
