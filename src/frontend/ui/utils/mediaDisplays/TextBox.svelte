@@ -1,10 +1,17 @@
 <script lang="ts">
   export let content = "";
   export let status: "normal" | "error" | "warning" = "normal";
+  export let fontSize: "small" | "medium" | "large" = "medium";
+
+  $: fontSizeCSS = {
+    small: "0.8em",
+    medium: "1em",
+    large: "2em",
+  }[fontSize];
 </script>
 
 <div class="content">
-  <div class="output {status}">
+  <div class="output {status}" style="font-size: {fontSizeCSS}">
     {content}
   </div>
 </div>

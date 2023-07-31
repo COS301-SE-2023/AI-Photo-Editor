@@ -65,6 +65,7 @@
       props: (data: number) => ({
         content: data?.toString() || "NULL",
         status: data == null ? "warning" : "normal",
+        fontSize: "large",
       }),
     },
     string: {
