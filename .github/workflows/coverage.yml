@@ -51,12 +51,6 @@ jobs:
         with:
           files: coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
-      - name: Build app
-        run: npm run build
-      - run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run playwright
-        if: matrix.os == 'ubuntu-latest'
-      - run: npm run playwright
-        if: matrix.os != 'ubuntu-latest'
 
   end:
     name: End State ✅✅✅
