@@ -4,7 +4,7 @@
 <i>(AKA. AI Photo Editor)</i>
 </p>
 
-[![codecov](https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor/branch/dev/graph/badge.svg?token=7T6WCYXEIO)](https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor)
+[![codecov](https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor/branch/master/graph/badge.svg?token=7T6WCYXEIO)](https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor)
 [![Build Codebase](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/build.yml/badge.svg)](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/build.yml)
 [![Lint Codebase](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/lint.yml/badge.svg)](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/lint.yml)
 [![Test Codebase](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/coverage.yml/badge.svg)](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/coverage.yml)
