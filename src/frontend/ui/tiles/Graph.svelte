@@ -7,7 +7,7 @@
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import type { UUID } from "@shared/utils/UniqueEntity";
   import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
-  import { onMount, tick } from "svelte";
+  import { tick } from "svelte";
   import { focusedPanelStore } from "../../lib/PanelNode";
   import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";

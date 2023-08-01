@@ -13,7 +13,6 @@
         .split(")")[0]
         .split(",")
         .map((v) => parseFloat(v));
-      console.log("LUMINANCE", l);
       return (45 < h && h < 190) || l > 85 ? "black" : "white";
     }
     return "white";

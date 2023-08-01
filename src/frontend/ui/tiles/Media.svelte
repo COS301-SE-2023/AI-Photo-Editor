@@ -8,8 +8,18 @@
   import type { MediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
   import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
+  import SelectionBox from "../utils/graph/SelectionBox.svelte";
+  import { type SelectionBoxItem } from "types";
 
   const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
+
+  let selectedItems: SelectionBoxItem[] = [];
+
+  $: if ($mediaOutputIds) {
+    selectedItems = Array.from($mediaOutputIds)
+      .sort()
+      .map((id) => ({ id, title: id }));
+  }
 
   let mediaId = writable("default");
   let oldMediaId: string | null = null;
@@ -47,8 +57,8 @@
   //   selectedNode = { graphUUID, outNode: nodeUUID };
   // }
 
-  async function exportMedia(e: Event){
-    if($media?.dataType && $media?.content){
+  async function exportMedia(e: Event) {
+    if ($media?.dataType && $media?.content) {
       await mediaStore.exportMedia($media);
     }
   }
@@ -99,7 +109,7 @@
 
 <div class="fullPane">
   <div class="hover">
-    <input type="text" bind:value="{$mediaId}" />
+    <!-- <input type="text" bind:value="{$mediaId}" />
     <select bind:value="{$mediaId}">
       {#if $mediaOutputIds}
         {#each Array.from($mediaOutputIds) as id}
@@ -108,7 +118,12 @@
       {:else}
         <option selected disabled value>No Outputs</option>
       {/if}
-    </select>
+    </select> -->
+    <SelectionBox
+      items="{selectedItems}"
+      selectedItemId="{selectedItems[0]?.id}"
+      missingContentLabel="No Outputs"
+    />
   </div>
 
   <div class="media">
@@ -143,7 +158,7 @@
   .media {
     position: absolute;
     left: 50%;
-    top: 50%;
+    top: 40%;
     transform: translate(-50%, -50%);
     width: 100%;
     margin: auto;

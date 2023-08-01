@@ -19,6 +19,8 @@
 
   export let items: SelectionBoxItem[];
   export let selectedItemId: string;
+  export let missingContentLabel: string = "No Graphs";
+
   let selectedItemTitle: string = "";
 
   let searchContainer: HTMLInputElement;
@@ -138,7 +140,9 @@
           {/each}
         </ul>
       {:else}
-        <span class="flex h-full w-full items-center justify-center text-zinc-400">No Graphs</span>
+        <span class="flex h-full w-full items-center justify-center text-zinc-400"
+          >{missingContentLabel}</span
+        >
       {/if}
     </div>
   {/if}
