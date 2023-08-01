@@ -103,6 +103,7 @@ class ShortcutStore {
     "blix.projects.newProject": ["meta+[KeyN]", "ctrl+[KeyN]"],
     "blix.settings.toggle": ["meta+[Comma]", "ctrl+[Comma]"],
     "blix.settings.hide": ["[Escape]"],
+    "blix.splash.hide": ["[Escape]"],
   });
 
   public addActionShortcut(action: ShortcutAction, combo: ShortcutCombo) {

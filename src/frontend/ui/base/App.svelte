@@ -25,6 +25,9 @@
     "blix.settings.hide": () => {
       settingsStore.hideSettings();
     },
+    "blix.splash.hide": () => {
+      showSplash = false;
+    },
   };
 
   onMount(async () => {
