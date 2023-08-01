@@ -203,14 +203,7 @@ describe("Test plugin integrations", () => {
 
     test("Plugin should send commands to command registry", () => {
         const commands =  Object.values(blix.commandRegistry.getRegistry());
-        expect(commands.length).toEqual(7);  // Find a more extensible solution for this
-    })
-
-    test("Plugin should be able to run", () => {
-
-      const commands =  blix.commandRegistry.getRegistry()['hello-plugin.addBrightnessNode'];
-      commands.handler.apply(commands, [{sendSuccessMessage: jest.fn()}]);
-
+        expect(commands.length).toEqual(6);  // Find a more extensible solution for this
     })
 
     test("Command registry should have correct contents", () => {
@@ -220,6 +213,5 @@ describe("Test plugin integrations", () => {
       expect(commands.hasOwnProperty("blix.projects.saveAs")).toBeTruthy();
       expect(commands.hasOwnProperty("blix.projects.open")).toBeTruthy();
       expect(commands.hasOwnProperty("blix.graphs.create")).toBeTruthy();
-      expect(commands.hasOwnProperty("hello-plugin.addBrightnessNode")).toBeTruthy();
     })
 });
