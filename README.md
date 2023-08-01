@@ -1,5 +1,5 @@
 <p align="center">
-<img alt="" src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/blix.svg" width="180px">
+<img alt=""src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/blix.svg" width="180px">
 <br />
 <i>(AKA. AI Photo Editor)</i>
 </p>
