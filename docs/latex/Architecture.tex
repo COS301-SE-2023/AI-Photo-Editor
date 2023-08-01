@@ -118,87 +118,161 @@ main approaches: decomposition and design based on quality requirements.
 \end{enumerate}
 
 \section{Quality Requirements}
+\subsection*{Performance}
 
-\subsection{Performance}
+Performance is pivotal to the success of this project. A bad performing system
+will severly hamper the user experience and will make the systems survival unfeasible.
+Due to the nature of photo editing, the system should be able to handle large
+images and projects without significant lag or delay, thus it is vital that these tasks are 
+not just performed well, but exceedingly well to ensure a good user experience.
 
-\begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] {\bf Description}: The application should demonstrate
-	efficient speed and responsiveness when editing large images and handling
-	multiple projects. Real-time processing of graph-based image operations
-	should be seamless and should not cause any delay during editing. The
-	application should be able to support the execution of multiple system
-	plugins that should not cause any significant performance degradation.
+{\bf Quantification}
 
-	\item[\textbullet] {\bf Quantification}: The performance requirement will be
-	measured by defining specific metrics, such as the maximum size of images
-	that can be edited without lag, the duration of time it takes for the
-	application to load and display images of various sizes, and the average
-	time taken for the application to process a graph-based image operation. The
-	application's performance with different numbers of open projects and
-	running plugins can also be benchmarked by measuring the percentage of CPU
-	and RAM usage and observing performance during peak usage.
+Performance is quantified by the maximum processing time for standard photo editing operations.
+The Throughput and resource utilization of the system must also be investigated for the purposes
+of the Blix system.
+
+The maximum processing time of the system is measured by the time it takes to perform a standard photo editing operation
+immediately after the user has requested the operation. The standard photo editing operations are defined as the following:
+\begin{enumerate}
+    \item Adjusting the white balance
+    \item Adjusting the hue
+    \item Adjusting the exposure
+    \item Adjusting the saturation
+    \item Rotating the image
+    \item Cropping the image
+    \item Applying a filter to the image
 \end{enumerate}
 
-\subsection{Security} 
-\begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] {\bf Description}: The application must ensure the
-	confidentiality, integrity, and availability of user data by protecting
-	against unauthorized access, disclosure, modification, or destruction.
-	Furthermore, the application and its plugin system must be resilient to
-	attacks from third-party entities and malicious users.
+The throughput of the system is measured by the number of standard photo editing operations that can be performed in a given time period.
 
-	\item[\textbullet] {\bf Quantification}: The application should isolate and
-	sandbox plugin code to prevent it from accessing sensitive user information
-	and core system functionality.  The application should use encryption for
-	sensitive user data both at-rest and in-transit. 
+The resource utilization of the system is measured by the amount of memory and CPU usage of the system during runtime.
+
+
+{\bf Targets}
+
+The target maximum processing time of the system is 1 second for a standard photo editing operations
+
+The target throughput of the system is 5 standard photo editing operations per second.
+
+The target resource
+utilization of the system is :
+\begin{enumerate}
+    \item Less than 100 MB of memory and 10\% CPU usage for the minor photo editing operations
+    \item 500MB of memory and 50\% CPU usage for the standard photo editing operations. 
+    \item 1GB of memory and less than 90\% CPU usage for the major photo editing operations.
 \end{enumerate}
 
-\subsection{Customizability}
-\begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] {\bf Description}: The system be extensible and
-	customizable to the extent where they can change the theme of the system to
-	their liking. Customize application command shortcuts as they see fit and
-	change the layout of the system with hot-swappable tiles. The system should
-	also allow for custom plugin creation and customization.
+\subsection*{Reliability}
 
-	\item[\textbullet] {\bf Quantification}: The system should support a minimum
-	of five themes. The system should allow the shortcut customization of base
-	system commands and plugin commands. The system should allow users to
-	rearrange the the base layout and add custom plugin tiles. The system will
-	provide a plugin development API that allows users to create and customize
-	their own plugins.
+The reliability of the system is dependent on the ability of the system to prevent and recover from failures.
+The system should be able to prevent failures by ensuring that the system is always in a consistent state.
+The system should be able to recover from failures by ensuring that the system can be restored to a consistent state, such that 
+the user does not lose any work.
+
+{\bf Quantification}
+
+The reliability of the system is quantified by the the mean time between failures (MTBF) and the mean time to recovery (MTTR).
+Another metric that will be used to quantify the reliability of the system is the number of critical failures per month.
+
+The mean time between failures is measured by the number of operations performed by the system before a failure occurs. This number
+is then divided by the number of failures that occured during the time period. 
+
+
+The mean time to recovery is measured by the number of operations required to restore the system to a consistent state after a failure has occured.
+
+The number of critical failures per month is measured by the number of failures that occured during the month that resulted in the loss of data or the loss of the ability to perform photo editing operations.
+
+{\bf Targets}
+
+The target mean time between failures is 100 operations.
+
+The target mean time to recovery is 10 operations.
+
+The target number of critical failures per month is 0.
+
+
+
+\subsection*{Usability} 
+
+The usability of the system is dependent on the ability of the system to be easily used by the user. It is important that the system is easy to use and that the 
+user is able to perform the desired tasks with ease and with clearly defined steps. The system caters for all users, from novice to expert, thus it is important to note that not all users
+will be familiar with the system and features, thus the system must provide alternatives for these users
+
+{\bf Quantification}
+
+To properly quantify Usability, user satisfaction cannot be neglected. Additionally the learning curve of the system must be investigated to ensure that the system is easy to use.
+Finally the number of user requests completed per month must be investigated to ensure that the system is able to appeal to the users.
+
+User satisfaction is measured by the number of users that are satisfied with the system. This number is then divided by the total number of users that used the system during the time period.
+
+The learning curve of the system is measured by the number of operations required to perform a standard photo editing operation. This number is then divided by the number of operations required to perform the same operation on a standard photo editing software.
+
+The number of user requests completed per month is measured by the number of requests that were fulfilled during the month. This number is then divided by the total number of requests that were made by users during the month.
+
+{\bf Targets}
+
+The target user satisfaction is 90\%.
+
+The target learning curve is 1.5 times the number of operations required to perform the same operation on a standard photo editing software. 
+
+The target number of user requests completed per month is 60\%.
+
+\subsection*{Security} 
+
+Security is an extension of the reliability of the system. It is important that the system is able to prevent and recover from security breaches to protect user.
+At the same time, extensive security hampers the usability of the system, thus it is important to find a balance between security and usability to provide the best 
+
+{\bf Quantification} 
+
+Security will be conceptually quantified by the integrity , confidentiality and availability of the system.
+
+The integrity of the system is measured by the systems transparency regarding the users limitations the policies of the system.
+
+The confidentiality of the system is measured by how secure the user's personal details are from other users. This is measured by the amount of security measures that are in place and the number of violations that have occured.
+
+The availability of the system is measured by the amount of systems that the users are provided access to to customize and modify.
+
+{\bf Goals}
+
+The integrity of the system must be well defined and transparent to the user.
+
+The confidentiality of the system must be extremely well guarded and the number of violations must be 0.
+
+The system must have a high availability such that the users must be able to customize and modify the system to their liking.
+
+\subsection*{Compatibility} 
+
+Compatibility is an extremely important quality requirement for the system. The system must be able to run on a variety of platforms and 
+must be able to support a variety of image formats. Due to the nature of the system, extensive compatibility is required to ensure that the system is able to
+appeal to a wide range of users.
+
+{\bf Quantification}
+
+Compatibility is quantified by the number of platforms that the system is able to run on and the number of image formats that the system is able to support.
+
+The number of platforms that the system is able to run on is measured by the number of platforms that the system is able to run on, with a specific focus on the most popular platforms.
+
+The number of image formats that the system is able to support is measured by the number of image formats that the system is able to support, with a specific focus on the most popular image formats.
+
+{\bf Goals}
+
+The system should be compatible with all the most well-known platforms : 
+\begin{enumerate}
+    \item Windows
+    \item Linux
+    \item Mac OS
 \end{enumerate}
 
-\subsection{Usability} 
-\begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] {\bf Description}: The system should be clear and concise
-	on how it should be operated. The system must ensure that users can easily
-	navigate and use the system without external assistance or unwarranted
-	difficulty. The system should provide keyboard navigation for primary parts
-	of the system to make powers users more efficient. All functionality must be
-	properly documented such that high-end users can easily perform complex
-	operations.
-
-	\item[\textbullet] {\bf Quantification}: The percentage of users who are
-	able complete a given set of tasks should be above specified threshold. User
-	errors rates should be kept to a minimum and users should have and easy and
-	pleasant time interacting with the system. 
-	
+The system should be compatible with all the most well-known image file formats : 
+\begin{enumerate}
+    \item JPEG
+    \item TIFF
+    \item PNG
+    \item GIF
+    \item BMP
 \end{enumerate}
 
-\subsection{Compatibility} 
-\begin{enumerate}[label*=\arabic*.]
-	\item[\textbullet] {\bf Description}: The application must be compatible
-	with major operating systems such as Windows, macOS, and Linux distributions
-	such as Ubuntu and Debian. It should support image file formats commonly
-	used in the industry such as JPEG, PNG, GIF, BMP, and RAW from popular
-	camera brands.
-
-	\item[\textbullet] {\bf Quantification}: The application must be able to run
-	without errors on the latest stable versions of the aforementioned operating
-	systems. It must be able to import and export image files with the
-	aforementioned formats without any data loss or corruption. 
-\end{enumerate}
 
 \pagebreak
 
