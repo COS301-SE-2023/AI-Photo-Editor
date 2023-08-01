@@ -39,9 +39,12 @@ const settings = new ElectronStore<Settings>({
 // On Linux, returns true if the app has emitted the ready event and the secret key is available.
 // On MacOS, returns true if Keychain is available.
 // On Windows, returns true once the app has emitted the ready event.
+
 export function setSecret(key: string, value: string): void {
   if (safeStorage.isEncryptionAvailable()) {
     settings.set(`secrets.${key}`, safeStorage.encryptString(value).toString("base64"));
+  } else {
+    settings.set(`secrets.${key}`, value);
   }
 }
 
@@ -80,11 +83,15 @@ export function getSecrets(): UnencryptedSecrets {
  * @returns Unencrypted string
  */
 export function decryptWithSafeStorage(value: string) {
-  try {
-    return value ? safeStorage.decryptString(Buffer.from(value, "base64")) : "";
-  } catch (error) {
-    logger.error(error);
-    return "";
+  if (safeStorage.isEncryptionAvailable()) {
+    try {
+      return value ? safeStorage.decryptString(Buffer.from(value, "base64")) : "";
+    } catch (error) {
+      logger.error(error);
+      return "";
+    }
+  } else {
+    return value ? value : "";
   }
 }
 
