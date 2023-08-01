@@ -185,5 +185,6 @@ const jsFiles = getAllJSFiles(bundledElectronPath);
 minifyJSFiles(jsFiles);
 
 copyPublicFolderAndMinify(join(__dirname, "..", "public"), join(bundledElectronPath, "public"));
+copyDirectory(join(__dirname, "../public/images"), join(bundledElectronPath, "public/images"));
 copyFile(join(__dirname, "../public/images/icon.png"), bundledElectronPath);
 cleanTsconfig();
