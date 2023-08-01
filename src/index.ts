@@ -11,7 +11,8 @@ import { CoreGraphInterpreter } from "./electron/lib/core-graph/CoreGraphInterpr
 import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
 
-const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
+//const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
+const isProd = true;
 
 if (app.isPackaged) {
   process.env.NODE_ENV = "production";
@@ -25,6 +26,10 @@ logger.info(
 );
 
 // ========== MAIN PROCESS ========== //
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -61,17 +66,16 @@ app.on("ready", async () => {
 
   blix = new Blix();
   exposeMainApis(blix);
+  await createMainWindow();
 
-  createMainWindow().then(async () => {
-    if (mainWindow && blix) {
-      await blix.init(mainWindow);
-      if (blix.isReady) {
-        mainWindow.apis.utilClientApi.onBlixReady();
-      }
-    } else {
-      app.quit();
+  if (mainWindow && blix) {
+    await blix.init(mainWindow);
+    if (blix.isReady) {
+      mainWindow.apis.utilClientApi.onBlixReady();
     }
-  });
+  } else {
+    app.quit();
+  }
 });
 
 async function createMainWindow() {
@@ -82,6 +86,7 @@ async function createMainWindow() {
       devTools: true,
       contextIsolation: true,
       nodeIntegration: false,
+      webviewTag: true,
       sandbox: true,
       preload: join(__dirname, "electron/preload.js"),
     },
@@ -96,7 +101,7 @@ async function createMainWindow() {
     // process.env.NODE_ENV === "production"
     isProd
       ? // in production, use the statically build version of our application
-        `file://${join(__dirname, "public", "index.html")}`
+        `file://${join(__dirname, "..", "public", "index.html")}`
       : // in dev, target the host and port of the local rollup web server
         "http://localhost:5500";
 
@@ -139,6 +144,7 @@ app.on("activate", () => {
 app.on("web-contents-created", (e, contents) => {
   logger.info(e);
   // Security of webviews
+
   contents.on("will-attach-webview", (event, webPreferences, params) => {
     logger.info(event, params);
     // Strip away preload scripts if unused or verify their location is legitimate

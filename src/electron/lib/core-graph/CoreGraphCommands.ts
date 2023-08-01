@@ -1,4 +1,4 @@
-import type { UUID } from "@shared/utils/UniqueEntity";
+import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { Command, CommandContext } from "../../lib/registries/CommandRegistry";
 import type { CommandResponse } from "../projects/ProjectCommands";
 import { CoreGraphUpdateEvent, CoreGraphUpdateParticipant } from "./CoreGraphInteractors";
@@ -16,11 +16,21 @@ export const createGraphCommand: Command = {
   },
   handler: async (ctx: CommandContext, args: CreateGraphArgs) => {
     const result = await createGraph(ctx, args);
-    if (result.success) {
-      ctx.sendSuccessMessage(result?.message ?? "");
-    } else {
-      ctx.sendErrorMessage(result?.error ?? "");
+    switch (result.success) {
+      case true: {
+        ctx.sendSuccessMessage(result?.message ?? "");
+        break;
+      }
+      case false: {
+        ctx.sendErrorMessage(result?.error ?? "");
+        break;
+      }
     }
+    // if (result.success) {
+    //   ctx.sendSuccessMessage(result?.message ?? "");
+    // } else {
+    //   ctx.sendErrorMessage(result?.error ?? "");
+    // }
   },
 };
 

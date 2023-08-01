@@ -7,10 +7,10 @@ import {
   checkEdgeDataTypesCompatible,
 } from "../registries/ToolboxRegistry";
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
-import { type NodeSignature } from "@shared/ui/ToolboxTypes";
+import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
-import { type MediaOutputId } from "@shared/types/media";
 import { type GraphMetadata } from "../../../shared/ui/UIGraph";
+import { type MediaOutputId } from "../../../shared/types/media";
 
 // =========================================
 // Explicit types for type safety
@@ -310,7 +310,10 @@ export class CoreGraph extends UniqueEntity {
   }
 
   public checkForDuplicateEdges(ancFrom: Anchor, ancTo: Anchor): boolean {
-    // TODO
+    if (this.edgeSrc[ancFrom.uuid]) {
+      return this.edgeSrc[ancFrom.uuid].includes(ancTo.uuid);
+    }
+
     if (ancFrom.uuid === ancTo.uuid) return true; // Needs to be changed
     return false;
   }
@@ -450,39 +453,35 @@ export class CoreGraph extends UniqueEntity {
   //   }
   // }
 
-  public exportJSON(): GraphToJSON {
-    return { nodes: this.nodesToJSONObject(), edges: this.edgesToJSONObject() };
-  }
+  // public nodesToJSONObject(): NodeToJSON[] {
+  //   const json: NodeToJSON[] = [];
+  //   for (const node in this.nodes) {
+  //     if (!this.nodes.hasOwnProperty(node)) continue;
+  //     json.push(this.nodes[node].exportJSON());
+  //   }
+  //   return json;
+  // }
 
-  public nodesToJSONObject(): NodeToJSON[] {
-    const json: NodeToJSON[] = [];
-    for (const node in this.nodes) {
-      if (!this.nodes.hasOwnProperty(node)) continue;
-      json.push(this.nodes[node].exportJSON());
-    }
-    return json;
-  }
-
-  public edgesToJSONObject(): EdgeToJSON[] {
-    const json: EdgeToJSON[] = [];
-    for (const anchorFrom in this.edgeSrc) {
-      if (!this.edgeSrc.hasOwnProperty(anchorFrom)) continue;
-      const anchorTos: AnchorUUID[] = this.edgeSrc[anchorFrom];
-      for (const anchorTo of anchorTos) {
-        json.push({
-          anchorFrom: {
-            parent: this.anchors[anchorFrom].parent.uuid,
-            id: anchorFrom,
-          },
-          anchorTo: {
-            parent: this.anchors[anchorTo].parent.uuid,
-            id: anchorTo,
-          },
-        });
-      }
-    }
-    return json;
-  }
+  // public edgesToJSONObject(): EdgeToJSON[] {
+  //   const json: EdgeToJSON[] = [];
+  //   for (const anchorFrom in this.edgeSrc) {
+  //     if (!this.edgeSrc.hasOwnProperty(anchorFrom)) continue;
+  //     const anchorTos: AnchorUUID[] = this.edgeSrc[anchorFrom];
+  //     for (const anchorTo of anchorTos) {
+  //       json.push({
+  //         anchorFrom: {
+  //           parent: this.anchors[anchorFrom].parent.uuid,
+  //           id: anchorFrom,
+  //         },
+  //         anchorTo: {
+  //           parent: this.anchors[anchorTo].parent.uuid,
+  //           id: anchorTo,
+  //         },
+  //       });
+  //     }
+  //   }
+  //   return json;
+  // }
 }
 
 interface AiAnchors {
@@ -585,6 +584,10 @@ export class Anchor extends UniqueEntity {
   ) {
     super();
   }
+
+  public getAnchorId() {
+    return this.anchorId;
+  }
 }
 
 class Edge extends UniqueEntity {
@@ -646,7 +649,7 @@ export class NodesAndEdgesGraph implements GraphRepresentation {
   ) {}
 }
 
-class ReducedNode {
+export class ReducedNode {
   constructor(
     readonly id: UUID,
     readonly signature: `${string}.${string}`,
@@ -656,7 +659,7 @@ class ReducedNode {
   ) {}
 }
 
-class ReducedEdge {
+export class ReducedEdge {
   constructor(
     readonly id: UUID,
     readonly nodeUUIDFrom: UUID,
@@ -666,7 +669,7 @@ class ReducedEdge {
   ) {}
 }
 
-class ReducedAnchor {
+export class ReducedAnchor {
   constructor(readonly id: string, readonly type: AnchorType, readonly displayName: string) {}
 }
 

@@ -19,13 +19,13 @@ import {
 } from "../core-graph/CoreGraphInteractors";
 import sharp from "sharp";
 
-type SaveProjectArgs = {
+export type SaveProjectArgs = {
   projectId: UUID;
   layout?: LayoutPanel;
   projectPath?: string;
 };
 
-type ExportMedia= {
+type ExportMedia = {
   type: string;
   data?: string;
 };
@@ -47,12 +47,22 @@ export const saveProjectCommand: Command = {
     description: "Save project to file system",
   },
   handler: async (ctx: CommandContext, args: SaveProjectArgs) => {
-    const result = await saveProject(ctx, args);
-    if (result.success) {
-      ctx.sendSuccessMessage(result?.message ?? "");
-    } else {
-      ctx.sendErrorMessage(result?.error ?? "");
+    const result: CommandResponse = await saveProject(ctx, args);
+    switch (result.success) {
+      case true: {
+        ctx.sendSuccessMessage(result?.message ?? "");
+        break;
+      }
+      case false: {
+        ctx.sendErrorMessage(result?.error ?? "");
+        break;
+      }
     }
+    // if (result.success) {
+    //   ctx.sendSuccessMessage(result?.message ?? "");
+    // } else {
+    //   ctx.sendErrorMessage(result?.error ?? "");
+    // }
   },
 };
 
@@ -64,12 +74,22 @@ export const saveProjectAsCommand: Command = {
     description: "Save project to file system",
   },
   handler: async (ctx: CommandContext, args: SaveProjectArgs) => {
-    const result = await saveProjectAs(ctx, args);
-    if (result?.success) {
-      // ctx.sendSuccessMessage(result?.message ?? "");
-    } else {
-      ctx.sendErrorMessage(result?.error ?? "");
+    const result: CommandResponse = await saveProjectAs(ctx, args);
+    switch (result.success) {
+      case true: {
+        ctx.sendSuccessMessage(result?.message ?? "");
+        break;
+      }
+      case false: {
+        ctx.sendErrorMessage(result?.error ?? "");
+        break;
+      }
     }
+    // if (result.success) {
+    //     // ctx.sendSuccessMessage(result?.message ?? "");
+    // } else {
+    //   ctx.sendErrorMessage(result?.error ?? "");
+    // }
   },
 };
 
@@ -98,12 +118,11 @@ export const exportMediaCommand: Command = {
   },
 };
 
-
 export const projectCommands: Command[] = [
   saveProjectCommand,
   saveProjectAsCommand,
   openProjectCommand,
-  exportMediaCommand
+  exportMediaCommand,
 ];
 
 // =========== Command Helpers ===========
@@ -193,7 +212,7 @@ export async function saveProjectAs(ctx: CommandContext, args: SaveProjectArgs) 
     filters: [{ name: "Blix Project", extensions: ["blix"] }],
     properties: ["createDirectory"],
   });
-  if (!path) return;
+  if (!path) return { success: false, error: "No path selected" };
   project.location = path;
   return await saveProject(ctx, { projectId, layout, projectPath: path });
 }
@@ -248,7 +267,7 @@ export async function exportMedia(ctx: CommandContext, args: ExportMedia) {
     return { success: false, error: "No data was provided" };
   }
 
-  if(type === "Image"){
+  if (type === "Image") {
     const base64Data = data.split(";base64, ");
     const imgBuffer = Buffer.from(base64Data[1], "base64");
 
@@ -259,16 +278,14 @@ export async function exportMedia(ctx: CommandContext, args: ExportMedia) {
       properties: ["createDirectory"],
     });
     if (!path) return;
-  
+
     sharp(imgBuffer).toFile(path);
 
-    return { success: true, message: "Media exported successfully"};
-  }
-  else if(type === "Number" || type === "color" || type === "string"){
-
+    return { success: true, message: "Media exported successfully" };
+  } else if (type === "Number" || type === "color" || type === "string") {
     const fileData = {
       OutputData: data,
-    }
+    };
     const path = await showSaveDialog({
       title: "Export media as",
       defaultPath: join(app.getPath("downloads"), "blix.json"),
@@ -277,19 +294,14 @@ export async function exportMedia(ctx: CommandContext, args: ExportMedia) {
     });
     if (!path) return;
 
-    try{
+    try {
       writeFile(path, JSON.stringify(fileData));
-    }
-    catch(err){
+    } catch (err) {
       logger.error(err);
     }
 
-    return { success: true, message: "Media exported successfully"};
-
-  }
-  else{
-
-    return { success: false, error: "Unsupported media type"};
-
+    return { success: true, message: "Media exported successfully" };
+  } else {
+    return { success: false, error: "Unsupported media type" };
   }
 }

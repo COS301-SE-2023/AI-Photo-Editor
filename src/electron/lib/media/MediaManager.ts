@@ -1,8 +1,8 @@
 import { type MainWindow } from "../api/apis/WindowApi";
 import { MediaSubscriber } from "./MediaSubscribers";
 import { CoreGraphInterpreter } from "../core-graph/CoreGraphInterpreter";
-import { type UUID } from "@shared/utils/UniqueEntity";
-import { type MediaOutput, type MediaOutputId } from "@shared/types/media";
+import { type UUID } from "../../../shared/utils/UniqueEntity";
+import { type MediaOutput, type MediaOutputId } from "../../../shared/types/media";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
 
 export class MediaManager {

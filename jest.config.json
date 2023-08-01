@@ -10,8 +10,9 @@
     "^.+\\.ts$": "ts-jest",
     "^.+\\.js$": "babel-jest"
   },
+  "coveragePathIgnorePatterns" : [ "blix-plugins" ],
   "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node", "svelte"],
   "coverageDirectory": "coverage",
-  "testPathIgnorePatterns": ["\bbuild\b"]
+  "testPathIgnorePatterns": ["\bbuild\b","e2e"]
 }

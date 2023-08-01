@@ -1,11 +1,6 @@
-import type { IGraphUIInputs, INodeUIInputs } from "@shared/types";
-import {
-  GraphEdge,
-  GraphNode,
-  NodeStylingStore,
-  UIGraph,
-  type GraphMetadata,
-} from "../../../shared/ui/UIGraph";
+import { type GraphMetadata } from "../../../shared/ui/UIGraph";
+import { type IGraphUIInputs, type INodeUIInputs } from "../../../shared/types";
+import { GraphEdge, GraphNode, NodeStylingStore, UIGraph } from "../../../shared/ui/UIGraph";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { CoreGraph, NodesAndEdgesGraph } from "./CoreGraph";
 

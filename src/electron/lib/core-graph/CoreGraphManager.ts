@@ -175,6 +175,10 @@ export class CoreGraphManager {
     return this._graphs[uuid];
   }
 
+  getSubscribers(graphUUID: UUID) {
+    return this._subscribers[graphUUID];
+  }
+
   deleteGraphs(uuids: UUID[]): boolean[] {
     const flags: boolean[] = [];
 
@@ -265,6 +269,7 @@ export class CoreGraphManager {
     this._subscribers[graphUUID].push(subscriber);
   }
 
+  // This needs to be implemented
   removeSubscriber() {
     return;
   }

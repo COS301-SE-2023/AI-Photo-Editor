@@ -94,7 +94,7 @@ export class Plugin {
   }
 }
 
-class PluginContext {
+export class PluginContext {
   // TODO: Add more stuff here
   get blixVersion() {
     return "0.0.1";
@@ -121,7 +121,7 @@ export class NodePluginContext extends PluginContext {
   }
 }
 
-class CommandPluginContext extends PluginContext {
+export class CommandPluginContext extends PluginContext {
   private plugin: string;
   private name: string;
   private displayName: string;
