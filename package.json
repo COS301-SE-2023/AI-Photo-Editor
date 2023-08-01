@@ -1,7 +1,7 @@
 {
   "name": "blix",
-  "description": "COS 301 Capstone Project - AI Photo Editor",
-  "version": "0.0.0",
+  "description": "Blix - A cross-platform AI-assisted graph photo editor",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor"
@@ -27,7 +27,7 @@
     "rollup"
   ],
   "homepage": "https://github.com/COS301-SE-2023/AI-Photo-Editor#readme",
-  "main": "build/electron/index.js",
+  "main": "build/index.js",
   "scripts": {
     "prestart": "cross-env NODE_ENV=development node scripts/preBuild.js",
     "start": "cross-env NODE_ENV=development npm-run-all -p -r build:frontend:dev start:electron",
@@ -41,12 +41,12 @@
     "build:electron:prod": "cross-env NODE_ENV=production tsc --p ./tsconfig.electron.prod.json",
     "validate:svelte": "svelte-check",
     "start:electron:run": "electron .",
-    "start:electron:nodemon": "nodemon",
+    "start:electron:nodemon": "nodemon --verbose",
     "start:electron:dev": "npm-run-all -s build:electron:dev start:electron:nodemon",
-    "start:electron": "npm-run-all -p build:electron:dev:watch start:electron:dev",
+    "start:electron": "sleep 2 && npm-run-all -p build:electron:dev:watch start:electron:dev",
     "test": "jest --config jest.config.json",
     "preplaywrite": "npm run build",
-    "playwrite": "playwright test",
+    "playwright": "playwright test",
     "postinstall": "electron-builder install-app-deps",
     "prepack": "npm run build",
     "pack": "electron-builder --dir",
@@ -59,7 +59,8 @@
     "lint": "npm-run-all -s lint:electron lint:svelte",
     "prepublishOnly": "npm-run-all -s test lint",
     "preversion": "npm-run-all -s lint format",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "profile:llm": "npm run build:electron:dev && node build/electron/lib/ai/ai.profiler.js"
   },
   "lint-staged": {
     "src/electron/**/*.{js,ts}": "eslint -c eslint.electron.json",
@@ -67,22 +68,34 @@
     "(src|scripts)/**": "prettier --write --ignore-unknown"
   },
   "dependencies": {
+    "@electron/remote": "^2.0.10",
+    "@popperjs/core": "^2.11.8",
+    "@types/chokidar": "^2.1.3",
+    "blix_svelvet": "^1.0.13",
+    "child_process": "^1.0.2",
     "chokidar": "^3.5.3",
+    "cohere-ai": "^5.1.0",
     "electron-affinity": "^1.2.4",
     "electron-ipc-mock": "^0.0.3",
     "electron-log": "^4.4.8",
+    "electron-prompt": "^1.7.0",
     "electron-store": "^8.1.0",
     "electron-updater": "^5.3.0",
+    "flowbite": "^1.7.0",
+    "flowbite-svelte": "^0.39.2",
+    "langchain": "^0.0.104",
     "sharp": "^0.32.1",
-    "svelvet": "^8.0.4",
-    "tinykeys": "^1.4.0"
+    "svelte": "^3.59.0",
+    "tailwind-merge": "^1.13.2",
+    "tinykeys": "^1.4.0",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.22.5",
     "@catppuccin/tailwindcss": "^0.1.1",
     "@fortawesome/free-regular-svg-icons": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
-    "@playwright/test": "^1.35.1",
+    "@playwright/test": "^1.36.0",
     "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-terser": "^0.4.1",
@@ -91,6 +104,7 @@
     "@testing-library/svelte": "^3.2.2",
     "@tsconfig/svelte": "^4.0.1",
     "@types/clean-css": "^4.2.6",
+    "@types/electron-prompt": "^1.6.1",
     "@types/html-minifier": "^4.0.2",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.0.0",
@@ -113,6 +127,7 @@
     "lint-staged": "^13.2.2",
     "nodemon": "^2.0.22",
     "npm-run-all": "^4.1.5",
+    "playwright": "^1.36.0",
     "postcss": "^8.4.23",
     "prettier": "^2.8.8",
     "prettier-plugin-svelte": "^2.10.0",
@@ -122,7 +137,6 @@
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-serve": "^2.0.2",
     "rollup-plugin-svelte": "^7.1.4",
-    "svelte": "^3.59.0",
     "svelte-check": "^3.3.1",
     "svelte-fa": "^3.0.4",
     "svelte-jester": "^2.3.2",
@@ -132,15 +146,15 @@
     "terser": "^5.17.1",
     "ts-jest": "^29.1.0",
     "tslib": "^2.5.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.6"
   },
   "optionalDependencies": {
     "dmg-license": "^1.0.11"
   },
   "build": {
-    "productName": "AI Photo Editor",
-    "appId": "ai.photo.editor",
-    "copyright": "Copyright © 2021 ${author}",
+    "productName": "Blix",
+    "appId": "com.the-spanish-inquisition.blix",
+    "copyright": "Copyright © 2023 The Spanish Inquisition",
     "win": {
       "target": [
         "nsis"
@@ -167,7 +181,15 @@
       "package.json"
     ],
     "extraResources": [
-      "assets/**"
+      "assets/**",
+      "blix-plugins/**",
+      {
+        "from": "src/electron/lib/ai/python",
+        "to": "python",
+        "filter": [
+          "**/*.py"
+        ]
+      }
     ],
     "publish": [
       {

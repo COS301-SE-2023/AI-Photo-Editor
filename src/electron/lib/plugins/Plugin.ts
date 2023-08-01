@@ -2,21 +2,10 @@ import type { PathLike } from "fs";
 import type { PackageData } from "./PluginManager";
 import logger from "../../utils/logger";
 import { Blix } from "../Blix";
-import {
-  InputAnchorInstance,
-  NodeInstance,
-  OutputAnchorInstance,
-} from "../core-graph/ToolboxRegistry";
-import { CommandInstance } from "../commands/CommandRegistry";
-import { TileInstance } from "../tiles/TileRegistry";
+import type { Command } from "../registries/CommandRegistry";
+import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
-import Main from "electron/main";
-import type { MainWindow } from "../api/WindowApi";
-import { dialog } from "electron";
-import { UUID } from "../../../shared/utils/UniqueEntity";
-
 export type PluginSignature = string;
-export type NodeSignature = string;
 
 export class Plugin {
   private hasRequiredSelf: boolean;
@@ -48,6 +37,7 @@ export class Plugin {
   // Load this plugin into a local Node module
   // See: [https://rollupjs.org/es-module-syntax/#dynamic-import]
   requireSelf(blix: Blix): void {
+    // console.log("Armand")
     try {
       // This uses Node.js require() to load the plugin as a module
       // TODO: ISOLATION + LIMITED API
@@ -59,24 +49,17 @@ export class Plugin {
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          const inputs: InputAnchorInstance[] = [];
-          const outputs: OutputAnchorInstance[] = [];
-
-          const nodeInstance = new NodeInstance("", "", "", "", "", "", inputs, outputs);
-
-          const nodeBuilder = new NodeBuilder(nodeInstance);
-
-          const ctx = new NodePluginContext(nodeBuilder);
+          const ctx = new NodePluginContext();
 
           try {
             pluginModule.nodes[node](ctx); // Execute node builder
-            nodeBuilder.validate(); // Ensure the node is properly instantiated
-            blix.toolbox.addInstance(nodeInstance); // Add to registry
+            blix.toolbox.addInstance(ctx.nodeBuilder.build); // Add to registry
           } catch (err) {
             logger.warn(err);
           }
           // console.log(blix.toolbox.getRegistry()[nodeInstance.getSignature])
         }
+        // blix.aiManager.instantiate(blix.toolbox);
       }
 
       if ("commands" in pluginModule && typeof pluginModule.nodes === "object") {
@@ -87,16 +70,16 @@ export class Plugin {
           blix.commandRegistry.addInstance(
             pluginModule.commands[cmd](
               new CommandPluginContext(cmd, this.packageData.name, blix)
-            ) as CommandInstance
+            ) as Command
           );
         }
       }
 
       if ("tiles" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to tile registry
+
         for (const tile in pluginModule.tiles) {
           if (!pluginModule.tiles.hasOwnProperty(tile)) continue;
-
           blix.tileRegistry.addInstance(
             pluginModule.tiles[tile](new TilePluginContext()) as TileInstance
           );
@@ -111,25 +94,34 @@ export class Plugin {
   }
 }
 
-class PluginContext {
+export class PluginContext {
   // TODO: Add more stuff here
   get blixVersion() {
     return "0.0.1";
   }
 }
 
-class NodePluginContext extends PluginContext {
-  constructor(private nodeBuilder: NodeBuilder) {
+export class NodePluginContext extends PluginContext {
+  private _nodeBuilder!: NodeBuilder;
+  constructor() {
     super();
   }
 
+  public get nodeBuilder() {
+    return this._nodeBuilder;
+  }
+
+  // nodeBuilder = context.instantiate("hello-plugin","hello");
+  // TODO: Change this: it should not be done in the plugin,
+  // but when the plugin loads. The plugin already defines each node name as the key
+  // in the dictionary, and we already know the plugin name in the package.json
   public instantiate(plugin: string, name: string): NodeBuilder {
-    this.nodeBuilder.instantiate(plugin, name);
+    this._nodeBuilder = new NodeBuilder(plugin, name);
     return this.nodeBuilder;
   }
 }
 
-class CommandPluginContext extends PluginContext {
+export class CommandPluginContext extends PluginContext {
   private plugin: string;
   private name: string;
   private displayName: string;
@@ -146,6 +138,7 @@ class CommandPluginContext extends PluginContext {
     this.icon = "";
     this.command = "";
     this.blix = blix;
+    this.displayName = "";
   }
 
   // public get getMainWindow() {
@@ -166,23 +159,20 @@ class CommandPluginContext extends PluginContext {
     this.displayName = displayName;
   }
 
-  public create() {
-    return new CommandInstance(
-      this.plugin,
-      this.name,
-      this.displayName,
-      this.description,
-      this.icon,
-      this.command
-    );
+  public getBlix() {
+    return this.blix;
   }
 
-  public loadProject(options: "openFile" | "openDirectory" | "multiSelections") {
-    this.blix.projectManager.loadProject(options);
-  }
-
-  public saveCurrentProject(project: UUID) {
-    this.blix.projectManager.saveCurrentProject(project);
+  public create(): Command {
+    return {
+      id: `${this.plugin}.${this.name}`,
+      handler: this.command,
+      description: {
+        name: this.displayName,
+        description: this.description,
+        icon: this.icon,
+      },
+    };
   }
 }
 

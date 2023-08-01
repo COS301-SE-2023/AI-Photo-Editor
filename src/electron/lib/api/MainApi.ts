@@ -1,11 +1,12 @@
 import { exposeMainApi } from "electron-affinity/main";
 import type { Blix } from "../Blix";
 
-import { UtilApi } from "./UtilApi";
-import { ProjectApi } from "./ProjectApi";
-import { PluginApi } from "./PluginApi";
-import { GraphApi } from "./GraphApi";
-import { ToolboxApi } from "./ToolboxApi";
+import { UtilApi } from "./apis/UtilApi";
+import { ProjectApi } from "./apis/ProjectApi";
+import { CommandApi } from "./apis/CommandApi";
+import { GraphApi } from "./apis/GraphApi";
+import { ToolboxApi } from "./apis/ToolboxApi";
+import { MediaApi } from "./apis/MediaApi";
 
 /**
  * Expose all main process APIs to the renderer. This method will be called on
@@ -18,10 +19,11 @@ import { ToolboxApi } from "./ToolboxApi";
  */
 export function exposeMainApis(blix: Blix) {
   const apis = {
-    utilApi: new UtilApi(),
+    utilApi: new UtilApi(blix),
     projectApi: new ProjectApi(blix),
-    pluginApi: new PluginApi(blix),
+    pluginApi: new CommandApi(blix),
     graphApi: new GraphApi(blix),
+    mediaApi: new MediaApi(blix),
     toolboxApi: new ToolboxApi(blix),
   };
 
@@ -31,6 +33,12 @@ export function exposeMainApis(blix: Blix) {
 
   // @ts-ignore: no-var-requires
   global.mainApis = apis as any;
+  return apis;
 }
 
 export type MainApis = ReturnType<typeof exposeMainApis>;
+
+export interface IpcResponse<T> {
+  success: boolean;
+  data: T;
+}

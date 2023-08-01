@@ -1,112 +1,332 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
-import { NodeInstance, NodeUIParent } from "../../core-graph/ToolboxRegistry";
+import { type MinAnchor, type NodeFunc, NodeInstance } from "../../registries/ToolboxRegistry";
+import {
+  NodeUIComponent,
+  NodeUILeaf,
+  NodeUIParent,
+  type UIComponentProps,
+  type UIComponentConfig,
+} from "../../../../shared/ui/NodeUITypes";
 
+type PartialNode = {
+  name: string;
+  plugin: string;
+  displayName: string;
+  description: string;
+  icon: string;
+  inputs: MinAnchor[];
+  outputs: MinAnchor[];
+  ui: NodeUIParent | null;
+  uiConfigs: { [key: string]: UIComponentConfig };
+  func: NodeFunc;
+};
+
+// TODO: Verification must be done in all these setter functions
+//       that the type expected at runtime is what's actually being received.
+//       See: [https://stackoverflow.com/a/44078574] / (Runtime type checking)
 export class NodeBuilder implements PluginContextBuilder {
-  constructor(node: NodeInstance) {
-    this.node = node;
-    this.ui = null;
+  private partialNode: PartialNode;
+
+  constructor(plugin: string, name: string) {
+    this.partialNode = {
+      name,
+      plugin,
+      displayName: name,
+      description: "",
+      icon: "",
+      inputs: [],
+      outputs: [],
+      ui: null,
+      uiConfigs: {},
+      func: () => ({}),
+    };
   }
 
-  private node: NodeInstance;
-  private ui: NodeUIParent | null;
-
-  public validate(): void {
-    if (this.node.getSignature === "" || this.node.getSignature === null) {
-      throw new Error("Node is not instantiated");
-    }
-
-    if (this.ui != null) {
-      this.node.setUI(this.ui);
-    }
-    return;
+  get build(): NodeInstance {
+    return new NodeInstance(
+      this.partialNode.name,
+      this.partialNode.plugin,
+      this.partialNode.displayName,
+      this.partialNode.description,
+      this.partialNode.icon,
+      this.partialNode.inputs,
+      this.partialNode.outputs,
+      this.partialNode.func,
+      this.partialNode.ui,
+      this.partialNode.uiConfigs
+    );
   }
 
-  get build(): any {
-    return null;
-  }
+  /**
+   *
+   * @param title Title of the node
+   *
+   * */
 
   public setTitle(title: string): void {
-    this.node.setTitle(title);
+    this.partialNode.displayName = title;
   }
 
   public setDescription(description: string): void {
-    this.node.setDescription(description);
+    this.partialNode.description = description;
   }
 
-  public instantiate(plugin: string, name: string): void {
-    if (plugin === "" || name === "") {
-      throw new Error("Plugin or name is not instantiated");
-    }
-
-    this.node.instantiate(plugin, name);
-  }
+  /**
+   *
+   * @param icon Icon to be displayed on the node
+   *
+   */
 
   public addIcon(icon: string): void {
-    this.node.setIcon(icon);
+    this.partialNode.icon = icon;
   }
 
-  public addInput(type: string, anchorname: string): void {
-    this.node.addInput(type, anchorname);
+  /**
+   * @param type type of input
+   * @param identifier  Unique identifier for the node
+   * @param displayName Node name to display
+   */
+
+  public addInput(type: string, identifier: string, displayName: string): void {
+    this.partialNode.inputs.push({ type, identifier, displayName });
   }
 
-  public addOutput(type: string, anchorname: string): void {
-    this.node.addOutput(type, anchorname);
+  /**
+   *
+   * @param type type of output
+   * @param identifier  Unique identifier for the node
+   * @param displayName Node name to display
+   */
+
+  public addOutput(type: string, identifier: string, displayName: string): void {
+    this.partialNode.outputs.push({ type, identifier, displayName });
   }
+
+  /**
+   * Creates a new nodeUIBuilder for the node
+   * @returns NodeUIBuilder
+   */
 
   public createUIBuilder(): NodeUIBuilder {
-    const node = new NodeUIParent("", null);
-    const builder = new NodeUIBuilder(node);
+    const builder = new NodeUIBuilder();
 
-    if (this.ui == null) this.ui = node; // set root node automatically
+    // if (this.ui == null) this.ui = node; // set root node automatically
     return builder;
   }
 
-  public define(code: any) {
-    this.node.setFunction(code);
+  public define(code: NodeFunc) {
+    this.partialNode.func = code;
   }
 
+  /**
+   *
+   * Sets the nodeUIBuilder for the node
+   * @param ui NodeUIBuilder that will be used to build the UI
+   * */
+
   public setUI(ui: NodeUIBuilder) {
-    this.ui = ui.getUI();
+    this.partialNode.ui = ui.getUI();
+    this.partialNode.uiConfigs = ui.getUIConfigs();
   }
 }
 
+function getRandomComponentId(type: NodeUIComponent) {
+  return `${type.toString()}-${Math.floor(Math.random() * 16 ** 6).toString(16)}`;
+}
+
+/**
+ *
+ * Builds the nodes's ui through restricted interface
+ *
+ * */
+
 export class NodeUIBuilder {
-  constructor(private node: NodeUIParent) {}
+  private node: NodeUIParent;
+  private uiConfigs: { [key: string]: UIComponentConfig };
 
-  public addButton(label: string, param: any): NodeUIBuilder {
-    this.node.addButton(label, param);
+  constructor() {
+    this.node = new NodeUIParent("", null);
+    this.uiConfigs = {};
+  }
+
+  public addKnob(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Knob);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Knob, componentId, [props]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
-  public addSlider(
-    label: string,
-    min: number,
-    max: number,
-    step: number,
-    defautlVal: number
-  ): NodeUIBuilder {
-    this.node.addSlider(label, min, max, step, defautlVal);
+  /**
+   * @param label Label for the button
+   * @param param Parameter for the button
+   * @returns callback to this NodeUIBuilder
+   * */
+  public addButton(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Button);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Button, componentId, [props]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "",
+      updatesBackend: config.updatesBackend ?? false,
+    };
     return this;
   }
 
-  public addDropdown(label: string, builder: NodeUIBuilder): NodeUIBuilder {
-    this.node.addDropdown(label, builder.node);
+  /**
+   * @param label Label for the slider
+   * @param min Minimum value for the slider
+   * @param max Maximum value for the slider
+   * @param step Change in value for the slider
+   * @param defautlVal Default value
+   * @returns callback to this NodeUIBuilder
+   */
+  public addSlider(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Slider);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Slider, componentId, [props]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+    };
+
     return this;
   }
 
-  public addNumberInput(label: string): NodeUIBuilder {
-    this.node.addNumberInput(label);
+  public addDropdown(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Dropdown);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.Dropdown, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
-  public addImageInput(label: string): NodeUIBuilder {
-    this.node.addImageInput(label);
+  public addRadio(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Radio);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Radio, componentId, [props]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
+  /**
+   * @param label Label for the accordion
+   * @param builder NodeUIBuilder for the accordion
+   * @returns callback to this NodeUIBuilder
+   * */
+
+  public addAccordion(config: UIComponentConfig, builder: NodeUIBuilder): NodeUIBuilder {
+    builder.node.label = config.label;
+    builder.node.parent = this.node;
+    this.node.params.push(builder.node);
+    return this;
+  }
+
+  /**
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   * */
+  public addFilePicker(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.FilePicker);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.FilePicker, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "",
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
+
+  /**
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   * */
+  public addTextInput(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.TextInput);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.TextInput, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "empty",
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
+
+  /**
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   * */
+  public addNumberInput(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.NumberInput);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.NumberInput, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
+
+  /**
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   * */
+  // TODO: Remove duplicate, we already have addFilePicker()
+  public addImageInput(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.FilePicker);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.FilePicker, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "",
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
+
+  /**
+   * @param label Label for the text input
+   * @returns callback to this NodeUIBuilder
+   * */
   // We need to discuss how to handle color pickers
-  public addColorPicker(label: string, param: any): NodeUIBuilder {
-    this.node.addColorPicker(label, param);
+  public addColorPicker(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.ColorPicker);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.ColorPicker, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "#000000",
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 
@@ -115,8 +335,24 @@ export class NodeUIBuilder {
     return this.node;
   }
 
-  public addLabel(label: string, param: string) {
-    this.node.addLabel(label, param);
+  public getUIConfigs() {
+    return this.uiConfigs;
+  }
+
+  /**
+   * @param label Label for the text input
+   * @props props Parameter for the text input
+   * @returns callback to this NodeUIBuilder
+   * */
+  public addLabel(config: UIComponentConfig, props: UIComponentProps) {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Label);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Label, componentId, [props]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "empty",
+      updatesBackend: config.updatesBackend ?? true,
+    };
     return this;
   }
 }
