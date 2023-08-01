@@ -109,7 +109,8 @@ async function createMainWindow() {
       ? // in production, use the statically build version of our application
         `file://${join(
           __dirname,
-          `${platform().toString() === "darwin" ? "" : "../"}public`,
+          // `${platform().toString() === "darwin" ? "../" : ""}public`,V
+          "public",
           "index.html"
         )}`
       : // in dev, target the host and port of the local rollup web server
