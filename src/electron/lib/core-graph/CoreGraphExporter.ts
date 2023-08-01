@@ -19,7 +19,7 @@ interface ExportStrategy<T> {
 
 export type GraphToJSON = { nodes: NodeToJSON[]; edges: EdgeToJSON[] };
 export type NodeToJSON = { signature: string; styling: NodeStyling | null };
-export type AnchorToJSON = { parent: string; id: string };
+export type AnchorToJSON = { parent: number; id: string };
 export type EdgeToJSON = {
   anchorFrom: AnchorToJSON;
   anchorTo: AnchorToJSON;
@@ -51,12 +51,12 @@ export class GraphFileExportStrategy implements ExportStrategy<GraphToJSON> {
       for (const anchorTo of anchorTos) {
         json.push({
           anchorFrom: {
-            parent: graph.getAnchors[anchorFrom].parent.uuid,
-            id: graph.getAnchors[anchorFrom].anchorId,
+            parent: Object.keys(graph.getNodes).indexOf(graph.getAnchors[anchorFrom].parent.uuid),
+            id: graph.getAnchors[anchorFrom].getAnchorId(),
           },
           anchorTo: {
-            parent: graph.getAnchors[anchorTo].parent.uuid,
-            id: graph.getAnchors[anchorTo].anchorId,
+            parent: Object.keys(graph.getNodes).indexOf(graph.getAnchors[anchorTo].parent.uuid),
+            id: graph.getAnchors[anchorTo].getAnchorId(),
           },
         });
       }
@@ -64,12 +64,11 @@ export class GraphFileExportStrategy implements ExportStrategy<GraphToJSON> {
     return json;
   }
 }
-
-// class YamlExportStrategy implements ExportStrategy<string> {
-//   export(graph: CoreGraph): string {
-//     throw Error("YamlExportStrategy not implemented");
-//   }
-// }
+export class YamlExportStrategy implements ExportStrategy<string> {
+  export(graph: CoreGraph): string {
+    throw Error("YamlExportStrategy not implemented");
+  }
+}
 
 export type LLMGraph = {
   graph: {

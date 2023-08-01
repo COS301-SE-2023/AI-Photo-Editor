@@ -1,4 +1,4 @@
-import type { UIValue } from "@shared/types";
+import type { UIValue } from "../../shared/types";
 import { type UUID } from "../../shared/utils/UniqueEntity";
 import { type NodeSignature } from "./ToolboxTypes";
 import { type Writable, writable } from "svelte/store";
@@ -88,6 +88,6 @@ export function constructUIValueStore(ui: NodeUI, uiConfigs: { [key: string]: UI
   return res;
 }
 
-class GraphAnchor {
+export class GraphAnchor {
   constructor(public uuid: GraphAnchorUUID, public type: string) {}
 }

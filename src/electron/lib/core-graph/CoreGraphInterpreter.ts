@@ -1,9 +1,9 @@
 import { CoreGraph, Node, Anchor, AnchorIO } from "./CoreGraph";
 import logger from "./../../utils/logger";
-import { type UUID } from "@shared/utils/UniqueEntity";
+import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";
-import { commandStore } from "@frontend/lib/stores/CommandStore";
-import type { MediaOutput } from "@shared/types/media";
+import { commandStore } from "../../../frontend/lib/stores/CommandStore";
+import type { MediaOutput } from "../../../shared/types/media";
 
 /*
 Assumptions:

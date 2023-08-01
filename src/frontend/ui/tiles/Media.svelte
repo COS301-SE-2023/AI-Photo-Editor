@@ -122,9 +122,16 @@
     <div class="self-end">
       <SelectionBox
         items="{selectedItems}"
-        selectedItemId="{$mediaId}"
+        bind:selectedItemId="{$mediaId}"
         missingContentLabel="No Outputs"
       />
+    </div>
+    <div
+      on:click="{exportMedia}"
+      on:keydown="{null}"
+      class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+    >
+      Export
     </div>
     <!-- <div class="self-end">
       <SelectionBox
@@ -140,7 +147,6 @@
       {@const display = dataTypeToMediaDisplay[$media.dataType]}
       {#if display}
         <svelte:component this="{display.component}" {...display.props($media.content)} />
-        <button on:click="{exportMedia}">Export</button>
       {:else}
         {@const errorDisplay = dataTypeToMediaDisplay["Error"]}
         <svelte:component

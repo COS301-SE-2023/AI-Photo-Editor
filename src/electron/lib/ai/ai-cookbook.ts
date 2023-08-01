@@ -105,7 +105,6 @@ export const responseSchema = z.union([
   removeNodeSchema,
   addEdgeSchema,
   removeEdgeSchema,
-  addEdgeSchema,
   updateInputValuesSchema,
   updateInputValueSchema,
   exitResponseSchema,

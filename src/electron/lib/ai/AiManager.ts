@@ -15,10 +15,16 @@ import {
   errorResponseSchema,
   updateInputValue,
 } from "./ai-cookbook";
-import type { ResponseFunctions } from "./ai-cookbook";
+import type {
+  AddNodeConfig,
+  RemoveNodeConfig,
+  AddEdgeConfig,
+  RemoveEdgeConfig,
+  UpdateInputValueConfig,
+  UpdateInputValuesConfig,
+} from "./ai-cookbook";
 import { type MainWindow } from "../api/apis/WindowApi";
-import { app } from "electron";
-import path, { join } from "path";
+const path = require("path");
 import { getSecret } from "../../utils/settings";
 import type { QueryResponse, ToastType } from "../../../shared/types";
 import { existsSync } from "fs";
@@ -55,14 +61,6 @@ export class AiManager {
     this.toolboxRegistry = toolbox;
     this.graphManager = graphManager;
     this._mainWindow = mainWindow;
-
-    // console.log(this._pluginContext);
-
-    // Need to bind dynamic function calls
-
-    // this.sendPrompt();
-    // console.log("Execute!")
-    // console.log(this.graphManager.getAllGraphUUIDs());
   }
 
   public getSupportedModels() {
@@ -203,7 +201,16 @@ export class AiManager {
     });
   }
 
-  executeMagicWand(config: ResponseFunctions, graphId: string) {
+  executeMagicWand(
+    config:
+      | AddNodeConfig
+      | RemoveNodeConfig
+      | AddEdgeConfig
+      | RemoveEdgeConfig
+      | UpdateInputValueConfig
+      | UpdateInputValuesConfig,
+    graphId: string
+  ) {
     const { name, args } = config;
 
     if (name === "addNode") {
@@ -245,12 +252,13 @@ export class AiManager {
   }
 
   private findPythonScriptPath() {
-    const possibilities = [
+    const possibilities: string[] = [
       // In packaged app
       path.join(process.resourcesPath, "python/main.py"),
       // In development
       path.join(__dirname, "../../../../src/electron/lib/ai/python/main.py"),
     ];
+    // console.log(possibilities)
     for (const path of possibilities) {
       if (existsSync(path)) {
         return path;

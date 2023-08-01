@@ -4,8 +4,7 @@ export class TileRegistry implements Registry {
   private registry: { [key: string]: TileInstance } = {};
 
   addInstance(instance: TileInstance): void {
-    const temp = instance;
-    return;
+    if (instance) this.registry[instance.id] = instance;
   }
   getRegistry(): { [key: string]: TileInstance } {
     return this.registry;
@@ -21,6 +20,6 @@ export class TileInstance implements RegistryInstance {
   ) {}
 
   get id(): string {
-    return this.id;
+    return this.signature;
   }
 }

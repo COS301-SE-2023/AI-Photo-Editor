@@ -60,7 +60,7 @@ export class ProjectManager {
     return Object.values(this._projects);
   }
 
-  public renameProject(uuid: UUID, name: string) {
+  public renameProject(uuid: UUID, name: string): boolean {
     if (this._projects.hasOwnProperty(uuid)) {
       return this._projects[uuid].rename(name);
     } else {
@@ -68,16 +68,16 @@ export class ProjectManager {
     }
   }
 
-  public async getRecentProjectsList(): Promise<RecentProject[]> {
-    try {
-      const filePath = join(app.getPath("userData"), "recentProjects.json");
-      const contents = await readFile(filePath, "utf8");
-      return recentProjectsSchema.parse(JSON.parse(contents)).projects;
-    } catch (err) {
-      logger.error("Could not retrieve recent project list");
-      return [];
-    }
-  }
+  // public async getRecentProjectsList(): Promise<RecentProject[]> {
+  //   try {
+  //     const filePath = join(app.getPath("userData"), "recentProjects.json");
+  //     const contents = await readFile(filePath, "utf8");
+  //     return recentProjectsSchema.parse(JSON.parse(contents)).projects;
+  //   } catch (err) {
+  //     logger.error("Could not retrieve recent project list");
+  //     return [];
+  //   }
+  // }
 
   public onProjectCreated(projectId: UUID) {
     const project = this._projects[projectId];

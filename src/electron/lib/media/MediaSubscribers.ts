@@ -1,4 +1,4 @@
-import { type MediaOutputId, type MediaOutput } from "@shared/types/media";
+import { type MediaOutputId, type MediaOutput } from "../../../shared/types/media";
 import { UniqueEntity } from "../../../shared/utils/UniqueEntity";
 
 export class MediaSubscriber extends UniqueEntity {

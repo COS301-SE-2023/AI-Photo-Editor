@@ -1,8 +1,8 @@
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
-import { type NodeSignature } from "@shared/ui/ToolboxTypes";
-import { type INodeUIInputs } from "@shared/types";
+import { type NodeSignature } from "../../../../shared/ui/ToolboxTypes";
+import { type INodeUIInputs } from "../../../../shared/types";
 import { CoreGraphUpdateParticipant } from "../../core-graph/CoreGraphInteractors";
 import type { GraphMetadata } from "../../../../shared/ui/UIGraph";
 

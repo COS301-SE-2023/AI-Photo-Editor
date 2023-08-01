@@ -1,10 +1,7 @@
 import { type UUID } from "../../../shared/utils/UniqueEntity";
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraph } from "./CoreGraph";
-import {
-  type AnchorToJSON,
-  type GraphToJSON,
-} from "./CoreGraphExporter";
+import { type AnchorToJSON, type GraphToJSON } from "./CoreGraphExporter";
 
 export class CoreGraphImporter {
   private _toolbox: ToolboxRegistry;
@@ -64,7 +61,6 @@ export class CoreGraphImporter {
         nodes[cnt++] = res.data?.nodeId;
       }
     }
-
     for (const edge of json.edges) {
       const anchorFrom = this.findCorrectAnchor(graph, nodes, edge.anchorFrom);
       const anchorTo = this.findCorrectAnchor(graph, nodes, edge.anchorTo);
