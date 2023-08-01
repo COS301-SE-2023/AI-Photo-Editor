@@ -24,15 +24,15 @@ function createCommandStore() {
   async function runCommand(id: string, args?: Record<string, any>) {
     if (id in blixCommandParams) {
       if (args) {
-        await window.apis.commandApi.runCommand(id, args);
+        return await window.apis.commandApi.runCommand(id, args);
       } else {
-        await window.apis.commandApi.runCommand(id, blixCommandParams[id]());
+        return await window.apis.commandApi.runCommand(id, blixCommandParams[id]());
       }
     } else {
       if (args) {
-        await window.apis.commandApi.runCommand(id, args);
+        return await window.apis.commandApi.runCommand(id, args);
       } else {
-        await window.apis.commandApi.runCommand(id);
+        return await window.apis.commandApi.runCommand(id);
       }
     }
   }

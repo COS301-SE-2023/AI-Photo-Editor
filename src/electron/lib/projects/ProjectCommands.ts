@@ -25,7 +25,7 @@ type SaveProjectArgs = {
   projectPath?: string;
 };
 
-type ExportMedia= {
+type ExportMedia = {
   type: string;
   data?: string;
 };
@@ -90,20 +90,19 @@ export const exportMediaCommand: Command = {
   },
   handler: async (ctx: CommandContext, args: ExportMedia) => {
     const result = await exportMedia(ctx, args);
-    if (result?.success) {
-      ctx.sendSuccessMessage(result?.message ?? "");
-    } else {
-      ctx.sendErrorMessage(result?.error ?? "");
+    if (result?.success && result.message) {
+      ctx.sendSuccessMessage(result?.message);
+    } else if (result?.error && result.error) {
+      ctx.sendErrorMessage(result.error);
     }
   },
 };
-
 
 export const projectCommands: Command[] = [
   saveProjectCommand,
   saveProjectAsCommand,
   openProjectCommand,
-  exportMediaCommand
+  exportMediaCommand,
 ];
 
 // =========== Command Helpers ===========
@@ -242,54 +241,55 @@ export async function openProject(ctx: CommandContext) {
 }
 
 export async function exportMedia(ctx: CommandContext, args: ExportMedia) {
+  if (!args) {
+    return { success: false, error: "No media selected to export" };
+  }
+
   const { type, data } = args;
 
   if (!data) {
     return { success: false, error: "No data was provided" };
   }
 
-  if(type === "Image"){
+  if (type === "Image") {
     const base64Data = data.split(";base64, ");
     const imgBuffer = Buffer.from(base64Data[1], "base64");
 
     const path = await showSaveDialog({
       title: "Export media as",
-      defaultPath: join(app.getPath("downloads"), "blix.png"),
-      filters: [{ name: "Images", extensions: ["png, jpg"] }],
+      defaultPath: "blix.png",
+      // filters: [{ name: "Images", extensions: ["png, jpg", "jpeg"] }],
       properties: ["createDirectory"],
     });
+
+
     if (!path) return;
-  
+
     sharp(imgBuffer).toFile(path);
 
-    return { success: true, message: "Media exported successfully"};
-  }
-  else if(type === "Number" || type === "color" || type === "string"){
-
+    return { success: true, message: "Media exported successfully" };
+  } else if (type === "Number" || type === "color" || type === "string") {
     const fileData = {
       OutputData: data,
-    }
+    };
+
     const path = await showSaveDialog({
       title: "Export media as",
       defaultPath: join(app.getPath("downloads"), "blix.json"),
       filters: [{ name: "Data", extensions: ["json"] }],
       properties: ["createDirectory"],
     });
+
     if (!path) return;
 
-    try{
+    try {
       writeFile(path, JSON.stringify(fileData));
-    }
-    catch(err){
+    } catch (err) {
       logger.error(err);
     }
 
-    return { success: true, message: "Media exported successfully"};
-
-  }
-  else{
-
-    return { success: false, error: "Unsupported media type"};
-
+    return { success: true, message: "Media exported successfully" };
+  } else {
+    return { success: false, error: "Unsupported media type" };
   }
 }

@@ -1,6 +1,7 @@
 import type { MediaOutput, MediaOutputId } from "@shared/types/media";
 import { derived, get, writable } from "svelte/store";
 import { graphMall } from "./GraphStore";
+import { commandStore } from "./CommandStore";
 
 type MediaOutputs = {
   [key: MediaOutputId]: MediaOutput;
@@ -49,9 +50,7 @@ class MediaStore {
   }
 
   public async exportMedia(output: MediaOutput){
-
-    return await window.apis.commandApi.runCommand("blix.exportMedia", {type: output.dataType, data: output.content});  
-
+    return await commandStore.runCommand("blix.exportMedia", {type: output.dataType, data: output.content});  
   }
 
   public get subscribe() {
