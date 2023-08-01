@@ -9,7 +9,7 @@
   import { onDestroy } from "svelte";
   import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
   import SelectionBox from "../utils/graph/SelectionBox.svelte";
-  import { type SelectionBoxItem } from "types";
+  import { type SelectionBoxItem } from "../../types/selection-box";
 
   const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
 
@@ -108,9 +108,9 @@
 </script>
 
 <div class="fullPane">
-  <div class="hover">
-    <!-- <input type="text" bind:value="{$mediaId}" />
-    <select bind:value="{$mediaId}">
+  <div class="hover flex items-center space-x-2">
+    <!-- <input type="text" bind:value="{$mediaId}" class="h-7 bg-zinc-800/80 border border-zinc-600 caret-rose-500 outline-none p-2 rounded-md text-zinc-400" /> -->
+    <!-- <select bind:value="{$mediaId}">
       {#if $mediaOutputIds}
         {#each Array.from($mediaOutputIds) as id}
           <option value="{id}">{id}</option>
@@ -119,11 +119,20 @@
         <option selected disabled value>No Outputs</option>
       {/if}
     </select> -->
-    <SelectionBox
-      items="{selectedItems}"
-      selectedItemId="{selectedItems[0]?.id}"
-      missingContentLabel="No Outputs"
-    />
+    <div class="self-end">
+      <SelectionBox
+        items="{selectedItems}"
+        selectedItemId="{$mediaId}"
+        missingContentLabel="No Outputs"
+      />
+    </div>
+    <!-- <div class="self-end">
+      <SelectionBox
+        items="{selectedItems}"
+        selectedItemId="{selectedItems[0]?.id}"
+        missingContentLabel="No Outputs"
+      />
+    </div> -->
   </div>
 
   <div class="media">

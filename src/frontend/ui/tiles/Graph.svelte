@@ -230,6 +230,8 @@
       items="{$projectGraphItems}"
       on:editItem="{(event) => updateGraphName(event.detail.newItem)}"
       on:removeItem="{(event) => deleteGraph(event.detail.id)}"
+      missingContentLabel="{'No Graphs'}"
+      itemsRemovable="{true}"
     />
   </div>
   <div

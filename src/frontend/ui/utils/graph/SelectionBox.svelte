@@ -19,7 +19,8 @@
 
   export let items: SelectionBoxItem[];
   export let selectedItemId: string;
-  export let missingContentLabel: string = "No Graphs";
+  export let missingContentLabel: string = "No Items";
+  export let itemsRemovable = false;
 
   let selectedItemTitle: string = "";
 
@@ -136,6 +137,7 @@
               on:removeItem="{removeItem}"
               on:selectItem="{selectItem}"
               selected="{item.id === selectedItemId}"
+              removable="{itemsRemovable}"
             />
           {/each}
         </ul>
@@ -156,7 +158,7 @@
         {selectedItemTitle}
       </span>
     {:else}
-      <span class="select-none truncate italic"></span>
+      <span class="select-none truncate italic text-gray-500">{missingContentLabel}</span>
     {/if}
     <svg
       xmlns="http://www.w3.org/2000/svg"
