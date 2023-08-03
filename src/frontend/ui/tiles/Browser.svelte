@@ -17,6 +17,8 @@
   let urlBar = SEARCH_ENGINE;
   let url = urlBar;
 
+  // TODO: Turns out webviews have their own built-in history,
+  // so I guess we can replace this later on
   let history = [urlBar];
   let historyIndex = 0;
 

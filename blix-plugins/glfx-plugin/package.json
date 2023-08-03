@@ -1,0 +1,34 @@
+{
+    "name": "glfx-plugin",
+    "displayName": "GLFX Plugin",
+    "description": "Performs basic image operations using glfx.js",
+    "version": "0.0.1",
+    "author": "Rec1dite",
+    "repository": "",
+    "type": "module",
+    "scripts": {
+        "build": "rollup -c",
+        "dev": "rollup -c -w"
+    },
+    "contributes": {
+        "commands": [],
+        "nodes": []
+    },
+    "main": "src/main.js",
+    "renderer": "src/renderer.js",
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^24.0.0",
+        "@rollup/plugin-node-resolve": "^15.0.0",
+        "@rollup/plugin-terser": "^0.4.0",
+        "@types/node": "^12.0.0",
+        "rollup": "^3.15.0",
+        "rollup-plugin-css-only": "^4.3.0",
+        "rollup-plugin-livereload": "^2.0.0",
+        "rollup-plugin-svelte": "^7.1.2",
+        "svelte": "^3.55.0",
+        "typescript": "^3.4.5"
+    },
+    "comments": [
+        "This plugin will be expanded to handle more image operations."
+    ]
+}

@@ -64,6 +64,9 @@ export class PluginManager {
     const pluginsPath = join(app.isPackaged ? process.resourcesPath : appPath, "blix-plugins");
     const ignorePatterns = [".DS_Store"];
 
+    // TODO: Make plugin loading async
+    // See: [https://stackoverflow.com/a/52243773]
+
     // Read blix-plugins/ directory
     const dirents = readdirSync(pluginsPath, { withFileTypes: true });
     // Ignore files (only directories)
