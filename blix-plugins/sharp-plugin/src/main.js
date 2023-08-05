@@ -3,7 +3,7 @@ const sharp = require(isProd ? "../../../app.asar/node_modules/sharp" : "sharp")
 
 const nodes = {
     "brightness": (context) => {
-        nodeBuilder = context.instantiate("sharp-plugin", "brightness");
+        const nodeBuilder = context.instantiate("sharp-plugin", "brightness");
         nodeBuilder.setTitle("Brightness");
         nodeBuilder.setDescription("Adjusts the brighness of an image taking one image as input and returning one image as output");
 
@@ -125,6 +125,7 @@ const nodes = {
         const nodeBuilder = context.instantiate("sharp-plugin", "sharpen");
         nodeBuilder.setTitle("Sharpen");
         nodeBuilder.setDescription("Sharpens an image taking one image as input and returning one image as output");
+        const ui = nodeBuilder.createUIBuilder();
         ui
             .addSlider(
                 {
@@ -201,15 +202,15 @@ const nodes = {
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
     "inputSharpImage": (context) => {
-        nodeBuilder = context.instantiate("input-plugin", "inputImage");
-        nodeBuilder.setTitle("Input image");
+        const nodeBuilder = context.instantiate("input-plugin", "inputSharpImage");
+        nodeBuilder.setTitle("Input Sharp image");
         nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
         nodeBuilder.define(async (input, uiInput, from) => {
             return { "res": await sharp(uiInput["imagePicker"]) };
         });
 
-        ui = nodeBuilder.createUIBuilder();
+        const ui = nodeBuilder.createUIBuilder();
         ui.addFilePicker({
             componentId: "imagePicker",
             label: "Pick an image",
@@ -221,7 +222,6 @@ const nodes = {
 
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
-
 }
 
 

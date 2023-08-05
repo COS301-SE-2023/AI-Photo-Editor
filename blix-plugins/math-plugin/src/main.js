@@ -1,6 +1,6 @@
 const nodes ={
     "unary": (context) => {
-        nodeBuilder = context.instantiate("math-plugin","unary");
+        const nodeBuilder = context.instantiate("math-plugin","unary");
         nodeBuilder.setTitle("Unary");
         nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output,such as root, negate or square");
 

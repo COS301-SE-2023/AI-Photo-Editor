@@ -14,7 +14,7 @@
         "commands": [],
         "nodes": []
     },
-    "main": "src/main.js",
+    "main": "src/main.cjs",
     "renderer": "src/renderer.js",
     "devDependencies": {
         "@rollup/plugin-commonjs": "^24.0.0",

@@ -90,7 +90,7 @@ const nodes ={
         nodeBuilder.addOutput("boolean", "res", "Result");
       },
     "ternary": (context) => {
-        nodeBuilder = context.instantiate("logic-plugin","ternary");
+        const nodeBuilder = context.instantiate("logic-plugin","ternary");
         nodeBuilder.setTitle("Ternary Comp.");
 
         nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {

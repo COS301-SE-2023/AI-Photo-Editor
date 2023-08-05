@@ -6,6 +6,10 @@
 
   let src = "file:///home/rec1dite/code/301/capstone/blix-plugins/glfx-plugin/src/index.html";
 
+  export let media: unknown;
+
+  $: updateMedia(media);
+
   // const loadstart = () => {
   //   indicator.innerText = 'loading...'
   // }
@@ -13,6 +17,18 @@
   // const loadstop = () => {
   //   indicator.innerText = ''
   // }
+
+  // setInterval(() => {
+  //   updateMedia(Math.random());
+  // }, 1000);
+
+  function updateMedia(media: unknown) {
+    // To manually execute a javascript function within the webview:
+    // const res = await webview?.executeJavaScript("app.dispatchMessage('hi there!')");
+
+    // To send a message to the webview over IPC, use the webview's send method:
+    webview?.send("mediaChanged", media);
+  }
 
   function reload() {
     webview?.reload();
@@ -22,12 +38,7 @@
   }
 
   onMount(() => {
-    setInterval(async () => {
-      // To manually execute a javascript function within the webview:
-      // const res = await webview?.executeJavaScript("app.dispatchMessage('hi there!')");
-      // To send a message to the webview over IPC, use the webview's send method:
-      webview?.send("testMessage", "salutations and hello");
-    }, 4000);
+    setInterval(async () => {}, 10);
 
     // To receive a message from the webview, add an event listener for the ipc-message event:
     webview?.addEventListener("ipc-message", (event) => {

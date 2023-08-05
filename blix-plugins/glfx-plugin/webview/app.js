@@ -1,10 +1,11 @@
+const { writable } = require('svelte/store');
 const App = require('./App.svelte').default;
+
+const media = writable({});
 
 const app = new App({
 	target: document.body,
-	props: {
-		greeting: "Now you can write Blix plugin webviews with Svelte!"
-	},
+	props: { media },
 });
 
 module.exports.default = app;
@@ -15,8 +16,10 @@ module.exports.default = app;
 // });
 
 window.addEventListener("DOMContentLoaded", () => {
-    window.api.on("testMessage", (data) => {
-        console.log(`Received [${data}] from main process in app.js`);
-		window.api.send("backTestMessage", "Hello from app.js");
+    window.api.on("mediaChanged", (newMedia) => {
+		media.set(newMedia);
+
+		// To send a message back
+		// window.api.send("backTestMessage", "Hello from app.js");
     });
 });

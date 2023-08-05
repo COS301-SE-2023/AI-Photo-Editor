@@ -1,6 +1,6 @@
 const nodes = {
     "inputNumber": (context) => {
-        nodeBuilder = context.instantiate("input-plugin", "inputNumber");
+        const nodeBuilder = context.instantiate("input-plugin", "inputNumber");
         nodeBuilder.setTitle("Input number");
         nodeBuilder.setDescription("Provides a number input and returns a single number output");
 
@@ -8,7 +8,7 @@ const nodes = {
             return { "res": uiInput["number"] };
         });
 
-        ui = nodeBuilder.createUIBuilder();
+        const ui = nodeBuilder.createUIBuilder();
         ui
         .addSlider(
             {
@@ -24,7 +24,7 @@ const nodes = {
         nodeBuilder.addOutput("Number", "res", "Result");
     },
     "inputImage": (context) => {
-        nodeBuilder = context.instantiate("input-plugin", "inputImage");
+        const nodeBuilder = context.instantiate("input-plugin", "inputImage");
         nodeBuilder.setTitle("Input image");
         nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
@@ -32,7 +32,7 @@ const nodes = {
             return { "res": uiInput["imagePicker"]};
         });
 
-        ui = nodeBuilder.createUIBuilder();
+        const ui = nodeBuilder.createUIBuilder();
         ui.addFilePicker({
             componentId: "imagePicker",
             label: "Pick an image",
@@ -46,7 +46,7 @@ const nodes = {
     },
     // Will we define a color type? or just a vector4/string 
     "inputColor": (context) => {
-        nodeBuilder = context.instantiate("input-plugin", "inputColor");
+        const nodeBuilder = context.instantiate("input-plugin", "inputColor");
         nodeBuilder.setTitle("Input color");
         nodeBuilder.setDescription("Provides a color input and returns a single color output");
 
@@ -54,7 +54,7 @@ const nodes = {
             return { "res": uiInput["colorPicker"]};
         });
 
-        ui = nodeBuilder.createUIBuilder();
+        const ui = nodeBuilder.createUIBuilder();
         ui.addColorPicker({
             componentId: "colorPicker",
             label: "Pick a color",
@@ -67,7 +67,7 @@ const nodes = {
     },
     // Will we define a color type? or just a vector4/string 
     "inputBoolean": (context) => {
-        nodeBuilder = context.instantiate("input-plugin", "inputBoolean");
+        const nodeBuilder = context.instantiate("input-plugin", "inputBoolean");
         nodeBuilder.setTitle("Input Boolean");
         nodeBuilder.setDescription("Provides a radio box and returns a single true/false value");
 
@@ -75,7 +75,7 @@ const nodes = {
             return { "res": uiInput["radio"]};
         });
 
-        ui = nodeBuilder.createUIBuilder();
+        const ui = nodeBuilder.createUIBuilder();
         ui.addColorPicker({
             componentId: "radio",
             label: "Pick a color",
