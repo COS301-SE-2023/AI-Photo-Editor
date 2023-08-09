@@ -7,3 +7,8 @@ export interface SharedProject {
   layout?: LayoutPanel;
   graphs?: UUID[];
 }
+
+export interface recentProject {
+  path: string;
+  lastEdited: string;
+}

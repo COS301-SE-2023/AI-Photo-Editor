@@ -7,7 +7,7 @@ import {
   type GraphToJSON,
 } from "../core-graph/CoreGraphExporter";
 import logger from "../../utils/logger";
-import { readFile, writeFile } from "fs/promises";
+import { readFile, writeFile, open } from "fs/promises";
 import type { ProjectFile } from "./CoreProject";
 import type { Command, CommandContext } from "../../lib/registries/CommandRegistry";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
@@ -18,6 +18,9 @@ import {
   CoreGraphUpdateParticipant,
 } from "../core-graph/CoreGraphInteractors";
 import sharp from "sharp";
+import  settings  from "../../utils/settings";
+import type { recentProject } from "../../../shared/types/index";
+import { getRecentProjects } from "../../utils/settings";
 
 export type SaveProjectArgs = {
   projectId: UUID;
@@ -39,6 +42,15 @@ export type CommandResponse =
       success: false;
       error?: string;
     };
+
+export const getRecentProjectsCommand: Command = {
+  id: "blix.projects.recent",
+  description: {
+    name: "Open recent project",
+    description: "Open a recently edited project"
+  },
+  handler: getRecentProjects 
+}
 
 export const saveProjectCommand: Command = {
   id: "blix.projects.save",
@@ -99,7 +111,9 @@ export const openProjectCommand: Command = {
     name: "Open project...",
     description: "Save project to file system",
   },
-  handler: openProject,
+  handler: async (ctx: CommandContext, project?: recentProject) => {
+    const option = project ? openProject(ctx, project.path) : openProject(ctx);
+  },
 };
 
 export const exportMediaCommand: Command = {
@@ -123,6 +137,7 @@ export const projectCommands: Command[] = [
   saveProjectAsCommand,
   openProjectCommand,
   exportMediaCommand,
+  getRecentProjectsCommand
 ];
 
 // =========== Command Helpers ===========
@@ -187,7 +202,7 @@ export async function saveProject(
       logger.error(err);
     }
   }
-
+  updateRecentProjectsList(project.location as string);
   return { success: true, message: "Project saved successfully" };
 }
 
@@ -224,15 +239,22 @@ export async function saveProjectAs(ctx: CommandContext, args: SaveProjectArgs) 
  *
  * @returns Nothing
  */
-export async function openProject(ctx: CommandContext) {
-  const paths = await showOpenDialog({
-    title: "Import Project",
-    defaultPath: app.getPath("downloads"),
-    filters: [{ name: "Blix Project", extensions: ["blix"] }],
-    properties: ["openFile", "multiSelections"],
-  });
+export async function openProject(ctx: CommandContext, path?: string) {
+  let paths: string[] = [];
+  
+  if(!path) {
+    const result = await showOpenDialog({
+      title: "Import Project",
+      defaultPath: app.getPath("downloads"),
+      filters: [{ name: "Blix Project", extensions: ["blix"] }],
+      properties: ["openFile", "multiSelections"],
+    });
+    if (!result) return;
+    paths = result;
+  } else {
+    paths = [path]
+  }
 
-  if (!paths) return;
 
   for (const path of paths) {
     const project = await readFile(path, "utf-8");
@@ -257,6 +279,7 @@ export async function openProject(ctx: CommandContext) {
       id: projectId,
       layout: projectFile.layout,
     });
+    updateRecentProjectsList(path);
   }
 }
 
@@ -309,5 +332,40 @@ export async function exportMedia(ctx: CommandContext, args: ExportMedia) {
     return { success: true, message: "Media exported successfully" };
   } else {
     return { success: false, error: "Unsupported media type" };
+  }
+}
+
+// TODO: Implement some sort of limit to how long the history of recent projects is.
+export async function updateRecentProjectsList(projectPath: string) {
+  const currentProjects: recentProject[] = settings.get("recentProjects");
+  let validProjects: recentProject[] = [];
+
+  const results = await Promise.all(
+    currentProjects.map(async (project) => await validateProjectPath(project.path))
+  );
+  for (let i = 0; i < currentProjects.length; i++) {
+    validProjects = results[i] ? [...validProjects, currentProjects[i]] : validProjects;
+  }
+
+  validProjects = validProjects.filter((project) => project.path !== projectPath);
+  const str = new Date().toUTCString().split(",")[1];
+  const date = str.slice(1, str.lastIndexOf(" "));
+  validProjects.unshift({ path: projectPath , lastEdited: date });
+  settings.set("recentProjects", validProjects);
+  logger.info(settings.get("recentProjects"));
+}
+
+/**
+ * This function will check if the path specified has the ability to be read
+ *
+ * @param path Path to be checked
+ * @returns A boolean response
+ */
+export async function validateProjectPath(path: string): Promise<boolean> {
+  try {
+    await (await open(path, "r")).close();
+    return true;
+  } catch (e) {
+    return false;
   }
 }
