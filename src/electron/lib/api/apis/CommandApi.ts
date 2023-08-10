@@ -1,6 +1,7 @@
 import type { ElectronMainApi } from "electron-affinity/main";
-import type { Command, CommandContext, CommandResponse } from "../../registries/CommandRegistry";
+import type { Command, CommandContext } from "../../registries/CommandRegistry";
 import type { Blix } from "../../Blix";
+import type { CommandResponse } from "../../../../shared/types/index";
 
 export class CommandApi implements ElectronMainApi<CommandApi> {
   private readonly blix: Blix;
