@@ -1,5 +1,5 @@
 import type { Registry } from "./Registry";
-import type { ICommand } from "../../../shared/types";
+import type { ICommand, PaletteView } from "../../../shared/types";
 import { Blix } from "../Blix";
 
 export type CommandContext = Blix;
@@ -10,8 +10,23 @@ export interface Command {
   description?: CommandDescription | null;
 }
 
-// Chnaged from void to any so the results of commands can be used
-export type CommandHandler = (ctx: CommandContext, params?: any) => any;
+export type CommandHandler = (ctx: CommandContext, params?: any) => CommandResponse;
+
+export type CommandResponse<S = unknown, E = unknown> =
+  | {
+      status: "success";
+      message?: string;
+      data?: S;
+    }
+  | {
+      status: "error";
+      message: string;
+      data?: E;
+    }
+  | {
+      status: "palette";
+      data: PaletteView;
+    };
 
 export interface CommandDescription {
   readonly name: string;
@@ -57,7 +72,7 @@ export class CommandRegistry implements Registry {
     return commands;
   }
 
-  async runCommand(id: string, params?: any) {
+  async runCommand(id: string, params?: any): Promise<CommandResponse> {
     const command = this.registry[id];
 
     if (!command) {

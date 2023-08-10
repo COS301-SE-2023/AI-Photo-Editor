@@ -5,3 +5,4 @@ export * from "./command";
 export * from "./util";
 export * from "./setting";
 export * from "./media";
+export * from "./palette";

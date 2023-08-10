@@ -1,5 +1,5 @@
 import type { ElectronMainApi } from "electron-affinity/main";
-import type { Command } from "../../registries/CommandRegistry";
+import type { Command, CommandContext, CommandResponse } from "../../registries/CommandRegistry";
 import type { Blix } from "../../Blix";
 
 export class CommandApi implements ElectronMainApi<CommandApi> {
@@ -13,7 +13,7 @@ export class CommandApi implements ElectronMainApi<CommandApi> {
     this.blix.commandRegistry.addInstance(instance);
   }
 
-  async runCommand(id: string, params?: any) {
+  async runCommand(id: string, params?: any): Promise<CommandResponse> {
     return await this.blix.commandRegistry.runCommand(id, params);
   }
 
