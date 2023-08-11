@@ -153,10 +153,11 @@ describe("Test graph interpreter", () => {
       blix.toolbox.addInstance(tempNodesInt[2]);
 
       const g2: CoreGraph = new CoreGraph();
-
-      g2.addNode(tempNodesInt[0]);
-      g2.addNode(tempNodesInt[1]);
-      g2.addNode(tempNodesInt[2]);
+      
+      const pos = { x: 0, y: 0 };
+      g2.addNode(tempNodesInt[0], pos);
+      g2.addNode(tempNodesInt[1], pos);
+      g2.addNode(tempNodesInt[2], pos);
 
 
       const g2Nodes = g2.getNodes;
@@ -261,10 +262,11 @@ describe("Test graph interpreter", () => {
       blix.toolbox.addInstance(tempNodesInt[2]);
 
       const g2: CoreGraph = new CoreGraph();
-
-      g2.addNode(tempNodesInt[0]);
-      g2.addNode(tempNodesInt[1]);
-      g2.addNode(tempNodesInt[2]);
+      
+      const pos = { x: 0, y: 0 }
+      g2.addNode(tempNodesInt[0], pos);
+      g2.addNode(tempNodesInt[1], pos);
+      g2.addNode(tempNodesInt[2], pos);
 
 
       const g2Nodes = g2.getNodes;

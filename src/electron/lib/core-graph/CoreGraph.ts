@@ -9,7 +9,7 @@ import {
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
 import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
-import { type GraphMetadata } from "../../../shared/ui/UIGraph";
+import { type GraphMetadata, type SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 import { type MediaOutputId } from "../../../shared/types/media";
 
 // =========================================
@@ -51,6 +51,9 @@ export class CoreGraph extends UniqueEntity {
   // Maps a node UUID to a list of UI inputs
   private uiInputs: { [key: UUID]: CoreNodeUIInputs };
 
+  // Maps a node UUID to a UI canvas position
+  private uiPositions: { [key: UUID]: SvelvetCanvasPos };
+
   // private subscribers: CoreGraphSubscriber[];
   private static nodeTracker = 0;
   constructor() {
@@ -61,6 +64,7 @@ export class CoreGraph extends UniqueEntity {
     this.edgeSrc = {};
     this.outputNodes = {};
     this.uiInputs = {};
+    this.uiPositions = {};
     this.metadata = {
       displayName: "Graph",
     };
@@ -156,8 +160,15 @@ export class CoreGraph extends UniqueEntity {
     return this.uiInputs[nodeUUID]?.getInputs || null;
   }
 
+  public get getUIPositions() {
+    return this.uiPositions;
+  }
+
   // We need to pass in node name and plugin name
-  public addNode(node: NodeInstance): QueryResponse<{
+  public addNode(
+    node: NodeInstance,
+    pos: SvelvetCanvasPos
+  ): QueryResponse<{
     nodeId: UUID;
     inputs: string[];
     outputs: string[];
@@ -185,6 +196,8 @@ export class CoreGraph extends UniqueEntity {
 
       // console.log(QueryResponseStatus.success)
       const anchors: AiAnchors = n.returnAnchors();
+      // Add position of node to graph
+      this.uiPositions[n.uuid] = pos;
       return {
         status: "success",
         message: "Node added succesfully",

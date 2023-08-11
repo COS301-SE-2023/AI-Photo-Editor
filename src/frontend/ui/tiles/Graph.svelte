@@ -87,6 +87,17 @@
   $: zoom = graphData?.transforms?.scale;
   $: dimensions = graphData?.dimensions;
 
+  $: $thisGraphStore?.view?.set({
+    translation: $translation,
+    dimensions: $dimensions,
+    zoom: $zoom,
+  });
+  // $: if($thisGraphStore?.view) {
+  //     console.log(get($thisGraphStore.view));
+  //   }
+
+  $: console.log($zoom);
+
   // Hooks exposed by <Svelvet />
   let connectAnchorIds: (
     sourceNode: NodeKey,

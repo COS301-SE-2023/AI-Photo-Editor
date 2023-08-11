@@ -192,10 +192,12 @@ export class TestGraph {
 
     const g2: CoreGraph = new CoreGraph();
 
-    g2.addNode(tempNodesInt[0]);
-    g2.addNode(tempNodesInt[1]);
-    g2.addNode(tempNodesInt[2]);
-    g2.addNode(tempNodesInt[3]);
+    const pos = { x: 0, y: 0 };
+    g2.addNode(this.tempNodes[0], pos);
+    g2.addNode(this.tempNodes[1], pos);
+    g2.addNode(this.tempNodes[2], pos);
+    g2.addNode(this.tempNodes[3], pos);
+
     // g2.addNode(tempNodesInt[4]);
     // g2.addNode(tempNodesInt[5]);
 
@@ -267,10 +269,10 @@ export class TestGraph {
     // =====================================
 
     const g1: CoreGraph = new CoreGraph();
-
-    g1.addNode(this.tempNodes[0]);
-    g1.addNode(this.tempNodes[1]);
-    g1.addNode(this.tempNodes[2]);
+    const pos = { x: 0, y: 0 };
+    g1.addNode(this.tempNodes[0], pos);
+    g1.addNode(this.tempNodes[1], pos);
+    g1.addNode(this.tempNodes[2], pos);
 
     const nodes = g1.getNodes;
     const actualNode1 = Object.values(nodes)[0];
@@ -325,12 +327,13 @@ export class TestGraph {
 
     const g2: CoreGraph = new CoreGraph();
 
-    g2.addNode(this.tempNodes[0]);
-    g2.addNode(this.tempNodes[1]);
-    g2.addNode(this.tempNodes[2]);
-    g2.addNode(this.tempNodes[3]);
-    g2.addNode(this.tempNodes[4]);
-    g2.addNode(this.tempNodes[5]);
+    const pos = { x: 0, y: 0 };
+    g2.addNode(this.tempNodes[0], pos);
+    g2.addNode(this.tempNodes[1], pos);
+    g2.addNode(this.tempNodes[2], pos);
+    g2.addNode(this.tempNodes[3], pos);
+    g2.addNode(this.tempNodes[4], pos);
+    g2.addNode(this.tempNodes[5], pos);
 
     const g2Nodes = g2.getNodes;
     const g2Node1 = Object.values(g2Nodes)[0];
@@ -408,8 +411,9 @@ export class TestGraph {
 
     const g3: CoreGraph = new CoreGraph();
 
-    g3.addNode(this.tempNodes[0]);
-    g3.addNode(this.tempNodes[1]);
+    const pos = { x: 0, y: 0 };
+    g3.addNode(this.tempNodes[0], pos);
+    g3.addNode(this.tempNodes[1], pos);
 
     const g3Nodes = g3.getNodes;
     const g3Node1 = Object.values(g3Nodes)[0];
@@ -456,9 +460,9 @@ export class TestGraph {
     // =====================================
 
     const g4: CoreGraph = new CoreGraph();
-
-    g4.addNode(this.tempNodes[0]);
-    g4.addNode(this.tempNodes[1]);
+    const pos = { x: 0, y: 0 };
+    g4.addNode(this.tempNodes[0], pos);
+    g4.addNode(this.tempNodes[1], pos);
 
     const g4Nodes = g4.getNodes;
     const g4Node1 = Object.values(g4Nodes)[0];
@@ -504,7 +508,7 @@ export class TestGraph {
 
     const g5: CoreGraph = new CoreGraph();
 
-    g5.addNode(this.tempNodes[0]);
+    g5.addNode(this.tempNodes[0], { x: 0, y: 0 });
 
     const g5Nodes = g5.getNodes;
     const g5Node1 = Object.values(g5Nodes)[0];
@@ -538,11 +542,12 @@ export class TestGraph {
 
     const g6: CoreGraph = new CoreGraph();
 
-    g6.addNode(this.tempNodes[0]);
-    g6.addNode(this.tempNodes[1]);
-    g6.addNode(this.tempNodes[2]);
-    g6.addNode(this.tempNodes[3]);
-    g6.addNode(this.tempNodes[4]);
+    const pos = { x: 0, y: 0 };
+    g6.addNode(this.tempNodes[0], pos);
+    g6.addNode(this.tempNodes[1], pos);
+    g6.addNode(this.tempNodes[2], pos);
+    g6.addNode(this.tempNodes[3], pos);
+    g6.addNode(this.tempNodes[4], pos);
 
     const g6Nodes = g6.getNodes;
     const g6Node1 = Object.values(g6Nodes)[0];
@@ -621,11 +626,12 @@ export class TestGraph {
 
     const g6: CoreGraph = new CoreGraph();
 
-    g6.addNode(this.tempNodes[0]);
-    g6.addNode(this.tempNodes[1]);
-    g6.addNode(this.tempNodes[2]);
-    g6.addNode(this.tempNodes[3]);
-    g6.addNode(this.tempNodes[4]);
+    const pos = { x: 0, y: 0 };
+    g6.addNode(this.tempNodes[0], pos);
+    g6.addNode(this.tempNodes[1], pos);
+    g6.addNode(this.tempNodes[2], pos);
+    g6.addNode(this.tempNodes[3], pos);
+    g6.addNode(this.tempNodes[4], pos);
 
     const g6Nodes = g6.getNodes;
     const g6Node1 = Object.values(g6Nodes)[0];
@@ -706,12 +712,12 @@ export class TestGraph {
     // =====================================
 
     const g6: CoreGraph = new CoreGraph();
-
-    g6.addNode(this.tempNodes[0]);
-    g6.addNode(this.tempNodes[1]);
-    g6.addNode(this.tempNodes[2]);
-    g6.addNode(this.tempNodes[3]);
-    g6.addNode(this.tempNodes[4]);
+    const pos = { x: 0, y: 0 };
+    g6.addNode(this.tempNodes[0], pos);
+    g6.addNode(this.tempNodes[1], pos);
+    g6.addNode(this.tempNodes[2], pos);
+    g6.addNode(this.tempNodes[3], pos);
+    g6.addNode(this.tempNodes[4], pos);
 
     const g6Nodes = g6.getNodes;
     const g6Node1 = Object.values(g6Nodes)[0];
@@ -919,8 +925,8 @@ export function testStuffies(blix: Blix) {
   const graph = blix.graphManager.createGraph();
   project.addGraph(graph);
   const g = blix.graphManager.getGraph(graph);
-  g.addNode(tempNodes[0]);
-  g.addNode(tempNodes[1]);
+  g.addNode(tempNodes[0], { x: 0, y: 0 });
+  g.addNode(tempNodes[1], { x: 0, y: 0 });
 
   const nodes = g.getNodes;
   const node1 = Object.values(nodes)[0];

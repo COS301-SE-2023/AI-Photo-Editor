@@ -13,7 +13,7 @@ import { NodeInstance } from "../registries/ToolboxRegistry";
 import { Blix } from "../Blix";
 import type { INodeUIInputs, QueryResponse } from "../../../shared/types";
 import type { MediaOutputId } from "../../../shared/types/media";
-import { type GraphMetadata } from "../../../shared/ui/UIGraph";
+import { type GraphMetadata, type SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 
 const GRAPH_UPDATED_EVENT = new Set([CoreGraphUpdateEvent.graphUpdated]);
 
@@ -47,11 +47,12 @@ export class CoreGraphManager {
   addNode(
     graphUUID: UUID,
     node: NodeInstance,
+    pos: SvelvetCanvasPos,
     participant: CoreGraphUpdateParticipant
   ): QueryResponse<{ nodeId: UUID; inputs: string[]; outputs: string[] }> {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };
-    const res = this._graphs[graphUUID].addNode(node);
+    const res = this._graphs[graphUUID].addNode(node, pos);
     if (res.status === "success") this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
     return res;
   }
