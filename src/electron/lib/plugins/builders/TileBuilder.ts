@@ -1,6 +1,38 @@
 import { PluginContextBuilder } from "./PluginContextBuilder";
 
+import {
+  TileUIComponent,
+  TileUILeaf,
+  TileUIParent,
+  type UIComponentProps,
+  type UIComponentConfig,
+} from "../../../../shared/ui/TileUITypes";
+
+type PartialTile = {
+  name: string;
+  plugin: string;
+  displayName: string;
+  description: string;
+  icon: string;
+  ui: TileUIParent | null;
+  uiConfigs: { [key: string]: UIComponentConfig };
+};
+
 export class TileBuilder implements PluginContextBuilder {
+  private partialTile: PartialTile;
+
+  constructor(plugin: string, name: string) {
+    this.partialTile = {
+      name,
+      plugin,
+      displayName: name,
+      description: "",
+      icon: "",
+      ui: null,
+      uiConfigs: {},
+    };
+  }
+
   get build(): any {
     return null;
   }

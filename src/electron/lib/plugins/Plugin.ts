@@ -5,6 +5,7 @@ import { Blix } from "../Blix";
 import type { Command } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
+import { TileBuilder } from "./builders/TileBuilder";
 export type PluginSignature = string;
 
 export class Plugin {
@@ -176,4 +177,18 @@ export class CommandPluginContext extends PluginContext {
   }
 }
 
-class TilePluginContext extends PluginContext {}
+class TilePluginContext extends PluginContext {
+  private _tileBuilder!: TileBuilder;
+  constructor() {
+    super();
+  }
+
+  public get tileBuilder() {
+    return this._tileBuilder;
+  }
+
+  public instantiate(plugin: string, name: string): TileBuilder {
+    this._tileBuilder = new TileBuilder(plugin, name);
+    return this._tileBuilder;
+  }
+}
