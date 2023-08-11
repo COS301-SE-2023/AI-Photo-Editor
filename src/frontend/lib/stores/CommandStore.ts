@@ -50,6 +50,7 @@ function createCommandStore() {
 const blixCommandParams: Record<string, () => any> = {
   "blix.projects.save": () => {
     const project = get(projectsStore).activeProject;
+    // await window.apis.graphApi.updateUIPositions(project?.graphs);
     return {
       projectId: project?.id,
       layout: project?.layout.saveLayout(),

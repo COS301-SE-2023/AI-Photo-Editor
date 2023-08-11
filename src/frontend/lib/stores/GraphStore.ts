@@ -32,7 +32,13 @@ import { tick } from "svelte";
 // type Connections = (string | number | [string | number, string | number] | null)[];
 
 // TODO: Return a GraphStore in createGraphStore for typing
+export type GraphView = {
+  translation: { x: number; y: number };
+  dimensions: { width: number; height: number };
+  zoom: number;
+};
 export class GraphStore {
+  view: Writable<GraphView>;
   graphStore: Writable<UIGraph>;
   uiInputUnsubscribers: { [key: GraphNodeUUID]: (() => void)[] } = {};
   uiInputSubscribers: { [key: GraphNodeUUID]: () => void } = {};
@@ -40,6 +46,7 @@ export class GraphStore {
   constructor(public uuid: GraphUUID) {
     // Starts with empty graph
     this.graphStore = writable<UIGraph>(new UIGraph(uuid));
+    this.view = writable<GraphView>();
   }
 
   public refreshUIInputs(newUIInputs: IGraphUIInputs) {

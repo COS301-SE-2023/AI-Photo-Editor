@@ -69,9 +69,12 @@
       if (!graphStore) return;
 
       if (action.type === "addNode") {
+        const view = get(graphStore.view);
+        console.log(view);
+        console.log(graphMenuState.canvasPos);
         graphStore.addNode(action.signature, {
-          x: graphMenuState.canvasPos.x,
-          y: graphMenuState.canvasPos.y,
+          x: view.dimensions.width / 2 - view.translation.x / view.zoom,
+          y: view.dimensions.height / 2 - view.translation.y / view.zoom,
         });
       }
     },

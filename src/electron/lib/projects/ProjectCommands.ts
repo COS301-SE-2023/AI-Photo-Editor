@@ -18,6 +18,7 @@ import {
   CoreGraphUpdateParticipant,
 } from "../core-graph/CoreGraphInteractors";
 import sharp from "sharp";
+import type { SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 
 export type SaveProjectArgs = {
   projectId: UUID;
