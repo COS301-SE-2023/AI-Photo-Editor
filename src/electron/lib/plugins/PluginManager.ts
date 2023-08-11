@@ -107,12 +107,12 @@ export class PluginManager {
         return;
       }
 
-      const pluginInstance: Plugin = new Plugin(packageData, pluginPath, mainPath);
+      const pluginInstance: Plugin = new Plugin(packageData, pluginPath);
 
       this.loadedPlugins.push(pluginInstance);
       pluginInstance.requireSelf(this.blix); // The plugin tries to require its corresponding npm module
     } catch (err) {
-      logger.warn("Failed to load plugin: " + plugin + ", package.json not found");
+      logger.warn("Failed to load plugin: " + plugin + ", package.json failed to load");
       return;
     }
   }
@@ -131,7 +131,7 @@ export interface PackageData {
   };
 
   main: PathLike;
-  renderer: PathLike;
+  renderers: { [key: string]: PathLike };
 
   devDependencies: {
     [key: string]: string;
