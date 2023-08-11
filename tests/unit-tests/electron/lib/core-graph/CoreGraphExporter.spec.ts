@@ -58,9 +58,9 @@ jest.mock("fs", () => ({
         node1 = new NodeInstance("Node-1", "Test-Plugin","Node 1","This is node 1","fa-bell", inputs1, outputs1);
         node2 = new NodeInstance("Node-2", "Test-Plugin","node 2","This is node 2","fa-bell", inputs2, outputs2);
         
-        let response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node1);
+        let response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node1, { x: 0, y: 0 });
         const uuid1 = (response.data! as { nodeId: UUID }).nodeId;
-        response = graph.addNode(node2);
+        response = graph.addNode(node2, { x: 0, y: 0});
         const uuid2 = (response.data! as { nodeId: UUID }).nodeId;
         
         // Get Node objects from graph

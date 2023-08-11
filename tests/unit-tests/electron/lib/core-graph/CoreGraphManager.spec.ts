@@ -106,7 +106,7 @@ jest.mock("electron-store", () => ({
         //Add Node to graph
         const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
         graphManager.addGraph(graph);
-        graphManager.addNode(graph.uuid,node,CoreGraphUpdateParticipant.system);
+        graphManager.addNode(graph.uuid,node, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
         const nodes = graphManager.getGraph(graph.uuid).getNodes;
         expect(Object.keys(nodes).length).toBe(1);
     })
@@ -120,8 +120,8 @@ jest.mock("electron-store", () => ({
         node2.outputs.push(new OutputAnchorInstance("number","bbbb","bbbb.number"));
 
         graphManager.addGraph(graph);
-        graphManager.addNode(graph.uuid,node,CoreGraphUpdateParticipant.system);
-        graphManager.addNode(graph.uuid,node2,CoreGraphUpdateParticipant.system);
+        graphManager.addNode(graph.uuid, node, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
+        graphManager.addNode(graph.uuid, node2, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
 
 
         let anchors : string[] = [];
@@ -144,7 +144,7 @@ jest.mock("electron-store", () => ({
     test("Test removeNode", () => {
         const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
         graphManager.addGraph(graph);
-        graphManager.addNode(graph.uuid,node,CoreGraphUpdateParticipant.system);
+        graphManager.addNode(graph.uuid, node, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
 
         let nodes : string[] = [];
         for(const key in graphManager.getGraph(graph.uuid).getNodes){
@@ -164,8 +164,8 @@ jest.mock("electron-store", () => ({
         node2.outputs.push(new OutputAnchorInstance("number","bbbb","bbbb.number"));
 
         graphManager.addGraph(graph);
-        graphManager.addNode(graph.uuid,node,CoreGraphUpdateParticipant.system);
-        graphManager.addNode(graph.uuid,node2,CoreGraphUpdateParticipant.system);
+        graphManager.addNode(graph.uuid, node, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
+        graphManager.addNode(graph.uuid, node2, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
 
 
         const node1Node = Object.values(graph.getNodes)[0];
@@ -188,7 +188,7 @@ jest.mock("electron-store", () => ({
 
     const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
     graphManager.addGraph(graph);
-    graphManager.addNode(graph.uuid,node,CoreGraphUpdateParticipant.system);
+    graphManager.addNode(graph.uuid, node, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
 
     let nodes : string[] = [];
     for(const key in graphManager.getGraph(graph.uuid).getNodes){
@@ -231,16 +231,16 @@ jest.mock("electron-store", () => ({
         expect(result.status).toBe("error");
 
         const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
-        const result2 = graphManager.addNode("",node,CoreGraphUpdateParticipant.system);
+        const result2 = graphManager.addNode("", node, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
         expect(result2.status).toBe("error");
 
-        const result3 = graphManager.removeNode("","",CoreGraphUpdateParticipant.system);
+        const result3 = graphManager.removeNode("", "", CoreGraphUpdateParticipant.system);
         expect(result3.status).toBe("error");
 
-        const result4 = graphManager.removeEdge("","",CoreGraphUpdateParticipant.system);
+        const result4 = graphManager.removeEdge("", "", CoreGraphUpdateParticipant.system);
         expect(result4.status).toBe("error");
 
-        const result5 = graphManager.setPos("","",0,0,CoreGraphUpdateParticipant.system);
+        const result5 = graphManager.setPos("","", 0, 0, CoreGraphUpdateParticipant.system);
         expect(result5.status).toBe("error");
 
         graphManager.addGraph(graph);

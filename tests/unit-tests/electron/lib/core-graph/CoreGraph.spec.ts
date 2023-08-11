@@ -21,7 +21,7 @@ describe("Test backend graph", () => {
     for(let i = 0; i < 10; i++){
       const node = new NodeInstance(`Node-${i}`, "Test-plugin", `Node-${i}`, `This is node ${i}`, `fa-duotone fa-bell`, inputs, outputs);
       nodes.push(node);
-      graph.addNode(node);
+      graph.addNode(node, { x: 0, y: 0 });
      }
   });
 
@@ -40,7 +40,7 @@ describe("Test backend graph", () => {
       const input: MinAnchor = { type: "string", displayName: `Test-plugin.Node-${i}.0`, identifier: `in${i}` };
       const output: MinAnchor = { type: "string", displayName: `Test-plugin.Node-${i}.1`, identifier: `out${i}` };
       const node = new NodeInstance(`Node-${i}`, `Test-plugin`, `Node-${i}`, `This is node ${i}`, `fa-duotone fa-bell`, [input], [output]);
-      graph.addNode(node);
+      graph.addNode(node, { x: 0, y: 0 });
       names.push(input.displayName, output.displayName);
      }
     const anchorNames = Object.values(graph.getAnchors).map((anchor) => anchor.displayName);
@@ -65,7 +65,7 @@ describe("Test backend graph", () => {
 
   test("Setting a node's position", () => {
     const node = new NodeInstance("Test-plugin",`Node-1`, `Node-1`, `This is node 1`, `fa-duotone fa-bell`, inputs, outputs);
-    const response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node);
+    const response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node, { x: 0, y: 0});
     const uuid = (response.data! as { nodeId: UUID }).nodeId;
     const response2: QueryResponse = graph.setNodePos(uuid, { x: 6, y: 9});
     expect(response2.status).toBe("success");
@@ -115,7 +115,7 @@ describe("Test CoreGraph Class", () => {
 
 test("Adding a node to a graph", () => {
     const node = new NodeInstance("Node-1",`Test-Plugin`, `Node-1`, `This is node 1`, `fa-duotone fa-bell`, inputs, outputs);
-    const response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node);
+    const response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node, { x: 0, y: 0 });
     const uuid = (response.data! as { nodeId: UUID }).nodeId;
     expect(uuid).toBe(graph.getNodes[uuid].uuid);
     const node2 = graph.getNodes[uuid];
@@ -128,7 +128,7 @@ test("Adding a node to a graph", () => {
 
   test("Removing a node from a graph", () => {
     const node = new NodeInstance("Test-plugin",`Node-1`, `Node-1`, `This is node 1`, `fa-duotone fa-bell`, inputs, outputs);
-    const response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node);
+    const response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node, { x: 0, y: 0 });
     const uuid = (response.data! as { nodeId: UUID }).nodeId;
     graph.removeNode(uuid);
     expect(graph.getNodes[uuid]).toBeUndefined();
@@ -165,9 +165,10 @@ test("Adding a node to a graph", () => {
 
     const node1Instance = new NodeInstance(`${bestNode}-${1}`, `${plugin}`, `${bestNode}-1`, description, icon, inputs1, outputs1);
     const node2Instance = new NodeInstance(`${bestNode}-${2}`, `${plugin}`, `${bestNode}-2`, description, icon, inputs2, outputs2);
-    
-    graph.addNode(node1Instance);
-    graph.addNode(node2Instance);
+   
+    const pos = { x: 0, y: 0 };
+    graph.addNode(node1Instance, pos);
+    graph.addNode(node2Instance, pos);
 
     
     const node1Node = Object.values(graph.getNodes)[0];
@@ -263,8 +264,9 @@ test("Adding a node to a graph", () => {
     const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
     const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
     
-    graph.addNode(node1Instance);
-    graph.addNode(node2Instance);
+    const pos = { x: 0, y: 0 };
+    graph.addNode(node1Instance, pos);
+    graph.addNode(node2Instance, pos);
 
     const node1Node = Object.values(graph.getNodes)[0];
     const node2Node = Object.values(graph.getNodes)[1];
@@ -335,11 +337,11 @@ test("Adding a node to a graph", () => {
     const node3Instance = new NodeInstance(`${node}-${3}`, `${plugin}`, `${node}-3`, description, icon, inputs3, outputs3);
     const node4Instance = new NodeInstance(`${node}-${4}`, `${plugin}`, `${node}-4`, description, icon, inputs4, outputs4);
 
-    graph.addNode(node1Instance);
-    graph.addNode(node2Instance);
-    graph.addNode(node3Instance);
-    graph.addNode(node4Instance);
-
+    const pos = { x: 0, y: 0 };
+    graph.addNode(node1Instance, pos);
+    graph.addNode(node2Instance, pos);
+    graph.addNode(node3Instance, pos);
+    graph.addNode(node4Instance, pos);
     
     const node1Node = Object.values(graph.getNodes)[0];
     const node2Node = Object.values(graph.getNodes)[1];
@@ -397,9 +399,10 @@ test("Adding a node to a graph", () => {
   
     const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
     const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
-
-    graph.addNode(node1Instance);
-    graph.addNode(node2Instance);
+    
+    const pos = { x: 0, y: 0 };
+    graph.addNode(node1Instance, pos);
+    graph.addNode(node2Instance, pos);
 
     const node1Node = Object.values(graph.getNodes)[0];
     const node2Node = Object.values(graph.getNodes)[1];
@@ -471,10 +474,11 @@ test("Adding a node to a graph", () => {
     const node3Instance = new NodeInstance(`${node}-${3}`, `${plugin}`, `${node}-3`, description, icon, inputs3, outputs3);
     const node4Instance = new NodeInstance(`${node}-${4}`, `${plugin}`, `${node}-4`, description, icon, inputs4, outputs4);
 
-    graph.addNode(node1Instance);
-    graph.addNode(node2Instance);
-    graph.addNode(node3Instance);
-    graph.addNode(node4Instance);
+    const pos = { x: 0, y: 0 };
+    graph.addNode(node1Instance, pos);
+    graph.addNode(node2Instance, pos);
+    graph.addNode(node3Instance, pos);
+    graph.addNode(node4Instance, pos);;
 
     
     const node1Node = Object.values(graph.getNodes)[0];
@@ -722,8 +726,10 @@ describe("Test NodesAndEdgesGraph Class ", () => {
     const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
     const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
 
-    g.addNode(node1Instance);
-    g.addNode(node2Instance);
+    const pos = { x: 0, y: 0 };
+    g.addNode(node1Instance, pos);
+    g.addNode(node2Instance, pos);
+    
 
     const node1Node = Object.values(g.getNodes)[0];
     const node2Node = Object.values(g.getNodes)[1];

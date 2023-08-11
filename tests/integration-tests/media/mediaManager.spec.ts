@@ -129,7 +129,7 @@ describe("Test graph importer", () => {
         const graph = new CoreGraph();
         blix.graphManager.addGraph(graph);
 
-        blix.graphManager.addNode(graph.uuid, blix.toolbox.getRegistry()["blix.output"], CoreGraphUpdateParticipant.user);
+        blix.graphManager.addNode(graph.uuid, blix.toolbox.getRegistry()["blix.output"], { x: 0, y: 0 }, CoreGraphUpdateParticipant.user);
 
 
         //mediaManager.onGraphUpdated(graph.uuid);
