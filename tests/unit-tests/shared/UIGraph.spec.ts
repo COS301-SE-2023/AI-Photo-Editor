@@ -26,7 +26,7 @@ import { UIGraph,GraphNode,GraphEdge,GraphAnchor } from "../../../src/shared/ui/
     })
 
     test("Instantiate pos", () => {
-        node = new GraphNode("Another Unique id", {x: 10, y: 10});
-        expect(node.styling).toBeDefined();
+        node = new GraphNode("Another Unique id");
+        expect(node.styling).toBeUndefined();
     })
   });

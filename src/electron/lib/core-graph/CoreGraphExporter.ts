@@ -1,6 +1,7 @@
 import type { UIValue } from "../../../shared/types";
 import { type AnchorUUID, CoreGraph, AnchorIO } from "./CoreGraph";
 import { NodeStyling } from "./CoreGraph";
+import type { SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 
 /**
  * This class is used to export a CoreGraph to external representations
@@ -18,7 +19,7 @@ interface ExportStrategy<T> {
 }
 
 export type GraphToJSON = { nodes: NodeToJSON[]; edges: EdgeToJSON[] };
-export type NodeToJSON = { signature: string; styling: NodeStyling | null };
+export type NodeToJSON = { signature: string; position: SvelvetCanvasPos };
 export type AnchorToJSON = { parent: number; id: string };
 export type EdgeToJSON = {
   anchorFrom: AnchorToJSON;
@@ -36,7 +37,7 @@ export class GraphFileExportStrategy implements ExportStrategy<GraphToJSON> {
       if (!graph.getNodes.hasOwnProperty(node)) continue;
       json.push({
         signature: `${graph.getNodes[node].getPlugin}.${graph.getNodes[node].getName}`,
-        styling: graph.getNodes[node].getStyling || null,
+        position: graph.getUIPositions()[node],
       });
     }
 

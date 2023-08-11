@@ -160,8 +160,12 @@ export class CoreGraph extends UniqueEntity {
     return this.uiInputs[nodeUUID]?.getInputs || null;
   }
 
-  public get getUIPositions() {
+  public getUIPositions() {
     return this.uiPositions;
+  }
+
+  public set UIPositions(positions: { [key: UUID]: SvelvetCanvasPos }) {
+    this.uiPositions = positions;
   }
 
   // We need to pass in node name and plugin name
@@ -572,12 +576,12 @@ export class Node extends UniqueEntity {
     return this.styling;
   }
 
-  public exportJSON(): NodeToJSON {
-    return {
-      signature: `${this.plugin}.${this.name}`,
-      styling: this.styling!,
-    };
-  }
+  // public exportJSON(): NodeToJSON {
+  //   return {
+  //     signature: `${this.plugin}.${this.name}`,
+  //     styling: this.styling!,
+  //   };
+  // }
 }
 
 export enum AnchorIO {

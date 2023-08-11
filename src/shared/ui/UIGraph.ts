@@ -43,10 +43,10 @@ export class GraphNode {
 
   constructor(public readonly uuid: GraphNodeUUID, pos?: SvelvetCanvasPos) {
     this.displayName = "Node-" + uuid.substring(0, 6);
-    if (pos) {
-      this.styling = new NodeStylingStore();
-      this.styling.pos.set(pos);
-    }
+    // if (pos) {
+    // this.styling = new NodeStylingStore();
+    // this.styling.pos.set(pos);
+    // }
     this.inputUIValues = new UIValueStore();
   }
 }

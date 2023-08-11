@@ -98,7 +98,8 @@ export class IPCGraphSubscriber extends CoreGraphSubscriber<UIGraph> {
   onGraphChanged(graphId: UUID, graphData: CoreGraph): void {
     const uiGraph: UIGraph = new UIGraph(graphId);
     uiGraph.metadata = graphData.getMetadata;
-    uiGraph.uiPositions = graphData.getUIPositions;
+
+    uiGraph.uiPositions = graphData.getUIPositions();
     const nodesAndEdges: NodesAndEdgesGraph = graphData.exportNodesAndEdges();
 
     for (const node in nodesAndEdges.nodes) {

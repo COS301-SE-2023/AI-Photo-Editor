@@ -75,4 +75,8 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
       CoreGraphUpdateParticipant.user
     );
   }
+
+  async updateUIPositions(graphUUID: UUID, positions: { [key: UUID]: SvelvetCanvasPos }) {
+    this._blix.graphManager.updateUIPositions(graphUUID, positions);
+  }
 }

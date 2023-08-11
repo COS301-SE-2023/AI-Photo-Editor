@@ -145,6 +145,10 @@ export class CoreGraphManager {
     return res;
   }
 
+  updateUIPositions(graphUUID: UUID, positions: { [key: UUID]: SvelvetCanvasPos }) {
+    this._graphs[graphUUID].UIPositions = positions;
+  }
+
   setPos(
     graphUUID: UUID,
     nodeUUID: UUID,

@@ -15,6 +15,7 @@ import { writable, get, derived, type Writable, type Readable } from "svelte/sto
 import { toolboxStore } from "./ToolboxStore";
 import type { MediaOutputId } from "@shared/types/media";
 import { tick } from "svelte";
+import type { UUID } from "@shared/utils/UniqueEntity";
 
 // When the the CoreGraphApi type has to be imported into the backend
 // (WindowApi.ts) so that the API can be bound then it tries to import the type
@@ -42,6 +43,8 @@ export class GraphStore {
   graphStore: Writable<UIGraph>;
   uiInputUnsubscribers: { [key: GraphNodeUUID]: (() => void)[] } = {};
   uiInputSubscribers: { [key: GraphNodeUUID]: () => void } = {};
+  uiPositionUnsubscribers: { [key: GraphNodeUUID]: (() => void)[] } = {};
+  uiPositionSubscribers: { [key: GraphNodeUUID]: () => void } = {};
 
   constructor(public uuid: GraphUUID) {
     // Starts with empty graph
@@ -77,6 +80,7 @@ export class GraphStore {
       graph.edges = newGraph.edges;
 
       const oldNodes = graph.nodes;
+      const oldPositions = graph.uiPositions;
       graph.nodes = newGraph.nodes;
 
       for (const node of Object.keys(graph.nodes)) {
@@ -85,11 +89,15 @@ export class GraphStore {
           graph.nodes[node].styling = oldNodes[node].styling;
           // graph.nodes[node].styling.pos =
           graph.nodes[node].inputUIValues = oldNodes[node].inputUIValues;
+          graph.uiPositions[node] = oldPositions[node];
         } else {
           // If node has a UI input, create a store and subscribe to it
           const toolboxNode = toolboxStore.getNode(graph.nodes[node].signature);
           graph.nodes[node].styling = new NodeStylingStore();
+          // console.log(newGraph.uiPositions[node])
           graph.nodes[node].styling!.pos.set(newGraph.uiPositions[node]);
+
+          graph.uiPositions[node] = newGraph.uiPositions[node];
 
           if (toolboxNode.ui) {
             graph.nodes[node].inputUIValues = constructUIValueStore(
@@ -100,9 +108,12 @@ export class GraphStore {
             const inputs = graph.nodes[node].inputUIValues.inputs;
             // TODO: Investigate this; for some reason not all the keys in `inputs`
             //       are available off the bat unless you wait for the next tick()
+            const position = graph.nodes[node].styling?.pos;
             tick()
               .then(() => {
+                this.uiPositionUnsubscribers[node] = [];
                 this.uiInputUnsubscribers[node] = [];
+
                 for (const input in inputs) {
                   if (!inputs.hasOwnProperty(input)) continue;
                   // console.log("SUB TO", node, "-->>", input)
@@ -115,6 +126,12 @@ export class GraphStore {
                     })
                   );
                 }
+
+                this.uiPositionUnsubscribers[node].push(
+                  position!.subscribe(() => {
+                    this.updateUIPosition(node, get(position!));
+                  })
+                );
               })
               .catch(() => {
                 return;
@@ -132,6 +149,9 @@ export class GraphStore {
             unsub();
           }
           delete this.uiInputUnsubscribers[node];
+        }
+        if (!graph.nodes[node] && this.uiPositionUnsubscribers[node]) {
+          delete this.uiPositionUnsubscribers[node];
         }
       }
 
@@ -174,6 +194,31 @@ export class GraphStore {
 
     // Notify our UI subscribers
   }
+
+  updateUIPosition(nodeUUID: UUID, position: SvelvetCanvasPos) {
+    // console.log("HERE", get(this.graphStore).uiPositions)
+    this.graphStore.update((graph) => {
+      graph.uiPositions[nodeUUID] = position;
+      return graph;
+    });
+    // await window.apis.graphApi.updateUIPosition(get(this.graphStore).uuid, nodeUUID, get(get(this.graphStore).uiPositions[nodeUUID]));
+  }
+
+  async updateUIPositions() {
+    await window.apis.graphApi.updateUIPositions(
+      get(this.graphStore).uuid,
+      get(this.graphStore).uiPositions
+    );
+  }
+
+  // convertUIPositions() {
+  //   const positions = get(this.graphStore).uiPositions;
+  //   const newPositions: { [key: UUID]: SvelvetCanvasPos } = {};
+  //   for(const pos in positions) {
+  //     newPositions[pos] = get(positions[pos]);
+  //   }
+  //   return newPositions;
+  // }
 
   async removeNode(nodeUUID: GraphNodeUUID) {
     const thisUUID = get(this.graphStore).uuid;
