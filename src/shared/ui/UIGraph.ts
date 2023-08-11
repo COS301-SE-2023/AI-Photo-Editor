@@ -16,6 +16,7 @@ export type GraphMetadata = {
 export class UIGraph {
   public nodes: { [key: GraphNodeUUID]: GraphNode } = {};
   public edges: { [key: GraphAnchorUUID]: GraphEdge } = {};
+  public uiPositions: { [key: GraphNodeUUID]: SvelvetCanvasPos } = {};
   public metadata: GraphMetadata = {
     displayName: "Graph",
   };

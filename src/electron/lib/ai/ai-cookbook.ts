@@ -155,7 +155,9 @@ export function addNode(
     const node = registry[args.signature];
     if (!node) return errorResponse("The provided signature is invalid :  node does not exist");
 
-    const response = graphManager.addNode(graphId, node, CoreGraphUpdateParticipant.ai);
+    // TODO: Calculate at what position to add node then set pos
+    const pos = { x: 0, y: 0 };
+    const response = graphManager.addNode(graphId, node, pos, CoreGraphUpdateParticipant.ai);
 
     if (response.status === "success" && response.data) {
       // Truncate ids

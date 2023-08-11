@@ -9,6 +9,7 @@ import {
   type SvelvetCanvasPos,
   constructUIValueStore,
   type GraphMetadata,
+  NodeStylingStore,
 } from "@shared/ui/UIGraph";
 import { writable, get, derived, type Writable, type Readable } from "svelte/store";
 import { toolboxStore } from "./ToolboxStore";
@@ -75,10 +76,13 @@ export class GraphStore {
         if (oldNodes[node]) {
           // Node carried over from old graph, maintain its styling / UI inputs
           graph.nodes[node].styling = oldNodes[node].styling;
+          // graph.nodes[node].styling.pos =
           graph.nodes[node].inputUIValues = oldNodes[node].inputUIValues;
         } else {
           // If node has a UI input, create a store and subscribe to it
           const toolboxNode = toolboxStore.getNode(graph.nodes[node].signature);
+          graph.nodes[node].styling = new NodeStylingStore();
+          graph.nodes[node].styling!.pos.set(newGraph.uiPositions[node]);
 
           if (toolboxNode.ui) {
             graph.nodes[node].inputUIValues = constructUIValueStore(
@@ -128,9 +132,9 @@ export class GraphStore {
     });
   }
 
-  async addNode(nodeSignature: NodeSignature, pos?: SvelvetCanvasPos) {
+  async addNode(nodeSignature: NodeSignature, pos: SvelvetCanvasPos) {
     const thisUUID = get(this.graphStore).uuid;
-    const res = await window.apis.graphApi.addNode(thisUUID, nodeSignature);
+    const res = await window.apis.graphApi.addNode(thisUUID, nodeSignature, pos);
 
     // if (pos) {
     //   console.log("SET NODE POS", pos);

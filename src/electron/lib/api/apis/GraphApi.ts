@@ -4,7 +4,7 @@ import { type UUID } from "../../../../shared/utils/UniqueEntity";
 import { type NodeSignature } from "../../../../shared/ui/ToolboxTypes";
 import { type INodeUIInputs } from "../../../../shared/types";
 import { CoreGraphUpdateParticipant } from "../../core-graph/CoreGraphInteractors";
-import type { GraphMetadata } from "../../../../shared/ui/UIGraph";
+import type { GraphMetadata, SvelvetCanvasPos } from "../../../../shared/ui/UIGraph";
 
 // Graphs across projects are stored homogeneously and referenced by UUID
 export class GraphApi implements ElectronMainApi<GraphApi> {
@@ -15,10 +15,11 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
   }
 
   // TODO: Implement these properly
-  async addNode(graphUUID: UUID, nodeSignature: NodeSignature) {
+  async addNode(graphUUID: UUID, nodeSignature: NodeSignature, pos: SvelvetCanvasPos) {
     return this._blix.graphManager.addNode(
       graphUUID,
       this._blix.toolbox.getNodeInstance(nodeSignature),
+      pos,
       CoreGraphUpdateParticipant.user
     );
   }

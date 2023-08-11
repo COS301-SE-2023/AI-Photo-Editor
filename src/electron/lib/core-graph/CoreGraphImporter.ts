@@ -56,7 +56,8 @@ export class CoreGraphImporter {
     const nodes: { [key: number]: UUID } = {};
     for (const node of json.nodes) {
       const nodeInstance: NodeInstance = this._toolbox.getNodeInstance(node.signature);
-      const res = graph.addNode(nodeInstance);
+      // TODO: fix importer to use imported node positions
+      const res = graph.addNode(nodeInstance, { x: 0, y: 0 });
       if (res.status === "success" && res.data) {
         nodes[cnt++] = res.data?.nodeId;
       }
