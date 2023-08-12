@@ -27,7 +27,7 @@ export class TileUIParent extends TileUI {
 // TODO: Add a way to optionally link each leaf to an input anchor
 export class TileUILeaf extends TileUI {
   constructor(
-    public readonly parent: TileUILeaf,
+    public readonly parent: TileUIParent,
     public readonly category: TileUIComponent,
     public readonly label: string,
     public readonly params: UIComponentProps[]
