@@ -7,6 +7,7 @@ import {
   type UIComponentProps,
   type UIComponentConfig,
 } from "../../../../shared/ui/TileUITypes";
+import { TileInstance } from "../../registries/TileRegistry";
 
 type PartialTile = {
   name: string;
@@ -33,18 +34,26 @@ export class TileBuilder implements PluginContextBuilder {
     };
   }
 
-  get build(): any {
-    return null;
+  get build(): TileInstance {
+    return new TileInstance(
+      this.partialTile.name,
+      this.partialTile.plugin,
+      this.partialTile.displayName,
+      this.partialTile.description,
+      this.partialTile.icon,
+      this.partialTile.ui,
+      this.partialTile.uiConfigs
+    );
   }
   public reset(): void {
     return;
   }
 
   // TODO: Implement all of these
-  public addTitle(title: string): void {
+  public setTitle(title: string): void {
     this.partialTile.displayName = title;
   }
-  public addDescription(description: string): void {
+  public setDescription(description: string): void {
     this.partialTile.description = description;
   }
   public addIcon(icon: string): void {
@@ -53,6 +62,12 @@ export class TileBuilder implements PluginContextBuilder {
   public setUI(ui: TileUIBuilder): void {
     this.partialTile.ui = ui.getUI();
     this.partialTile.uiConfigs = ui.getUIConfigs();
+  }
+
+  public createUIBuilder(): TileUIBuilder {
+    const builder = new TileUIBuilder();
+
+    return builder;
   }
 
   public addUIElement(): void {

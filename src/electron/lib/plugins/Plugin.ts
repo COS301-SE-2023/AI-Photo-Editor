@@ -81,9 +81,15 @@ export class Plugin {
 
         for (const tile in pluginModule.tiles) {
           if (!pluginModule.tiles.hasOwnProperty(tile)) continue;
-          blix.tileRegistry.addInstance(
-            pluginModule.tiles[tile](new TilePluginContext()) as TileInstance
-          );
+
+          const ctx = new TilePluginContext();
+
+          try {
+            pluginModule.tiles[tile](ctx); // Execute tile builder
+            blix.tileRegistry.addInstance(ctx.tileBuilder.build); // Add to registry
+          } catch (err) {
+            logger.warn(err);
+          }
         }
       }
 
@@ -189,6 +195,6 @@ class TilePluginContext extends PluginContext {
 
   public instantiate(plugin: string, name: string): TileBuilder {
     this._tileBuilder = new TileBuilder(plugin, name);
-    return this._tileBuilder;
+    return this.tileBuilder;
   }
 }

@@ -228,7 +228,26 @@ const nodes = {
 const commands = {}
 
 
-const tiles = {}
+const tiles = {
+    "test": (context) => {
+
+        tileBuilder = context.instantiate("input-plugin", "inputImage");
+        tileBuilder.setTitle("Input image");
+        tileBuilder.setDescription("Provides an image input and returns a single image output");
+
+
+        ui = tileBuilder.createUIBuilder();
+        ui.addFilePicker({
+            componentId: "imagePicker",
+            label: "Pick an image",
+            defaultValue: "",
+            updateBackend: true,
+        }, {});
+
+        tileBuilder.setUI(ui);
+
+    },
+}
 
 module.exports = {
     nodes,

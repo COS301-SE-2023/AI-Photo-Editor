@@ -189,9 +189,6 @@ const commands = {
 
 // Here we define custom tiles for the UI
 const tiles = {
-    "helloTile": (context) => {
-        // Use context.tileBuilder to construct the tile UI
-    }
 }
 
 module.exports = {

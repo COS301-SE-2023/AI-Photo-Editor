@@ -16,6 +16,7 @@ import { ProjectClientApi } from "./apis/ProjectClientApi";
 import { UtilClientApi } from "./apis/UtilClientApi";
 import { ToolboxClientApi } from "./apis/ToolboxClientApi";
 import { MediaClientApi } from "./apis/MediaClientApi";
+import { TileClientApi } from "./apis/TileClientApi";
 /**
  * Initializes the application by exposing the window IPC APIs to the main
  * process and binding the main process IPC APIs to the window.
@@ -50,6 +51,7 @@ function exposeWindowApis() {
   exposeWindowApi(new ProjectClientApi());
   exposeWindowApi(new UtilClientApi());
   exposeWindowApi(new MediaClientApi());
+  exposeWindowApi(new TileClientApi());
 }
 
 export type MainApis = AwaitedType<typeof bindMainApis>;
