@@ -171,7 +171,8 @@ export class CoreGraph extends UniqueEntity {
   // We need to pass in node name and plugin name
   public addNode(
     node: NodeInstance,
-    pos: SvelvetCanvasPos
+    pos: SvelvetCanvasPos,
+    uiValues?: { [key: string]: UIValue }
   ): QueryResponse<{
     nodeId: UUID;
     inputs: string[];
@@ -194,9 +195,22 @@ export class CoreGraph extends UniqueEntity {
       }
 
       const inputValues: Record<string, unknown> = {};
-      Object.values(node.uiConfigs).forEach((config) => {
-        inputValues[config.componentId] = config.defaultValue;
-      });
+      // New Node with default Ui Input Values
+      if (!uiValues) {
+        const inputs: { [key: string]: unknown } = {};
+        const changes: string[] = [];
+        Object.values(node.uiConfigs).forEach((config) => {
+          inputValues[config.componentId] = config.defaultValue;
+          inputs[config.componentId] = config.defaultValue;
+        });
+        this.uiInputs[n.uuid] = new CoreNodeUIInputs({ inputs, changes });
+      } else {
+        // Loading in input values from an existing node
+        this.uiInputs[n.uuid] = new CoreNodeUIInputs({ inputs: uiValues, changes: [] });
+        Object.values(node.uiConfigs).forEach((config) => {
+          inputValues[config.componentId] = uiValues[config.componentId];
+        });
+      }
 
       // console.log(QueryResponseStatus.success)
       const anchors: AiAnchors = n.returnAnchors();

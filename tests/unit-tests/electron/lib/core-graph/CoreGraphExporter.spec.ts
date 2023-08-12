@@ -80,11 +80,13 @@ jest.mock("fs", () => ({
             "nodes": [
                 {
                     "signature": "Test-Plugin.Node-1",
-                    "position": { x: 0, y: 0}
+                    "position": { x: 0, y: 0},
+                    "inputs": {}
                 },
                 {
                     "signature": "Test-Plugin.Node-2",
-                    "position": { x: 0, y: 0}
+                    "position": { x: 0, y: 0},
+                    "inputs": {}
                 }
             ],
             "edges": [
@@ -171,11 +173,13 @@ jest.mock("fs", () => ({
         const nodeFormat = [
             {
                 "signature": "Test-Plugin.Node-1",
-                "position": { x: 0, y: 0 }
+                "position": { x: 0, y: 0 },
+                "inputs": {}
             },
             {
                 "signature": "Test-Plugin.Node-2",
-                "position": { x: 0, y: 0 }
+                "position": { x: 0, y: 0 },
+                "inputs": {}
             }
         ];
 

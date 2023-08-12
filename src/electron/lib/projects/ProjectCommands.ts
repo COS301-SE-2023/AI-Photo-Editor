@@ -249,7 +249,7 @@ export async function openProject(ctx: CommandContext) {
       ctx.projectManager.addGraph(projectId, coreGraph.uuid);
       ctx.graphManager.onGraphUpdated(
         coreGraph.uuid,
-        new Set([CoreGraphUpdateEvent.graphUpdated]),
+        new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
         CoreGraphUpdateParticipant.system
       );
     }

@@ -1,5 +1,5 @@
 import type { UIValue } from "../../../shared/types";
-import { type AnchorUUID, CoreGraph, AnchorIO } from "./CoreGraph";
+import { type AnchorUUID, CoreGraph, AnchorIO, CoreNodeUIInputs } from "./CoreGraph";
 import { NodeStyling } from "./CoreGraph";
 import type { SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 
@@ -19,25 +19,29 @@ interface ExportStrategy<T> {
 }
 
 export type GraphToJSON = { nodes: NodeToJSON[]; edges: EdgeToJSON[] };
-export type NodeToJSON = { signature: string; position: SvelvetCanvasPos };
-export type AnchorToJSON = { parent: number; id: string };
-export type EdgeToJSON = {
-  anchorFrom: AnchorToJSON;
-  anchorTo: AnchorToJSON;
+export type NodeToJSON = {
+  signature: string;
+  position: SvelvetCanvasPos;
+  inputs: { [key: string]: UIValue };
 };
+export type AnchorToJSON = { parent: number; id: string };
+export type EdgeToJSON = { anchorFrom: AnchorToJSON; anchorTo: AnchorToJSON };
 
 export class GraphFileExportStrategy implements ExportStrategy<GraphToJSON> {
   export(graph: CoreGraph): GraphToJSON {
+    // console.log(this.nodesToJSON(graph));
     return { nodes: this.nodesToJSON(graph), edges: this.edgesToJSON(graph) };
   }
 
   nodesToJSON(graph: CoreGraph): NodeToJSON[] {
+    const inputs = graph.getAllUIInputs;
     const json: NodeToJSON[] = [];
     for (const node in graph.getNodes) {
       if (!graph.getNodes.hasOwnProperty(node)) continue;
       json.push({
         signature: `${graph.getNodes[node].getPlugin}.${graph.getNodes[node].getName}`,
         position: graph.getUIPositions()[node],
+        inputs: inputs[node].getInputs,
       });
     }
 
