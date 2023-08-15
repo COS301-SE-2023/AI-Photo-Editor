@@ -12,12 +12,14 @@ export class CoreProject extends UniqueEntity {
   //       have references to the same graph.
   private _graphs: UUID[]; // Indexes into the GraphManager
   private _location: PathLike; // Location in user local storage to sync to
+  private _saved: boolean; // Flag used to check if project has been saved since last changes
 
   constructor(name: string) {
     super();
     this._name = name;
     this._graphs = [];
     this._location = "" as PathLike;
+    this._saved = false;
   }
 
   public rename(name: string): boolean {
@@ -79,10 +81,15 @@ export class CoreProject extends UniqueEntity {
     const project = {
       name: this.name,
       id: this.uuid,
+      saved: this._saved,
       graphs: [...this._graphs],
     };
 
     return project;
+  }
+
+  public set saved(flag: boolean) {
+    this._saved = flag;
   }
 }
 

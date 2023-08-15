@@ -2,6 +2,8 @@
   import { projectsStore } from "@frontend/lib/stores/ProjectStore";
   import Shortcuts from "../utils/Shortcuts.svelte";
   import { onMount, tick } from "svelte";
+  import { fade } from "svelte/transition";
+  import { commandStore } from "lib/stores/CommandStore";
 
   function createProject() {
     projectsStore.createProject();
@@ -10,6 +12,9 @@
   const shortcuts = {
     "blix.projects.newProject": () => {
       createProject();
+    },
+    "blix.projects.save": () => {
+      if ($projectsStore.activeProject) commandStore.runCommand("blix.projects.save");
     },
   };
 
@@ -38,6 +43,13 @@
       on:click="{() => projectsStore.setActiveProject(project.id)}"
       on:keypress="{() => projectsStore.setActiveProject(project.id)}"
     >
+      {#if !project.saved}
+        <div
+          transition:fade="{{ duration: 150 }}"
+          class="z-1000000 mr-2 h-[10px] w-[10px] rounded-full border-[1px] border-zinc-600 bg-white"
+        ></div>
+      {/if}
+
       <p class="mr-2 truncate">{project.name}</p>
       <svg
         on:click="{() => projectsStore.closeProject(project.id)}"

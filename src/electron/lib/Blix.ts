@@ -26,6 +26,7 @@ import { MediaManager } from "./media/MediaManager";
 import { CoreGraph } from "./core-graph/CoreGraph";
 import { MediaSubscriber } from "./media/MediaSubscribers";
 import type { IGraphUIInputs } from "../../shared/types";
+import { CoreProject } from "./projects/CoreProject";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -139,6 +140,12 @@ export class Blix {
     const ipcGraphSubscriber = new IPCGraphSubscriber();
     ipcGraphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
       this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
+      const project = this._projectManager.getRelatedProject(graphId);
+      // console.log("listened")
+      if (project) {
+        // console.log("valid")
+        this._projectManager.setProjectSaveState(project.uuid, false);
+      }
     };
     this._graphManager.addAllSubscriber(ipcGraphSubscriber);
 

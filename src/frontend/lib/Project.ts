@@ -5,6 +5,7 @@ import type { LayoutPanel } from "@shared/types/index";
 export interface UIProject {
   readonly id: UUID;
   readonly name: string;
+  readonly saved: boolean;
   readonly layout: PanelGroup;
   readonly graphs: UUID[];
 }

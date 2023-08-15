@@ -4,7 +4,7 @@ import { platform, type, release } from "os";
 import logger from "../../../utils/logger";
 import settings, { getSecret } from "../../../utils/settings";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
-import { getSecrets, setSecret, clearSecret } from "../../../utils/settings";
+import { getSecrets, setSecret, clearSecret, getRecentProjects } from "../../../utils/settings";
 import type { Setting, UserSettingsCategory, QueryResponse } from "../../../../shared/types";
 
 // Exposes basic system information

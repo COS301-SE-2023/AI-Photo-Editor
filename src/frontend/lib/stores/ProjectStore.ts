@@ -35,11 +35,12 @@ class ProjectsStore {
    * and UI has show the new state.
    */
   public handleProjectCreated(projectState: SharedProject, setAsActive = false): void {
-    const { id, name, layout, graphs } = projectState;
+    const { id, name, saved, layout, graphs } = projectState;
 
     const project: UIProject = {
       id,
       name: name ?? "Untitled",
+      saved: saved ?? false,
       layout: layout ? constructLayout(layout) : constructLayout(layoutTemplate),
       graphs: graphs ? graphs : [],
     };
@@ -66,11 +67,12 @@ class ProjectsStore {
       if (index < 0) return state;
 
       const project = state.projects[index];
-      const { id, name, layout, graphs } = changedState;
+      const { id, name, saved, layout, graphs } = changedState;
 
       const newProject: UIProject = {
         id,
         name: name ? name : project.name,
+        saved: saved ?? project.saved,
         layout: layout ? constructLayout(layout) : project.layout,
         graphs: graphs ? graphs : project.graphs,
       };

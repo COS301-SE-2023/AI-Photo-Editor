@@ -125,6 +125,15 @@ export class ProjectManager {
       }
     }
   }
+
+  public getRelatedProject(graphUUID: UUID) {
+    return Object.values(this._projects).filter((project) => project.graphs.includes(graphUUID))[0];
+  }
+
+  public setProjectSaveState(projectId: UUID, newState: boolean) {
+    this._projects[projectId].saved = newState;
+    this.onProjectChanged(projectId);
+  }
 }
 
 const recentProjectsSchema = z.object({
