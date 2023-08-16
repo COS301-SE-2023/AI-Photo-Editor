@@ -117,6 +117,8 @@ class ProjectsStore {
    * @param id ID of specific Project
    */
   public async closeProject(projectId: UUID): Promise<void> {
+    const project = get(this.store).projects.find((p) => p.id === projectId);
+    if (project) await window.apis.graphApi.deleteGraphs(project.graphs);
     await window.apis.projectApi.closeProject(projectId);
   }
 

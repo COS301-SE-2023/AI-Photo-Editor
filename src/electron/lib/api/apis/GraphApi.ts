@@ -14,6 +14,10 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
     this._blix = blix;
   }
 
+  async deleteGraphs(graphUUIDs: UUID[]) {
+    this._blix.graphManager.deleteGraphs(graphUUIDs);
+  }
+
   // TODO: Implement these properly
   async addNode(graphUUID: UUID, nodeSignature: NodeSignature, pos: SvelvetCanvasPos) {
     return this._blix.graphManager.addNode(

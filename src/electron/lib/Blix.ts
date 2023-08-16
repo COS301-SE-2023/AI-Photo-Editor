@@ -140,12 +140,7 @@ export class Blix {
     const ipcGraphSubscriber = new IPCGraphSubscriber();
     ipcGraphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
       this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
-      const project = this._projectManager.getRelatedProject(graphId);
-      // console.log("listened")
-      if (project) {
-        // console.log("valid")
-        this._projectManager.setProjectSaveState(project.uuid, false);
-      }
+      this.updateProjectState(graphId, false);
     };
     this._graphManager.addAllSubscriber(ipcGraphSubscriber);
 
@@ -171,6 +166,7 @@ export class Blix {
     mediaSubscriber.listen = (graphId: UUID, newGraph: CoreGraph) => {
       // this._graphInterpreter.run(this._graphManager.getGraph(graphId));
       this._mediaManager.onGraphUpdated(graphId);
+      this.updateProjectState(graphId, false);
     };
     this._graphManager.addAllSubscriber(mediaSubscriber);
 
@@ -193,6 +189,13 @@ export class Blix {
     //   this.mainWindow?.apis.mediaClientApi.outputChanged(media);
     // };
     // this._mediaManager.addSubscriber("default", ipcMediaSubscriber);
+  }
+
+  updateProjectState(graphUUID: UUID, newState: boolean) {
+    const project = this._projectManager.getRelatedProject(graphUUID);
+    if (project) {
+      this._projectManager.setProjectSaveState(project.uuid, newState);
+    }
   }
 
   // TODO: Move these to a Utils.ts or something like that

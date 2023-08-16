@@ -159,13 +159,13 @@ export async function saveProject(
     project.location = path;
   } else if (projectPath) {
     project.location = projectPath;
-  } else {
+  } else if (!project.location) {
     return { status: "error", message: "No path specified" };
   }
 
   // I don't really like this, but also can't really think of a nice way to change it
   // TODO: Rename sets name as path
-  project.rename(project.location.split("/").pop()!.split(".blix")[0]);
+  project.rename(project.location.toString().split("/").pop()!.split(".blix")[0]);
   ctx.projectManager.setProjectSaveState(project.uuid, true);
   // ctx.projectManager.onProjectChanged(project.uuid);
 
@@ -185,7 +185,7 @@ export async function saveProject(
       logger.error(err);
     }
   }
-  updateRecentProjectsList(project.location);
+  updateRecentProjectsList(project.location.toString());
   return { status: "success", message: "Project saved successfully" };
 }
 
@@ -246,7 +246,6 @@ export async function openProject(ctx: CommandContext, path?: string): Promise<C
     const projectFile = JSON.parse(project) as ProjectFile;
     const projectName = path.split("/").pop()?.split(".blix")[0];
     const projectId = ctx.projectManager.loadProject(projectName!, path);
-
     const coreGraphImporter = new CoreGraphImporter(ctx.toolbox);
 
     for (const graph of projectFile.graphs) {
@@ -259,10 +258,9 @@ export async function openProject(ctx: CommandContext, path?: string): Promise<C
         CoreGraphUpdateParticipant.system
       );
     }
-
     ctx.mainWindow?.apis.projectClientApi.onProjectChanged({
       id: projectId,
-      saved: false,
+      saved: true,
       layout: projectFile.layout,
     });
     updateRecentProjectsList(path);

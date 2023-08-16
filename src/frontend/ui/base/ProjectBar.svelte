@@ -41,7 +41,7 @@
         {$projectsStore.activeProject?.id === project.id ? 'bg-zinc-900' : 'hover:bg-zinc-700'}"
       title="{project.name}"
       on:click="{() => projectsStore.setActiveProject(project.id)}"
-      on:keypress="{() => projectsStore.setActiveProject(project.id)}"
+      on:keypress="{null}"
     >
       {#if !project.saved}
         <div
@@ -52,8 +52,8 @@
 
       <p class="mr-2 truncate">{project.name}</p>
       <svg
-        on:click="{() => projectsStore.closeProject(project.id)}"
-        on:keypress="{() => projectsStore.closeProject(project.id)}"
+        on:click|stopPropagation="{() => projectsStore.closeProject(project.id)}"
+        on:keypress="{null}"
         fill="none"
         viewBox="0 0 24 24"
         stroke-width="1.5"
