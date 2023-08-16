@@ -213,6 +213,12 @@
   function deleteGraph(id: string) {
     commandStore.runCommand("blix.graphs.deleteGraph", { id });
   }
+
+  async function dataTypeChecker(from: string, to: string) {
+    console.log("CHECKING", from, to);
+    return await window.apis.typeclassApi.checkTypesCompatible(from, to);
+    // return new Promise((resolve) => { return resolve(true) });
+  }
 </script>
 
 <div class="absolute bottom-[15px] left-[15px] z-[100] flex h-7 items-center space-x-2">
@@ -294,6 +300,7 @@
     on:disconnection="{edgeDisconnected}"
     bind:connectAnchorIds="{connectAnchorIds}"
     bind:clearAllGraphEdges="{clearAllGraphEdges}"
+    dataTypeChecker="{dataTypeChecker}"
   >
     {#each $graphNodes || [] as node}
       {#key node.uuid}
