@@ -63,15 +63,12 @@
 
       if (!action) return;
 
-      const graphMenuState = get(graphMenuStore);
       const graphStore = graphMall.getGraph($focusedGraphStore.graphUUID);
 
       if (!graphStore) return;
 
       if (action.type === "addNode") {
         const view = get(graphStore.view);
-        console.log(view);
-        console.log(graphMenuState.canvasPos);
         graphStore.addNode(action.signature, {
           x: view.dimensions.width / 2 - view.translation.x / view.zoom,
           y: view.dimensions.height / 2 - view.translation.y / view.zoom,
@@ -180,7 +177,9 @@
       }
     }
 
-    return filteredNodes;
+    return filteredNodes.sort((nodeA, nodeB) => {
+      return nodeA.label < nodeB.label ? -1 : nodeA.label > nodeB.label ? 1 : 0;
+    });
   }
 
   function handleInput() {
