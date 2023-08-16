@@ -129,6 +129,8 @@ class ProjectsStore {
    */
   public setActiveProject(id: UUID) {
     const storeValue = get(this.store);
+    // console.log("Clicked: ", id)
+    // console.log("Current Active: ", storeValue.activeProject?.id)
 
     if (storeValue.activeProject?.id !== id) {
       this.store.update((state) => {

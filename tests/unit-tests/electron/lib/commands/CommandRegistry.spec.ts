@@ -1,7 +1,7 @@
 import { CommandRegistry,type CommandHandler, Command } from "../../../../../src/electron/lib/registries/CommandRegistry"
 import { Blix } from "../../../../../src/electron/lib/Blix";
 import { MainWindow } from "../../../../../src/electron/lib/api/apis/WindowApi";
-import { ICommand } from "../../../../../src/shared/types/command";
+import { ICommand, CommandResponse } from "../../../../../src/shared/types/command";
 
 
 const mainWindow: MainWindow = {
@@ -85,7 +85,7 @@ describe("Test CommandRegistry", () => {
       }
        command = {
         id: "plugin.name",
-        handler : () => {console.log(1)},
+        handler : async () => { console.log(1); return Promise.resolve({ status: "success"})},
         description: description,
       }
     });
@@ -97,11 +97,12 @@ describe("Test CommandRegistry", () => {
 
     test("Test addInstance", () => {
       //Add command to registry
-      command.handler = () => {return 1};
+      const response: CommandResponse = { status: "success", message: "Instance added", data: 1 };
+      command.handler = () => { return Promise.resolve(response)};
       commandRegistry.addInstance(command);
       expect(commandRegistry.getRegistry()[command.id].id).toBe("plugin.name");
       expect(commandRegistry.getRegistry()[command.id].description).toBe(description);
-      expect(commandRegistry.getRegistry()[command.id].handler(blix,"")).toBe(1);
+      commandRegistry.getRegistry()[command.id].handler(blix,"").then(res => { expect(res.data).toBe(1) })
 
       const dummy = null;
 
@@ -110,9 +111,9 @@ describe("Test CommandRegistry", () => {
     });
 
     test("Test getCommands", () => {
-      const command2 = {
+      const command2: Command = {
         id: "plugin1.name1",
-        handler : () => {return 2},
+        handler : async () => { return Promise.resolve({ status: "success", message: "Hooray", data: 1}) },
         description: description,
       }
 
@@ -127,9 +128,9 @@ describe("Test CommandRegistry", () => {
 
     test("Test runCommand",async () => {
       console.log = jest.fn();
-      const command2 = {
+      const command2: Command = {
         id: "plugin1.name1",
-        handler : () => {console.log(2)},
+        handler : async () => { console.log(2); return Promise.resolve({ status: "success", data: 2 }) },
         description: description,
       }
 
