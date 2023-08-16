@@ -234,6 +234,7 @@ const tiles = {
         tileBuilder = context.instantiate("input-plugin", "inputImage");
         tileBuilder.setTitle("Input image");
         tileBuilder.setDescription("Provides an image input and returns a single image output");
+        tileBuilder.addIcon("faCode");
 
 
         ui = tileBuilder.createUIBuilder();

@@ -1,8 +1,21 @@
+export type TileSignature = string;
+
 export type UIComponentConfig = {
   label: string;
   componentId: string;
   defaultValue: unknown;
   updatesBackend: boolean;
+};
+
+export type ITile = {
+  signature: TileSignature;
+  name: string;
+  plugin: string;
+  displayName: string;
+  description: string;
+  icon: string;
+  ui: TileUIParent | null;
+  uiConfigs: { [key: string]: UIComponentConfig };
 };
 
 export type UIComponentProps = {
@@ -24,7 +37,6 @@ export class TileUIParent extends TileUI {
   }
 }
 
-// TODO: Add a way to optionally link each leaf to an input anchor
 export class TileUILeaf extends TileUI {
   constructor(
     public readonly parent: TileUIParent,

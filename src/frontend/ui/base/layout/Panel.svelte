@@ -17,16 +17,20 @@
   import Blank from "../../tiles/Blank.svelte";
   import Debug from "../../tiles/Debug.svelte";
   import WebView from "../../tiles/WebView.svelte";
+  import Plugin from "../../tiles/Plugin.svelte";
   import ShortcutSettings from "../../tiles/ShortcutSettings.svelte";
   import { PanelGroup, PanelLeaf, type PanelNode } from "@frontend/lib/PanelNode";
   import type { PanelType } from "@shared/types";
   import { focusedPanelStore } from "../../../lib/PanelNode";
+  import { tileStore } from "../../../lib/stores/TileStore";
+  import { get } from "svelte/store";
 
   // import { scale } from "svelte/transition";
 
   const dispatch = createEventDispatcher();
 
   const minSize = 10;
+  const tiles = get(tileStore);
 
   export let horizontal: boolean = false;
   export let height: string;
@@ -178,6 +182,8 @@
   function getComponentForPanelType(panelType: PanelType): ConstructorOfATypedSvelteComponent {
     if (panelType in panelTypeToComponent) {
       return panelTypeToComponent[panelType];
+    } else if (panelType in tiles) {
+      return Plugin;
     } else {
       console.error(`No component found for panel type '${panelType}'`);
       return Blank;
@@ -238,7 +244,11 @@
       </div>
     {/if} -->
     <!-- {layout.content} -->
-    <svelte:component this="{getComponentForPanelType(layout.content)}" {...tileProps} />
+    <svelte:component
+      this="{getComponentForPanelType(layout.content)}"
+      signature="{layout.content}"
+      {...tileProps}
+    />
   </div>
 {/if}
 

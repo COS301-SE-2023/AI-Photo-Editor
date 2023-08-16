@@ -1,19 +1,42 @@
-import { TileUIParent, type UIComponentConfig } from "../../../shared/ui/TileUITypes";
+import { type ITile, TileUIParent, type UIComponentConfig } from "../../../shared/ui/TileUITypes";
 import type { Registry, RegistryInstance } from "./Registry";
 import { type MainWindow } from "../api/apis/WindowApi";
+import { Blix } from "../Blix";
 
 export class TileRegistry implements Registry {
   private registry: { [key: string]: TileInstance } = {};
 
-  constructor(readonly mainWindow?: MainWindow) {}
+  constructor(private readonly blix: Blix) {}
 
   addInstance(instance: TileInstance): void {
     this.registry[instance.id] = instance;
 
-    this.mainWindow?.apis.tileClientApi.registryChanged("test");
+    this.blix.mainWindow?.apis.tileClientApi.registryChanged(this.getITiles());
   }
   getRegistry(): { [key: string]: TileInstance } {
     return this.registry;
+  }
+
+  getITiles(): ITile[] {
+    const tiles: ITile[] = [];
+
+    for (const tile in this.registry) {
+      if (this.registry.hasOwnProperty(tile)) {
+        const tileInstance: TileInstance = this.registry[tile];
+        tiles.push({
+          signature: tileInstance.signature,
+          name: tileInstance.name,
+          plugin: tileInstance.plugin,
+          displayName: tileInstance.displayName,
+          description: tileInstance.description,
+          icon: tileInstance.icon,
+          ui: tileInstance.ui,
+          uiConfigs: tileInstance.uiConfigs,
+        });
+      }
+    }
+
+    return tiles;
   }
 }
 

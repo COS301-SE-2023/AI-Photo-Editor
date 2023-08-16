@@ -51,7 +51,7 @@ export class Blix {
   constructor() {
     // this.startTime = new Date();
     this._commandRegistry = new CommandRegistry(this);
-    this._tileRegistry = new TileRegistry();
+    this._tileRegistry = new TileRegistry(this);
   }
 
   /**
