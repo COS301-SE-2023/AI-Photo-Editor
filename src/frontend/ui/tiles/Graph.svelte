@@ -1,6 +1,6 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
+  import { Svelvet, type NodeKey, type AnchorKey, Node } from "blix_svelvet";
   import { derived, type Readable } from "svelte/store";
   import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
@@ -150,11 +150,16 @@
   // Only updates when _graphId_ changes
   $: updateOnGraphId(graphId);
 
+  // Convert a canvas coord to a svelvet coord within the graph
+  function transformPoint(canvasX: number, canvasY: number) {
+    let x = (canvasX - $translation.x - $dimensions.width / 2) / $zoom + $dimensions.width / 2;
+    let y = (canvasY - $translation.y - $dimensions.height / 2) / $zoom + $dimensions.height / 2;
+
+    return { x, y };
+  }
+
   function getGraphCenter() {
-    return {
-      x: $dimensions.width / 2 - $translation.x / $zoom,
-      y: $dimensions.height / 2 - $translation.y / $zoom,
-    };
+    return transformPoint($dimensions.width / 2, $dimensions.height / 2);
   }
 
   function handleRightClick(event: CustomEvent) {
@@ -296,7 +301,7 @@
 {#if thisGraphStore && $thisGraphStore}
   <Svelvet
     id="{panelId}-{graphId}"
-    zoom="{0.7}"
+    zoom="{1}"
     minimap
     theme="custom-dark"
     bind:graph="{graphData}"
@@ -313,14 +318,14 @@
     {/each}
 
     <!-- Testing graph center -->
-    <!-- {#key [$translation, $dimensions]} -->
-    <!-- <Node position="{getGraphCenter()}">
+    <!-- {#key [$translation, $dimensions]}
+    <Node position="{getGraphCenter()}">
         <div class="z-50 text-white">
           {JSON.stringify($translation)}<br />
           {JSON.stringify($zoom)}
         </div>
-      </Node> -->
-    <!-- {/key} -->
+      </Node>
+    {/key} -->
   </Svelvet>
 {:else}
   <div class="flex h-full w-full items-center justify-center text-xl text-zinc-400">No graphs</div>
