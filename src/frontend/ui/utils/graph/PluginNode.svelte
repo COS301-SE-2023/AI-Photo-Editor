@@ -87,9 +87,10 @@ height="{graphNode.dims.h}" -->
     textColor="#ffffff"
     bind:position="{$nodePos}"
     id="{svelvetNodeId}"
-    borderColor="#ffffff"
-    borderWidth="{3}"
+    borderColor="#262630"
+    borderWidth="1px"
     borderRadius="{10}"
+    selectionColor="#f43e5c"
     on:selected="{() => console.log('selected')}"
     on:nodeClicked="{nodeClicked}"
   >
