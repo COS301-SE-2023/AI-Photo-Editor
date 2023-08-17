@@ -27,7 +27,8 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "skipLibCheck": true
   },
   "include": [".", "../global.d.ts", "../index.ts"],
   "exclude": ["node_modules"]

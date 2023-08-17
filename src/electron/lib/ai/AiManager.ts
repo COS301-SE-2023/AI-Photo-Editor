@@ -29,6 +29,12 @@ import { getSecret } from "../../utils/settings";
 import type { QueryResponse, ToastType } from "../../../shared/types";
 import { existsSync } from "fs";
 // Refer to .env for api keys
+import { utils } from "@pinecone-database/pinecone";
+import { PineconeClient } from "@pinecone-database/pinecone";
+import { config } from "dotenv";
+import cliProgress from "cli-progress";
+import { embedder } from "./Embedder";
+const { createIndexIfNotExists, chunkedUpsert } = utils;
 
 const supportedLanguageModels = {
   OpenAI: "OpenAI",
@@ -49,6 +55,7 @@ export class AiManager {
   private _mainWindow?: MainWindow;
   private graphManager: CoreGraphManager;
   private toolboxRegistry: ToolboxRegistry;
+  private pineconeClient: PineconeClient | null = null;
 
   /**
    *
@@ -61,6 +68,21 @@ export class AiManager {
     this.toolboxRegistry = toolbox;
     this.graphManager = graphManager;
     this._mainWindow = mainWindow;
+
+    // console.log(this.pluginContext());
+    config();
+
+    this.pineconeClient = new PineconeClient();
+    if (!process.env.PINECONE_API_KEY || !process.env.PINECONE_INDEX_NAME) {
+      return;
+    }
+
+    this.pineconeClient.init({
+      apiKey: process.env.PINECONE_API_KEY,
+      environment: process.env.PINECONE_INDEX_NAME,
+    });
+
+    const progressBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
   }
 
   public getSupportedModels() {
@@ -265,6 +287,34 @@ export class AiManager {
       }
     }
     return "";
+  }
+
+  private async execute(csvPath: string, column: string) {
+    const progressBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+    // Get index name
+    const indexName = process.env.PINECONE_INDEX!;
+    let counter = 0;
+
+    // Create a Pinecone index with the name "word-embeddings" and a dimension of 384
+    await createIndexIfNotExists(this.pineconeClient!, indexName, 384);
+
+    // Select the target Pinecone index
+    const index = this.pineconeClient!.Index(indexName);
+
+    // Start the progress bar
+    progressBar.start(this.pluginContext().length, 0);
+
+    // Start the batch embedding process
+    await embedder.init();
+    await embedder.embedBatch(this.pluginContext(), 1, async (embeddings) => {
+      counter += embeddings.length;
+      // Whenever the batch embedding process returns a batch of embeddings, insert them into the index
+      await chunkedUpsert(index, embeddings, "default");
+      progressBar.update(counter);
+    });
+
+    progressBar.stop();
+    // console.log(`Inserted ${this.pluginContext().length} documents into index ${indexName}`);
   }
 }
 
