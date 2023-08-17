@@ -24,7 +24,7 @@ const nodes ={
             componentId: "state",
             label: "State",
             defaultValue: 0,
-            updateBackend: true,
+            triggerUpdate: true,
         }, {
           options: {
             "Square": 0,
@@ -69,7 +69,7 @@ const nodes ={
             componentId: "state",
             label: "State",
             defaultValue: 0,
-            updateBackend: true,
+            triggerUpdate: true,
         }, {
           options: {
             "Add": 0,

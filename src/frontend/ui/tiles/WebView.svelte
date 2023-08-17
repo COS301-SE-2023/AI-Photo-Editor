@@ -4,23 +4,11 @@
 
   let webview: Electron.WebviewTag | null = null;
 
-  let src = "file:///home/rec1dite/code/301/capstone/blix-plugins/glfx-plugin/src/index.html";
+  let src = "file:///home/rec1dite/code/301/capstone/blix-plugins/pixi-plugin/src/index.html";
 
   export let media: unknown;
 
   $: updateMedia(media);
-
-  // const loadstart = () => {
-  //   indicator.innerText = 'loading...'
-  // }
-
-  // const loadstop = () => {
-  //   indicator.innerText = ''
-  // }
-
-  // setInterval(() => {
-  //   updateMedia(Math.random());
-  // }, 1000);
 
   function updateMedia(media: unknown) {
     // To manually execute a javascript function within the webview:

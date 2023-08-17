@@ -1,6 +1,7 @@
 import { CommandRegistry } from "./registries/CommandRegistry";
 import { ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
+import { TypeclassRegistry } from "./registries/TypeclassRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
@@ -33,6 +34,7 @@ export class Blix {
   private _toolboxRegistry!: ToolboxRegistry;
   private _tileRegistry: TileRegistry;
   private _commandRegistry: CommandRegistry;
+  private _typeclassRegistry: TypeclassRegistry;
   private _graphManager!: CoreGraphManager;
   private _projectManager!: ProjectManager;
   private _pluginManager!: PluginManager;
@@ -51,6 +53,7 @@ export class Blix {
   constructor() {
     // this.startTime = new Date();
     this._commandRegistry = new CommandRegistry(this);
+    this._typeclassRegistry = new TypeclassRegistry(this);
     this._tileRegistry = new TileRegistry();
   }
 
@@ -74,7 +77,7 @@ export class Blix {
         componentId: "export",
         label: "Export",
         defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
-        updatesBackend: false,
+        triggerUpdate: false,
       },
       {}
     );
@@ -83,7 +86,7 @@ export class Blix {
         componentId: "outputId",
         label: "Export",
         defaultValue: "default", // TODO: Make this a random id to start with
-        updatesBackend: true,
+        triggerUpdate: true,
       },
       {}
     );
@@ -215,6 +218,10 @@ export class Blix {
 
   get commandRegistry(): CommandRegistry {
     return this._commandRegistry;
+  }
+
+  get typeclassRegistry(): TypeclassRegistry {
+    return this._typeclassRegistry;
   }
 
   get graphManager(): CoreGraphManager {

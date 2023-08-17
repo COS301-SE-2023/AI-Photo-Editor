@@ -15,7 +15,7 @@ const nodes = {
                 componentId: "number",
                 label: "Input number",
                 defaultValue: 0,
-                updateBackend: true,
+                triggerUpdate: true,
             },
             { min: 0, max: 100, set: 0.1 }
         );
@@ -37,7 +37,7 @@ const nodes = {
             componentId: "imagePicker",
             label: "Pick an image",
             defaultValue: "",
-            updateBackend: true,
+            triggerUpdate: true,
         }, {});
 
         nodeBuilder.setUI(ui);
@@ -59,7 +59,7 @@ const nodes = {
             componentId: "colorPicker",
             label: "Pick a color",
             defaultValue: "red",
-            updateBackend: true,
+            triggerUpdate: true,
         }, {})
         nodeBuilder.setUI(ui);
 
@@ -80,7 +80,7 @@ const nodes = {
             componentId: "radio",
             label: "Pick a color",
             defaultValue: "red",
-            updateBackend: true,
+            triggerUpdate: true,
         }, {})
         nodeBuilder.setUI(ui);
 

@@ -48,7 +48,7 @@ declare module "shared/ui/NodeUITypes" {
         label: string;
         componentId: string;
         defaultValue: unknown;
-        updatesBackend: boolean;
+        triggerUpdate: boolean;
     };
     export type UIComponentProps = {
         [key: string]: unknown;

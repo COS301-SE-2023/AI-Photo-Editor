@@ -1,6 +1,6 @@
 // Use UI input if anchor not defined
 function chooseInput(input, uiInput, inputKey) {
-    if (input[inputKey]) {
+    if (input[inputKey] ?? false) {
         return input[inputKey];
     }
     return uiInput[inputKey];
@@ -23,7 +23,7 @@ function createGLFXNode(type, title, desc, params) {
                     componentId: param.id,
                     label: toTitleCase(param.id),
                     defaultValue: 0,
-                    updateBackend: true,
+                    triggerUpdate: true,
                 },
                 { min: param.min ?? -1, max: param.max ?? 1, step: param.step ?? 0.05 }
             );
@@ -117,7 +117,7 @@ const nodes = {
             componentId: "imagePicker",
             label: "Pick an image",
             defaultValue: "",
-            updateBackend: true,
+            triggerUpdate: true,
         }, {});
 
         nodeBuilder.setUI(ui);

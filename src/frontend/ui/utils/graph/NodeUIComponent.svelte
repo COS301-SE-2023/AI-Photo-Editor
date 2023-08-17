@@ -1,6 +1,7 @@
 <script lang="ts">
   import { NodeUIComponent, type NodeUILeaf, type UIComponentConfig } from "@shared/ui/NodeUITypes";
   import Button from "./nodeUICcomponents/Button.svelte";
+  import Buffer from "./nodeUICcomponents/Buffer.svelte";
   import Slider from "./nodeUICcomponents/Slider.svelte";
   import ColorPicker from "./nodeUICcomponents/ColorPicker.svelte";
   import Knob from "./nodeUICcomponents/Knob.svelte";
@@ -15,6 +16,7 @@
 
   const mapToSvelteComponent: { [key in NodeUIComponent]: any } = {
     Button: Button,
+    Buffer: Buffer,
     Slider: Slider,
     Knob: Knob,
     Label: null,

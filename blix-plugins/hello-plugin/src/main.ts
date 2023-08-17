@@ -53,7 +53,7 @@ const nodes = {
             componentId: "order66",
             label: "Execute 66",
             defaultValue: "",
-            updatesBackend: true,
+            triggerUpdate: true,
         }, {})
 
         // addSlider(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
@@ -61,7 +61,7 @@ const nodes = {
             componentId: "slideAlong",
             label: "Slide Along",
             defaultValue: 0,
-            updatesBackend: true,
+            triggerUpdate: true,
         }, { min: 0, max: 100, set: 0.1 })
 
         // addColorPicker(config: UIComponentConfig, param: any): NodeUIBuilder {
@@ -69,7 +69,7 @@ const nodes = {
             componentId: "incarnadine",
             label: "Multitudinous seas incarnadine",
             defaultValue: 0,
-            updatesBackend: true,
+            triggerUpdate: true,
         }, {})
 
         // addKnob(config: UIComponentConfig, { min, max, step }: ComponentProps): NodeUIBuilder {
@@ -77,7 +77,7 @@ const nodes = {
             componentId: "yourAKnob",
             label: "Your a knob",
             defaultValue: 0,
-            updatesBackend: true,
+            triggerUpdate: true,
         }, { min: 0, max: 100, set: 0.1 })
 
         // addDropdown(config: UIComponentConfig, options: { [key: string]: any }): NodeUIBuilder {
@@ -85,7 +85,7 @@ const nodes = {
             componentId: "dropdown",
             label: "Rock",
             defaultValue: "Rock",
-            updatesBackend: true,
+            triggerUpdate: true,
         }, {
             options: {
                 "Rock": "Rock",
@@ -99,7 +99,7 @@ const nodes = {
             componentId: "mxitRevived",
             label: "dms",
             defaultValue: "some text here",
-            updatesBackend: true,
+            triggerUpdate: true,
         }, {})
 
         // addTextInput(config: UIComponentConfig): NodeUIBuilder {
@@ -107,7 +107,7 @@ const nodes = {
             componentId: "diamondPick",
             label: "So we back in the mine",
             defaultValue: "",
-            updatesBackend: true,
+            triggerUpdate: true,
         }, {});
 
         // TODO:

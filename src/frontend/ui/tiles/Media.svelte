@@ -109,6 +109,10 @@
       component: WebView,
       props: (data: string) => ({ media: data }),
     },
+    ["Pixi image"]: {
+      component: WebView,
+      props: (data: string) => ({ media: data }),
+    },
   };
 </script>
 
@@ -176,9 +180,7 @@
   }
 
   .media {
-    position: absolute;
     width: 100%;
-    margin: auto;
     height: 100%;
     text-align: center;
   }
