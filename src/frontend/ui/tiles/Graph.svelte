@@ -229,6 +229,14 @@
   function deleteGraph(id: string) {
     commandStore.runCommand("blix.graphs.deleteGraph", { id });
   }
+
+  function triggerGravity() {
+    if (!$thisGraphStore) return;
+    $thisGraphStore.gravityDisplace(
+      $graphNodes.map((node) => node.uuid),
+      10
+    );
+  }
 </script>
 
 <div class="absolute bottom-[15px] left-[15px] z-[100] flex h-7 items-center space-x-2">
@@ -267,6 +275,9 @@
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
     </svg>
   </div>
+</div>
+<div class="hoverElements">
+  <button style:float="right" on:click="{triggerGravity}">Gravity</button>
 </div>
 
 <!-- <div class="hoverElements">
@@ -347,14 +358,14 @@
     --theme-toggle-color: hsl(225, 20%, 27%);
   }
 
-  /* .hoverElements {
+  .hoverElements {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
+    top: 10px;
+    right: 10px;
     z-index: 100;
   }
 
-  .dropdown {
+  /* .dropdown {
     color: #11111b;
   } */
 </style>
