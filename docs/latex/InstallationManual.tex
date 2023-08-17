@@ -201,6 +201,55 @@ Download the packaged app from our GitHub release page by using the following
 	\end{figure}
 \end{enumerate}
 
+\addcontentsline{toc}{subsection}{Windows}
+\subsection*{Windows}
+
+
+\begin{enumerate}[label*=\arabic*.]
+	\item[\textbullet] {\bf Install Prerequisites}: 
+
+	You will need to install \textbf{libvips} for the image processing and compilation of the app.
+	To install libvips on Windows, you can follow these steps:
+\begin{enumerate}[label*=\arabic*.]
+    \item[\textbullet]{Download libvips:}
+	Go to the libvips releases page on GitHub: \url{https://github.com/libvips/libvips/releases}
+        Scroll down to the "Assets" section of the latest release.
+        Download the Windows installer package with a filename like vips-dev-w64-web-xxx.exe, where xxx represents the version number.
+    \item[\textbullet]{Add libvips to the System Path:}
+        After installation, you need to add the libvips binary directory to your system's PATH environment variable to make it accessible from the command line.
+        Right-click on "This PC" (or "My Computer") and select "Properties."
+        Click on "Advanced system settings" on the left sidebar.
+        In the "System Properties" window, click on the "Environment Variables" button.
+        Under the "System variables" section, find and select the "Path" variable, then click on "Edit."
+        Click "New" and add the path to the libvips binary directory (usually something like \texttt{C:\textbackslash Program Files\textbackslash vips\textbackslash bin}).
+
+    \item[\textbullet]{Test the Installation (Optional):}
+        Open a new Command Prompt or PowerShell window.
+        Type vips --version and press Enter. This should display the libvips version information if the installation was successful.
+	\end{enumerate}
+
+	\begin{lstlisting}[language=sh]
+		 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+	\end{lstlisting}
+
+
+	\item[\textbullet] {\bf Download the app from GitHub releases for Windows}: 
+
+	Download the \code{Blix Setup 1.0.0.exe} file which is the installer for windows.
+
+	Go to the folder where the app was downloaded and then run the installer
+	by double clicking the app.
+
+	The installer will automatically install blix on your device. 
+	You can now simply click on the blix icon on your desktop to launch the app.
+
+	% \begin{figure}[ht]
+	% 	\centering
+	% 	\includegraphics[width=0.3\textwidth,height=\textheight,keepaspectratio,rotate=0,origin=c]{../pics/mac-isntall.png}
+	% \end{figure}
+	% ADD WINDOWS IMAGE HERE
+\end{enumerate}
+
 \addcontentsline{toc}{section}{General Usage}
 \section*{General Usage}
 
