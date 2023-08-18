@@ -135,14 +135,14 @@ export class Blix {
 
   private initSubscribers() {
     // ===== CORE GRAPH SUBSCRIBERS ===== //
-    // Subscribes to graph updates and alerts the frontend
+    // ----- Subscribes to graph updates and alerts the frontend -----
     const ipcGraphSubscriber = new IPCGraphSubscriber();
     ipcGraphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
       this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
     };
     this._graphManager.addAllSubscriber(ipcGraphSubscriber);
 
-    // Subscribes to backend UI input updates and alerts the frontend
+    // ----- Subscribes to backend UI input updates and alerts the frontend -----
     const ipcUIInputsSubscriber = new UIInputsGraphSubscriber();
     ipcUIInputsSubscriber.setListenEvents([CoreGraphUpdateEvent.uiInputsUpdated]);
     ipcUIInputsSubscriber.setListenParticipants([
@@ -155,7 +155,20 @@ export class Blix {
     };
     this._graphManager.addAllSubscriber(ipcUIInputsSubscriber);
 
-    // Subscribes to all updates and alerts the media manager
+    // ----- Subscribes to backend UI input updates and alerts the frontend -----
+    const ipcGravityAISubsriber = new IPCGraphSubscriber();
+    ipcGravityAISubsriber.setListenEvents([CoreGraphUpdateEvent.graphUpdated]);
+    ipcGravityAISubsriber.setListenParticipants([
+      CoreGraphUpdateParticipant.system,
+      CoreGraphUpdateParticipant.ai,
+    ]);
+
+    ipcGravityAISubsriber.listen = (graphId: UUID) => {
+      this.mainWindow?.apis.graphClientApi.aiChangedGraph(graphId);
+    };
+    this._graphManager.addAllSubscriber(ipcGravityAISubsriber);
+
+    // ----- Subscribes to all updates and alerts the media manager -----
     const mediaSubscriber = new SystemGraphSubscriber();
     mediaSubscriber.setListenEvents([
       CoreGraphUpdateEvent.graphUpdated,

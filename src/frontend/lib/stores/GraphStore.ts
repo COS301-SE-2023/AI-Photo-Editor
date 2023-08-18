@@ -249,6 +249,10 @@ export class GraphStore {
     return get(this.graphStore).nodes[nodeUUID];
   }
 
+  public getNodes() {
+    return get(this.graphStore).nodes;
+  }
+
   public getNodesReactive() {
     return derived(this.graphStore, (graph) => {
       return Object.values(graph.nodes);
