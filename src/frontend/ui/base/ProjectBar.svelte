@@ -3,7 +3,7 @@
   import Shortcuts from "../utils/Shortcuts.svelte";
   import { onMount, tick } from "svelte";
   import { fade } from "svelte/transition";
-  import { commandStore } from "lib/stores/CommandStore";
+  import { commandStore } from "../../lib/stores/CommandStore";
 
   function createProject() {
     projectsStore.createProject();
