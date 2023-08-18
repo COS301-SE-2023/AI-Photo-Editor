@@ -2,6 +2,7 @@ import { writable, derived, type Readable, get } from "svelte/store";
 import { type UUID } from "@shared/utils/UniqueEntity";
 import { constructLayout, layoutTemplate, type UIProject } from "../Project";
 import type { SharedProject } from "@shared/types";
+import { graphMall } from "./GraphStore";
 
 type ProjectsStoreState = {
   projects: UIProject[];
@@ -118,8 +119,8 @@ class ProjectsStore {
    */
   public async closeProject(projectId: UUID): Promise<void> {
     const project = get(this.store).projects.find((p) => p.id === projectId);
-    if (project) await window.apis.graphApi.deleteGraphs(project.graphs);
-    await window.apis.projectApi.closeProject(projectId);
+    // if (project) await window.apis.graphApi.deleteGraphs(project.graphs);
+    await window.apis.projectApi.closeProject(projectId, project?.graphs);
   }
 
   /**
@@ -127,17 +128,25 @@ class ProjectsStore {
    *
    * @param id ID of specific Project
    */
-  public setActiveProject(id: UUID) {
+  public setActiveProject(projectId: UUID) {
     const storeValue = get(this.store);
-    // console.log("Clicked: ", id)
-    // console.log("Current Active: ", storeValue.activeProject?.id)
-
-    if (storeValue.activeProject?.id !== id) {
+    if (storeValue.activeProject?.id !== projectId) {
       this.store.update((state) => {
-        state.activeProject = state.projects.find((p) => p.id === id) || null;
+        state.activeProject = state.projects.find((p) => p.id === projectId) || null;
         return state;
       });
     }
+  }
+
+  public async handleProjectSaving(projectId: UUID) {
+    const project = get(this.store).projects.find((p) => p.id === projectId);
+    if (!project) return;
+    // Update Ui Positions
+    await Promise.all(
+      project.graphs.map(async (graph) => await graphMall.getGraph(graph).updateUIPositions())
+    );
+    // Update Project Layout
+    await window.apis.projectApi.saveLayout(projectId, project.layout.saveLayout());
   }
 
   /**

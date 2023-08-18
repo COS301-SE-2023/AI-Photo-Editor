@@ -1,4 +1,13 @@
-import { app, BrowserWindow, Notification, protocol, Menu, MenuItem, dialog } from "electron";
+import {
+  app,
+  BrowserWindow,
+  Notification,
+  protocol,
+  Menu,
+  MenuItem,
+  dialog,
+  globalShortcut,
+} from "electron";
 import { join } from "path";
 import { parse } from "url";
 import { autoUpdater } from "electron-updater";
@@ -77,6 +86,9 @@ app.on("ready", async () => {
   } else {
     app.quit();
   }
+
+  // TODO: Check for compatability for Linux and Windows
+  globalShortcut.register("CommandOrControl+Q", () => shutdownMenu());
 });
 
 async function createMainWindow() {
@@ -144,9 +156,67 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
-app.on("will-quit", () => {
+app.on("will-quit", (e) => {
   // blix.projectManager.saveAllProjects();
 });
+
+async function shutdownMenu() {
+  if (!mainWindow) return;
+  if (!blix) return;
+
+  const unsaved = blix.projectManager.getTotalUnsavedProjects();
+  if (unsaved.length === 0) {
+    closeApp();
+    return;
+  }
+  dialog
+    .showMessageBox(mainWindow, {
+      type: "info",
+      // buttons: ['Cancel', 'Save Changes', 'Discard Changes'],
+      buttons: ["Save Changes...", "Cancel", "Discard Changes"],
+      cancelId: 1,
+      message: `You have ${unsaved.length} project${
+        unsaved.length > 1 ? "s that are" : " that is"
+      } not saved. Do you want to save these changes before quiting?`,
+      detail: `If you dont save the project${
+        unsaved.length > 1 ? "s" : ""
+      }, unsaved changes will be lost.`,
+    })
+    .then(async ({ response }) => {
+      if (response === 0) {
+        /**
+         * Save all changes
+         */
+        if (!blix) return;
+        for (const project of unsaved) {
+          const result = await blix?.projectManager.removeProject(blix, project.projectId);
+          if (result === 1) break; // If user cancelled saving changes to all projects while quitting
+        }
+      } else if (response === 2) {
+        /**
+         * Discard all changes
+         * Close app
+         */
+        if (!blix) return;
+        await Promise.all(
+          blix.projectManager
+            .getOpenProjects()
+            .map(
+              async (project) => await blix?.projectManager.removeProject(blix, project.uuid, true)
+            )
+        );
+        closeApp();
+      } else if (response === 1) {
+        // Cancel quitting app
+      }
+    });
+}
+
+function closeApp() {
+  // TODO: Is this a clean quit?
+  mainWindow?.destroy();
+  if (process.platform !== "darwin") app.quit();
+}
 
 app.on("activate", () => {
   if (mainWindow === null) createMainWindow();
@@ -239,8 +309,12 @@ autoUpdater.on("error", (err) => {
   notification.show();
 });
 
-// // Menu
-// const menuBar = new Menu();
+// Menu
+// Menu.getApplicationMenu()?.append(new MenuItem({
+//   label: 'Quit',
+//   accelerator: 'CmdOrCtrl+Q',
+//   click: shutdownMenu
+// }))
 
 // // Onyl for macOS
 // if (process.platform === "darwin") {

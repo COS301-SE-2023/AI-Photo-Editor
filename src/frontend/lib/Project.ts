@@ -1,6 +1,6 @@
-import type { UUID } from "@shared/utils/UniqueEntity";
+import type { UUID } from "../../shared/utils/UniqueEntity";
 import { PanelGroup } from "./PanelNode";
-import type { LayoutPanel } from "@shared/types/index";
+import type { LayoutPanel } from "../../shared/types/index";
 
 export interface UIProject {
   readonly id: UUID;

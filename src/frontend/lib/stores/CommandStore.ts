@@ -1,7 +1,6 @@
 import { writable, get } from "svelte/store";
 import { projectsStore } from "./ProjectStore";
 import type { ICommand } from "@shared/types";
-import { graphMall } from "./GraphStore";
 
 interface CommandStore {
   commands: ICommand[];
@@ -52,27 +51,27 @@ const blixCommandParams: Record<string, () => any> = {
   "blix.projects.save": async () => {
     const project = get(projectsStore).activeProject;
     // For every graph in the project, update the copy of the node positions in the backend
-    if (project) {
-      await Promise.all(
-        project.graphs.map(async (graph) => await graphMall.getGraph(graph).updateUIPositions())
-      );
-    }
+    if (project) await projectsStore.handleProjectSaving(project.id);
+    // if (project) {
+    //   await Promise.all(
+    //     project.graphs.map(async (graph) => await graphMall.getGraph(graph).updateUIPositions())
+    //   );
+    // }
     return {
       projectId: project?.id,
-      layout: project?.layout.saveLayout(),
     };
   },
   "blix.projects.saveAs": async () => {
     const project = get(projectsStore).activeProject;
     // For every graph in the project, update the copy of the node positions in the backend
-    if (project) {
-      await Promise.all(
-        project.graphs.map(async (graph) => await graphMall.getGraph(graph).updateUIPositions())
-      );
-    }
+    if (project) await projectsStore.handleProjectSaving(project.id);
+    // if (project) {
+    //   await Promise.all(
+    //     project.graphs.map(async (graph) => await graphMall.getGraph(graph).updateUIPositions())
+    //   );
+    // }
     return {
       projectId: project?.id,
-      layout: project?.layout.saveLayout(),
     };
   },
   "blix.graphs.create": () => {

@@ -49,6 +49,9 @@ jest.mock("electron", () => ({
         return "test/electron";
       })
     },
+    dialog: {
+      showMessageBox: jest.fn().mockImplementation(() => Promise.resolve(0))
+    }
 }));
 
 jest.mock("fs/promises", () => ({
@@ -85,7 +88,7 @@ describe("Test Integration of ProjectManager", () => {
         // Without name
         const untitledProject = manager.createProject();
         expect(untitledProject).toBeDefined();
-        expect(untitledProject.name).toEqual("Untitled");
+        expect(untitledProject.name).toEqual("Untitled-1");
         const openProjectIds2 = manager.getOpenProjects().map((project) => project.uuid);
         expect(openProjectIds2).toContain(untitledProject.uuid); 
     });
@@ -111,7 +114,7 @@ describe("Test Integration of ProjectManager", () => {
         let openProjectIds = manager.getOpenProjects().map((project) => project.uuid);
         expect(openProjectIds).toContain(uuid);
         // Remove Project
-        manager.removeProject(uuid);
+        manager.removeProject(blix, uuid, true);
         openProjectIds = manager.getOpenProjects().map((project) => project.uuid);
         expect(openProjectIds.length).toEqual(0);
         expect(openProjectIds).not.toContain(uuid);

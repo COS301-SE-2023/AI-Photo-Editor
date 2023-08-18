@@ -3,6 +3,7 @@ import type { SharedProject, LayoutPanel } from "../../../shared/types";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { PathLike } from "fs";
 import type { GraphToJSON } from "../../lib/core-graph/CoreGraphExporter";
+import { layoutTemplate } from "../../../frontend/lib/Project";
 // Encapsulates the backend state for one of the open Blix projects
 export class CoreProject extends UniqueEntity {
   private _name: string;
@@ -13,6 +14,7 @@ export class CoreProject extends UniqueEntity {
   private _graphs: UUID[]; // Indexes into the GraphManager
   private _location: PathLike; // Location in user local storage to sync to
   private _saved: boolean; // Flag used to check if project has been saved since last changes
+  private _layout: LayoutPanel;
 
   constructor(name: string) {
     super();
@@ -20,6 +22,7 @@ export class CoreProject extends UniqueEntity {
     this._graphs = [];
     this._location = "" as PathLike;
     this._saved = false;
+    this._layout = layoutTemplate;
   }
 
   public rename(name: string): boolean {
@@ -70,6 +73,14 @@ export class CoreProject extends UniqueEntity {
     return [...this._graphs];
   }
 
+  public get layout() {
+    return this._layout;
+  }
+
+  public set layout(value: LayoutPanel) {
+    this._layout = value;
+  }
+
   /**
    * Reduces the the state of the core project to be used by frontend. Might
    * need to figure out how this can be better implemented since it feels a bit
@@ -86,6 +97,10 @@ export class CoreProject extends UniqueEntity {
     };
 
     return project;
+  }
+
+  public get saved() {
+    return this._saved;
   }
 
   public set saved(flag: boolean) {

@@ -17,6 +17,10 @@ export class ProjectClientApi implements ElectronWindowApi<ProjectClientApi> {
     projectsStore.handleProjectRemoved(projectId);
   }
 
+  public async handleProjectSaving(projectId: string) {
+    await projectsStore.handleProjectSaving(projectId);
+  }
+
   // public loadProject(state: SharedProject): void {
   //   const project = new Project(state.name, state.id, state.layout);
   //   projectsStore.addProject(project);

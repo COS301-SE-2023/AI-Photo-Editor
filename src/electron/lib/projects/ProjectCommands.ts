@@ -137,7 +137,7 @@ export async function saveProject(
   ctx: CommandContext,
   args: SaveProjectArgs
 ): Promise<CommandResponse> {
-  const { projectId, layout, projectPath } = args;
+  const { projectId, projectPath } = args;
   const project = ctx.projectManager.getProject(projectId);
 
   if (!project) {
@@ -174,7 +174,7 @@ export async function saveProject(
   const exportedGraphs = graphs.map((g) => exporter.exportGraph(g));
 
   const projectFile: ProjectFile = {
-    layout: layout!,
+    layout: project.layout,
     graphs: exportedGraphs,
   };
 
@@ -201,7 +201,7 @@ export async function saveProjectAs(
   ctx: CommandContext,
   args: SaveProjectArgs
 ): Promise<CommandResponse> {
-  const { projectId, layout } = args;
+  const { projectId } = args;
   const project = ctx.projectManager.getProject(projectId);
 
   if (!project) {
@@ -215,7 +215,7 @@ export async function saveProjectAs(
   });
   if (!path) return { status: "error", message: "No path selected" };
   project.location = path;
-  return saveProject(ctx, { projectId, layout, projectPath: path });
+  return saveProject(ctx, { projectId, projectPath: path });
 }
 
 /**
@@ -246,6 +246,8 @@ export async function openProject(ctx: CommandContext, path?: string): Promise<C
     const projectFile = JSON.parse(project) as ProjectFile;
     const projectName = path.split("/").pop()?.split(".blix")[0];
     const projectId = ctx.projectManager.loadProject(projectName!, path);
+    ctx.projectManager.saveProjectLayout(projectId, projectFile.layout);
+    // ctx.projectManager.getProject(projectId)!.saved = true;
     const coreGraphImporter = new CoreGraphImporter(ctx.toolbox);
 
     for (const graph of projectFile.graphs) {
