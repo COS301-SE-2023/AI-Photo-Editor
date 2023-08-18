@@ -4,7 +4,7 @@ import { PluginManager } from "./PluginManager";
 import { session } from "electron";
 
 export const refreshPluginsCommand: Command = {
-  id: "blix.plugins.refrsh",
+  id: "blix.plugins.refresh",
   description: {
     name: "Refresh plugins...",
     description: "Refreshes the currently loaded plugins",
