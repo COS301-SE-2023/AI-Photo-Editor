@@ -1,6 +1,6 @@
 import { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
-import { ToolboxRegistry } from "../../lib/registries/ToolboxRegistry";
+import { NodeInstance, ToolboxRegistry } from "../../lib/registries/ToolboxRegistry";
 import { CoreGraphUpdateParticipant } from "../../lib/core-graph/CoreGraphInteractors";
 import { type CoreGraph, CoreNodeUIInputs, type Node } from "../../lib/core-graph/CoreGraph";
 import type { INodeUIInputs } from "../../../shared/types";
@@ -51,14 +51,6 @@ export class BlypescriptProgram implements AiLangProgram {
       .split("\n")
       .map((s) => s.trim())
       .filter((s) => s || !s.startsWith("//"));
-    // if (statements[0].match(/^\s*function\s*graph\s*\{\s*$/)?.length !== 0) {
-    //   statements.shift()
-    // }
-    // if (statements[statements.length - 1].match(/^\s*\}\s*$/)) {
-    //   statements.pop()
-    // }
-    statements.pop();
-    statements.shift();
     const resStatements = [];
     const usedNodeIds = new Set<string>();
 
@@ -112,6 +104,7 @@ export class BlypescriptProgram implements AiLangProgram {
   public diffV2(other: BlypescriptProgram): AiLangDiff {
     const removed = this.statements.filter((ts) => !other.nodeNameIdMap.has(ts.name));
     const added = other.statements.filter((os) => !this.nodeNameIdMap.has(os.name));
+    // Make it an array of objects, with old and new statement properties
     const changed = other.statements.filter(
       (os) =>
         !removed.includes(os) &&
@@ -189,8 +182,8 @@ export class BlypescriptInterpreter {
       console.log(newProgram.toString());
       console.log(colorString("//==========Diff==========//", "LIGHT_BLUE"));
       console.log(JSON.stringify({ added, removed, changed }, null, 2));
-      console.log(colorString("//==========New Program Node Name Map==========//", "LIGHT_BLUE"));
-      console.log(newProgram.nodeNameIdMap.entries());
+      // console.log(colorString("//==========New Program Node Name Map==========//", "LIGHT_BLUE"));
+      // console.log(newProgram.nodeNameIdMap.entries());
     }
 
     // Remove nodes
@@ -355,7 +348,6 @@ export class BlypescriptInterpreter {
           edge.getAnchorTo,
           CoreGraphUpdateParticipant.ai
         );
-        console.log(response);
         // TODO: Handle response
       }
 
@@ -462,6 +454,153 @@ export class BlypescriptInterpreter {
       return result;
     }, {} as { [key: string]: UUID });
     return map;
+  }
+}
+
+export type BlypescriptNodeParam = {
+  name: string;
+  types: string[];
+};
+
+export class BlypescriptNodeSignature {
+  constructor(
+    public readonly plugin: string,
+    public readonly name: string,
+    public readonly description: string,
+    public readonly nodeInputs: BlypescriptNodeParam[],
+    public readonly uiInputs: BlypescriptNodeParam[],
+    public readonly nodeOutputs: BlypescriptNodeParam[]
+  ) {}
+
+  public toString(): string {
+    const nodeInputStrings = this.nodeInputs.map((input) => {
+      const types = input.types
+        .map((type) => {
+          return `N<${type}>`;
+        })
+        .join("| ");
+      return `${input.name}: ${types}`;
+    });
+    const uiInputStrings = this.uiInputs.map((input) => {
+      const types = input.types
+        .map((type) => {
+          return `${type}`;
+        })
+        .join("| ");
+      return `${input.name}: ${types}`;
+    });
+    const nodeOutputStrings = this.nodeOutputs.map((output) => {
+      const types = output.types
+        .map((type) => {
+          return `N<${type}>`;
+        })
+        .join("| ");
+      return `${output.name}: ${types}`;
+    });
+
+    const nodeParams = [...nodeInputStrings, ...uiInputStrings].join(", ");
+    const nodeReturn = nodeOutputStrings.join(", ");
+    // let str = `// ${this.description}\n${this.name}(${nodeParams}) => { ${nodeReturn} }`;
+    const str = `${this.name}: (${nodeParams}) => ${nodeReturn ? "{ " + nodeReturn + " }" : "void"}`;
+
+    return str;
+  }
+}
+
+export class BlypescriptPlugin {
+  constructor(public readonly name: string, public readonly nodes: BlypescriptNodeSignature[]) {}
+
+  public static fromPluginNodeInstances(
+    pluginName: string,
+    nodes: NodeInstance[]
+  ): BlypescriptPlugin {
+    const blypescriptNodes = nodes.map((nodeInstance) => {
+      const { name, plugin, description } = nodeInstance;
+      const nodeInputs = this.generateNodeInputs(nodeInstance);
+      // const uiInputs = this.generateUiInputs(nodeInstance);
+      const uiInputs: BlypescriptNodeParam[] = [];
+      const nodeOutputs = this.generateNodeOutputs(nodeInstance);
+
+      return new BlypescriptNodeSignature(
+        plugin,
+        name,
+        description,
+        nodeInputs,
+        uiInputs,
+        nodeOutputs
+      );
+    });
+
+    return new BlypescriptPlugin(pluginName, blypescriptNodes);
+  }
+
+  public toString(): string {
+    let str = `interface ${this.name} {\n`;
+
+    this.nodes.forEach((node) => {
+      str += `${node.toString()}\n`;
+    });
+
+    return str + "}";
+  }
+
+  private static generateNodeInputs(node: NodeInstance): BlypescriptNodeParam[] {
+    return node.inputs.map((input) => {
+      return {
+        name: input.id,
+        types: [input.type],
+      };
+    });
+  }
+
+  private static generateUiInputs(node: NodeInstance) {
+    throw Error("Generate ui inputs not implemented");
+    return node.inputs.map((input) => {
+      return {
+        name: input.id,
+        types: [input.type],
+      };
+    });
+  }
+
+  private static generateNodeOutputs(node: NodeInstance) {
+    return node.outputs.map((output) => {
+      return {
+        name: output.id,
+        types: [output.type],
+      };
+    });
+  }
+}
+
+export class BlypescriptToolbox {
+  constructor(public readonly plugins: BlypescriptPlugin[]) {}
+
+  public static fromToolbox(toolbox: ToolboxRegistry) {
+    const pluginMap = new Map<string, NodeInstance[]>();
+
+    Object.values(toolbox.getRegistry()).forEach((node) => {
+      if (pluginMap.has(node.plugin)) {
+        pluginMap.get(node.plugin)?.push(node);
+      } else {
+        pluginMap.set(node.plugin, [node]);
+      }
+    });
+
+    const blypescriptPlugins: BlypescriptPlugin[] = [];
+
+    pluginMap.forEach((nodes, plugin) => {
+      blypescriptPlugins.push(BlypescriptPlugin.fromPluginNodeInstances(plugin, nodes));
+    });
+
+    return new BlypescriptToolbox(blypescriptPlugins);
+  }
+
+  public toString(): string {
+    const pluginStrings = this.plugins.map((plugin) => plugin.toString());
+    let str = "// Node output wrapper type\ntype N<T> = { value: T } | null;\n\n";
+    str += pluginStrings.join("\n\n");
+    return str;
   }
 }
 

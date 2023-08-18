@@ -2,15 +2,37 @@
 type N<T> = { value: T } | null;
 
 interface input-plugin {
-  inputNumber: (value: number) => { res: N<number> };
+  inputNumber: (value: Number) => { res: N<Number> };
+  inputImage: (value: Image | null) => { res: N<Image> };
 }
 
 interface math-plugin {
-  unary: (num: N<number>, operator: 'square' | 'factorial' | 'negate' | 'sine') => { res: N<number> };
-  binary: (num1: N<number>, num2: N<number>, operator: 'add' | 'subtract' | 'multiply') => { res: N<number> };
+  // Description
+  unary: (num: N<Number>, operator: 'square' | 'square_root' | 'absolute' | 'factorial' | 'negate' | 'sine' | 'cosine' | 'tangent') => { res: N<Number> };
+  // Description
+  binary: (num1: N<Number>, num2: N<Number>, operator: 'add' | 'subtract' | 'multiply' | 'divide' | 'power' | 'modulo' | 'max' | 'min') => { res: N<Number> };
 }
 
 interface blix {
   // Useful when displaying the final result to the user
-  output: (input: N<any>, outputId: string) => { res: any };
+  output: (input: N<any>, outputId: string) => void;
+}
+
+slider
+color
+text
+dropdown
+
+gloria(anchor1: N<number>,                                                   slider: number, color: string, text: string, dropdown: 'hello' | 'sus')
+
+
+interface sharp-plugin {
+  brightness: (img: N<Sharp>, value: N<Number>) => { res: N<Sharp> }
+  saturation: (img: N<Sharp>) => { res: N<Sharp> }
+  hue: (img: N<Sharp>) => { res: N<Sharp> }
+  rotate: (img: N<Sharp>) => { res: N<Sharp> }
+  sharpen: (img: N<Sharp>) => { res: N<Sharp> }
+  normalise: (img: N<Sharp>) => { res: N<Sharp> }
+  toImage: (img: N<Sharp>) => { res: N<Image> }
+  toSharp: (img: N<Image>) => { res: N<Sharp> }
 }

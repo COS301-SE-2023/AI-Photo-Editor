@@ -24,7 +24,7 @@ export class AiManager {
     const exporter = new CoreGraphExporter(new BlypescriptExportStrategy(this.toolbox));
     const blypescriptProgram = exporter.exportGraph(this.graphManager.getGraph(graphId));
     const chat = new OpenAiChat(process.env.OPENAI_API_KEY || "", {
-      model: "gpt-4-0613",
+      model: "gpt-3.5-turbo-0613",
     });
 
     if (!messages) {
@@ -176,7 +176,7 @@ class OpenAiChat extends Chat {
         temperature,
         messages,
       });
-      console.log(JSON.stringify(response.data, null, 2));
+      // console.log(JSON.stringify(response.data, null, 2));
       return response.data;
     } catch (error) {
       // @ts-ignore

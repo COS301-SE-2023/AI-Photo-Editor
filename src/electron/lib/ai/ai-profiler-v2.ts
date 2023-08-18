@@ -11,7 +11,7 @@ import {
   BlypescriptExportStrategy,
   CoreGraphExporter,
 } from "../../lib/core-graph/CoreGraphExporter";
-import { BlypescriptProgram, colorString } from "./AiLang";
+import { BlypescriptProgram, BlypescriptToolbox, colorString } from "./AiLang";
 import { AiManager, Message } from "./AiManagerv2";
 import { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
 import readline from "readline";
@@ -83,6 +83,12 @@ class Profiler {
         console.log(response.usage);
       }
     }
+  }
+
+  public test() {
+    const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
+    const str = blypescriptToolbox.toString();
+    return str;
   }
 
   private getPrompt() {
@@ -182,3 +188,4 @@ class Profiler {
 
 const profiler = new Profiler();
 profiler.run();
+// console.log(profiler.test());
