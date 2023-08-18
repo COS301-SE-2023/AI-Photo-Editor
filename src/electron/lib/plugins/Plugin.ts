@@ -42,6 +42,9 @@ export class Plugin {
       // This uses Node.js require() to load the plugin as a module
       // TODO: ISOLATION + LIMITED API
       // @ts-ignore: no-var-requires
+
+      // We need to clear the local node cache so that the plugin can be reloaded
+      delete require.cache[require.resolve(this.mainPath)];
       const pluginModule = require(this.mainPath);
 
       if ("nodes" in pluginModule && typeof pluginModule.nodes === "object") {

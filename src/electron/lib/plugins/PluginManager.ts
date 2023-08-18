@@ -60,6 +60,7 @@ export class PluginManager {
    * modification to also load installed plugins in the userData directory.
    */
   public async loadBasePlugins() {
+    this.loadedPlugins = [];
     const appPath = app.getAppPath();
     const pluginsPath = join(app.isPackaged ? process.resourcesPath : appPath, "blix-plugins");
     const ignorePatterns = [".DS_Store"];
