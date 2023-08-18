@@ -52,6 +52,7 @@
     "pack": "electron-builder --dir",
     "predist": "npm run build",
     "dist": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder",
+    "win": "electron-builder --win",
     "postdist": "node scripts/cleanBuilds.js",
     "format": "prettier --write \"src/**/**/*\" --write \"scripts/**/**/*\"",
     "lint:electron": "eslint -c eslint.electron.json --ext .js,.ts src/electron",
