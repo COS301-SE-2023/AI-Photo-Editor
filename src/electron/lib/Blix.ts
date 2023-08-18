@@ -18,7 +18,7 @@ import type { UUID } from "../../shared/utils/UniqueEntity";
 import type { GraphMetadata, UIGraph } from "../../shared/ui/UIGraph";
 import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
-import { AiManager } from "./ai/AiManager";
+import { AiManager } from "./ai/AiManagerv2";
 // import { testStuffies } from "./core-graph/CoreGraphTesting";
 import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
 import type { MediaOutput } from "../../shared/types/media";
@@ -69,15 +69,15 @@ export class Blix {
     // Create Output node
     const outputNodeBuilder = new NodeBuilder("blix", "output");
     const outputUIBuilder = outputNodeBuilder.createUIBuilder();
-    outputUIBuilder.addButton(
-      {
-        componentId: "export",
-        label: "Export",
-        defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
-        updatesBackend: false,
-      },
-      {}
-    );
+    // outputUIBuilder.addButton(
+    //   {
+    //     componentId: "export",
+    //     label: "Export",
+    //     defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+    //     updatesBackend: false,
+    //   },
+    //   {}
+    // );
     outputUIBuilder.addTextInput(
       {
         componentId: "outputId",

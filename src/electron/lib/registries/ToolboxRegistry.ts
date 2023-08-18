@@ -104,7 +104,7 @@ export class NodeInstance implements RegistryInstance {
 
   // Global unique identifier for the node (amongst all plugins)
   get signature(): NodeSignature {
-    return this.plugin + "." + this.name;
+    return `${this.plugin}.${this.name}`;
   }
 
   get getFunction(): any {

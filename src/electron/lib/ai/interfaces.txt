@@ -1,0 +1,16 @@
+// Node output wrapper type
+type N<T> = { value: T } | null;
+
+interface input-plugin {
+  inputNumber: (value: number) => { res: N<number> };
+}
+
+interface math-plugin {
+  unary: (num: N<number>, operator: 'square' | 'factorial' | 'negate' | 'sine') => { res: N<number> };
+  binary: (num1: N<number>, num2: N<number>, operator: 'add' | 'subtract' | 'multiply') => { res: N<number> };
+}
+
+interface blix {
+  // Useful when displaying the final result to the user
+  output: (input: N<any>, outputId: string) => { res: any };
+}

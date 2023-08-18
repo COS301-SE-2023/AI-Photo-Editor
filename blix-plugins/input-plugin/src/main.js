@@ -5,14 +5,14 @@ const nodes = {
         nodeBuilder.setDescription("Provides a number input and returns a single number output");
 
         nodeBuilder.define((input, uiInput, from) => {
-            return { "res": uiInput["number"] };
+            return { "res": uiInput["value"] };
         });
 
         ui = nodeBuilder.createUIBuilder();
         ui
         .addSlider(
             {
-                componentId: "number",
+                componentId: "value",
                 label: "Input number",
                 defaultValue: 0,
                 updateBackend: true,
