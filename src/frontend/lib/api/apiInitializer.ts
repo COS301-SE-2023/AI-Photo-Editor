@@ -8,6 +8,7 @@ import type { CommandApi } from "@electron/lib/api/apis/CommandApi";
 import type { GraphApi } from "@electron/lib/api/apis/GraphApi";
 import type { ToolboxApi } from "@electron/lib/api/apis/ToolboxApi";
 import type { MediaApi } from "@electron/lib/api/apis/MediaApi";
+import type { TileApi } from "@electron/lib/api/apis/TileApi";
 
 // Window APIs
 import { CommandClientApi } from "./apis/CommandClientApi";
@@ -37,6 +38,7 @@ export async function bindMainApis() {
     graphApi: await bindMainApi<GraphApi>("GraphApi"),
     toolboxApi: await bindMainApi<ToolboxApi>("ToolboxApi"),
     mediaApi: await bindMainApi<MediaApi>("MediaApi"),
+    tileApi: await bindMainApi<TileApi>("TileApi"),
   };
 }
 
