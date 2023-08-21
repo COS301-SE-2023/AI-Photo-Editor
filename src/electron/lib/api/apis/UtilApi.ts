@@ -68,6 +68,20 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
           },
         ],
       },
+      {
+        id: "keybind_settings",
+        title: "Keybindings",
+        settings: [
+          {
+            id: "Keybindings",
+            title: "Keybindings",
+            subtitle: "Customize your keybindings",
+            type: "text",
+            secret: false,
+            value: "Keybindings",
+          },
+        ],
+      },
     ];
 
     return { status: "success", data: userSettings };

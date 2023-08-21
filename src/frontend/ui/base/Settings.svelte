@@ -4,6 +4,7 @@
   import SecureInput from "../../ui/utils/SecureInput.svelte";
   import { toastStore } from "./../../lib/stores/ToastStore";
   import { settingsStore } from "../../lib/stores/SettingsStore";
+  import ShortcutSettings from "../../ui/tiles/ShortcutSettings.svelte";
 
   let selectedCategoryId = "";
   let selectedCategory: UserSettingsCategory | undefined;
@@ -107,12 +108,28 @@
         >
           Save
         </div>
-        <!-- {:else}
+      {:else if selectedCategory?.id === "keybind_settings"}
+        <div class="pb-2 text-3xl font-semibold text-zinc-300">KeyBindings</div>
+        <div class="mb-10 text-justify text-sm font-medium text-zinc-500">
+          Customize all your keybindings here. You can also add new keybindings for any action you
+          want.
+        </div>
+        <ShortcutSettings />
+        <div
+          class="mt-12 flex h-10 w-20 cursor-pointer items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/[0.7] text-gray-300 transition duration-300 ease-in-out hover:text-zinc-500"
+          on:click="{() => {
+            if (selectedCategory) saveSettings(selectedCategory?.settings);
+          }}"
+          on:keydown="{null}"
+        >
+          Save
+        </div>
+      {:else}
         <div
           class="flex h-full w-full items-center justify-center text-xl font-semibold text-zinc-400"
         >
           <div class="coming-soon flex h-48 w-64 items-center justify-center">Coming Soon</div>
-        </div> -->
+        </div>
       {/if}
     </div>
   </div>
