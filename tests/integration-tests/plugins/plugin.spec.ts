@@ -93,7 +93,7 @@ describe("Test builder propagations", () => {
             label: "slider",
             componentId: "shrek",
             defaultValue: 50,
-            updatesBackend: true
+            triggerUpdate: true
         }
         nodeUIBuilder.addSlider(uiComponentConfig,{ min: 0, max: 100, step: 0.1 });
   
@@ -109,14 +109,14 @@ describe("Test builder propagations", () => {
             label: "dropdown",
             componentId: "SHROK",
             defaultValue: 50,
-            updatesBackend: true
+            triggerUpdate: true
         }
 
         const buttonComponentConfig : UIComponentConfig = {
             label: "button",
             componentId: "Shrek",
             defaultValue: 50,
-            updatesBackend: true
+            triggerUpdate: true
         }
         nodeUIBuilder.addDropdown(uiComponentConfig, {min: 0, max: 100, set: 0.1 });
   

@@ -83,7 +83,7 @@
 
 <div
   class="{'blip ' + (['tl', 'tr', 'bl', 'br'].includes(dock) ? dock : 'tl')}"
-  on:mousedown="{tryStartTrack}"
+  on:mousedown|stopPropagation|preventDefault="{tryStartTrack}"
 >
   {dir}
 </div>

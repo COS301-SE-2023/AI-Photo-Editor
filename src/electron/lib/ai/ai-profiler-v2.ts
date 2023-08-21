@@ -110,7 +110,7 @@ class Profiler {
     toolboxRegistry.addInstance(this.generateBlixOutputNode());
 
     const pluginsPath = join(__dirname, "../../../../blix-plugins");
-    const ignorePatterns = [".DS_Store"];
+    const ignorePatterns = [".DS_Store", "types.d.ts"];
     const plugins = readdirSync(pluginsPath).filter((plugin) => {
       return !ignorePatterns.some((pattern) => plugin.includes(pattern));
     });
@@ -121,7 +121,7 @@ class Profiler {
       const data = readFileSync(packageJson);
       const packageData: PackageData = JSON.parse(data.toString());
       const mainPath = join(pluginPath, packageData.main.toString());
-      const pluginInstance: Plugin = new Plugin(packageData, pluginPath, mainPath);
+      const pluginInstance: Plugin = new Plugin(packageData, pluginPath);
 
       const pluginModule = require(pluginInstance.mainPath);
 
@@ -161,7 +161,7 @@ class Profiler {
         componentId: "outputId",
         label: "Export",
         defaultValue: "default",
-        updatesBackend: true,
+        triggerUpdate: true,
       },
       {}
     );

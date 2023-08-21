@@ -34,7 +34,7 @@ const nodes ={
             componentId: "state",
             label: "State",
             defaultValue: 0,
-            updateBackend: true,
+            triggerUpdate: true,
         }, {
           options: {
             "And": 0,
@@ -72,7 +72,7 @@ const nodes ={
             componentId: "state",
             label: "State",
             defaultValue: 0,
-            updateBackend: true,
+            triggerUpdate: true,
         }, {
           options: {
             ">": 0,
@@ -90,7 +90,7 @@ const nodes ={
         nodeBuilder.addOutput("boolean", "res", "Result");
       },
     "ternary": (context) => {
-        nodeBuilder = context.instantiate("logic-plugin","ternary");
+        const nodeBuilder = context.instantiate("logic-plugin","ternary");
         nodeBuilder.setTitle("Ternary Comp.");
 
         nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {

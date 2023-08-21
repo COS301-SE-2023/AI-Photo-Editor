@@ -16,6 +16,7 @@ import type { MediaOutputId } from "../../../shared/types/media";
 import { type GraphMetadata, type SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 
 const GRAPH_UPDATED_EVENT = new Set([CoreGraphUpdateEvent.graphUpdated]);
+const UIINPUTS_UPDATED_EVENT = new Set([CoreGraphUpdateEvent.uiInputsUpdated]);
 
 // This class stores all the graphs amongst all open projects
 // Projects index into this store at runtime to get their graphs
@@ -53,7 +54,16 @@ export class CoreGraphManager {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };
     const res = this._graphs[graphUUID].addNode(node, pos);
-    if (res.status === "success") this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
+
+    if (res.status === "success") {
+      this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
+
+      // If node had a UI inputs initializer function
+      if (res.data?.uiInputsInitialized) {
+        this.onGraphUpdated(graphUUID, UIINPUTS_UPDATED_EVENT, CoreGraphUpdateParticipant.system);
+      }
+    }
+
     return res;
   }
 
@@ -131,15 +141,14 @@ export class CoreGraphManager {
 
       let shouldUpdate = false;
       for (const change of changes) {
-        if (uiConfigs[change].updatesBackend) {
+        if (uiConfigs[change].triggerUpdate) {
           shouldUpdate = true;
           break;
         }
       }
 
       if (shouldUpdate) {
-        const updateEvents = new Set([CoreGraphUpdateEvent.uiInputsUpdated]);
-        this.onGraphUpdated(graphUUID, updateEvents, participant);
+        this.onGraphUpdated(graphUUID, UIINPUTS_UPDATED_EVENT, participant);
       }
     }
     return res;

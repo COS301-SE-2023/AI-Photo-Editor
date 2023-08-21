@@ -1,5 +1,10 @@
 import { type PluginContextBuilder } from "./PluginContextBuilder";
-import { type MinAnchor, type NodeFunc, NodeInstance } from "../../registries/ToolboxRegistry";
+import {
+  type MinAnchor,
+  type NodeFunc,
+  NodeInstance,
+  type NodeUIInitializer,
+} from "../../registries/ToolboxRegistry";
 import {
   NodeUIComponent,
   NodeUILeaf,
@@ -19,6 +24,7 @@ type PartialNode = {
   ui: NodeUIParent | null;
   uiConfigs: { [key: string]: UIComponentConfig };
   func: NodeFunc;
+  uiInitializer: NodeUIInitializer;
 };
 
 // TODO: Verification must be done in all these setter functions
@@ -39,6 +45,7 @@ export class NodeBuilder implements PluginContextBuilder {
       ui: null,
       uiConfigs: {},
       func: () => ({}),
+      uiInitializer: (x) => x,
     };
   }
 
@@ -53,7 +60,8 @@ export class NodeBuilder implements PluginContextBuilder {
       this.partialNode.outputs,
       this.partialNode.func,
       this.partialNode.ui,
-      this.partialNode.uiConfigs
+      this.partialNode.uiConfigs,
+      this.partialNode.uiInitializer
     );
   }
 
@@ -69,6 +77,10 @@ export class NodeBuilder implements PluginContextBuilder {
 
   public setDescription(description: string): void {
     this.partialNode.description = description;
+  }
+
+  public setUIInitializer(uiInitializer: NodeUIInitializer): void {
+    this.partialNode.uiInitializer = uiInitializer;
   }
 
   /**
@@ -149,6 +161,19 @@ export class NodeUIBuilder {
     this.uiConfigs = {};
   }
 
+  public addBuffer(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Buffer);
+    this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Buffer, componentId, [props]));
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? {},
+      triggerUpdate: config.triggerUpdate ?? true,
+    };
+
+    return this;
+  }
+
   public addKnob(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Knob);
     this.node.params.push(new NodeUILeaf(this.node, NodeUIComponent.Knob, componentId, [props]));
@@ -156,7 +181,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? 0,
-      updatesBackend: config.updatesBackend ?? true,
+      triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;
   }
@@ -173,7 +198,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? "",
-      updatesBackend: config.updatesBackend ?? false,
+      triggerUpdate: config.triggerUpdate ?? false,
     };
     return this;
   }
@@ -193,7 +218,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? 0,
-      updatesBackend: config.updatesBackend ?? true,
+      triggerUpdate: config.triggerUpdate ?? true,
     };
 
     return this;
@@ -208,7 +233,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
-      updatesBackend: config.updatesBackend ?? true,
+      triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;
   }
@@ -220,7 +245,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
-      updatesBackend: config.updatesBackend ?? true,
+      triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;
   }
@@ -251,7 +276,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? "",
-      updatesBackend: config.updatesBackend ?? true,
+      triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;
   }
@@ -269,7 +294,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? "empty",
-      updatesBackend: config.updatesBackend ?? true,
+      triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;
   }
@@ -287,7 +312,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? 0,
-      updatesBackend: config.updatesBackend ?? true,
+      triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;
   }
@@ -306,7 +331,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? "",
-      updatesBackend: config.updatesBackend ?? true,
+      triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;
   }
@@ -325,7 +350,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? "#000000",
-      updatesBackend: config.updatesBackend ?? true,
+      triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;
   }
@@ -351,7 +376,7 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? "empty",
-      updatesBackend: config.updatesBackend ?? true,
+      triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;
   }
