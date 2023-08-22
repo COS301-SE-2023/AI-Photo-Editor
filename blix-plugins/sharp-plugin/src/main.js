@@ -237,15 +237,21 @@ const tiles = {
         tileBuilder.addIcon("faCode");
 
 
-        ui = tileBuilder.createUIBuilder();
-        ui.addFilePicker({
-            componentId: "imagePicker",
-            label: "Pick an image",
-            defaultValue: "",
-            updateBackend: true,
-        }, {});
+        tile1 = tileBuilder.createUIBuilder();
+        tile1.addSidebar("right");
 
-        tileBuilder.setUI(ui);
+        tile2 = tileBuilder.createUIBuilder();
+        tile2.addSidebar("left");
+        tile2.addStatusbar("top");
+
+        tile3 = tileBuilder.createUIBuilder();
+        tile3.addStatusbar("bottom");
+
+        tile2.addLayout(tile3);
+        tile1.addLayout(tile2);
+
+
+        tileBuilder.setUI(tile1);
 
     },
 }

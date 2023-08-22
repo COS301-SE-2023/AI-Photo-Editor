@@ -1,3 +1,5 @@
+import { TileUIBuilder } from "../../electron/lib/plugins/builders/TileBuilder";
+
 export type TileSignature = string;
 
 export type UIComponentConfig = {
@@ -14,7 +16,7 @@ export type ITile = {
   displayName: string;
   description: string;
   icon: string;
-  ui: TileUIParent | null;
+  ui: { [key: string]: TileUIParent | null };
   uiConfigs: { [key: string]: UIComponentConfig };
 };
 
@@ -26,14 +28,16 @@ export abstract class TileUI {
   constructor(
     public parent: TileUI | null,
     public label: string,
+    public location: string,
     public readonly params: any[],
+    public childUis: { [key: string]: TileUIParent | null }[] | null,
     public readonly type: string
   ) {}
 }
 
 export class TileUIParent extends TileUI {
-  constructor(label: string, parent: TileUIParent | null) {
-    super(parent, label, [], "parent");
+  constructor(label: string, location: string, parent: TileUIParent | null) {
+    super(parent, label, location, [], [], "parent");
   }
 }
 
@@ -44,7 +48,7 @@ export class TileUILeaf extends TileUI {
     public readonly label: string,
     public readonly params: UIComponentProps[]
   ) {
-    super(parent, label, params, "leaf");
+    super(parent, label, "", params, null, "leaf");
   }
 }
 

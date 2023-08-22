@@ -47,7 +47,7 @@ export class TileInstance implements RegistryInstance {
     public readonly displayName: string,
     public readonly description: string,
     public readonly icon: string,
-    public readonly ui: TileUIParent | null = null,
+    public readonly ui: { [key: string]: TileUIParent | null },
     public readonly uiConfigs: { [key: string]: UIComponentConfig } = {}
   ) {}
 
