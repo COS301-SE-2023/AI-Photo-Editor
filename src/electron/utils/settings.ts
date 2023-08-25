@@ -1,6 +1,7 @@
 import ElectronStore from "electron-store";
 import { safeStorage } from "electron";
 import logger from "./logger";
+import type { Preferences } from "@shared/types";
 
 interface Settings {
   check: boolean;
@@ -97,6 +98,14 @@ export function decryptWithSafeStorage(value: string) {
 
 export function clearSecret(key: string): void {
   settings.set(`secrets.${key}`, "");
+}
+
+export function setPreferences(userPreferences: Preferences) {
+  settings.set("preferences", userPreferences);
+}
+
+export function getPreferences(): Preferences {
+  return settings.get("preferences");
 }
 
 export default settings;

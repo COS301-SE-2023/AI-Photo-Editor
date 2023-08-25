@@ -21,6 +21,7 @@
   });
 
   async function saveSettings(settings: Setting[]) {
+    // console.log(settings)
     const res = await window.apis.utilApi.saveUserSettings(settings);
 
     if (res.status === "success") {
@@ -109,16 +110,23 @@
           Save
         </div>
       {:else if selectedCategory?.id === "keybind_settings"}
-        <div class="pb-2 text-3xl font-semibold text-zinc-300">KeyBindings</div>
-        <div class="mb-10 text-justify text-sm font-medium text-zinc-500">
-          Customize all your keybindings here. You can also add new keybindings for any action you
-          want.
-        </div>
-        <ShortcutSettings />
+        {#each selectedCategory.settings as item (item.id)}
+          <div>
+            <label for="{item.id}" class="pb-3">
+              <div class="text-normal font-semibold text-zinc-300">{item.title}</div>
+              <div class="font-ligt text-sm text-zinc-500">{item.subtitle}</div>
+            </label>
+            {#if item.type === "preferences"}
+              <ShortcutSettings bind:shortcuts="{item.value}" />
+            {/if}
+          </div>
+        {/each}
         <div
           class="mt-12 flex h-10 w-20 cursor-pointer items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/[0.7] text-gray-300 transition duration-300 ease-in-out hover:text-zinc-500"
           on:click="{() => {
-            if (selectedCategory) saveSettings(selectedCategory?.settings);
+            if (selectedCategory) {
+              saveSettings(selectedCategory?.settings);
+            }
           }}"
           on:keydown="{null}"
         >

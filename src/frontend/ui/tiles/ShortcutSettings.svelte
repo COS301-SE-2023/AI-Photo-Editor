@@ -4,6 +4,9 @@
     type ShortcutAction,
     ShortcutCombo,
   } from "@frontend/lib/stores/ShortcutStore";
+  import { get } from "svelte/store";
+
+  export const shortcuts: { [key: string]: string[] } = get(shortcutsRegistry.shortcuts);
 
   export function updateShortcut(action: string, index: number, event: KeyboardEvent) {
     console.log(action, event);
@@ -58,7 +61,7 @@
 <style>
   .content {
     width: 100%;
-    height: 100%;
+    height: 75%;
     padding: 1em;
   }
   .shortcutsTable {
