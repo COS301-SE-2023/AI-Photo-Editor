@@ -3,6 +3,7 @@
   import { toastStore } from "../../../lib/stores/ToastStore";
   import { fade, fly } from "svelte/transition";
   import { flip } from "svelte/animate";
+  import { cubicIn } from "svelte/easing";
 
   let hoveredId: string | null = null;
   const maxToasts = 5;
@@ -24,7 +25,7 @@
       <div
         animate:flip="{{ duration: 250 }}"
         in:fade
-        out:fly
+        out:fly="{{x: 500, duration: 1000}}"
         on:mouseenter="{() => onMouseEnter(toast.id)}"
         on:mouseleave="{() => onMouseLeave(toast.id)}"
       >

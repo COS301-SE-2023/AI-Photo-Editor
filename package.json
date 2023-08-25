@@ -61,7 +61,7 @@
     "prepublishOnly": "npm-run-all -s test lint",
     "preversion": "npm-run-all -s lint format",
     "prepare": "husky install",
-    "profile:llm": "npm run build:electron:dev && node build/electron/lib/ai/ai-profiler-v2.js"
+    "llm": "npm run build:electron:dev && node build/electron/lib/ai/ai-profiler-v2.js"
   },
   "lint-staged": {
     "src/electron/**/*.{js,ts}": "eslint -c eslint.electron.json",
@@ -70,6 +70,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.10",
+    "@neoconfetti/svelte": "^1.0.0",
     "@popperjs/core": "^2.11.8",
     "@rollup/plugin-json": "^6.0.0",
     "@types/chokidar": "^2.1.3",

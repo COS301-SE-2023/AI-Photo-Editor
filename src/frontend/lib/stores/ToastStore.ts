@@ -7,6 +7,7 @@ export interface ToastOptions {
   autohide: boolean;
   timeout: number;
   freezable: boolean;
+  dismissible: boolean
 }
 
 export interface Toast extends ToastOptions {
@@ -20,6 +21,7 @@ const defaults: ToastOptions = {
   autohide: true,
   timeout: 3000,
   freezable: true,
+  dismissible: true
 };
 
 /** Generate random id to differentiate toasts. */
@@ -41,12 +43,23 @@ function handleAutoHide(toast: Toast) {
 function createToastStore() {
   const { subscribe, update, set } = writable<Toast[]>([]);
 
-  /** Add a new toast to the queue. */
+  /**
+   * Add a new toast to the queue.
+   * @returns Callback to dismiss toast
+   */
   function trigger(options: Partial<ToastOptions>) {
     const id = randomUUID();
     const toast: Toast = { id, ...defaults, ...options };
+    
+    if (options.type === "loading") {
+      toast.autohide = options.autohide || false;
+      toast.dismissible = options.dismissible || false;
+    }
+    
     toast.timeoutId = handleAutoHide(toast);
     update((toasts) => [...toasts, toast]);
+    
+    return () => dismiss(toast.id);
   }
 
   /** Remove a toast from the queue. */

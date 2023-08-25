@@ -32,8 +32,15 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
   async sendPrompt(prompt: string, id: UUID) {
     if (this.blix.graphManager.getGraph(id)) {
       const res = await this.blix.aiManager.sendPrompt(prompt, id);
+      return {
+        status: "success",
+        message: "Executed successfully"
+      } satisfies QueryResponse;
     } else {
-      this.blix.sendWarnMessage("No graph selected");
+      return {
+        status: "error",
+        message: "No graph selected"
+      } satisfies QueryResponse;
     }
   }
 

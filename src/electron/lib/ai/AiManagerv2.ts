@@ -9,8 +9,10 @@ import {
 import { readFileSync } from "fs";
 import { join } from "path";
 import logger from "../../utils/logger";
-import { BlypescriptProgram, type AiLangDiff, BlypescriptInterpreter } from "./AiLang";
+import { BlypescriptProgram, type AiLangDiff, BlypescriptInterpreter, BlypescriptToolbox } from "./AiLang";
 import dotenv from "dotenv";
+import { CoreGraphUpdateEvent, CoreGraphUpdateParticipant } from "../../lib/core-graph/CoreGraphInteractors";
+import { BaseError } from "./errors";
 dotenv.config();
 
 export class AiManager {
@@ -61,6 +63,7 @@ export class AiManager {
 
     const interpreter = new BlypescriptInterpreter(this.toolbox, this.graphManager);
     interpreter.run(graphId, blypescriptProgram, newBlypescriptProgram, true);
+    this.graphManager.onGraphUpdated(graphId, new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]), CoreGraphUpdateParticipant.ai)
     return response;
   }
 
@@ -72,10 +75,18 @@ export class AiManager {
   }
 
   private getToolboxInterfaces() {
-    return readFileSync(
-      join(__dirname.replace("build", "src"), "interfaces.txt"),
-      "utf8"
-    ).toString();
+    // return readFileSync(
+    //   join(__dirname.replace("build", "src"), "interfaces.txt"),
+    //   "utf8"
+    // ).toString();
+
+    const response = BlypescriptToolbox.fromToolbox(this.toolbox);
+
+    if (!response.success) {
+      throw new BaseError("Oof, this shouldn't have happened", response.error.cause);
+    }
+
+    return response.data.toString();
   }
 
   private getGraphExamples() {
@@ -176,7 +187,6 @@ class OpenAiChat extends Chat {
         temperature,
         messages,
       });
-      // console.log(JSON.stringify(response.data, null, 2));
       return response.data;
     } catch (error) {
       // @ts-ignore

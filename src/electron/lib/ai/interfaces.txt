@@ -18,14 +18,6 @@ interface blix {
   output: (input: N<any>, outputId: string) => void;
 }
 
-slider
-color
-text
-dropdown
-
-gloria(anchor1: N<number>,                                                   slider: number, color: string, text: string, dropdown: 'hello' | 'sus')
-
-
 interface sharp-plugin {
   brightness: (img: N<Sharp>, value: N<Number>) => { res: N<Sharp> }
   saturation: (img: N<Sharp>) => { res: N<Sharp> }
@@ -35,4 +27,5 @@ interface sharp-plugin {
   normalise: (img: N<Sharp>) => { res: N<Sharp> }
   toImage: (img: N<Sharp>) => { res: N<Image> }
   toSharp: (img: N<Image>) => { res: N<Sharp> }
+  rotate: (img: N<Sharp>) => { res: N<Sharp> }
 }

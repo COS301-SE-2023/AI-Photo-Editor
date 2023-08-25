@@ -19,27 +19,27 @@ const nodes ={
         nodeBuilder.setDescription("Performs a logical operation (AND/OR/XOR) on two inputs and returns a single output");
       
         nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {
-          const state = Math.min(uiInputs?.state ?? 0, 2);
+          const operation = uiInputs?.operation ?? "and";
           const boolA = anchorInputs.boolA ?? false;
           const boolB = anchorInputs.boolB ?? false;
-          switch (state) {
-            case 0: return { res: boolA && boolB  }
-            case 1: return { res: boolA || boolB  }
-            case 2: return { res: boolA !== boolB }
+          switch (operation) {
+            case "and": return { res: boolA && boolB  }
+            case "or": return { res: boolA || boolB  }
+            case "xor": return { res: boolA !== boolB }
           }
         });
 
         const ui = nodeBuilder.createUIBuilder();
         ui.addDropdown({
-            componentId: "state",
-            label: "State",
+            componentId: "operation",
+            label: "Operation",
             defaultValue: 0,
             triggerUpdate: true,
         }, {
           options: {
-            "And": 0,
-            "Or": 1,
-            "Xor": 2,
+            "And": "and",
+            "Or": "or",
+            "Xor": "xor",
           }
         });
 
@@ -55,31 +55,32 @@ const nodes ={
         nodeBuilder.setDescription("Performs a comparison operation (==/!=/>/</>=/<=) on two inputs and returns a single boolean output");
       
         nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {
-          const state = Math.min(uiInputs?.state ?? 0, 4);
+          // const state = Math.min(uiInputs?.state ?? 0, 4);
+          const operation = uiInputs?.state ?? ">";
           const valA = anchorInputs.valA;
           const valB = anchorInputs.valB;
-          switch (state) {
-            case 0: return { res: valA  >  valB }
-            case 1: return { res: valA  >= valB }
-            case 2: return { res: valA  <  valB }
-            case 3: return { res: valA  <= valB }
-            case 4: return { res: valA === valB }
+          switch (operation) {
+            case ">": return { res: valA  >  valB }
+            case ">=": return { res: valA  >= valB }
+            case "<": return { res: valA  <  valB }
+            case "<=": return { res: valA  <= valB }
+            case "=": return { res: valA === valB }
           }
         });
 
         const ui = nodeBuilder.createUIBuilder();
         ui.addDropdown({
-            componentId: "state",
-            label: "State",
+            componentId: "operation",
+            label: "Operation",
             defaultValue: 0,
             triggerUpdate: true,
         }, {
           options: {
-            ">": 0,
-            "≥": 1,
-            "<": 2,
-            "≤": 3,
-            "=": 4,
+            ">": ">",
+            "≥": ">=",
+            "<": "<",
+            "≤": "<=",
+            "=": "=",
           }
         });
 

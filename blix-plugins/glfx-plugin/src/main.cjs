@@ -28,7 +28,6 @@ function createGLFXNode(type, title, desc, params) {
                 { min: param.min ?? -1, max: param.max ?? 1, step: param.step ?? 0.05 }
             );
         }
-
         nodeBuilder.define(async (input, uiInput, from) => {
             return {
                 "res": {

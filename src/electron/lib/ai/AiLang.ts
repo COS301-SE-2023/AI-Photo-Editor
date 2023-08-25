@@ -4,6 +4,11 @@ import { NodeInstance, ToolboxRegistry } from "../../lib/registries/ToolboxRegis
 import { CoreGraphUpdateParticipant } from "../../lib/core-graph/CoreGraphInteractors";
 import { type CoreGraph, CoreNodeUIInputs, type Node } from "../../lib/core-graph/CoreGraph";
 import type { INodeUIInputs } from "../../../shared/types";
+import { NodeUI, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
+import { type Result, BaseError } from "./errors";
+import { z } from "zod";
+
+// Created custom error type to potential extension in future easier
 
 abstract class AiLangProgram {
   public abstract diff(other: AiLangProgram): AiLangDiff;
@@ -45,7 +50,6 @@ export class BlypescriptProgram implements AiLangProgram {
     const nodeNameIdMap = new Map<string, UUID>();
     const match = program.match(/^.*function\s*graph\(\)\s*{([\s\S]*)}.*$/s);
     if (!match) return null;
-    console.log(match);
     const extractedProgram = match[1];
     const statements = extractedProgram
       .split("\n")
@@ -111,12 +115,6 @@ export class BlypescriptProgram implements AiLangProgram {
         !added.includes(os) &&
         !this.statements.some((ts) => os.checkEquals(ts))
     );
-    // const changed = this.statements.filter(
-    //   (ts) =>
-    //     !removed.includes(ts) &&
-    //     !added.includes(ts) &&
-    //     !other.statements.some((os) => ts.checkEquals(os))
-    // );
     return { added, removed, changed };
   }
 
@@ -207,18 +205,20 @@ export class BlypescriptInterpreter {
     // Remove nodes
     removed.forEach((statement) => {
       const nodeId = oldProgram.nodeNameIdMap.get(statement.name);
-      this.graphManager.removeNode(graphId, nodeId!, CoreGraphUpdateParticipant.ai);
+      // this.graphManager.removeNode(graphId, nodeId!, CoreGraphUpdateParticipant.ai);
+      graph.removeNode(nodeId!);
     });
 
     // Add nodes
     added.forEach((statement) => {
       const nodeInstance = this.toolbox.getNodeInstance(statement.nodeSignature);
-      const response = this.graphManager.addNode(
-        graphId,
-        nodeInstance,
-        { x: 0, y: 0 },
-        CoreGraphUpdateParticipant.ai
-      );
+      // const response = this.graphManager.addNode(
+      //   graphId,
+      //   nodeInstance,
+      //   { x: 0, y: 0 },
+      //   CoreGraphUpdateParticipant.ai
+      // );
+      const response = graph.addNode(nodeInstance, { x: 0, y: 0 });
 
       if (response.status === "error" || !response.data) {
         throw Error("Error while adding node to graph");
@@ -343,11 +343,12 @@ export class BlypescriptInterpreter {
       const anchorInput = statement.nodeInputs[i];
 
       if (edge) {
-        const response = this.graphManager.removeEdge(
-          graph.uuid,
-          edge.getAnchorTo,
-          CoreGraphUpdateParticipant.ai
-        );
+        // const response = this.graphManager.removeEdge(
+        //   graph.uuid,
+        //   edge.getAnchorTo,
+        //   CoreGraphUpdateParticipant.ai
+        // );
+        graph.removeEdge(edge.getAnchorTo);
         // TODO: Handle response
       }
 
@@ -374,18 +375,17 @@ export class BlypescriptInterpreter {
         throw Error("Error retrieving output node id from program map");
       }
 
-      console.log(outputNodeId, outputNodeAnchorId);
-
       const fromNode = graph.getNodes[fromNodeUuid];
       const fromNodeAnchors = this.mapAnchorIdsToUuids(fromNode);
       const outputAnchorUuid = fromNodeAnchors[outputNodeAnchorId];
       const inputAnchorUuid = anchorsIdToUuid[anchorId];
-      this.graphManager.addEdge(
-        graph.uuid,
-        outputAnchorUuid,
-        inputAnchorUuid,
-        CoreGraphUpdateParticipant.ai
-      );
+      // this.graphManager.addEdge(
+      //   graph.uuid,
+      //   outputAnchorUuid,
+      //   inputAnchorUuid,
+      //   CoreGraphUpdateParticipant.ai
+      // );
+      graph.addEdge(outputAnchorUuid, inputAnchorUuid);
     });
 
     // const uiInputs = graph.getUIInputs(node.uuid);
@@ -415,7 +415,6 @@ export class BlypescriptInterpreter {
   private changeUiInputs(node: Node, graph: CoreGraph, statement: AiLangStatement) {
     const nodeInstance = this.toolbox.getNodeInstance(statement.nodeSignature);
     const uiInputs = graph.getUIInputs(node.uuid);
-    console.log(uiInputs);
 
     if (!uiInputs) {
       throw Error("Error finding node ui inputs");
@@ -439,12 +438,226 @@ export class BlypescriptInterpreter {
       newNodeUiInputs.changes.push(uiInputId);
     });
 
-    this.graphManager.updateUIInputs(
-      graph.uuid,
-      node.uuid,
-      newNodeUiInputs,
-      CoreGraphUpdateParticipant.ai
-    );
+    // this.graphManager.updateUIInputs(
+    //   graph.uuid,
+    //   node.uuid,
+    //   newNodeUiInputs,
+    //   CoreGraphUpdateParticipant.ai
+    // );
+    graph.updateUIInputs(node.uuid, newNodeUiInputs);
+  }
+
+  private mapAnchorIdsToUuids(node: Node) {
+    const nodeAnchors = node.getAnchors;
+    const map = Object.entries(nodeAnchors).reduce((result, [key, value]) => {
+      result[value.anchorId] = key;
+      return result;
+    }, {} as { [key: string]: UUID });
+    return map;
+  }
+}
+
+export class BlypescriptInterpreterV2 {
+  private blypescriptToolbox: BlypescriptToolbox;
+
+  constructor(
+    private readonly toolbox: ToolboxRegistry,
+    private readonly graphManager: CoreGraphManager
+  ) {
+    const result = BlypescriptToolbox.fromToolbox(this.toolbox);
+
+    if (!result.success) {
+      throw result.error;
+    }
+
+    this.blypescriptToolbox = result.data;
+  }
+
+  public run(
+    graphId: UUID,
+    oldProgram: BlypescriptProgram,
+    newProgram: BlypescriptProgram,
+    verbose = false
+  ) {
+    const graph = this.graphManager.getGraph(graphId);
+    const { added, removed, changed } = oldProgram.diffV2(newProgram);
+    newProgram.addNodeIds(oldProgram);
+
+    if (verbose) {
+      console.log(colorString("//==========Old Program==========//", "ORANGE"));
+      console.log(oldProgram.toString());
+      console.log(colorString("//==========New Program==========//", "GREEN"));
+      console.log(newProgram.toString());
+      console.log(colorString("//==========Diff==========//", "LIGHT_BLUE"));
+      console.log(JSON.stringify({ added, removed, changed }, null, 2));
+    }
+
+    // Remove nodes
+    removed.forEach((statement) => {
+      const nodeId = oldProgram.nodeNameIdMap.get(statement.name);
+      // this.graphManager.removeNode(graphId, nodeId!, CoreGraphUpdateParticipant.ai);
+      graph.removeNode(nodeId!);
+    });
+
+    // Add nodes
+    added.forEach((statement) => {
+      const nodeInstance = this.toolbox.getNodeInstance(statement.nodeSignature);
+      // const response = this.graphManager.addNode(
+      //   graphId,
+      //   nodeInstance,
+      //   { x: 0, y: 0 },
+      //   CoreGraphUpdateParticipant.ai
+      // );
+      const response = graph.addNode(nodeInstance, { x: 0, y: 0 });
+
+      if (response.status === "error" || !response.data) {
+        throw Error("Error while adding node to graph");
+      }
+
+      newProgram.nodeNameIdMap.set(statement.name, response.data.nodeId);
+    });
+
+    // Change edges and ui inputs
+    // Optimizations can be made to treat added edges and changed edges differently
+    [...added, ...changed].forEach((statement) => {
+      const nodeId = newProgram.nodeNameIdMap.get(statement.name);
+      const node = graph.getNodes[nodeId || ""];
+
+      if (!node) {
+        throw Error("Node id not defined in changed statements");
+      }
+
+      this.changeEdges(node, graph, statement, newProgram);
+      this.changeUiInputs(node, graph, statement);
+    });
+  }
+
+  // Improve so that it checks if edge should actually be changed
+  private changeEdges(
+    node: Node,
+    graph: CoreGraph,
+    statement: AiLangStatement,
+    program: BlypescriptProgram
+  ) {
+    const blypescriptNode = this.blypescriptToolbox.getNode(statement.nodeSignature);
+
+    if (!blypescriptNode) {
+      throw Error("Node instance not found when changing edges");
+    }
+
+    const nodeInputAnchorIds = blypescriptNode.nodeInputs
+      .filter((input) => input.aiCanUse)
+      .map((input) => input.name);
+    const anchorsIdToUuid = this.mapAnchorIdsToUuids(node);
+
+    nodeInputAnchorIds.forEach((anchorId, i) => {
+      const edge = graph.getEdgeDest[anchorsIdToUuid[anchorId]];
+      const anchorInput = statement.nodeInputs[i];
+
+      if (edge) {
+        // const response = this.graphManager.removeEdge(
+        //   graph.uuid,
+        //   edge.getAnchorTo,
+        //   CoreGraphUpdateParticipant.ai
+        // );
+        graph.removeEdge(edge.getAnchorTo);
+        // TODO: Handle response
+      }
+
+      if (anchorInput === "null") {
+        return;
+      }
+
+      const match = anchorInput.match(/^(.*)\['(.*)'\]$/);
+
+      if (!match) {
+        throw Error("Could not match anchor parameters when changing edges");
+      }
+
+      const [_, outputNodeId, outputNodeAnchorId] = match;
+
+      if (!outputNodeId || !outputNodeAnchorId) {
+        // Prolly means language model added primitive instead of connecting input edge
+        throw Error("Could not match anchor parameters when changing edges");
+      }
+
+      const fromNodeUuid = program.nodeNameIdMap.get(outputNodeId);
+
+      if (!fromNodeUuid) {
+        throw Error("Error retrieving output node id from program map");
+      }
+
+      const fromNode = graph.getNodes[fromNodeUuid];
+      const fromNodeAnchors = this.mapAnchorIdsToUuids(fromNode);
+      const outputAnchorUuid = fromNodeAnchors[outputNodeAnchorId];
+      const inputAnchorUuid = anchorsIdToUuid[anchorId];
+      // this.graphManager.addEdge(
+      //   graph.uuid,
+      //   outputAnchorUuid,
+      //   inputAnchorUuid,
+      //   CoreGraphUpdateParticipant.ai
+      // );
+      graph.addEdge(outputAnchorUuid, inputAnchorUuid);
+    });
+
+    // const uiInputs = graph.getUIInputs(node.uuid);
+    // console.log(uiInputs)
+
+    // if (!uiInputs) {
+    //   // some error shit
+    //   continue;
+    // }
+
+    // for (const uiInputKey of Object.keys(nodeInstance.uiConfigs)) {
+    //     const value = statement.nodeInputs[index++];
+    //     if (!isNaN(Number(value))) {
+    //       uiInputs[uiInputKey] = Number(value);
+    //     } else {
+    //       uiInputs[uiInputKey] = value.slice(1, -1);
+    //     }
+    // }
+
+    // const newNodeUiInputs = {inputs: uiInputs, changes: []};
+    // this.graphManager.updateUIInputs(graphId, node.uuid, newNodeUiInputs, CoreGraphUpdateParticipant.ai)
+
+    // console.log(graph.getUIInputs(node.uuid));
+    // console.log()
+  }
+
+  private changeUiInputs(node: Node, graph: CoreGraph, statement: AiLangStatement) {
+    const blypescriptNode = this.blypescriptToolbox.getNode(statement.nodeSignature);
+    const uiInputs = graph.getUIInputs(node.uuid);
+
+    if (!uiInputs || !blypescriptNode) {
+      throw Error("Error finding node ui inputs");
+    }
+
+    const uiInputIds = blypescriptNode.uiInputs
+      .filter((input) => input.aiCanUse)
+      .map((input) => input.name);
+    const uiInputValues = statement.nodeInputs.slice(-uiInputIds.length);
+    const newNodeUiInputs: INodeUIInputs = { inputs: { ...uiInputs }, changes: [] };
+
+    uiInputIds.forEach((uiInputId, i) => {
+      const uiInputValue = uiInputValues[i];
+
+      if (!isNaN(Number(uiInputValue))) {
+        newNodeUiInputs.inputs[uiInputId] = Number(uiInputValue);
+      } else {
+        // SLice of the quotes
+        newNodeUiInputs.inputs[uiInputId] = uiInputValue.slice(1, -1);
+      }
+
+      newNodeUiInputs.changes.push(uiInputId);
+    });
+
+    // this.graphManager.updateUIInputs(
+    //   graph.uuid,
+    //   node.uuid,
+    //   newNodeUiInputs,
+    //   CoreGraphUpdateParticipant.ai
+    // );
+    graph.updateUIInputs(node.uuid, newNodeUiInputs);
   }
 
   private mapAnchorIdsToUuids(node: Node) {
@@ -459,13 +672,15 @@ export class BlypescriptInterpreter {
 
 export type BlypescriptNodeParam = {
   name: string;
+  aiCanUse: boolean;
   types: string[];
 };
 
-export class BlypescriptNodeSignature {
+export class BlypescriptNode {
   constructor(
     public readonly plugin: string,
     public readonly name: string,
+    public readonly signature: string,
     public readonly description: string,
     public readonly nodeInputs: BlypescriptNodeParam[],
     public readonly uiInputs: BlypescriptNodeParam[],
@@ -481,49 +696,53 @@ export class BlypescriptNodeSignature {
         .join("| ");
       return `${input.name}: ${types}`;
     });
-    const uiInputStrings = this.uiInputs.map((input) => {
-      const types = input.types
-        .map((type) => {
-          return `${type}`;
-        })
-        .join("| ");
-      return `${input.name}: ${types}`;
-    });
+    const uiInputStrings = this.uiInputs
+      .filter((input) => input.aiCanUse)
+      .map((input) => {
+        const types = input.types
+          .map((type) => {
+            return `${type}`;
+          })
+          .join(" | ");
+        return `${input.name}: ${types}`;
+      });
     const nodeOutputStrings = this.nodeOutputs.map((output) => {
       const types = output.types
         .map((type) => {
           return `N<${type}>`;
         })
-        .join("| ");
+        .join(" | ");
       return `${output.name}: ${types}`;
     });
 
     const nodeParams = [...nodeInputStrings, ...uiInputStrings].join(", ");
     const nodeReturn = nodeOutputStrings.join(", ");
     // let str = `// ${this.description}\n${this.name}(${nodeParams}) => { ${nodeReturn} }`;
-    const str = `${this.name}: (${nodeParams}) => ${nodeReturn ? "{ " + nodeReturn + " }" : "void"}`;
+    const str = `${this.name}: (${nodeParams}) => ${
+      nodeReturn ? "{ " + nodeReturn + " }" : "void"
+    }`;
 
     return str;
   }
 }
 
 export class BlypescriptPlugin {
-  constructor(public readonly name: string, public readonly nodes: BlypescriptNodeSignature[]) {}
+  constructor(public readonly name: string, public readonly nodes: BlypescriptNode[]) {}
 
   public static fromPluginNodeInstances(
     pluginName: string,
     nodes: NodeInstance[]
   ): BlypescriptPlugin {
     const blypescriptNodes = nodes.map((nodeInstance) => {
-      const { name, plugin, description } = nodeInstance;
+      const { name, plugin, description, signature } = nodeInstance;
       const nodeInputs = this.generateNodeInputs(nodeInstance);
-      // const uiInputs = this.generateUiInputs(nodeInstance);
-      const uiInputs: BlypescriptNodeParam[] = [];
+      const uiInputs = this.generateUiInputs(nodeInstance.ui);
       const nodeOutputs = this.generateNodeOutputs(nodeInstance);
 
-      return new BlypescriptNodeSignature(
+      return new BlypescriptNode(
         plugin,
         name,
+        signature,
         description,
         nodeInputs,
         uiInputs,
@@ -538,36 +757,98 @@ export class BlypescriptPlugin {
     let str = `interface ${this.name} {\n`;
 
     this.nodes.forEach((node) => {
-      str += `${node.toString()}\n`;
+      str += `${node
+        .toString()
+        .split("\n")
+        .map((line) => `  ${line}`)
+        .join("\n")}\n`;
     });
 
     return str + "}";
+  }
+
+  public findNode(signature: string): BlypescriptNode | null {
+    return this.nodes.find((node) => node.signature === signature) || null;
   }
 
   private static generateNodeInputs(node: NodeInstance): BlypescriptNodeParam[] {
     return node.inputs.map((input) => {
       return {
         name: input.id,
-        types: [input.type],
+        aiCanUse: true,
+        types: [input.type ? input.type : "any"],
       };
     });
   }
 
-  private static generateUiInputs(node: NodeInstance) {
-    throw Error("Generate ui inputs not implemented");
-    return node.inputs.map((input) => {
-      return {
-        name: input.id,
-        types: [input.type],
+  private static generateUiInputs(ui: NodeUI | null): BlypescriptNodeParam[] {
+    if (!ui) {
+      return [];
+    }
+
+    if (ui.type === "parent") {
+      return ui.params.flatMap((child) => this.generateUiInputs(child as NodeUI));
+    } else if (ui.type === "leaf") {
+      const props = ui.params[0];
+      const componentType = (ui as NodeUILeaf)?.category;
+
+      if (!props) {
+        throw new BaseError("Props not available on NodeUiLeaf");
+      }
+
+      if (!componentType) {
+        throw new BaseError("Component type not available on NodeUiLeaf");
+      }
+
+      const nodeParam: BlypescriptNodeParam = {
+        name: ui.label,
+        aiCanUse: true,
+        types: [],
       };
-    });
+
+      if (componentType === "Button") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("string");
+      } else if (componentType === "Slider") {
+        nodeParam.types.push("number");
+      } else if (componentType === "Knob") {
+        nodeParam.types.push("number");
+      } else if (componentType === "Dropdown") {
+        const objectSchema = z.record(z.string(), z.string());
+        const options = objectSchema.safeParse(props.options);
+
+        if (!options.success) {
+          throw new BaseError("Options on UI Dropdown is not a Record<string, string>");
+        }
+
+        nodeParam.types = Object.values(options.data).map((val) => `'${val}'`);
+      } else if (componentType === "TextInput") {
+        nodeParam.types.push("string");
+      } else if (componentType === "ColorPicker") {
+        // nodeParam.types.push("\`#${string}\`");
+        nodeParam.types.push("color");
+      } else if (componentType === "FilePicker") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("file");
+      } else if (componentType === "Buffer") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("buffer");
+      } else {
+        throw new BaseError(`${componentType} UI component has not been implemented yet`);
+      }
+
+      return [nodeParam];
+    }
+
+    return [];
   }
 
-  private static generateNodeOutputs(node: NodeInstance) {
+  private static generateNodeOutputs(node: NodeInstance): BlypescriptNodeParam[] {
     return node.outputs.map((output) => {
       return {
         name: output.id,
-        types: [output.type],
+        aiCanUse: true,
+        types: [output.type ? output.type : "any"],
       };
     });
   }
@@ -576,9 +857,10 @@ export class BlypescriptPlugin {
 export class BlypescriptToolbox {
   constructor(public readonly plugins: BlypescriptPlugin[]) {}
 
-  public static fromToolbox(toolbox: ToolboxRegistry) {
+  public static fromToolbox(toolbox: ToolboxRegistry): Result<BlypescriptToolbox> {
     const pluginMap = new Map<string, NodeInstance[]>();
 
+    // Group nodes by plugin
     Object.values(toolbox.getRegistry()).forEach((node) => {
       if (pluginMap.has(node.plugin)) {
         pluginMap.get(node.plugin)?.push(node);
@@ -589,11 +871,15 @@ export class BlypescriptToolbox {
 
     const blypescriptPlugins: BlypescriptPlugin[] = [];
 
-    pluginMap.forEach((nodes, plugin) => {
-      blypescriptPlugins.push(BlypescriptPlugin.fromPluginNodeInstances(plugin, nodes));
-    });
+    try {
+      pluginMap.forEach((nodes, plugin) => {
+        blypescriptPlugins.push(BlypescriptPlugin.fromPluginNodeInstances(plugin, nodes));
+      });
+    } catch (error) {
+      if (error instanceof BaseError) return { success: false, error };
+    }
 
-    return new BlypescriptToolbox(blypescriptPlugins);
+    return { success: true, data: new BlypescriptToolbox(blypescriptPlugins) };
   }
 
   public toString(): string {
@@ -602,6 +888,34 @@ export class BlypescriptToolbox {
     str += pluginStrings.join("\n\n");
     return str;
   }
+
+  public getPlugin(name: string): BlypescriptPlugin | null {
+    return this.plugins.find((plugin) => plugin.name === name) || null;
+  }
+
+  public getNode(signature: string): BlypescriptNode | null {
+    const plugin = this.getPlugin(signature.split(".")[0]);
+
+    if (!plugin) return null;
+
+    return plugin.findNode(signature);
+  }
+}
+
+// ==================================================================
+// HELPERS
+// ==================================================================
+
+export function castToError(err: unknown): Error {
+  if (err instanceof Error) return err;
+
+  let stringified = "[Unable to stringify the thrown value]";
+  try {
+    stringified = JSON.stringify(err);
+  } catch {}
+
+  const error = new Error(`This value was thrown as is, not through an Error: ${stringified}`);
+  return error;
 }
 
 export function colorString(str: string, color: keyof typeof colors) {
