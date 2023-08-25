@@ -134,17 +134,19 @@ export class TileUIBuilder {
   //   return this;
   // }
 
-  // public addButton(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
-  //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Button);
-  //   this.node.params.push(new TileUILeaf(this.node, TileUIComponent.Button, componentId, [props]));
-  //   this.uiConfigs[componentId] = {
-  //     componentId,
-  //     label: config.label,
-  //     defaultValue: config.defaultValue ?? "",
-  //     updatesBackend: config.updatesBackend ?? false,
-  //   };
-  //   return this;
-  // }
+  public addButton(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Button);
+    this.sidebar?.params.push(
+      new TileUILeaf(this.sidebar, TileUIComponent.Button, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "",
+      updatesBackend: config.updatesBackend ?? false,
+    };
+    return this;
+  }
 
   // public addRadio(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
   //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Radio);

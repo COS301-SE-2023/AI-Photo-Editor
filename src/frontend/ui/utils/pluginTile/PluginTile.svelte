@@ -1,8 +1,10 @@
 <script lang="ts">
-  import type { TileUIParent } from "../../../shared/ui/TileUITypes";
+  import type { TileUIParent, UIComponentConfig } from "../../../../shared/ui/TileUITypes";
+  import TileUiFragment from "./TileUIFragment.svelte";
 
   // export let type: string = "";
   export let componentUI: { [key: string]: TileUIParent | null } = {};
+  export let uiConfigs: { [key: string]: UIComponentConfig } = {};
   console.log("componentUI", componentUI);
 
   const layouts: { [key: string]: string } = {
@@ -77,7 +79,7 @@
   {/if}
   {#if componentUI["sidebar"]}
     <div class="sidebar">
-      <h1>sidebar</h1>
+      <TileUiFragment ui="{componentUI['sidebar']}" uiConfigs="{uiConfigs}" />
     </div>
   {/if}
   {#if componentUI["statusbar"]}

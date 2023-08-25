@@ -229,31 +229,6 @@ const commands = {}
 
 
 const tiles = {
-    "test": (context) => {
-
-        tileBuilder = context.instantiate("input-plugin", "inputImage");
-        tileBuilder.setTitle("Input image");
-        tileBuilder.setDescription("Provides an image input and returns a single image output");
-        tileBuilder.addIcon("faCode");
-
-
-        tile1 = tileBuilder.createUIBuilder();
-        tile1.addSidebar("right");
-
-        tile2 = tileBuilder.createUIBuilder();
-        tile2.addSidebar("left");
-        tile2.addStatusbar("top");
-
-        tile3 = tileBuilder.createUIBuilder();
-        tile3.addStatusbar("bottom");
-
-        tile2.addLayout(tile3);
-        tile1.addLayout(tile2);
-
-
-        tileBuilder.setUI(tile1);
-
-    },
 }
 
 module.exports = {
