@@ -10,3 +10,15 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.on(channel, (_event, args) => func(args));
   },
 });
+
+contextBridge.exposeInMainWorld("cache", {
+  write: (id: string, content: Blob) => {
+    ipcRenderer.sendToHost("cache-write", { id, content });
+  },
+  get: (id: string) => {
+    ipcRenderer.sendToHost("cache-get", { id });
+  },
+  delete: (id: string) => {
+    ipcRenderer.sendToHost("cache-delete", { id });
+  },
+});
