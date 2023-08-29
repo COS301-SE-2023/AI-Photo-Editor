@@ -9,9 +9,18 @@ import {
 import { readFileSync } from "fs";
 import { join } from "path";
 import logger from "../../utils/logger";
-import { BlypescriptProgram, type AiLangDiff, BlypescriptInterpreter, BlypescriptToolbox, Result } from "./AiLang";
+import {
+  BlypescriptProgram,
+  type AiLangDiff,
+  BlypescriptInterpreter,
+  BlypescriptToolbox,
+} from "./AiLang";
+import type { Result } from "./AiLang";
 import dotenv from "dotenv";
-import { CoreGraphUpdateEvent, CoreGraphUpdateParticipant } from "../../lib/core-graph/CoreGraphInteractors";
+import {
+  CoreGraphUpdateEvent,
+  CoreGraphUpdateParticipant,
+} from "../../lib/core-graph/CoreGraphInteractors";
 dotenv.config();
 
 export class AiManager {
@@ -53,16 +62,23 @@ export class AiManager {
 
     if (!response) return;
 
-    const newBlypescriptProgram = BlypescriptProgram.fromString(response.lastResponse);
+    const result = BlypescriptProgram.fromString(response.lastResponse);
 
-    if (!newBlypescriptProgram) {
-      // TODO: Add checks here, some shit went wrong
+    if (!result.success) {
+      logger.warn(result.error);
+      // Maybe this is where we add the loop?
       return;
     }
 
+    const newBlypescriptProgram = result.data;
+
     const interpreter = new BlypescriptInterpreter(this.toolbox, this.graphManager);
     interpreter.run(graphId, blypescriptProgram, newBlypescriptProgram, true);
-    this.graphManager.onGraphUpdated(graphId, new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]), CoreGraphUpdateParticipant.ai)
+    this.graphManager.onGraphUpdated(
+      graphId,
+      new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
+      CoreGraphUpdateParticipant.ai
+    );
     return response;
   }
 
@@ -88,7 +104,7 @@ export class AiManager {
 
     return {
       success: true,
-      data: response.data.toString()
+      data: response.data.toString(),
     } satisfies Result;
   }
 

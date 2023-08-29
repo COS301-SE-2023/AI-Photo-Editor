@@ -6,6 +6,7 @@ import { type CoreGraph, CoreNodeUIInputs, type Node } from "../../lib/core-grap
 import type { INodeUIInputs } from "../../../shared/types";
 import { NodeUI, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
 import { z } from "zod";
+import logger from "../../utils/logger";
 
 // Created custom error type to potential extension in future easier
 
@@ -45,10 +46,18 @@ export class BlypescriptProgram implements AiLangProgram {
     public nodeNameIdMap: Map<string, UUID>
   ) {}
 
-  public static fromString(program: string): BlypescriptProgram | null {
+  public static fromString(program: string): Result<BlypescriptProgram> {
     const nodeNameIdMap = new Map<string, UUID>();
     const match = program.match(/^.*function\s*graph\(\)\s*{([\s\S]*)}.*$/s);
-    if (!match) return null;
+
+    // Does not conform to syntax
+    if (!match)
+      return {
+        success: false,
+        error: "Program does not conform to syntax",
+        message: "Incorrect syntax provided for Blypescript program",
+      };
+
     const extractedProgram = match[1];
     const statements = extractedProgram
       .split("\n")
@@ -60,11 +69,27 @@ export class BlypescriptProgram implements AiLangProgram {
     for (let s = 0; s < statements.length; s++) {
       if (statements[s].length === 0 || statements[s].startsWith("//")) continue;
 
-      const statement = BlypescriptStatement.fromString(statements[s]);
+      const result = BlypescriptStatement.fromString(statements[s]);
 
       // TODO: Fail + return error message to the AI when a statement is invalid
-      if (statement === null) return null; // Invalid statement
-      if (usedNodeIds.has(statement.name)) return null; // Duplicate nodeId
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.error,
+          message: result.message + "on line " + (s + 1).toString(),
+        };
+      } // Invalid statement
+
+      const statement = result.data;
+      // Duplicate nodeId
+
+      if (usedNodeIds.has(statement.name)) {
+        return {
+          success: false,
+          error: "Duplicate nodeId",
+          message: "Duplicate nodeId provided on line " + (s + 1).toString(),
+        };
+      }
 
       nodeNameIdMap.set(statement.name, "");
       statement.lineNumber = s;
@@ -72,7 +97,9 @@ export class BlypescriptProgram implements AiLangProgram {
       usedNodeIds.add(statement.name);
     }
 
-    return new BlypescriptProgram(resStatements, nodeNameIdMap);
+    const prog = new BlypescriptProgram(resStatements, nodeNameIdMap);
+
+    return { success: true, data: prog };
   }
 
   public toString(): string {
@@ -121,18 +148,23 @@ const BlypescriptStatementRegex =
 export class BlypescriptStatement extends AiLangStatement {
   public lineNumber?: number;
 
-  public static fromString(statement: string): BlypescriptStatement | null {
+  public static fromString(statement: string): Result<BlypescriptStatement> {
     const match = statement.match(BlypescriptStatementRegex);
     if (match) {
-      return new BlypescriptStatement(
+      const statement = new BlypescriptStatement(
         match[1],
         `${match[2]}.${match[3]}`,
-
         // TODO: Look into being a bit smarter about checking/storing input 'arguments'
         match[4].split(",").map((s) => s.trim())
       );
+
+      return { success: true, data: statement };
     }
-    return null;
+    return {
+      success: false,
+      error: "Invalid statement provided",
+      message: "Invalid syntax for statementS",
+    };
   }
 
   public toString(): string {
@@ -147,7 +179,6 @@ export class BlypescriptInterpreter {
     private readonly graphManager: CoreGraphManager
   ) {
     const result = BlypescriptToolbox.fromToolbox(this.toolbox);
-
     if (!result.success) {
       throw result.error;
     }
@@ -166,12 +197,12 @@ export class BlypescriptInterpreter {
     newProgram.addNodeIds(oldProgram);
 
     if (verbose) {
-      console.log(colorString("//==========Old Program==========//", "ORANGE"));
-      console.log(oldProgram.toString());
-      console.log(colorString("//==========New Program==========//", "GREEN"));
-      console.log(newProgram.toString());
-      console.log(colorString("//==========Diff==========//", "LIGHT_BLUE"));
-      console.log(JSON.stringify({ added, removed, changed }, null, 2));
+      logger.warn(colorString("//==========Old Program==========//", "ORANGE"));
+      logger.warn(oldProgram.toString());
+      logger.warn(colorString("//==========New Program==========//", "GREEN"));
+      logger.warn(newProgram.toString());
+      logger.warn(colorString("//==========Diff==========//", "LIGHT_BLUE"));
+      logger.warn(JSON.stringify({ added, removed, changed }, null, 2));
     }
 
     // Remove nodes
@@ -283,7 +314,7 @@ export class BlypescriptInterpreter {
     });
 
     // const uiInputs = graph.getUIInputs(node.uuid);
-    // console.log(uiInputs)
+    // logger.warn(uiInputs)
 
     // if (!uiInputs) {
     //   // some error shit
@@ -302,8 +333,8 @@ export class BlypescriptInterpreter {
     // const newNodeUiInputs = {inputs: uiInputs, changes: []};
     // this.graphManager.updateUIInputs(graphId, node.uuid, newNodeUiInputs, CoreGraphUpdateParticipant.ai)
 
-    // console.log(graph.getUIInputs(node.uuid));
-    // console.log()
+    // logger.warn(graph.getUIInputs(node.uuid));
+    // logger.warn()
   }
 
   private changeUiInputs(node: Node, graph: CoreGraph, statement: AiLangStatement) {
