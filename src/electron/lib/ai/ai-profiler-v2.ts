@@ -17,7 +17,6 @@ import { AiManager, Message } from "./AiManagerv2";
 import { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
 import readline from "readline";
 import { NodeUI, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
-import { BaseError } from "./errors";
 
 class Profiler {
   private toolboxRegistry!: ToolboxRegistry;
@@ -100,55 +99,7 @@ class Profiler {
       return str;
     }
 
-    return blypescriptToolbox.error.message;
-  }
-
-  test2() {
-    console.log(JSON.stringify(Object.keys(this.toolboxRegistry.getRegistry()), null, 2));
-    for (const nodeInstance of Object.values(this.toolboxRegistry.getRegistry())) {
-      const graph = new CoreGraph();
-      const result = graph.addNode(nodeInstance, { x: 0, y: 0 });
-      if (result.status === "success") {
-        const node = graph.getNodes[result.data.nodeId];
-        console.log(JSON.stringify(graph.getAllUIInputs[node.uuid], null, 2));
-        console.log(this.getUiInputs(nodeInstance.ui))
-      } else {
-        console.log(result.message);
-      }
-    }
-    // const nodeInstance = this.toolboxRegistry.getNodeInstance("input-plugin.inputImage");
-  }
-
-  getUiInputs(ui: NodeUI | null): string[] {
-    if (!ui) {
-      return [];
-    }
-
-    if (ui.type === "parent") {
-      return ui.params.flatMap((child) => this.getUiInputs(child));
-    } else if (ui.type === "leaf") {
-      const props = ui.params[0];
-      const componentType = (ui as NodeUILeaf).category;
-
-      if (!props) {
-        throw new BaseError("Props not available on NodeUiLeaf");
-      }
-
-      if (componentType === "Button") {
-      } else if (componentType === "Slider") {
-      } else if (componentType === "Knob") {
-      } else if (componentType === "Dropdown") {
-      } else if (componentType === "TextInput") {
-      } else if (componentType === "ColorPicker") {
-      } else if (componentType === "FilePicker") {
-      } else {
-        throw new BaseError(`${componentType} UI component has not been implemented yet`);
-      }
-
-      return [ui.label];
-    }
-
-    return [];
+    return blypescriptToolbox.message;
   }
 
   private getPrompt() {

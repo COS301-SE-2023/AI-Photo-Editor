@@ -4,7 +4,6 @@ import { BlypescriptProgram, BlypescriptStatement, BlypescriptToolbox } from "..
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import { ToolboxRegistry } from "../../lib/registries/ToolboxRegistry";
 import type { SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
-import { BaseError } from "../../lib/ai/errors";
 
 /**
  * This class is used to export a CoreGraph to external representations
@@ -509,10 +508,8 @@ export class BlypescriptExportStrategyV2 implements ExportStrategy<BlypescriptPr
     const blypescriptNode = this.toolbox.getNode(node.getSignature);
 
     if (!blypescriptNode) {
-      console.log(signature);
-      console.log(this.toolbox.getPlugin(signature.split(".")[0]))
-      console.log(this.toolbox.plugins)
-      throw new BaseError("Graph node not found in Blypescript toolbox");
+      // TODO: Add proper error handling using Result type from AiLang
+      return new BlypescriptStatement("", ".", []);
     }
 
     const inputAnchorNames = blypescriptNode.nodeInputs

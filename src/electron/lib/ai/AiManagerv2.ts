@@ -9,10 +9,9 @@ import {
 import { readFileSync } from "fs";
 import { join } from "path";
 import logger from "../../utils/logger";
-import { BlypescriptProgram, type AiLangDiff, BlypescriptInterpreter, BlypescriptToolbox } from "./AiLang";
+import { BlypescriptProgram, type AiLangDiff, BlypescriptInterpreter, BlypescriptToolbox, Result } from "./AiLang";
 import dotenv from "dotenv";
 import { CoreGraphUpdateEvent, CoreGraphUpdateParticipant } from "../../lib/core-graph/CoreGraphInteractors";
-import { BaseError } from "./errors";
 dotenv.config();
 
 export class AiManager {
@@ -37,7 +36,7 @@ export class AiManager {
         },
         {
           role: "system",
-          content: `Interfaces allowed to be used: \n${this.getToolboxInterfaces()}}`,
+          content: `Interfaces allowed to be used: \n${this.getToolboxInterfaces()?.data || ""}}`,
         },
         {
           role: "system",
@@ -83,17 +82,20 @@ export class AiManager {
     const response = BlypescriptToolbox.fromToolbox(this.toolbox);
 
     if (!response.success) {
-      throw new BaseError("Oof, this shouldn't have happened", response.error.cause);
+      // TODO: Handle error here
+      return response;
     }
 
-    return response.data.toString();
+    return {
+      success: true,
+      data: response.data.toString()
+    } satisfies Result;
   }
 
   private getGraphExamples() {
     return readFileSync(join(__dirname.replace("build", "src"), "examples.txt"), "utf8").toString();
   }
 }
-
 abstract class Chat {
   protected readonly apiKey: string;
   protected messages: Message[] = [];
