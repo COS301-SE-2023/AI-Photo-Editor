@@ -21,7 +21,7 @@ const nodes = {
         );
         nodeBuilder.setUI(ui);
 
-        nodeBuilder.addOutput("Number", "res", "Result");
+        nodeBuilder.addOutput("number", "res", "Result");
     },
     "inputImage": (context) => {
         const nodeBuilder = context.instantiate("input-plugin", "inputImage");

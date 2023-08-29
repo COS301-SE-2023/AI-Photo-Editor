@@ -5,7 +5,7 @@
   import { mediaStore } from "../../lib/stores/MediaStore";
   import type { GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
   import { writable, type Readable } from "svelte/store";
-  import type { MediaOutput } from "@shared/types/media";
+  import type { MediaDisplayType, DisplayableMediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
   import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
   import SelectionBox from "../utils/graph/SelectionBox.svelte";
@@ -32,7 +32,7 @@
   });
 
   let selectedNode: { graphUUID: GraphUUID; outNode: GraphNodeUUID } | null;
-  let media: Readable<MediaOutput | null>;
+  let media: Readable<DisplayableMediaOutput | null>;
 
   async function connectNewMedia(oldMediaId: string | null, mediaId: string) {
     if (oldMediaId !== null) {
@@ -64,55 +64,38 @@
     }
   }
 
-  type MediaDisplay = {
-    component: any;
-    props: (data: any) => { [key: string]: any };
-  };
-  const dataTypeToMediaDisplay: { [key: string]: MediaDisplay } = {
-    [""]: {
-      component: TextBox,
-      props: (_data: any) => ({ content: "NO INPUT", status: "warning" }),
-    },
-    Image: {
-      component: Image,
-      props: (data: string) => ({ src: data }),
-    },
-    Number: {
-      component: TextBox,
-      props: (data: number) => ({
-        content: data?.toString() || "NULL",
-        status: data == null ? "warning" : "normal",
-        fontSize: "large",
-      }),
-    },
-    boolean: {
-      component: TextBox,
-      props: (data: number) => ({
-        content: data?.toString() || "NULL",
-        status: data == null ? "warning" : "normal",
-        fontSize: "large",
-      }),
-    },
-    string: {
-      component: TextBox,
-      props: (data: string) => ({ content: data }),
-    },
-    color: {
-      component: ColorDisplay,
-      props: (data: string) => ({ color: data }),
-    },
-    Error: {
-      component: TextBox,
-      props: (data: string) => ({ content: data, status: "error" }),
-    },
-    ["GLFX image"]: {
-      component: WebView,
-      props: (data: string) => ({ media: data }),
-    },
-    ["Pixi image"]: {
-      component: WebView,
-      props: (data: string) => ({ media: data }),
-    },
+  function getDisplayProps(media: DisplayableMediaOutput) {
+    let res = media.display.props;
+    if (media.display.contentProp !== null) res[media.display.contentProp] ??= media.content; // If content nullish, use default value
+    return res;
+  }
+
+  // async function getDisplay(id: TypeclassId) {
+  //   const value = null;
+  //   return await window.apis.typeclassApi.getMediaDisplay(id, value);
+  // }
+
+  // type MediaDisplay = {
+  //   component: any;
+  //   props: (data: any) => { [key: string]: any };
+  // };
+  // const dataTypeToMediaDisplay: { [key: string]: MediaDisplay } = {
+  //   [""]: { component: TextBox, props: (_data: any) => ({ content: "NO INPUT", status: "warning" }), },
+  //   Image: { component: Image, props: (data: string) => ({ src: data }), },
+  //   Number: { component: TextBox, props: (data: number) => ({ content: data?.toString() || "NULL", status: data == null ? "warning" : "normal", fontSize: "large", }),
+  //   }, boolean: { component: TextBox, props: (data: number) => ({ content: data?.toString() || "NULL", status: data == null ? "warning" : "normal", fontSize: "large", }), },
+  //   string: { component: TextBox, props: (data: string) => ({ content: data }), },
+  //   color: { component: ColorDisplay, props: (data: string) => ({ color: data }), },
+  //   Error: { component: TextBox, props: (data: string) => ({ content: data, status: "error" }), },
+  //   ["GLFX image"]: { component: WebView, props: (data: string) => ({ media: data }), },
+  //   ["Pixi image"]: { component: WebView, props: (data: string) => ({ media: data }), },
+  // };
+
+  const displayIdToSvelteConstructor: { [key in MediaDisplayType]: any } = {
+    Image: Image,
+    TextBox: TextBox,
+    ColorDisplay: ColorDisplay,
+    Webview: WebView,
   };
 </script>
 
@@ -153,16 +136,14 @@
 
   <div class="media">
     {#if $media}
-      {@const display = dataTypeToMediaDisplay[$media.dataType]}
-      {#if display}
-        <svelte:component this="{display.component}" {...display.props($media.content)} />
-      {:else}
-        {@const errorDisplay = dataTypeToMediaDisplay["Error"]}
-        <svelte:component
-          this="{errorDisplay.component}"
-          {...errorDisplay.props(`ERROR: Unknown data type: ${JSON.stringify($media)}`)}
-        />
-      {/if}
+      <svelte:component
+        this="{displayIdToSvelteConstructor[$media.display.displayType]}"
+        {...getDisplayProps($media)}
+      />
+      <!-- <TextBox
+          content="ERROR: Unknown data type: ${JSON.stringify($media)}"
+          status="error"
+        /> -->
       <!-- <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" /> -->
     {:else}
       <div class="placeholder">NO CONTENT</div>

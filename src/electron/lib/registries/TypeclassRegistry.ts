@@ -1,14 +1,24 @@
 import type { Registry } from "./Registry";
 import type { ICommand } from "../../../shared/types";
 import { Blix } from "../Blix";
+import {
+  type DisplayableMediaOutput,
+  type MediaDisplayConfig,
+  MediaDisplayType,
+  type MediaOutput,
+} from "../../../shared/types/media";
 
 export type TypeclassId = string;
 export type TypeConverter = (value: any) => any;
+
+type RendererId = `${string}/${string}`;
+type RendererURL = string;
 
 export interface Typeclass {
   id: TypeclassId;
   description: string | null;
   subtypes: TypeclassId[];
+  mediaDisplayConfig: (data: any) => MediaDisplayConfig;
 }
 
 // Maximum depth through which we'll traverse the
@@ -20,6 +30,7 @@ const MAX_SEARCH_DEPTH = 2;
 // string
 
 export class TypeclassRegistry implements Registry {
+  private renderers: { [key: RendererId]: RendererURL } = {};
   // The set of all typeclasses allowed in Blix
   private typeclasses: { [key: TypeclassId]: Typeclass } = {};
   // Implicit conversion functions between typeclasses
@@ -27,32 +38,13 @@ export class TypeclassRegistry implements Registry {
 
   constructor(private readonly blix: Blix) {
     // Add default Blix types
-    this.addInstance({
-      id: "",
-      description: "The `any` type, into which all other types can fit",
-      subtypes: [],
-    });
-    this.addInstance({
-      id: "number",
-      description: "A simple integer or floating point number",
-      subtypes: [],
-    });
-    this.addInstance({ id: "string", description: "A string of characters", subtypes: [] });
-    this.addInstance({ id: "bool", description: "A true/false value", subtypes: [] });
-    this.addInstance({ id: "color", description: "An RGBA hex value", subtypes: [] });
-    this.addInstance({ id: "image", description: "A 2D array of RGBA pixel values", subtypes: [] });
-    this.addInstance({
-      id: "error",
-      description: "An object representing an error state during graph computation",
-      subtypes: [],
+    baseTypes.forEach((baseType) => {
+      this.addInstance(baseType);
     });
 
-    // Add default converters
-    this.addConverter("number", "string", (value: number) => value.toString());
-    this.addConverter("string", "number", (value: string) => parseFloat(value));
-    this.addConverter("bool", "string", (value: boolean) => (value ? "true" : "false"));
-    this.addConverter("string", "bool", (value: string) => value.toLowerCase() === "true");
-    this.addConverter("number", "bool", (value: number) => value !== 0);
+    baseConverters.forEach((baseConverter) => {
+      this.addConverter(...baseConverter);
+    });
   }
 
   addInstance(instance: Typeclass): void {
@@ -124,4 +116,131 @@ export class TypeclassRegistry implements Registry {
     // }
     return commands;
   }
+
+  getDisplayableMedia(value: MediaOutput): DisplayableMediaOutput {
+    // Get display config
+    const typeclass = this.typeclasses[value.dataType];
+    if (!typeclass) {
+      // Invalid typeclass
+      const stringifiedContent = JSON.stringify(value.content);
+      return {
+        ...value,
+        display: {
+          displayType: MediaDisplayType.TextBox,
+          props: {
+            content: `INVALID TYPE: ${value.dataType}\nCONTENT: ${stringifiedContent}`,
+            status: "error",
+          },
+          contentProp: null,
+        },
+      } as DisplayableMediaOutput;
+    }
+
+    const display = typeclass.mediaDisplayConfig(value.content);
+    return {
+      ...value,
+      display,
+    };
+  }
 }
+
+const baseTypes: Typeclass[] = [
+  {
+    id: "",
+    description: "The `any` type, into which all other types can fit",
+    subtypes: [],
+    mediaDisplayConfig: (_data: any) => ({
+      displayType: MediaDisplayType.TextBox,
+      props: {
+        content: "NO INPUT",
+        status: "warning",
+      },
+      contentProp: "content",
+    }),
+  },
+  {
+    id: "number",
+    description: "A simple integer or floating point number",
+    subtypes: [],
+    mediaDisplayConfig: (data: number) => ({
+      displayType: MediaDisplayType.TextBox,
+      props: {
+        content: data?.toString() || "NULL",
+        status: data == null ? "warning" : "normal",
+        fontSize: "large",
+      },
+      contentProp: "content",
+    }),
+  },
+  {
+    id: "string",
+    description: "A string of characters",
+    subtypes: [],
+    mediaDisplayConfig: (data: string) => ({
+      displayType: MediaDisplayType.TextBox,
+      props: {
+        content: data,
+      },
+      contentProp: "content",
+    }),
+  },
+  {
+    id: "bool",
+    description: "A true/false value",
+    subtypes: [],
+    mediaDisplayConfig: (data: number) => ({
+      displayType: MediaDisplayType.TextBox,
+      props: {
+        content: data?.toString() || "NULL",
+        status: data == null ? "warning" : "normal",
+        fontSize: "large",
+      },
+      contentProp: "content",
+    }),
+  },
+  {
+    id: "color",
+    description: "An RGBA hex value",
+    subtypes: [],
+    mediaDisplayConfig: (data: string) => ({
+      displayType: MediaDisplayType.ColorDisplay,
+      props: {
+        color: data,
+      },
+      contentProp: "color",
+    }),
+  },
+  {
+    id: "image",
+    description: "A 2D array of RGBA pixel values",
+    subtypes: [],
+    mediaDisplayConfig: (data: string) => ({
+      displayType: MediaDisplayType.Image,
+      props: {
+        src: data,
+      },
+      contentProp: "src",
+    }),
+  },
+  {
+    id: "error",
+    description: "An object representing an error state during graph computation",
+    subtypes: [],
+    mediaDisplayConfig: (data: string) => ({
+      displayType: MediaDisplayType.TextBox,
+      props: {
+        content: data,
+        status: "error",
+      },
+      contentProp: "content",
+    }),
+  },
+];
+
+const baseConverters: [TypeclassId, TypeclassId, TypeConverter][] = [
+  ["number", "string", (value: number) => value.toString()],
+  ["string", "number", (value: string) => parseFloat(value)],
+  ["bool", "string", (value: boolean) => (value ? "true" : "false")],
+  ["string", "bool", (value: string) => value.toLowerCase() === "true"],
+  ["number", "bool", (value: number) => value !== 0],
+];

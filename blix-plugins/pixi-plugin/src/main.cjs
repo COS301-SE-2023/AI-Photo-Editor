@@ -109,14 +109,14 @@ const nodes = {
 
         nodeBuilder.setUI(ui);
         nodeBuilder.addInput("Pixi image", "img", "GLFX Image");
-        nodeBuilder.addInput("Number", "number", "Number");
+        nodeBuilder.addInput("number", "number", "number");
         nodeBuilder.addOutput("GLFX image", "res", "Result");
     }
 };
 const commands = {};
 const tiles = {};
 
-const types = {
+const typeclasses = {
 };
 
 module.exports = {

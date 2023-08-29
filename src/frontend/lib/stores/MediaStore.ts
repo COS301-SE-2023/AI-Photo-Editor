@@ -1,17 +1,16 @@
-import type { MediaOutput, MediaOutputId } from "@shared/types/media";
-import { derived, get, writable } from "svelte/store";
-import { graphMall } from "./GraphStore";
+import type { DisplayableMediaOutput, MediaOutputId } from "@shared/types/media";
+import { derived, writable } from "svelte/store";
 import { commandStore } from "./CommandStore";
 
 type MediaOutputs = {
-  [key: MediaOutputId]: MediaOutput;
+  [key: MediaOutputId]: DisplayableMediaOutput;
 };
 
 class MediaStore {
   private store = writable<MediaOutputs>({});
   private outputIds = writable<Set<MediaOutputId>>();
 
-  public refreshStore(media: MediaOutput) {
+  public refreshStore(media: DisplayableMediaOutput) {
     // Refresh media store
     this.store.update((mediaOutputs) => {
       mediaOutputs[media.outputId] = media;
@@ -49,7 +48,7 @@ class MediaStore {
     });
   }
 
-  public async exportMedia(output: MediaOutput) {
+  public async exportMedia(output: DisplayableMediaOutput) {
     return await commandStore.runCommand("blix.exportMedia", {
       type: output.dataType,
       data: output.content as string,

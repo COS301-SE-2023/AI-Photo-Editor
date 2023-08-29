@@ -6,6 +6,7 @@ import type { Command } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
 import { join } from "path";
+import { MediaDisplayType } from "../../../shared/types/media";
 export type PluginSignature = string;
 
 export class Plugin {
@@ -96,6 +97,28 @@ export class Plugin {
           blix.tileRegistry.addInstance(
             pluginModule.tiles[tile](new TilePluginContext()) as TileInstance
           );
+        }
+      }
+
+      if ("typeclasses" in pluginModule && typeof pluginModule.typeclasses === "object") {
+        // Add typeclass to registry
+        for (const typeclass in pluginModule.typeclasses) {
+          if (!pluginModule.typeclasses.hasOwnProperty(typeclass)) continue;
+
+          // TODO: Add error response when failed to add typeclass
+          // blix.typeclassRegistry.addInstance({
+          //   id: "",
+          //   description: "The `any` type, into which all other types can fit",
+          //   subtypes: [],
+          //   mediaDisplayConfig: (_data: any) => ({
+          //     displayType: MediaDisplayType.TextBox,
+          //     props: {
+          //       content: "NO INPUT",
+          //       status: "warning",
+          //     },
+          //     contentProp: "content",
+          //   }),
+          // });
         }
       }
 

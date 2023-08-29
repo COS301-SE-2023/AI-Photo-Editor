@@ -127,7 +127,11 @@ export class Blix {
     this._graphManager = new CoreGraphManager(this._toolboxRegistry, mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
 
-    this._mediaManager = new MediaManager(mainWindow, this._graphInterpreter, this._graphManager);
+    this._mediaManager = new MediaManager(
+      this._typeclassRegistry,
+      this._graphInterpreter,
+      this._graphManager
+    );
 
     this.initSubscribers();
     this._isReady = true;

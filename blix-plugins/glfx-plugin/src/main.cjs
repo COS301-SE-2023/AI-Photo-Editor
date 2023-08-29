@@ -47,7 +47,7 @@ function createGLFXNode(type, title, desc, params) {
         nodeBuilder.setUI(ui);
         nodeBuilder.addInput("GLFX image", "img", "GLFX Image");
         for (let param of params) {
-            nodeBuilder.addInput("Number", type, toTitleCase(param.id));
+            nodeBuilder.addInput("number", type, toTitleCase(param.id));
         }
         nodeBuilder.addOutput("GLFX image", "res", "Result");
     };
@@ -137,8 +137,8 @@ const types = {
 
         // Define implicit returns
         typeBuidler.setLifts({
-            // Number -> GLFX<Number>
-            "Number": (value) => {},
+            // number -> GLFX<number>
+            "number": (value) => {},
             // string -> GLFX<string>
             "string": (value) => {}
         });
