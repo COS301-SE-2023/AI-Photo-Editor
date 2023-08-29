@@ -7,6 +7,7 @@ import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 import { CoreGraphInterpreter } from "./core-graph/CoreGraphInterpreter";
 import { PluginManager } from "./plugins/PluginManager";
+import { CacheManager } from "./cache/CacheManager";
 import {
   CoreGraphUpdateEvent,
   IPCGraphSubscriber,
@@ -36,6 +37,7 @@ export class Blix {
   private _commandRegistry: CommandRegistry;
   private _typeclassRegistry: TypeclassRegistry;
   private _graphManager!: CoreGraphManager;
+  private _cacheManager!: CacheManager;
   private _projectManager!: ProjectManager;
   private _pluginManager!: PluginManager;
   private _mainWindow!: MainWindow;
@@ -55,6 +57,7 @@ export class Blix {
     this._commandRegistry = new CommandRegistry(this);
     this._typeclassRegistry = new TypeclassRegistry(this);
     this._tileRegistry = new TileRegistry();
+    this._cacheManager = new CacheManager();
   }
 
   /**

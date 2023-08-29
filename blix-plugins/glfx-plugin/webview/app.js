@@ -22,4 +22,6 @@ window.addEventListener("DOMContentLoaded", () => {
 		// To send a message back
 		// window.api.send("backTestMessage", "Hello from app.js");
     });
+
+	window.cache.write("123", new Blob([]));
 });

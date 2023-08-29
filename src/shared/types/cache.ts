@@ -22,3 +22,9 @@ export type CacheObject = {
   data: Blob;
   metadata: any;
 };
+
+export type CacheRequest = {
+  type: string;
+  id: string;
+  content: Blob;
+};

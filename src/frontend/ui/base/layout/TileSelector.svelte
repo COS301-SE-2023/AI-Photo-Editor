@@ -29,6 +29,7 @@
   tileIcons["promptBox"] = faTerminal;
   tileIcons["shortcutSettings"] = faKeyboard;
   tileIcons["debug"] = faCode;
+  tileIcons["assets"] = faImage;
 </script>
 
 <div class="tileSel" on:click="{() => (open = !open)}" on:keypress="{null}">

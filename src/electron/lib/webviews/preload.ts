@@ -2,6 +2,8 @@
 // It exposes some IPC functions so the webview can communicate with its parent renderer.
 const { ipcRenderer, contextBridge } = require("electron");
 
+const ws = new WebSocket("ws://localhost:60606");
+
 contextBridge.exposeInMainWorld("api", {
   send: (channel: string, data: any) => {
     ipcRenderer.sendToHost(channel, data);
@@ -13,12 +15,27 @@ contextBridge.exposeInMainWorld("api", {
 
 contextBridge.exposeInMainWorld("cache", {
   write: (id: string, content: Blob) => {
-    ipcRenderer.sendToHost("cache-write", { id, content });
+    ws.send(
+      JSON.stringify({
+        type: "cache-write",
+        id,
+        content,
+      })
+    );
+    // ipcRenderer.sendToHost("cache-write", { id, content });
   },
   get: (id: string) => {
-    ipcRenderer.sendToHost("cache-get", { id });
+    ws.send(
+      JSON.stringify({
+        type: "cache-get",
+      })
+    );
   },
   delete: (id: string) => {
-    ipcRenderer.sendToHost("cache-delete", { id });
+    ws.send(
+      JSON.stringify({
+        type: "cache-delete",
+      })
+    );
   },
 });

@@ -1,13 +1,13 @@
 import type { SubsidiaryUUID, CacheUUID, CacheObject } from "@shared/types/cache";
-import { derived, get, writable } from "svelte/store";
+// import { derived, get, writable } from "svelte/store";
 
 type CacheObjects = {
   [key: CacheUUID]: CacheObject;
 };
 
 class CacheStore {
-  private cacheStore = writable<CacheObjects>({});
-  private globalCache: { [key: CacheUUID]: SubsidiaryUUID } = {};
+  // private cacheStore = writable<CacheObjects>({});
+  // private globalCache: { [key: CacheUUID]: SubsidiaryUUID } = {};
 
   constructor() {
     const ws = new WebSocket("ws://127.0.0.1:69420");

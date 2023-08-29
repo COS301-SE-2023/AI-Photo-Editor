@@ -4,7 +4,7 @@
 
   let webview: Electron.WebviewTag | null = null;
 
-  let src = "file:///home/rec1dite/code/301/capstone/blix-plugins/pixi-plugin/src/index.html";
+  let src = "file:///home/klairgo/Desktop/AI-Photo-Editor/blix-plugins/glfx-plugin/src/index.html";
 
   export let media: unknown;
 
