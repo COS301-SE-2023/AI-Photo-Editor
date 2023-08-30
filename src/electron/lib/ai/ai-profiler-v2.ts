@@ -13,10 +13,11 @@ import {
   CoreGraphExporter,
 } from "../../lib/core-graph/CoreGraphExporter";
 import { BlypescriptProgram, BlypescriptToolbox, colorString } from "./AiLang";
-import { AiManager, Message } from "./AiManagerv2";
+import { AiManager } from "./AiManagerv2";
 import { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
 import readline from "readline";
 import { NodeUI, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
+import { Message } from "./Chat";
 
 class Profiler {
   private toolboxRegistry!: ToolboxRegistry;
@@ -82,12 +83,18 @@ class Profiler {
         continue;
       }
 
-      const response = await this.aiManager.sendPrompt(prompt, coreGraph.uuid, messages);
+      const response = await this.aiManager.executePrompt({
+        prompt,
+        graphId: coreGraph.uuid,
+        messages,
+        model: "GPT-3.5",
+        apiKey: process.env.OPENAI_API_KEY || "",
+      });
 
-      if (response) {
-        messages = response.messages;
+      if (response.success) {
+        messages = response.data.messages;
         messages[messages.length - 1].content = coreGraphExporter.exportGraph(coreGraph).toString();
-        console.log(response.usage);
+        // console.log(response.usage);
       }
     }
   }
@@ -204,7 +211,6 @@ class Profiler {
     outputNodeBuilder.setUI(outputUIBuilder);
     return outputNodeBuilder.build;
   }
-
 }
 
 const profiler = new Profiler();

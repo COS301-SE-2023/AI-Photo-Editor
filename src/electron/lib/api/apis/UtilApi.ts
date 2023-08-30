@@ -29,18 +29,32 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     };
   }
 
-  async sendPrompt(prompt: string, id: UUID) {
+  async sendPrompt(prompt: string, id: UUID): Promise<QueryResponse> {
     if (this.blix.graphManager.getGraph(id)) {
-      const res = await this.blix.aiManager.sendPrompt(prompt, id);
+      // const res = await this.blix.aiManager.sendPrompt(prompt, id);
+      const response = await this.blix.aiManager.executePrompt({
+        prompt,
+        graphId: id,
+        model: "GPT-3.5",
+        apiKey: getSecret("OPENAI_API_KEY"),
+      });
+
+      if (!response.success) {
+        return {
+          status: "error",
+          message: response.message,
+        };
+      }
+
       return {
         status: "success",
-        message: "Executed successfully"
-      } satisfies QueryResponse;
+        message: "Executed successfully",
+      };
     } else {
       return {
         status: "error",
-        message: "No graph selected"
-      } satisfies QueryResponse;
+        message: "No graph selected",
+      };
     }
   }
 

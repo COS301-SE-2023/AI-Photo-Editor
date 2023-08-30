@@ -1,7 +1,6 @@
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
 import type { MainWindow } from "../api/apis/WindowApi";
-import OpenAi from "openai";
 import {
   BlypescriptExportStrategy,
   CoreGraphExporter,
@@ -14,28 +13,45 @@ import {
   type AiLangDiff,
   BlypescriptInterpreter,
   BlypescriptToolbox,
+  type Result,
 } from "./AiLang";
-import type { Result } from "./AiLang";
-import dotenv from "dotenv";
 import {
   CoreGraphUpdateEvent,
   CoreGraphUpdateParticipant,
 } from "../../lib/core-graph/CoreGraphInteractors";
-dotenv.config();
+import { type Message, type Chat, OpenAiChat } from "./Chat";
+
+type PromptOptions = {
+  prompt: string;
+  graphId: string;
+  messages?: Message[];
+  model: "GPT-3.5" | "GPT-4";
+  apiKey: string;
+  chatId?: string;
+};
+
+export const genericErrorResponse = "Oops, that wasn't supposed to happen🫠. Try again.";
 
 export class AiManager {
+  private readonly graphExporter: CoreGraphExporter<BlypescriptProgram>;
+  private readonly blypescriptInterpreter: BlypescriptInterpreter;
+  private readonly chats: Chat[] = [];
+
   constructor(
     private readonly toolbox: ToolboxRegistry,
     private readonly graphManager: CoreGraphManager,
     private readonly mainWindow?: MainWindow
-  ) {}
+  ) {
+    this.graphExporter = new CoreGraphExporter(new BlypescriptExportStrategy(toolbox));
+    this.blypescriptInterpreter = new BlypescriptInterpreter(toolbox, graphManager);
+  }
 
-  async sendPrompt(prompt: string, graphId: string, messages?: Message[]) {
-    const exporter = new CoreGraphExporter(new BlypescriptExportStrategy(this.toolbox));
-    const blypescriptProgram = exporter.exportGraph(this.graphManager.getGraph(graphId));
-    const chat = new OpenAiChat(process.env.OPENAI_API_KEY || "", {
-      model: "gpt-3.5-turbo-0613",
-    });
+  async executePrompt({ prompt, graphId, messages, model, apiKey, chatId }: PromptOptions) {
+    const chat: Chat = this.chats.find((chat) => chat.id)
+      ? this.chats.find((chat) => chat.id)!
+      : new OpenAiChat(apiKey, { model: "gpt-3.5-turbo-0613" });
+
+    const blypescriptProgram = this.graphExporter.exportGraph(this.graphManager.getGraph(graphId));
 
     if (!messages) {
       messages = [
@@ -58,33 +74,41 @@ export class AiManager {
       ];
     }
 
-    // loop starts here
-    const iterationLimit = 5;
-    for (let i = 0; i < iterationLimit; i++) {
-      const response = await chat.runPrompt(prompt, messages);
+    chat.addMessages(messages);
+    chat.addMessage({ role: "user", content: prompt });
 
-      if (!response) return;
+    while (chat.iteration < chat.iterationLimit) {
+      const response = await chat.run();
+
+      if (!response.success) {
+        return {
+          success: false,
+          error: response.code,
+          message: response.message,
+        } satisfies Result;
+      }
 
       const result = BlypescriptProgram.fromString(response.lastResponse);
 
       if (!result.success) {
-        logger.warn(result.error);
-        // chat.addMessage(result.message)
+        chat.addMessage({ role: "blix", content: result.message });
         continue; // retry if failure
       }
 
       const newBlypescriptProgram = result.data;
 
-      let interpreter: BlypescriptInterpreter;
-
       try {
         // cant return Result interface in constructor, this function will only break if we are bozo anyway
-        interpreter = new BlypescriptInterpreter(this.toolbox, this.graphManager);
-        const result = interpreter.run(graphId, blypescriptProgram, newBlypescriptProgram, true);
+        const result = this.blypescriptInterpreter.run(
+          graphId,
+          blypescriptProgram,
+          newBlypescriptProgram,
+          true
+        );
 
         if (!result.success) {
           logger.warn(result.error);
-          // chat.addMessage(result.message);
+          chat.addMessage({ role: "blix", content: result.message });
           continue; // retry if failure
         }
 
@@ -93,15 +117,29 @@ export class AiManager {
           new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
           CoreGraphUpdateParticipant.ai
         );
-        return response;
-      } catch (error) {
-        // constructor failed
-        logger.warn(error);
-        return;
-      }
-    } // loop ends
 
-    return;
+        return {
+          success: true,
+          data: {
+            messages: chat.getMessages(),
+          },
+        } satisfies Result;
+      } catch (error) {
+        logger.warn(error);
+
+        return {
+          success: false,
+          error: "Something very bad went wrong",
+          message: error instanceof Error ? error.message : "Some unknown error occurred.",
+        } satisfies Result;
+      }
+    }
+
+    return {
+      success: false,
+      error: "Chat iteration limit reached",
+      message: genericErrorResponse,
+    } satisfies Result;
   }
 
   private getGuidePrompt() {
@@ -134,129 +172,3 @@ export class AiManager {
     return readFileSync(join(__dirname.replace("build", "src"), "examples.txt"), "utf8").toString();
   }
 }
-abstract class Chat {
-  protected readonly apiKey: string;
-  protected messages: Message[] = [];
-  protected iterationLimit = 10;
-  protected iteration = 0;
-
-  constructor(apiKey = "") {
-    this.apiKey = apiKey;
-  }
-
-  public abstract run(prompt?: string): Promise<ChatResponse>;
-
-  public appendMessage(message: Message) {
-    this.messages.push(message);
-  }
-
-  public appendMessages(messages: Message[]) {
-    this.messages.push(...messages);
-  }
-}
-
-export type Message = {
-  role: "system" | "user" | "assistant" | "blix";
-  content: string;
-};
-
-export type ChatResponse =
-  | {
-      success: true;
-      content: string;
-    }
-  | {
-      success: false;
-      message: string;
-      code: "invalid_api_key" | "no_internet_connection";
-    };
-
-type OpenAIChatConfig = {
-  model?:
-    | "gpt-4"
-    | "gpt-4-0613"
-    | "gpt-4-32k"
-    | "gpt-4-32k-0613"
-    | "gpt-3.5-turbo"
-    | "gpt-3.5-turbo-0613"
-    | "gpt-3.5-turbo-16k"
-    | "gpt-3.5-turbo-16k-0613";
-  temperature?: number;
-};
-
-class OpenAiChat extends Chat {
-  private openai: OpenAi;
-  private chatConfig!: Required<OpenAIChatConfig>;
-
-  constructor(apiKey: string, chatConfig?: OpenAIChatConfig) {
-    super(apiKey);
-
-    this.openai = new OpenAi({
-      apiKey,
-    });
-
-    this.setChatConfig(chatConfig);
-  }
-
-  public async run(prompt?: string) {
-    this.messages = [...(messages ? messages : []), { role: "user", content: prompt }];
-    const response = await this.runChatCompletion();
-
-    if (!response) return "";
-
-    const lastResponse = response.choices[response.choices.length - 1].message?.content || "";
-    this.messages.push({ role: "assistant", content: lastResponse });
-
-    return {
-      lastResponse,
-      messages: this.messages,
-      usage: response.usage,
-    };
-  }
-
-  public setChatConfig(chatConfig?: OpenAIChatConfig) {
-    const chatConfigDefaults = {
-      model: "gpt-3.5-turbo-0613",
-      temperature: 0,
-    } satisfies OpenAIChatConfig;
-
-    this.chatConfig = {
-      model: chatConfig?.model || chatConfigDefaults.model,
-      temperature: chatConfig?.temperature || chatConfigDefaults.temperature,
-    };
-  }
-
-  private async runChatCompletion() {
-    const messages = this.messages.map((msg) => ({
-      ...msg,
-      role: msg.role === "blix" ? "user" : msg.role,
-    }));
-    const { model, temperature } = this.chatConfig;
-    // TODO: Add some safety checks for request and response
-
-    try {
-      const response = await this.openai.chat.completions.create({
-        model,
-        temperature,
-        messages,
-      });
-      return response;
-    } catch (error) {
-      if (error instanceof OpenAi.APIError) {
-        logger.error(error.status);
-        logger.error(error.message);
-        logger.error(error.code);
-        logger.error(error.type);
-      } else {
-        logger.error(error.message);
-      }
-      return null;
-    }
-  }
-}
-
-// type Prettify<T> = {
-//   [K in keyof T]: T[K];
-// } & {};
-
-// type test = Prettify<ChatCompletionRequestMessage>;
