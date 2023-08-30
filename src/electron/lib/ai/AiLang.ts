@@ -191,7 +191,7 @@ export class BlypescriptInterpreter {
     oldProgram: BlypescriptProgram,
     newProgram: BlypescriptProgram,
     verbose = false
-  ) {
+  ): Result<null, null> {
     const graph = this.graphManager.getGraph(graphId);
     const { added, removed, changed } = oldProgram.diff(newProgram);
     newProgram.addNodeIds(oldProgram);
@@ -212,6 +212,8 @@ export class BlypescriptInterpreter {
       graph.removeNode(nodeId!);
     });
 
+    let result: Result<null, null>;
+    result = { success: true, data: null };
     // Add nodes
     added.forEach((statement) => {
       const nodeInstance = this.toolbox.getNodeInstance(statement.nodeSignature);
@@ -224,11 +226,18 @@ export class BlypescriptInterpreter {
       const response = graph.addNode(nodeInstance, { x: 0, y: 0 });
 
       if (response.status === "error" || !response.data) {
-        throw Error("Error while adding node to graph");
+        result = {
+          success: false,
+          error: "Error while adding node to graph",
+          message: response.message,
+        };
+        return;
       }
 
       newProgram.nodeNameIdMap.set(statement.name, response.data.nodeId);
     });
+
+    if (!result.success) return result;
 
     // Change edges and ui inputs
     // Optimizations can be made to treat added edges and changed edges differently
@@ -237,12 +246,22 @@ export class BlypescriptInterpreter {
       const node = graph.getNodes[nodeId || ""];
 
       if (!node) {
-        throw Error("Node id not defined in changed statements");
+        result = {
+          success: false,
+          error: "Node id not defined in changed statements",
+          message: "Node not found in graph",
+        };
+        return;
       }
 
-      this.changeEdges(node, graph, statement, newProgram);
-      this.changeUiInputs(node, graph, statement);
+      result = this.changeEdges(node, graph, statement, newProgram); // will return success = false if something went wrong
+      if (!result.success) return;
+
+      result = this.changeUiInputs(node, graph, statement); // will return success = false if something went wrong
+      return;
     });
+
+    return result; // will return success = true if everything went well
   }
 
   // Improve so that it checks if edge should actually be changed
@@ -251,11 +270,17 @@ export class BlypescriptInterpreter {
     graph: CoreGraph,
     statement: AiLangStatement,
     program: BlypescriptProgram
-  ) {
+  ): Result<null, null> {
     const blypescriptNode = this.blypescriptToolbox.getNode(statement.nodeSignature);
+    let result: Result<null, null>;
+    result = { success: true, data: null };
 
     if (!blypescriptNode) {
-      throw Error("Node instance not found when changing edges");
+      return {
+        success: false,
+        error: "Node instance not found when changing edges",
+        message: "Node not found in toolbox when changing edges",
+      };
     }
 
     const nodeInputAnchorIds = blypescriptNode.nodeInputs
@@ -273,8 +298,17 @@ export class BlypescriptInterpreter {
         //   edge.getAnchorTo,
         //   CoreGraphUpdateParticipant.ai
         // );
-        graph.removeEdge(edge.getAnchorTo);
+        const response = graph.removeEdge(edge.getAnchorTo);
         // TODO: Handle response
+        // Not sure if should end function here or continue
+        if (response.status === "error") {
+          result = {
+            success: false,
+            error: "Error removing edge from graph",
+            message: response.message,
+          };
+          return;
+        }
       }
 
       if (anchorInput === "null") {
@@ -284,20 +318,35 @@ export class BlypescriptInterpreter {
       const match = anchorInput.match(/^(.*)\['(.*)'\]$/);
 
       if (!match) {
-        throw Error("Could not match anchor parameters when changing edges");
+        result = {
+          success: false,
+          error: "Error matching anchor parameters when changing edges",
+          message: "Could not match anchor parameters when changing edges",
+        };
+        return;
       }
 
       const [_, outputNodeId, outputNodeAnchorId] = match;
 
       if (!outputNodeId || !outputNodeAnchorId) {
         // Prolly means language model added primitive instead of connecting input edge
-        throw Error("Could not match anchor parameters when changing edges");
+        result = {
+          success: false,
+          error: "Error matching anchor parameters when changing edges",
+          message: "Could not match anchor parameters when changing edges",
+        };
+        return;
       }
 
       const fromNodeUuid = program.nodeNameIdMap.get(outputNodeId);
 
       if (!fromNodeUuid) {
-        throw Error("Error retrieving output node id from program map");
+        result = {
+          success: false,
+          error: "Error retrieving output node id from program map",
+          message: "Could not retrieve output node id from program map",
+        };
+        return;
       }
 
       const fromNode = graph.getNodes[fromNodeUuid];
@@ -335,14 +384,23 @@ export class BlypescriptInterpreter {
 
     // logger.warn(graph.getUIInputs(node.uuid));
     // logger.warn()
+    return result;
   }
 
-  private changeUiInputs(node: Node, graph: CoreGraph, statement: AiLangStatement) {
+  private changeUiInputs(
+    node: Node,
+    graph: CoreGraph,
+    statement: AiLangStatement
+  ): Result<null, null> {
     const blypescriptNode = this.blypescriptToolbox.getNode(statement.nodeSignature);
     const uiInputs = graph.getUIInputs(node.uuid);
 
     if (!uiInputs || !blypescriptNode) {
-      throw Error("Error finding node ui inputs");
+      return {
+        success: false,
+        error: "Error finding node ui inputs",
+        message: "Missing input arguments",
+      };
     }
 
     const uiInputIds = blypescriptNode.uiInputs
@@ -371,6 +429,7 @@ export class BlypescriptInterpreter {
     //   CoreGraphUpdateParticipant.ai
     // );
     graph.updateUIInputs(node.uuid, newNodeUiInputs);
+    return { success: true, data: null };
   }
 
   private mapAnchorIdsToUuids(node: Node) {

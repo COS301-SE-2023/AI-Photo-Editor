@@ -58,28 +58,50 @@ export class AiManager {
       ];
     }
 
-    const response = await chat.runPrompt(prompt, messages);
+    // loop starts here
+    const iterationLimit = 5;
+    for (let i = 0; i < iterationLimit; i++) {
+      const response = await chat.runPrompt(prompt, messages);
 
-    if (!response) return;
+      if (!response) return;
 
-    const result = BlypescriptProgram.fromString(response.lastResponse);
+      const result = BlypescriptProgram.fromString(response.lastResponse);
 
-    if (!result.success) {
-      logger.warn(result.error);
-      // Maybe this is where we add the loop?
-      return;
-    }
+      if (!result.success) {
+        logger.warn(result.error);
+        // chat.addMessage(result.message)
+        continue; // retry if failure
+      }
 
-    const newBlypescriptProgram = result.data;
+      const newBlypescriptProgram = result.data;
 
-    const interpreter = new BlypescriptInterpreter(this.toolbox, this.graphManager);
-    interpreter.run(graphId, blypescriptProgram, newBlypescriptProgram, true);
-    this.graphManager.onGraphUpdated(
-      graphId,
-      new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
-      CoreGraphUpdateParticipant.ai
-    );
-    return response;
+      let interpreter: BlypescriptInterpreter;
+
+      try {
+        // cant return Result interface in constructor, this function will only break if we are bozo anyway
+        interpreter = new BlypescriptInterpreter(this.toolbox, this.graphManager);
+        const result = interpreter.run(graphId, blypescriptProgram, newBlypescriptProgram, true);
+
+        if (!result.success) {
+          logger.warn(result.error);
+          // chat.addMessage(result.message);
+          continue; // retry if failure
+        }
+
+        this.graphManager.onGraphUpdated(
+          graphId,
+          new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
+          CoreGraphUpdateParticipant.ai
+        );
+        return response;
+      } catch (error) {
+        // constructor failed
+        logger.warn(error);
+        return;
+      }
+    } // loop ends
+
+    return;
   }
 
   private getGuidePrompt() {
