@@ -83,6 +83,12 @@
 
   // If the item/category index is out of bounds, remap it back to a valid value
   function repairItemIndex(): void {
+    if (categories.length == 0) {
+      selectedCategory = 0;
+      selectedItem = 0;
+      return;
+    }
+
     // True modulo operator which wraps negatives back to [0, m]
     const trueMod = (n: number, m: number) => {
       return ((n % m) + m) % m;
@@ -155,8 +161,10 @@
     },
     "blix.palette.selectItem": () => {
       // Default enter
-      const item = categories[selectedCategory].items[selectedItem];
-      handleAction(item);
+      const item = categories[selectedCategory]?.items[selectedItem];
+      if (item) {
+        handleAction(item);
+      }
     },
     "blix.palette.prompt": async () => {
       if (searchTerm.trim() === "") {
