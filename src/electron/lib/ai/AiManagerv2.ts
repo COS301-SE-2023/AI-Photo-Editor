@@ -1,7 +1,7 @@
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
 import type { MainWindow } from "../api/apis/WindowApi";
-import { Configuration, OpenAIApi } from "openai";
+import OpenAi from "openai";
 import {
   BlypescriptExportStrategy,
   CoreGraphExporter,
@@ -138,10 +138,13 @@ abstract class Chat {
   protected readonly apiKey: string;
   protected messages: Message[] = [];
   protected iterationLimit = 10;
+  protected iteration = 0;
 
   constructor(apiKey = "") {
     this.apiKey = apiKey;
   }
+
+  public abstract run(prompt?: string): Promise<ChatResponse>;
 
   public appendMessage(message: Message) {
     this.messages.push(message);
@@ -157,6 +160,17 @@ export type Message = {
   content: string;
 };
 
+export type ChatResponse =
+  | {
+      success: true;
+      content: string;
+    }
+  | {
+      success: false;
+      message: string;
+      code: "invalid_api_key" | "no_internet_connection";
+    };
+
 type OpenAIChatConfig = {
   model?:
     | "gpt-4"
@@ -171,22 +185,20 @@ type OpenAIChatConfig = {
 };
 
 class OpenAiChat extends Chat {
-  private config: Configuration;
-  private openai: OpenAIApi;
+  private openai: OpenAi;
   private chatConfig!: Required<OpenAIChatConfig>;
 
   constructor(apiKey: string, chatConfig?: OpenAIChatConfig) {
     super(apiKey);
 
-    this.config = new Configuration({
+    this.openai = new OpenAi({
       apiKey,
     });
-    this.openai = new OpenAIApi(this.config);
 
     this.setChatConfig(chatConfig);
   }
 
-  public async runPrompt(prompt: string, messages?: Message[]) {
+  public async run(prompt?: string) {
     this.messages = [...(messages ? messages : []), { role: "user", content: prompt }];
     const response = await this.runChatCompletion();
 
@@ -221,22 +233,21 @@ class OpenAiChat extends Chat {
     }));
     const { model, temperature } = this.chatConfig;
     // TODO: Add some safety checks for request and response
+
     try {
-      const response = await this.openai.createChatCompletion({
+      const response = await this.openai.chat.completions.create({
         model,
         temperature,
         messages,
       });
-      return response.data;
+      return response;
     } catch (error) {
-      // @ts-ignore
-      if (error.response) {
-        // @ts-ignore
-        logger.error(error.response.status);
-        // @ts-ignore
-        logger.error(error.response.data);
+      if (error instanceof OpenAi.APIError) {
+        logger.error(error.status);
+        logger.error(error.message);
+        logger.error(error.code);
+        logger.error(error.type);
       } else {
-        // @ts-ignore
         logger.error(error.message);
       }
       return null;
