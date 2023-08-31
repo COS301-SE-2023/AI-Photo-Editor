@@ -155,7 +155,7 @@
   "build": {
     "productName": "Blix",
     "appId": "com.the-spanish-inquisition.blix",
-    "copyright": "Copyright © 2023 The Spanish Inquisition",
+    "copyright": "Copyright © 2023 Blix",
     "win": {
       "target": [
         "nsis"
