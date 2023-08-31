@@ -1,7 +1,7 @@
 {
   "name": "blix",
   "description": "Blix - A cross-platform AI-assisted graph photo editor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor"
@@ -162,18 +162,13 @@
       ]
     },
     "mac": {
-      "target": [
-        "dmg"
-      ],
+      "target": ["dmg"],
       "category": "productivity",
       "type": "distribution",
       "hardenedRuntime": "true"
     },
     "linux": {
-      "target": [
-        "AppImage",
-        "snap"
-      ],
+      "target": ["AppImage"],
       "category": "productivity"
     },
     "files": [
@@ -195,8 +190,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "COS301-SE-2023",
-        "repo": "AI-Photo-Editor"
+        "owner": "ArmandKrynauw",
+        "repo": "Blix"
       }
     ]
   }
