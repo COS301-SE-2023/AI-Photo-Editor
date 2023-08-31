@@ -119,7 +119,6 @@ test("Adding a node to a graph", () => {
     const uuid = (response.data! as { nodeId: UUID }).nodeId;
     expect(uuid).toBe(graph.getNodes[uuid].uuid);
     const node2 = graph.getNodes[uuid];
-    expect(node2.getStyling).toBeUndefined();
     expect(node2.getName).toBe("Node-1");
     expect(node2.getPlugin).toBe("Test-Plugin");
 });

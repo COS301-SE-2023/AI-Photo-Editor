@@ -14,6 +14,14 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
     this._blix = blix;
   }
 
+  async undoChange(graph: UUID) {
+    return this._blix.graphManager.undoEvent(graph);
+  }
+
+  async redoChange(graph: UUID) {
+    return this._blix.graphManager.redoEvent(graph);
+  }
+
   async deleteGraphs(graphUUIDs: UUID[]) {
     this._blix.graphManager.deleteGraphs(graphUUIDs);
   }

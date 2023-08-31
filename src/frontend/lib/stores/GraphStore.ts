@@ -159,6 +159,14 @@ export class GraphStore {
     });
   }
 
+  async undoChange() {
+    const res = await window.apis.graphApi.undoChange(get(this.graphStore).uuid);
+  }
+
+  async redoChange() {
+    const res = await window.apis.graphApi.redoChange(get(this.graphStore).uuid);
+  }
+
   async addNode(nodeSignature: NodeSignature, pos: SvelvetCanvasPos) {
     const thisUUID = get(this.graphStore).uuid;
     const res = await window.apis.graphApi.addNode(thisUUID, nodeSignature, pos);
@@ -210,15 +218,6 @@ export class GraphStore {
       get(this.graphStore).uiPositions
     );
   }
-
-  // convertUIPositions() {
-  //   const positions = get(this.graphStore).uiPositions;
-  //   const newPositions: { [key: UUID]: SvelvetCanvasPos } = {};
-  //   for(const pos in positions) {
-  //     newPositions[pos] = get(positions[pos]);
-  //   }
-  //   return newPositions;
-  // }
 
   async removeNode(nodeUUID: GraphNodeUUID) {
     const thisUUID = get(this.graphStore).uuid;
