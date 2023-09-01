@@ -1,6 +1,7 @@
 import type { Registry } from "./Registry";
 import type { ICommand } from "../../../shared/types";
 import { Blix } from "../Blix";
+import type { RendererId, RendererURL } from "../../../shared/types/typeclass";
 import {
   type DisplayableMediaOutput,
   type MediaDisplayConfig,
@@ -10,9 +11,6 @@ import {
 
 export type TypeclassId = string;
 export type TypeConverter = (value: any) => any;
-
-type RendererId = `${string}/${string}`;
-type RendererURL = string;
 
 export interface Typeclass {
   id: TypeclassId;
@@ -142,6 +140,14 @@ export class TypeclassRegistry implements Registry {
       display,
     };
   }
+
+  addRenderer(id: RendererId, url: RendererURL): void {
+    if (!this.renderers[id]) this.renderers[id] = url;
+  }
+
+  getRendererSrc(id: RendererId): RendererURL | null {
+    return this.renderers[id] || null;
+  }
 }
 
 const baseTypes: Typeclass[] = [
@@ -237,10 +243,13 @@ const baseTypes: Typeclass[] = [
   },
 ];
 
-const baseConverters: [TypeclassId, TypeclassId, TypeConverter][] = [
+export type ConverterTriple = [TypeclassId, TypeclassId, TypeConverter];
+
+// [from, to, converter]
+const baseConverters: ConverterTriple[] = [
   ["number", "string", (value: number) => value.toString()],
   ["string", "number", (value: string) => parseFloat(value)],
   ["bool", "string", (value: boolean) => (value ? "true" : "false")],
-  ["string", "bool", (value: string) => value.toLowerCase() === "true"],
-  ["number", "bool", (value: number) => value !== 0],
+  ["string", "boolean", (value: string) => value.toLowerCase() === "true"],
+  ["number", "boolean", (value: number) => value !== 0],
 ];

@@ -45,7 +45,7 @@ function createGLFXNode(type, title, desc, params) {
         });
 
         nodeBuilder.setUI(ui);
-        nodeBuilder.addInput("GLFX image", "img", "GLFX Image");
+        nodeBuilder.addInput("GLFX image", "img", "GLFX image");
         for (let param of params) {
             nodeBuilder.addInput("number", type, toTitleCase(param.id));
         }
@@ -129,32 +129,46 @@ const nodes = {
 const commands = {}
 const tiles = {}
 
-const types = {
-    "GLFX": (context) => {
-        const typeBuilder = context.instantiate();
+function init(context) {
 
-        typeBuilder.setMediaHandler("glfxHandler"); // === "./dist/glfxHandler/index.html" in package.json
+    const glfxTypeBuilder = context.createTypeclassBuilder("GLFX image");
+    glfxTypeBuilder.setToConverters({
+        "image": (value) => ({})
+    });
+    glfxTypeBuilder.setFromConverters({
+        "image": (value) => ({})
+    });
 
-        // Define implicit returns
-        typeBuidler.setLifts({
-            // number -> GLFX<number>
-            "number": (value) => {},
-            // string -> GLFX<string>
-            "string": (value) => {}
-        });
+    glfxTypeBuilder.setDisplayConfigurator((data) => {
+        return {
+            displayType: "webview",
+            props: {
+                renderer: `${context.pluginId}/glfxHandler`,
+                media: null
+            },
+            contentProp: "media"
+        };
+    });
 
-        // Define implicit flatmap
-        // value: GLFX <({ [key: AnchorId]: any }, { [key: UIComponentId]: any })>
-        // func: (anchorInputs: { [key: AnchorId]: any }, uiInputs: { [key: UIComponentId]: any }) => GLFX<{ [key: AnchorId]: any }>
+    // glfxTypeBuilder.setMediaHandler("glfxHandler"); // "./dist/glfxHandler/index.html" in package.json
 
-        // result: GLFX<{ [key: AnchorId]: any }>
-        typeBuilder.setBind((value, func) => {
-        });
-    }
+    // glfxTypeBuilder.setType("GLFX", ['a'], "GLFX a")
+    // glfxTypeBuilder.setType("Maybe", ['a'], "Just a | Nothing");
+    // glfxTypeBuilder.setType("List", ['x'], "Empty | Cons x (List x)");
+    // glfxTypeBuilder.setType("Either", ['a', 'b'], "Left a | Right b");
+
+    // Define implicit flatmap
+    // value: GLFX <({ [key: AnchorId]: any }, { [key: UIComponentId]: any })>
+    // func: (anchorInputs: { [key: AnchorId]: any }, uiInputs: { [key: UIComponentId]: any }) => GLFX<{ [key: AnchorId]: any }>
+
+    // result: GLFX<{ [key: AnchorId]: any }>
+    // glfxTypeBuilder.setBind((value, func) => {
+    // });
 }
 
 module.exports = {
     nodes,
     commands,
-    tiles
+    tiles,
+    init
 };

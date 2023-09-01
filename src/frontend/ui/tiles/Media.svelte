@@ -92,10 +92,10 @@
   // };
 
   const displayIdToSvelteConstructor: { [key in MediaDisplayType]: any } = {
-    Image: Image,
-    TextBox: TextBox,
-    ColorDisplay: ColorDisplay,
-    Webview: WebView,
+    image: Image,
+    textbox: TextBox,
+    colorDisplay: ColorDisplay,
+    webview: WebView,
   };
 </script>
 

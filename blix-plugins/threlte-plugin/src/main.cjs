@@ -45,7 +45,7 @@ function createGLFXNode(type, title, desc, params) {
         });
 
         nodeBuilder.setUI(ui);
-        nodeBuilder.addInput("GLFX image", "img", "GLFX Image");
+        nodeBuilder.addInput("GLFX image", "img", "GLFX image");
         for (let param of params) {
             nodeBuilder.addInput("number", type, toTitleCase(param.id));
         }
@@ -129,29 +129,7 @@ const nodes = {
 const commands = {}
 const tiles = {}
 
-const types = {
-    "GLFX": (context) => {
-        const typeBuilder = context.instantiate();
-
-        typeBuilder.setMediaHandler("glfxHandler"); // === "./dist/glfxHandler/index.html" in package.json
-
-        // Define implicit returns
-        typeBuidler.setLifts({
-            // number -> GLFX<number>
-            "number": (value) => {},
-            // string -> GLFX<string>
-            "string": (value) => {}
-        });
-
-        // Define implicit flatmap
-        // value: GLFX <({ [key: AnchorId]: any }, { [key: UIComponentId]: any })>
-        // func: (anchorInputs: { [key: AnchorId]: any }, uiInputs: { [key: UIComponentId]: any }) => GLFX<{ [key: AnchorId]: any }>
-
-        // result: GLFX<{ [key: AnchorId]: any }>
-        typeBuilder.setBind((value, func) => {
-        });
-    }
-}
+const types = {}
 
 module.exports = {
     nodes,

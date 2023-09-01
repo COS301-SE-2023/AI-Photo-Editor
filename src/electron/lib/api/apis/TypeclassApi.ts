@@ -1,6 +1,7 @@
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { type TypeclassId } from "../../registries/TypeclassRegistry";
+import { type RendererId } from "../../../../shared/types/typeclass";
 
 export class TypeclassApi implements ElectronMainApi<TypeclassApi> {
   private readonly blix: Blix;
@@ -15,5 +16,9 @@ export class TypeclassApi implements ElectronMainApi<TypeclassApi> {
 
   async getTypeclasses() {
     return this.blix.typeclassRegistry.getTypeclasses();
+  }
+
+  async getRendererSrc(id: RendererId) {
+    return this.blix.typeclassRegistry.getRendererSrc(id);
   }
 }

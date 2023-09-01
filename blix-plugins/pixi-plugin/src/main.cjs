@@ -108,7 +108,7 @@ const nodes = {
         });
 
         nodeBuilder.setUI(ui);
-        nodeBuilder.addInput("Pixi image", "img", "GLFX Image");
+        nodeBuilder.addInput("Pixi image", "img", "GLFX image");
         nodeBuilder.addInput("number", "number", "number");
         nodeBuilder.addOutput("GLFX image", "res", "Result");
     }

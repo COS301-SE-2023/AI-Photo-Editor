@@ -20,8 +20,8 @@ export interface MediaDisplayConfig {
 }
 
 export enum MediaDisplayType {
-  Image = "Image",
-  TextBox = "TextBox",
-  ColorDisplay = "ColorDisplay",
-  Webview = "Webview",
+  Image = "image",
+  TextBox = "textbox",
+  ColorDisplay = "colorDisplay",
+  Webview = "webview",
 }
