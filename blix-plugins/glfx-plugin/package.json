@@ -15,7 +15,7 @@
         "nodes": []
     },
     "main": "src/main.cjs",
-    "renderers": { "glfxHandler": "src/index.html" },
+    "renderers": { "glfxRenderer": "src/index.html" },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^24.0.0",
         "@rollup/plugin-node-resolve": "^15.0.0",

@@ -110,17 +110,37 @@ const nodes = {
         nodeBuilder.setUI(ui);
         nodeBuilder.addInput("Pixi image", "img", "GLFX image");
         nodeBuilder.addInput("number", "number", "number");
-        nodeBuilder.addOutput("GLFX image", "res", "Result");
+        nodeBuilder.addOutput("Pixi image", "res", "Result");
     }
 };
 const commands = {};
 const tiles = {};
 
-const typeclasses = {
-};
+function init(context) {
+
+    const glfxTypeBuilder = context.createTypeclassBuilder("Pixi image");
+    glfxTypeBuilder.setToConverters({
+        "image": (value) => ({})
+    });
+    glfxTypeBuilder.setFromConverters({
+        "image": (value) => ({})
+    });
+
+    glfxTypeBuilder.setDisplayConfigurator((data) => {
+        return {
+            displayType: "webview",
+            props: {
+                renderer: `${context.pluginId}/pixiRenderer`,
+                media: null
+            },
+            contentProp: "media"
+        };
+    });
+}
 
 module.exports = {
     nodes,
     commands,
-    tiles
+    tiles,
+    init
 };

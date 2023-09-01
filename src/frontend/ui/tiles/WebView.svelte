@@ -8,7 +8,6 @@
 
   export let renderer: RendererId = "/";
 
-  // $: src = "file:///home/rec1dite/code/301/capstone/blix-plugins/pixi-plugin/src/index.html";
   $: asyncSrc = window.apis.typeclassApi.getRendererSrc(renderer);
 
   export let media: unknown;
@@ -23,6 +22,25 @@
     webview?.send("mediaChanged", media);
   }
 
+  // Initialize media when the webview is ready
+  $: initWebviewMedia(webview);
+
+  function initWebviewMedia(webview: Electron.WebviewTag | null) {
+    if (webview) {
+      console.log("WEBVIEW");
+      webview.addEventListener("dom-ready", () => {
+        updateMedia(media);
+      });
+
+      // Force focus the webview when the mouse is over it.
+      // This is necessary to prevent the user having to
+      // click into it every time before it can receive input
+      webview.addEventListener("mouseover", () => {
+        webview.focus();
+      });
+    }
+  }
+
   function reload() {
     webview?.reload();
   }
@@ -35,19 +53,7 @@
     webview?.addEventListener("ipc-message", (event) => {
       console.log("Message received from webview:", event.channel, event);
     });
-
-    // TODO: Update webview media directly after load
-    // $: if (webview) {
-    //   webview.addEventListener("dom-ready", () => {
-    //     webview?.send("mediaChanged", media);
-    //   });
-    // }
   });
-
-  if (webview) {
-    // webview.addEventListener('did-start-loading', loadstart)
-    // webview.addEventListener('did-stop-loading', loadstop)
-  }
 </script>
 
 <div class="content">

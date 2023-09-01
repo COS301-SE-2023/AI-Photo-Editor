@@ -143,7 +143,7 @@ function init(context) {
         return {
             displayType: "webview",
             props: {
-                renderer: `${context.pluginId}/glfxHandler`,
+                renderer: `${context.pluginId}/glfxRenderer`,
                 media: null
             },
             contentProp: "media"
