@@ -7,6 +7,7 @@
     let canvasWidth = 500;
     let canvasHeight = 500;
     const canvas = fx.canvas();
+    let lastid = "";
 
     let image;
     let texture;

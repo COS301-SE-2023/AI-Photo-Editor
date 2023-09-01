@@ -19,12 +19,22 @@ export type CacheSubsidiary = {
 
 export type CacheObject = {
   uuid: CacheUUID;
-  data: Blob;
+  data: Buffer;
   metadata: any;
 };
 
 export type CacheRequest = {
   type: string;
   id: string;
-  content: Blob;
+  metadata?: any;
 };
+
+export type CacheResponse =
+  | {
+      success: true;
+      data?: string;
+    }
+  | {
+      success: false;
+      message?: string;
+    };

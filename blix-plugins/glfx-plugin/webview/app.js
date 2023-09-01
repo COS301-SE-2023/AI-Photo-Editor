@@ -15,7 +15,7 @@ module.exports.default = app;
 //   console.log(`Received ${data} from main process`);
 // });
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
     window.api.on("mediaChanged", (newMedia) => {
 		media.set(newMedia);
 
@@ -23,5 +23,4 @@ window.addEventListener("DOMContentLoaded", () => {
 		// window.api.send("backTestMessage", "Hello from app.js");
     });
 
-	window.cache.write("123", new Blob([]));
 });

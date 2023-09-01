@@ -5,9 +5,11 @@ import type {
   CacheSubsidiary,
   CacheObject,
   CacheRequest,
+  CacheResponse,
 } from "../../../shared/types/cache";
 
 import WebSocket from "ws";
+// import { Server } from "socket.io";
 import { randomBytes } from "crypto";
 import logger from "../../utils/logger";
 
@@ -31,34 +33,35 @@ export class CacheManager {
     this.server = new WebSocket.Server({ port: 60606 });
 
     this.server.on("connection", (socket) => {
-      // console.log("CacheManager connection: ");
-
-      // Register new subsidiary
       const subUUID = randomBytes(32).toString("base64url");
 
-      socket.on("message", (message: string) => {
-        logger.info("CacheManager received message: ", JSON.parse(message));
-        // Maybe look at the types
-        const data = JSON.parse(message);
+      socket.onmessage = (event) => {
+        if (typeof event.data === "string") {
+          const data: CacheRequest = JSON.parse(event.data);
 
-        switch (data.type) {
-          case "cache-write":
-            // console.log("CacheManager received cache-write request");
-            socket.send("Hello from ChaceManager");
-            break;
-
-          case "cache-get":
-            // console.log("CacheManager received cache-get request");
-            break;
-
-          case "cache-delete":
-            // console.log("CacheManager received cache-delete request");
-            break;
-
-          default:
-          // console.log("CacheManager received unknown request");
+          switch (data.type) {
+            case "cache-write-metadata":
+              this.writeMetadata(data.id, data.metadata);
+              break;
+            case "cache-get":
+              // TODO: check if exist
+              socket.send(this.cache[data.id].data);
+              break;
+            case "cache-delete":
+              this.delete(data.id);
+              // TODO: check if exist
+              socket.send(JSON.stringify({ success: true }));
+              break;
+            default:
+              logger.info("Unknown cache message type", data.type);
+          }
+        } else if (event.data instanceof Buffer) {
+          const id = this.writeContent(event.data);
+          socket.send(JSON.stringify({ success: true, id }));
+        } else {
+          logger.info("unknown", event.data);
         }
-      }); // TODO
+      };
 
       this.server.on("error", (err) => {
         logger.error("Cache System error", err);
@@ -76,10 +79,14 @@ export class CacheManager {
     return cacheUUID;
   }
 
-  write(content: Blob, metadata: any): CacheUUID {
+  writeContent(content: Buffer): CacheUUID {
     const cacheUUID = randomBytes(32).toString("base64url");
-    this.cache[cacheUUID] = { uuid: cacheUUID, data: content, metadata };
+    this.cache[cacheUUID] = { uuid: cacheUUID, data: content, metadata: {} };
     return cacheUUID;
+  }
+
+  writeMetadata(cacheUUID: CacheUUID, metadata: any) {
+    this.cache[cacheUUID].metadata = metadata;
   }
 
   get(cacheUUID: CacheUUID): CacheObject {
