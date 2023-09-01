@@ -1,6 +1,7 @@
 // N-way tree of panels
 
 import type { LayoutPanel, PanelType } from "@shared/types/index";
+import { tick } from "svelte";
 import { writable } from "svelte/store";
 
 export abstract class PanelNode {

@@ -42,6 +42,7 @@
         dispatch("blipDragged", { dir: dir });
       }
     }
+    dispatch("blipReleased");
     startPos = null;
   }
 
@@ -66,10 +67,11 @@
       let d = getDirection(endPos);
 
       // Update UI
+      const prevDir = dir;
       dir = d === null ? "" : mapToCaret(d);
 
-      // Dispatch event
-      if (d !== null) {
+      // Dispatch dragging when direction changes
+      if (dir !== prevDir) {
         dispatch("blipDragging", { dir: d });
       }
     } else {
