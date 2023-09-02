@@ -3,8 +3,8 @@
     import { Viewport } from "pixi-viewport";
     import { onDestroy, onMount } from "svelte";
     import { Writable } from "svelte/store";
-    import { root1 } from "./clump";
     import { renderApp } from "./render";
+    import { canvas1 } from "./clump";
 
     export let media: Writable<any>;
 
@@ -92,41 +92,11 @@
         viewport.fit(true, viewportFitX, viewportFitY);
         viewport.moveCenter(imgCanvasBlockW/2, imgCanvasBlockH/2);
 
-        //===== LOAD SPRITES =====//
-        // const sprites = ["media/bird.png", "media/blueArrow.png"];
-        // const sprites = ["media/bird.png"];
-        const sprites = [];
-        for (let s of sprites) {
-            // const spriteContainer = new PIXI.Container();
-            // spriteContainer.sortableChildren = true;
-
-            // Create sprite
-            var sprite = PIXI.Sprite.from(s);
-            // sprite.scale.set(0.1);
-            sprite.eventMode = "dynamic";
-            sprite.on("click", (e) => { console.log(s + " click"); });
-        }
-
-        renderApp(blink, viewport, root1);
-
-        // const renderTex = PIXI.RenderTexture.create({ width: 800, height: 600 });
-        // const spr = PIXI.Sprite.from("media/bird.png");
-
-        // var filter = new PIXI.BlurFilter(100, 10);
-        // spr.filters = [filter];
-
-        // spr.position.x = 800 / 2;
-        // spr.position.y = 600 / 2;
-        // spr.anchor.x = 0.5;
-        // spr.anchor.y = 0.5;
-
-        // setTimeout(() => {
-        //     pixi.renderer.render(spr, { renderTexture: renderTex });
-        // }, 100);
-
-        // const renderrSprite = new PIXI.Sprite(renderTex);
-        // renderrSprite.position.set(-100, -100);
-        // viewport.addChild(renderrSprite);
+        //===== RENDER Blink =====//
+        renderApp(blink, viewport, $media);
+        media.subscribe((media) => {
+            renderApp(blink, viewport, media);
+        });
 
         //===== MAIN LOOP =====//
         let elapsed = 0;
@@ -156,7 +126,7 @@
 </div>
 
 <code>
-    Media: {JSON.stringify($media)}
+    Media: {JSON.stringify($media, null, 2)}
 </code>
 
 <style>
@@ -178,9 +148,11 @@
 
     code {
         position: absolute;
-        bottom: 0px;
-        right: 0px;
+        white-space: break-spaces;
+        pointer-events: none;
+        top: 1.2em;
         z-index: 10;
+        font-size: 0.6em;
         color: white;
     }
 </style>

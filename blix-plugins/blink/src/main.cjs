@@ -1,13 +1,12 @@
-const { kMaxLength } = require("buffer");
 const crypto = require("crypto");
 
 function getUUID() {
-    return crypto.randomBytes(32).toString("base64url");
+    return crypto.randomBytes(16).toString("base64url");
 }
 
 const nodes = {
-    "inputSprite": (context) => {
-        const nodeBuilder = context.instantiate(context.pluginId, "inputSprite");
+    "inputImage": (context) => {
+        const nodeBuilder = context.instantiate(context.pluginId, "inputImage");
         nodeBuilder.setTitle("Blink Image");
         nodeBuilder.setDescription("Input a Blink Sprite Image");
 
@@ -27,7 +26,6 @@ const nodes = {
         );
 
         nodeBuilder.setUIInitializer((x) => {
-            console.log("UI INITIALIZER", x);
             return {
                 state: {
                     id: getUUID(),
@@ -36,28 +34,37 @@ const nodes = {
         });
 
         nodeBuilder.define(async (input, uiInput, from) => {
-            return {
-                res: {
-                    images: {
-                        "asdjfkljasdf": uiInput["imagePicker"]
-                    },
-                    sprites: {
-                        "jkfddasjkf": {
-                            image: "asdjfkljasdf",
-                            transform: {
-                                translation: [0, 0],
-                                rotation: 0,
-                                scale: [1, 1]
-                            }
-                        }
+            let src = uiInput["imagePicker"].split("/");
+            src = src.splice(-2);
+            src = src.join("/");
+
+            const canvas = {
+                assets: {
+                    [uiInput["state"]["id"]]: {
+                        class: "asset",
+                        type: "image",
+                        data: src
                     }
+                },
+                content: {
+                    class: "clump",
+                    transform: {},
+                    elements: [
+                        {
+                            class: "atom",
+                            type: "image",
+                            assetId: uiInput["state"]["id"],
+                        }
+                    ]
                 }
             }
+
+            return { res: canvas };
         });
 
         nodeBuilder.setUI(ui);
         nodeBuilder.addInput("Blink matrix", "transform", "Transform");
-        nodeBuilder.addOutput("Blink image", "res", "Result");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
     },
     "matrix": (context) => {
         const nodeBuilder = context.instantiate(context.pluginId, "matrix");
@@ -87,30 +94,51 @@ const nodes = {
         nodeBuilder.addInput("vec2", "scale", "Scale");
         nodeBuilder.addOutput("Blink matrix", "res", "Result");
     },
-    "testNode": (context) => {
-        const nodeBuilder = context.instantiate(context.pluginId, "testNode");
-        nodeBuilder.setTitle("Test Node");
-        nodeBuilder.setDescription("Test node for blink");
+    "filter": (context) => {
+        const nodeBuilder = context.instantiate(context.pluginId, "filter");
+        nodeBuilder.setTitle("Filter");
+        nodeBuilder.setDescription("Construct a Blink matrix");
 
         const ui = nodeBuilder.createUIBuilder();
-        ui.addBuffer(
+        ui.addDropdown({
+            componentId: "filter",
+            label: "Filter",
+            defaultValue: "blur",
+            triggerUpdate: true,
+        }, {
+          options: {
+            "Blur": "blur",
+            "Noise": "noise",
+            "Color": "color",
+          }
+        })
+        .addSlider(
             {
-                componentId: "state",
-                label: "State Buffer",
-                defaultValue: { test: "asdf", test2: [3, 1, 4, 1, 5, 9], test3: { test4: "test5" } },
+                componentId: "strength",
+                label: "Strength",
+                defaultValue: 0,
                 triggerUpdate: true,
             },
-            {}
+            { min: -100, max: 100, set: 0.1 }
         );
 
         nodeBuilder.define(async (input, uiInput, from) => {
-            return { "res": {} }
+            // Apply filter to outermost clump
+            const canvas = input["clump"];
+
+            if (!canvas.content.filters) canvas.content.filters = [];
+            canvas.content.filters.push({
+                class: "filter",
+                type: uiInput["filter"],
+                params: [uiInput["strength"], ...(uiInput["filter"] === "blur" ? [25] : [])],
+            });
+
+            return { "res": canvas };
         });
 
         nodeBuilder.setUI(ui);
-        nodeBuilder.addInput("Blink image", "img", "GLFX image");
-        nodeBuilder.addInput("number", "number", "number");
-        nodeBuilder.addOutput("Blink image", "res", "Result");
+        nodeBuilder.addInput("Blink clump", "clump", "Clump");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
     }
 };
 const commands = {};
@@ -118,13 +146,13 @@ const tiles = {};
 
 function init(context) {
 
-    const glfxTypeBuilder = context.createTypeclassBuilder("Blink image");
-    glfxTypeBuilder.setToConverters({
-        "image": (value) => ({})
-    });
-    glfxTypeBuilder.setFromConverters({
-        "image": (value) => ({})
-    });
+    const glfxTypeBuilder = context.createTypeclassBuilder("Blink clump");
+    // glfxTypeBuilder.setToConverters({
+    //     "image": (value) => ({})
+    // });
+    // glfxTypeBuilder.setFromConverters({
+    //     "image": (value) => ({})
+    // });
 
     glfxTypeBuilder.setDisplayConfigurator((data) => {
         return {

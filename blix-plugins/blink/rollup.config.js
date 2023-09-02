@@ -79,13 +79,20 @@ export default {
 			include: 'node_modules/**',
 		}),
 
-		// In dev mode, call `npm run start` once
-		// the bundle has been generated
-		!production && serve(),
+		serve({
+			// open: true, // Open browser automatically
+			// verbose: true,
+			// contentBase: ['src', 'dist'],
 
-		// Watch the `public` directory and refresh the
+			// host: 'localhost',
+			// port: 3000,
+		}),
+
+		// Watch the `dist` directory and refresh the
 		// browser on changes when not in production
-		!production && livereload('public'),
+		!production && livereload({
+			watch: 'dist'
+		}),
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
