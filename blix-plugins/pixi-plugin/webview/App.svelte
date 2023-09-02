@@ -3,10 +3,12 @@
     import { Viewport } from "pixi-viewport";
     import { onDestroy, onMount } from "svelte";
     import { Writable } from "svelte/store";
+    import { root1 } from "./clump";
+    import { renderApp } from "./render";
 
     export let media: Writable<any>;
 
-    let pixi: PIXI.Application;
+    let blink: PIXI.Application;
     let pixiCanvas: HTMLCanvasElement;
     let mouseCursor = "cursorDefault";
 
@@ -18,7 +20,7 @@
 
     onMount(async () => {
         //====== INITIALIZE PIXI ======//
-        pixi = new PIXI.Application({
+        blink = new PIXI.Application({
             view: pixiCanvas,
             width: 500,
             height: 500,
@@ -30,18 +32,18 @@
             resizeTo: window,
         });
 
-        if (pixi === null) {
+        if (blink === null) {
             console.error("PIXI failed to initialize");
             return;
         }
 
         //====== CREATE VIEWPORT ======//
         const viewport = new Viewport({
-            screenWidth: pixi.renderer.width,
-            screenHeight: pixi.renderer.height,
+            screenWidth: blink.renderer.width,
+            screenHeight: blink.renderer.height,
             worldWidth: 100,
             worldHeight: 100,
-            events: pixi.renderer.events,
+            events: blink.renderer.events,
         });
 
         window.addEventListener("resize", () => {
@@ -60,14 +62,14 @@
                 friction: 0.95,
             });
 
-        pixi.stage.addChild(viewport);
+        blink.stage.addChild(viewport);
 
         viewport.on("drag-start", () => {
             mouseCursor = "cursorGrabbing";
         });
 
         viewport.on("drag-end", () => {
-            mouseCursor = "default";
+            mouseCursor = "";
         });
 
         //===== CREATE BASE LAYOUT =====//
@@ -92,63 +94,63 @@
 
         //===== LOAD SPRITES =====//
         // const sprites = ["media/bird.png", "media/blueArrow.png"];
-        const sprites = ["media/bird.png"];
+        // const sprites = ["media/bird.png"];
+        const sprites = [];
         for (let s of sprites) {
-            const spriteContainer = new PIXI.Container();
-            spriteContainer.sortableChildren = true;
+            // const spriteContainer = new PIXI.Container();
+            // spriteContainer.sortableChildren = true;
 
             // Create sprite
             var sprite = PIXI.Sprite.from(s);
-            sprite.scale.set(0.1);
+            // sprite.scale.set(0.1);
             sprite.eventMode = "dynamic";
             sprite.on("click", (e) => { console.log(s + " click"); });
-
-            // Create interaction box once sprite has loaded
-            const box = new PIXI.Graphics();
-            box.lineStyle(1, 0xf43e5c, 0.5);
-            box.drawRect(0, 0, sprite.width, sprite.height);
-            box.zIndex = 1000;
-
-            spriteContainer.addChild(sprite);
-            spriteContainer.addChild(box);
-            box.sortChildren();
-
-            var filter = new PIXI.BlurFilter(10, 10);
-            // filter.resolution = sprite.scale.x;
-            sprite.filters = [filter];
-
-            // const renderTexture = PIXI.RenderTexture.create({ width: 100, height: 100 });
-            // pixi.ticker.add((delta) => {
-            //     pixi.renderer.render(sprite, renderTexture);
-            // });
-            // const scaleInvariantSprite = new PIXI.Sprite(renderTexture);
-            // scaleInvariantSprite.scale.set(0.1);
-            // imgCanvas.addChild(scaleInvariantSprite);
-
-            // let elapsed = 0;
-            // pixi.ticker.add((delta) => {
-            //     elapsed += delta;
-            //     const scale = 0.1 + 0.05*Math.cos(elapsed/100);
-            //     sprite.scale.set(scale);
-            //     // filter.blur = 100*scale;
-            // });
-
-            imgCanvas.addChild(spriteContainer);
-
         }
+
+        renderApp(blink, viewport, root1);
+
+        // const renderTex = PIXI.RenderTexture.create({ width: 800, height: 600 });
+        // const spr = PIXI.Sprite.from("media/bird.png");
+
+        // var filter = new PIXI.BlurFilter(100, 10);
+        // spr.filters = [filter];
+
+        // spr.position.x = 800 / 2;
+        // spr.position.y = 600 / 2;
+        // spr.anchor.x = 0.5;
+        // spr.anchor.y = 0.5;
+
+        // setTimeout(() => {
+        //     pixi.renderer.render(spr, { renderTexture: renderTex });
+        // }, 100);
+
+        // const renderrSprite = new PIXI.Sprite(renderTex);
+        // renderrSprite.position.set(-100, -100);
+        // viewport.addChild(renderrSprite);
 
         //===== MAIN LOOP =====//
         let elapsed = 0;
-        pixi.ticker.add((delta) => {
+        blink.ticker.add((delta) => {
             elapsed += delta;
-
-            // imgCanvas.angle = 100*Math.cos(elapsed/10);
         });
     });
 
     onDestroy(() => {});
+
+    function keydown(e: KeyboardEvent) {
+        if (e.key === " ") {
+            mouseCursor = "cursorGrab";
+        }
+    }
+
+    function keyup(e: KeyboardEvent) {
+        if (e.key === " ") {
+            mouseCursor = "";
+        }
+    }
 </script>
 
+<svelte:window on:keydown={keydown} on:keyup={keyup} />
 <div class="{mouseCursor}">
     <canvas id="pixiCanvas" bind:this={pixiCanvas} />
 </div>
@@ -164,9 +166,6 @@
         padding: 0px;
     }
 
-    .cursorDefault {
-        cursor: default;
-    }
     .cursorPointer {
         cursor: pointer;
     }

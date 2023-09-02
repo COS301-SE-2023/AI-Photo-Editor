@@ -65,8 +65,12 @@ export default {
 		}),
 
 		typescript({
+			tsconfig: './tsconfig.json',
 			sourceMap: !production,
 			inlineSources: !production,
+			// compilerOptions: {
+			// 	noUnusedLocals: false
+			// }
 		}),
 
 		// Important to allow node modules to be imported in .svelte files
