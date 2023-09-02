@@ -7,9 +7,9 @@ function getUUID() {
 
 const nodes = {
     "inputSprite": (context) => {
-        const nodeBuilder = context.instantiate("pixi-plugin", "inputSprite");
-        nodeBuilder.setTitle("Input Pixi Sprite");
-        nodeBuilder.setDescription("Input a Pixi Sprite Image");
+        const nodeBuilder = context.instantiate(context.pluginId, "inputSprite");
+        nodeBuilder.setTitle("Blink Image");
+        nodeBuilder.setDescription("Input a Blink Sprite Image");
 
         const ui = nodeBuilder.createUIBuilder();
         ui.addFilePicker({
@@ -56,13 +56,13 @@ const nodes = {
         });
 
         nodeBuilder.setUI(ui);
-        nodeBuilder.addInput("Pixi matrix", "transform", "Transform");
-        nodeBuilder.addOutput("Pixi image", "res", "Result");
+        nodeBuilder.addInput("Blink matrix", "transform", "Transform");
+        nodeBuilder.addOutput("Blink image", "res", "Result");
     },
     "matrix": (context) => {
-        const nodeBuilder = context.instantiate("pixi-plugin", "matrix");
+        const nodeBuilder = context.instantiate(context.pluginId, "matrix");
         nodeBuilder.setTitle("Matrix");
-        nodeBuilder.setDescription("Construct a Pixi matrix");
+        nodeBuilder.setDescription("Construct a Blink matrix");
 
         const ui = nodeBuilder.createUIBuilder();
         ui.addSlider(
@@ -85,12 +85,12 @@ const nodes = {
         nodeBuilder.addInput("vec2", "translation", "Translation");
         nodeBuilder.addInput("number", "rotation", "Rotation");
         nodeBuilder.addInput("vec2", "scale", "Scale");
-        nodeBuilder.addOutput("Pixi matrix", "res", "Result");
+        nodeBuilder.addOutput("Blink matrix", "res", "Result");
     },
     "testNode": (context) => {
-        const nodeBuilder = context.instantiate("pixi-plugin", "testNode");
+        const nodeBuilder = context.instantiate(context.pluginId, "testNode");
         nodeBuilder.setTitle("Test Node");
-        nodeBuilder.setDescription("Test node for pixi-plugin");
+        nodeBuilder.setDescription("Test node for blink");
 
         const ui = nodeBuilder.createUIBuilder();
         ui.addBuffer(
@@ -108,9 +108,9 @@ const nodes = {
         });
 
         nodeBuilder.setUI(ui);
-        nodeBuilder.addInput("Pixi image", "img", "GLFX image");
+        nodeBuilder.addInput("Blink image", "img", "GLFX image");
         nodeBuilder.addInput("number", "number", "number");
-        nodeBuilder.addOutput("Pixi image", "res", "Result");
+        nodeBuilder.addOutput("Blink image", "res", "Result");
     }
 };
 const commands = {};
@@ -118,7 +118,7 @@ const tiles = {};
 
 function init(context) {
 
-    const glfxTypeBuilder = context.createTypeclassBuilder("Pixi image");
+    const glfxTypeBuilder = context.createTypeclassBuilder("Blink image");
     glfxTypeBuilder.setToConverters({
         "image": (value) => ({})
     });
@@ -130,7 +130,7 @@ function init(context) {
         return {
             displayType: "webview",
             props: {
-                renderer: `${context.pluginId}/pixiRenderer`,
+                renderer: `${context.pluginId}/blinkRenderer`,
                 media: null
             },
             contentProp: "media"

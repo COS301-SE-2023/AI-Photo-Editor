@@ -1,7 +1,7 @@
 {
     "extends": "@tsconfig/svelte/tsconfig.json",
     "compilerOptions": {
-        "baseUrl": "../blink",
+        "baseUrl": ".",
         "target": "es2017",
         "moduleResolution": "node",
 
@@ -24,6 +24,6 @@
         "forceConsistentCasingInFileNames": true,
     },
 
-    "include": ["../blink/webview/**/*", "../blink/global.d.ts"],
-    "exclude": ["../blink/node_modules"],
+    "include": ["webview/**/*", "global.d.ts"],
+    "exclude": ["node_modules"],
 }
