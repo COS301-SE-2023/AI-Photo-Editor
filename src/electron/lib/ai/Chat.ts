@@ -1,8 +1,12 @@
 import crypto from "crypto";
 import OpenAi from "openai";
 import { genericErrorResponse } from "./AiManagerv2";
-import type { Result } from "./AiLang";
+import { colorString, type Result } from "./AiLang";
 import logger from "../../utils/logger";
+import { DiscussServiceClient } from "@google-ai/generativelanguage";
+import { GoogleAuth } from "google-auth-library";
+import dotenv from "dotenv";
+dotenv.config();
 
 // ========== Types ========== //
 
@@ -22,34 +26,27 @@ export type ChatResponse =
       code: "invalid_api_key" | "connection_error" | "unknown_error";
     };
 
-type OpenAIChatConfig = {
-  model?:
-    | "gpt-4"
-    | "gpt-4-0613"
-    | "gpt-4-32k"
-    | "gpt-4-32k-0613"
-    | "gpt-3.5-turbo"
-    | "gpt-3.5-turbo-0613"
-    | "gpt-3.5-turbo-16k"
-    | "gpt-3.5-turbo-16k-0613";
-  temperature?: number;
-};
+export const CHAT_MODELS = {
+  "GPT-4": "gpt-4-0613",
+  "GPT-4-32K": "gpt-4-32k-0613",
+  "GPT-3.5": "gpt-3.5-turbo-0613",
+  "GPT-3.5-16K": "gpt-3.5-turbo-16k-0613",
+  "PaLM-Chat-Bison": "chat-bison-001",
+} as const;
 
-// ========== Classes ========== //
+export type ChatModel = keyof typeof CHAT_MODELS;
 
 export abstract class Chat {
   public readonly id: string;
-  protected readonly apiKey: string;
   protected messages: Message[] = [];
   protected _iterationLimit = 10;
   protected _iteration = 0;
 
-  constructor(apiKey = "") {
+  constructor() {
     this.id = crypto.randomUUID();
-    this.apiKey = apiKey;
   }
 
-  public abstract run(prompt?: string): Promise<ChatResponse>;
+  public abstract generate(prompt: string, apiKey: string): Promise<ChatResponse>;
 
   public addMessage(message: Message) {
     this.messages.push(message);
@@ -72,24 +69,38 @@ export abstract class Chat {
   }
 }
 
+// ==================================================================
+// OPEN AI
+// ==================================================================
+
+type OpenAiModel = 
+    | "gpt-4"
+    | "gpt-4-0613"
+    | "gpt-4-32k"
+    | "gpt-4-32k-0613"
+    | "gpt-3.5-turbo"
+    | "gpt-3.5-turbo-0613"
+    | "gpt-3.5-turbo-16k"
+    | "gpt-3.5-turbo-16k-0613";
+
+type OpenAiChatConfig = {
+  model?: OpenAiModel
+  temperature?: number;
+};
+
 export class OpenAiChat extends Chat {
   private openai: OpenAi;
-  private chatConfig!: Required<OpenAIChatConfig>;
+  private chatConfig!: Required<OpenAiChatConfig>;
 
-  constructor(apiKey: string, chatConfig?: OpenAIChatConfig) {
-    super(apiKey);
-
-    this.openai = new OpenAi({
-      apiKey,
-    });
-
+  constructor(chatConfig?: OpenAiChatConfig) {
+    super();
+    this.openai = new OpenAi();
     this.setChatConfig(chatConfig);
   }
 
-  public async run(prompt?: string): Promise<ChatResponse> {
-    if (prompt) {
-      this.messages.push({ role: "user", content: prompt });
-    }
+  public async generate(prompt: string, apiKey: string): Promise<ChatResponse> {
+    this.openai.apiKey = apiKey;
+    this.messages.push({ role: "user", content: `USER'S INPUT: ${prompt}` });
 
     const formattedMessages = this.messages.map((msg) => ({
       ...msg,
@@ -124,20 +135,24 @@ export class OpenAiChat extends Chat {
         } else if (error.message.toLocaleLowerCase().includes("connection")) {
           response.code = "connection_error";
           response.message = "The internet connection appears to be offline.";
+        } else if (error.message.toLocaleLowerCase().includes("provide your api")) {
+          response.code = "invalid_api_key";
+          response.message = "Open AI API key hasn't been provided.";
         }
 
         logger.error(error.code);
       }
 
+
       return response;
     }
   }
 
-  public setChatConfig(chatConfig?: OpenAIChatConfig) {
+  public setChatConfig(chatConfig?: OpenAiChatConfig) {
     const chatConfigDefaults = {
       model: "gpt-3.5-turbo-0613",
       temperature: 0,
-    } satisfies OpenAIChatConfig;
+    } satisfies OpenAiChatConfig;
 
     this.chatConfig = {
       model: chatConfig?.model || chatConfigDefaults.model,
@@ -145,50 +160,93 @@ export class OpenAiChat extends Chat {
     };
   }
 
-  private async runChatCompletion() {
-    const messages = this.messages.map((msg) => ({
-      ...msg,
-      role: msg.role === "blix" ? "user" : msg.role,
-    }));
-    const { model, temperature } = this.chatConfig;
-    // TODO: Add some safety checks for request and response
+}
+
+// ==================================================================
+// PALM
+// ==================================================================
+
+type PalmModel = 
+    | "chat-bison-001";
+
+type PalmChatConfig = {
+  model?: PalmModel
+  temperature?: number;
+};
+
+export class PalmChat extends Chat {
+  private palm: DiscussServiceClient;
+  private chatConfig!: Required<PalmChatConfig>;
+
+  constructor(chatConfig?: PalmChatConfig) {
+    super();
+
+    // this.palm = new DiscussServiceClient({
+    //   authClient: new GoogleAuth().fromAPIKey(apiKey) as any,
+    // });
+
+    this.palm = new DiscussServiceClient();
+
+    this.setChatConfig(chatConfig);
+  }
+
+  public async generate(prompt: string, apiKey: string): Promise<ChatResponse> {
+    // TODO: Add properly to Blix
+    apiKey = process.env.PALM_API_KEY || "";
+    this.palm.auth = new GoogleAuth().fromAPIKey(apiKey) as any
+    this.messages.push({role: "system", content: "Only respond with the updated graph code."});
+
+    if (prompt) {
+      this.messages.push({ role: "user", content: prompt });
+    }
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model,
-        temperature,
-        messages,
-      });
+      console.log(prompt);
+      const result = await this.palm.generateMessage({
+        model: `models/${this.chatConfig.model}`,
+        temperature: this.chatConfig.temperature,
+        candidateCount: 1,
+        prompt: {
+          context: this.messages.slice(0, 5).map((m) => m.content).join("\n\n"),
+          messages: [{ content: this.messages.slice(-1)[0].content}]
+        }
+      })
+
+      if (!result[0] || !result[0].candidates) {
+        return {
+          success: false,
+          code: "unknown_error",
+          message: "Error with palm generative result"
+        };
+      }
 
       return {
         success: true,
-        data: response,
-      } satisfies Result;
-    } catch (error) {
-      const response: Result = {
-        success: false,
-        error: "unknown_error",
-        message: genericErrorResponse,
-      };
-
-      if (error instanceof OpenAi.APIError) {
-        if (error.code === "invalid_api_key") {
-          response.error = "invalid_api_key";
-          response.message = "OpenAI API key is invalid.";
-        }
-        if (error.message.toLocaleLowerCase().includes("connection")) {
-          response.error = "connection_error";
-          response.message = "The internet connection appears to be offline.";
-        }
-        logger.error(error.status);
-        logger.error(error.message);
-        logger.error(error.code);
-        logger.error(error.type);
-      } else {
-        logger.error(error);
+        lastResponse: result[0].candidates[0].content || ""
       }
-
-      return response;
+    } catch(error) {
+      // @ts-ignore
+      console.log(error.message)
+      return {
+        success: false,
+        code: "unknown_error",
+        message: "Ah shit"
+      }
     }
+
+
   }
+
+  public setChatConfig(chatConfig?: PalmChatConfig) {
+    const chatConfigDefaults = {
+      model: "chat-bison-001",
+      temperature: 0,
+    } satisfies PalmChatConfig;
+
+    this.chatConfig = {
+      model: chatConfig?.model || chatConfigDefaults.model,
+      temperature: chatConfig?.temperature || chatConfigDefaults.temperature,
+    };
+  }
+
 }

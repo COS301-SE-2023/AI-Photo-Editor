@@ -61,7 +61,7 @@
     "prepublishOnly": "npm-run-all -s test lint",
     "preversion": "npm-run-all -s lint format",
     "prepare": "husky install",
-    "llm": "npm run build:electron:dev && node build/electron/lib/ai/ai-profiler-v2.js"
+    "llm": "cross-env NODE_ENV=development npm run build:electron:dev && node build/electron/lib/ai/ai-profiler-v2.js"
   },
   "lint-staged": {
     "src/electron/**/*.{js,ts}": "eslint -c eslint.electron.json",
@@ -70,6 +70,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.10",
+    "@google-ai/generativelanguage": "^1.0.0",
     "@neoconfetti/svelte": "^1.0.0",
     "@popperjs/core": "^2.11.8",
     "@rollup/plugin-json": "^6.0.0",
@@ -87,6 +88,7 @@
     "electron-updater": "^5.3.0",
     "flowbite": "^1.7.0",
     "flowbite-svelte": "^0.39.2",
+    "google-auth-library": "^8.9.0",
     "langchain": "^0.0.104",
     "openai": "^4.3.1",
     "sharp": "^0.32.1",

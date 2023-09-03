@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
 import type { MainWindow } from "../api/apis/WindowApi";
@@ -14,20 +15,24 @@ import {
   BlypescriptInterpreter,
   BlypescriptToolbox,
   type Result,
+  colorString,
+  type Colors,
 } from "./AiLang";
 import {
   CoreGraphUpdateEvent,
   CoreGraphUpdateParticipant,
 } from "../../lib/core-graph/CoreGraphInteractors";
-import { type Message, type Chat, OpenAiChat } from "./Chat";
+import { type Message, type Chat, type ChatModel, OpenAiChat, PalmChat, CHAT_MODELS } from "./Chat";
+import { generateGuidePrompt } from "./prompt";
 
 type PromptOptions = {
   prompt: string;
   graphId: string;
   messages?: Message[];
-  model: "GPT-3.5" | "GPT-4";
+  model?: ChatModel;
   apiKey: string;
   chatId?: string;
+  verbose?: boolean;
 };
 
 export const genericErrorResponse = "Oops, that wasn't supposed to happen🫠. Try again.";
@@ -46,39 +51,36 @@ export class AiManager {
     this.blypescriptInterpreter = new BlypescriptInterpreter(toolbox, graphManager);
   }
 
-  async executePrompt({ prompt, graphId, messages, model, apiKey, chatId }: PromptOptions) {
-    const chat: Chat = this.chats.find((chat) => chat.id)
-      ? this.chats.find((chat) => chat.id)!
-      : new OpenAiChat(apiKey, { model: "gpt-3.5-turbo-0613" });
+  async executePrompt({ prompt, graphId, model, apiKey, chatId, verbose }: PromptOptions) {
+    const chat = this.getChat({ id: chatId, model });
 
     const blypescriptProgram = this.graphExporter.exportGraph(this.graphManager.getGraph(graphId));
+    const blypescriptToolboxResult = this.getBlypescriptToolbox();
 
-    if (!messages) {
-      messages = [
+    if (!blypescriptToolboxResult.success) {
+      if (verbose) this.log(blypescriptToolboxResult.message, "RED");
+      return {
+        success: false,
+        error: blypescriptToolboxResult.error,
+        message: genericErrorResponse,
+      } satisfies Result;
+    }
+
+    const messages: Message[] = [
         {
           role: "system",
-          content: this.getGuidePrompt(),
-        },
-        {
-          role: "system",
-          content: `Interfaces allowed to be used: \n${this.getToolboxInterfaces()?.data || ""}}`,
-        },
-        {
-          role: "system",
-          content: `Example Graphs: \n${this.getGraphExamples()}}`,
+          content: generateGuidePrompt({ interfaces: blypescriptToolboxResult.data.toolbox.toString() }),
         },
         {
           role: "user",
-          content: `Current Graph: \n${blypescriptProgram.toString()}`,
+          content: `CURRENT GRAPH: \n\`\`\`ts\n${blypescriptProgram.toString()}\n\`\`\``,
         },
-      ];
-    }
+    ];
 
     chat.addMessages(messages);
-    chat.addMessage({ role: "user", content: prompt });
 
     while (chat.iteration < chat.iterationLimit) {
-      const response = await chat.run();
+      const response = await chat.generate(prompt, apiKey);
 
       if (!response.success) {
         return {
@@ -88,9 +90,13 @@ export class AiManager {
         } satisfies Result;
       }
 
+      console.log(response.lastResponse)
+
       const result = BlypescriptProgram.fromString(response.lastResponse);
 
       if (!result.success) {
+        console.log(result.message)
+        console.log(result.error)
         chat.addMessage({ role: "blix", content: result.message });
         continue; // retry if failure
       }
@@ -108,7 +114,7 @@ export class AiManager {
 
         if (!result.success) {
           logger.warn(result.error);
-          chat.addMessage({ role: "blix", content: result.message });
+          chat.addMessage({ role: "blix", content: `USER'S RESPONSE:\n${result.message}` });
           continue; // retry if failure
         }
 
@@ -142,33 +148,63 @@ export class AiManager {
     } satisfies Result;
   }
 
-  private getGuidePrompt() {
-    return readFileSync(
-      join(__dirname.replace("build", "src"), "systemPrompt.txt"),
-      "utf8"
-    ).toString();
-  }
+  getBlypescriptToolbox() {
+    const { result, time } = measurePerformance(BlypescriptToolbox.fromToolbox, this.toolbox);
 
-  private getToolboxInterfaces() {
-    // return readFileSync(
-    //   join(__dirname.replace("build", "src"), "interfaces.txt"),
-    //   "utf8"
-    // ).toString();
-
-    const response = BlypescriptToolbox.fromToolbox(this.toolbox);
-
-    if (!response.success) {
-      // TODO: Handle error here
-      return response;
+    if (!result.success) {
+      return result;
     }
 
     return {
       success: true,
-      data: response.data.toString(),
+      data: {
+        toolbox: result.data,
+        time,
+      },
     } satisfies Result;
+  }
+
+  /**
+   * Will retrieve a specific chat. If you no ID is specified or Chat doesn't
+   * exist then a new Chat will generated.
+   *
+   * @param id Chat ID
+   */
+  getChat({ id, model }: { id?: string; model?: ChatModel }): Chat {
+    const chat = this.chats.find((chat) => chat.id === id);
+
+    if (chat) return chat;
+
+    model = model ?? "GPT-3.5";
+
+    switch (model) {
+      case "GPT-3.5":
+      case "GPT-3.5-16K":
+      case "GPT-4":
+      case "GPT-4-32K":
+        return new OpenAiChat({ model: CHAT_MODELS[model] });
+      
+      case "PaLM-Chat-Bison":
+        return new PalmChat({ model: CHAT_MODELS[model] });
+    }
   }
 
   private getGraphExamples() {
     return readFileSync(join(__dirname.replace("build", "src"), "examples.txt"), "utf8").toString();
   }
+
+  private log(message: string, color: Colors) {
+    console.log(colorString(message, color));
+  }
+}
+
+function measurePerformance<T>(
+  func: (...args: any[]) => T,
+  ...params: any[]
+): { result: T; time: number } {
+  const startTime = performance.now();
+  const result = func(...params);
+  const endTime = performance.now();
+  const elapsedTime = endTime - startTime;
+  return { result, time: elapsedTime };
 }

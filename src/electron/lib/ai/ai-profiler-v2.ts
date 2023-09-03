@@ -18,6 +18,8 @@ import { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
 import readline from "readline";
 import { NodeUI, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
 import { Message } from "./Chat";
+import dotenv from "dotenv";
+dotenv.config();
 
 class Profiler {
   private toolboxRegistry!: ToolboxRegistry;
@@ -89,12 +91,16 @@ class Profiler {
         messages,
         model: "GPT-3.5",
         apiKey: process.env.OPENAI_API_KEY || "",
+        // apiKey: process.env.PALM_API_KEY || "",
       });
 
       if (response.success) {
         messages = response.data.messages;
         messages[messages.length - 1].content = coreGraphExporter.exportGraph(coreGraph).toString();
         // console.log(response.usage);
+      } else {
+        console.log(colorString(response.message, "RED"));
+        console.log(colorString(response.error, "RED"));
       }
     }
   }

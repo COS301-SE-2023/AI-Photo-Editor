@@ -48,7 +48,8 @@ export class BlypescriptProgram implements AiLangProgram {
 
   public static fromString(program: string): Result<BlypescriptProgram> {
     const nodeNameIdMap = new Map<string, UUID>();
-    const match = program.match(/^.*function\s*graph\(\)\s*{([\s\S]*)}.*$/s);
+    // const match = program.match(/^.*(?:function)?\s*graph\(\)\s*{([\s\S]*)}.*$/s);
+    const match = program.match(/^.*\s*graph\(\)\s*{([\s\S]*)}.*$/s);
 
     // Does not conform to syntax
     if (!match)
@@ -71,14 +72,7 @@ export class BlypescriptProgram implements AiLangProgram {
 
       const result = BlypescriptStatement.fromString(statements[s]);
 
-      // TODO: Fail + return error message to the AI when a statement is invalid
-      if (!result.success) {
-        return {
-          success: false,
-          error: result.error,
-          message: result.message + "on line " + (s + 1).toString(),
-        };
-      } // Invalid statement
+      if (!result.success) return result;
 
       const statement = result.data;
       // Duplicate nodeId
@@ -86,8 +80,8 @@ export class BlypescriptProgram implements AiLangProgram {
       if (usedNodeIds.has(statement.name)) {
         return {
           success: false,
-          error: "Duplicate nodeId",
-          message: "Duplicate nodeId provided on line " + (s + 1).toString(),
+          error: "syntax_error",
+          message: `Variable with following name has already been declared: ${statement.name}`,
         };
       }
 
@@ -105,7 +99,7 @@ export class BlypescriptProgram implements AiLangProgram {
   public toString(): string {
     let res = "graph {\n";
     for (let s = 0; s < this.statements.length; s++) {
-      if (s % 5 === 0) res += `  //===== SECTION ${s / 5} =====//\n`;
+      // if (s % 5 === 0) res += `  //===== SECTION ${s / 5} =====//\n`;
 
       res += `  ${this.statements[s].toString()}\n`;
     }
@@ -138,11 +132,11 @@ export class BlypescriptProgram implements AiLangProgram {
   }
 }
 
-// var 139dfjslaf = hello-plugin.gloria(10, "The quick brown fox jumps over the lazy dog");
-// var 12u394238x = hello-plugin.hello(139dfjslaf["output1"]);
-// var afhuoewnc2 = math-plugin.add(139dfjslaf["output2"], 12u394238x["out"]);
+// const 139dfjslaf = hello-plugin.gloria(10, "The quick brown fox jumps over the lazy dog");
+// const 12u394238x = hello-plugin.hello(139dfjslaf["output1"]);
+// const afhuoewnc2 = math-plugin.add(139dfjslaf["output2"], 12u394238x["out"]);
 const BlypescriptStatementRegex =
-  /\s*var\s*([a-zA-Z_]\w+)\s*=\s*([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\)\s*;/;
+  /\s*const \s*(\w+)\s*=\s*([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\)\s*;/;
 
 // A single line in a BlypescriptProgram
 export class BlypescriptStatement extends AiLangStatement {
@@ -150,25 +144,38 @@ export class BlypescriptStatement extends AiLangStatement {
 
   public static fromString(statement: string): Result<BlypescriptStatement> {
     const match = statement.match(BlypescriptStatementRegex);
-    if (match) {
-      const statement = new BlypescriptStatement(
-        match[1],
-        `${match[2]}.${match[3]}`,
-        // TODO: Look into being a bit smarter about checking/storing input 'arguments'
-        match[4].split(",").map((s) => s.trim())
-      );
 
-      return { success: true, data: statement };
+    if (!match) {
+      return {
+        success: false,
+        error: "syntax_error",
+        message: `Invalid syntax for statement: ${statement}`,
+      };
     }
-    return {
-      success: false,
-      error: "Invalid statement provided",
-      message: "Invalid syntax for statementS",
-    };
+
+    const parameters = match[0].split(",").map((s) => s.trim());
+
+    const regex = /^([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\).*$/;
+    if (parameters.some((param) => param.match(regex))) {
+      return {
+        success: false,
+        error: "syntax_error",
+        message: `Invalid syntax for statement: ${statement}\nNested function calls not allowed!`,
+      };
+    }
+
+    const blypescriptStatement = new BlypescriptStatement(
+      match[1],
+      `${match[2]}.${match[3]}`,
+      // TODO: Look into being a bit smarter about checking/storing input 'arguments'
+      parameters
+    );
+
+    return { success: true, data: blypescriptStatement };
   }
 
   public toString(): string {
-    return `var ${this.name} = ${this.nodeSignature}(${this.nodeInputs.join(", ")});`;
+    return `const ${this.name} = ${this.nodeSignature}(${this.nodeInputs.join(", ")});`;
   }
 }
 export class BlypescriptInterpreter {
@@ -740,11 +747,11 @@ export class BlypescriptToolbox {
 // HELPERS
 // ==================================================================
 
-export function colorString(str: string, color: keyof typeof colors) {
-  return `${colors[color]}${str}${colors.RESET}`;
+export function colorString(str: string, color: Colors) {
+  return `${COLORS[color]}${str}${COLORS.RESET}`;
 }
 
-const colors = {
+const COLORS = {
   ORANGE: "\x1b[38;5;208m",
   GREEN: "\x1b[38;5;40m",
   RED: "\x1b[38;5;196m",
@@ -752,6 +759,8 @@ const colors = {
   BLUE: "\x1b[38;5;27m",
   RESET: "\x1b[0m",
 } as const;
+
+export type Colors = keyof typeof COLORS;
 
 export type Result<T = unknown, E = unknown> =
   | { success: true; message?: string; data: T }

@@ -29,3 +29,21 @@ interface sharp-plugin {
   toSharp: (img: N<Image>) => { res: N<Sharp> }
   rotate: (img: N<Sharp>) => { res: N<Sharp> }
 }
+
+// Node edge connection wrapper type
+type E<T> = { value: T } | null;
+
+interface input-plugin {
+  inputNumber: (value: number) => { res: E<number> };
+  inputImage: () => { res: E<image> };
+}
+
+interface math-plugin {
+  unary: (num: E<number>, operator: 'square' | 'square_root' | 'absolute' | 'factorial' | 'negate' | 'sine' | 'cosine' | 'tangent') => { res: E<number> };
+  binary: (num1: E<number>, num2: N<number>, operator: 'add' | 'subtract' | 'multiply' | 'divide' | 'power' | 'modulo' | 'max' | 'min') => { res: E<number> };
+}
+
+interface blix {
+  // Useful when displaying the final result to the user
+  output: (input: E<any>, outputId: string) => void;
+}
