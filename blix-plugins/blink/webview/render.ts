@@ -1,31 +1,35 @@
 import * as PIXI from "pixi.js";
 import { getPixiFilter, type Atom, type Clump, BlinkCanvas, Asset } from "./clump";
-import { Viewport } from "pixi-viewport";
 
-export function renderApp(blink: PIXI.Application, viewport: Viewport, canvas: BlinkCanvas) {
-    // Preload all image assets
-    const imgPromises = [];
-    for (let assetId in canvas.assets) {
-        if (canvas.assets[assetId].type === "image") {
-            imgPromises.push(PIXI.Assets.load(canvas.assets[assetId].data));
-        }
+export function renderApp(blink: PIXI.Application, hierarchy: PIXI.Container, canvas: BlinkCanvas) {
+  // Destroy previous viewport contents
+  hierarchy.removeChildren();
+
+  // Preload all image assets
+  const imgPromises = [];
+  for (let assetId in canvas.assets) {
+    if (canvas.assets[assetId].type === "image") {
+      imgPromises.push(PIXI.Assets.load(canvas.assets[assetId].data));
+      // TODO: Use bundles instead (e.g. PIXI.Assets.addBundle())
+      // See: [https://pixijs.io/guides/basics/assets.html]
     }
+  }
 
-    // Construct clump hierarchy
-    Promise.all(imgPromises).then(() => {
-        viewport.addChild(renderClump(blink, canvas.content, canvas));
-    });
+  // Construct clump hierarchy
+  Promise.all(imgPromises).then(() => {
+    hierarchy.addChild(renderClump(blink, canvas.content, canvas));
+  });
 }
 
 export function renderCanvas(blink: PIXI.Application, root: Clump) {
 }
 
 function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas) {
-    // Create container
+    //========== CREATE CONTAINER ==========//
     const content = new PIXI.Container();
     content.sortableChildren = true;
 
-    // Create child elements
+    //========== CREATE CHILD ELEMENTS ==========//
     if (clump.elements) {
         let counter = clump.elements.length;
         for (let child of clump.elements) {
@@ -51,10 +55,12 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas)
         }
     }
 
+    //========== CREATE INTERACTION BOX ==========//
     // Create interaction box once sprite has loaded
     content.sortChildren();
 
     const resClump = new PIXI.Container();
+    const resClumpContent = new PIXI.Container();
     resClump.sortableChildren = true;
 
     if (clump.filters && clump.filters.length > 0) {
@@ -82,26 +88,58 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas)
         const renderSprite = new PIXI.Sprite(renderTexture);
         renderSprite.setTransform(bx - renderPadding, by - renderPadding);
 
-
-        resClump.addChild(renderSprite);
+        resClumpContent.addChild(renderSprite);
     }
     else {
         //===== ADD CONTENT WITHOUT FLATTENING =====//
-        resClump.addChild(content);
+        resClumpContent.addChild(content);
     }
 
-    const clumpBounds = resClump.getBounds();
+    // Get bounds before applying transform
+    const clumpBounds = resClumpContent.getBounds();
+
+    //========== APPLY CLUMP PROPERTIES ==========//
+    let transMatrix = PIXI.Matrix.IDENTITY;
+    if (clump.transform) {
+        const { position: pos, rotation: rot, scale: scl } = clump.transform;
+
+        if (scl) transMatrix.scale(scl.x, scl.y);
+        if (rot) transMatrix.rotate(rot * Math.PI / 180);
+        if (pos) transMatrix.translate(pos.x, pos.y);
+
+        // if (pos) resClumpContent.setTransform(pos.x, pos.y);
+        // if (rot) resClumpContent.angle = rot;
+        // if (scl) resClumpContent.scale.set(scl.x, scl.y);
+    }
+
+    resClumpContent.transform.setFromMatrix(transMatrix);
+    // const matTransform = resClumpContent.transform.worldTransform;
+
+    if (clump.opacity) {
+        resClumpContent.alpha = Math.min(100, Math.max(0, clump.opacity));
+    }
+
+    resClump.addChild(resClumpContent);
 
     const box = new PIXI.Graphics();
-    box.lineStyle(5, 0xf43e5c, 0.5);
-    box.drawRect(clumpBounds.x, clumpBounds.y, clumpBounds.width, clumpBounds.height);
+    // box.drawRect(clumpBounds.x, clumpBounds.y, clumpBounds.width, clumpBounds.height);
 
-    box.lineStyle();
     box.beginFill(0xf43e5c, 1);
-    box.drawCircle(clumpBounds.x, clumpBounds.y, 10);
-    box.drawCircle(clumpBounds.x + clumpBounds.width, clumpBounds.y, 10);
-    box.drawCircle(clumpBounds.x, clumpBounds.y + clumpBounds.height, 10);
-    box.drawCircle(clumpBounds.x + clumpBounds.width, clumpBounds.y + clumpBounds.height, 10);
+
+    const tl = transMatrix.apply(new PIXI.Point(clumpBounds.x, clumpBounds.y));
+    const tr = transMatrix.apply(new PIXI.Point(clumpBounds.x + clumpBounds.width, clumpBounds.y));
+    const bl = transMatrix.apply(new PIXI.Point(clumpBounds.x, clumpBounds.y + clumpBounds.height));
+    const br = transMatrix.apply(new PIXI.Point(clumpBounds.x + clumpBounds.width, clumpBounds.y + clumpBounds.height));
+
+    const corners = [tl, tr, br, bl];
+    for (let c = 0; c < 4; c++) {
+        box.drawCircle(corners[c].x, corners[c].y, 10);
+
+        box.lineStyle(5, 0xf43e5c, 0.5);
+        box.moveTo(corners[c].x, corners[c].y);
+        box.lineTo(corners[(c + 1) % 4].x, corners[(c + 1) % 4].y);
+        box.lineStyle();
+    }
     box.zIndex = 1000;
 
     resClump.addChild(box);

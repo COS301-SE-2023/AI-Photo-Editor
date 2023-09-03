@@ -15,10 +15,17 @@ export type Asset = {
 export type Clump = {
   class: "clump";
   name?: string;
-  transform: Matrix;
+  transform: Transform;
+  opacity?: number;
   elements: (Clump | Atom)[];
   filters?: Filter[];
 };
+
+export type Transform = {
+  position: { x: number, y: number };
+  rotation: number;
+  scale: { x: number, y: number };
+}
 
 export type Filter = {
     class: "filter";
@@ -83,7 +90,7 @@ export const canvas1: BlinkCanvas = {
   content: {
     class: "clump",
     name: "root",
-    transform: new Matrix(),
+    transform: { position: { x: 0, y: 0 }, rotation: 0, scale: { x: 1, y: 1 } },
     filters: [
       { class: "filter", type: "blur", params: [100, 25] },
       // { class: "filter", type: "noise", params: [10] },
@@ -98,7 +105,7 @@ export const canvas1: BlinkCanvas = {
       {
         class: "clump",
         name: "clump1",
-        transform: new Matrix().translate(500, 500),
+        transform: { position: { x: 500, y: 500 }, rotation: 0, scale: { x: 1, y: 1 } },
         elements: [
           {
             class: "atom",

@@ -17,6 +17,17 @@ const nodes = {
             defaultValue: "",
             triggerUpdate: true,
         }, {})
+        for (let numInp of ["position X", "position Y", "rotation", "scale X", "scale Y"]) {
+            ui.addNumberInput(
+                {
+                    componentId: numInp.replace(" ", ""),
+                    label: numInp[0].toUpperCase() + numInp.slice(1),
+                    defaultValue: 0,
+                    triggerUpdate: true,
+                },
+                {}
+            );
+        }
         ui.addBuffer({
                 componentId: "state",
                 label: "State Buffer",
@@ -48,7 +59,11 @@ const nodes = {
                 },
                 content: {
                     class: "clump",
-                    transform: {},
+                    transform: {
+                        position: { x: uiInput["positionX"], y: uiInput["positionY"] },
+                        rotation: uiInput["rotation"],
+                        scale: { x: uiInput["scaleX"], y: uiInput["scaleY"] },
+                    },
                     elements: [
                         {
                             class: "atom",
@@ -79,7 +94,7 @@ const nodes = {
                 defaultValue: 0,
                 triggerUpdate: true,
             },
-            { min: -100, max: 100, set: 0.1 }
+            { min: 0, max: 100, set: 0.1 }
         );
 
         nodeBuilder.define(async (input, uiInput, from) => {
@@ -93,6 +108,67 @@ const nodes = {
         nodeBuilder.addInput("number", "rotation", "Rotation");
         nodeBuilder.addInput("vec2", "scale", "Scale");
         nodeBuilder.addOutput("Blink matrix", "res", "Result");
+    },
+    "layer": (context) => {
+        const nodeBuilder = context.instantiate(context.pluginId, "layer");
+        nodeBuilder.setTitle("Layer");
+        nodeBuilder.setDescription("Layer two or more Blink clumps");
+
+        const ui = nodeBuilder.createUIBuilder();
+        for (let numInp of ["position X", "position Y", "rotation", "scale X", "scale Y"]) {
+            ui.addNumberInput(
+                {
+                    componentId: numInp.replace(" ", ""),
+                    label: numInp[0].toUpperCase() + numInp.slice(1),
+                    defaultValue: 0,
+                    triggerUpdate: true,
+                },
+                {}
+            );
+        }
+        ui.addSlider(
+            {
+                componentId: "opacity",
+                label: "Opacity",
+                defaultValue: 100,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 100, set: 0.1 }
+        );
+        // TODO: transform
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            // Apply filter to outermost clump
+            const clumps = [1, 2, 3].map(n => input["clump" + n]).filter(c => c != null);
+
+            // Construct assets union
+            const assets = {};
+            clumps.forEach(c => {
+                Object.keys(c.assets).forEach(k => {
+                    assets[k] = c.assets[k];
+                });
+            });
+
+            // Construct parent clump
+            const parent = {
+                class: "clump",
+                transform: {
+                    position: { x: uiInput["positionX"], y: uiInput["positionY"] },
+                    rotation: uiInput["rotation"],
+                    scale: { x: uiInput["scaleX"], y: uiInput["scaleY"] },
+                },
+                opacity: uiInput["opacity"],
+                elements: clumps.map(c => c.content)
+            }
+
+            return { "res": { assets, content: parent } };
+        });
+
+        nodeBuilder.setUI(ui);
+        nodeBuilder.addInput("Blink clump", "clump1", "Clump 1");
+        nodeBuilder.addInput("Blink clump", "clump2", "Clump 2");
+        nodeBuilder.addInput("Blink clump", "clump3", "Clump 3");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
     },
     "filter": (context) => {
         const nodeBuilder = context.instantiate(context.pluginId, "filter");
@@ -119,7 +195,7 @@ const nodes = {
                 defaultValue: 0,
                 triggerUpdate: true,
             },
-            { min: -100, max: 100, set: 0.1 }
+            { min: 0, max: 100, set: 0.1 }
         );
 
         nodeBuilder.define(async (input, uiInput, from) => {

@@ -84,7 +84,10 @@
         imgCanvasBlock.drawRect(0, 0, imgCanvasBlockW, imgCanvasBlockH);
 
         imgCanvas.addChild(imgCanvasBlock);
+
+        const hierarchy = new PIXI.Container();
         viewport.addChild(imgCanvas);
+        viewport.addChild(hierarchy);
 
         // Place viewport such that imgCanvas is centered with padding
         const viewportFitX = imgCanvasBlockW + 2 * imgCanvasInitialPadding;
@@ -93,9 +96,9 @@
         viewport.moveCenter(imgCanvasBlockW/2, imgCanvasBlockH/2);
 
         //===== RENDER Blink =====//
-        renderApp(blink, viewport, $media);
+        renderApp(blink, hierarchy, $media);
         media.subscribe((media) => {
-            renderApp(blink, viewport, media);
+            renderApp(blink, hierarchy, media);
         });
 
         //===== MAIN LOOP =====//
@@ -126,7 +129,7 @@
 </div>
 
 <code>
-    Media: {JSON.stringify($media, null, 2)}
+    <!-- {JSON.stringify($media, null, 2)} -->
 </code>
 
 <style>
@@ -152,7 +155,8 @@
         pointer-events: none;
         top: 1.2em;
         z-index: 10;
-        font-size: 0.6em;
+        font-size: 0.2em;
         color: white;
+        height: 100%;
     }
 </style>

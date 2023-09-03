@@ -10,6 +10,7 @@
   import TextInput from "./nodeUICcomponents/TextInput.svelte";
   import FilePicker from "./nodeUICcomponents/FilePicker.svelte";
   import Radio from "./nodeUICcomponents/Radio.svelte";
+  import NumberInput from "./nodeUICcomponents/NumberInput.svelte";
 
   export let leafUI: NodeUILeaf | null = null;
   export let inputStore: UIValueStore;
@@ -24,7 +25,7 @@
     Radio: Radio,
     Dropdown: Dropdown,
     Accordion: null,
-    NumberInput: null,
+    NumberInput: NumberInput,
     TextInput: TextInput,
     Checkbox: null,
     ColorPicker: ColorPicker,
