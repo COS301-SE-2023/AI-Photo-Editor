@@ -1,4 +1,7 @@
 /* eslint-disable no-console */
+import { type Message, Chat } from "./Chat";
+import { type ChatModel, Model } from "./Model";
+
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
 import type { MainWindow } from "../api/apis/WindowApi";
@@ -22,7 +25,6 @@ import {
   CoreGraphUpdateEvent,
   CoreGraphUpdateParticipant,
 } from "../../lib/core-graph/CoreGraphInteractors";
-import { type Message, type Chat, type ChatModel, OpenAiChat, PalmChat, CHAT_MODELS } from "./Chat";
 import { generateGuidePrompt } from "./prompt";
 
 type PromptOptions = {
@@ -41,6 +43,7 @@ export class AiManager {
   private readonly graphExporter: CoreGraphExporter<BlypescriptProgram>;
   private readonly blypescriptInterpreter: BlypescriptInterpreter;
   private readonly chats: Chat[] = [];
+  private agentIterationLimit = 5;
 
   constructor(
     private readonly toolbox: ToolboxRegistry,
@@ -52,8 +55,6 @@ export class AiManager {
   }
 
   async executePrompt({ prompt, graphId, model, apiKey, chatId, verbose }: PromptOptions) {
-    const chat = this.getChat({ id: chatId, model });
-
     const blypescriptProgram = this.graphExporter.exportGraph(this.graphManager.getGraph(graphId));
     const blypescriptToolboxResult = this.getBlypescriptToolbox();
 
@@ -66,38 +67,45 @@ export class AiManager {
       } satisfies Result;
     }
 
+    let chat = this.chats.find((chat) => chat.id === chatId);
+
+    if (!chat) {
+      chat = new Chat();
+      this.chats.push(chat);
+    }
+
     const messages: Message[] = [
-        {
-          role: "system",
-          content: generateGuidePrompt({ interfaces: blypescriptToolboxResult.data.toolbox.toString() }),
-        },
-        {
-          role: "user",
-          content: `CURRENT GRAPH: \n\`\`\`ts\n${blypescriptProgram.toString()}\n\`\`\``,
-        },
+      {
+        role: "system",
+        content: generateGuidePrompt({
+          interfaces: blypescriptToolboxResult.data.toolbox.toString(),
+        }),
+      },
+      {
+        role: "user",
+        content: `CURRENT GRAPH: \n\`\`\`ts\n${blypescriptProgram.toString()}\n\`\`\``,
+      },
+      {
+        role: "user",
+        content: `USER's INPUT: \n${prompt}`,
+      },
     ];
 
     chat.addMessages(messages);
 
-    while (chat.iteration < chat.iterationLimit) {
-      const response = await chat.generate(prompt, apiKey);
+    const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0 });
 
-      if (!response.success) {
-        return {
-          success: false,
-          error: response.code,
-          message: response.message,
-        } satisfies Result;
-      }
+    for (let i = 0; i < this.agentIterationLimit; i++) {
+      const response = await llm.generate(chat);
 
-      console.log(response.lastResponse)
+      if (!response.success) return response;
 
-      const result = BlypescriptProgram.fromString(response.lastResponse);
+      const result = BlypescriptProgram.fromString(response.data.content);
 
       if (!result.success) {
-        console.log(result.message)
-        console.log(result.error)
-        chat.addMessage({ role: "blix", content: result.message });
+        console.log(result.message);
+        console.log(result.error);
+        chat.addMessage({ role: "blix", content: `USER'S RESPONSE: ${result.message}` });
         continue; // retry if failure
       }
 
@@ -113,6 +121,8 @@ export class AiManager {
         );
 
         if (!result.success) {
+          console.log(colorString(result.error, "RED"));
+          console.log(colorString(result.message, "RED"));
           logger.warn(result.error);
           chat.addMessage({ role: "blix", content: `USER'S RESPONSE:\n${result.message}` });
           continue; // retry if failure
@@ -164,31 +174,6 @@ export class AiManager {
     } satisfies Result;
   }
 
-  /**
-   * Will retrieve a specific chat. If you no ID is specified or Chat doesn't
-   * exist then a new Chat will generated.
-   *
-   * @param id Chat ID
-   */
-  getChat({ id, model }: { id?: string; model?: ChatModel }): Chat {
-    const chat = this.chats.find((chat) => chat.id === id);
-
-    if (chat) return chat;
-
-    model = model ?? "GPT-3.5";
-
-    switch (model) {
-      case "GPT-3.5":
-      case "GPT-3.5-16K":
-      case "GPT-4":
-      case "GPT-4-32K":
-        return new OpenAiChat({ model: CHAT_MODELS[model] });
-      
-      case "PaLM-Chat-Bison":
-        return new PalmChat({ model: CHAT_MODELS[model] });
-    }
-  }
-
   private getGraphExamples() {
     return readFileSync(join(__dirname.replace("build", "src"), "examples.txt"), "utf8").toString();
   }
@@ -198,7 +183,7 @@ export class AiManager {
   }
 }
 
-function measurePerformance<T>(
+export function measurePerformance<T>(
   func: (...args: any[]) => T,
   ...params: any[]
 ): { result: T; time: number } {

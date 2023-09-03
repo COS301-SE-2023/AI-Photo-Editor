@@ -98,10 +98,12 @@ export class BlypescriptProgram implements AiLangProgram {
 
   public toString(): string {
     let res = "graph {\n";
-    for (let s = 0; s < this.statements.length; s++) {
+    // for (let s = 0; s < this.statements.length; s++) {
       // if (s % 5 === 0) res += `  //===== SECTION ${s / 5} =====//\n`;
-
-      res += `  ${this.statements[s].toString()}\n`;
+      // res += `  ${this.statements[s].toString()}\n`;
+    // }
+    for (const s of this.statements) {
+      res += `  ${s.toString()}\n`
     }
     return res + "}";
   }
@@ -153,7 +155,7 @@ export class BlypescriptStatement extends AiLangStatement {
       };
     }
 
-    const parameters = match[0].split(",").map((s) => s.trim());
+    const parameters = match[4].split(",").map((s) => s.trim());
 
     const regex = /^([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\).*$/;
     if (parameters.some((param) => param.match(regex))) {
