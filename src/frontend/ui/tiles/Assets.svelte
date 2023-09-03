@@ -1,17 +1,16 @@
 <script lang="ts">
-  const ws = new WebSocket("ws://localhost:60606");
-
-  ws.onopen = () => {
-    console.log("connected");
-    ws.send("hello");
-  };
-
-  ws.onmessage = (evt) => {
-    console.log(evt.data);
-  };
+  import { cacheStore } from "../../lib/stores/CacheStore"
 </script>
 
-<h1>hello</h1>
+<div>
+  <ul>
+      {#each $cacheStore as id}
+        <li>
+          <span>{id}</span>
+        </li>
+      {/each}
+  </ul>
+</div>
 
 <style>
 </style>

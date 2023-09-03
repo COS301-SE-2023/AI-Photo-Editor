@@ -12,6 +12,7 @@ import WebSocket from "ws";
 // import { Server } from "socket.io";
 import { randomBytes } from "crypto";
 import logger from "../../utils/logger";
+import { ipcMain } from "electron";
 
 // The main interface which this manager must expose is:
 //  - get(cacheUUID: CacheUUID): CacheObject
@@ -23,10 +24,27 @@ export class CacheManager {
   // globalCache: { [key: CacheUUID]: SubsidiaryUUID };
   cache: { [key: CacheUUID]: CacheObject };
 
+  listeners: Set<WebSocket>;
+
   server: WebSocket.Server;
 
   constructor() {
     this.cache = {};
+    this.listeners = new Set();
+
+    ipcMain.on("cache-get", (event, id: string) => {
+      // const id = this.writeContent(content);
+      // event.returnValue = id;
+      event.returnValue = this.get(id).data;
+      // for (const listener of this.listeners) {
+      //   listener.send(JSON.stringify({ type: "cache-update", cache: Object.keys(this.cache) }));
+      // }
+    })
+    
+    // ipcMain.on("cache-get", (event, id) => {
+    //   event.returnValue = this.cache[id].data;
+    // })
+    // this.subsidiaries = {};
     // this.subsidiaries = {};
     // this.globalCache = {};
 
@@ -51,13 +69,28 @@ export class CacheManager {
               this.delete(data.id);
               // TODO: check if exist
               socket.send(JSON.stringify({ success: true }));
+
+              for (const listener of this.listeners) {
+                listener.send(JSON.stringify({ type: "cache-update", cache: Object.keys(this.cache) }));
+              }
+
+              break;
+            case "cache-subscribe":
+              this.listeners.add(socket);
               break;
             default:
               logger.info("Unknown cache message type", data.type);
           }
         } else if (event.data instanceof Buffer) {
+
           const id = this.writeContent(event.data);
           socket.send(JSON.stringify({ success: true, id }));
+
+          // Send cache update to all listeners
+          for (const listener of this.listeners) {
+            listener.send(JSON.stringify({ type: "cache-update", cache: Object.keys(this.cache) }));
+          }
+
         } else {
           logger.info("unknown", event.data);
         }

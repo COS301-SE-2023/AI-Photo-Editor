@@ -1,29 +1,50 @@
 import type { SubsidiaryUUID, CacheUUID, CacheObject } from "@shared/types/cache";
-// import { derived, get, writable } from "svelte/store";
+import { derived, get, writable } from "svelte/store";
 
-type CacheObjects = {
-  [key: CacheUUID]: CacheObject;
-};
+// type CacheObjects = {
+//   [key: CacheUUID]: CacheObject;
+// };
+
+type CacheObjects = CacheUUID[];
+
+type CacheResponse = {
+  type: string
+  cache: CacheUUID[];
+}
 
 class CacheStore {
-  // private cacheStore = writable<CacheObjects>({});
+  private cacheStore = writable<CacheObjects>([]);
   // private globalCache: { [key: CacheUUID]: SubsidiaryUUID } = {};
+  private ws: WebSocket;
 
   constructor() {
-    const ws = new WebSocket("ws://127.0.0.1:69420");
+    this.ws = new WebSocket("ws://localhost:60606");
 
-    // EXAMPLE: To send a blob over the websocket
-    const blob = new Blob([
-      /* image data */
-    ]);
-    const reader = new FileReader();
+    this.ws.onopen = () => {
 
-    reader.onloadend = function () {
-      // reader.result contains the ArrayBuffer.
-      ws.send(reader.result as ArrayBuffer);
-    };
-    reader.readAsArrayBuffer(blob);
+      this.ws.send(JSON.stringify({ type: "cache-subscribe" }));
+
+      this.ws.onmessage = (event) => {
+        if(typeof event.data === "string") {
+          const data: CacheResponse = JSON.parse(event.data);
+
+          switch(data.type) {
+            case "cache-update":
+              this.cacheStore.set(data.cache);
+              break;
+          }
+        }
+
+      }
+    }
   }
+
+
+  public get subscribe() {
+    return this.cacheStore.subscribe;
+  }
+
+
 }
 
 export const cacheStore = new CacheStore();
