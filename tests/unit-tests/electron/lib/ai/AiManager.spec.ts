@@ -151,16 +151,16 @@ describe("Test AI Manager", () => {
         expect(result).toBe("/python/main.py");
     })
 
-    // test("Test findPythonScriptPath", () => {
+    test("Test findPythonScriptPath", () => {
 
 
-    //     fs.existsSync.mockReturnValue(false);
+        fs.existsSync.mockReturnValue(false);
 
 
-    //     const result = aiManager["findPythonScriptPath"]();
-    //     expect(result).toBeDefined();
-    //     expect(result).toBe("");
-    // });
+        const result = aiManager["findPythonScriptPath"]();
+        expect(result).toBeDefined();
+        expect(result).toBe("");
+    });
 
     // test("Test handle api error response", () => {
 
