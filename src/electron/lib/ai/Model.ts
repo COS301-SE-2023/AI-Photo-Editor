@@ -128,14 +128,18 @@ export const OPENAI_CHAT_MODELS = {
   "GPT-3.5-16K": "gpt-3.5-turbo-16k-0613",
 } as const;
 
-// @ts-ignore @typescript-eslint/naming-convention
 export const PALM_CHAT_MODELS = {
   "PaLM-Chat-Bison": "chat-bison-001",
-};
+} as const;
+
+export const CHAT_MODELS = {
+  ...OPENAI_CHAT_MODELS,
+  ...PALM_CHAT_MODELS,
+} as const;
 
 export type OpenAiChatModel = keyof typeof OPENAI_CHAT_MODELS;
 export type PalmChatModel = keyof typeof PALM_CHAT_MODELS;
-export type ChatModel = OpenAiChatModel | PalmChatModel;
+export type ChatModel = keyof typeof CHAT_MODELS;
 
 export type ModelConfig<TModel = ChatModel> = {
   model?: TModel;

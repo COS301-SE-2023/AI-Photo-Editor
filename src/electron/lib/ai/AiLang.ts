@@ -99,11 +99,11 @@ export class BlypescriptProgram implements AiLangProgram {
   public toString(): string {
     let res = "graph {\n";
     // for (let s = 0; s < this.statements.length; s++) {
-      // if (s % 5 === 0) res += `  //===== SECTION ${s / 5} =====//\n`;
-      // res += `  ${this.statements[s].toString()}\n`;
+    // if (s % 5 === 0) res += `  //===== SECTION ${s / 5} =====//\n`;
+    // res += `  ${this.statements[s].toString()}\n`;
     // }
     for (const s of this.statements) {
-      res += `  ${s.toString()}\n`
+      res += `  ${s.toString()}\n`;
     }
     return res + "}";
   }
@@ -137,8 +137,7 @@ export class BlypescriptProgram implements AiLangProgram {
 // const 139dfjslaf = hello-plugin.gloria(10, "The quick brown fox jumps over the lazy dog");
 // const 12u394238x = hello-plugin.hello(139dfjslaf["output1"]);
 // const afhuoewnc2 = math-plugin.add(139dfjslaf["output2"], 12u394238x["out"]);
-const BlypescriptStatementRegex =
-  /\s*const \s*(\w+)\s*=\s*([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\)\s*;/;
+const BlypescriptStatementRegex = /\s*const \s*(\w+)\s*=\s*([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\)\s*;/;
 
 // A single line in a BlypescriptProgram
 export class BlypescriptStatement extends AiLangStatement {
@@ -759,6 +758,7 @@ const COLORS = {
   RED: "\x1b[38;5;196m",
   LIGHT_BLUE: "\x1b[38;5;39m",
   BLUE: "\x1b[38;5;27m",
+  PINK: "\x1b[38;5;200m",
   RESET: "\x1b[0m",
 } as const;
 

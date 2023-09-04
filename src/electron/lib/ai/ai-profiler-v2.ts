@@ -21,11 +21,11 @@ import { Message } from "./Chat";
 import dotenv from "dotenv";
 dotenv.config();
 
-class Profiler {
-  private toolboxRegistry!: ToolboxRegistry;
-  private graphManager: CoreGraphManager;
-  private aiManager: AiManager;
-  private coreGraphImporter: CoreGraphImporter;
+export class Profiler {
+  public toolboxRegistry!: ToolboxRegistry;
+  public graphManager: CoreGraphManager;
+  public aiManager: AiManager;
+  public coreGraphImporter: CoreGraphImporter;
 
   constructor(toolboxFilter: string[] = []) {
     this.toolboxRegistry = Profiler.generateToolboxRegistry(toolboxFilter);
@@ -41,8 +41,11 @@ class Profiler {
     const projectJSON = JSON.parse(projectData) as ProjectFile;
     const graphJSON = projectJSON.graphs[0];
     // let coreGraph = this.coreGraphImporter.import("json", graphJSON);
+
     let coreGraph = new CoreGraph();
+
     const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
+
     if (!blypescriptToolbox.success) {
       return;
     }
@@ -95,8 +98,8 @@ class Profiler {
       });
 
       if (response.success) {
-        messages = response.data.messages;
-        messages[messages.length - 1].content = coreGraphExporter.exportGraph(coreGraph).toString();
+        // messages = response.data.messages;
+        // messages[messages.length - 1].content = coreGraphExporter.exportGraph(coreGraph).toString();
         // console.log(response.usage);
       } else {
         console.log(colorString(response.message, "RED"));
@@ -122,7 +125,7 @@ class Profiler {
     });
 
     return new Promise<string>((resolve) => {
-      rl.question(colorString("\n> Enter prompt: ", "LIGHT_BLUE"), (input) => {
+      rl.question(colorString("\n> ", "PINK"), (input) => {
         rl.close();
         resolve(input.toString());
       });
@@ -217,10 +220,25 @@ class Profiler {
     outputNodeBuilder.setUI(outputUIBuilder);
     return outputNodeBuilder.build;
   }
+
+  public getBlypescriptProgram(graphId: string): BlypescriptProgram | null {
+    if (!graphId) return null;
+
+    const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
+
+    if (!blypescriptToolbox.success) return null;
+
+    const coreGraph = this.graphManager.getGraph(graphId);
+    const blypescriptExporter = new BlypescriptExportStrategyV2(blypescriptToolbox.data);
+    const coreGraphExporter = new CoreGraphExporter(blypescriptExporter);
+    const blypescriptProgram = coreGraphExporter.exportGraph(coreGraph);
+
+    return blypescriptProgram;
+  }
 }
 
-const profiler = new Profiler();
-profiler.run();
+// const profiler = new Profiler();
+// profiler.run();
 // console.log(profiler.test());
 
 // const profiler2 = new Profiler(["Input-plugin", "Math-plugin"]);

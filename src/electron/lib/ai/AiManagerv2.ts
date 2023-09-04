@@ -100,6 +100,8 @@ export class AiManager {
 
       if (!response.success) return response;
 
+      chat.addMessage({ role: "assistant", content: response.data.content });
+
       const result = BlypescriptProgram.fromString(response.data.content);
 
       if (!result.success) {
@@ -137,7 +139,8 @@ export class AiManager {
         return {
           success: true,
           data: {
-            messages: chat.getMessages(),
+            chatId: chat.id,
+            lastResponse: response.data.content,
           },
         } satisfies Result;
       } catch (error) {
@@ -181,6 +184,10 @@ export class AiManager {
   private log(message: string, color: Colors) {
     console.log(colorString(message, color));
   }
+
+  public getChat(id: string) {
+    return this.chats.find((chat) => chat.id === id) || null;
+  }
 }
 
 export function measurePerformance<T>(
@@ -188,6 +195,7 @@ export function measurePerformance<T>(
   ...params: any[]
 ): { result: T; time: number } {
   const startTime = performance.now();
+  // eslint-disable-next-line
   const result = func(...params);
   const endTime = performance.now();
   const elapsedTime = endTime - startTime;

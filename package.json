@@ -61,7 +61,8 @@
     "prepublishOnly": "npm-run-all -s test lint",
     "preversion": "npm-run-all -s lint format",
     "prepare": "husky install",
-    "llm": "cross-env NODE_ENV=development npm run build:electron:dev && node build/electron/lib/ai/ai-profiler-v2.js"
+    "llm": "cross-env NODE_ENV=development npm run build:electron:dev && node build/electron/lib/ai/ai-profiler-v2.js",
+    "cli": "cross-env NODE_ENV=development npm run build:electron:dev && node build/electron/lib/ai/cli.js"
   },
   "lint-staged": {
     "src/electron/**/*.{js,ts}": "eslint -c eslint.electron.json",
@@ -119,7 +120,9 @@
     "@typescript-eslint/parser": "^5.59.2",
     "autoprefixer": "^10.4.14",
     "babel-jest": "^29.5.0",
+    "chalk": "^4.1.2",
     "clean-css": "^5.3.2",
+    "commander": "^11.0.0",
     "cross-env": "^7.0.3",
     "electron": "^24.2.0",
     "electron-builder": "^24.3.0",
@@ -139,6 +142,7 @@
     "prettier": "^2.8.8",
     "prettier-plugin-svelte": "^2.10.0",
     "prettier-plugin-tailwindcss": "^0.2.8",
+    "prompts": "^2.4.2",
     "rollup": "^3.21.5",
     "rollup-plugin-css-only": "^4.3.0",
     "rollup-plugin-livereload": "^2.0.5",
