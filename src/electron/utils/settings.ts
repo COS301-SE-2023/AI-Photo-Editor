@@ -104,7 +104,7 @@ export function setPreferences(userPreferences: Preferences) {
   settings.set("preferences", userPreferences);
 }
 
-export function getPreferences(): Preferences {
+export function getPreferences(): { [key: string]: string[] } {
   return settings.get("preferences");
 }
 

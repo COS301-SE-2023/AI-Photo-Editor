@@ -6,6 +6,7 @@ import settings, { getPreferences, getSecret } from "../../../utils/settings";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
 import { getSecrets, setSecret, clearSecret } from "../../../utils/settings";
 import type { Setting, UserSettingsCategory, QueryResponse } from "../../../../shared/types";
+import { app } from "electron";
 
 // Exposes basic system information
 export class UtilApi implements ElectronMainApi<UtilApi> {
@@ -81,7 +82,7 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
             subtitle: "Customize your keybindings",
             type: "preferences",
             secret: false,
-            value: getPreferences().value,
+            value: getPreferences(),
           },
         ],
       },

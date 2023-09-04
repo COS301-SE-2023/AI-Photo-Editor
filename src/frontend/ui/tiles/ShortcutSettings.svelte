@@ -6,7 +6,11 @@
   } from "@frontend/lib/stores/ShortcutStore";
   import { get } from "svelte/store";
 
-  export const shortcuts: { [key: string]: string[] } = get(shortcutsRegistry.shortcuts);
+  export let shortcuts: { [key: string]: string[] } = get(shortcutsRegistry.shortcuts);
+
+  $: {
+    shortcutsRegistry.shortcuts.set(shortcuts);
+  }
 
   export function updateShortcut(action: string, index: number, event: KeyboardEvent) {
     console.log(action, event);
