@@ -68,10 +68,11 @@
 <div class="container" style="grid: {layouts[getLayout(componentUI)]}">
   {#if componentUI["main"]}
     <div class="main">
-      {#if componentUI["main"].childUis && componentUI["main"].childUis.length > 0}
-        {#each componentUI["main"].childUis as ui}
-          <svelte:self componentUI="{ui}" />
-        {/each}
+      {#if componentUI["main"].childUis}
+        <svelte:self
+          componentUI="{componentUI['main'].childUis.ui}"
+          uiConfigs="{componentUI['main'].childUis.uiConfigs}"
+        />
       {:else}
         <h1>main</h1>
       {/if}

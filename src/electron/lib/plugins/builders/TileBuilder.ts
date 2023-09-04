@@ -4,6 +4,7 @@ import {
   TileUIComponent,
   TileUILeaf,
   TileUIParent,
+  type ITileUI,
   type UIComponentProps,
   type UIComponentConfig,
 } from "../../../../shared/ui/TileUITypes";
@@ -109,7 +110,7 @@ export class TileUIBuilder {
   }
 
   public addLayout(builder: TileUIBuilder): void {
-    this.main.childUis?.push(builder.getUI());
+    this.main.childUis = { ui: builder.getUI(), uiConfigs: builder.getUIConfigs() };
   }
 
   public addSidebar(location: string): TileUIBuilder {

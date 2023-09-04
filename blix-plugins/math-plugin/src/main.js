@@ -110,9 +110,9 @@ const commands = {}
 const tiles = {
     "test": (context) => {
 
-        tileBuilder = context.instantiate("input-plugin", "inputImage");
-        tileBuilder.setTitle("Input image");
-        tileBuilder.setDescription("Provides an image input and returns a single image output");
+        tileBuilder = context.instantiate("math-plugin", "Math Tile");
+        tileBuilder.setTitle("Math Tile");
+        tileBuilder.setDescription("");
         tileBuilder.addIcon("faCode");
 
 
@@ -128,9 +128,28 @@ const tiles = {
           {}
         );
 
+        tile1.addButton(
+          {
+            componentId: "test",
+            label: "Test",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        );
+
         tile2 = tileBuilder.createUIBuilder();
         tile2.addSidebar("left");
         tile2.addStatusbar("top");
+        tile2.addButton(
+          {
+            componentId: "test",
+            label: "Test",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        );
 
         tile3 = tileBuilder.createUIBuilder();
         tile3.addStatusbar("bottom");

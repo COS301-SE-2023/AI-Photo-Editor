@@ -20,6 +20,11 @@ export type ITile = {
   uiConfigs: { [key: string]: UIComponentConfig };
 };
 
+export type ITileUI = {
+  ui: { [key: string]: TileUIParent | null };
+  uiConfigs: { [key: string]: UIComponentConfig };
+};
+
 export type UIComponentProps = {
   [key: string]: unknown;
 };
@@ -30,14 +35,14 @@ export abstract class TileUI {
     public label: string,
     public location: string,
     public readonly params: any[],
-    public childUis: { [key: string]: TileUIParent | null }[] | null,
+    public childUis: ITileUI | null,
     public readonly type: string
   ) {}
 }
 
 export class TileUIParent extends TileUI {
   constructor(label: string, location: string, parent: TileUIParent | null) {
-    super(parent, label, location, [], [], "parent");
+    super(parent, label, location, [], null, "parent");
   }
 }
 
