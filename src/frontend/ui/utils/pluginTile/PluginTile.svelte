@@ -6,7 +6,6 @@
   // export let type: string = "";
   export let componentUI: { [key: string]: TileUIParent | null } = {};
   export let uiConfigs: { [key: string]: UIComponentConfig } = {};
-  console.log("componentUI", componentUI);
 
   const layouts: { [key: string]: string } = {
     "1": '[row1-start] "main" [row1-end] ',
@@ -80,13 +79,13 @@
     </div>
   {/if}
   {#if componentUI["sidebar"]}
-    <div class="sidebar">
+    <div class="sidebar border border-zinc-500">
       <TileUiFragment ui="{componentUI['sidebar']}" uiConfigs="{uiConfigs}" />
     </div>
   {/if}
   {#if componentUI["statusbar"]}
-    <div class="statusbar">
-      <h1>statusbar</h1>
+    <div class="statusbar overflow-clip border border-zinc-500">
+      <TileUiFragment ui="{componentUI['statusbar']}" uiConfigs="{uiConfigs}" />
     </div>
   {/if}
 </div>
@@ -107,15 +106,15 @@
 
   .statusbar {
     grid-area: statusbar;
-    border: 1px solid white;
-    margin: 10px;
+    padding: 5px;
+    margin: 5px;
     border-radius: 10px;
   }
 
   .sidebar {
     grid-area: sidebar;
-    border: 1px solid white;
-    margin: 10px;
+    padding: 5px;
+    margin: 5px;
     border-radius: 10px;
   }
 </style>

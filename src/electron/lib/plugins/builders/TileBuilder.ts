@@ -82,8 +82,8 @@ function getRandomComponentId(type: TileUIComponent) {
 
 export class TileUIBuilder {
   private _main: TileUIParent;
-  private _sidebar: TileUIParent | null;
-  private _statusbar: TileUIParent | null;
+  private _sidebar: tileUIComponentBuilder | null;
+  private _statusbar: tileUIComponentBuilder | null;
   private uiConfigs: { [key: string]: UIComponentConfig };
 
   constructor() {
@@ -101,11 +101,11 @@ export class TileUIBuilder {
     return this._main;
   }
 
-  get sidebar(): TileUIParent | null {
+  get sidebar(): tileUIComponentBuilder | null {
     return this._sidebar;
   }
 
-  get statusbar(): TileUIParent | null {
+  get statusbar(): tileUIComponentBuilder | null {
     return this._statusbar;
   }
 
@@ -114,12 +114,64 @@ export class TileUIBuilder {
   }
 
   public addSidebar(location: string): TileUIBuilder {
-    this._sidebar = new TileUIParent("", location, null);
+    this._sidebar = new tileUIComponentBuilder("", location);
     return this;
   }
 
   public addStatusbar(location: string): TileUIBuilder {
-    this._statusbar = new TileUIParent("", location, null);
+    this._statusbar = new tileUIComponentBuilder("", location);
+    return this;
+  }
+
+  // public addLayerList(): void {
+  //   return;
+  // }
+
+  // public reset(): void {
+  //   return;
+  // }
+
+  public getUI(): { [key: string]: TileUIParent | null } {
+    return {
+      main: this.main,
+      sidebar: this.sidebar ? this.sidebar.component : null,
+      statusbar: this.statusbar ? this.statusbar.component : null,
+    };
+  }
+
+  public getUIConfigs(): { [key: string]: UIComponentConfig } {
+    return Object.assign({}, this.uiConfigs, this.sidebar?.uiConfigs, this.statusbar?.uiConfigs);
+  }
+}
+
+class tileUIComponentBuilder {
+  private _component: TileUIParent;
+  private _uiConfigs: { [key: string]: UIComponentConfig };
+
+  get component() {
+    return this._component;
+  }
+
+  get uiConfigs() {
+    return this._uiConfigs;
+  }
+
+  constructor(label: string, location: string) {
+    this._component = new TileUIParent(label, location, null);
+    this._uiConfigs = {};
+  }
+
+  public addButton(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Button);
+    this._component?.params.push(
+      new TileUILeaf(this._component, TileUIComponent.Button, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "",
+      updatesBackend: config.updatesBackend ?? false,
+    };
     return this;
   }
 
@@ -134,20 +186,6 @@ export class TileUIBuilder {
   //   };
   //   return this;
   // }
-
-  public addButton(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
-    const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Button);
-    this.sidebar?.params.push(
-      new TileUILeaf(this.sidebar, TileUIComponent.Button, componentId, [props])
-    );
-    this.uiConfigs[componentId] = {
-      componentId,
-      label: config.label,
-      defaultValue: config.defaultValue ?? "",
-      updatesBackend: config.updatesBackend ?? false,
-    };
-    return this;
-  }
 
   // public addRadio(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
   //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Radio);
@@ -165,18 +203,19 @@ export class TileUIBuilder {
   //   return;
   // }
 
-  // public addSlider(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
-  //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Slider);
-  //   this.node.params.push(new TileUILeaf(this.node, TileUIComponent.Slider, componentId, [props]));
-  //   this.uiConfigs[componentId] = {
-  //     componentId,
-  //     label: config.label,
-  //     defaultValue: config.defaultValue ?? 0,
-  //     updatesBackend: config.updatesBackend ?? true,
-  //   };
-
-  //   return this;
-  // }
+  public addSlider(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Slider);
+    this.component.params.push(
+      new TileUILeaf(this.component, TileUIComponent.Slider, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
 
   // public addToggle(): void {
   //   return;
@@ -210,19 +249,19 @@ export class TileUIBuilder {
   //   return this;
   // }
 
-  // public addDropdown(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
-  //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Dropdown);
-  //   this.node.params.push(
-  //     new TileUILeaf(this.node, TileUIComponent.Dropdown, componentId, [props])
-  //   );
-  //   this.uiConfigs[componentId] = {
-  //     componentId,
-  //     label: config.label,
-  //     defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
-  //     updatesBackend: config.updatesBackend ?? true,
-  //   };
-  //   return this;
-  // }
+  public addDropdown(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Dropdown);
+    this.component.params.push(
+      new TileUILeaf(this._component, TileUIComponent.Dropdown, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
 
   // public addFilePicker(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
   //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.FilePicker);
@@ -238,19 +277,19 @@ export class TileUIBuilder {
   //   return this;
   // }
 
-  // public addTextInput(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
-  //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.TextInput);
-  //   this.node.params.push(
-  //     new TileUILeaf(this.node, TileUIComponent.TextInput, componentId, [props])
-  //   );
-  //   this.uiConfigs[componentId] = {
-  //     componentId,
-  //     label: config.label,
-  //     defaultValue: config.defaultValue ?? "empty",
-  //     updatesBackend: config.updatesBackend ?? true,
-  //   };
-  //   return this;
-  // }
+  public addTextInput(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.TextInput);
+    this.component.params.push(
+      new TileUILeaf(this.component, TileUIComponent.TextInput, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "empty",
+      updatesBackend: config.updatesBackend ?? true,
+    };
+    return this;
+  }
 
   // public addNumberInput(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
   //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.NumberInput);
@@ -277,24 +316,4 @@ export class TileUIBuilder {
   //   };
   //   return this;
   // }
-
-  // public addLayerList(): void {
-  //   return;
-  // }
-
-  // public reset(): void {
-  //   return;
-  // }
-
-  public getUI(): { [key: string]: TileUIParent | null } {
-    return {
-      main: this.main,
-      sidebar: this.sidebar,
-      statusbar: this.statusbar,
-    };
-  }
-
-  public getUIConfigs(): { [key: string]: UIComponentConfig } {
-    return this.uiConfigs;
-  }
 }
