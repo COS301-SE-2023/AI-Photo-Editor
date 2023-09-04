@@ -16,6 +16,8 @@
     faTerminal,
     faKeyboard,
     faCode,
+    faPuzzlePiece,
+    faGlobe,
   } from "@fortawesome/free-solid-svg-icons";
 
   import { tileStore } from "../../../lib/stores/TileStore";
@@ -33,6 +35,8 @@
   tileDict["graph"] = { displayName: "graph", description: null, icon: faDiagramProject };
   tileDict["media"] = { displayName: "media", description: null, icon: faImage };
   tileDict["inspector"] = { displayName: "inspector", description: null, icon: faMagnifyingGlass };
+  tileDict["webview"] = { displayName: "webview", description: null, icon: faPuzzlePiece };
+  tileDict["browser"] = { displayName: "browser", description: null, icon: faGlobe };
   tileDict["promptBox"] = { displayName: "promptBox", description: null, icon: faTerminal };
   tileDict["shortcutSettings"] = {
     displayName: "shortcutSettings",
@@ -40,6 +44,7 @@
     icon: faKeyboard,
   };
   tileDict["debug"] = { displayName: "debug", description: null, icon: faCode };
+  tileDict["assets"] = { displayName: "assets", description: null, icon: faImage };
 
   for (const tile in tiles) {
     tileDict[tiles[tile].signature] = {

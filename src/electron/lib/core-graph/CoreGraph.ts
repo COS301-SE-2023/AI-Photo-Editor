@@ -7,7 +7,7 @@ import {
   checkEdgeDataTypesCompatible,
 } from "../registries/ToolboxRegistry";
 import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
-import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
+import { INode, type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
 import { type GraphMetadata, type SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 import { type MediaOutputId } from "../../../shared/types/media";
@@ -173,6 +173,7 @@ export class CoreGraph extends UniqueEntity {
     inputs: string[];
     outputs: string[];
     inputValues: Record<string, unknown>;
+    uiInputsInitialized: boolean;
   }> {
     try {
       // Create New Node
@@ -189,10 +190,27 @@ export class CoreGraph extends UniqueEntity {
         this.outputNodes[n.uuid] = "default"; // TODO: set this to a unique id and propagate to the frontend
       }
 
-      const inputValues: Record<string, unknown> = {};
+      let inputValues: Record<string, unknown> = {};
       Object.values(node.uiConfigs).forEach((config) => {
         inputValues[config.componentId] = config.defaultValue;
       });
+
+      // Handle the UI input initializer
+      const initializedInputs = node.uiInitializer(inputValues);
+      let uiInputsInitialized = false;
+      const uiChanges = Object.keys(initializedInputs);
+      if (typeof initializedInputs === "object" && uiChanges.length > 0) {
+        inputValues = { ...inputValues, ...initializedInputs };
+
+        // Update the graph's UI inputs
+        const uiInputsPayload: INodeUIInputs = {
+          inputs: inputValues,
+          changes: uiChanges,
+        };
+        this.uiInputs[n.uuid] = new CoreNodeUIInputs(uiInputsPayload);
+
+        uiInputsInitialized = true;
+      }
 
       // console.log(QueryResponseStatus.success)
       const anchors: AiAnchors = n.returnAnchors();
@@ -206,6 +224,7 @@ export class CoreGraph extends UniqueEntity {
           inputs: anchors.inputAnchors,
           outputs: anchors.outputAnchors,
           inputValues,
+          uiInputsInitialized,
         },
       };
     } catch (error) {

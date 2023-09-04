@@ -10,6 +10,7 @@
   import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
   import SelectionBox from "../utils/graph/SelectionBox.svelte";
   import { type SelectionBoxItem } from "../../types/selection-box";
+  import WebView from "./WebView.svelte";
 
   const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
 
@@ -104,6 +105,14 @@
       component: TextBox,
       props: (data: string) => ({ content: data, status: "error" }),
     },
+    ["GLFX image"]: {
+      component: WebView,
+      props: (data: string) => ({ media: data }),
+    },
+    ["Pixi image"]: {
+      component: WebView,
+      props: (data: string) => ({ media: data }),
+    },
   };
 </script>
 
@@ -171,13 +180,8 @@
   }
 
   .media {
-    position: absolute;
-    left: 50%;
-    top: 40%;
-    transform: translate(-50%, -50%);
     width: 100%;
-    margin: auto;
-    height: auto;
+    height: 100%;
     text-align: center;
   }
 

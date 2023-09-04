@@ -1,6 +1,6 @@
 const nodes ={
     "unary": (context) => {
-        nodeBuilder = context.instantiate("math-plugin","unary");
+        const nodeBuilder = context.instantiate("math-plugin","unary");
         nodeBuilder.setTitle("Unary");
         nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output,such as root, negate or square");
 
@@ -24,7 +24,7 @@ const nodes ={
             componentId: "state",
             label: "State",
             defaultValue: 0,
-            updateBackend: true,
+            triggerUpdate: true,
         }, {
           options: {
             "Square": 0,
@@ -69,7 +69,7 @@ const nodes ={
             componentId: "state",
             label: "State",
             defaultValue: 0,
-            updateBackend: true,
+            triggerUpdate: true,
         }, {
           options: {
             "Add": 0,

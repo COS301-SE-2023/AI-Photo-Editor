@@ -18,6 +18,8 @@
   import Debug from "../../tiles/Debug.svelte";
   import WebView from "../../tiles/WebView.svelte";
   import Plugin from "../../tiles/Plugin.svelte";
+  import Browser from "../../tiles/Browser.svelte";
+  import Assets from "../../tiles/Assets.svelte";
   import ShortcutSettings from "../../tiles/ShortcutSettings.svelte";
   import { PanelGroup, PanelLeaf, type PanelNode } from "@frontend/lib/PanelNode";
   import type { PanelType } from "@shared/types";
@@ -175,7 +177,9 @@
     media: Media,
     debug: Debug,
     webview: WebView,
+    browser: Browser,
     shortcutSettings: ShortcutSettings,
+    assets: Assets,
   };
 
   // Wraps the above dict safely

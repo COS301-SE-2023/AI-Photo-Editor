@@ -6,17 +6,26 @@ import type { Command } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
 import { TileBuilder } from "./builders/TileBuilder";
+import { join } from "path";
 export type PluginSignature = string;
 
 export class Plugin {
   private hasRequiredSelf: boolean;
+  private main: PathLike;
+  private renderers: { [key: string]: PathLike };
 
-  constructor(
-    private packageData: PackageData,
-    private pluginDir: PathLike,
-    private main: PathLike
-  ) {
+  constructor(private packageData: PackageData, private pluginDir: PathLike) {
     this.hasRequiredSelf = false;
+    this.main = join(pluginDir.toString(), packageData.main.toString());
+
+    this.renderers = {};
+    if (typeof packageData.renderers === "object") {
+      Object.keys(packageData.renderers).forEach((key) => {
+        this.renderers[key] = join(pluginDir.toString(), packageData.renderers[key].toString());
+      });
+    } else {
+      logger.warn("Invalid renderers in plugin: " + this.name);
+    }
   }
 
   get name() {
@@ -29,6 +38,10 @@ export class Plugin {
 
   get mainPath() {
     return this.main.toString();
+  }
+
+  get renderersPaths() {
+    return this.renderers.toString();
   }
 
   get pluginPath() {

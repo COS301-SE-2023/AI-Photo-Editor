@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { TileUIParent, UIComponentConfig } from "../../../../shared/ui/TileUITypes";
   import TileUiFragment from "./TileUIFragment.svelte";
+  import WebView from "../../tiles/WebView.svelte";
 
   // export let type: string = "";
   export let componentUI: { [key: string]: TileUIParent | null } = {};
@@ -74,7 +75,7 @@
           uiConfigs="{componentUI['main'].childUis.uiConfigs}"
         />
       {:else}
-        <h1>main</h1>
+        <WebView media="" />
       {/if}
     </div>
   {/if}

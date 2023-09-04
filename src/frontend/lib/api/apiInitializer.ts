@@ -6,6 +6,7 @@ import type { UtilApi } from "@electron/lib/api/apis/UtilApi";
 import type { ProjectApi } from "@electron/lib/api/apis/ProjectApi";
 import type { CommandApi } from "@electron/lib/api/apis/CommandApi";
 import type { GraphApi } from "@electron/lib/api/apis/GraphApi";
+import type { TypeclassApi } from "@electron/lib/api/apis/TypeclassApi";
 import type { ToolboxApi } from "@electron/lib/api/apis/ToolboxApi";
 import type { MediaApi } from "@electron/lib/api/apis/MediaApi";
 import type { TileApi } from "@electron/lib/api/apis/TileApi";
@@ -36,6 +37,7 @@ export async function bindMainApis() {
     projectApi: await bindMainApi<ProjectApi>("ProjectApi"),
     commandApi: await bindMainApi<CommandApi>("CommandApi"),
     graphApi: await bindMainApi<GraphApi>("GraphApi"),
+    typeclassApi: await bindMainApi<TypeclassApi>("TypeclassApi"),
     toolboxApi: await bindMainApi<ToolboxApi>("ToolboxApi"),
     mediaApi: await bindMainApi<MediaApi>("MediaApi"),
     tileApi: await bindMainApi<TileApi>("TileApi"),
