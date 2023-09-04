@@ -2,7 +2,7 @@ import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { platform, type, release } from "os";
 import logger from "../../../utils/logger";
-import settings, { getPreferences, getSecret } from "../../../utils/settings";
+import settings, { getKeybindings, getSecret } from "../../../utils/settings";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
 import { getSecrets, setSecret, clearSecret } from "../../../utils/settings";
 import type { Setting, UserSettingsCategory, QueryResponse } from "../../../../shared/types";
@@ -43,13 +43,9 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     for (const setting of newSettings) {
       if (setting.secret) {
         setSecret(setting.id, setting.value.toString());
-      } else {
-        if (setting.type === "preferences") {
-          // Need to ask panda about this, not sure why else case is there
-          settings.set("preferences", setting.value);
-        } else settings.set(setting.value.toString(), setting.value);
-      }
+      } else settings.set(setting.id, setting.value);
     }
+
     return { status: "success" };
   }
 
@@ -82,7 +78,7 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
             subtitle: "Customize your keybindings",
             type: "preferences",
             secret: false,
-            value: getPreferences(),
+            value: getKeybindings(),
           },
         ],
       },

@@ -100,12 +100,12 @@ export function clearSecret(key: string): void {
   settings.set(`secrets.${key}`, "");
 }
 
-export function setPreferences(userPreferences: Preferences) {
-  settings.set("preferences", userPreferences);
+export function setKeybindings(userPreferences: Preferences) {
+  settings.set("Keybindings", userPreferences);
 }
 
-export function getPreferences(): { [key: string]: string[] } {
-  return settings.get("preferences");
+export function getKeybindings(): { [key: string]: string[] } {
+  return settings.get("Keybindings", {});
 }
 
 export default settings;

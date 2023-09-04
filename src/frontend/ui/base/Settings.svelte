@@ -18,6 +18,7 @@
       categories = res.data;
       selectedCategoryId = categories.length ? categories[0].id : "";
     }
+    // console.log(categories)
   });
 
   async function saveSettings(settings: Setting[]) {
@@ -117,7 +118,7 @@
               <div class="font-ligt text-sm text-zinc-500">{item.subtitle}</div>
             </label>
             {#if item.type === "preferences"}
-              <ShortcutSettings bind:shortcuts="{item.value}" />
+              <ShortcutSettings bind:settings="{item.value}" />
             {/if}
           </div>
         {/each}
