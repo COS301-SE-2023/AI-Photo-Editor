@@ -86,7 +86,6 @@ export class CacheManager {
         } else if (event.data instanceof Buffer) {
           const id = this.writeContent(event.data);
           socket.send(JSON.stringify({ success: true, id }));
-
           // Send cache update to all listeners
           for (const listener of this.listeners) {
             listener.send(JSON.stringify({ type: "cache-update", cache: Object.keys(this.cache) }));

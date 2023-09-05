@@ -3,4 +3,11 @@ export interface LayoutPanel {
   content?: PanelType;
 }
 
-export type PanelType = "graph" | "media" | "debug" | "webview" | "shortcutSettings" | "assets";
+export type PanelType =
+  | "graph"
+  | "media"
+  | "debug"
+  | "webview"
+  | "shortcutSettings"
+  | "assets"
+  | "webcamera";

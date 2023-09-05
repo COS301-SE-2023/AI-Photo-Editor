@@ -18,6 +18,7 @@
     faCode,
     faPuzzlePiece,
     faGlobe,
+    faCamera,
   } from "@fortawesome/free-solid-svg-icons";
 
   import { tileStore } from "../../../lib/stores/TileStore";
@@ -34,6 +35,7 @@
   const tileDict: { [key: string]: blixTile } = {};
   tileDict["graph"] = { displayName: "graph", description: null, icon: faDiagramProject };
   tileDict["media"] = { displayName: "media", description: null, icon: faImage };
+  tileDict["webcamera"] = { displayName: "camera", description: null, icon: faCamera };
   tileDict["inspector"] = { displayName: "inspector", description: null, icon: faMagnifyingGlass };
   tileDict["webview"] = { displayName: "webview", description: null, icon: faPuzzlePiece };
   tileDict["browser"] = { displayName: "browser", description: null, icon: faGlobe };
