@@ -4,6 +4,7 @@
   import SecureInput from "../../ui/utils/SecureInput.svelte";
   import { toastStore } from "./../../lib/stores/ToastStore";
   import { settingsStore } from "../../lib/stores/SettingsStore";
+  import ShortcutSettings from "../../ui/tiles/ShortcutSettings.svelte";
 
   let selectedCategoryId = "";
   let selectedCategory: UserSettingsCategory | undefined;
@@ -17,9 +18,11 @@
       categories = res.data;
       selectedCategoryId = categories.length ? categories[0].id : "";
     }
+    // console.log(categories)
   });
 
   async function saveSettings(settings: Setting[]) {
+    // console.log(settings)
     const res = await window.apis.utilApi.saveUserSettings(settings);
 
     if (res.status === "success") {
@@ -107,12 +110,35 @@
         >
           Save
         </div>
-        <!-- {:else}
+      {:else if selectedCategory?.id === "keybind_settings"}
+        {#each selectedCategory.settings as item (item.id)}
+          <div>
+            <label for="{item.id}" class="pb-3">
+              <div class="text-normal font-semibold text-zinc-300">{item.title}</div>
+              <div class="font-ligt text-sm text-zinc-500">{item.subtitle}</div>
+            </label>
+            {#if item.type === "preferences"}
+              <ShortcutSettings bind:settings="{item.value}" />
+            {/if}
+          </div>
+        {/each}
+        <div
+          class="mt-12 flex h-10 w-20 cursor-pointer items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/[0.7] text-gray-300 transition duration-300 ease-in-out hover:text-zinc-500"
+          on:click="{() => {
+            if (selectedCategory) {
+              saveSettings(selectedCategory?.settings);
+            }
+          }}"
+          on:keydown="{null}"
+        >
+          Save
+        </div>
+      {:else}
         <div
           class="flex h-full w-full items-center justify-center text-xl font-semibold text-zinc-400"
         >
           <div class="coming-soon flex h-48 w-64 items-center justify-center">Coming Soon</div>
-        </div> -->
+        </div>
       {/if}
     </div>
   </div>

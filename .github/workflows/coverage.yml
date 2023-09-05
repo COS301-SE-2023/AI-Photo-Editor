@@ -51,7 +51,6 @@ jobs:
         with:
           files: coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
-
   end:
     name: End State ✅✅✅
     runs-on: ubuntu-latest

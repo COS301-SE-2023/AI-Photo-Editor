@@ -6,6 +6,7 @@ import settings, { getSecret } from "../../../utils/settings";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
 import { getSecrets, setSecret, clearSecret } from "../../../utils/settings";
 import type { Setting, UserSettingsCategory, QueryResponse } from "../../../../shared/types";
+import { app } from "electron";
 
 // Exposes basic system information
 export class UtilApi implements ElectronMainApi<UtilApi> {
@@ -42,10 +43,9 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     for (const setting of newSettings) {
       if (setting.secret) {
         setSecret(setting.id, setting.value.toString());
-      } else {
-        settings.set(setting.value.toString(), setting.value);
-      }
+      } else settings.set(setting.id, setting.value);
     }
+
     return { status: "success" };
   }
 
@@ -65,6 +65,20 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
             type: "password",
             secret: true,
             value: getSecret("OPENAI_API_KEY"),
+          },
+        ],
+      },
+      {
+        id: "keybind_settings",
+        title: "Keybindings",
+        settings: [
+          {
+            id: "Keybindings",
+            title: "Keybindings",
+            subtitle: "Customize your keybindings",
+            type: "preferences",
+            secret: false,
+            value: settings.get("Keybindings"),
           },
         ],
       },
