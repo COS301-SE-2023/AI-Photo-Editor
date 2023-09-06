@@ -285,7 +285,7 @@ export async function exportMedia(
     return { status: "error", message: "No data was provided" };
   }
 
-  if (type === "Image") {
+  if (type === "image") {
     const base64Data = data.split(";base64, ");
     const imgBuffer = Buffer.from(base64Data[1], "base64");
 

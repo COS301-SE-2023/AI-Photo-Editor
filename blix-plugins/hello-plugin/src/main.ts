@@ -18,13 +18,6 @@ const nodes = {
         nodeBuilder.setDescription("Provides a test slider and button and label for testing purposes, taking two string inputs and returning one string output");
 
         nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {
-            // console.log(
-            //     "------------------",
-            //     "\nANCHOR INPUTS", anchorInputs,
-            //     "\nUI INPUTS", uiInputs,
-            //     "\nREQUIRED OUTPUTS", requiredOutputs
-            // );
-
             // Doing it this way allows us to only compute the outputs that are required
             const computers: { [key: string]: () => any } = {
                 "out1": () => anchorInputs["in1"] + anchorInputs["in2"],
@@ -122,14 +115,14 @@ const nodes = {
         // addInput(type: string, identifier: string, displayName: string)
         nodeBuilder.addInput("string", "in1", "In 1");
         nodeBuilder.addInput("string", "in2", "In 2");
-        nodeBuilder.addInput("Number", "in3", "In 3");
+        nodeBuilder.addInput("number", "in3", "In 3");
 
         // addOutput(type: string, identifier: string, displayName: string)
         nodeBuilder.addOutput("string", "out1", "Concat");
-        nodeBuilder.addOutput("Number", "out2", "Passthrough");
-        nodeBuilder.addOutput("Number", "outSlider", "Slide along");
+        nodeBuilder.addOutput("number", "out2", "Passthrough");
+        nodeBuilder.addOutput("number", "outSlider", "Slide along");
         nodeBuilder.addOutput("color",  "outColorPicker", "");
-        nodeBuilder.addOutput("Number", "outKnob", "Your a knob");
+        nodeBuilder.addOutput("number", "outKnob", "Your a knob");
         nodeBuilder.addOutput("string", "outDropdown", "");
         nodeBuilder.addOutput("string", "outTextbox", "");
         nodeBuilder.addOutput("string", "outFilePicker", "");

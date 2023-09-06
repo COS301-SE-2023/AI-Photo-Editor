@@ -7,7 +7,7 @@
   // 45 < h < 190 -> black
   // 85 < l -> black
   function getFontColor(color: CSSColorString): string {
-    if (color.startsWith("hsl")) {
+    if (typeof color === "string" && color.startsWith("hsl")) {
       const [h, _, l] = color
         .split("(")[1]
         .split(")")[0]

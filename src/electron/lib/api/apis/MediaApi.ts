@@ -1,7 +1,7 @@
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
-import { type MediaOutput, type MediaOutputId } from "../../../../shared/types/media";
+import { type DisplayableMediaOutput, type MediaOutputId } from "../../../../shared/types/media";
 import { MediaSubscriber } from "../../media/MediaSubscribers";
 
 export class MediaApi implements ElectronMainApi<MediaApi> {
@@ -37,7 +37,7 @@ export class MediaApi implements ElectronMainApi<MediaApi> {
     if (!this.mediaSubscribers[mediaId]) {
       const mediaSubscriber = new MediaSubscriber();
 
-      mediaSubscriber.listen = (media: MediaOutput) => {
+      mediaSubscriber.listen = (media: DisplayableMediaOutput) => {
         this._blix.mainWindow?.apis.mediaClientApi.outputChanged(media);
       };
 

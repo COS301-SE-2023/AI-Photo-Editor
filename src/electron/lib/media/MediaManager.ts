@@ -2,12 +2,18 @@ import { type MainWindow } from "../api/apis/WindowApi";
 import { MediaSubscriber } from "./MediaSubscribers";
 import { CoreGraphInterpreter } from "../core-graph/CoreGraphInterpreter";
 import { type UUID } from "../../../shared/utils/UniqueEntity";
-import { type MediaOutput, type MediaOutputId } from "../../../shared/types/media";
+import {
+  MediaDisplayType,
+  type MediaDisplayConfig,
+  type MediaOutput,
+  type MediaOutputId,
+} from "../../../shared/types/media";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
+import { TypeclassRegistry } from "../registries/TypeclassRegistry";
 
 export class MediaManager {
   private media: { [key: MediaOutputId]: MediaOutput };
-  private _mainWindow: MainWindow;
+  private _typeclassRegistry: TypeclassRegistry;
   private _graphInterpreter: CoreGraphInterpreter;
   private _graphManager: CoreGraphManager;
 
@@ -15,11 +21,11 @@ export class MediaManager {
   private _subscribers: { [key: MediaOutputId]: { [key: UUID]: MediaSubscriber } };
 
   constructor(
-    mainWindow: MainWindow,
+    typeclassRegistry: TypeclassRegistry,
     graphInterpreter: CoreGraphInterpreter,
     graphManager: CoreGraphManager
   ) {
-    this._mainWindow = mainWindow;
+    this._typeclassRegistry = typeclassRegistry;
     this._subscribers = {};
     this._graphInterpreter = graphInterpreter;
     this._graphManager = graphManager;
@@ -61,8 +67,10 @@ export class MediaManager {
   // Notify all subscribers of media change
   onMediaUpdated(mediaId: MediaOutputId) {
     if (this._subscribers[mediaId] !== undefined) {
+      const displayableMedia = this._typeclassRegistry.getDisplayableMedia(this.media[mediaId]);
+
       Object.keys(this._subscribers[mediaId]).forEach((subscriberUUID) => {
-        this._subscribers[mediaId][subscriberUUID].onMediaChanged(this.media[mediaId]);
+        this._subscribers[mediaId][subscriberUUID].onMediaChanged(displayableMedia);
       });
     }
   }

@@ -21,7 +21,7 @@ const nodes = {
         );
         nodeBuilder.setUI(ui);
 
-        nodeBuilder.addOutput("Number", "res", "Result");
+        nodeBuilder.addOutput("number", "res", "Result");
     },
     "inputImage": (context) => {
         const nodeBuilder = context.instantiate("input-plugin", "inputImage");
@@ -42,7 +42,7 @@ const nodes = {
 
         nodeBuilder.setUI(ui);
 
-        nodeBuilder.addOutput("Image", "res", "Result");
+        nodeBuilder.addOutput("image", "res", "Result");
     },
     // Will we define a color type? or just a vector4/string 
     "inputColor": (context) => {
@@ -69,22 +69,27 @@ const nodes = {
     "inputBoolean": (context) => {
         const nodeBuilder = context.instantiate("input-plugin", "inputBoolean");
         nodeBuilder.setTitle("Input Boolean");
-        nodeBuilder.setDescription("Provides a radio box and returns a single true/false value");
+        nodeBuilder.setDescription("Provides a radio box to select a single true/false value");
 
         nodeBuilder.define((input, uiInput, from) => {
-            return { "res": uiInput["radio"]};
+            return { "val": uiInput["radio"]};
         });
 
         const ui = nodeBuilder.createUIBuilder();
-        ui.addColorPicker({
+        ui.addRadio({
             componentId: "radio",
-            label: "Pick a color",
-            defaultValue: "red",
+            label: "Boolean value",
+            defaultValue: false,
             triggerUpdate: true,
-        }, {})
+        }, {
+          options: {
+            "False": false,
+            "True": true,
+          }
+        });
         nodeBuilder.setUI(ui);
 
-        nodeBuilder.addOutput("color", "res", "Result");
+        nodeBuilder.addOutput("boolean", "val", "Value");
     },
 }
 

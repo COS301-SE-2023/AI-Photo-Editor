@@ -160,7 +160,7 @@ export class Profiler {
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          const ctx = new NodePluginContext();
+          const ctx = new NodePluginContext("profiler-plugin");
 
           try {
             pluginModule.nodes[node](ctx);

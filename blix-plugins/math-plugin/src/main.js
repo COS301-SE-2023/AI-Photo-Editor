@@ -40,8 +40,8 @@ const nodes = {
 
         nodeBuilder.setUI(ui);
 
-        nodeBuilder.addInput("Number", "num","Num");
-        nodeBuilder.addOutput("Number", "res","Result");
+        nodeBuilder.addInput("number", "num","Num");
+        nodeBuilder.addOutput("number", "res","Result");
     },
     "binary": (context) => {
         const nodeBuilder = context.instantiate("math-plugin", "binary");
@@ -85,9 +85,9 @@ const nodes = {
 
         nodeBuilder.setUI(ui);
       
-        nodeBuilder.addInput("Number", "num1", "Num1");
-        nodeBuilder.addInput("Number", "num2", "Num2");
-        nodeBuilder.addOutput("Number", "res", "Result");
+        nodeBuilder.addInput("number", "num1", "Num1");
+        nodeBuilder.addInput("number", "num2", "Num2");
+        nodeBuilder.addOutput("number", "res", "Result");
       },
     // "ternary": (context) => {
     //     nodeBuilder = context.instantiate("math-plugin","ternary");
@@ -96,10 +96,10 @@ const nodes = {
     //         return { "res" : data.input[0] + data.input[1] + data.input[2] }[data.from];
     //     });
 
-    //   nodeBuilder.addInput("Number","num1", "Num");
-    //   nodeBuilder.addInput("Number","num2", "Num");
-    //   nodeBuilder.addInput("Number","num3", "Num");
-    //   nodeBuilder.addOutput("Number","res", "Num");
+    //   nodeBuilder.addInput("number","num1", "Num");
+    //   nodeBuilder.addInput("number","num2", "Num");
+    //   nodeBuilder.addInput("number","num3", "Num");
+    //   nodeBuilder.addOutput("number","res", "Num");
     // }
 }
 

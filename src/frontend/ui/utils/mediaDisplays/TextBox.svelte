@@ -30,6 +30,7 @@
     vertical-align: center;
     max-height: 100%;
     overflow-y: auto;
+    white-space: pre-line; /* Preserve whitespace in output */
 
     padding: 2em;
     word-break: break-all;

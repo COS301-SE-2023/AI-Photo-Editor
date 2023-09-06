@@ -10,4 +10,5 @@ export type PanelType =
   | "webview"
   | "shortcutSettings"
   | "assets"
+  | "browser"
   | "webcamera";

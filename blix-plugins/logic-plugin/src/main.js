@@ -86,8 +86,8 @@ const nodes ={
 
         nodeBuilder.setUI(ui);
       
-        nodeBuilder.addInput("Number", "valA", "A");
-        nodeBuilder.addInput("Number", "valB", "B");
+        nodeBuilder.addInput("number", "valA", "A");
+        nodeBuilder.addInput("number", "valB", "B");
         nodeBuilder.addOutput("boolean", "res", "Result");
       },
     "ternary": (context) => {
