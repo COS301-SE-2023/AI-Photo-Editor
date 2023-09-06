@@ -1,7 +1,11 @@
 import { writable } from 'svelte/store';
 import App from './App.svelte';
+import { BlinkCanvas } from './clump';
 
-const media = writable({});
+const media = writable<BlinkCanvas>({
+	assets: {},
+	content: null
+});
 
 const app = new App({
 	target: document.body,
@@ -20,6 +24,6 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 
-window.cache.write("test", new Blob([]));
+// window.cache.write("test", new Blob([]));
 
 export { app };

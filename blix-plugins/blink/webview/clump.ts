@@ -3,7 +3,7 @@ import { Matrix } from "pixi.js";
 
 export type BlinkCanvas = {
   assets: { [key: string]: Asset };
-  content: Clump;
+  content: Clump | null;
 }
 
 export type Asset = {
@@ -49,8 +49,9 @@ type ImageAtom = {
 };
 type ShapeAtom = {
   type: "shape";
-  shape: "rect" | "circle" | "ellipse" | "line" | "polygon" | "polyline";
+  shape: "rectangle" | "ellipse" | "triangle";
 
+  bounds: { w: number, h: number };
   fill: number;
   stroke: number;
   strokeWidth: number;
@@ -110,8 +111,9 @@ export const canvas1: BlinkCanvas = {
           {
             class: "atom",
             type: "shape",
-            shape: "rect",
+            shape: "rectangle",
 
+            bounds: { w: 100, h: 100 },
             fill: 0xff0000,
             stroke: 0x00ff00,
             strokeWidth: 5,
