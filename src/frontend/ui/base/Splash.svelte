@@ -1,7 +1,29 @@
 <script lang="ts">
+  // import type { recentProject } from "@electron/lib/projects/ProjectCommands";
   import { createEventDispatcher } from "svelte";
-
   const dispatch = createEventDispatcher();
+  // import { projectsStore } from "../../lib/stores/ProjectStore";
+  import { commandStore } from "../../lib/stores/CommandStore";
+  import type { recentProject } from "../../../shared/types/index";
+
+  async function loadProjects(): Promise<recentProject[]> {
+    return (await commandStore.runCommand("blix.projects.recent")).data as recentProject[];
+  }
+
+  /**
+   * This function extracts a project name from a path. It handles different operating system path formats
+   * for MacOS, Linux and Windows as of 09 Aug 2023
+   *
+   * @param path Path to project
+   */
+  function handlePath(path: string): string {
+    return path.slice(
+      path.lastIndexOf(path.includes("\\") ? "\\" : "/") + 1,
+      path.lastIndexOf(".")
+    );
+  }
+
+  let currentProject = "";
 </script>
 
 <div class="darkenBackground" on:click="{() => dispatch('click')}" on:keydown="{null}"></div>
@@ -17,7 +39,34 @@
       <br /><br />
       <h2>Recent projects</h2>
       <hr class="my-3 border-gray-600" />
-      <i>No recent projects</i>
+      <ul>
+        {#await loadProjects()}
+          <p>&nbsp;No recent projects</p>
+        {:then projects}
+          {#each projects as project (project.path)}
+            <!-- Styling might need a little touching up -->
+            <li
+              class="mb-1 overflow-hidden rounded hover:bg-dino"
+              on:click="{() => commandStore.runCommand('blix.projects.open', project)}"
+              on:keydown="{null}"
+              on:mouseover="{() => (currentProject = project.path)}"
+              on:focus="{null}"
+              on:mouseleave="{() => (currentProject = '')}"
+            >
+              <span style="float:left">
+                <p>&nbsp;{handlePath(project.path)}</p>
+              </span>
+              <span style="float:right">
+                {#if project.path == currentProject}
+                  <i class="text-white">{project.lastEdited}&nbsp;</i>
+                {:else}
+                  <i class="text-gray-500">{project.lastEdited}&nbsp;</i>
+                {/if}
+              </span>
+            </li>
+          {/each}
+        {/await}
+      </ul>
       <br /><br /><br /><br />
       <h2>Templates</h2>
       <hr class="my-3 border-gray-600" />

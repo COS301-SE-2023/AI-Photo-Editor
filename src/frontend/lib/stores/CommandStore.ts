@@ -26,7 +26,7 @@ function createCommandStore() {
       if (args) {
         return await window.apis.commandApi.runCommand(id, args);
       } else {
-        return await window.apis.commandApi.runCommand(id, blixCommandParams[id]());
+        return await window.apis.commandApi.runCommand(id, await blixCommandParams[id]());
       }
     } else {
       if (args) {
@@ -48,19 +48,30 @@ function createCommandStore() {
 // ========== Native Command Parameters ==========
 
 const blixCommandParams: Record<string, () => any> = {
-  "blix.projects.save": () => {
+  "blix.projects.save": async () => {
     const project = get(projectsStore).activeProject;
-    // await window.apis.graphApi.updateUIPositions(project?.graphs);
+    // For every graph in the project, update the copy of the node positions in the backend
+    if (project) await projectsStore.handleProjectSaving(project.id);
+    // if (project) {
+    //   await Promise.all(
+    //     project.graphs.map(async (graph) => await graphMall.getGraph(graph).updateUIPositions())
+    //   );
+    // }
     return {
       projectId: project?.id,
-      layout: project?.layout.saveLayout(),
     };
   },
-  "blix.projects.saveAs": () => {
+  "blix.projects.saveAs": async () => {
     const project = get(projectsStore).activeProject;
+    // For every graph in the project, update the copy of the node positions in the backend
+    if (project) await projectsStore.handleProjectSaving(project.id);
+    // if (project) {
+    //   await Promise.all(
+    //     project.graphs.map(async (graph) => await graphMall.getGraph(graph).updateUIPositions())
+    //   );
+    // }
     return {
       projectId: project?.id,
-      layout: project?.layout.saveLayout(),
     };
   },
   "blix.graphs.create": () => {

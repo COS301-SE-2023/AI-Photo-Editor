@@ -15,6 +15,8 @@
     faTerminal,
     faKeyboard,
     faCode,
+    faPuzzlePiece,
+    faGlobe,
   } from "@fortawesome/free-solid-svg-icons";
 
   // TODO: Clean this up and bundle it with the string -> tile mappings in Panel.svelte
@@ -22,6 +24,8 @@
   tileIcons["graph"] = faDiagramProject;
   tileIcons["media"] = faImage;
   tileIcons["inspector"] = faMagnifyingGlass;
+  tileIcons["webview"] = faPuzzlePiece;
+  tileIcons["browser"] = faGlobe;
   tileIcons["promptBox"] = faTerminal;
   tileIcons["shortcutSettings"] = faKeyboard;
   tileIcons["debug"] = faCode;

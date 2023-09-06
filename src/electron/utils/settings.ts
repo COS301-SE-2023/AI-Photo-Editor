@@ -2,12 +2,14 @@ import ElectronStore from "electron-store";
 import { safeStorage } from "electron";
 import logger from "./logger";
 import type { Preferences } from "../../shared/types";
+import type { recentProject } from "../../shared/types/index";
 
 interface Settings {
   check: boolean;
   secrets: {
     OPENAI_API_KEY: string;
   };
+  recentProjects: recentProject[];
 }
 
 type DotUnionKeys<T, Prefix extends string = ""> = T extends object
@@ -33,6 +35,7 @@ const settings = new ElectronStore<Settings>({
     secrets: {
       OPENAI_API_KEY: "",
     },
+    recentProjects: [],
   },
 });
 
@@ -98,6 +101,14 @@ export function decryptWithSafeStorage(value: string) {
 
 export function clearSecret(key: string): void {
   settings.set(`secrets.${key}`, "");
+}
+
+export function setRecentProjects(projects: recentProject[]) {
+  settings.set("recentProjects", projects);
+}
+
+export function getRecentProjects() {
+  return settings.get("recentProjects");
 }
 
 export default settings;

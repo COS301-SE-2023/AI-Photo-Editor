@@ -9,6 +9,7 @@ coverage:
         branches: 
           - master
           - dev
+          - feature/projects
         if_ci_failed: error #success, failure, error, ignore
         informational: false
         only_pulls: false

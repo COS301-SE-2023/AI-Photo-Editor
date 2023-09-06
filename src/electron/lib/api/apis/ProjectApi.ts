@@ -2,6 +2,7 @@ import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import type { UUID } from "../../../../shared/utils/UniqueEntity";
 import type { IpcResponse } from "../MainApi";
+import type { LayoutPanel } from "../../../../shared/types/index";
 import {
   CoreGraphUpdateEvent,
   CoreGraphUpdateParticipant,
@@ -43,6 +44,10 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
     }
   }
 
+  async saveLayout(projectId: UUID, layout: LayoutPanel) {
+    this.blix.projectManager.saveProjectLayout(projectId, layout);
+  }
+
   // async getRecentProjects(): Promise<IpcResponse<CommonProject[]>> {
   //   const projects: CommonProject[] = this._projMgr.getRecentProjects().data;
   //   return {
@@ -51,7 +56,8 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
   //   };
   // }
 
-  async closeProject(uuid: UUID) {
-    this.blix.projectManager.removeProject(uuid);
+  async closeProject(uuid: UUID, graphs?: UUID[]) {
+    const res = await this.blix.projectManager.removeProject(this.blix, uuid);
+    if (res === -1 && graphs) this.blix.graphManager.deleteGraphs(graphs);
   }
 }

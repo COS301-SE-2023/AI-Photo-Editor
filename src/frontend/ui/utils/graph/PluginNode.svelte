@@ -4,6 +4,7 @@
   import { toolboxStore } from "../../../lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";
   import { createEventDispatcher } from "svelte";
+  import { graphMall } from "lib/stores/GraphStore";
 
   const dispatch = createEventDispatcher();
 
@@ -76,6 +77,15 @@
       await window.apis.graphApi.removeNode(graphId, nodeUUID);
     }
   }
+
+  async function nodeDragReleased(e: CustomEvent) {
+    await window.apis.graphApi.setNodePos(
+      graphId,
+      node.uuid,
+      graphMall.getGraphState(graphId).uiPositions[node.uuid]
+    );
+    console.log("NODE POSITION UPDATED");
+  }
 </script>
 
 {#if svelvetNodeId !== ""}
@@ -87,11 +97,13 @@ height="{graphNode.dims.h}" -->
     textColor="#ffffff"
     bind:position="{$nodePos}"
     id="{svelvetNodeId}"
-    borderColor="#ffffff"
-    borderWidth="{3}"
+    borderColor="transparent"
+    borderWidth="1px"
     borderRadius="{10}"
+    selectionColor="#f43e5c"
     on:selected="{() => console.log('selected')}"
     on:nodeClicked="{nodeClicked}"
+    on:nodeDragReleased="{nodeDragReleased}"
   >
     <div class="node">
       <div class="header">

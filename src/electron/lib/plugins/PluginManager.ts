@@ -64,7 +64,15 @@ export class PluginManager {
     const appPath = app.getAppPath();
     const pluginsPath = join(app.isPackaged ? process.resourcesPath : appPath, "blix-plugins");
     const ignorePatterns = [".DS_Store"];
-    const plugins = readdirSync(pluginsPath);
+
+    // TODO: Make plugin loading async
+    // See: [https://stackoverflow.com/a/52243773]
+
+    // Read blix-plugins/ directory
+    const dirents = readdirSync(pluginsPath, { withFileTypes: true });
+    // Ignore files (only directories)
+    const plugins = dirents.filter((dirent) => dirent.isDirectory()).map((dirent) => dirent.name);
+
     plugins.filter((plugin) => {
       return !ignorePatterns.some((pattern) => plugin.includes(pattern));
     });
@@ -100,12 +108,12 @@ export class PluginManager {
         return;
       }
 
-      const pluginInstance: Plugin = new Plugin(packageData, pluginPath, mainPath);
+      const pluginInstance: Plugin = new Plugin(packageData, pluginPath);
 
       this.loadedPlugins.push(pluginInstance);
       pluginInstance.requireSelf(this.blix); // The plugin tries to require its corresponding npm module
     } catch (err) {
-      logger.warn("Failed to load plugin: " + plugin + ", package.json not found");
+      logger.warn("Failed to load plugin: " + plugin + ", package.json failed to load");
       return;
     }
   }
@@ -124,7 +132,7 @@ export interface PackageData {
   };
 
   main: PathLike;
-  renderer: PathLike;
+  renderers: { [key: string]: PathLike };
 
   devDependencies: {
     [key: string]: string;

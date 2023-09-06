@@ -4,7 +4,7 @@ import { platform, type, release } from "os";
 import logger from "../../../utils/logger";
 import settings, { getSecret } from "../../../utils/settings";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
-import { getSecrets, setSecret, clearSecret } from "../../../utils/settings";
+import { getSecrets, setSecret, clearSecret, getRecentProjects } from "../../../utils/settings";
 import type { Setting, UserSettingsCategory, QueryResponse } from "../../../../shared/types";
 import { app } from "electron";
 
@@ -30,11 +30,32 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     };
   }
 
-  async sendPrompt(prompt: string, id: UUID) {
+  async sendPrompt(prompt: string, id: UUID): Promise<QueryResponse> {
     if (this.blix.graphManager.getGraph(id)) {
-      const res = await this.blix.aiManager.sendPrompt(prompt, id);
+      // const res = await this.blix.aiManager.sendPrompt(prompt, id);
+      const response = await this.blix.aiManager.executePrompt({
+        prompt,
+        graphId: id,
+        model: "GPT-3.5",
+        apiKey: getSecret("OPENAI_API_KEY"),
+      });
+
+      if (!response.success) {
+        return {
+          status: "error",
+          message: response.message,
+        };
+      }
+
+      return {
+        status: "success",
+        message: "Executed successfully",
+      };
     } else {
-      this.blix.sendWarnMessage("No graph selected");
+      return {
+        status: "error",
+        message: "No graph selected",
+      };
     }
   }
 

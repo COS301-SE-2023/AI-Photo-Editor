@@ -4,7 +4,11 @@ module.exports = {
   content: ['./public/index.html', './src/**/*.svelte'],
   darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+        colors: {
+          dino: "#f43e5c"
+        }
+    },
   },
   plugins: [
     require('@catppuccin/tailwindcss')({

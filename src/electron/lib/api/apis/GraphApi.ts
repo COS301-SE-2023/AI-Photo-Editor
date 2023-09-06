@@ -14,6 +14,18 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
     this._blix = blix;
   }
 
+  async undoChange(graph: UUID) {
+    return this._blix.graphManager.undoEvent(graph);
+  }
+
+  async redoChange(graph: UUID) {
+    return this._blix.graphManager.redoEvent(graph);
+  }
+
+  async deleteGraphs(graphUUIDs: UUID[]) {
+    this._blix.graphManager.deleteGraphs(graphUUIDs);
+  }
+
   // TODO: Implement these properly
   async addNode(graphUUID: UUID, nodeSignature: NodeSignature, pos: SvelvetCanvasPos) {
     return this._blix.graphManager.addNode(
@@ -74,5 +86,9 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
       updatedMetadata,
       CoreGraphUpdateParticipant.user
     );
+  }
+
+  async updateUIPositions(graphUUID: UUID, positions: { [key: UUID]: SvelvetCanvasPos }) {
+    this._blix.graphManager.updateUIPositions(graphUUID, positions);
   }
 }

@@ -186,7 +186,9 @@
       }
     }
 
-    return filteredNodes;
+    return filteredNodes.sort((nodeA, nodeB) => {
+      return nodeA.label < nodeB.label ? -1 : nodeA.label > nodeB.label ? 1 : 0;
+    });
   }
 
   function handleInput() {

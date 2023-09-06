@@ -72,6 +72,8 @@ export type NodeFunc = (
   requiredOutputs: string[]
 ) => { [key: string]: any };
 
+export type NodeUIInitializer = (uiInputs: { [key: string]: any }) => { [key: string]: any };
+
 export class NodeInstance implements RegistryInstance {
   public readonly inputs: InputAnchorInstance[];
   public readonly outputs: OutputAnchorInstance[];
@@ -86,7 +88,8 @@ export class NodeInstance implements RegistryInstance {
     outputs: MinAnchor[],
     public readonly func: NodeFunc = () => ({}),
     public readonly ui: NodeUIParent | null = null,
-    public readonly uiConfigs: { [key: string]: UIComponentConfig } = {}
+    public readonly uiConfigs: { [key: string]: UIComponentConfig } = {},
+    public readonly uiInitializer: NodeUIInitializer = (x) => x
   ) {
     this.inputs = [];
     this.outputs = [];
@@ -104,7 +107,7 @@ export class NodeInstance implements RegistryInstance {
 
   // Global unique identifier for the node (amongst all plugins)
   get signature(): NodeSignature {
-    return this.plugin + "." + this.name;
+    return `${this.plugin}.${this.name}`;
   }
 
   get getFunction(): any {
