@@ -95,7 +95,7 @@
     position: relative;
   }
   :root {
-    --navbar-height: 1.2rem;
+    --navbar-height: 2rem;
   }
 
   div.navbar {

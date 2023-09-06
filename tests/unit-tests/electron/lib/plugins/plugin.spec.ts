@@ -103,7 +103,7 @@ describe("Test plugin integrations", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      plugin = new Plugin(pack,plugDir,main);
+      plugin = new Plugin(pack,plugDir);
       blix = new Blix();
       plugin.requireSelf(blix);
     });
@@ -123,13 +123,13 @@ describe("Test plugin integrations", () => {
 
     test("Logger should warn for invalid node", () => {
 
-      plugin = new Plugin(badPlug.pack,badPlug.plugDir,badPlug.main);
+      plugin = new Plugin(badPlug.pack,badPlug.plugDir);
       expect(plugin.requireSelf(blix)).toReturn;
     });
 
     test("Logger should warn for invalid file", () => {
 
-      plugin = new Plugin(badPlug.pack,badPlug.plugDir,badPlug.main+"\fake");
+      plugin = new Plugin(badPlug.pack,badPlug.plugDir);
       expect(plugin.requireSelf(blix)).toReturn;
     });
 
