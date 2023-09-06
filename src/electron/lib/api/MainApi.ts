@@ -7,6 +7,7 @@ import { CommandApi } from "./apis/CommandApi";
 import { GraphApi } from "./apis/GraphApi";
 import { ToolboxApi } from "./apis/ToolboxApi";
 import { MediaApi } from "./apis/MediaApi";
+import { TypeclassApi } from "./apis/TypeclassApi";
 
 /**
  * Expose all main process APIs to the renderer. This method will be called on
@@ -23,6 +24,7 @@ export function exposeMainApis(blix: Blix) {
     projectApi: new ProjectApi(blix),
     pluginApi: new CommandApi(blix),
     graphApi: new GraphApi(blix),
+    typeclassApi: new TypeclassApi(blix),
     mediaApi: new MediaApi(blix),
     toolboxApi: new ToolboxApi(blix),
   };

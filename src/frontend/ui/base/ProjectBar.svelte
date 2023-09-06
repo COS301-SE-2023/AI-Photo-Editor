@@ -37,7 +37,7 @@
 <div class="drag flex h-full flex-row flex-nowrap items-center">
   {#each $projectsStore.projects as project (project.id)}
     <div
-      class="no-drag group flex h-full shrink basis-48 items-center overflow-hidden rounded-t-xl px-2 text-sm font-medium text-zinc-200
+      class="no-drag group flex h-full shrink basis-48 items-center overflow-hidden px-2 text-xs font-medium text-zinc-200
         {$projectsStore.activeProject?.id === project.id ? 'bg-zinc-900' : 'hover:bg-zinc-700'}"
       title="{project.name}"
       on:click="{() => projectsStore.setActiveProject(project.id)}"
@@ -58,7 +58,7 @@
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="ml-auto h-5 w-5 shrink-0 rounded-md stroke-zinc-500 p-[0.1em] hover:bg-zinc-600 hover:stroke-rose-500/70"
+        class="ml-auto h-4 w-4 shrink-0 rounded-md stroke-zinc-500 p-[0.1em] hover:bg-zinc-600 hover:stroke-rose-500/70"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
@@ -71,7 +71,7 @@
       viewBox="0 0 24 24"
       stroke-width="1.8"
       stroke="currentColor"
-      class="h-6 w-6 rounded-md stroke-zinc-400 hover:bg-zinc-700"
+      class="h-4 w-4 rounded-md stroke-zinc-400 hover:bg-zinc-700"
     >
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
     </svg>

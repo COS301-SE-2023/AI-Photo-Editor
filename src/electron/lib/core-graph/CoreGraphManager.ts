@@ -13,6 +13,7 @@ import type { MediaOutputId } from "../../../shared/types/media";
 import type { GraphMetadata, SvelvetCanvasPos, GraphUUID } from "../../../shared/ui/UIGraph";
 import { type CoreGraphEvent, CoreGraphEventManager, type EventArgs } from "./CoreGraphEventManger";
 const GRAPH_UPDATED_EVENT = new Set([CoreGraphUpdateEvent.graphUpdated]);
+const UIINPUTS_UPDATED_EVENT = new Set([CoreGraphUpdateEvent.uiInputsUpdated]);
 
 // This class stores all the graphs amongst all open projects
 // Projects index into this store at runtime to get their graphs
@@ -58,18 +59,23 @@ export class CoreGraphManager {
       // console.log("Node added: ", res.data!.nodeId);
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
 
+      // If node had a UI inputs initializer function
+      if (res.data?.uiInputsInitialized) {
+        this.onGraphUpdated(graphUUID, UIINPUTS_UPDATED_EVENT, CoreGraphUpdateParticipant.system);
+      }
+
       if (participant === CoreGraphUpdateParticipant.user) {
         this._events[graphUUID].addEvent({
           element: "Node",
           operation: "Add",
           execute: { graphUUID, node, pos },
-          revert: { graphUUID, nodeUUId: res.data!.nodeId },
+          revert: { graphUUID, nodeUUId: res.data.nodeId },
         });
       } else if (eventArgs) {
         const { event } = eventArgs;
         if (event?.element === "Node" && event.operation === "Add") {
           const old = event.revert.nodeUUId; // Old uuid currently in the event
-          this._events[graphUUID].onAddNode(old, res.data!.nodeId); // Update uuid of node throughout all events
+          this._events[graphUUID].onAddNode(old, res.data.nodeId); // Update uuid of node throughout all events
           // console.log("Old UUID: ", old);
           // console.log("NEW UUID: ", res.data!.nodeId);
         }
@@ -99,8 +105,8 @@ export class CoreGraphManager {
           execute: { graphUUID, nodeUUId: nodeUUID },
           revert: {
             node: { graphUUID, node, pos },
-            edges: res.data!.edges,
-            uiInputs: res.data!.uiInputs[nodeUUID].getInputs,
+            edges: res.data.edges,
+            uiInputs: res.data.uiInputs[nodeUUID].getInputs,
           },
         });
       }
@@ -149,8 +155,8 @@ export class CoreGraphManager {
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
       if (participant === CoreGraphUpdateParticipant.user) {
         const edge = this._graphs[graphUUID].createEdgeBlueprint(
-          res.data!.anchorFrom,
-          res.data!.anchorTo
+          res.data.anchorFrom,
+          res.data.anchorTo
         );
         this._events[graphUUID].addEvent({
           element: "Edge",
@@ -222,15 +228,14 @@ export class CoreGraphManager {
 
       let shouldUpdate = false;
       for (const change of changes) {
-        if (uiConfigs[change].updatesBackend) {
+        if (uiConfigs[change].triggerUpdate) {
           shouldUpdate = true;
           break;
         }
       }
 
       if (shouldUpdate) {
-        const updateEvents = new Set([CoreGraphUpdateEvent.uiInputsUpdated]);
-        this.onGraphUpdated(graphUUID, updateEvents, participant);
+        this.onGraphUpdated(graphUUID, UIINPUTS_UPDATED_EVENT, participant);
       }
     }
     return res;
@@ -455,7 +460,7 @@ export class CoreGraphManager {
           if (nodeRes.status === "success") {
             // Get old uuid used to execute removing the node
             const { nodeUUId } = event.execute;
-            this._events[node.graphUUID].onAddNode(nodeUUId, nodeRes.data!.nodeId);
+            this._events[node.graphUUID].onAddNode(nodeUUId, nodeRes.data.nodeId);
 
             const edgesAdded: string[] = [];
 

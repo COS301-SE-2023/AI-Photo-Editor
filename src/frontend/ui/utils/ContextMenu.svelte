@@ -63,16 +63,25 @@
 
       if (!action) return;
 
+      const graphMenuState = get(graphMenuStore);
       const graphStore = graphMall.getGraph($focusedGraphStore.graphUUID);
 
       if (!graphStore) return;
 
       if (action.type === "addNode") {
         const view = get(graphStore.view);
-        graphStore.addNode(action.signature, {
-          x: view.dimensions.width / 2 - view.translation.x / view.zoom,
-          y: view.dimensions.height / 2 - view.translation.y / view.zoom,
-        });
+
+        // Convert canvas coord to svelvet coord in graph
+        let x =
+          (graphMenuState.canvasPos.x - view.translation.x - view.dimensions.width / 2) /
+            view.zoom +
+          view.dimensions.width / 2;
+        let y =
+          (graphMenuState.canvasPos.y - view.translation.y - view.dimensions.height / 2) /
+            view.zoom +
+          view.dimensions.height / 2;
+
+        graphStore.addNode(action.signature, { x, y });
       }
     },
     expandedNodeIds,

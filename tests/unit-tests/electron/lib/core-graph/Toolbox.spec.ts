@@ -101,7 +101,7 @@ describe("Test Node ui", () => {
             label: "button",
             componentId: "Button",
             defaultValue: 50,
-            updatesBackend: true
+            triggerUpdate: true
       }  
     builder.addButton(uiComponentConfig,{exec : 1});
       
@@ -116,7 +116,7 @@ describe("Test Node ui", () => {
             label: "slider",
             componentId: "Slider",
             defaultValue: 50,
-            updatesBackend: true
+            triggerUpdate: true
       }  
     builder.addSlider(uiComponentConfig,{ min: 0, max: 100, step: 0.1 });
       
@@ -135,7 +135,7 @@ describe("Test Node ui", () => {
           label: "dropdown",
           componentId: "Dropdown",
           defaultValue: 50,
-          updatesBackend: true
+          triggerUpdate: true
         }
    
 
@@ -152,7 +152,7 @@ describe("Test Node ui", () => {
         label: "label",
         componentId: "Label",
         defaultValue: 50,
-        updatesBackend: true
+        triggerUpdate: true
       }
 
     builder.addLabel(uiComponentConfig,{type : "Attack the D point!"});
@@ -168,7 +168,7 @@ describe("Test Node ui", () => {
         label: "numberInput",
         componentId: "InputNum",
         defaultValue: 50,
-        updatesBackend: true
+        triggerUpdate: true
       }
 
     builder.addNumberInput(uiComponentConfig,{min : 0, max : 100, step : 0.1});
@@ -184,7 +184,7 @@ describe("Test Node ui", () => {
         label: "label",
         componentId: "InputImg",
         defaultValue: 50,
-        updatesBackend: true
+        triggerUpdate: true
       }
 
     builder.addImageInput(uiComponentConfig,{type : "Attack the D point!"});
@@ -200,7 +200,7 @@ describe("Test Node ui", () => {
         label: "label",
         componentId: "ColorPicker",
         defaultValue: 50,
-        updatesBackend: true
+        triggerUpdate: true
       }
 
     builder.addColorPicker(uiComponentConfig,{type : "Attack the D point!"});

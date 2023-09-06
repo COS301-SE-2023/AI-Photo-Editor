@@ -227,16 +227,21 @@ app.on("web-contents-created", (e, contents) => {
   // Security of webviews
 
   contents.on("will-attach-webview", (event, webPreferences, params) => {
+    // See: [https://www.electronjs.org/docs/latest/api/web-contents#event-will-attach-webview]
     logger.info(event, params);
-    // Strip away preload scripts if unused or verify their location is legitimate
-    delete webPreferences.preload;
 
-    // Disable Node.js integration
+    // Strip away preload scripts if unused or verify their location is legitimate
+    // delete webPreferences.preload;
+
+    // Setup webview security features
+    webPreferences.preload = join(__dirname, "electron/lib/webviews/preload.js");
     webPreferences.nodeIntegration = false;
+    webPreferences.contextIsolation = true;
+    // webPreferences.sandbox = true; // TODO: Look into this
 
     // Verify URL being loaded
     // if (!params.src.startsWith(`file://${join(__dirname)}`)) {
-    //   event.preventDefault(); // We do not open anything now
+    // event.preventDefault(); // Cancel opening the webview
     // }
   });
 

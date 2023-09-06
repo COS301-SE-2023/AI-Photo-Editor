@@ -1,6 +1,7 @@
 import { CommandRegistry } from "./registries/CommandRegistry";
 import { ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
+import { TypeclassRegistry } from "./registries/TypeclassRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
@@ -18,7 +19,7 @@ import type { UUID } from "../../shared/utils/UniqueEntity";
 import type { GraphMetadata, UIGraph } from "../../shared/ui/UIGraph";
 import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
-import { AiManager } from "./ai/AiManager";
+import { AiManager } from "./ai/AiManagerv2";
 // import { testStuffies } from "./core-graph/CoreGraphTesting";
 import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
 import type { MediaOutput } from "../../shared/types/media";
@@ -34,6 +35,7 @@ export class Blix {
   private _toolboxRegistry!: ToolboxRegistry;
   private _tileRegistry: TileRegistry;
   private _commandRegistry: CommandRegistry;
+  private _typeclassRegistry: TypeclassRegistry;
   private _graphManager!: CoreGraphManager;
   private _projectManager!: ProjectManager;
   private _pluginManager!: PluginManager;
@@ -52,6 +54,7 @@ export class Blix {
   constructor() {
     // this.startTime = new Date();
     this._commandRegistry = new CommandRegistry(this);
+    this._typeclassRegistry = new TypeclassRegistry(this);
     this._tileRegistry = new TileRegistry();
   }
 
@@ -75,7 +78,7 @@ export class Blix {
         componentId: "export",
         label: "Export",
         defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
-        updatesBackend: false,
+        triggerUpdate: false,
       },
       {}
     );
@@ -84,7 +87,7 @@ export class Blix {
         componentId: "outputId",
         label: "Export",
         defaultValue: "default", // TODO: Make this a random id to start with
-        updatesBackend: true,
+        triggerUpdate: true,
       },
       {}
     );
@@ -136,7 +139,7 @@ export class Blix {
 
   private initSubscribers() {
     // ===== CORE GRAPH SUBSCRIBERS ===== //
-    // Subscribes to graph updates and alerts the frontend
+    // ----- Subscribes to graph updates and alerts the frontend -----
     const ipcGraphSubscriber = new IPCGraphSubscriber();
     ipcGraphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
       this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
@@ -144,7 +147,7 @@ export class Blix {
     };
     this._graphManager.addAllSubscriber(ipcGraphSubscriber);
 
-    // Subscribes to backend UI input updates and alerts the frontend
+    // ----- Subscribes to backend UI input updates and alerts the frontend -----
     const ipcUIInputsSubscriber = new UIInputsGraphSubscriber();
     ipcUIInputsSubscriber.setListenEvents([CoreGraphUpdateEvent.uiInputsUpdated]);
     ipcUIInputsSubscriber.setListenParticipants([
@@ -157,7 +160,20 @@ export class Blix {
     };
     this._graphManager.addAllSubscriber(ipcUIInputsSubscriber);
 
-    // Subscribes to all updates and alerts the media manager
+    // ----- Subscribes to backend UI input updates and alerts the frontend -----
+    const ipcGravityAISubsriber = new IPCGraphSubscriber();
+    ipcGravityAISubsriber.setListenEvents([CoreGraphUpdateEvent.graphUpdated]);
+    ipcGravityAISubsriber.setListenParticipants([
+      CoreGraphUpdateParticipant.system,
+      CoreGraphUpdateParticipant.ai,
+    ]);
+
+    ipcGravityAISubsriber.listen = (graphId: UUID) => {
+      this.mainWindow?.apis.graphClientApi.aiChangedGraph(graphId);
+    };
+    this._graphManager.addAllSubscriber(ipcGravityAISubsriber);
+
+    // ----- Subscribes to all updates and alerts the media manager -----
     const mediaSubscriber = new SystemGraphSubscriber();
     mediaSubscriber.setListenEvents([
       CoreGraphUpdateEvent.graphUpdated,
@@ -225,6 +241,10 @@ export class Blix {
 
   get commandRegistry(): CommandRegistry {
     return this._commandRegistry;
+  }
+
+  get typeclassRegistry(): TypeclassRegistry {
+    return this._typeclassRegistry;
   }
 
   get graphManager(): CoreGraphManager {

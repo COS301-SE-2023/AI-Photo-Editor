@@ -5,6 +5,7 @@
   import { onDestroy } from "svelte";
   import Shortcuts from "../../utils/Shortcuts.svelte";
   import { graphMall } from "../../../lib/stores/GraphStore";
+  import { toastStore } from "lib/stores/ToastStore";
   let showPalette = false;
   let expanded = true;
   let inputElement: HTMLInputElement;
@@ -82,6 +83,12 @@
 
   // If the item/category index is out of bounds, remap it back to a valid value
   function repairItemIndex(): void {
+    if (categories.length == 0) {
+      selectedCategory = 0;
+      selectedItem = 0;
+      return;
+    }
+
     // True modulo operator which wraps negatives back to [0, m]
     const trueMod = (n: number, m: number) => {
       return ((n % m) + m) % m;
@@ -154,14 +161,34 @@
     },
     "blix.palette.selectItem": () => {
       // Default enter
-      const item = categories[selectedCategory].items[selectedItem];
-      handleAction(item);
+      const item = categories[selectedCategory]?.items[selectedItem];
+      if (item) {
+        handleAction(item);
+      }
     },
-    "blix.palette.prompt": () => {
-      if (searchTerm.trim() != "") {
-        // TODO remove and refactor how we get graphID ,hecker man shark said no to this, he very right
-        window.apis.utilApi.sendPrompt(searchTerm.trim(), graphMall.getAllGraphUUIDs()[0]);
-        closePalette();
+    "blix.palette.prompt": async () => {
+      if (searchTerm.trim() === "") {
+        return;
+      }
+
+      closePalette();
+      const dismiss = toastStore.trigger({ message: "🔥Cooking...", type: "loading" });
+
+      try {
+        const res = await window.apis.utilApi.sendPrompt(
+          searchTerm.trim(),
+          graphMall.getAllGraphUUIDs()[0]
+        );
+
+        if (res.status === "error") {
+          toastStore.trigger({ message: res.message, type: "error" });
+        } else {
+          toastStore.trigger({ message: "Yay!", type: "success" });
+        }
+      } catch (error) {
+        toastStore.trigger({ message: "Oops😐 That wasn't supposed to happen", type: "error" });
+      } finally {
+        dismiss();
       }
     },
   };
