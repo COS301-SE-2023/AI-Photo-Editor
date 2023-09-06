@@ -19,4 +19,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+
+window.cache.write("test", new Blob([]));
+
 export { app };

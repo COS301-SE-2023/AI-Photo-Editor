@@ -5,6 +5,7 @@ import { Blix } from "../Blix";
 import type { Command } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
+import { TileBuilder } from "./builders/TileBuilder";
 import { join } from "path";
 export type PluginSignature = string;
 
@@ -96,9 +97,15 @@ export class Plugin {
 
         for (const tile in pluginModule.tiles) {
           if (!pluginModule.tiles.hasOwnProperty(tile)) continue;
-          blix.tileRegistry.addInstance(
-            pluginModule.tiles[tile](new TilePluginContext()) as TileInstance
-          );
+
+          const ctx = new TilePluginContext();
+
+          try {
+            pluginModule.tiles[tile](ctx); // Execute tile builder
+            blix.tileRegistry.addInstance(ctx.tileBuilder.build); // Add to registry
+          } catch (err) {
+            logger.warn(err);
+          }
         }
       }
 
@@ -192,4 +199,18 @@ export class CommandPluginContext extends PluginContext {
   }
 }
 
-class TilePluginContext extends PluginContext {}
+class TilePluginContext extends PluginContext {
+  private _tileBuilder!: TileBuilder;
+  constructor() {
+    super();
+  }
+
+  public get tileBuilder() {
+    return this._tileBuilder;
+  }
+
+  public instantiate(plugin: string, name: string): TileBuilder {
+    this._tileBuilder = new TileBuilder(plugin, name);
+    return this.tileBuilder;
+  }
+}

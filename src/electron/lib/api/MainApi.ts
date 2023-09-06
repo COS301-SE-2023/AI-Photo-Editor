@@ -7,6 +7,7 @@ import { CommandApi } from "./apis/CommandApi";
 import { GraphApi } from "./apis/GraphApi";
 import { ToolboxApi } from "./apis/ToolboxApi";
 import { MediaApi } from "./apis/MediaApi";
+import { TileApi } from "./apis/TileApi";
 import { TypeclassApi } from "./apis/TypeclassApi";
 
 /**
@@ -27,6 +28,7 @@ export function exposeMainApis(blix: Blix) {
     typeclassApi: new TypeclassApi(blix),
     mediaApi: new MediaApi(blix),
     toolboxApi: new ToolboxApi(blix),
+    TileApi: new TileApi(blix),
   };
 
   for (const api of Object.values(apis)) {

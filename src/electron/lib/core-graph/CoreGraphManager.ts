@@ -55,6 +55,7 @@ export class CoreGraphManager {
     if (this._graphs[graphUUID] === undefined)
       return { status: "error", message: "Graph does not exist" };
     const res = this._graphs[graphUUID].addNode(node, pos);
+
     if (res.status === "success") {
       // console.log("Node added: ", res.data!.nodeId);
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);

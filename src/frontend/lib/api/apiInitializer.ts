@@ -9,6 +9,7 @@ import type { GraphApi } from "@electron/lib/api/apis/GraphApi";
 import type { TypeclassApi } from "@electron/lib/api/apis/TypeclassApi";
 import type { ToolboxApi } from "@electron/lib/api/apis/ToolboxApi";
 import type { MediaApi } from "@electron/lib/api/apis/MediaApi";
+import type { TileApi } from "@electron/lib/api/apis/TileApi";
 
 // Window APIs
 import { CommandClientApi } from "./apis/CommandClientApi";
@@ -17,6 +18,7 @@ import { ProjectClientApi } from "./apis/ProjectClientApi";
 import { UtilClientApi } from "./apis/UtilClientApi";
 import { ToolboxClientApi } from "./apis/ToolboxClientApi";
 import { MediaClientApi } from "./apis/MediaClientApi";
+import { TileClientApi } from "./apis/TileClientApi";
 /**
  * Initializes the application by exposing the window IPC APIs to the main
  * process and binding the main process IPC APIs to the window.
@@ -38,6 +40,7 @@ export async function bindMainApis() {
     typeclassApi: await bindMainApi<TypeclassApi>("TypeclassApi"),
     toolboxApi: await bindMainApi<ToolboxApi>("ToolboxApi"),
     mediaApi: await bindMainApi<MediaApi>("MediaApi"),
+    tileApi: await bindMainApi<TileApi>("TileApi"),
   };
 }
 
@@ -52,6 +55,7 @@ function exposeWindowApis() {
   exposeWindowApi(new ProjectClientApi());
   exposeWindowApi(new UtilClientApi());
   exposeWindowApi(new MediaClientApi());
+  exposeWindowApi(new TileClientApi());
 }
 
 export type MainApis = AwaitedType<typeof bindMainApis>;

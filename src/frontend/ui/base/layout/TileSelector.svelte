@@ -6,6 +6,7 @@
   export let type: string;
 
   import Fa from "svelte-fa";
+  import { get } from "svelte/store";
   // import { faFlag } from '@fortawesome/free-solid-svg-icons'
   // import { faGithub } from '@fortawesome/free-brands-svg-icons';
   import {
@@ -17,26 +18,52 @@
     faCode,
     faPuzzlePiece,
     faGlobe,
+    faCamera,
   } from "@fortawesome/free-solid-svg-icons";
 
+  import { tileStore } from "../../../lib/stores/TileStore";
+
+  const tiles = get(tileStore);
+
+  type blixTile = {
+    displayName: string;
+    description: string | null;
+    icon: any;
+  };
+
   // TODO: Clean this up and bundle it with the string -> tile mappings in Panel.svelte
-  const tileIcons: { [key: string]: any } = {};
-  tileIcons["graph"] = faDiagramProject;
-  tileIcons["media"] = faImage;
-  tileIcons["inspector"] = faMagnifyingGlass;
-  tileIcons["webview"] = faPuzzlePiece;
-  tileIcons["browser"] = faGlobe;
-  tileIcons["promptBox"] = faTerminal;
-  tileIcons["shortcutSettings"] = faKeyboard;
-  tileIcons["debug"] = faCode;
+  const tileDict: { [key: string]: blixTile } = {};
+  tileDict["graph"] = { displayName: "graph", description: null, icon: faDiagramProject };
+  tileDict["media"] = { displayName: "media", description: null, icon: faImage };
+  tileDict["webcamera"] = { displayName: "camera", description: null, icon: faCamera };
+  tileDict["inspector"] = { displayName: "inspector", description: null, icon: faMagnifyingGlass };
+  tileDict["webview"] = { displayName: "webview", description: null, icon: faPuzzlePiece };
+  tileDict["browser"] = { displayName: "browser", description: null, icon: faGlobe };
+  tileDict["promptBox"] = { displayName: "promptBox", description: null, icon: faTerminal };
+  tileDict["shortcutSettings"] = {
+    displayName: "shortcutSettings",
+    description: null,
+    icon: faKeyboard,
+  };
+  tileDict["debug"] = { displayName: "debug", description: null, icon: faCode };
+  tileDict["assets"] = { displayName: "assets", description: null, icon: faImage };
+
+  for (const tile in tiles) {
+    tileDict[tiles[tile].signature] = {
+      displayName: tiles[tile].displayName,
+      description: tiles[tile].description,
+      icon: tiles[tile].icon,
+    };
+    console.log("Icon", tiles[tile].icon);
+  }
 </script>
 
 <div class="tileSel" on:click="{() => (open = !open)}" on:keypress="{null}">
-  <div class="icon"><Fa icon="{tileIcons[type]}" /></div>
+  <div class="icon"><Fa icon="{tileDict[type].icon}" /></div>
 </div>
 {#if open}
   <div class="tileDialog" on:mouseleave="{() => (open = false)}">
-    {#each Object.keys(tileIcons) as to}
+    {#each Object.keys(tileDict) as to}
       <!-- {#each Array(50).fill("Some item") as to} -->
       <div
         class="tileOption"
@@ -47,7 +74,7 @@
         on:keydown="{null}"
       >
         <div class="innerTileOption">
-          <span class="padRight"><Fa icon="{tileIcons[to]}" /></span>{to}
+          <span class="padRight"><Fa icon="{tileDict[to].icon}" /></span>{tileDict[to].displayName}
         </div>
       </div>
     {/each}

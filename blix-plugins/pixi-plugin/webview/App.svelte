@@ -174,8 +174,10 @@
 
     code {
         position: absolute;
-        bottom: 0px;
+        text-align: right;
+        top: 0px;
         right: 0px;
+        font-size: 1.2em;
         z-index: 10;
         color: white;
     }

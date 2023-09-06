@@ -107,7 +107,78 @@ const nodes = {
 const commands = {}
 
 
-const tiles = {}
+const tiles = {
+    "test": (context) => {
+
+        tileBuilder = context.instantiate("math-plugin", "Math Tile");
+        tileBuilder.setTitle("Math Tile");
+        tileBuilder.setDescription("");
+        tileBuilder.addIcon("faCode");
+
+
+        tile1 = tileBuilder.createUIBuilder();
+        tile1.addSidebar("right");
+        tile1.sidebar.addButton(
+          {
+            componentId: "export",
+            label: "Export",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        );
+
+        tile1.sidebar.addButton(
+          {
+            componentId: "test",
+            label: "Test",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        );
+        tile1.sidebar.addButton(
+          {
+            componentId: "test2",
+            label: "Stop",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        );
+
+        tile2 = tileBuilder.createUIBuilder();
+        tile2.addSidebar("left");
+        tile2.addStatusbar("top");
+        tile2.sidebar.addButton(
+          {
+            componentId: "test1",
+            label: "Test",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        );
+
+        tile3 = tileBuilder.createUIBuilder();
+        tile3.addStatusbar("bottom");
+        tile3.statusbar.addButton(
+          {
+            componentId: "test",
+            label: "Test",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        )
+
+        tile2.addLayout(tile3);
+        tile1.addLayout(tile2);
+
+
+        tileBuilder.setUI(tile1);
+    },
+}
 
 module.exports = {
     nodes,

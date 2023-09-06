@@ -15,11 +15,12 @@ module.exports.default = app;
 //   console.log(`Received ${data} from main process`);
 // });
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
     window.api.on("mediaChanged", (newMedia) => {
 		media.set(newMedia);
 
 		// To send a message back
 		// window.api.send("backTestMessage", "Hello from app.js");
     });
+
 });
