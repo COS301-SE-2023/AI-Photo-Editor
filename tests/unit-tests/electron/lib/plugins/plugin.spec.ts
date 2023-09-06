@@ -134,7 +134,7 @@ describe("Test plugin integrations", () => {
     });
 
     test("Plugin context should return the correct version",() => {
-      const ctx  = new PluginContext();
+      const ctx  = new PluginContext("");
 
       expect(ctx.blixVersion).toBe("0.0.1");
     });

@@ -60,7 +60,7 @@ export class BlypescriptProgram implements AiLangProgram {
   public static fromString(
     program: string,
     toolbox?: BlypescriptToolbox
-  ): Result<BlypescriptProgram> {
+  ): Result<BlypescriptProgram> | Result<unknown> {
     const nodeNameIdMap = new Map<string, UUID>();
     const match = program.match(/^.*\s*graph\(\)\s*{([\s\S]*)}.*$/s);
 
@@ -1064,6 +1064,17 @@ const COLORS = {
 
 export type Colors = keyof typeof COLORS;
 
-export type Result<T = unknown, E = unknown> =
-  | { success: true; message?: string; data: T }
-  | { success: false; error: string; message: string; data?: E };
+export type Result<T = unknown, E = unknown> = SuccessResponse<T> | ErrorResponse<E>;
+
+export type SuccessResponse<T = unknown> = {
+  success: true;
+  message?: string;
+  data: T;
+};
+
+export type ErrorResponse<E = unknown> = {
+  success: false;
+  error: string;
+  message: string;
+  data?: E;
+};
