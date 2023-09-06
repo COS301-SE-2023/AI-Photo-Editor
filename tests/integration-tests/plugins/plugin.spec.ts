@@ -152,7 +152,7 @@ describe("Test plugin integrations", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      plugin = new Plugin(pack,plugDir,main);
+      plugin = new Plugin(pack,plugDir);
       blix = new Blix();
       blix.init(mainWindow);
       plugin.requireSelf(blix);
