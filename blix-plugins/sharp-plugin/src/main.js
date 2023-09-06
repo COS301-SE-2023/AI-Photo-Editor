@@ -31,7 +31,7 @@ const nodes = {
 
         nodeBuilder.setUI(ui);
         nodeBuilder.addInput("Sharp", "img", "Img");
-        nodeBuilder.addInput("Number", "value", "Value");
+        nodeBuilder.addInput("number", "value", "Value");
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
     "saturation": (context) => {
@@ -125,6 +125,7 @@ const nodes = {
         const nodeBuilder = context.instantiate("sharp-plugin", "sharpen");
         nodeBuilder.setTitle("Sharpen");
         nodeBuilder.setDescription("Sharpens an image taking one image as input and returning one image as output");
+        const ui = nodeBuilder.createUIBuilder();
         ui
             .addSlider(
                 {
@@ -185,7 +186,7 @@ const nodes = {
         });
 
         nodeBuilder.addInput("Sharp", "img", "Img");
-        nodeBuilder.addOutput("Image", "res", "Result");
+        nodeBuilder.addOutput("image", "res", "Result");
     },
     "toSharp": (context) => {
         const nodeBuilder = context.instantiate("sharp-plugin", "toSharp");
@@ -197,7 +198,7 @@ const nodes = {
             return { "res": await sharp(input["img"]) };
         });
 
-        nodeBuilder.addInput("Image", "img", "Img");
+        nodeBuilder.addInput("image", "img", "Img");
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
     "inputSharpImage": (context) => {

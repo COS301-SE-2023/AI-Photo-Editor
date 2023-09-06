@@ -191,7 +191,7 @@ const baseTypes: Typeclass[] = [
     }),
   },
   {
-    id: "bool",
+    id: "boolean",
     description: "A true/false value",
     subtypes: [],
     mediaDisplayConfig: (data: number) => ({
@@ -249,7 +249,7 @@ export type ConverterTriple = [TypeclassId, TypeclassId, TypeConverter];
 const baseConverters: ConverterTriple[] = [
   ["number", "string", (value: number) => value.toString()],
   ["string", "number", (value: string) => parseFloat(value)],
-  ["bool", "string", (value: boolean) => (value ? "true" : "false")],
+  ["boolean", "string", (value: boolean) => (value ? "true" : "false")],
   ["string", "boolean", (value: string) => value.toLowerCase() === "true"],
   ["number", "boolean", (value: number) => value !== 0],
 ];

@@ -187,11 +187,14 @@ export class BlypescriptInterpreter {
     private readonly graphManager: CoreGraphManager
   ) {
     const result = BlypescriptToolbox.fromToolbox(this.toolbox);
-    if (!result.success) {
-      throw result.error;
-    }
 
-    this.blypescriptToolbox = result.data;
+    if (result.success) {
+      this.blypescriptToolbox = result.data;
+    } else {
+      // throw result.error;
+      this.blypescriptToolbox = new BlypescriptToolbox([]);
+      logger.error("Failed to initialize BlypescriptInterpreter with error:", result.error);
+    }
   }
 
   public run(
@@ -632,11 +635,11 @@ export class BlypescriptPlugin {
       if (componentType === "Button") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("string");
-      } else if (componentType === "Slider") {
+      } else if (componentType === "Slider" || componentType === "NumberInput") {
         nodeParam.types.push("number");
       } else if (componentType === "Knob") {
         nodeParam.types.push("number");
-      } else if (componentType === "Dropdown") {
+      } else if (componentType === "Dropdown" || componentType === "Radio") {
         const objectSchema = z.record(z.string(), z.string());
         const options = objectSchema.safeParse(props.options);
 
