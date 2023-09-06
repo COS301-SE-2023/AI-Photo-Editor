@@ -59,7 +59,7 @@ export class PluginManager {
    * Loads the base plugins that come packaged with Blix. This method may need
    * modification to also load installed plugins in the userData directory.
    */
-  public async loadBasePlugins() {
+  public async loadBasePlugins(flag = false) {
     this.loadedPlugins = [];
     const appPath = app.getAppPath();
     const pluginsPath = join(app.isPackaged ? process.resourcesPath : appPath, "blix-plugins");
@@ -81,14 +81,14 @@ export class PluginManager {
       plugins.map(async (plugin) => {
         // Ignore MacOS temp files
         if (plugin !== ".DS_Store") {
-          await this.loadPlugin(plugin, pluginsPath);
+          await this.loadPlugin(plugin, pluginsPath, flag);
         }
       })
     );
     // this.blix.aiManager.instantiate(this.blix.toolbox);
   }
 
-  public async loadPlugin(plugin: string, path: string): Promise<void> {
+  public async loadPlugin(plugin: string, path: string, flag = false): Promise<void> {
     const readFilePromise = promisify(readFile);
 
     const pluginPath = join(path, plugin);
@@ -111,7 +111,7 @@ export class PluginManager {
       const pluginInstance: Plugin = new Plugin(packageData, pluginPath);
 
       this.loadedPlugins.push(pluginInstance);
-      pluginInstance.requireSelf(this.blix); // The plugin tries to require its corresponding npm module
+      pluginInstance.requireSelf(this.blix, flag); // The plugin tries to require its corresponding npm module
     } catch (err) {
       logger.warn("Failed to load plugin: " + plugin + ", package.json failed to load");
       return;

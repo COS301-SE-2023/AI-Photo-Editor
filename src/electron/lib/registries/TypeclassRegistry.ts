@@ -8,6 +8,7 @@ import {
   MediaDisplayType,
   type MediaOutput,
 } from "../../../shared/types/media";
+import logger from "../../utils/logger";
 
 export type TypeclassId = string;
 export type TypeConverter = (value: any) => any;
@@ -45,12 +46,14 @@ export class TypeclassRegistry implements Registry {
     });
   }
 
-  addInstance(instance: Typeclass): void {
+  addInstance(instance: Typeclass, flag = false): void {
     if (!instance) {
-      throw Error("Invalid Typeclass");
+      logger.warn("Invalid Typeclass");
+      return;
     }
-    if (this.typeclasses[instance.id]) {
-      throw Error(`Typeclass ${instance.id} already exists`);
+    if (this.typeclasses[instance.id] && !flag) {
+      logger.warn(`Typeclass ${instance.id} already exists`);
+      return;
     }
     this.typeclasses[instance.id] = instance;
     this.blix.mainWindow?.apis.commandClientApi.registryChanged(this.getTypeclasses());
