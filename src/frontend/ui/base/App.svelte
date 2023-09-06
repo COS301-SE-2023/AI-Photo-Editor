@@ -12,7 +12,7 @@
   import Settings from "./Settings.svelte";
   import Shortcuts from "../../ui/utils/Shortcuts.svelte";
   import { settingsStore } from "../../lib/stores/SettingsStore";
-  import { confetti } from '@neoconfetti/svelte';
+  import { confetti } from "@neoconfetti/svelte";
 
   const testing = false;
   let showSettings = false;
@@ -35,7 +35,6 @@
     await initAPIs();
   });
 </script>
-
 
 <!-- <div class="fixed top-0 right-0" use:confetti={{ particleCount: 200, force: 0.6, stageHeight: window.innerHeight - 20 }} /> -->
 
@@ -79,9 +78,6 @@
 <ContextMenu />
 <Shortcuts shortcuts="{shortcuts}" />
 
-
-
-
 <style lang="postcss" global>
   @tailwind base;
   @tailwind components;
@@ -99,7 +95,7 @@
     position: relative;
   }
   :root {
-    --navbar-height: 1.2rem;
+    --navbar-height: 2rem;
   }
 
   div.navbar {

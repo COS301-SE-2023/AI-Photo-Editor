@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { type Message, Chat } from "./Chat";
-import { type ChatModel, Model } from "./Model";
+import { type ChatModel, Model, type ModelResponse } from "./Model";
 
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
@@ -102,7 +102,10 @@ export class AiManager {
 
       chat.addMessage({ role: "assistant", content: response.data.content });
 
-      const result = BlypescriptProgram.fromString(response.data.content);
+      const result = BlypescriptProgram.fromString(
+        response.data.content,
+        blypescriptToolboxResult.data.toolbox
+      );
 
       if (!result.success) {
         console.log(result.message);
