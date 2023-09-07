@@ -37,6 +37,15 @@ jest.mock("chokidar", () => ({
   }
 }));
 
+
+jest.mock("ws", () => ({
+  WebSocket: {
+    Server: jest.fn(({port}) => {
+      return;
+    })
+  }
+}));
+
 jest.mock("../../../src/electron/lib/projects/ProjectManager");
 
 jest.mock("electron", () => ({
@@ -54,7 +63,13 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn(),
+    handle: jest.fn(),
+  },
 }));
+
+
 
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
@@ -152,7 +167,7 @@ describe("Test plugin integrations", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      plugin = new Plugin(pack,plugDir,main);
+      plugin = new Plugin(pack,plugDir);
       blix = new Blix();
       blix.init(mainWindow);
       plugin.requireSelf(blix);

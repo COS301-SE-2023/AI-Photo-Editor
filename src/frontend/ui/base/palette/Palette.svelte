@@ -19,6 +19,10 @@
   let selectedCategory = 0;
   let selectedItem = 0;
 
+  let promptHistory: string[] = [];
+  let isHistoryNavigationInProgress = false;
+  let historyNavigationIndex = -1;
+
   // TODO: Change items to use the command store values directly:
   $commandStore; // Use the shorthand like this
 
@@ -156,6 +160,14 @@
       repairItemIndex();
     },
     "blix.palette.scrollUp": () => {
+      if (!searchTerm && promptHistory.length) {
+        // inputElement.focus();
+        // inputElement.value = prompts[0];
+        // inputElement.selectionStart = inputElement.selectionEnd = prompts[0].length;
+        searchTerm = promptHistory.at(-1) || "";
+        // inputElement.setSelectionRange(searchTerm.length, 0);
+        return;
+      }
       selectedItem--;
       repairItemIndex();
     },
@@ -167,12 +179,17 @@
       }
     },
     "blix.palette.prompt": async () => {
-      if (searchTerm.trim() === "") {
+      const prompt = searchTerm.trim();
+
+      if (!prompt) {
         return;
       }
 
       closePalette();
       const dismiss = toastStore.trigger({ message: "🔥Cooking...", type: "loading" });
+      if (promptHistory.at(-1) != prompt) {
+        promptHistory.push(prompt);
+      }
 
       try {
         const res = await window.apis.utilApi.sendPrompt(
@@ -215,7 +232,7 @@
     class="fixed inset-x-0 top-48 z-[6969669669] m-auto flex w-[40%] min-w-[300px] max-w-[600px] flex-col items-center overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/80 backdrop-blur-md"
   >
     <!-- Header -->
-    <header class="flex w-full select-none items-center px-3">
+    <header class="flex w-full select-none items-center px-3 caret-rose-400">
       <input
         type="text"
         placeholder="Search for tools and commands..."

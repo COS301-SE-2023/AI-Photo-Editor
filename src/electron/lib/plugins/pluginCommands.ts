@@ -12,7 +12,7 @@ export const refreshPluginsCommand: Command = {
   handler: async (ctx: CommandContext) => {
     await session.defaultSession.clearCache();
 
-    ctx.pluginManager.loadBasePlugins();
+    ctx.pluginManager.loadBasePlugins(true);
 
     return { status: "success" };
   },
