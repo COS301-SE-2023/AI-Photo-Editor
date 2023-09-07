@@ -252,16 +252,35 @@ const nodes = {
             triggerUpdate: true,
         }, {
           options: {
-            "Blur": "blur",
-            "Noise": "noise",
-            "Color": "color",
+            "Blur":         "blur",
+            "Noise":        "noise",
+            "Bloom":        "bloom",
+            "Grayscale":    "grayscale",
+            "Bevel":        "bevel",
+            "Outline":      "outline",
+            "Dot":          "dot",
+            "Crt":          "crt",
+            "Emboss":       "emboss",
+            "Bulge":        "bulge",
+            "Glitch":       "glitch",
+            "Zoomblur":     "zoomblur",
+            "Twist":        "twist", 
           }
         })
         .addSlider(
             {
                 componentId: "strength",
                 label: "Strength",
-                defaultValue: 0,
+                defaultValue: 10,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 100, set: 0.1 }
+        )
+        .addSlider(
+            {
+                componentId: "amount",
+                label: "Amount",
+                defaultValue: 10,
                 triggerUpdate: true,
             },
             { min: 0, max: 100, set: 0.1 }
@@ -275,7 +294,7 @@ const nodes = {
             canvas.content.filters.push({
                 class: "filter",
                 type: uiInput["filter"],
-                params: [uiInput["strength"], ...(uiInput["filter"] === "blur" ? [25] : [])],
+                params: [uiInput["strength"], uiInput["amount"]],
             });
 
             return { "res": canvas };
