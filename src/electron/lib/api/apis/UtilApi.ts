@@ -2,9 +2,16 @@ import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { platform, type, release } from "os";
 import logger from "../../../utils/logger";
-import settings, { getSecret } from "../../../utils/settings";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
-import { getSecrets, setSecret, clearSecret, getRecentProjects } from "../../../utils/settings";
+import {
+  getSecrets,
+  setSecret,
+  clearSecret,
+  getRecentProjects,
+  settings,
+  getSecret,
+  type Settings,
+} from "../../../utils/settings";
 import type { Setting, UserSettingsCategory, QueryResponse } from "../../../../shared/types";
 import { app } from "electron";
 
@@ -49,7 +56,7 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
 
       return {
         status: "success",
-        message: "Executed successfully",
+        message: response.message,
       };
     } else {
       return {
@@ -138,5 +145,13 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
       logger.info(e);
       this.blix.sendErrorMessage(`There was an error removing your ${key} setting.`);
     }
+  }
+
+  async saveState<T>(key: keyof Settings, value: T) {
+    settings.set(key, value);
+  }
+
+  async getState<T>(key: string): Promise<T> {
+    return settings.get(key);
   }
 }

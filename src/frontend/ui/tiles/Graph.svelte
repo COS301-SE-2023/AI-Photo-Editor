@@ -322,8 +322,16 @@
     </svg>
   </div>
 </div>
-<div class="hoverElements">
+<!-- <div class="hoverElements">
   <button style:float="right" on:click="{triggerGravity}">Gravity</button>
+</div> -->
+<div
+  class="hoverElements flex h-7 select-none items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 px-1 text-zinc-400 backdrop-blur-md hover:bg-zinc-700 active:bg-zinc-800"
+  title="Enable Gravity"
+  on:click="{triggerGravity}"
+  on:keydown="{null}"
+>
+  Gravity
 </div>
 
 <!-- <div class="hoverElements">
@@ -358,7 +366,7 @@
 {#if thisGraphStore && $thisGraphStore}
   <Svelvet
     id="{panelId}-{graphId}"
-    zoom="{1}"
+    zoom="{0.6}"
     minimap
     theme="custom-dark"
     bind:graph="{graphData}"

@@ -82,4 +82,8 @@ const blixCommandParams: Record<string, () => any> = {
   },
 };
 
+// ========== Frontend Commands ==========
+
+// const commands =
+
 export const commandStore = createCommandStore();

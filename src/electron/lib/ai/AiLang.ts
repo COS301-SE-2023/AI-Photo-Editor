@@ -173,7 +173,7 @@ export class BlypescriptProgram implements AiLangProgram {
       if (statement.nodeInputs.length > node.getNodeParameters().length) {
         return error(
           "too_many_parameters",
-          `Received ${statement.nodeInputs.length} parameters, but received ${
+          `Received ${statement.nodeInputs.length} parameters, but expected ${
             node.getNodeParameters().length
           } at line: ${statement.toString()}`
         );
@@ -266,7 +266,10 @@ export class BlypescriptProgram implements AiLangProgram {
         const newStatement = new BlypescriptStatement(
           this.generateUniqueVarName(nodeSignature),
           nodeSignature as `${string}.${string}`,
-          params.split(",").map((p) => p.trim())
+          params
+            .split(",")
+            .map((p) => p.trim())
+            .filter((p) => p !== "")
         );
 
         this.addStatement(newStatement, false, statement.lineNumber);
@@ -316,7 +319,7 @@ export class BlypescriptProgram implements AiLangProgram {
 
       // Assumes parameter valid when of form: nodeName['res']
       // Does not do comprehensive typechecking here
-      if (statementNodeInput.match(/^\s*(.*)\s*(\['([\w.-]+)'\])\s*$/)) {
+      if (statementNodeInput.match(/^\s*(.*)\s*(\['([\w.-]+)'\])\s*|null$/)) {
         continue;
       }
 
@@ -430,7 +433,10 @@ export class BlypescriptStatement extends AiLangStatement {
     const blypescriptStatement = new BlypescriptStatement(
       name,
       `${pluginName}.${nodeName}`,
-      params.split(",").map((p) => p.trim())
+      params
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p !== "")
     );
 
     return { success: true, data: blypescriptStatement };
@@ -741,7 +747,7 @@ export class BlypescriptNode {
     const nodeInputStrings = this.nodeInputs.map((input) => {
       const types = input.types
         .map((type) => {
-          return `N<${type}>`;
+          return `E<${type}>`;
         })
         .join("| ");
       return `${input.name}: ${types}`;
@@ -759,7 +765,7 @@ export class BlypescriptNode {
     const nodeOutputStrings = this.nodeOutputs.map((output) => {
       const types = output.types
         .map((type) => {
-          return `N<${type}>`;
+          return `E<${type}>`;
         })
         .join(" | ");
       return `${output.name}: ${types}`;
@@ -1012,7 +1018,7 @@ export class BlypescriptToolbox {
 
   public toString(): string {
     const pluginStrings = this.plugins.map((plugin) => plugin.toString());
-    let str = "// Node output wrapper type\ntype N<T> = { value: T } | null;\n\n";
+    let str = "// Graph edge connection wrapper type\nE<T> = { value: T } | null;\n\n";
     str += pluginStrings.join("\n\n");
     return str;
   }
