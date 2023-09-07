@@ -5,13 +5,14 @@
   import Slider from "./nodeUICcomponents/Slider.svelte";
   import ColorPicker from "./nodeUICcomponents/ColorPicker.svelte";
   import Knob from "./nodeUICcomponents/Knob.svelte";
-  import type { GraphNodeUUID, GraphUUID, UIValueStore } from "@shared/ui/UIGraph";
+  import type { UIValueStore } from "@shared/ui/UIGraph";
   import Dropdown from "./nodeUICcomponents/Dropdown.svelte";
   import TextInput from "./nodeUICcomponents/TextInput.svelte";
   import FilePicker from "./nodeUICcomponents/FilePicker.svelte";
   import Radio from "./nodeUICcomponents/Radio.svelte";
   import NumberInput from "./nodeUICcomponents/NumberInput.svelte";
-  import TweakDial from "./nodeUICcomponents/TweakDial.svelte";
+  import TweakDial from "./nodeUICcomponents/dials/TweakDial.svelte";
+  import DiffDial from "./nodeUICcomponents/dials/DiffDial.svelte";
 
   export let leafUI: NodeUILeaf | null = null;
   export let inputStore: UIValueStore;
@@ -21,6 +22,7 @@
     Button: Button,
     Buffer: Buffer,
     TweakDial: TweakDial,
+    DiffDial: DiffDial,
     Slider: Slider,
     Knob: Knob,
     Label: null,

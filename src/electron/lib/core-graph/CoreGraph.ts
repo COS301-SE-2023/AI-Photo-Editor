@@ -12,7 +12,7 @@ import { type GraphMetadata, type SvelvetCanvasPos } from "../../../shared/ui/UI
 import { type MediaOutputId } from "../../../shared/types/media";
 import type { EdgeBlueprint } from "./CoreGraphEventManger";
 import logger from "../../utils/logger";
-import { populateReadonlyUIInputs } from "../ui-inputs/ReadonlyInputComponents";
+import { populateDials } from "../ui-inputs/ReadonlyInputComponents";
 
 // =========================================
 // Explicit types for type safety
@@ -212,9 +212,10 @@ export class CoreGraph extends UniqueEntity {
       }
 
       // Handle special readonly UI component types (e.g. TweakDial)
-      const filledReadonlyInputs = populateReadonlyUIInputs(node.ui, {
+      const filledReadonlyInputs = populateDials(node.ui, {
         nodeUUID: n.uuid,
         uiInputs: Object.keys(inputValues),
+        uiInputChanges: Object.keys(inputValues), // When node is created, all inputs have 'changed'
       });
       inputValues = { ...inputValues, ...filledReadonlyInputs };
 
@@ -326,6 +327,8 @@ export class CoreGraph extends UniqueEntity {
 
   public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs) {
     this.uiInputs[nodeUUID] = new CoreNodeUIInputs(nodeUIInputs);
+
+    // TODO: Notify any DiffDials of changes
 
     // If output node, update output node id
     if (this.outputNodes[nodeUUID]) {

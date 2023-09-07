@@ -13,7 +13,9 @@ function addTransformInput(ui) {
                 defaultValue: (numInp.includes("scale") ? 1 : 0),
                 triggerUpdate: true,
             },
-            {}
+            numInp.includes("scale") ? { step: 0.025 } :
+            numInp === "rotation" ? { step: 0.2 } :
+            { step: 1 }
         );
     }
     return (uiInput) => ({
@@ -38,7 +40,14 @@ function addTweakability(ui) {
             componentId: "tweaks",
             label: "Tweak Dial",
             defaultValue: {},
-            triggerUpdate: true,
+            triggerUpdate: false,
+        }, {}
+    );
+    ui.addDiffDial({
+            componentId: "diffs",
+            label: "Diff Dial",
+            defaultValue: {},
+            triggerUpdate: false,
         }, {}
     );
 }

@@ -40,6 +40,7 @@ export enum NodeUIComponent {
   Button = "Button",
   Buffer = "Buffer",
   TweakDial = "TweakDial",
+  DiffDial = "DiffDial",
   Slider = "Slider",
   Knob = "Knob",
   Label = "Label",
