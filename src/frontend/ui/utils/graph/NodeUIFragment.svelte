@@ -2,8 +2,6 @@
   import { NodeUILeaf, type NodeUI, type UIComponentConfig } from "@shared/ui/NodeUITypes";
   import type { UIValueStore } from "@shared/ui/UIGraph";
   import NodeUiComponent from "./NodeUIComponent.svelte";
-  // import { writable } from "svelte/store";
-  // import { ColorPicker, RadioGroup, type CSSColorString } from "blix_svelvet";
 
   export let ui: NodeUI | null = null;
   export let inputStore: UIValueStore;
