@@ -4,13 +4,14 @@
   import { toolboxStore } from "../../../lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";
   import { createEventDispatcher } from "svelte";
-  import { graphMall } from "lib/stores/GraphStore";
+  import { graphMall } from "../../../lib/stores/GraphStore";
 
   const dispatch = createEventDispatcher();
 
   export let graphId: string;
   export let panelId: number;
   export let node: GraphNode;
+  // let activeInput = false;
 
   $: svelvetNodeId = `${panelId}_${node.uuid}`;
   $: toolboxNode = toolboxStore.getNodeReactive(node.signature);
@@ -86,6 +87,15 @@
     );
     console.log("NODE POSITION UPDATED");
   }
+
+  // $: graphMall.getGraph(graphId).onActiveUiInput(graphId, node.uuid, activeInput);
+
+  function handleInputInteraction(e: CustomEvent) {
+    // console.log("Node has event", e.detail);
+    // console.log(e.detail);
+    // activeInput = e.detail;
+    graphMall.getGraph(graphId).handleNodeInputInteraction(graphId, node.uuid, e.detail);
+  }
 </script>
 
 {#if svelvetNodeId !== ""}
@@ -121,6 +131,7 @@ height="{graphNode.dims.h}" -->
           inputStore="{node.inputUIValues}"
           ui="{$toolboxNode?.ui}"
           uiConfigs="{$toolboxNode?.uiConfigs}"
+          on:inputInteraction="{handleInputInteraction}"
         />
       </div>
 

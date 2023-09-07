@@ -213,6 +213,22 @@ export class CoreGraphEventManager {
     }
   }
 
+  findPreviousInputs(nodeUUID: UUID): INodeUIInputs | null {
+    for (let i = this.eventPointer; i > 0; i--) {
+      const event = this.events[i];
+      if (
+        event.element === "UiInput" &&
+        event.operation === "Change" &&
+        event.execute.nodeUUId === nodeUUID
+      ) {
+        return event.execute.nodeUIInputs;
+      } // else if(event.element === "Node" && event.operation === "Remove" && event.execute.nodeUUId === nodeUUID) {
+      //   return { inputs: event.revert.uiInputs, changes: [] };
+      // }
+    }
+    return null;
+  }
+
   reset() {
     this.events = [];
     this.eventPointer = -1;

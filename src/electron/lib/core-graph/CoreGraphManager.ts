@@ -8,7 +8,7 @@ import {
 } from "./CoreGraphInteractors";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { NodeInstance } from "../registries/ToolboxRegistry";
-import type { INodeUIInputs, QueryResponse } from "../../../shared/types";
+import type { INodeUIInputs, QueryResponse, UIInputChange } from "../../../shared/types";
 import type { MediaOutputId } from "../../../shared/types/media";
 import type { GraphMetadata, SvelvetCanvasPos, GraphUUID } from "../../../shared/ui/UIGraph";
 import { type CoreGraphEvent, CoreGraphEventManager, type EventArgs } from "./CoreGraphEventManger";
@@ -170,6 +170,41 @@ export class CoreGraphManager {
     return res;
   }
 
+  handleNodeInputInteraction(graphUUID: UUID, nodeUUID: UUID, input: UIInputChange): QueryResponse {
+    if (this._graphs[graphUUID] === undefined)
+      return { status: "error", message: "Graph does not exist" };
+    const inputs = this._graphs[graphUUID].getUIInputs(nodeUUID);
+    if (!inputs) return { status: "error", message: "No node UI inputs provided" };
+
+    const nodeUIInputs = { inputs, changes: [input.id] };
+    nodeUIInputs.inputs[input.id] = input.value;
+    // Get last saved Input
+    let old = this._events[graphUUID].findPreviousInputs(nodeUUID);
+    if (!old) {
+      // If no prior inputs for the node were changed, construct the default inputs
+      old = { inputs: {}, changes: [] };
+      const node = this._toolbox.getNodeInstance(
+        this._graphs[graphUUID].getNodes[nodeUUID].getSignature
+      );
+      Object.values(node.uiConfigs).forEach((config) => {
+        old!.inputs[config.componentId] = config.defaultValue;
+      });
+      old.changes = [input.id];
+    }
+    // Add Event
+    this._events[graphUUID].addEvent({
+      element: "UiInput",
+      operation: "Change",
+      execute: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs },
+      revert: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs: old },
+    });
+
+    // console.log("OLD: ", old);
+    // console.log("NEW: ", nodeUIInputs);
+
+    return { status: "success", message: "Saved UI Input changed event" };
+  }
+
   updateUIInputs(
     graphUUID: UUID,
     nodeUUID: UUID,
@@ -183,12 +218,18 @@ export class CoreGraphManager {
     if (!nodeUIInputs) return { status: "error", message: "No node UI inputs provided" };
 
     // console.log("Update node -> ", nodeUUID);
+    // console.log("Update UIInputs");
+    // console.log("Checking: ", nodeUUID);
+    // console.log(this._activeInputs[graphUUID][nodeUUID])
 
-    let oldInputs = this._graphs[graphUUID].getUIInputs(nodeUUID);
+    // let oldInputs = this._graphs[graphUUID].getUIInputs(nodeUUID);
 
-    oldInputs = oldInputs ? oldInputs : {};
+    // oldInputs = oldInputs ? oldInputs : {};
     // define the old state
-    const old = { inputs: oldInputs, changes: nodeUIInputs.changes } as INodeUIInputs;
+    // const old = { inputs: oldInputs, changes: nodeUIInputs.changes } as INodeUIInputs;
+    // console.log("OLD: ", old);
+    // console.log("NEW: ", nodeUIInputs);
+    // console.log("P: ", participant);
     const res = this._graphs[graphUUID].updateUIInputs(nodeUUID, nodeUIInputs);
 
     const signature = this._graphs[graphUUID].getNodes[nodeUUID].getSignature;
@@ -202,20 +243,21 @@ export class CoreGraphManager {
       // Problem: frontend is seeing change and calling function which in turn is making new events which throws off the event order
       // You will need to just try it and see what happens
       // if(nodeUIInputs.inputs.outputId && old.inputs.outputId && (nodeUIInputs.inputs.outputId !== old.inputs.outputId || nodeUIInputs.changes !== old.changes)) //  Used to not check for output node changes
-      if (!nodeUIInputs.inputs.outputId)
-        if (
-          participant === CoreGraphUpdateParticipant.user &&
-          !(JSON.stringify(old) === JSON.stringify(nodeUIInputs))
-        ) {
-          // Trying to not add events where frontend has sent it where it is exactly the same
-          // console.log("Not the same inputs");
-          this._events[graphUUID].addEvent({
-            element: "UiInput",
-            operation: "Change",
-            execute: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs },
-            revert: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs: old },
-          });
-        }
+
+      // if (!nodeUIInputs.inputs.outputId)
+      //   if (
+      //     participant === CoreGraphUpdateParticipant.user &&
+      //     !(JSON.stringify(old) === JSON.stringify(nodeUIInputs))
+      //   )
+      //   {
+      //     // Trying to not add events where frontend has sent it where it is exactly the same
+      //     this._events[graphUUID].addEvent({
+      //       element: "UiInput",
+      //       operation: "Change",
+      //       execute: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs },
+      //       revert: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs: old },
+      //     });
+      //    }
       // Determine whether the update should trigger the graph to recompute
       const uiConfigs = this._toolbox.getNodeInstance(signature).uiConfigs;
       const changes = nodeUIInputs.changes;
@@ -459,7 +501,6 @@ export class CoreGraphManager {
           const graph = this._graphs[node.graphUUID];
           const nodeRes = graph.addNode(node.node, node.pos, uiInputs);
           if (nodeRes.status === "success") {
-            // Get old uuid used to execute removing the node
             const { nodeUUId } = event.execute;
             this._events[node.graphUUID].onAddNode(nodeUUId, nodeRes.data.nodeId);
 
@@ -598,3 +639,11 @@ function checkForCommonElement<T>(setA: Set<T>, setB: Set<T>) {
   }
   return false;
 }
+
+/**
+ * Changing dictionary which pairs uuid of node ot its ui inputs and whether is changing
+ * componnents can then issue an update indicating they are changing which will then set their value for that
+ * input in the dictionary to true. All events will be disregarded.
+ *
+ * Need to take in value of that input aswell when the start and stop events are sent
+ */

@@ -1,5 +1,5 @@
 import type { AnchorUUID } from "@electron/lib/core-graph/CoreGraph";
-import type { IGraphUIInputs, INodeUIInputs } from "@shared/types";
+import type { IGraphUIInputs, INodeUIInputs, UIInputChange } from "@shared/types/graph";
 import type { NodeSignature } from "@shared/ui/ToolboxTypes";
 import {
   UIGraph,
@@ -117,12 +117,19 @@ export class GraphStore {
                 for (const input in inputs) {
                   if (!inputs.hasOwnProperty(input)) continue;
                   // console.log("SUB TO", node, "-->>", input)
+                  let first = true;
                   this.uiInputUnsubscribers[node].push(
                     inputs[input].subscribe(() => {
                       // console.log("UPDATE UI INPUTS", node, "->", input);
-                      this.updateUIInputs(node, input).catch((err) => {
-                        return;
-                      });
+                      // console.log("Sg", false, node)
+                      // Ensure the subscribe does not run when first created
+                      if (first) {
+                        first = false;
+                      } else {
+                        this.updateUIInputs(node, input).catch((err) => {
+                          return;
+                        });
+                      }
                     })
                   );
                 }
@@ -179,6 +186,12 @@ export class GraphStore {
     return res.status;
   }
 
+  async handleNodeInputInteraction(graphUUID: UUID, nodeUUID: UUID, input: UIInputChange) {
+    // console.log("INPUT: ", input.value)
+    const res = await window.apis.graphApi.handleNodeInputInteraction(graphUUID, nodeUUID, input);
+    // console.log(res);
+  }
+
   async addEdge(anchorA: AnchorUUID, anchorB: AnchorUUID) {
     const thisUUID = get(this.graphStore).uuid;
     const res = await window.apis.graphApi.addEdge(thisUUID, anchorA, anchorB);
@@ -188,19 +201,23 @@ export class GraphStore {
 
   async updateUIInputs(nodeUUID: GraphNodeUUID, inputId: string) {
     const thisUUID = get(this.graphStore).uuid;
+    const res = await window.apis.graphApi.updateUIInputs(
+      thisUUID,
+      nodeUUID,
+      this.getNodeUiInputs(nodeUUID, inputId)
+    );
+    // Notify our UI subscribers
+  }
+
+  getNodeUiInputs(nodeUUID: UUID, inputId: string) {
     const node = get(this.graphStore).nodes[nodeUUID];
     const nodeInputs = node.inputUIValues;
-
-    // Extract values from stores
-    const payload: INodeUIInputs = { inputs: {}, changes: [inputId] };
+    const inputs: INodeUIInputs = { inputs: {}, changes: [inputId] };
 
     for (const input of Object.keys(nodeInputs.inputs)) {
-      payload.inputs[input] = get(nodeInputs.inputs[input]);
+      inputs.inputs[input] = get(nodeInputs.inputs[input]);
     }
-
-    const res = await window.apis.graphApi.updateUIInputs(thisUUID, nodeUUID, payload);
-
-    // Notify our UI subscribers
+    return inputs;
   }
 
   updateUIPosition(nodeUUID: UUID, position: SvelvetCanvasPos) {
