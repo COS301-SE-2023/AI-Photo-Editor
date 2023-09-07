@@ -48,7 +48,7 @@ export class Plugin {
 
   // Load this plugin into a local Node module
   // See: [https://rollupjs.org/es-module-syntax/#dynamic-import]
-  requireSelf(blix: Blix, flag = false): void {
+  requireSelf(blix: Blix, force = false): void {
     try {
       // This uses Node.js require() to load the plugin as a module
       // TODO: ISOLATION + LIMITED API
@@ -120,7 +120,7 @@ export class Plugin {
         // Obtain typeclasses
         ctx.typeclassBuilders.forEach((builder) => {
           const [typeclass, converters] = builder.build;
-          blix.typeclassRegistry.addInstance(typeclass, flag);
+          blix.typeclassRegistry.addInstance(typeclass, force);
           converters.forEach((converter) => blix.typeclassRegistry.addConverter(...converter));
         });
       }

@@ -46,12 +46,12 @@ export class TypeclassRegistry implements Registry {
     });
   }
 
-  addInstance(instance: Typeclass, flag = false): void {
+  addInstance(instance: Typeclass, force = false): void {
     if (!instance) {
       logger.warn("Invalid Typeclass");
       return;
     }
-    if (this.typeclasses[instance.id] && !flag) {
+    if (this.typeclasses[instance.id] && !force) {
       logger.warn(`Typeclass ${instance.id} already exists`);
       return;
     }
