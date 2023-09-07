@@ -7,22 +7,6 @@
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
 
-  let db;
-  const request = indexedDB.open("blix-ui", 1);
-
-  request.onupgradeneeded = function (event: IDBVersionChangeEvent) {
-    db = event?.target?.result;
-    db.createObjectStore("images", {
-      keyPath: "id",
-    });
-  };
-  request.onsuccess = function (event: Event) {
-    db = event?.target?.result;
-  };
-  request.onerror = function (event: Event) {
-    console.error("IndexedDB error: " + event?.target?.errorCode);
-  };
-
   if (!inputStore.inputs[config.componentId]) inputStore.inputs[config.componentId] = writable("");
 
   $: valStore = inputStore.inputs[config.componentId];

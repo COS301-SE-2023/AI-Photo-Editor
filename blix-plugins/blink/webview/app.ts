@@ -7,20 +7,30 @@ const media = writable<BlinkCanvas>({
 	content: null
 });
 
+let sender = (message: string, data: any) => {};
+
+const send = (message: string, data: any) => {
+	sender(message, data);
+}
+
 const app = new App({
 	target: document.body,
-	props: { media },
+	props: { media, send },
 });
 
 // Assert window.api is loaded
 
 window.addEventListener("DOMContentLoaded", () => {
-    window.api.on("mediaChanged", (newMedia) => {
-		media.set(newMedia);
-
-		// To send a message back
-		// window.api.send("backTestMessage", "Hello from app.js");
+    window.api.on("mediaChanged", (newMedia: any) => {
+		if (newMedia.assets && newMedia.content) {
+			media.set(newMedia);
+		}
     });
+
+	// To send a message back to main renderer
+	sender = (message: string, data: any) => {
+		window.api.send(message, data);
+	}
 });
 
 

@@ -7,6 +7,7 @@
     import { BlinkCanvas, canvas1 } from "./clump";
 
     export let media: Writable<BlinkCanvas>;
+    export let send: (msg: string, data: any) => void;
 
     let blink: PIXI.Application;
     let pixiCanvas: HTMLCanvasElement;
@@ -99,7 +100,7 @@
         //===== RENDER Blink =====//
         let hasCentered = false;
             media.subscribe(async (media) => {
-                const success = renderApp(blink, hierarchy, media);
+                const success = renderApp(blink, hierarchy, media, send);
 
                 // Necessary to fix an occasional race condition with PIXI failing to load
                 // Something seems to go wrong due to the canvas having to resize to the window

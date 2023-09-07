@@ -6,13 +6,13 @@ import {
   OutputAnchorInstance,
   checkEdgeDataTypesCompatible,
 } from "../registries/ToolboxRegistry";
-import { INode, type NodeSignature } from "../../../shared/ui/ToolboxTypes";
+import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
 import { type GraphMetadata, type SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 import { type MediaOutputId } from "../../../shared/types/media";
 import type { EdgeBlueprint } from "./CoreGraphEventManger";
-import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
 import logger from "../../utils/logger";
+import { populateReadonlyUIInputs } from "../ui-inputs/ReadonlyInputComponents";
 
 // =========================================
 // Explicit types for type safety
@@ -210,6 +210,13 @@ export class CoreGraph extends UniqueEntity {
         });
         // console.log(inputValues);
       }
+
+      // Handle special readonly UI component types (e.g. TweakDial)
+      const filledReadonlyInputs = populateReadonlyUIInputs(node.ui, {
+        nodeUUID: n.uuid,
+        uiInputs: Object.keys(inputValues),
+      });
+      inputValues = { ...inputValues, ...filledReadonlyInputs };
 
       // Handle the UI input initializer
       const initializedInputs = node.uiInitializer(inputValues);

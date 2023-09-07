@@ -50,6 +50,14 @@ const nodes = {
         addTransformInput(ui);
         addState(ui);
 
+        ui.addTweakDial({
+                componentId: "tweaks",
+                label: "Tweak Dial",
+                defaultValue: {},
+                triggerUpdate: true,
+            }, {}
+        );
+
         nodeBuilder.setUIInitializer((x) => {
             return {
                 state: {

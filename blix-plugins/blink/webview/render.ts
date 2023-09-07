@@ -4,7 +4,8 @@ import { getPixiFilter, type Atom, type Clump, BlinkCanvas, Asset } from "./clum
 export function renderApp(
   blink: PIXI.Application,
   hierarchy: PIXI.Container,
-  canvas: BlinkCanvas
+  canvas: BlinkCanvas,
+  send: (message: string, data: any) => void
 ): boolean {
   if (!canvas || !canvas.content) return false;
   // Destroy previous viewport contents
@@ -23,7 +24,7 @@ export function renderApp(
   // Construct clump hierarchy
   const loaded = Promise.all(imgPromises);
   loaded.then(() => {
-    const child = renderClump(blink, canvas.content, canvas);
+    const child = renderClump(blink, canvas.content, canvas, send);
     if (child != null) {
       hierarchy.addChild(child);
     }
@@ -34,7 +35,9 @@ export function renderApp(
 
 export function renderCanvas(blink: PIXI.Application, root: Clump) {}
 
-function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas) {
+let selectedClump = null;
+
+function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas, send) {
   if (!clump) return null;
   //========== CREATE CONTAINER ==========//
   const content = new PIXI.Container();
@@ -45,7 +48,7 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas)
     let counter = clump.elements.length;
     for (let child of clump.elements) {
       if (child.class === "clump") {
-        const pixiClump = renderClump(blink, child, canvas);
+        const pixiClump = renderClump(blink, child, canvas, send);
 
         if (pixiClump != null) {
           pixiClump.zIndex = counter--;
@@ -156,9 +159,22 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas)
   resClump.addChild(box);
   resClump.sortChildren();
 
+  //========== HANDLE EVENTS ==========//
+  let dragging = false;
+  let dragDelta = { x: 0, y: 0 };
+
   resClump.eventMode = "dynamic";
   resClump.on("click", () => {
-    console.log(clump.name + " click");
+    console.log("SEND", send);
+    send("clumpClick", clump.name);
+    // console.log(clump.name + " click");
+  });
+
+  resClump.on("mousedown", (event) => {
+    dragging = true;
+  });
+
+  blink.ticker.add(() => {
   });
 
   return resClump;
