@@ -192,7 +192,16 @@
       }
 
       closePalette();
-      const dismiss = toastStore.trigger({ message: "🔥Cooking...", type: "loading" });
+
+      const messages = [
+        "🔥 Cooking...",
+        "🪄 Stirring the creative cauldron...",
+        "🐉 Slaying the ender dragon...",
+      ];
+      const dismiss = toastStore.trigger({
+        message: messages[Math.floor(Math.random() * messages.length)],
+        type: "loading",
+      });
 
       const index = promptHistory.indexOf(prompt);
       if (index !== -1) {
@@ -203,10 +212,7 @@
 
       console.log(prompt);
       try {
-        const res = await window.apis.utilApi.sendPrompt(
-          searchTerm.trim(),
-          graphMall.getAllGraphUUIDs()[0]
-        );
+        const res = await window.apis.utilApi.sendPrompt(prompt, graphMall.getAllGraphUUIDs()[0]);
 
         toastStore.trigger({
           message: res.message,

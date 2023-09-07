@@ -77,10 +77,12 @@ export class PluginManager {
       return !ignorePatterns.some((pattern) => plugin.includes(pattern));
     });
 
+    const filters = [".DS_Store", "blink", "sharp-plugin"];
+
     await Promise.all(
       plugins.map(async (plugin) => {
         // Ignore MacOS temp files
-        if (plugin !== ".DS_Store") {
+        if (!filters.includes(plugin)) {
           await this.loadPlugin(plugin, pluginsPath);
         }
       })

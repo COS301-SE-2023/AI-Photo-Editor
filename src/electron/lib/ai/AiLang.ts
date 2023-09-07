@@ -62,7 +62,7 @@ export class BlypescriptProgram implements AiLangProgram {
     toolbox?: BlypescriptToolbox
   ): Result<BlypescriptProgram> {
     const nodeNameIdMap = new Map<string, UUID>();
-    const match = program.match(/^.*\s*graph\(\)\s*{([\s\S]*)}.*$/s);
+    const match = program.match(/^^.*\s*graph\(?\)?\s*{([\s\S]*)}.*$$/s);
 
     if (!match) {
       return error("invalid_syntax", "Function should be in the form `graph() { // statements }`");

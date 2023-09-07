@@ -93,7 +93,7 @@ export class AiManager {
 
     chat.addMessages(messages);
 
-    const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0.1 });
+    const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0.05 });
 
     for (let i = 0; i < 2; i++) {
       const response = await llm.generate(chat);
@@ -123,7 +123,7 @@ export class AiManager {
       if (!result.success) {
         console.log(result.message);
         console.log(result.error);
-        chat.addMessage({ role: "blix", content: `USER'S RESPONSE: ${result.message}` });
+        chat.addMessage({ role: "blix", content: `Code syntax error: ${result.message}` });
         continue; // retry if failure
       }
 
@@ -142,7 +142,7 @@ export class AiManager {
           console.log(colorString(result.error, "RED"));
           console.log(colorString(result.message, "RED"));
           logger.warn(result.error);
-          chat.addMessage({ role: "blix", content: `USER'S RESPONSE:\n${result.message}` });
+          chat.addMessage({ role: "blix", content: `Code syntax error:\n${result.message}` });
           continue; // retry if failure
         }
 

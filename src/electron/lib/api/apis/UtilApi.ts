@@ -38,32 +38,38 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
   }
 
   async sendPrompt(prompt: string, id: UUID): Promise<QueryResponse> {
-    if (this.blix.graphManager.getGraph(id)) {
-      // const res = await this.blix.aiManager.sendPrompt(prompt, id);
-      const response = await this.blix.aiManager.executePrompt({
-        prompt,
-        graphId: id,
-        model: "GPT-3.5",
-        apiKey: getSecret("OPENAI_API_KEY"),
-      });
-
-      if (!response.success) {
-        return {
-          status: "error",
-          message: response.message,
-        };
-      }
-
+    if (!prompt) {
       return {
-        status: "success",
-        message: response.message,
+        status: "error",
+        message: "Prompt is empty",
       };
-    } else {
+    }
+
+    if (!this.blix.graphManager.getGraph(id)) {
       return {
         status: "error",
         message: "No graph selected",
       };
     }
+
+    const response = await this.blix.aiManager.executePrompt({
+      prompt,
+      graphId: id,
+      model: "GPT-3.5",
+      apiKey: getSecret("OPENAI_API_KEY"),
+    });
+
+    if (!response.success) {
+      return {
+        status: "error",
+        message: response.message,
+      };
+    }
+
+    return {
+      status: "success",
+      message: response.message,
+    };
   }
 
   // Add something extra validation
