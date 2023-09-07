@@ -70,6 +70,7 @@
   }
 
   async function nodeClicked(e: CustomEvent) {
+    console.log("NODE CLICKED");
     if (e.detail.e.button === 2) {
       console.log("DELETE NODE EVENT");
 
@@ -80,12 +81,13 @@
   }
 
   async function nodeDragReleased(e: CustomEvent) {
+    console.log("NODE RELEASED");
     await window.apis.graphApi.setNodePos(
       graphId,
       node.uuid,
       graphMall.getGraphState(graphId).uiPositions[node.uuid]
     );
-    console.log("NODE POSITION UPDATED");
+    // console.log("NODE POSITION UPDATED");
   }
 
   // $: graphMall.getGraph(graphId).onActiveUiInput(graphId, node.uuid, activeInput);
@@ -112,7 +114,7 @@ height="{graphNode.dims.h}" -->
     borderRadius="{10}"
     selectionColor="#f43e5c"
     on:selected="{() => console.log('selected')}"
-    on:nodeClicked="{nodeClicked}"
+    on:nodeClickReleased="{nodeClicked}"
     on:nodeDragReleased="{nodeDragReleased}"
   >
     <div class="node">
