@@ -2,10 +2,11 @@
 <script lang="ts">
   import TextBox from "../../ui/utils/mediaDisplays/TextBox.svelte";
   import { type RendererId } from "../../../shared/types/typeclass";
-  import { onMount } from "svelte";
+  import type { TweakApi } from "lib/webview/TweakApi";
 
   let webview: Electron.WebviewTag | null = null;
 
+  export let tweakApi: TweakApi;
   export let renderer: RendererId = "/";
 
   $: asyncSrc = window.apis.typeclassApi.getRendererSrc(renderer);
@@ -18,7 +19,17 @@
 
     // To receive a message from the webview, add an event listener for the ipc-message event:
     webview?.addEventListener("ipc-message", (event) => {
-      console.log("Message received from webview:", event.channel, event.args);
+      // console.log("Message received from webview:", event.channel, event.args);
+      switch (event.channel) {
+        case "tweak":
+          const data = event.args[0];
+          if (typeof data?.inputs === "object") {
+            Object.keys(data.inputs).forEach((input) => {
+              tweakApi.setUIInput(data.nodeUUID, input, data.inputs[input]);
+            });
+          }
+          break;
+      }
     });
   }
 

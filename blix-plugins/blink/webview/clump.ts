@@ -28,6 +28,7 @@ export type Asset = {
 export type Clump = {
   class: "clump";
   name?: string;
+  nodeUUID: string;
   transform: Transform;
   opacity?: number;
   elements: (Clump | Atom)[];
@@ -114,6 +115,7 @@ export const canvas1: BlinkCanvas = {
   content: {
     class: "clump",
     name: "root",
+    nodeUUID: "",
     transform: { position: { x: 0, y: 0 }, rotation: 0, scale: { x: 1, y: 1 } },
     filters: [
       { class: "filter", type: "blur", params: [100, 25] },
@@ -128,6 +130,7 @@ export const canvas1: BlinkCanvas = {
       },
       {
         class: "clump",
+        nodeUUID: "",
         name: "clump1",
         transform: { position: { x: 500, y: 500 }, rotation: 0, scale: { x: 1, y: 1 } },
         elements: [

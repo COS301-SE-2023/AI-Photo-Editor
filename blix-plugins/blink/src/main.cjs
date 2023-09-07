@@ -33,6 +33,16 @@ function addState(ui) {
     );
 }
 
+function addTweakability(ui) {
+    ui.addTweakDial({
+            componentId: "tweaks",
+            label: "Tweak Dial",
+            defaultValue: {},
+            triggerUpdate: true,
+        }, {}
+    );
+}
+
 //========== NODES ==========//
 const nodes = {
     "inputImage": (context) => {
@@ -49,14 +59,7 @@ const nodes = {
         }, {});
         addTransformInput(ui);
         addState(ui);
-
-        ui.addTweakDial({
-                componentId: "tweaks",
-                label: "Tweak Dial",
-                defaultValue: {},
-                triggerUpdate: true,
-            }, {}
-        );
+        addTweakability(ui);
 
         nodeBuilder.setUIInitializer((x) => {
             return {
@@ -81,6 +84,7 @@ const nodes = {
                 },
                 content: {
                     class: "clump",
+                    nodeUUID: uiInput["tweaks"].nodeUUID,
                     transform: {
                         position: { x: uiInput["positionX"], y: uiInput["positionY"] },
                         rotation: uiInput["rotation"],
@@ -133,12 +137,14 @@ const nodes = {
             );
         }
         const getTransform = addTransformInput(ui);
+        addTweakability(ui);
 
         nodeBuilder.define(async (input, uiInput, from) => {
             const canvas = {
                 assets: {},
                 content: {
                     class: "clump",
+                    nodeUUID: uiInput["tweaks"].nodeUUID,
                     transform: getTransform(uiInput),
                     elements: [
                         {
@@ -207,10 +213,11 @@ const nodes = {
             },
             { min: 0, max: 100, set: 0.1 }
         );
+        addTweakability(ui);
 
         nodeBuilder.define(async (input, uiInput, from) => {
             // Apply filter to outermost clump
-            const clumps = [1, 2, 3, 4, 5].map(n => input["clump" + n]).filter(c => c != null);
+            const clumps = [1, 2, 3, 4, 5].map(n => input[`clump${n}`]).filter(c => c != null);
 
             // Construct assets union
             const assets = {};
@@ -223,7 +230,8 @@ const nodes = {
             // Construct parent clump
             const parent = {
                 class: "clump",
-                transform: getTransform(ui),
+                nodeUUID: uiInput["tweaks"].nodeUUID,
+                transform: getTransform(uiInput),
                 opacity: uiInput["opacity"],
                 elements: clumps.map(c => c.content)
             }

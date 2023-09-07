@@ -1,6 +1,8 @@
 import * as PIXI from "pixi.js";
 import { getPixiFilter, type Atom, type Clump, BlinkCanvas, Asset } from "./clump";
 
+let prevMedia = null;
+
 export function renderApp(
   blink: PIXI.Application,
   hierarchy: PIXI.Container,
@@ -127,9 +129,9 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas,
   resClumpContent.transform.setFromMatrix(transMatrix);
   // const matTransform = resClumpContent.transform.worldTransform;
 
-  if (clump.opacity) {
-    resClumpContent.alpha = Math.min(100, Math.max(0, clump.opacity));
-  }
+  // if (clump.opacity) {
+  //   resClumpContent.alpha = Math.min(100, Math.max(0, clump.opacity));
+  // }
 
   resClump.addChild(resClumpContent);
 
@@ -162,6 +164,7 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas,
   //========== HANDLE EVENTS ==========//
   let dragging = false;
   let dragDelta = { x: 0, y: 0 };
+  let prevMousePos = { x: 0, y: 0 };
 
   resClump.eventMode = "dynamic";
   resClump.on("click", () => {
@@ -173,9 +176,27 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas,
   resClump.on("mousedown", (event) => {
     dragging = true;
   });
-
-  blink.ticker.add(() => {
+  resClump.on("mouseupoutside", (event) => {
+    dragging = false;
   });
+  resClump.on("mouseup", (event) => {
+    dragging = false;
+  });
+  resClump.on("mousemove", (event) => {
+    if(dragging) {
+      const { x: mX, y: mY } = event.movement;
+      send("tweak", {
+        nodeUUID: clump.nodeUUID,
+        inputs: {
+          positionX: clump.transform.position.x + mX,
+          positionY: clump.transform.position.y + mY,
+        },
+      });
+    }
+  })
+
+  // To get global mouse position at any point:
+  // console.log("MOUSE", blink.renderer.plugins.interaction.pointer.global);
 
   return resClump;
 }
