@@ -96,8 +96,6 @@
   //     console.log(get($thisGraphStore.view));
   //   }
 
-  $: console.log($zoom);
-
   // Hooks exposed by <Svelvet />
   let connectAnchorIds: (
     sourceNode: NodeKey,
@@ -151,16 +149,16 @@
   $: updateOnGraphId(graphId);
 
   // Convert a canvas coord to a svelvet coord within the graph
-  function transformPoint(canvasX: number, canvasY: number) {
-    let x = (canvasX - $translation.x - $dimensions.width / 2) / $zoom + $dimensions.width / 2;
-    let y = (canvasY - $translation.y - $dimensions.height / 2) / $zoom + $dimensions.height / 2;
+  // function transformPoint(canvasX: number, canvasY: number) {
+  //   let x = (canvasX - $translation.x - $dimensions.width / 2) / $zoom + $dimensions.width / 2;
+  //   let y = (canvasY - $translation.y - $dimensions.height / 2) / $zoom + $dimensions.height / 2;
 
-    return { x, y };
-  }
+  //   return { x, y };
+  // }
 
-  function getGraphCenter() {
-    return transformPoint($dimensions.width / 2, $dimensions.height / 2);
-  }
+  // function getGraphCenter() {
+  //   return transformPoint($dimensions.width / 2, $dimensions.height / 2);
+  // }
 
   function handleRightClick(event: CustomEvent) {
     // TODO: Fix this at a stage, on initial load context menu does not show

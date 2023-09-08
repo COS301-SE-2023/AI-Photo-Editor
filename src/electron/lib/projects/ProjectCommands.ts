@@ -42,6 +42,7 @@ export const getRecentProjectsCommand: Command = {
   },
   handler: async (ctx: CommandContext) => {
     try {
+      updateRecentProjectsList();
       return { status: "success", data: getRecentProjects() };
     } catch (e) {
       return { status: "error", message: "An exception occured", data: [] };
@@ -333,25 +334,23 @@ export async function exportMedia(
 }
 
 // TODO: Implement some sort of limit to how long the history of recent projects is.
-export async function updateRecentProjectsList(projectPath: string) {
-  if (!(await validateProjectPath(projectPath))) return; // Ensure file is of correct type
+export async function updateRecentProjectsList(projectPath?: string) {
+  if (projectPath && !(await validateProjectPath(projectPath))) return; // Ensure file is of correct type
   const currentProjects: recentProject[] = settings.get("recentProjects");
   let validProjects: recentProject[] = [];
 
   const results = await Promise.all(
     currentProjects.map(async (project) => await validateProjectPath(project.path))
   );
-  for (let i = 0; i < currentProjects.length; i++) {
+  for (let i = 0; i < results.length; i++) {
     validProjects = results[i] ? [...validProjects, currentProjects[i]] : validProjects;
   }
 
-  validProjects = validProjects.filter((project) => project.path !== projectPath);
+  if (projectPath) validProjects = validProjects.filter((project) => project.path !== projectPath);
   const str = new Date().toUTCString().split(",")[1];
   const date = str.slice(1, str.lastIndexOf(" "));
-
-  validProjects.unshift({ path: projectPath, lastEdited: date });
+  if (projectPath) validProjects.unshift({ path: projectPath, lastEdited: date });
   settings.set("recentProjects", validProjects);
-  logger.info(settings.get("recentProjects"));
 }
 
 /**

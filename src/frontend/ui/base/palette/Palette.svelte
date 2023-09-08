@@ -4,8 +4,9 @@
   import type { ICommand } from "../../../../shared/types/index";
   import { onDestroy, onMount } from "svelte";
   import Shortcuts from "../../utils/Shortcuts.svelte";
-  import { graphMall } from "../../../lib/stores/GraphStore";
+  import { focusedGraphStore, graphMall } from "../../../lib/stores/GraphStore";
   import { toastStore } from "lib/stores/ToastStore";
+  import { get } from "svelte/store";
   let showPalette = false;
   let expanded = true;
   let inputElement: HTMLInputElement;
@@ -212,7 +213,7 @@
 
       console.log(prompt);
       try {
-        const res = await window.apis.utilApi.sendPrompt(prompt, graphMall.getAllGraphUUIDs()[0]);
+        const res = await window.apis.utilApi.sendPrompt(prompt, get(focusedGraphStore).graphUUID);
 
         toastStore.trigger({
           message: res.message,

@@ -95,6 +95,8 @@ export class ProjectManager {
       delete this._projects[uuid];
       this.onProjectRemoved(uuid);
     }
+
+    if (Object.keys(this._projects).length === 0) this._projectsCreatedCounter = 1;
     return output;
   }
 

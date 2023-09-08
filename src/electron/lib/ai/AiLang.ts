@@ -489,8 +489,8 @@ export class BlypescriptInterpreter {
     // Remove nodes
     removed.forEach((statement) => {
       const nodeId = oldProgram.nodeNameIdMap.get(statement.name);
-      // this.graphManager.removeNode(graphId, nodeId!, CoreGraphUpdateParticipant.ai);
-      graph.removeNode(nodeId!);
+      this.graphManager.removeNode(graphId, nodeId!, CoreGraphUpdateParticipant.ai);
+      // graph.removeNode(nodeId!);
     });
 
     let result: Result<null, null>;
@@ -498,24 +498,26 @@ export class BlypescriptInterpreter {
     // Add nodes
     added.forEach((statement) => {
       const nodeInstance = this.toolbox.getNodeInstance(statement.nodeSignature);
-      // const response = this.graphManager.addNode(
-      //   graphId,
-      //   nodeInstance,
-      //   { x: 0, y: 0 },
-      //   CoreGraphUpdateParticipant.ai
-      // );
-      const response = graph.addNode(nodeInstance, { x: 0, y: 0 });
+      const response = this.graphManager.addNode(
+        graphId,
+        nodeInstance,
+        { x: 0, y: 0 },
+        CoreGraphUpdateParticipant.ai
+      );
+      // const response = graph.addNode(nodeInstance, { x: 0, y: 0 });
 
       if (response.status === "error" || !response.data) {
-        result = {
+        return {
           success: false,
           error: "Error while adding node to graph",
-          message: response.message,
-        };
-        return;
+          message: response.message || "",
+        } satisfies Result;
       }
 
       newProgram.nodeNameIdMap.set(statement.name, response.data.nodeId);
+      return {
+        success: true,
+      };
     });
 
     if (!result.success) return result;
@@ -574,12 +576,12 @@ export class BlypescriptInterpreter {
       const anchorInput = statement.nodeInputs[i];
 
       if (edge) {
-        // const response = this.graphManager.removeEdge(
-        //   graph.uuid,
-        //   edge.getAnchorTo,
-        //   CoreGraphUpdateParticipant.ai
-        // );
-        const response = graph.removeEdge(edge.getAnchorTo);
+        const response = this.graphManager.removeEdge(
+          graph.uuid,
+          edge.getAnchorTo,
+          CoreGraphUpdateParticipant.ai
+        );
+        // const response = graph.removeEdge(edge.getAnchorTo);
         // TODO: Handle response
         // Not sure if should end function here or continue
         if (response.status === "error") {
@@ -634,13 +636,13 @@ export class BlypescriptInterpreter {
       const fromNodeAnchors = this.mapAnchorIdsToUuids(fromNode);
       const outputAnchorUuid = fromNodeAnchors[outputNodeAnchorId];
       const inputAnchorUuid = anchorsIdToUuid[anchorId];
-      // this.graphManager.addEdge(
-      //   graph.uuid,
-      //   outputAnchorUuid,
-      //   inputAnchorUuid,
-      //   CoreGraphUpdateParticipant.ai
-      // );
-      graph.addEdge(outputAnchorUuid, inputAnchorUuid);
+      this.graphManager.addEdge(
+        graph.uuid,
+        outputAnchorUuid,
+        inputAnchorUuid,
+        CoreGraphUpdateParticipant.ai
+      );
+      // graph.addEdge(outputAnchorUuid, inputAnchorUuid);
     });
 
     // const uiInputs = graph.getUIInputs(node.uuid);
@@ -711,13 +713,18 @@ export class BlypescriptInterpreter {
       newNodeUiInputs.changes.push(uiInputId);
     });
 
-    // this.graphManager.updateUIInputs(
-    //   graph.uuid,
-    //   node.uuid,
-    //   newNodeUiInputs,
-    //   CoreGraphUpdateParticipant.ai
-    // );
-    graph.updateUIInputs(node.uuid, newNodeUiInputs);
+    this.graphManager.updateUIInputs(
+      graph.uuid,
+      node.uuid,
+      newNodeUiInputs,
+      CoreGraphUpdateParticipant.ai
+    );
+    for (const input of Object.keys(newNodeUiInputs.inputs)) {
+      this.graphManager.handleNodeInputInteraction(graph.uuid, node.uuid, {
+        id: input,
+        value: newNodeUiInputs.inputs[input],
+      });
+    }
     return { success: true, data: null };
   }
 

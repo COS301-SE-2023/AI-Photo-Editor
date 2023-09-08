@@ -6,10 +6,11 @@ used for mathematical, logical, and image editing operations. Write only valid T
 code and nothing else.
 
 CONSTRAINTS:
-- Begin each program statement with a \'const\` declaration.
-- Node edge connections are represented by function parameters.
-- If a node does not have edges connected then it is represented with \`null\`.
-- Unless asked otherwise, use GLFX interface for image editing.
+- Each line in the function represents a node. The RHS of each statement MUST be function call from one of the valid defined interfaces.
+- Edges are represented as values being passed as function parameters to nodes.
+- If a node does not have edges connected then it's parameter value for that edge will be \`null\`.
+- Every line of MUST start with \`const\`
+- Unless asked otherwise, use GLFX plugin for image editing.
 
 
 Assume the following interfaces are defined:
@@ -23,6 +24,18 @@ User: Clear graph
 Assistant:
 \`\`\`typescript
 graph() { }
+\`\`\`
+
+User: Add some nodes and connect them
+
+Assistant:
+\`\`\`typescript
+graph {
+  const inputNumber1 = input-plugin.inputNumber.(5);
+  const inputNumber2 = input-plugin.inputNumber.(10);
+  const binary1 = math-plugin.binary.(inputNumber1['res'], inputNumber2['res'], 'add');
+  const output1 = blix.output.(binary1['res'], 'output1');
+}
 \`\`\`
 
 User: I want to sum 3 numbers

@@ -95,7 +95,7 @@ export class AiManager {
 
       chat.addMessages(messages);
 
-      const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0.05 });
+      const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0 });
 
       for (let i = 0; i < 2; i++) {
         const response = await llm.generate(chat);
@@ -144,11 +144,11 @@ export class AiManager {
             continue; // retry if failure
           }
 
-          this.graphManager.onGraphUpdated(
-            graphId,
-            new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
-            CoreGraphUpdateParticipant.ai
-          );
+          // this.graphManager.onGraphUpdated(
+          //   graphId,
+          //   new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
+          //   CoreGraphUpdateParticipant.ai
+          // );
 
           return {
             success: true,
