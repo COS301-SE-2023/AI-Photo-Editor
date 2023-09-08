@@ -97,6 +97,8 @@
   $: filteredItems = filterItems(searchTerm, items);
   $: if (showItems) searchContainer?.focus();
   $: if (!selectedItemId && items.length > 0) selectedItemId = items[0].id;
+  // Make sure selected item id is reset when item list is empty
+  $: if (items.length === 0) selectedItemId = "";
 </script>
 
 <div class="relative w-36" bind:this="{container}">
