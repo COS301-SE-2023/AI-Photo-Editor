@@ -4,7 +4,7 @@ import { NodeInstance, ToolboxRegistry } from "../../lib/registries/ToolboxRegis
 import { CoreGraphUpdateParticipant } from "../../lib/core-graph/CoreGraphInteractors";
 import { type CoreGraph, CoreNodeUIInputs, type Node } from "../../lib/core-graph/CoreGraph";
 import type { INodeUIInputs } from "../../../shared/types";
-import { NodeUI, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
+import { NodeUI, NodeUIComponent, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
 import { z } from "zod";
 import logger from "../../utils/logger";
 
@@ -462,7 +462,6 @@ export class BlypescriptInterpreter {
     if (result.success) {
       this.blypescriptToolbox = result.data;
     } else {
-      // throw result.error;
       this.blypescriptToolbox = new BlypescriptToolbox([]);
       logger.error("Failed to initialize BlypescriptInterpreter with error:", result.error);
     }
@@ -958,6 +957,9 @@ export class BlypescriptPlugin {
       } else if (componentType === "Buffer") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("buffer");
+      } else if (componentType === "TweakDial") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("dial");
       } else {
         return {
           success: false,
