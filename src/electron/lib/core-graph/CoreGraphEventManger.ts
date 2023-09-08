@@ -58,6 +58,7 @@ export type CoreGraphEvent =
 export class CoreGraphEventManager {
   events: CoreGraphEvent[]; // Linear storage for events
   eventPointer: number; // A number indicating the last event that was executed
+  limit = 1000;
 
   constructor() {
     this.events = [];
@@ -122,9 +123,13 @@ export class CoreGraphEventManager {
 
     this.events =
       this.eventPointer === -1 ? [event] : [...this.events.slice(0, this.eventPointer + 1), event];
-    this.eventPointer = this.events.length - 1;
+
+    if (this.eventPointer === this.limit) {
+      this.events = [...this.events.slice(1)];
+    }
     // console.log("Pointer after adding: ", this.eventPointer);
     // console.log("Events after adding: ", this.events)
+    this.eventPointer = this.events.length - 1;
     return { status: "success" };
   }
 
