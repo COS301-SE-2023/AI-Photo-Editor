@@ -52,18 +52,20 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse<{ nodeId: UUID; inputs: string[]; outputs: string[] }> {
-    if (this._graphs[graphUUID] === undefined)
+    if (!this._graphs[graphUUID]) {
       return { status: "error", message: "Graph does not exist" };
+    }
+
     const res = this._graphs[graphUUID].addNode(node, pos);
 
     if (res.status === "success") {
-      // console.log("Node added: ", res.data!.nodeId);
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
 
       if (res.data?.uiInputsInitialized) {
         this.onGraphUpdated(graphUUID, UIINPUTS_UPDATED_EVENT, CoreGraphUpdateParticipant.system);
       }
-      if (participant === CoreGraphUpdateParticipant.user) {
+
+      if (participant !== CoreGraphUpdateParticipant.system) {
         this._events[graphUUID].addEvent({
           element: "Node",
           operation: "Add",
@@ -78,6 +80,7 @@ export class CoreGraphManager {
         }
       }
     }
+
     return res;
   }
 
@@ -87,14 +90,18 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse {
-    if (this._graphs[graphUUID] === undefined)
+    if (!this._graphs[graphUUID]) {
       return { status: "error", message: "Graph does not exist" };
+    }
+
     const signature = this._graphs[graphUUID].getNodes[nodeUUID].getSignature;
     const pos = this._graphs[graphUUID].getNodes[nodeUUID].getStyling!.getPosition;
     const res = this._graphs[graphUUID].removeNode(nodeUUID);
+
     if (res.status === "success") {
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
-      if (participant === CoreGraphUpdateParticipant.user) {
+
+      if (participant !== CoreGraphUpdateParticipant.system) {
         const node = this._toolbox.getNodeInstance(signature);
         this._events[graphUUID].addEvent({
           element: "Node",
@@ -107,8 +114,10 @@ export class CoreGraphManager {
           },
         });
       }
+
       delete this._outputIds[nodeUUID];
     }
+
     return res;
   }
 
@@ -119,14 +128,16 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse<{ edgeId: UUID }> {
-    if (this._graphs[graphUUID] === undefined)
+    if (!this._graphs[graphUUID]) {
       return { status: "error", message: "Graph does not exist" };
+    }
 
     const res = this._graphs[graphUUID].addEdge(anchorA, anchorB);
 
     if (res.status === "success") {
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
-      if (participant === CoreGraphUpdateParticipant.user) {
+
+      if (participant !== CoreGraphUpdateParticipant.system) {
         const edge = this._graphs[graphUUID].createEdgeBlueprint(anchorA, anchorB);
         this._events[graphUUID].addEvent({
           element: "Edge",
@@ -136,6 +147,7 @@ export class CoreGraphManager {
         });
       }
     }
+
     return res;
   }
 
@@ -145,12 +157,16 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse {
-    if (this._graphs[graphUUID] === undefined)
+    if (!this._graphs[graphUUID]) {
       return { status: "error", message: "Graph does not exist" };
+    }
+
     const res = this._graphs[graphUUID].removeEdge(anchorTo);
+
     if (res.status === "success") {
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
-      if (participant === CoreGraphUpdateParticipant.user) {
+
+      if (participant !== CoreGraphUpdateParticipant.system) {
         const edge = this._graphs[graphUUID].createEdgeBlueprint(
           res.data.anchorFrom,
           res.data.anchorTo
@@ -163,19 +179,26 @@ export class CoreGraphManager {
         });
       }
     }
+
     return res;
   }
 
   handleNodeInputInteraction(graphUUID: UUID, nodeUUID: UUID, input: UIInputChange): QueryResponse {
-    if (this._graphs[graphUUID] === undefined)
+    if (!this._graphs[graphUUID]) {
       return { status: "error", message: "Graph does not exist" };
+    }
+
     const inputs = this._graphs[graphUUID].getUIInputs(nodeUUID);
-    if (!inputs) return { status: "error", message: "No node UI inputs provided" };
+
+    if (!inputs) {
+      return { status: "error", message: "No node UI inputs provided" };
+    }
 
     const nodeUIInputs = { inputs, changes: [input.id] };
     nodeUIInputs.inputs[input.id] = input.value;
     // Get last saved Input
     let old = this._events[graphUUID].findPreviousInputs(nodeUUID);
+
     if (!old) {
       // If no prior inputs for the node were changed, construct the default inputs
       old = { inputs: {}, changes: [] };
@@ -208,10 +231,13 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse {
-    if (this._graphs[graphUUID] === undefined)
+    if (!this._graphs[graphUUID]) {
       return { status: "error", message: "Graph does not exist" };
+    }
 
-    if (!nodeUIInputs) return { status: "error", message: "No node UI inputs provided" };
+    if (!nodeUIInputs) {
+      return { status: "error", message: "No node UI inputs provided" };
+    }
 
     const res = this._graphs[graphUUID].updateUIInputs(nodeUUID, nodeUIInputs);
 
@@ -245,7 +271,9 @@ export class CoreGraphManager {
   }
 
   updateUIPositions(graphUUID: UUID, positions: { [key: UUID]: SvelvetCanvasPos }) {
-    this._graphs[graphUUID].UIPositions = positions;
+    if (this._graphs[graphUUID]) {
+      this._graphs[graphUUID].UIPositions = positions;
+    }
   }
 
   setPos(
