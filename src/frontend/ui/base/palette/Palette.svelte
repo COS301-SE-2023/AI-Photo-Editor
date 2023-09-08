@@ -5,7 +5,7 @@
   import { onDestroy, onMount } from "svelte";
   import Shortcuts from "../../utils/Shortcuts.svelte";
   import { focusedGraphStore, graphMall } from "../../../lib/stores/GraphStore";
-  import { toastStore } from "lib/stores/ToastStore";
+  import { toastStore } from "../../../lib/stores/ToastStore";
   import { get } from "svelte/store";
   let showPalette = false;
   let expanded = true;
