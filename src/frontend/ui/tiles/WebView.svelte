@@ -10,6 +10,18 @@
 
   $: asyncSrc = window.apis.typeclassApi.getRendererSrc(renderer);
 
+  $: webviewUpdated(webview);
+
+  // Called when the webview is created/recreated
+  function webviewUpdated(webview: Electron.WebviewTag | null) {
+    if (!webview) return;
+
+    // To receive a message from the webview, add an event listener for the ipc-message event:
+    webview?.addEventListener("ipc-message", (event) => {
+      console.log("Message received from webview:", event.channel, event.args);
+    });
+  }
+
   export let media: unknown;
 
   $: updateMedia(media);
@@ -47,13 +59,6 @@
   function openDevTools() {
     webview?.openDevTools();
   }
-
-  onMount(() => {
-    // To receive a message from the webview, add an event listener for the ipc-message event:
-    webview?.addEventListener("ipc-message", (event) => {
-      console.log("Message received from webview:", event.channel, event);
-    });
-  });
 </script>
 
 <div class="content">

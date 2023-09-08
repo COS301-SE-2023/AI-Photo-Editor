@@ -20,6 +20,8 @@ import {
   type Result,
   colorString,
   type Colors,
+  type ErrorResponse,
+  type SuccessResponse,
 } from "./AiLang";
 import {
   CoreGraphUpdateEvent,
@@ -59,133 +61,131 @@ export class AiManager {
     const blypescriptToolboxResult = this.getBlypescriptToolbox();
 
     if (!blypescriptToolboxResult.success) {
-      if (verbose) this.log(blypescriptToolboxResult.message, "RED");
+      const errorResult = blypescriptToolboxResult as ErrorResponse;
+      if (verbose) this.log(errorResult.message, "RED");
       return {
         success: false,
-        error: blypescriptToolboxResult.error,
+        error: errorResult.error,
         message: genericErrorResponse,
       } satisfies Result;
-    }
+    } else {
+      let chat = this.chats.find((chat) => chat.id === chatId);
 
-    let chat = this.chats.find((chat) => chat.id === chatId);
-
-    if (!chat) {
-      chat = new Chat();
-      this.chats.push(chat);
-    }
-
-    const messages: Message[] = [
-      {
-        role: "system",
-        content: generateGuidePrompt({
-          interfaces: blypescriptToolboxResult.data.toolbox.toString(),
-        }),
-      },
-      {
-        role: "user",
-        content: `Current Graph: \n\`\`\`typescript\n${blypescriptProgram.toString()}\n\`\`\``,
-      },
-      {
-        role: "user",
-        content: `User: \n${prompt}\n\nAssistant:`,
-      },
-    ];
-
-    chat.addMessages(messages);
-
-    const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0.05 });
-
-    for (let i = 0; i < 2; i++) {
-      const response = await llm.generate(chat);
-
-      if (!response.success) return response;
-
-      chat.addMessage({ role: "assistant", content: response.data.content });
-
-      const matchFinalAnswer = response.data.content.match(/.*Final_Answer:(.*)/);
-
-      if (matchFinalAnswer) {
-        return {
-          success: true,
-          message: matchFinalAnswer[1],
-          data: {
-            chatId: chat.id,
-            lastResponse: response.data.content,
-          },
-        } satisfies Result;
+      if (!chat) {
+        chat = new Chat();
+        this.chats.push(chat);
       }
 
-      const result = BlypescriptProgram.fromString(
-        response.data.content,
-        blypescriptToolboxResult.data.toolbox
-      );
+      const messages: Message[] = [
+        {
+          role: "system",
+          content: generateGuidePrompt({
+            interfaces: blypescriptToolboxResult.data.toolbox.toString(),
+          }),
+        },
+        {
+          role: "user",
+          content: `Current Graph: \n\`\`\`typescript\n${blypescriptProgram.toString()}\n\`\`\``,
+        },
+        {
+          role: "user",
+          content: `User: \n${prompt}\n\nAssistant:`,
+        },
+      ];
 
-      if (!result.success) {
-        console.log(result.message);
-        console.log(result.error);
-        chat.addMessage({ role: "blix", content: `Code syntax error: ${result.message}` });
-        continue; // retry if failure
-      }
+      chat.addMessages(messages);
 
-      const newBlypescriptProgram = result.data;
+      const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0.05 });
 
-      try {
-        // cant return Result interface in constructor, this function will only break if we are bozo anyway
-        const result = this.blypescriptInterpreter.run(
-          graphId,
-          blypescriptProgram,
-          newBlypescriptProgram,
-          true
+      for (let i = 0; i < 2; i++) {
+        const response = await llm.generate(chat);
+
+        if (!response.success) return response;
+
+        chat.addMessage({ role: "assistant", content: response.data.content });
+
+        const matchFinalAnswer = response.data.content.match(/.*Final_Answer:(.*)/);
+
+        if (matchFinalAnswer) {
+          return {
+            success: true,
+            message: matchFinalAnswer[1],
+            data: {
+              chatId: chat.id,
+              lastResponse: response.data.content,
+            },
+          } satisfies Result;
+        }
+
+        const result = BlypescriptProgram.fromString(
+          response.data.content,
+          blypescriptToolboxResult.data.toolbox
         );
 
         if (!result.success) {
-          console.log(colorString(result.error, "RED"));
-          console.log(colorString(result.message, "RED"));
-          logger.warn(result.error);
-          chat.addMessage({ role: "blix", content: `Code syntax error:\n${result.message}` });
+          chat.addMessage({ role: "blix", content: `USER'S RESPONSE: ${result.message}` });
           continue; // retry if failure
         }
 
-        this.graphManager.onGraphUpdated(
-          graphId,
-          new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
-          CoreGraphUpdateParticipant.ai
-        );
+        const newBlypescriptProgram = result.data as BlypescriptProgram;
 
-        return {
-          success: true,
-          message: "Successfully made changes to the graph.",
-          data: {
-            chatId: chat.id,
-            lastResponse: response.data.content,
-          },
-        } satisfies Result;
-      } catch (error) {
-        logger.warn(error);
+        try {
+          // cant return Result interface in constructor, this function will only break if we are bozo anyway
+          const result = this.blypescriptInterpreter.run(
+            graphId,
+            blypescriptProgram,
+            newBlypescriptProgram,
+            true
+          );
 
-        return {
-          success: false,
-          error: "Something very bad went wrong",
-          message: error instanceof Error ? error.message : "Some unknown error occurred.",
-        } satisfies Result;
+          if (!result.success) {
+            logger.warn(result.error);
+            chat.addMessage({ role: "blix", content: `USER'S RESPONSE:\n${result.message}` });
+            continue; // retry if failure
+          }
+
+          this.graphManager.onGraphUpdated(
+            graphId,
+            new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
+            CoreGraphUpdateParticipant.ai
+          );
+
+          return {
+            success: true,
+            message: "Successfully made changes to the graph.",
+            data: {
+              chatId: chat.id,
+              lastResponse: response.data.content,
+            },
+          } satisfies Result;
+        } catch (error) {
+          logger.warn(error);
+
+          return {
+            success: false,
+            error: "Something very bad went wrong",
+            message: error instanceof Error ? error.message : "Some unknown error occurred.",
+          } satisfies Result;
+        }
       }
-    }
 
-    return {
-      success: false,
-      error: "Chat iteration limit reached",
-      message: genericErrorResponse,
-      data: {
-        chatId: chat.id,
-      },
-    } satisfies Result;
+      return {
+        success: false,
+        error: "Chat iteration limit reached",
+        message: genericErrorResponse,
+        data: {
+          chatId: chat.id,
+        },
+      } satisfies Result;
+    }
   }
 
-  getBlypescriptToolbox() {
+  getBlypescriptToolbox(): Result<{ toolbox: BlypescriptToolbox; time: number }> | ErrorResponse {
     const { result, time } = measurePerformance(BlypescriptToolbox.fromToolbox, this.toolbox);
 
     if (!result.success) {
-      return result;
+      const errorResult = result as ErrorResponse;
+      return errorResult;
     }
 
     return {

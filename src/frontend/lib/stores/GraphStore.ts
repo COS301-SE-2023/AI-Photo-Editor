@@ -120,7 +120,7 @@ export class GraphStore {
                   this.uiInputUnsubscribers[node].push(
                     inputs[input].subscribe(() => {
                       // console.log("UPDATE UI INPUTS", node, "->", input);
-                      this.updateUIInputs(node, input).catch((err) => {
+                      this.globalizeUIInputs(node, input).catch((err) => {
                         return;
                       });
                     })
@@ -186,9 +186,11 @@ export class GraphStore {
     return res.status;
   }
 
-  async updateUIInputs(nodeUUID: GraphNodeUUID, inputId: string) {
+  // Linked once to each UI input as a store subscriber.
+  // Notifies the backend of the frontend store changing.
+  async globalizeUIInputs(nodeUUID: GraphNodeUUID, inputId: string) {
     const thisUUID = get(this.graphStore).uuid;
-    const node = get(this.graphStore).nodes[nodeUUID];
+    const node = this.getNode(nodeUUID);
     const nodeInputs = node.inputUIValues;
 
     // Extract values from stores
@@ -201,6 +203,12 @@ export class GraphStore {
     const res = await window.apis.graphApi.updateUIInputs(thisUUID, nodeUUID, payload);
 
     // Notify our UI subscribers
+  }
+
+  // Update the store value of a specific UI input
+  updateUIInput(nodeUUID: GraphNodeUUID, inputId: string, value: unknown) {
+    const node = this.getNode(nodeUUID);
+    node.inputUIValues.inputs[inputId].set(value);
   }
 
   updateUIPosition(nodeUUID: UUID, position: SvelvetCanvasPos) {

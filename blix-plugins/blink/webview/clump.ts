@@ -1,9 +1,22 @@
 import * as PIXI from "pixi.js";
 import { Matrix } from "pixi.js";
+import {
+  BloomFilter,
+  GrayscaleFilter,
+  BevelFilter,
+  OutlineFilter,
+  DotFilter,
+  CRTFilter,
+  EmbossFilter,
+  BulgePinchFilter,
+  GlitchFilter,
+  ZoomBlurFilter,
+  TwistFilter
+} from "pixi-filters"
 
 export type BlinkCanvas = {
   assets: { [key: string]: Asset };
-  content: Clump;
+  content: Clump | null;
 }
 
 export type Asset = {
@@ -29,7 +42,7 @@ export type Transform = {
 
 export type Filter = {
     class: "filter";
-    type: "blur" | "noise" | "color";
+    type: "blur" | "noise" | "bloom" | "grayscale" | "bevel" | "outline" | "dot" | "crt" | "emboss" | "bulge" | "glitch" | "zoomblur" | "twist";
     params: any[]
 };
 
@@ -37,7 +50,17 @@ export function getPixiFilter(filter: Filter) {
     switch (filter.type) {
         case "blur":        return new PIXI.BlurFilter(...filter.params);
         case "noise":       return new PIXI.NoiseFilter(...filter.params);
-        case "color":       return new PIXI.ColorMatrixFilter();
+        case "bloom":       return new BloomFilter(...filter.params);
+        case "grayscale":   return new GrayscaleFilter();
+        case "bevel":       return new BevelFilter(...filter.params);
+        case "outline":     return new OutlineFilter(...filter.params);
+        case "dot":         return new DotFilter(...filter.params);
+        case "crt":         return new CRTFilter(...filter.params);
+        case "emboss":      return new EmbossFilter(...filter.params);
+        case "bulge":       return new BulgePinchFilter(...filter.params);
+        case "glitch":      return new GlitchFilter(...filter.params);
+        case "zoomblur":    return new ZoomBlurFilter(...filter.params);
+        case "twist":       return new TwistFilter(...filter.params);
     }
 }
 
@@ -49,8 +72,9 @@ type ImageAtom = {
 };
 type ShapeAtom = {
   type: "shape";
-  shape: "rect" | "circle" | "ellipse" | "line" | "polygon" | "polyline";
+  shape: "rectangle" | "ellipse" | "triangle";
 
+  bounds: { w: number, h: number };
   fill: number;
   stroke: number;
   strokeWidth: number;
@@ -110,8 +134,9 @@ export const canvas1: BlinkCanvas = {
           {
             class: "atom",
             type: "shape",
-            shape: "rect",
+            shape: "rectangle",
 
+            bounds: { w: 100, h: 100 },
             fill: 0xff0000,
             stroke: 0x00ff00,
             strokeWidth: 5,

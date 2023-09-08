@@ -1,15 +1,18 @@
 import { TileRegistry,TileInstance } from "../../../../../src/electron/lib/registries/TileRegistry";
+import { Blix } from "../../../../../src/electron/lib/Blix";
 
 
 describe("Test TileRegistry", () => {
   let tileRegistry : TileRegistry;
   let tileInstance : TileInstance;
+  let blix : Blix;
 
 
 
     beforeEach(() => {
-      tileRegistry = new TileRegistry();
-      tileInstance = new TileInstance("plugin.name","plugin","description","icon");
+      blix = new Blix();
+      tileRegistry = new TileRegistry(blix);
+      tileInstance = new TileInstance("plugin.name","plugin","Hello","description","icon",{});
     });
 
     test("Test constructor", () => {

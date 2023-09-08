@@ -4,6 +4,36 @@ function getUUID() {
     return crypto.randomBytes(16).toString("base64url");
 }
 
+function addTransformInput(ui) {
+    for (let numInp of ["position X", "position Y", "rotation", "scale X", "scale Y"]) {
+        ui.addNumberInput(
+            {
+                componentId: numInp.replace(" ", ""),
+                label: numInp[0].toUpperCase() + numInp.slice(1),
+                defaultValue: (numInp.includes("scale") ? 1 : 0),
+                triggerUpdate: true,
+            },
+            {}
+        );
+    }
+    return (uiInput) => ({
+        position: { x: uiInput?.positionX, y: uiInput?.positionY },
+        rotation: uiInput?.rotation,
+        scale: { x: uiInput?.scaleX, y: uiInput?.scaleY },
+    });
+}
+
+function addState(ui) {
+    ui.addBuffer({
+            componentId: "state",
+            label: "State Buffer",
+            defaultValue: { id: null },
+            triggerUpdate: true,
+        }, {}
+    );
+}
+
+//========== NODES ==========//
 const nodes = {
     "inputImage": (context) => {
         const nodeBuilder = context.instantiate(context.pluginId, "inputImage");
@@ -16,22 +46,14 @@ const nodes = {
             label: "Pick an image",
             defaultValue: "",
             triggerUpdate: true,
-        }, {})
-        for (let numInp of ["position X", "position Y", "rotation", "scale X", "scale Y"]) {
-            ui.addNumberInput(
-                {
-                    componentId: numInp.replace(" ", ""),
-                    label: numInp[0].toUpperCase() + numInp.slice(1),
-                    defaultValue: 0,
-                    triggerUpdate: true,
-                },
-                {}
-            );
-        }
-        ui.addBuffer({
-                componentId: "state",
-                label: "State Buffer",
-                defaultValue: { id: null },
+        }, {});
+        addTransformInput(ui);
+        addState(ui);
+
+        ui.addTweakDial({
+                componentId: "tweaks",
+                label: "Tweak Dial",
+                defaultValue: {},
                 triggerUpdate: true,
             }, {}
         );
@@ -81,6 +103,66 @@ const nodes = {
         nodeBuilder.addInput("Blink matrix", "transform", "Transform");
         nodeBuilder.addOutput("Blink clump", "res", "Result");
     },
+    "inputShape": (context) => {
+        const nodeBuilder = context.instantiate(context.pluginId, "inputShape");
+        nodeBuilder.setTitle("Blink Shape");
+        nodeBuilder.setDescription("Input a Blink Shape");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addDropdown({
+            componentId: "shape",
+            label: "Shape",
+            defaultValue: "rectangle",
+            triggerUpdate: true,
+        }, {
+          options: {
+            "Rectangle": "rectangle",
+            "Ellipse": "ellipse",
+            "Triangle": "triangle",
+          }
+        })
+        for (let numInp of ["width", "height"]) {
+            ui.addNumberInput(
+                {
+                    componentId: numInp.replace(" ", ""),
+                    label: numInp[0].toUpperCase() + numInp.slice(1),
+                    defaultValue: 100,
+                    triggerUpdate: true,
+                },
+                {}
+            );
+        }
+        const getTransform = addTransformInput(ui);
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            const canvas = {
+                assets: {},
+                content: {
+                    class: "clump",
+                    transform: getTransform(uiInput),
+                    elements: [
+                        {
+                            class: "atom",
+                            type: "shape",
+                            shape: uiInput["shape"],
+                            bounds: { w: uiInput["width"], h: uiInput["height"] },
+
+                            fill: 0x0000ff,
+                            stroke: 0xff0000,
+                            strokeWidth: 1,
+                        }
+                    ]
+                }
+            }
+
+            return { res: canvas };
+        });
+
+        nodeBuilder.setUI(ui);
+
+        nodeBuilder.addInput("Blink matrix", "transform", "Transform");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
     "matrix": (context) => {
         const nodeBuilder = context.instantiate(context.pluginId, "matrix");
         nodeBuilder.setTitle("Matrix");
@@ -115,17 +197,7 @@ const nodes = {
         nodeBuilder.setDescription("Layer two or more Blink clumps");
 
         const ui = nodeBuilder.createUIBuilder();
-        for (let numInp of ["position X", "position Y", "rotation", "scale X", "scale Y"]) {
-            ui.addNumberInput(
-                {
-                    componentId: numInp.replace(" ", ""),
-                    label: numInp[0].toUpperCase() + numInp.slice(1),
-                    defaultValue: 0,
-                    triggerUpdate: true,
-                },
-                {}
-            );
-        }
+        const getTransform = addTransformInput(ui);
         ui.addSlider(
             {
                 componentId: "opacity",
@@ -135,11 +207,10 @@ const nodes = {
             },
             { min: 0, max: 100, set: 0.1 }
         );
-        // TODO: transform
 
         nodeBuilder.define(async (input, uiInput, from) => {
             // Apply filter to outermost clump
-            const clumps = [1, 2, 3].map(n => input["clump" + n]).filter(c => c != null);
+            const clumps = [1, 2, 3, 4, 5].map(n => input["clump" + n]).filter(c => c != null);
 
             // Construct assets union
             const assets = {};
@@ -152,11 +223,7 @@ const nodes = {
             // Construct parent clump
             const parent = {
                 class: "clump",
-                transform: {
-                    position: { x: uiInput["positionX"], y: uiInput["positionY"] },
-                    rotation: uiInput["rotation"],
-                    scale: { x: uiInput["scaleX"], y: uiInput["scaleY"] },
-                },
+                transform: getTransform(ui),
                 opacity: uiInput["opacity"],
                 elements: clumps.map(c => c.content)
             }
@@ -168,6 +235,8 @@ const nodes = {
         nodeBuilder.addInput("Blink clump", "clump1", "Clump 1");
         nodeBuilder.addInput("Blink clump", "clump2", "Clump 2");
         nodeBuilder.addInput("Blink clump", "clump3", "Clump 3");
+        nodeBuilder.addInput("Blink clump", "clump4", "Clump 4");
+        nodeBuilder.addInput("Blink clump", "clump5", "Clump 5");
         nodeBuilder.addOutput("Blink clump", "res", "Result");
     },
     "filter": (context) => {
@@ -183,16 +252,35 @@ const nodes = {
             triggerUpdate: true,
         }, {
           options: {
-            "Blur": "blur",
-            "Noise": "noise",
-            "Color": "color",
+            "Blur":         "blur",
+            "Noise":        "noise",
+            "Bloom":        "bloom",
+            "Grayscale":    "grayscale",
+            "Bevel":        "bevel",
+            "Outline":      "outline",
+            "Dot":          "dot",
+            "Crt":          "crt",
+            "Emboss":       "emboss",
+            "Bulge":        "bulge",
+            "Glitch":       "glitch",
+            "Zoomblur":     "zoomblur",
+            "Twist":        "twist", 
           }
         })
         .addSlider(
             {
                 componentId: "strength",
                 label: "Strength",
-                defaultValue: 0,
+                defaultValue: 10,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 100, set: 0.1 }
+        )
+        .addSlider(
+            {
+                componentId: "amount",
+                label: "Amount",
+                defaultValue: 10,
                 triggerUpdate: true,
             },
             { min: 0, max: 100, set: 0.1 }
@@ -206,7 +294,7 @@ const nodes = {
             canvas.content.filters.push({
                 class: "filter",
                 type: uiInput["filter"],
-                params: [uiInput["strength"], ...(uiInput["filter"] === "blur" ? [25] : [])],
+                params: [uiInput["strength"], uiInput["amount"]],
             });
 
             return { "res": canvas };

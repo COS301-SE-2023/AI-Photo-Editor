@@ -12,6 +12,7 @@ import {
   type UIComponentProps,
   type UIComponentConfig,
 } from "../../../../shared/ui/NodeUITypes";
+import { type NodeTweakData } from "../../../../shared/types";
 
 type PartialNode = {
   name: string;
@@ -168,6 +169,23 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? {},
+      triggerUpdate: config.triggerUpdate ?? true,
+    };
+
+    return this;
+  }
+
+  // This dial allows plugins to access the tweak data of the node
+  // This can then be used in coordination with the webview Tweaks API to modify node properties
+  public addTweakDial(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.TweakDial);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.TweakDial, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? ({ nodeUUID: "", inputs: [] } as NodeTweakData),
       triggerUpdate: config.triggerUpdate ?? true,
     };
 

@@ -87,7 +87,7 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
   }
 
   // This will have to be cleaned up later. Kinda a temp implementation rn
-  async getUserSettings(): Promise<QueryResponse<UserSettingsCategory[]>> {
+  async getUserSettings() {
     // const secrets = getSecrets();
 
     const userSettings: UserSettingsCategory[] = [
@@ -121,7 +121,7 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
       },
     ];
 
-    return { status: "success", data: userSettings };
+    return { status: "success", data: userSettings } satisfies QueryResponse;
   }
 
   /**
