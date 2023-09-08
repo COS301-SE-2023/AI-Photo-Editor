@@ -170,9 +170,9 @@ export class BlypescriptProgram implements AiLangProgram {
         );
       }
 
-      if (statement.nodeInputs.length > node.getNodeParameters().length) {
+      if (statement.nodeInputs.length !== node.getNodeParameters().length) {
         return error(
-          "too_many_parameters",
+          "parameter_count_mismatch",
           `Received ${statement.nodeInputs.length} parameters, but expected ${
             node.getNodeParameters().length
           } at line: ${statement.toString()}`
@@ -443,7 +443,6 @@ export class BlypescriptStatement extends AiLangStatement {
   }
 
   public toString(): string {
-    return `const ${this.name} = ${this.nodeSignature}(${this.nodeInputs.join(", ")});`;
     return fillTemplate(BLYPESCRIPT_STATEMENT_TEMPLATE, {
       name: this.name,
       signature: this.nodeSignature,
@@ -691,6 +690,14 @@ export class BlypescriptInterpreter {
       .map((input) => input.name);
     const uiInputValues = statement.nodeInputs.slice(-uiInputIds.length);
     const newNodeUiInputs: INodeUIInputs = { inputs: { ...uiInputs }, changes: [] };
+
+    if (uiInputIds.length !== uiInputValues.length) {
+      return {
+        success: false,
+        error: "ui_inputs_syntax_error",
+        message: `UI Input parameters don't match`,
+      };
+    }
 
     uiInputIds.forEach((uiInputId, i) => {
       const uiInputValue = uiInputValues[i];

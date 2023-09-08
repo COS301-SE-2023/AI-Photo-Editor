@@ -50,7 +50,6 @@ graph() {
   const noiseResult = glfx-plugin.noise(hueResult['res'], null, 0.5);
   const output1 = blix.output(noiseResult['res'], 'output');
 }
-
 \`\`\`
 
 ---END EXAMPLES---
@@ -69,6 +68,45 @@ best and most fun, but be creative :)
   return Object.entries(replacements).reduce((str, [key, value]) => {
     return str.replace(`{{${key}}}`, value);
   }, template);
+}
+
+export function getExamples(): { user: string; assistant: string }[] {
+  return [
+    {
+      user: "Clear graph",
+      assistant: `
+\`\`\`typescript
+graph() { }
+\`\`\``,
+    },
+    {
+      user: "I want to sum 3 numbers",
+      assistant: `
+\`\`\`typescript
+graph() {
+    const num1 = input-plugin.inputNumber(5);
+    const num2 = input-plugin.inputNumber(2);
+    const num3 = input-plugin.inputNumber(12);
+    const binary1 = math-plugin.binary(num1['res'], num2['res'], 'add');
+    const binary2 = math-plugin.binary(binary1['res'], num3['res'], 'add');
+    const output1 = blix.output(binary2['res'], 'output1');
+}
+\`\`\``,
+    },
+    {
+      user: "Help the edit the brightness, hue and noise of an image.",
+      assistant: `
+\`\`\`typescript
+graph() {
+  const glfxInput = input-plugin.inputGLFXImage();
+  const brightnessResult = glfx-plugin.brightnessContrast(glfxInput['res'], mull, null, 0, 0);
+  const hueResult = glfx-plugin.hueSaturation(brightnessResult['res'], null, null, 0, 0);
+  const noiseResult = glfx-plugin.noise(hueResult['res'], null, 0.5);
+  const output1 = blix.output(noiseResult['res'], 'output1');
+}
+\`\`\``,
+    },
+  ];
 }
 
 // export function generateGuidePrompt(replacements: Record<string, string>): string {

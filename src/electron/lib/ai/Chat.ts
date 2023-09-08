@@ -266,8 +266,8 @@ export type Message = {
 //         message: "Ah shit"
 //       }
 //     }
-
 //   }
+// }
 
 //   public setChatConfig(chatConfig?: PalmChatConfig) {
 //     const chatConfigDefaults = {

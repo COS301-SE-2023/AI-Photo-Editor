@@ -13,7 +13,8 @@ import {
   type Settings,
 } from "../../../utils/settings";
 import type { Setting, UserSettingsCategory, QueryResponse } from "../../../../shared/types";
-import { app } from "electron";
+// import dotenv from "dotenv";
+// dotenv.config();
 
 // Exposes basic system information
 export class UtilApi implements ElectronMainApi<UtilApi> {
@@ -55,6 +56,8 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     const response = await this.blix.aiManager.executePrompt({
       prompt,
       graphId: id,
+      // model: "PaLM-Chat",
+      // apiKey: process.env.PALM_API_KEY || "",
       model: "GPT-3.5",
       apiKey: getSecret("OPENAI_API_KEY"),
     });

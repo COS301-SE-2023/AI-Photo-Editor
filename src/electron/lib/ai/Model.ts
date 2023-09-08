@@ -4,6 +4,9 @@ import { type Result } from "./AiLang";
 import { genericErrorResponse } from "./AiManagerv2";
 import OpenAI from "openai";
 import logger from "../../utils/logger";
+import { DiscussServiceClient } from "@google-ai/generativelanguage";
+import { GoogleAuth } from "google-auth-library";
+import { getExamples } from "./prompt";
 
 /**
  * Wrapper interface for various LLM model implementations
@@ -37,7 +40,7 @@ export class OpenAiModel extends Model {
   constructor(config: Required<ModelConfig<OpenAiChatModel>>) {
     super(config);
     this.model = config.model;
-    this.openai = new OpenAI({ apiKey: this.apiKey });
+    this.openai = new OpenAI({ apiKey: this.apiKey, timeout: 60 * 1000 });
   }
 
   public async generate(chat: Chat): Promise<Result<ModelResponse>> {
@@ -102,14 +105,69 @@ export class OpenAiModel extends Model {
 
 export class PalmModel extends Model {
   private model: PalmChatModel;
+  private palm: DiscussServiceClient;
 
   constructor(config: Required<ModelConfig<PalmChatModel>>) {
     super(config);
     this.model = config.model;
+    this.palm = new DiscussServiceClient({
+      // Issue with Google Auth type mismatches
+      authClient: new GoogleAuth().fromAPIKey(this.apiKey) as any,
+    });
   }
 
-  public generate(chat: Chat): Promise<Result<ModelResponse>> {
-    throw Error("Not implemented");
+  public async generate(chat: Chat): Promise<Result<ModelResponse>> {
+    try {
+      const chatMessages = chat.getMessages();
+      const context = chatMessages
+        .slice(0, -1)
+        .map((m) => m.content)
+        .join("\n\n");
+      const lastMessage = chatMessages.at(-1)?.content || "";
+
+      const start = performance.now();
+      const result = await this.palm.generateMessage({
+        model: `models/${PALM_CHAT_MODELS[this.model]}`,
+        temperature: this.temperature,
+        candidateCount: 1,
+        prompt: {
+          context,
+          messages: [{ content: lastMessage }],
+          examples: getExamples().map((e) => ({
+            input: { content: e.user },
+            output: { content: e.assistant },
+          })),
+        },
+      });
+      const end = performance.now();
+
+      if (!result[0] || !result[0].candidates) {
+        return {
+          success: false,
+          error: "palm_api_error",
+          message: "Error with palm generative result",
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          content: result[0].candidates[0].content || "",
+          time: end - start,
+          usage: {
+            completionTokens: 0,
+            promptTokens: 0,
+            totalTokens: 0,
+          },
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: "unknown_palm_api_error",
+        message: "An unknown error has occurred with the PaLM API",
+      };
+    }
   }
 
   public getType(): ChatModel {
@@ -129,7 +187,7 @@ export const OPENAI_CHAT_MODELS = {
 } as const;
 
 export const PALM_CHAT_MODELS = {
-  "PaLM-Chat-Bison": "chat-bison-001",
+  "PaLM-Chat": "chat-bison-001",
 } as const;
 
 export const CHAT_MODELS = {
