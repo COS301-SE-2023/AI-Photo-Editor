@@ -42,7 +42,15 @@ export const getRecentProjectsCommand: Command = {
   },
   handler: async (ctx: CommandContext) => {
     try {
-      return { status: "success", data: getRecentProjects() };
+      const projects = getRecentProjects();
+      const validProjects: recentProject[] = [];
+      for (const project of projects) {
+        if (await validateProjectPath(project.path)) {
+          validProjects.push(project);
+        }
+      }
+      settings.set("recentProjects", validProjects);
+      return { status: "success", data: validProjects };
     } catch (e) {
       return { status: "error", message: "An exception occured", data: [] };
     }
