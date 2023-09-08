@@ -38,17 +38,23 @@ graph {
 }
 \`\`\`
 
-User: I want to sum 3 numbers
+User: Solve the following expression: (((a+5) * (b+c)) / (69))^8
 
 Assistant:
 \`\`\`typescript
 graph() {
-    const num1 = input-plugin.inputNumber(5);
-    const num2 = input-plugin.inputNumber(2);
-    const num3 = input-plugin.inputNumber(12);
-    const binary1 = math-plugin.binary(num1['res'], num2['res'], 'add');
-    const binary2 = math-plugin.binary(binary1['res'], num3['res'], 'add');
-    const output1 = blix.output(binary2['res'], 'output1');
+  const inputA = input-plugin.inputNumber(0);
+  const inputB = input-plugin.inputNumber(0);
+  const inputC = input-plugin.inputNumber(0);
+  const input1 = input-plugin.inputNumber(5);
+  const input2 = input-plugin.inputNumber(69);
+  const input3 = input-plugin.inputNumber(8);
+  const num1 = math-plugin.binary(inputA['res'], input1['res'], 'add');
+  const num2 = math-plugin.binary(inputB['res'], inputC['res'], 'add');
+  const num3 = math-plugin.binary(num1['res'], num2['res'], 'multiply');
+  const num4 = math-plugin.binary(num3['res'], input2['res'], 'divide');
+  const num5 = math-plugin.binary(num4['res'], input3['res'], 'power');
+  const output1 = blix.output(num5['res'], 'output1');
 }
 \`\`\`
 

@@ -56,7 +56,7 @@ const nodes = {
             case "add": return { res: num1 + num2             }
             case "subtract": return { res: num1 - num2        }
             case "multiply": return { res: num1 * num2        }
-            case "divide": return { res: num1 / num2          }
+            case "divide": return { res: num2 === 0 ? 0 : num1 / num2 }
             case "power": return { res: Math.pow(num1, num2)  }
             case "modulo": return { res: num1 % num2          }
             case "max": return { res: Math.max(num1, num2)    }

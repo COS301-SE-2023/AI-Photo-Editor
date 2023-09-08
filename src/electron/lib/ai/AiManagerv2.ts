@@ -190,31 +190,35 @@ export class AiManager {
   }
 
   private writeChatToDisk(chat: Chat) {
-    const filePath = path.join(app.getPath("userData"), "chats.json");
+    try {
+      const filePath = path.join(app.getPath("userData"), "chats.json");
 
-    // Check if the file exists
-    if (fs.existsSync(filePath)) {
-      // Read the existing JSON data
-      const jsonData = fs.readFileSync(filePath, "utf8");
-      const chatsData = JSON.parse(jsonData);
+      // Check if the file exists
+      if (fs.existsSync(filePath)) {
+        // Read the existing JSON data
+        const jsonData = fs.readFileSync(filePath, "utf8");
+        const chatsData = JSON.parse(jsonData);
 
-      chatsData.chats.push({
-        timestamp: Date.now(),
-        messages: chat.getMessages(),
-      });
+        chatsData.chats.push({
+          timestamp: Date.now(),
+          messages: chat.getMessages(),
+        });
 
-      // Write the updated JSON data back to file
-      fs.writeFileSync(filePath, JSON.stringify(chatsData));
-    } else {
-      const initialData = {
-        chats: [
-          {
-            timestamp: Date.now(),
-            messages: chat.getMessages(),
-          },
-        ],
-      };
-      fs.writeFileSync(filePath, JSON.stringify(initialData));
+        // Write the updated JSON data back to file
+        fs.writeFileSync(filePath, JSON.stringify(chatsData));
+      } else {
+        const initialData = {
+          chats: [
+            {
+              timestamp: Date.now(),
+              messages: chat.getMessages(),
+            },
+          ],
+        };
+        fs.writeFileSync(filePath, JSON.stringify(initialData));
+      }
+    } catch (error) {
+      logger.warn("Something is wrong with chats file");
     }
   }
 
