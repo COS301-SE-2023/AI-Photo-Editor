@@ -17,7 +17,6 @@ import {
   CoreGraphUpdateEvent,
   CoreGraphUpdateParticipant,
 } from "../core-graph/CoreGraphInteractors";
-import sharp from "sharp";
 import type { SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 import settings from "../../utils/settings";
 import type { recentProject } from "../../../shared/types/index";
@@ -282,55 +281,55 @@ export async function exportMedia(
   ctx: CommandContext,
   args: ExportMedia
 ): Promise<CommandResponse> {
-  if (!args) {
-    return { status: "error", message: "No media selected to export" };
-  }
+  return { status: "success", message: "Exporting currently disabled." };
 
-  const { type, data } = args;
+  // if (!args) {
+  //   return { status: "error", message: "No media selected to export" };
+  // }
 
-  if (!data) {
-    return { status: "error", message: "No data was provided" };
-  }
+  // const { type, data } = args;
 
-  if (type === "image") {
-    const base64Data = data.split(";base64, ");
-    const imgBuffer = Buffer.from(base64Data[1], "base64");
+  // if (!data) {
+  //   return { status: "error", message: "No data was provided" };
+  // }
 
-    const path = await showSaveDialog({
-      title: "Export media as",
-      defaultPath: "blix.png",
-      // filters: [{ name: "Images", extensions: ["png, jpg", "jpeg"] }],
-      properties: ["createDirectory"],
-    });
+  // if (type === "image") {
+  //   const base64Data = data.split(";base64, ");
+  //   const imgBuffer = Buffer.from(base64Data[1], "base64");
 
-    if (!path) return { status: "error", message: "No path chosen" };
+  //   const path = await showSaveDialog({
+  //     title: "Export media as",
+  //     defaultPath: "blix.png",
+  //     // filters: [{ name: "Images", extensions: ["png, jpg", "jpeg"] }],
+  //     properties: ["createDirectory"],
+  //   });
 
-    sharp(imgBuffer).toFile(path);
+  //   if (!path) return { status: "error", message: "No path chosen" };
 
-    return { status: "success", message: "Media exported successfully" };
-  } else if (type === "Number" || type === "color" || type === "string") {
-    const fileData = {
-      OutputData: data,
-    };
-    const path = await showSaveDialog({
-      title: "Export media as",
-      defaultPath: "blix.json",
-      filters: [{ name: "Data", extensions: ["json"] }],
-      properties: ["createDirectory"],
-    });
+  //   return { status: "success", message: "Media exported successfully" };
+  // } else if (type === "Number" || type === "color" || type === "string") {
+  //   const fileData = {
+  //     OutputData: data,
+  //   };
+  //   const path = await showSaveDialog({
+  //     title: "Export media as",
+  //     defaultPath: "blix.json",
+  //     filters: [{ name: "Data", extensions: ["json"] }],
+  //     properties: ["createDirectory"],
+  //   });
 
-    if (!path) return { status: "error", message: "Not path chosen" };
+  //   if (!path) return { status: "error", message: "Not path chosen" };
 
-    try {
-      writeFile(path, JSON.stringify(fileData));
-    } catch (err) {
-      logger.error(err);
-    }
+  //   try {
+  //     writeFile(path, JSON.stringify(fileData));
+  //   } catch (err) {
+  //     logger.error(err);
+  //   }
 
-    return { status: "success", message: "Media exported successfully" };
-  } else {
-    return { status: "success", message: "Unsupported media type" };
-  }
+  //   return { status: "success", message: "Media exported successfully" };
+  // } else {
+  //   return { status: "success", message: "Unsupported media type" };
+  // }
 }
 
 // TODO: Implement some sort of limit to how long the history of recent projects is.

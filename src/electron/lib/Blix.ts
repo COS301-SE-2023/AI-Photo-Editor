@@ -76,15 +76,15 @@ export class Blix {
     // Create Output node
     const outputNodeBuilder = new NodeBuilder("blix", "output");
     const outputUIBuilder = outputNodeBuilder.createUIBuilder();
-    outputUIBuilder.addButton(
-      {
-        componentId: "export",
-        label: "Export",
-        defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
-        triggerUpdate: false,
-      },
-      {}
-    );
+    // outputUIBuilder.addButton(
+    //   {
+    //     componentId: "export",
+    //     label: "Export",
+    //     defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+    //     triggerUpdate: false,
+    //   },
+    //   {}
+    // );
     outputUIBuilder.addTextInput(
       {
         componentId: "outputId",

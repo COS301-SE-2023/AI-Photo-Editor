@@ -89,10 +89,10 @@
     bind:clientWidth="{canvasWidth}"
 />
 
-<code>
+<!-- <code>
     Rendering at: <b>{canvasWidth} x {canvasHeight}</b><br />
     Media: {JSON.stringify($media)}
-</code>
+</code> -->
 
 <style>
     .canvasContainer {

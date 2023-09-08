@@ -319,7 +319,7 @@
           <div class="flex flex-col items-center justify-center text-zinc-500">
             <span>"I want to edit the brightness, hue and noise of an image."</span>
             <span>"What is the result of 16 subtract 42, squared?"</span>
-            <span>"I want my image to sparkly like summer's day"</span>
+            <!-- <span>"I want my image to sparkly like summer's day"</span> -->
             <span>"Make my image more medieval"</span>
           </div>
         </div>

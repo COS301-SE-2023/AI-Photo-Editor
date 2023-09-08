@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import { NodeInstance, ToolboxRegistry } from "../../lib/registries/ToolboxRegistry";
@@ -510,12 +511,12 @@ export class BlypescriptInterpreter {
     newProgram.addNodeIds(oldProgram);
 
     if (verbose) {
-      logger.warn(colorString("//==========Old Program==========//", "ORANGE"));
-      logger.warn(oldProgram.toString());
-      logger.warn(colorString("//==========New Program==========//", "GREEN"));
-      logger.warn(newProgram.toString());
-      logger.warn(colorString("//==========Diff==========//", "LIGHT_BLUE"));
-      logger.warn(JSON.stringify({ added, removed, changed }, null, 2));
+      console.log(colorString("//==========Old Program==========//", "ORANGE"));
+      console.log(oldProgram.toString());
+      console.log(colorString("//==========New Program==========//", "GREEN"));
+      console.log(newProgram.toString());
+      console.log(colorString("//==========Diff==========//", "LIGHT_BLUE"));
+      console.log(JSON.stringify({ added, removed, changed }, null, 2));
     }
 
     // Remove nodes

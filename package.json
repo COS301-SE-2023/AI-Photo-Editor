@@ -91,7 +91,6 @@
     "google-auth-library": "^8.9.0",
     "langchain": "^0.0.104",
     "openai": "^4.3.1",
-    "sharp": "^0.32.1",
     "svelte": "^3.59.0",
     "tailwind-merge": "^1.13.2",
     "tinykeys": "^1.4.0",
