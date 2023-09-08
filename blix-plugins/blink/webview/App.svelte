@@ -2,9 +2,9 @@
     import * as PIXI from "pixi.js";
     import { Viewport } from "pixi-viewport";
     import { onDestroy, onMount, tick } from "svelte";
-    import { Writable } from "svelte/store";
+    import { type Writable } from "svelte/store";
     import { renderApp } from "./render";
-    import { BlinkCanvas, canvas1 } from "./clump";
+    import { type BlinkCanvas, canvas1 } from "./clump";
 
     export let media: Writable<BlinkCanvas>;
     export let send: (msg: string, data: any) => void;

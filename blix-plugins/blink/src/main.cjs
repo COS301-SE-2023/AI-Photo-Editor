@@ -60,9 +60,15 @@ const nodes = {
         nodeBuilder.setDescription("Input a Blink Sprite Image");
 
         const ui = nodeBuilder.createUIBuilder();
-        ui.addFilePicker({
-            componentId: "imagePicker",
-            label: "Pick an image",
+        // ui.addFilePicker({
+        //     componentId: "imagePicker",
+        //     label: "Pick an image",
+        //     defaultValue: "",
+        //     triggerUpdate: true,
+        // }, {});
+        ui.addCachePicker({
+            componentId: "cachePicker",
+            label: "Pick an cache item",
             defaultValue: "",
             triggerUpdate: true,
         }, {});
@@ -79,7 +85,7 @@ const nodes = {
         });
 
         nodeBuilder.define(async (input, uiInput, from) => {
-            let src = uiInput["imagePicker"].split("/");
+            let src = uiInput["cachePicker"].split("/");
             src = src.splice(-2);
             src = src.join("/");
 
@@ -87,8 +93,8 @@ const nodes = {
                 assets: {
                     [uiInput["state"]["id"]]: {
                         class: "asset",
-                        type: "image",
-                        data: src
+                        type: "blob",
+                        data: await window.cache.get(src)
                     }
                 },
                 content: {
@@ -150,7 +156,13 @@ const nodes = {
 
         nodeBuilder.define(async (input, uiInput, from) => {
             const canvas = {
-                assets: {},
+                assets: {
+                    "1": {
+                      class: "asset",
+                      type: "image",
+                      data: "media/bird.png",
+                    },
+                },
                 content: {
                     class: "clump",
                     nodeUUID: uiInput["tweaks"].nodeUUID,

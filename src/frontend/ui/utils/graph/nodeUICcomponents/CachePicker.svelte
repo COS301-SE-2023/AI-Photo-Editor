@@ -14,7 +14,7 @@
 
   if (!inputStore.inputs[config.componentId]) {
     if (!defaultItem) defaultItem = Object.keys($cacheStore)[0];
-    inputStore.inputs[config.componentId] = writable(items[0]);
+    inputStore.inputs[config.componentId] = writable("");
   }
 
   $: valStore = inputStore.inputs[config.componentId];

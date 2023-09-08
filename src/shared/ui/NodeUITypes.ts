@@ -52,4 +52,5 @@ export enum NodeUIComponent {
   Checkbox = "Checkbox",
   ColorPicker = "ColorPicker",
   FilePicker = "FilePicker",
+  CachePicker = "CachePicker",
 }

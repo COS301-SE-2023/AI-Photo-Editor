@@ -6,6 +6,7 @@
   import ColorPicker from "./nodeUICcomponents/ColorPicker.svelte";
   import Knob from "./nodeUICcomponents/Knob.svelte";
   import type { UIValueStore } from "@shared/ui/UIGraph";
+  import CachePicker from "./nodeUICcomponents/CachePicker.svelte";
   import Dropdown from "./nodeUICcomponents/Dropdown.svelte";
   import TextInput from "./nodeUICcomponents/TextInput.svelte";
   import FilePicker from "./nodeUICcomponents/FilePicker.svelte";
@@ -25,6 +26,7 @@
     DiffDial: DiffDial,
     Slider: Slider,
     Knob: Knob,
+    CachePicker: CachePicker,
     Label: null,
     Radio: Radio,
     Dropdown: Dropdown,

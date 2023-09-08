@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  // import { cacheStore } from "lib/stores/CacheStore";
 
   const ws = new WebSocket("ws://localhost:60606");
 
   let videoStream: HTMLVideoElement;
   let loading = false;
+  // let pictureUrl;
   // @ts-ignore
   let capture: ImageCapture;
   // let pictureUrl: string;
@@ -36,6 +38,8 @@
       .takePhoto()
       .then((blob: Blob) => {
         ws.send(blob);
+        // pictureUrl = URL.createObjectURL(blob);
+        // cacheStore.refreshStore([pictureUrl]);
       })
       .catch((err: string) => console.log("Error while taking photo ", err));
   }

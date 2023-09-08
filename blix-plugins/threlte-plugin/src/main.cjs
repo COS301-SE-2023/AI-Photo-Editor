@@ -109,16 +109,22 @@ const nodes = {
         nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
         nodeBuilder.define(async (input, uiInput, from) => {
-            return { "res": { src: uiInput["imagePicker"] } };
+            return { "res": { src: uiInput["cacheid"] } };
         });
 
         const ui = nodeBuilder.createUIBuilder();
-        ui.addFilePicker({
-            componentId: "imagePicker",
+        // ui.addFilePicker({
+        //     componentId: "imagePicker",
+        //     label: "Pick an image",
+        //     defaultValue: "",
+        //     triggerUpdate: true,
+        // }, {});
+        ui.addCachePicker({
+            componentId: "cacheid",
             label: "Pick an image",
             defaultValue: "",
             triggerUpdate: true,
-        }, {});
+        }, {})
 
         nodeBuilder.setUI(ui);
 

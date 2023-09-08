@@ -37,6 +37,13 @@ class CacheStore {
     };
   }
 
+  // public refreshStore(cacheId: CacheUUID) {
+  //   this.cacheStore.update((cache) => {
+  //     cache.push(cacheId)
+  //     return cache;
+  //   });
+  // }
+
   public get subscribe() {
     return this.cacheStore.subscribe;
   }

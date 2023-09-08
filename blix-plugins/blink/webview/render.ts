@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { getPixiFilter, type Atom, type Clump, BlinkCanvas, Asset } from "./clump";
+import { getPixiFilter, type Atom, type Clump, type BlinkCanvas, type Asset } from "./clump";
 
 // let prevMedia = null; // TODO: Replace with DiffDial
 
