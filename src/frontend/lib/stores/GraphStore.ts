@@ -1,5 +1,5 @@
 import type { AnchorUUID } from "@electron/lib/core-graph/CoreGraph";
-import type { IGraphUIInputs, INodeUIInputs } from "@shared/types";
+import type { IGraphUIInputs, INodeUIInputs, UIInputChange } from "@shared/types/graph";
 import type { NodeSignature } from "@shared/ui/ToolboxTypes";
 import {
   UIGraph,
@@ -117,21 +117,29 @@ export class GraphStore {
                 for (const input in inputs) {
                   if (!inputs.hasOwnProperty(input)) continue;
                   // console.log("SUB TO", node, "-->>", input)
+                  let first = true;
                   this.uiInputUnsubscribers[node].push(
                     inputs[input].subscribe(() => {
                       // console.log("UPDATE UI INPUTS", node, "->", input);
-                      this.globalizeUIInputs(node, input).catch((err) => {
-                        return;
-                      });
+                      // console.log("Sg", false, node)
+                      // Ensure the subscribe does not run when first created
+                      if (first) {
+                        first = false;
+                      } else {
+                        this.globalizeUIInputs(node, input).catch((err) => {
+                          return;
+                        });
+                      }
                     })
                   );
                 }
-
-                this.uiPositionUnsubscribers[node].push(
-                  position!.subscribe(() => {
-                    this.updateUIPosition(node, get(position!));
-                  })
-                );
+                // Update frontend
+                if (position)
+                  this.uiPositionUnsubscribers[node].push(
+                    position.subscribe((state) => {
+                      this.updateUIPosition(node, state);
+                    })
+                  );
               })
               .catch(() => {
                 return;
@@ -179,6 +187,12 @@ export class GraphStore {
     return res.status;
   }
 
+  async handleNodeInputInteraction(graphUUID: UUID, nodeUUID: UUID, input: UIInputChange) {
+    // console.log("INPUT: ", input.value)
+    const res = await window.apis.graphApi.handleNodeInputInteraction(graphUUID, nodeUUID, input);
+    // console.log(res);
+  }
+
   async addEdge(anchorA: AnchorUUID, anchorB: AnchorUUID) {
     const thisUUID = get(this.graphStore).uuid;
     const res = await window.apis.graphApi.addEdge(thisUUID, anchorA, anchorB);
@@ -190,19 +204,23 @@ export class GraphStore {
   // Notifies the backend of the frontend store changing.
   async globalizeUIInputs(nodeUUID: GraphNodeUUID, inputId: string) {
     const thisUUID = get(this.graphStore).uuid;
-    const node = this.getNode(nodeUUID);
-    const nodeInputs = node.inputUIValues;
+    const res = await window.apis.graphApi.updateUIInputs(
+      thisUUID,
+      nodeUUID,
+      this.getNodeUiInputs(nodeUUID, inputId)
+    );
+    // Notify our UI subscribers
+  }
 
-    // Extract values from stores
-    const payload: INodeUIInputs = { inputs: {}, changes: [inputId] };
+  getNodeUiInputs(nodeUUID: UUID, inputId: string) {
+    const node = get(this.graphStore).nodes[nodeUUID];
+    const nodeInputs = node.inputUIValues;
+    const inputs: INodeUIInputs = { inputs: {}, changes: [inputId] };
 
     for (const input of Object.keys(nodeInputs.inputs)) {
-      payload.inputs[input] = get(nodeInputs.inputs[input]);
+      inputs.inputs[input] = get(nodeInputs.inputs[input]);
     }
-
-    const res = await window.apis.graphApi.updateUIInputs(thisUUID, nodeUUID, payload);
-
-    // Notify our UI subscribers
+    return inputs;
   }
 
   // Update the store value of a specific UI input
@@ -220,7 +238,12 @@ export class GraphStore {
     // await window.apis.graphApi.updateUIPosition(get(this.graphStore).uuid, nodeUUID, get(get(this.graphStore).uiPositions[nodeUUID]));
   }
 
+  /**
+   * BE CAREFUL OF THE UNAWAITED PROMISE
+   * AWAIT REMOVED FOR UP DAY AS A TEMP FIX
+   */
   async updateUIPositions() {
+    // eslint-disable-next-line
     await window.apis.graphApi.updateUIPositions(
       get(this.graphStore).uuid,
       get(this.graphStore).uiPositions
@@ -293,7 +316,6 @@ export class GraphStore {
     nodes.forEach((node) => {
       const nodePos = this.getNode(node)?.styling?.pos;
       if (!nodePos) return;
-
       nodePos.update((pos) => {
         return {
           x: pos.x + NUDGE_DISTANCE * 2 * (Math.random() - 0.5),
@@ -303,7 +325,8 @@ export class GraphStore {
     });
 
     // Notify the system of the new node positions
-    const registerPositionUpdate = () => {
+    const registerPositionUpdate = async () => {
+      await this.updateUIPositions();
       return; // TODO
     };
 
@@ -311,7 +334,7 @@ export class GraphStore {
       const now = performance.now();
       if (now - start > duration * 1000) {
         // Animation is done
-        registerPositionUpdate();
+        void registerPositionUpdate().then().catch();
         return;
       }
 
@@ -380,8 +403,10 @@ export class GraphStore {
         const dist = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
         const forceMag = dist * CENTER_FORCE;
 
-        forces[node].x += (diff.x / dist) * forceMag - totalDirForce;
-        forces[node].y += (diff.y / dist) * forceMag;
+        if (diff.x !== 0 || diff.y !== 0) {
+          forces[node].x += (diff.x / dist) * forceMag - totalDirForce;
+          forces[node].y += (diff.y / dist) * forceMag;
+        }
       });
 
       // ===== ADD INTER-NODE REPULSION FORCES ===== //

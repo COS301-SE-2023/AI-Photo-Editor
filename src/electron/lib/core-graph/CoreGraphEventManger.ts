@@ -58,6 +58,7 @@ export type CoreGraphEvent =
 export class CoreGraphEventManager {
   events: CoreGraphEvent[]; // Linear storage for events
   eventPointer: number; // A number indicating the last event that was executed
+  limit = 1000;
 
   constructor() {
     this.events = [];
@@ -117,14 +118,18 @@ export class CoreGraphEventManager {
    */
   addEvent(event: CoreGraphEvent): CoreGraphEventResponse {
     // console.log("New event: ", event);
-    // console.log("Pointer: ", this.eventPointer);
+    // console.log("Pointer before: ", this.eventPointer);
     // console.log("Length before add: ", this.events.length);
 
     this.events =
       this.eventPointer === -1 ? [event] : [...this.events.slice(0, this.eventPointer + 1), event];
-    this.eventPointer = this.events.length - 1;
+
+    if (this.eventPointer === this.limit) {
+      this.events = [...this.events.slice(1)];
+    }
     // console.log("Pointer after adding: ", this.eventPointer);
     // console.log("Events after adding: ", this.events)
+    this.eventPointer = this.events.length - 1;
     return { status: "success" };
   }
 
@@ -211,6 +216,22 @@ export class CoreGraphEventManager {
       }
       this.events[i] = event;
     }
+  }
+
+  findPreviousInputs(nodeUUID: UUID): INodeUIInputs | null {
+    for (let i = this.eventPointer; i > 0; i--) {
+      const event = this.events[i];
+      if (
+        event.element === "UiInput" &&
+        event.operation === "Change" &&
+        event.execute.nodeUUId === nodeUUID
+      ) {
+        return event.execute.nodeUIInputs;
+      } // else if(event.element === "Node" && event.operation === "Remove" && event.execute.nodeUUId === nodeUUID) {
+      //   return { inputs: event.revert.uiInputs, changes: [] };
+      // }
+    }
+    return null;
   }
 
   reset() {

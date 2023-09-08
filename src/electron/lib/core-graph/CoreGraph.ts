@@ -187,7 +187,8 @@ export class CoreGraph extends UniqueEntity {
         this.outputNodes[n.uuid] = "default"; // TODO: set this to a unique id and propagate to the frontend
       }
 
-      let inputValues: Record<string, unknown> = {};
+      const inputValues: Record<string, unknown> = {};
+      let uiInputsInitialized = false;
       // New Node with default Ui Input Values
       if (!uiValues) {
         const inputs: { [key: string]: unknown } = {};
@@ -208,32 +209,24 @@ export class CoreGraph extends UniqueEntity {
         Object.values(node.uiConfigs).forEach((config) => {
           inputValues[config.componentId] = uiValues[config.componentId];
         });
-        // console.log(inputValues);
-      }
-
-      // Handle special readonly UI component types (e.g. TweakDial)
-      const filledReadonlyInputs = populateReadonlyUIInputs(node.ui, {
-        nodeUUID: n.uuid,
-        uiInputs: Object.keys(inputValues),
-      });
-      inputValues = { ...inputValues, ...filledReadonlyInputs };
-
-      // Handle the UI input initializer
-      const initializedInputs = node.uiInitializer(inputValues);
-      let uiInputsInitialized = false;
-      const uiChanges = Object.keys(initializedInputs);
-      if (typeof initializedInputs === "object" && uiChanges.length > 0) {
-        inputValues = { ...inputValues, ...initializedInputs };
-
-        // Update the graph's UI inputs
-        const uiInputsPayload: INodeUIInputs = {
-          inputs: inputValues,
-          changes: uiChanges,
-        };
-        this.uiInputs[n.uuid] = new CoreNodeUIInputs(uiInputsPayload);
 
         uiInputsInitialized = true;
       }
+
+      // Handle the UI input initializer
+      // const initializedInputs = node.uiInitializer(inputValues);
+      // const uiChanges = Object.keys(initializedInputs);
+      // if (typeof initializedInputs === "object" && uiChanges.length > 0) {
+      //   inputValues = { ...inputValues, ...initializedInputs };
+
+      //   // Update the graph's UI inputs
+      //   const uiInputsPayload: INodeUIInputs = {
+      //     inputs: inputValues,
+      //     changes: uiChanges,
+      //   };
+      //   this.uiInputs[n.uuid] = new CoreNodeUIInputs(uiInputsPayload);
+
+      // }
 
       // console.log(QueryResponseStatus.success)
       const anchors: AiAnchors = n.returnAnchors();

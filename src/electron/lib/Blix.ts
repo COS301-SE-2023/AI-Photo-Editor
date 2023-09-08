@@ -170,10 +170,7 @@ export class Blix {
     // ----- Subscribes to backend UI input updates and alerts the frontend -----
     const ipcGravityAISubsriber = new IPCGraphSubscriber();
     ipcGravityAISubsriber.setListenEvents([CoreGraphUpdateEvent.graphUpdated]);
-    ipcGravityAISubsriber.setListenParticipants([
-      CoreGraphUpdateParticipant.system,
-      CoreGraphUpdateParticipant.ai,
-    ]);
+    ipcGravityAISubsriber.setListenParticipants([CoreGraphUpdateParticipant.ai]);
 
     ipcGravityAISubsriber.listen = (graphId: UUID) => {
       this.mainWindow?.apis.graphClientApi.aiChangedGraph(graphId);

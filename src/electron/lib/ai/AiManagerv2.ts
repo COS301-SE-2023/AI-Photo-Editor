@@ -144,11 +144,11 @@ export class AiManager {
             continue; // retry if failure
           }
 
-          this.graphManager.onGraphUpdated(
-            graphId,
-            new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
-            CoreGraphUpdateParticipant.ai
-          );
+          // this.graphManager.onGraphUpdated(
+          //   graphId,
+          //   new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
+          //   CoreGraphUpdateParticipant.ai
+          // );
 
           return {
             success: true,
