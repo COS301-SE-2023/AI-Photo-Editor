@@ -87,10 +87,12 @@
           and maintained securely and solely within the confines of your own device.
         </div>
         {#each selectedCategory.settings as item (item.id)}
-          <div>
+          <div class="pb-3">
             <label for="{item.id}" class="pb-3">
               <div class="text-normal font-semibold text-zinc-300">{item.title}</div>
-              <div class="font-ligt text-sm text-zinc-500">{item.subtitle}</div>
+              {#if item.subtitle}
+                <div class="font-ligt text-sm text-zinc-500">{item.subtitle}</div>
+              {/if}
             </label>
             {#if item.type === "password"}
               <SecureInput
@@ -98,6 +100,19 @@
                 id="{item.id}"
                 placeholder="{item.placeholder}"
               />
+            {:else if item.type === "dropdown"}
+              <select
+                bind:value="{item.value}"
+                class="h-9 rounded-md border-none bg-zinc-800/70 px-2 text-zinc-400 ring-1 ring-zinc-600 focus:outline-none"
+              >
+                {#each item.options as option}
+                  {#if item.value === option}
+                    <option value="{option}" selected>{option}</option>
+                  {:else}
+                    <option value="{option}">{option}</option>
+                  {/if}
+                {/each}
+              </select>
             {/if}
           </div>
         {/each}

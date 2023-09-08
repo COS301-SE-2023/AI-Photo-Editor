@@ -11,6 +11,7 @@ export interface Settings {
   };
   recentProjects: recentProject[];
   prompts: string[];
+  model: string;
 }
 
 type DotUnionKeys<T, Prefix extends string = ""> = T extends object
@@ -38,6 +39,7 @@ export const settings = new ElectronStore<Settings>({
     },
     recentProjects: [],
     prompts: [],
+    model: "GPT-3.5",
   },
 });
 

@@ -112,7 +112,7 @@ export class AiManager {
         const matchFinalAnswer = response.data.content.match(/.*Final_Answer:(.*)/);
 
         if (matchFinalAnswer) {
-          this.writeChatToDisk(chat);
+          this.writeChatToDisk(chat, model);
           return {
             success: true,
             message: matchFinalAnswer[1],
@@ -157,7 +157,7 @@ export class AiManager {
           //   CoreGraphUpdateParticipant.ai
           // );
 
-          this.writeChatToDisk(chat);
+          this.writeChatToDisk(chat, model);
           return {
             success: true,
             message: "Successfully made changes to the graph.",
@@ -177,7 +177,7 @@ export class AiManager {
         }
       }
 
-      this.writeChatToDisk(chat);
+      this.writeChatToDisk(chat, model);
       return {
         success: false,
         error: "Chat iteration limit reached",
@@ -189,7 +189,7 @@ export class AiManager {
     }
   }
 
-  private writeChatToDisk(chat: Chat) {
+  private writeChatToDisk(chat: Chat, model: string | undefined) {
     try {
       const filePath = path.join(app.getPath("userData"), "chats.json");
 
@@ -201,6 +201,7 @@ export class AiManager {
 
         chatsData.chats.push({
           timestamp: Date.now(),
+          model,
           messages: chat.getMessages(),
         });
 

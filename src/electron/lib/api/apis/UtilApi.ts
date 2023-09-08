@@ -13,6 +13,7 @@ import {
   type Settings,
 } from "../../../utils/settings";
 import type { Setting, UserSettingsCategory, QueryResponse } from "../../../../shared/types";
+import { type ChatModel } from "../../../lib/ai/Model";
 // import dotenv from "dotenv";
 // dotenv.config();
 
@@ -58,7 +59,7 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
       graphId: id,
       // model: "PaLM-Chat",
       // apiKey: process.env.PALM_API_KEY || "",
-      model: "GPT-3.5",
+      model: settings.get("model") as ChatModel,
       apiKey: getSecret("OPENAI_API_KEY"),
     });
 
@@ -102,6 +103,13 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
             type: "password",
             secret: true,
             value: getSecret("OPENAI_API_KEY"),
+          },
+          {
+            id: "model",
+            title: "Open AI Model",
+            type: "dropdown",
+            value: settings.get("model"),
+            options: ["GPT-4", "GPT-3.5"],
           },
         ],
       },
