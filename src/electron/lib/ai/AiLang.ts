@@ -4,7 +4,7 @@ import { NodeInstance, ToolboxRegistry } from "../../lib/registries/ToolboxRegis
 import { CoreGraphUpdateParticipant } from "../../lib/core-graph/CoreGraphInteractors";
 import { type CoreGraph, CoreNodeUIInputs, type Node } from "../../lib/core-graph/CoreGraph";
 import type { INodeUIInputs } from "../../../shared/types";
-import { NodeUI, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
+import { NodeUI, NodeUIComponent, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
 import { z } from "zod";
 import logger from "../../utils/logger";
 
@@ -62,7 +62,7 @@ export class BlypescriptProgram implements AiLangProgram {
     toolbox?: BlypescriptToolbox
   ): Result<BlypescriptProgram> | Result<unknown> {
     const nodeNameIdMap = new Map<string, UUID>();
-    const match = program.match(/^.*\s*graph\(\)\s*{([\s\S]*)}.*$/s);
+    const match = program.match(/^^.*\s*graph\(?\)?\s*{([\s\S]*)}.*$$/s);
 
     if (!match) {
       return error("invalid_syntax", "Function should be in the form `graph() { // statements }`");
@@ -170,10 +170,10 @@ export class BlypescriptProgram implements AiLangProgram {
         );
       }
 
-      if (statement.nodeInputs.length > node.getNodeParameters().length) {
+      if (statement.nodeInputs.length !== node.getNodeParameters().length) {
         return error(
-          "too_many_parameters",
-          `Received ${statement.nodeInputs.length} parameters, but received ${
+          "parameter_count_mismatch",
+          `Received ${statement.nodeInputs.length} parameters, but expected ${
             node.getNodeParameters().length
           } at line: ${statement.toString()}`
         );
@@ -266,7 +266,10 @@ export class BlypescriptProgram implements AiLangProgram {
         const newStatement = new BlypescriptStatement(
           this.generateUniqueVarName(nodeSignature),
           nodeSignature as `${string}.${string}`,
-          params.split(",").map((p) => p.trim())
+          params
+            .split(",")
+            .map((p) => p.trim())
+            .filter((p) => p !== "")
         );
 
         this.addStatement(newStatement, false, statement.lineNumber);
@@ -316,7 +319,7 @@ export class BlypescriptProgram implements AiLangProgram {
 
       // Assumes parameter valid when of form: nodeName['res']
       // Does not do comprehensive typechecking here
-      if (statementNodeInput.match(/^\s*(.*)\s*(\['([\w.-]+)'\])\s*$/)) {
+      if (statementNodeInput.match(/^\s*(.*)\s*(\['([\w.-]+)'\])\s*|null$/)) {
         continue;
       }
 
@@ -430,14 +433,16 @@ export class BlypescriptStatement extends AiLangStatement {
     const blypescriptStatement = new BlypescriptStatement(
       name,
       `${pluginName}.${nodeName}`,
-      params.split(",").map((p) => p.trim())
+      params
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p !== "")
     );
 
     return { success: true, data: blypescriptStatement };
   }
 
   public toString(): string {
-    return `const ${this.name} = ${this.nodeSignature}(${this.nodeInputs.join(", ")});`;
     return fillTemplate(BLYPESCRIPT_STATEMENT_TEMPLATE, {
       name: this.name,
       signature: this.nodeSignature,
@@ -457,7 +462,6 @@ export class BlypescriptInterpreter {
     if (result.success) {
       this.blypescriptToolbox = result.data;
     } else {
-      // throw result.error;
       this.blypescriptToolbox = new BlypescriptToolbox([]);
       logger.error("Failed to initialize BlypescriptInterpreter with error:", result.error);
     }
@@ -686,6 +690,14 @@ export class BlypescriptInterpreter {
     const uiInputValues = statement.nodeInputs.slice(-uiInputIds.length);
     const newNodeUiInputs: INodeUIInputs = { inputs: { ...uiInputs }, changes: [] };
 
+    if (uiInputIds.length !== uiInputValues.length) {
+      return {
+        success: false,
+        error: "ui_inputs_syntax_error",
+        message: `UI Input parameters don't match`,
+      };
+    }
+
     uiInputIds.forEach((uiInputId, i) => {
       const uiInputValue = uiInputValues[i];
 
@@ -741,7 +753,7 @@ export class BlypescriptNode {
     const nodeInputStrings = this.nodeInputs.map((input) => {
       const types = input.types
         .map((type) => {
-          return `N<${type}>`;
+          return `E<${type}>`;
         })
         .join("| ");
       return `${input.name}: ${types}`;
@@ -759,7 +771,7 @@ export class BlypescriptNode {
     const nodeOutputStrings = this.nodeOutputs.map((output) => {
       const types = output.types
         .map((type) => {
-          return `N<${type}>`;
+          return `E<${type}>`;
         })
         .join(" | ");
       return `${output.name}: ${types}`;
@@ -945,6 +957,9 @@ export class BlypescriptPlugin {
       } else if (componentType === "Buffer") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("buffer");
+      } else if (componentType === "TweakDial") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("dial");
       } else {
         return {
           success: false,
@@ -1012,7 +1027,7 @@ export class BlypescriptToolbox {
 
   public toString(): string {
     const pluginStrings = this.plugins.map((plugin) => plugin.toString());
-    let str = "// Node output wrapper type\ntype N<T> = { value: T } | null;\n\n";
+    let str = "// Graph edge connection wrapper type\nE<T> = { value: T } | null;\n\n";
     str += pluginStrings.join("\n\n");
     return str;
   }

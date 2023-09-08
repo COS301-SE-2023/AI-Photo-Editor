@@ -85,24 +85,37 @@ export class AiManager {
         },
         {
           role: "user",
-          content: `CURRENT GRAPH: \n\`\`\`ts\n${blypescriptProgram.toString()}\n\`\`\``,
+          content: `Current Graph: \n\`\`\`typescript\n${blypescriptProgram.toString()}\n\`\`\``,
         },
         {
           role: "user",
-          content: `USER's INPUT: \n${prompt}`,
+          content: `User: \n${prompt}\n\nAssistant:`,
         },
       ];
 
       chat.addMessages(messages);
 
-      const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0 });
+      const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0.05 });
 
-      for (let i = 0; i < this.agentIterationLimit; i++) {
+      for (let i = 0; i < 2; i++) {
         const response = await llm.generate(chat);
 
         if (!response.success) return response;
 
         chat.addMessage({ role: "assistant", content: response.data.content });
+
+        const matchFinalAnswer = response.data.content.match(/.*Final_Answer:(.*)/);
+
+        if (matchFinalAnswer) {
+          return {
+            success: true,
+            message: matchFinalAnswer[1],
+            data: {
+              chatId: chat.id,
+              lastResponse: response.data.content,
+            },
+          } satisfies Result;
+        }
 
         const result = BlypescriptProgram.fromString(
           response.data.content,
@@ -110,10 +123,7 @@ export class AiManager {
         );
 
         if (!result.success) {
-          const errorResult = result as ErrorResponse;
-          logger.warn(errorResult.message);
-          logger.warn(errorResult.error);
-          chat.addMessage({ role: "blix", content: `USER'S RESPONSE: ${errorResult.message}` });
+          chat.addMessage({ role: "blix", content: `USER'S RESPONSE: ${result.message}` });
           continue; // retry if failure
         }
 
@@ -129,11 +139,8 @@ export class AiManager {
           );
 
           if (!result.success) {
-            const errorResult = result as ErrorResponse;
-            logger.warn(colorString(errorResult.error, "RED"));
-            logger.warn(colorString(errorResult.message, "RED"));
-            logger.warn(errorResult.error);
-            chat.addMessage({ role: "blix", content: `USER'S RESPONSE:\n${errorResult.message}` });
+            logger.warn(result.error);
+            chat.addMessage({ role: "blix", content: `USER'S RESPONSE:\n${result.message}` });
             continue; // retry if failure
           }
 
@@ -145,6 +152,7 @@ export class AiManager {
 
           return {
             success: true,
+            message: "Successfully made changes to the graph.",
             data: {
               chatId: chat.id,
               lastResponse: response.data.content,
@@ -165,6 +173,9 @@ export class AiManager {
         success: false,
         error: "Chat iteration limit reached",
         message: genericErrorResponse,
+        data: {
+          chatId: chat.id,
+        },
       } satisfies Result;
     }
   }

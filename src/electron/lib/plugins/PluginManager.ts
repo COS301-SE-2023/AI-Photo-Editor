@@ -79,10 +79,7 @@ export class PluginManager {
 
     await Promise.all(
       plugins.map(async (plugin) => {
-        // Ignore MacOS temp files
-        if (plugin !== ".DS_Store") {
-          await this.loadPlugin(plugin, pluginsPath, force);
-        }
+        await this.loadPlugin(plugin, pluginsPath);
       })
     );
     // this.blix.aiManager.instantiate(this.blix.toolbox);
