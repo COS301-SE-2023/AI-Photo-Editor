@@ -163,6 +163,11 @@ export async function saveProject(
     return { status: "error", message: "No path specified" };
   }
 
+  if (!project.location.toString().endsWith(".blix")) {
+    // Ensure file is of correct type
+    return { status: "error", message: "Invalid file extension : " + project.location.toString() };
+  }
+
   // I don't really like this, but also can't really think of a nice way to change it
   // TODO: Rename sets name as path
   project.rename(project.location.toString().split("/").pop()!.split(".blix")[0]);
@@ -186,6 +191,7 @@ export async function saveProject(
     }
   }
   updateRecentProjectsList(project.location.toString());
+
   return { status: "success", message: "Project saved successfully" };
 }
 
@@ -328,6 +334,7 @@ export async function exportMedia(
 
 // TODO: Implement some sort of limit to how long the history of recent projects is.
 export async function updateRecentProjectsList(projectPath: string) {
+  if (!(await validateProjectPath(projectPath))) return; // Ensure file is of correct type
   const currentProjects: recentProject[] = settings.get("recentProjects");
   let validProjects: recentProject[] = [];
 
@@ -341,6 +348,7 @@ export async function updateRecentProjectsList(projectPath: string) {
   validProjects = validProjects.filter((project) => project.path !== projectPath);
   const str = new Date().toUTCString().split(",")[1];
   const date = str.slice(1, str.lastIndexOf(" "));
+
   validProjects.unshift({ path: projectPath, lastEdited: date });
   settings.set("recentProjects", validProjects);
   logger.info(settings.get("recentProjects"));
@@ -355,6 +363,7 @@ export async function updateRecentProjectsList(projectPath: string) {
 export async function validateProjectPath(path: string): Promise<boolean> {
   try {
     await (await open(path, "r")).close();
+    if (!path.endsWith(".blix")) return false; // Additional check just to be safe
     return true;
   } catch (e) {
     return false;
