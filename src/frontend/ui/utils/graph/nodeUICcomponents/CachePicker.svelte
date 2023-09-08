@@ -42,5 +42,7 @@
     background-color: #1f1f28;
     border: none;
     padding: 0.1em;
+    max-width: 200px;
+    min-width: 200px;
   }
 </style>

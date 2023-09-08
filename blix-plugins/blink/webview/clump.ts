@@ -13,6 +13,7 @@ import {
   ZoomBlurFilter,
   TwistFilter
 } from "pixi-filters"
+import { type } from "os";
 
 export type BlinkCanvas = {
   assets: { [key: string]: Asset };
@@ -21,7 +22,7 @@ export type BlinkCanvas = {
 
 export type Asset = {
   class: "asset";
-  type: "image" | "text";
+  type: "image" | "text" | "blob";
   data: any;
 };
 
@@ -66,11 +67,17 @@ export function getPixiFilter(filter: Filter) {
 }
 
 // A single indivisible unit of a clump (E.g. image, shape, text etc.)
-export type Atom = { class: "atom" } & (ImageAtom | ShapeAtom | TextAtom | PaintAtom);
+export type Atom = { class: "atom" } & (ImageAtom | ShapeAtom | TextAtom | PaintAtom | BlobAtom);
 type ImageAtom = {
   type: "image";
   assetId: string;
 };
+
+type BlobAtom = {
+  type: "blob";
+  assetId: string;
+}
+
 type ShapeAtom = {
   type: "shape";
   shape: "rectangle" | "ellipse" | "triangle";

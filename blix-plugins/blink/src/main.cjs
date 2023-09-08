@@ -85,16 +85,16 @@ const nodes = {
         });
 
         nodeBuilder.define(async (input, uiInput, from) => {
-            let src = uiInput["cachePicker"].split("/");
-            src = src.splice(-2);
-            src = src.join("/");
+            // let src = uiInput["cachePicker"].split("/");
+            // src = src.splice(-2);
+            // src = src.join("/");
 
             const canvas = {
                 assets: {
                     [uiInput["state"]["id"]]: {
                         class: "asset",
-                        type: "blob",
-                        data: await window.cache.get(src)
+                        type: "image",
+                        data: uiInput["cachePicker"],
                     }
                 },
                 content: {
