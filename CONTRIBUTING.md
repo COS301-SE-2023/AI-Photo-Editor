@@ -11,7 +11,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 > - Mention the project at local meetups and tell your friends/colleagues
 > - Report bugs
 > - Request features
-> - Share Blix on social medi
+> - Share Blix on social media
 
 ## Table of Contents
 
