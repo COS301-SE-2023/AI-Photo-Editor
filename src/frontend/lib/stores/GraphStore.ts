@@ -238,7 +238,12 @@ export class GraphStore {
     // await window.apis.graphApi.updateUIPosition(get(this.graphStore).uuid, nodeUUID, get(get(this.graphStore).uiPositions[nodeUUID]));
   }
 
+  /**
+   * BE CAREFUL OF THE UNAWAITED PROMISE
+   * AWAIT REMOVED FOR UP DAY AS A TEMP FIX
+   */
   async updateUIPositions() {
+    // eslint-disable-next-line
     await window.apis.graphApi.updateUIPositions(
       get(this.graphStore).uuid,
       get(this.graphStore).uiPositions
@@ -312,8 +317,6 @@ export class GraphStore {
       const nodePos = this.getNode(node)?.styling?.pos;
       if (!nodePos) return;
       nodePos.update((pos) => {
-        // console.log("New X: ", pos.x + NUDGE_DISTANCE * 2 * (Math.random() - 0.5))
-        // console.log("New Y: ", pos.y + NUDGE_DISTANCE * 2 * (Math.random() - 0.5))
         return {
           x: pos.x + NUDGE_DISTANCE * 2 * (Math.random() - 0.5),
           y: pos.y + NUDGE_DISTANCE * 2 * (Math.random() - 0.5),
@@ -322,7 +325,8 @@ export class GraphStore {
     });
 
     // Notify the system of the new node positions
-    const registerPositionUpdate = () => {
+    const registerPositionUpdate = async () => {
+      await this.updateUIPositions();
       return; // TODO
     };
 
@@ -330,7 +334,7 @@ export class GraphStore {
       const now = performance.now();
       if (now - start > duration * 1000) {
         // Animation is done
-        registerPositionUpdate();
+        void registerPositionUpdate().then().catch();
         return;
       }
 

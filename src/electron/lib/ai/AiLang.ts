@@ -719,7 +719,12 @@ export class BlypescriptInterpreter {
       newNodeUiInputs,
       CoreGraphUpdateParticipant.ai
     );
-    // graph.updateUIInputs(node.uuid, newNodeUiInputs);
+    for (const input of Object.keys(newNodeUiInputs.inputs)) {
+      this.graphManager.handleNodeInputInteraction(graph.uuid, node.uuid, {
+        id: input,
+        value: newNodeUiInputs.inputs[input],
+      });
+    }
     return { success: true, data: null };
   }
 

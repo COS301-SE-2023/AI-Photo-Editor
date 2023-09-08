@@ -210,13 +210,15 @@ export class CoreGraphManager {
       });
       old.changes = [input.id];
     }
-    // Add Event
-    this._events[graphUUID].addEvent({
-      element: "UiInput",
-      operation: "Change",
-      execute: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs },
-      revert: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs: old },
-    });
+
+    // Add Event only if new value is not the same as old value
+    if (old.inputs[input.id] !== input.value)
+      this._events[graphUUID].addEvent({
+        element: "UiInput",
+        operation: "Change",
+        execute: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs },
+        revert: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs: old },
+      });
 
     // console.log("OLD: ", old);
     // console.log("NEW: ", nodeUIInputs);
@@ -273,6 +275,9 @@ export class CoreGraphManager {
   updateUIPositions(graphUUID: UUID, positions: { [key: UUID]: SvelvetCanvasPos }) {
     if (this._graphs[graphUUID]) {
       this._graphs[graphUUID].UIPositions = positions;
+      for (const node of Object.keys(positions)) {
+        this._graphs[graphUUID].setNodePos(node, positions[node]);
+      }
     }
   }
 
