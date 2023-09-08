@@ -133,12 +133,13 @@ export class GraphStore {
                     })
                   );
                 }
-
-                this.uiPositionUnsubscribers[node].push(
-                  position!.subscribe(() => {
-                    this.updateUIPosition(node, get(position!));
-                  })
-                );
+                // Update frontend
+                if (position)
+                  this.uiPositionUnsubscribers[node].push(
+                    position.subscribe((state) => {
+                      this.updateUIPosition(node, state);
+                    })
+                  );
               })
               .catch(() => {
                 return;
@@ -219,6 +220,8 @@ export class GraphStore {
     }
     return inputs;
   }
+
+  // Keeps being called as writable store
 
   updateUIPosition(nodeUUID: UUID, position: SvelvetCanvasPos) {
     // console.log("HERE", get(this.graphStore).uiPositions)
@@ -302,8 +305,9 @@ export class GraphStore {
     nodes.forEach((node) => {
       const nodePos = this.getNode(node)?.styling?.pos;
       if (!nodePos) return;
-
       nodePos.update((pos) => {
+        // console.log("New X: ", pos.x + NUDGE_DISTANCE * 2 * (Math.random() - 0.5))
+        // console.log("New Y: ", pos.y + NUDGE_DISTANCE * 2 * (Math.random() - 0.5))
         return {
           x: pos.x + NUDGE_DISTANCE * 2 * (Math.random() - 0.5),
           y: pos.y + NUDGE_DISTANCE * 2 * (Math.random() - 0.5),
@@ -389,8 +393,10 @@ export class GraphStore {
         const dist = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
         const forceMag = dist * CENTER_FORCE;
 
-        forces[node].x += (diff.x / dist) * forceMag - totalDirForce;
-        forces[node].y += (diff.y / dist) * forceMag;
+        if (diff.x !== 0 || diff.y !== 0) {
+          forces[node].x += (diff.x / dist) * forceMag - totalDirForce;
+          forces[node].y += (diff.y / dist) * forceMag;
+        }
       });
 
       // ===== ADD INTER-NODE REPULSION FORCES ===== //

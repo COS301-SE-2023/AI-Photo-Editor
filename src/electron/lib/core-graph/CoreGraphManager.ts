@@ -60,11 +60,9 @@ export class CoreGraphManager {
       // console.log("Node added: ", res.data!.nodeId);
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
 
-      // If node had a UI inputs initializer function
       if (res.data?.uiInputsInitialized) {
         this.onGraphUpdated(graphUUID, UIINPUTS_UPDATED_EVENT, CoreGraphUpdateParticipant.system);
       }
-
       if (participant === CoreGraphUpdateParticipant.user) {
         this._events[graphUUID].addEvent({
           element: "Node",
@@ -77,8 +75,6 @@ export class CoreGraphManager {
         if (event?.element === "Node" && event.operation === "Add") {
           const old = event.revert.nodeUUId; // Old uuid currently in the event
           this._events[graphUUID].onAddNode(old, res.data.nodeId); // Update uuid of node throughout all events
-          // console.log("Old UUID: ", old);
-          // console.log("NEW UUID: ", res.data!.nodeId);
         }
       }
     }
@@ -217,47 +213,11 @@ export class CoreGraphManager {
 
     if (!nodeUIInputs) return { status: "error", message: "No node UI inputs provided" };
 
-    // console.log("Update node -> ", nodeUUID);
-    // console.log("Update UIInputs");
-    // console.log("Checking: ", nodeUUID);
-    // console.log(this._activeInputs[graphUUID][nodeUUID])
-
-    // let oldInputs = this._graphs[graphUUID].getUIInputs(nodeUUID);
-
-    // oldInputs = oldInputs ? oldInputs : {};
-    // define the old state
-    // const old = { inputs: oldInputs, changes: nodeUIInputs.changes } as INodeUIInputs;
-    // console.log("OLD: ", old);
-    // console.log("NEW: ", nodeUIInputs);
-    // console.log("P: ", participant);
     const res = this._graphs[graphUUID].updateUIInputs(nodeUUID, nodeUIInputs);
 
     const signature = this._graphs[graphUUID].getNodes[nodeUUID].getSignature;
 
     if (res.status === "success") {
-      // console.log("Old: ", old);
-      // console.log("New: ", nodeUIInputs);
-      // console.log("P:", participant);
-
-      // TODO: Fix so that updating of ouput node ids works
-      // Problem: frontend is seeing change and calling function which in turn is making new events which throws off the event order
-      // You will need to just try it and see what happens
-      // if(nodeUIInputs.inputs.outputId && old.inputs.outputId && (nodeUIInputs.inputs.outputId !== old.inputs.outputId || nodeUIInputs.changes !== old.changes)) //  Used to not check for output node changes
-
-      // if (!nodeUIInputs.inputs.outputId)
-      //   if (
-      //     participant === CoreGraphUpdateParticipant.user &&
-      //     !(JSON.stringify(old) === JSON.stringify(nodeUIInputs))
-      //   )
-      //   {
-      //     // Trying to not add events where frontend has sent it where it is exactly the same
-      //     this._events[graphUUID].addEvent({
-      //       element: "UiInput",
-      //       operation: "Change",
-      //       execute: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs },
-      //       revert: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs: old },
-      //     });
-      //    }
       // Determine whether the update should trigger the graph to recompute
       const uiConfigs = this._toolbox.getNodeInstance(signature).uiConfigs;
       const changes = nodeUIInputs.changes;
@@ -301,6 +261,7 @@ export class CoreGraphManager {
     // if (res) this.onGraphUpdated(graphUUID);
     // Style changes shouldn't update the subscribers
     // We only need this state when reloading the graph
+    // this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
     return res;
   }
 
@@ -526,12 +487,6 @@ export class CoreGraphManager {
             if (edgesAdded.includes("error")) {
               return { status: "error", message: "Edges could not be added back to node" };
             }
-
-            this.onGraphUpdated(
-              node.graphUUID,
-              new Set([...GRAPH_UPDATED_EVENT, CoreGraphUpdateEvent.uiInputsUpdated]),
-              CoreGraphUpdateParticipant.system
-            );
 
             // this.updateUIInputs(node.graphUUID, nodeRes.data!.nodeId, { inputs: uiInputs, changes: [...Object.keys(uiInputs)] }, node.participant, { eventPosition } );
             return nodeRes;

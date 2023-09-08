@@ -81,29 +81,15 @@
   }
 
   async function nodeDragReleased(e: CustomEvent) {
-    console.log("NODE RELEASED");
-    await window.apis.graphApi.setNodePos(
-      graphId,
-      node.uuid,
-      graphMall.getGraphState(graphId).uiPositions[node.uuid]
-    );
-    // console.log("NODE POSITION UPDATED");
+    await window.apis.graphApi.setNodePos(graphId, node.uuid, { x: $nodePos.x, y: $nodePos.y });
   }
 
-  // $: graphMall.getGraph(graphId).onActiveUiInput(graphId, node.uuid, activeInput);
-
   function handleInputInteraction(e: CustomEvent) {
-    // console.log("Node has event", e.detail);
-    // console.log(e.detail);
-    // activeInput = e.detail;
     graphMall.getGraph(graphId).handleNodeInputInteraction(graphId, node.uuid, e.detail);
   }
 </script>
 
 {#if svelvetNodeId !== ""}
-  <!-- {#key nodePos} -->
-  <!-- width="{graphNode.dims.w}"
-height="{graphNode.dims.h}" -->
   <Node
     bgColor="#262630"
     textColor="#ffffff"
@@ -128,7 +114,6 @@ height="{graphNode.dims.h}" -->
         {JSON.stringify({ ...$toolboxNode, ui: undefined })}
       </div> -->
       <div class="node-body" style="max-width: 400px">
-        <!-- <button on:click={updateUIInputs}>SUBMIT</button> -->
         <NodeUiFragment
           inputStore="{node.inputUIValues}"
           ui="{$toolboxNode?.ui}"
@@ -170,7 +155,6 @@ height="{graphNode.dims.h}" -->
                 connected="{false}"
               />
             </Anchor>
-            <!-- bind:connections={$nodeConns} -->
           {/each}
         </div>
         <div class="anchors outputs">
@@ -192,7 +176,6 @@ height="{graphNode.dims.h}" -->
                   {#if output.displayName}
                     {output.displayName}<br />
                   {/if}
-                  <!-- &lt;{output.type || "any"}&gt; -->
                   &lt;<span style:color="{changeBrightness(color, 120)}"
                     >{output.type || "any"}</span
                   >&gt;
