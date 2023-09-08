@@ -7,6 +7,7 @@ import {
   type MediaDisplayConfig,
   type MediaOutput,
   type MediaOutputId,
+  type DisplayableMediaOutput,
 } from "../../../shared/types/media";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
 import { TypeclassRegistry } from "../registries/TypeclassRegistry";
@@ -38,8 +39,13 @@ export class MediaManager {
     this.onMediaUpdated(mediaOutput.outputId);
   }
 
-  getMedia(mediaOutputId: MediaOutputId) {
-    return this.media[mediaOutputId];
+  getMedia(mediaOutputId: MediaOutputId): MediaOutput | null {
+    return this.media[mediaOutputId] ?? null;
+  }
+
+  getDisplayableMedia(mediaOutputId: MediaOutputId): DisplayableMediaOutput | null {
+    if (!this.media[mediaOutputId]) return null;
+    return this._typeclassRegistry.getDisplayableMedia(this.media[mediaOutputId]);
   }
 
   onGraphUpdated(graphUUID: UUID) {

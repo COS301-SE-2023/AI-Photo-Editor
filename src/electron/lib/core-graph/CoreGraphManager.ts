@@ -72,6 +72,13 @@ export class CoreGraphManager {
           execute: { graphUUID, node, pos },
           revert: { graphUUID, nodeUUId: res.data.nodeId },
         });
+
+        if (node.signature === "blix.output") {
+          this._outputIds[res.data.nodeId] = "default";
+          this._mainWindow?.apis.mediaClientApi.onMediaOutputIdsChanged(
+            new Set(Object.values(this._outputIds))
+          );
+        }
       } else if (eventArgs) {
         const { event } = eventArgs;
         if (event?.element === "Node" && event.operation === "Add") {
