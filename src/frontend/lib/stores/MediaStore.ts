@@ -1,5 +1,5 @@
 import type { DisplayableMediaOutput, MediaOutputId } from "@shared/types/media";
-import { derived, writable } from "svelte/store";
+import { derived, get, writable } from "svelte/store";
 import { commandStore } from "./CommandStore";
 
 type MediaOutputs = {
@@ -34,6 +34,18 @@ class MediaStore {
     await window.apis.mediaApi.subscribeToMedia(mediaId).catch((err) => {
       return;
     });
+
+    // If we do not have a frontend copy of the media, fetch it
+    if (!get(this.store)[mediaId]) {
+      const media = await window.apis.mediaApi.getDisplayableMedia(mediaId);
+
+      if (media) {
+        this.store.update((mediaOutputs) => {
+          mediaOutputs[mediaId] = media;
+          return mediaOutputs;
+        });
+      }
+    }
 
     // TODO: Optimize this with a proper subscription system
     // that only listens for updates to the requested id specifically

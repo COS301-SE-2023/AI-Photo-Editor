@@ -1,7 +1,13 @@
 import * as PIXI from "pixi.js";
 import { getPixiFilter, type Atom, type Clump, BlinkCanvas, Asset } from "./clump";
 
-let prevMedia = null;
+// let prevMedia = null; // TODO: Replace with DiffDial
+
+type Scene = { [key: string]: PIXI.Container };
+
+let selected: string = "";
+let oldScene: Scene = {};
+let scene: Scene = {};
 
 export function renderApp(
   blink: PIXI.Application,
@@ -26,9 +32,20 @@ export function renderApp(
   // Construct clump hierarchy
   const loaded = Promise.all(imgPromises);
   loaded.then(() => {
+    oldScene = { ...scene };
+    scene = {};
     const child = renderClump(blink, canvas.content, canvas, send);
     if (child != null) {
       hierarchy.addChild(child);
+    }
+
+    //===============// DELETE DEAD CLUMPS //==============//
+    const newClumps = new Set(Object.keys(scene));
+
+    for (let nodeUUID in oldScene) {
+      if (!newClumps.has(nodeUUID)) {
+        oldScene[nodeUUID].destroy(); // PIXI.js cleanup
+      }
     }
   });
 
@@ -41,6 +58,16 @@ let selectedClump = null;
 
 function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas, send) {
   if (!clump) return null;
+
+  //===============// RESURRECT OLD CLUMPS //==============//
+  if (clump.nodeUUID in oldScene) {
+    // Clump already exists, resurrect and update it
+    scene[clump.nodeUUID] = oldScene[clump.nodeUUID];
+  }
+  //===============// ADD NEW CLUMPS //==============//
+  else {
+  }
+
   //========== CREATE CONTAINER ==========//
   const content = new PIXI.Container();
   content.sortableChildren = true;
@@ -149,11 +176,13 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas,
 
   const corners = [tl, tr, br, bl];
   for (let c = 0; c < 4; c++) {
+    const c2 = (c + 1) % 4;
     box.drawCircle(corners[c].x, corners[c].y, 10);
+    box.drawCircle((corners[c].x + corners[c2].x)/2, (corners[c].y + corners[c2].y)/2, 8);
 
     box.lineStyle(5, 0xf43e5c, 0.5);
     box.moveTo(corners[c].x, corners[c].y);
-    box.lineTo(corners[(c + 1) % 4].x, corners[(c + 1) % 4].y);
+    box.lineTo(corners[c2].x, corners[c2].y);
     box.lineStyle();
   }
   box.zIndex = 1000;
@@ -168,9 +197,7 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas,
 
   resClump.eventMode = "dynamic";
   resClump.on("click", () => {
-    console.log("SEND", send);
-    send("clumpClick", clump.name);
-    // console.log(clump.name + " click");
+    selected = clump.nodeUUID;
   });
 
   resClump.on("mousedown", (event) => {
@@ -198,8 +225,11 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas,
   // To get global mouse position at any point:
   // console.log("MOUSE", blink.renderer.plugins.interaction.pointer.global);
 
+  scene[clump.nodeUUID] = resClump;
   return resClump;
 }
+
+
 
 function renderAtom(assets: { [key: string]: Asset }, atom: Atom) {
   switch (atom.type) {

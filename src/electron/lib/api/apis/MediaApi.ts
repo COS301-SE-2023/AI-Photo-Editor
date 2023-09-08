@@ -53,6 +53,10 @@ export class MediaApi implements ElectronMainApi<MediaApi> {
     // }
   }
 
+  async getDisplayableMedia(mediaId: MediaOutputId) {
+    return this._blix.mediaManager.getDisplayableMedia(mediaId);
+  }
+
   // async compute(graphUUID: UUID, nodeUUID: UUID) {
   //   return this._blix.graphInterpreter.run(this._blix.graphManager.getGraph(graphUUID), nodeUUID);
   // }
