@@ -2,7 +2,7 @@
   import PaletteItem from "./PaletteItem.svelte";
   import { commandStore } from "../../../lib/stores/CommandStore";
   import type { ICommand } from "../../../../shared/types/index";
-  import { onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import Shortcuts from "../../utils/Shortcuts.svelte";
   import { graphMall } from "../../../lib/stores/GraphStore";
   import { toastStore } from "lib/stores/ToastStore";
@@ -20,8 +20,8 @@
   let selectedItem = 0;
 
   let promptHistory: string[] = [];
-  let isHistoryNavigationInProgress = false;
-  let historyNavigationIndex = -1;
+  let navigationInProcess = false;
+  let historyNavigationIndex = 0;
 
   // TODO: Change items to use the command store values directly:
   $commandStore; // Use the shorthand like this
@@ -61,6 +61,10 @@
     ];
 
     categories = categoriesOriginals;
+  });
+
+  onMount(async () => {
+    promptHistory = await window.apis.utilApi.getState<string[]>("prompts");
   });
 
   onDestroy(unsubscribe);
@@ -139,6 +143,7 @@
 
   function closePalette() {
     showPalette = false;
+    searchTerm = "";
   }
 
   const shortcuts = {
@@ -156,15 +161,16 @@
       closePalette();
     },
     "blix.palette.scrollDown": () => {
+      navigationInProcess = true;
       selectedItem++;
       repairItemIndex();
     },
     "blix.palette.scrollUp": () => {
-      if (!searchTerm && promptHistory.length) {
+      if (promptHistory.length && !navigationInProcess) {
         // inputElement.focus();
         // inputElement.value = prompts[0];
         // inputElement.selectionStart = inputElement.selectionEnd = prompts[0].length;
-        searchTerm = promptHistory.at(-1) || "";
+        searchTerm = promptHistory[historyNavigationIndex++] || "";
         // inputElement.setSelectionRange(searchTerm.length, 0);
         return;
       }
@@ -186,22 +192,33 @@
       }
 
       closePalette();
-      const dismiss = toastStore.trigger({ message: "🔥Cooking...", type: "loading" });
-      if (promptHistory.at(-1) != prompt) {
-        promptHistory.push(prompt);
+
+      const messages = [
+        "🔥 Cooking...",
+        "🪄 Stirring the creative cauldron...",
+        "🐉 Slaying the ender dragon...",
+      ];
+      const dismiss = toastStore.trigger({
+        message: messages[Math.floor(Math.random() * messages.length)],
+        type: "loading",
+      });
+
+      const index = promptHistory.indexOf(prompt);
+      if (index !== -1) {
+        promptHistory.splice(index, 1);
       }
+      promptHistory.unshift(prompt);
+      await window.apis.utilApi.saveState("prompts", promptHistory);
 
+      console.log(prompt);
       try {
-        const res = await window.apis.utilApi.sendPrompt(
-          searchTerm.trim(),
-          graphMall.getAllGraphUUIDs()[0]
-        );
+        const res = await window.apis.utilApi.sendPrompt(prompt, graphMall.getAllGraphUUIDs()[0]);
 
-        if (res.status === "error") {
-          toastStore.trigger({ message: res.message, type: "error" });
-        } else {
-          toastStore.trigger({ message: "Yay!", type: "success" });
-        }
+        toastStore.trigger({
+          message: res.message,
+          type: res.status === "error" ? "error" : "success",
+          timeout: 5000,
+        });
       } catch (error) {
         toastStore.trigger({ message: "Oops😐 That wasn't supposed to happen", type: "error" });
       } finally {
@@ -225,6 +242,16 @@
     selectedItem;
     repairItemIndex();
   }
+
+  $: if (searchTerm === "") {
+    historyNavigationIndex = 0;
+    navigationInProcess = false;
+  }
+
+  $: {
+    searchTerm;
+    onSearch();
+  }
 </script>
 
 {#if showPalette}
@@ -235,15 +262,15 @@
     <header class="flex w-full select-none items-center px-3 caret-rose-400">
       <input
         type="text"
-        placeholder="Search for tools and commands..."
+        placeholder="Search for commands or ask AI..."
         class="mr-auto h-14 w-full border-none bg-transparent text-lg text-zinc-100 outline-none"
         bind:this="{inputElement}"
         bind:value="{searchTerm}"
-        on:input="{onSearch}"
+        spellcheck="false"
       />
       {#if searchTerm !== ""}
-        <div class="float-right flex min-w-max items-center space-x-2">
-          <span class="text-sm font-medium text-zinc-500">Send prompt</span>
+        <div class="float-right flex min-w-max items-center space-x-2 pl-2">
+          <span class="text-sm font-medium text-zinc-500">Ask AI</span>
           <span class="rounded-md p-1 text-xs font-semibold text-zinc-500 ring-1 ring-zinc-500"
             >Tab</span
           >
@@ -252,10 +279,10 @@
     </header>
 
     <!-- Results -->
-    {#if expanded && categories.length > 0}
-      <div
-        class="hide-scrollbar container max-h-[400px] w-full overflow-x-auto border-t border-zinc-600 p-2"
-      >
+    <div
+      class="hide-scrollbar container h-[400px] w-full overflow-x-auto border-t border-zinc-600 p-2"
+    >
+      {#if categories.length > 0}
         <nav>
           {#each categories as category, i}
             {#if category.items.length > 0}
@@ -275,8 +302,28 @@
             {/if}
           {/each}
         </nav>
-      </div>
-    {/if}
+      {:else}
+        <div class="flex h-full w-full select-none flex-col items-center justify-center space-y-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="h-16 w-16 text-zinc-200"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 010 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 01-1.422 0l-.395-1.183a1.5 1.5 0 00-.948-.948l-1.183-.395a.75.75 0 010-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0116.5 15z"
+              clip-rule="evenodd"></path>
+          </svg>
+          <h1 class="text-xl font-bold text-zinc-400">Ask AI to assist with a task</h1>
+          <div class="flex flex-col items-center justify-center text-zinc-500">
+            <span>"What is the result of 16 subtract 42, squared?"</span>
+            <span>"I want to edit the brightness, hue and noise of an image."</span>
+            <span>"Make my image more medieval"</span>
+          </div>
+        </div>
+      {/if}
+    </div>
   </div>
 {/if}
 

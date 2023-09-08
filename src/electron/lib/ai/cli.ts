@@ -120,6 +120,14 @@ function initProgram() {
 
       if (!result.success) {
         console.log(chalk.red(`${result.message} [${result.error}]`));
+        if (
+          result.data &&
+          typeof result.data === "object" &&
+          "chatId" in result.data &&
+          typeof result.data.chatId === "string"
+        ) {
+          activeChatId = result.data.chatId;
+        }
         readline.prompt();
         return;
       }
