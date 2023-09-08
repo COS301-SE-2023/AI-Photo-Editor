@@ -117,7 +117,7 @@ export class CoreGraphEventManager {
    */
   addEvent(event: CoreGraphEvent): CoreGraphEventResponse {
     // console.log("New event: ", event);
-    // console.log("Pointer: ", this.eventPointer);
+    // console.log("Pointer before: ", this.eventPointer);
     // console.log("Length before add: ", this.events.length);
 
     this.events =

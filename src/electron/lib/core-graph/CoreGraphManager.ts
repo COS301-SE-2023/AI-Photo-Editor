@@ -516,6 +516,12 @@ export class CoreGraphManager {
               return { status: "error", message: "Edges could not be added back to node" };
             }
 
+            this.onGraphUpdated(
+              node.graphUUID,
+              new Set([...GRAPH_UPDATED_EVENT, ...UIINPUTS_UPDATED_EVENT]),
+              CoreGraphUpdateParticipant.system
+            );
+
             // this.updateUIInputs(node.graphUUID, nodeRes.data!.nodeId, { inputs: uiInputs, changes: [...Object.keys(uiInputs)] }, node.participant, { eventPosition } );
             return nodeRes;
           } else {
