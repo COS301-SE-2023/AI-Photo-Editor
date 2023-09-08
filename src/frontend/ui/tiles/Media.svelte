@@ -26,25 +26,25 @@
   let oldMediaId: string | null = null;
 
   const unsubMedia = mediaId.subscribe((newMediaId) => {
-    console.log("SUBSCRIBE MEDIA ID", oldMediaId, newMediaId);
+    // console.log("SUBSCRIBE MEDIA ID", oldMediaId, newMediaId);
     connectNewMedia(oldMediaId, newMediaId);
     oldMediaId = newMediaId;
   });
 
+  // TODO: Add toggle that auto-switches media to the last selected output node
   let selectedNode: { graphUUID: GraphUUID; outNode: GraphNodeUUID } | null;
   let media: Readable<DisplayableMediaOutput | null>;
 
   async function connectNewMedia(oldMediaId: string | null, mediaId: string) {
     if (oldMediaId !== null) {
-      console.log("STOPPING OLD", oldMediaId);
+      // console.log("STOPPING OLD", oldMediaId);
       await mediaStore.stopMediaReactive(oldMediaId);
     }
     media = await mediaStore.getMediaReactive(mediaId);
-    console.log("CONNECT NEW MEDIA", mediaId, media);
+    // console.log("CONNECT NEW MEDIA", mediaId, media);
   }
 
   onDestroy(async () => {
-    console.log("ON DESTROY");
     await mediaStore.stopMediaReactive($mediaId);
     unsubMedia();
   });

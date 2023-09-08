@@ -42,7 +42,7 @@
   <Test />
 {:else if !$blixStore.blixReady && testing}
   <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
-    <span class="text-5xl text-purple-400">Loading</span>
+    <!-- <span class="text-5xl text-purple-400">Loading</span> -->
   </div>
   <div></div>
 {:else if $blixStore.blixReady}
@@ -65,7 +65,7 @@
   </div>
 {:else}
   <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
-    <span class="text-5xl text-purple-400">Loading</span>
+    <!-- <span class="text-5xl text-purple-400">Loading</span> -->
   </div>
   <div></div>
 {/if}
