@@ -179,13 +179,17 @@ export class BlypescriptProgram implements AiLangProgram {
         );
       }
 
-      let result = this.repairNestedFunctionCalls(statement, node);
+      const repairFunctions = [
+        this.repairNestedFunctionCalls,
+        this.repairPrimitiveTypes,
+        this.repairUiInputTypes,
+      ];
 
-      if (!result.success) return result;
+      for (const repairFunction of repairFunctions) {
+        const result = repairFunction(statement, node, toolbox);
 
-      result = this.repairPrimitiveTypes(statement, node, toolbox);
-
-      if (!result.success) return result;
+        if (!result.success) return result;
+      }
     }
 
     return {
@@ -377,6 +381,34 @@ export class BlypescriptProgram implements AiLangProgram {
     } satisfies Result;
   }
 
+  private repairUiInputTypes(statement: BlypescriptStatement, node: BlypescriptNode) {
+    const statementUiInputs = statement.nodeInputs.slice(node.nodeInputs.length);
+
+    for (let i = 0; i < statementUiInputs.length; i++) {
+      const statementUiInput = statementUiInputs[i];
+      const nodeUiInput = node.uiInputs[i];
+
+      if (nodeUiInput.types.length === 1 && nodeUiInput.types[0].toLowerCase() === "number") {
+        if (statementUiInput === "null") {
+          statement.nodeInputs[node.nodeInputs.length + i] = "0";
+        } else if (isNaN(Number(statementUiInput))) {
+          return {
+            success: false,
+            error: "ui_input_type_error",
+            message: `Type error: '${statementUiInput}' is not of type \`number\` on the following line: ${statement.toString()}`,
+          } satisfies Result;
+        }
+      }
+
+      // TODO: Add other type checks here
+    }
+
+    return {
+      success: true,
+      data: true as const,
+    } satisfies Result;
+  }
+
   private generateUniqueVarName(nodeSignature?: string) {
     const varPrefix = nodeSignature ? nodeSignature.split(".").slice(1).join(".") : "var";
     let count = 1;
@@ -407,7 +439,7 @@ function error<T>(error: string, message: string, data?: T) {
  * const num1 = input-plugin.inputNumber(69);
  * const binary1 = math-plugin.input(num1['res'], num1['res'], 'multiply');
  */
-const BLYPESCRIPT_STATEMENT_TEMPLATE = "const {{name}} = {{signature}}.({{params}});";
+const BLYPESCRIPT_STATEMENT_TEMPLATE = "const {{name}} = {{signature}}({{params}});";
 const BLYPESCRIPT_STATEMENT_REGEX =
   /\s*const \s*(\w+)\s*=\s*([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\)\s*;/;
 const BLYPESCRIPT_FUNCTION_CALL_REGEX = /^([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\).*$/;
@@ -446,7 +478,7 @@ export class BlypescriptStatement extends AiLangStatement {
     return fillTemplate(BLYPESCRIPT_STATEMENT_TEMPLATE, {
       name: this.name,
       signature: this.nodeSignature,
-      params: this.nodeInputs.join(", "),
+      params: this.nodeInputs.join(", ") || "",
     });
   }
 }
@@ -719,6 +751,7 @@ export class BlypescriptInterpreter {
       newNodeUiInputs,
       CoreGraphUpdateParticipant.ai
     );
+
     for (const input of Object.keys(newNodeUiInputs.inputs)) {
       this.graphManager.handleNodeInputInteraction(graph.uuid, node.uuid, {
         id: input,

@@ -31,8 +31,8 @@ User: Add some nodes and connect them
 Assistant:
 \`\`\`typescript
 graph {
-  const inputNumber1 = input-plugin.inputNumber.(5);
-  const inputNumber2 = input-plugin.inputNumber.(10);
+  const inputNumber1 = input-plugin.inputNumber(5);
+  const inputNumber2 = input-plugin.inputNumber(10);
   const binary1 = math-plugin.binary.(inputNumber1['res'], inputNumber2['res'], 'add');
   const output1 = blix.output.(binary1['res'], 'output1');
 }

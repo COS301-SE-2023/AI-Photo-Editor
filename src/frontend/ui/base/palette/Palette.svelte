@@ -195,7 +195,7 @@
       closePalette();
 
       const messages = [
-        "🔥 Cooking...",
+        "👨🏼‍🍳 Cooking...",
         "🪄 Stirring the creative cauldron...",
         "🐉 Slaying the ender dragon...",
       ];
@@ -211,7 +211,6 @@
       promptHistory.unshift(prompt);
       await window.apis.utilApi.saveState("prompts", promptHistory);
 
-      console.log(prompt);
       try {
         const res = await window.apis.utilApi.sendPrompt(prompt, get(focusedGraphStore).graphUUID);
 
@@ -318,8 +317,9 @@
           </svg>
           <h1 class="text-xl font-bold text-zinc-400">Ask AI to assist with a task</h1>
           <div class="flex flex-col items-center justify-center text-zinc-500">
-            <span>"What is the result of 16 subtract 42, squared?"</span>
             <span>"I want to edit the brightness, hue and noise of an image."</span>
+            <span>"What is the result of 16 subtract 42, squared?"</span>
+            <span>"I want my image to sparkly like summer's day"</span>
             <span>"Make my image more medieval"</span>
           </div>
         </div>

@@ -39,7 +39,7 @@ type PromptOptions = {
   verbose?: boolean;
 };
 
-export const genericErrorResponse = "Oops, that wasn't supposed to happen🫠. Try again.";
+export const genericErrorResponse = "Oops, that wasn't supposed to happen😅";
 
 export class AiManager {
   private readonly graphExporter: CoreGraphExporter<BlypescriptProgram>;
@@ -123,7 +123,7 @@ export class AiManager {
         );
 
         if (!result.success) {
-          chat.addMessage({ role: "blix", content: `USER'S RESPONSE: ${result.message}` });
+          chat.addMessage({ role: "blix", content: `Error: ${result.message}` });
           continue; // retry if failure
         }
 
@@ -140,7 +140,7 @@ export class AiManager {
 
           if (!result.success) {
             logger.warn(result.error);
-            chat.addMessage({ role: "blix", content: `USER'S RESPONSE:\n${result.message}` });
+            chat.addMessage({ role: "blix", content: `Error: ${result.message}` });
             continue; // retry if failure
           }
 

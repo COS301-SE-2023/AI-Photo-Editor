@@ -46,7 +46,7 @@
       {#if !project.saved}
         <div
           transition:fade="{{ duration: 150 }}"
-          class="z-1000000 mr-2 h-[10px] w-[10px] rounded-full border-[1px] border-zinc-600 bg-white"
+          class="z-1000000 mr-2 h-[10px] w-[10px] rounded-full border-[1px] border-zinc-600 bg-rose-400"
         ></div>
       {/if}
 
