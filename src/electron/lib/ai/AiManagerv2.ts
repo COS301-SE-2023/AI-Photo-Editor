@@ -95,7 +95,7 @@ export class AiManager {
 
       chat.addMessages(messages);
 
-      const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0.05 });
+      const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0 });
 
       for (let i = 0; i < 2; i++) {
         const response = await llm.generate(chat);
