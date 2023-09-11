@@ -43,7 +43,7 @@
     "start:electron:run": "electron .",
     "start:electron:nodemon": "nodemon --verbose",
     "start:electron:dev": "npm-run-all -s build:electron:dev start:electron:nodemon",
-    "start:electron": "sleep 2 && npm-run-all -p build:electron:dev:watch start:electron:dev",
+    "start:electron": "sleep 3 && npm-run-all -p build:electron:dev:watch start:electron:dev",
     "test": "jest --config jest.config.json",
     "preplaywrite": "npm run build",
     "playwright": "playwright test",

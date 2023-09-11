@@ -174,6 +174,19 @@ export class NodeUIBuilder {
 
     return this;
   }
+  public addCachePicker(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.CachePicker);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.CachePicker, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? 0,
+      triggerUpdate: config.triggerUpdate ?? true,
+    };
+    return this;
+  }
 
   // This dial enables plugins to access the current node's UUID, as well as a list of uiInputs id's.
   // This can then be used in coordination with the webview Tweaks API to modify node UI inputs.

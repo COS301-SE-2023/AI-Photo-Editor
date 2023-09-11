@@ -2,7 +2,7 @@
     import * as PIXI from "pixi.js";
     import { Viewport } from "pixi-viewport";
     import { onDestroy, onMount, tick } from "svelte";
-    import { Writable } from "svelte/store";
+    import { type Writable } from "svelte/store";
     import { renderApp } from "./render";
     import { type BlinkCanvas, canvas1 } from "./clump";
 
