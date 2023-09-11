@@ -5,6 +5,7 @@
   import type { NodeTweakData } from "@shared/types";
   import { faParagraph, type IconDefinition } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
+  import { onMount } from "svelte";
 
   export let props: UIComponentProps;
   export let inputStore: UIValueStore;
@@ -19,6 +20,12 @@
     });
 
   $: valStore = inputStore.inputs[config.componentId];
+
+  onMount(() => {
+    valStore.subscribe((v) => {
+      console.log("DIAL", v);
+    });
+  });
 
   let mouseover = false;
 </script>
@@ -62,5 +69,6 @@
     border: 2px solid #2f2f3f;
     text-align: center;
     overflow-wrap: break-word;
+    pointer-events: none;
   }
 </style>

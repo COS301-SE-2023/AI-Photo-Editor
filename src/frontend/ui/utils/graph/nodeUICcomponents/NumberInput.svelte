@@ -50,7 +50,11 @@
   $: valStore = inputStore.inputs[config.componentId];
 </script>
 
-<svelte:window on:pointermove="{handlePointerMove}" on:pointerup="{handlePointerUp}" />
+<svelte:window
+  on:pointermove="{handlePointerMove}"
+  on:pointerup="{handlePointerUp}"
+  on:blur="{handlePointerUp}"
+/>
 
 <div class="container">
   <label for="{randomId}-{config.componentId}">{config.label}</label>

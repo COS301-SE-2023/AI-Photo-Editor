@@ -36,20 +36,8 @@ function addState(ui) {
 }
 
 function addTweakability(ui) {
-    ui.addTweakDial({
-            componentId: "tweaks",
-            label: "Tweak Dial",
-            defaultValue: {},
-            triggerUpdate: false,
-        }, {}
-    );
-    ui.addDiffDial({
-            componentId: "diffs",
-            label: "Diff Dial",
-            defaultValue: {},
-            triggerUpdate: false,
-        }, {}
-    );
+    ui.addTweakDial("tweaks", {});
+    ui.addDiffDial("diffs", {});
 }
 
 //========== NODES ==========//
@@ -94,6 +82,7 @@ const nodes = {
                 content: {
                     class: "clump",
                     nodeUUID: uiInput["tweaks"].nodeUUID,
+                    changes: uiInput["diffs"]?.uiInputs ?? [],
                     transform: {
                         position: { x: uiInput["positionX"], y: uiInput["positionY"] },
                         rotation: uiInput["rotation"],
@@ -240,6 +229,7 @@ const nodes = {
             const parent = {
                 class: "clump",
                 nodeUUID: uiInput["tweaks"].nodeUUID,
+                changes: uiInput["diffs"]?.uiInputs ?? [],
                 transform: getTransform(uiInput),
                 opacity: uiInput["opacity"],
                 elements: clumps.map(c => c.content)

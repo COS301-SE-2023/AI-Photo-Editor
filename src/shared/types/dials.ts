@@ -5,5 +5,5 @@ export type NodeTweakData = {
 
 export type NodeDiffData = {
   uiInputs: string[];
-  anchors: { anchorId: string; change: "connection" | "value" }[];
+  anchors: { [key: string]: "connection" | "value" }; // anchorId -> changeType
 };

@@ -14,7 +14,7 @@
   let files: FileList | undefined;
 
   $: if (files) {
-    valStore.set(files[0].path);
+    valStore.set(files[0]?.path ?? "");
   } else {
     valStore.set("");
   }

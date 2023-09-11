@@ -29,6 +29,7 @@ import { CoreGraph } from "./core-graph/CoreGraph";
 import { MediaSubscriber } from "./media/MediaSubscribers";
 import type { IGraphUIInputs } from "../../shared/types";
 import { CoreProject } from "./projects/CoreProject";
+import * as crypto from "crypto";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -94,8 +95,25 @@ export class Blix {
       },
       {}
     );
+    outputUIBuilder.addBuffer(
+      {
+        componentId: "id",
+        label: "ID Buffer",
+        defaultValue: { id: null },
+        triggerUpdate: true,
+      },
+      {}
+    );
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
+
+    outputNodeBuilder.setUIInitializer((x) => {
+      return {
+        id: {
+          id: crypto.randomBytes(32).toString("base64url"),
+        },
+      };
+    });
 
     outputNodeBuilder.setTitle("Output");
     outputNodeBuilder.setDescription(

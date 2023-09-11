@@ -177,32 +177,32 @@ export class NodeUIBuilder {
 
   // This dial enables plugins to access the current node's UUID, as well as a list of uiInputs id's.
   // This can then be used in coordination with the webview Tweaks API to modify node UI inputs.
-  public addTweakDial(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
-    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.TweakDial);
+  public addTweakDial(id: string, props: UIComponentProps): NodeUIBuilder {
+    const componentId = id ?? getRandomComponentId(NodeUIComponent.TweakDial);
     this.node.params.push(
       new NodeUILeaf(this.node, NodeUIComponent.TweakDial, componentId, [props])
     );
     this.uiConfigs[componentId] = {
       componentId,
-      label: config.label,
-      defaultValue: config.defaultValue ?? ({ nodeUUID: "", inputs: [] } as NodeTweakData),
-      triggerUpdate: config.triggerUpdate ?? true,
+      label: "TweakDial",
+      defaultValue: { nodeUUID: "", inputs: [] } as NodeTweakData,
+      triggerUpdate: true,
     };
 
     return this;
   }
 
   // This dial provides the node a list of properties that changed in the last UI update
-  public addDiffDial(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
-    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.DiffDial);
+  public addDiffDial(id: string, props: UIComponentProps): NodeUIBuilder {
+    const componentId = id ?? getRandomComponentId(NodeUIComponent.DiffDial);
     this.node.params.push(
       new NodeUILeaf(this.node, NodeUIComponent.DiffDial, componentId, [props])
     );
     this.uiConfigs[componentId] = {
       componentId,
-      label: config.label,
-      defaultValue: config.defaultValue ?? { changes: [] as string[] },
-      triggerUpdate: config.triggerUpdate ?? true,
+      label: "DiffDial",
+      defaultValue: { changes: [] as string[] },
+      triggerUpdate: true,
     };
 
     return this;

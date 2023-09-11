@@ -1,25 +1,46 @@
 import * as PIXI from "pixi.js";
-import { getPixiFilter, type Atom, type Clump, BlinkCanvas, Asset } from "./clump";
+import { getPixiFilter, type Atom, type Clump, type BlinkCanvas, type Asset } from "./clump";
+import { Viewport } from "pixi-viewport";
+import { createBoundingBox } from "./select";
 
 // let prevMedia = null; // TODO: Replace with DiffDial
 
 type Scene = { [key: string]: PIXI.Container };
 
-let selected: string = "";
+let selected: string = ""; // NodeUUID of selected clump
+
+let oldSceneStructure = "";
+let sceneStructure = "_";
 let oldScene: Scene = {};
-let scene: Scene = {};
+let clumps: Scene = {};
+
+let boundingBox: PIXI.Container;
+let scene: PIXI.Container;
 
 export function renderApp(
   blink: PIXI.Application,
-  hierarchy: PIXI.Container,
   canvas: BlinkCanvas,
+  viewport: Viewport,
   send: (message: string, data: any) => void
 ): boolean {
   if (!canvas || !canvas.content) return false;
-  // Destroy previous viewport contents
-  hierarchy.removeChildren();
+  if (!scene) scene = viewport.addChild(new PIXI.Container());
 
-  // Preload all image assets
+  oldSceneStructure = sceneStructure;
+  sceneStructure = getSceneStructure(canvas.content);
+
+  if (oldSceneStructure === sceneStructure) return;
+
+  // Destroy previous viewport contents
+  scene.removeChildren();
+  oldScene = clumps;
+  clumps = {};
+
+  //===== CREATE BOUNDING BOX =====//
+  boundingBox = new PIXI.Container();
+  blink.stage.addChild(boundingBox);
+
+  //===== PRELOAD IMAGE ASSETS =====//
   const imgPromises = [];
   for (let assetId in canvas.assets) {
     if (canvas.assets[assetId].type === "image") {
@@ -32,41 +53,64 @@ export function renderApp(
   // Construct clump hierarchy
   const loaded = Promise.all(imgPromises);
   loaded.then(() => {
-    oldScene = { ...scene };
-    scene = {};
-    const child = renderClump(blink, canvas.content, canvas, send);
+
+    const child = renderClump(blink, canvas.content, canvas, viewport, send);
     if (child != null) {
-      hierarchy.addChild(child);
+      scene.addChild(child);
     }
 
     //===============// DELETE DEAD CLUMPS //==============//
-    const newClumps = new Set(Object.keys(scene));
+    // const newClumps = new Set(Object.keys(scene));
 
-    for (let nodeUUID in oldScene) {
-      if (!newClumps.has(nodeUUID)) {
-        oldScene[nodeUUID].destroy(); // PIXI.js cleanup
-      }
-    }
+    // for (let nodeUUID in oldScene) {
+    //   if (!newClumps.has(nodeUUID)) {
+    //     oldScene[nodeUUID].destroy(); // PIXI.js cleanup
+    //   }
+    // }
+    console.log("CLUMPS", clumps);
+    console.log("SCENE", scene);
   });
 
   return true;
 }
 
+function getSceneStructure(clump: Clump) {
+  if (!clump) return "";
+  let res = clump.nodeUUID;
+
+  if (clump.elements) {
+    let counter = clump.elements.length;
+    for (let child of clump.elements) {
+      if (child.class === "clump") {
+        res += ">" + getSceneStructure(child);
+      } else if (child.class === "atom") {
+        // res += ">" + child.nodeUUID;
+      }
+    }
+  }
+
+  return res;
+}
+
 export function renderCanvas(blink: PIXI.Application, root: Clump) {}
 
-let selectedClump = null;
-
-function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas, send) {
+function renderClump(
+  blink: PIXI.Application,
+  clump: Clump,
+  canvas: BlinkCanvas,
+  viewport: Viewport,
+  send: (message: string, data: any) => void
+) {
   if (!clump) return null;
 
-  //===============// RESURRECT OLD CLUMPS //==============//
-  if (clump.nodeUUID in oldScene) {
-    // Clump already exists, resurrect and update it
-    scene[clump.nodeUUID] = oldScene[clump.nodeUUID];
-  }
-  //===============// ADD NEW CLUMPS //==============//
-  else {
-  }
+  // //===============// RESURRECT OLD CLUMPS //==============//
+  // if (clump.nodeUUID in oldScene) {
+  //   // Clump already exists, resurrect and update it
+  //   scene[clump.nodeUUID] = oldScene[clump.nodeUUID];
+  // }
+  // //===============// ADD NEW CLUMPS //==============//
+  // else {
+  // }
 
   //========== CREATE CONTAINER ==========//
   const content = new PIXI.Container();
@@ -77,7 +121,7 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas,
     let counter = clump.elements.length;
     for (let child of clump.elements) {
       if (child.class === "clump") {
-        const pixiClump = renderClump(blink, child, canvas, send);
+        const pixiClump = renderClump(blink, child, canvas, viewport, send);
 
         if (pixiClump != null) {
           pixiClump.zIndex = counter--;
@@ -147,85 +191,65 @@ function renderClump(blink: PIXI.Application, clump: Clump, canvas: BlinkCanvas,
     if (scl) transMatrix.scale(scl.x, scl.y);
     if (rot) transMatrix.rotate((rot * Math.PI) / 180);
     if (pos) transMatrix.translate(pos.x, pos.y);
-
-    // if (pos) resClumpContent.setTransform(pos.x, pos.y);
-    // if (rot) resClumpContent.angle = rot;
-    // if (scl) resClumpContent.scale.set(scl.x, scl.y);
   }
 
-  resClumpContent.transform.setFromMatrix(transMatrix);
+  resClump.transform.setFromMatrix(transMatrix);
   // const matTransform = resClumpContent.transform.worldTransform;
 
-  // if (clump.opacity) {
-  //   resClumpContent.alpha = Math.min(100, Math.max(0, clump.opacity));
-  // }
+  if (clump.opacity) {
+    resClumpContent.alpha = Math.min(100, Math.max(0, clump.opacity));
+  }
 
   resClump.addChild(resClumpContent);
 
-  const box = new PIXI.Graphics();
-  // box.drawRect(clumpBounds.x, clumpBounds.y, clumpBounds.width, clumpBounds.height);
+  const box = createBoundingBox(transMatrix, clumpBounds, viewport);
 
-  box.beginFill(0xf43e5c, 1);
+  boundingBox.removeChildren();
+  boundingBox.addChild(box);
 
-  const tl = transMatrix.apply(new PIXI.Point(clumpBounds.x, clumpBounds.y));
-  const tr = transMatrix.apply(new PIXI.Point(clumpBounds.x + clumpBounds.width, clumpBounds.y));
-  const bl = transMatrix.apply(new PIXI.Point(clumpBounds.x, clumpBounds.y + clumpBounds.height));
-  const br = transMatrix.apply(
-    new PIXI.Point(clumpBounds.x + clumpBounds.width, clumpBounds.y + clumpBounds.height)
-  );
-
-  const corners = [tl, tr, br, bl];
-  for (let c = 0; c < 4; c++) {
-    const c2 = (c + 1) % 4;
-    box.drawCircle(corners[c].x, corners[c].y, 10);
-    box.drawCircle((corners[c].x + corners[c2].x)/2, (corners[c].y + corners[c2].y)/2, 8);
-
-    box.lineStyle(5, 0xf43e5c, 0.5);
-    box.moveTo(corners[c].x, corners[c].y);
-    box.lineTo(corners[c2].x, corners[c2].y);
-    box.lineStyle();
-  }
-  box.zIndex = 1000;
-
-  resClump.addChild(box);
   resClump.sortChildren();
 
   //========== HANDLE EVENTS ==========//
   let dragging = false;
-  let dragDelta = { x: 0, y: 0 };
-  let prevMousePos = { x: 0, y: 0 };
+  var prevMousePos = new PIXI.Point();
 
   resClump.eventMode = "dynamic";
-  resClump.on("click", () => {
-    selected = clump.nodeUUID;
-  });
+  // resClump.on("click", () => {
+  // });
 
   resClump.on("mousedown", (event) => {
+    event.stopPropagation();
+    selected = clump.nodeUUID;
     dragging = true;
+    prevMousePos = viewport.toWorld(event.global);
   });
-  resClump.on("mouseupoutside", (event) => {
+  viewport.on("mouseup", (event) => {
     dragging = false;
   });
-  resClump.on("mouseup", (event) => {
-    dragging = false;
-  });
-  resClump.on("mousemove", (event) => {
-    if(dragging) {
-      const { x: mX, y: mY } = event.movement;
+
+  viewport.on("mousemove", (event) => {
+    if (selected === clump.nodeUUID && dragging) {
+      const pos = viewport.toWorld(event.global);
+      const shift = new PIXI.Point(pos.x - prevMousePos.x, pos.y - prevMousePos.y);
+      prevMousePos = pos;
+
+      resClump.transform.position.x += shift.x;
+      resClump.transform.position.y += shift.y;
+
       send("tweak", {
         nodeUUID: clump.nodeUUID,
         inputs: {
-          positionX: clump.transform.position.x + mX,
-          positionY: clump.transform.position.y + mY,
+          positionX: resClump.transform.position.x,
+          positionY: resClump.transform.position.y,
         },
       });
     }
-  })
+  });
 
   // To get global mouse position at any point:
   // console.log("MOUSE", blink.renderer.plugins.interaction.pointer.global);
 
-  scene[clump.nodeUUID] = resClump;
+  clumps[clump.nodeUUID] = resClump;
   return resClump;
 }
 

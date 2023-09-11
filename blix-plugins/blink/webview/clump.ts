@@ -48,25 +48,25 @@ export type Filter = {
 };
 
 export function getPixiFilter(filter: Filter) {
-    switch (filter.type) {
-        case "blur":        return new PIXI.BlurFilter(...filter.params);
-        case "noise":       return new PIXI.NoiseFilter(...filter.params);
-        case "bloom":       return new BloomFilter(...filter.params);
-        case "grayscale":   return new GrayscaleFilter();
-        case "bevel":       return new BevelFilter(...filter.params);
-        case "outline":     return new OutlineFilter(...filter.params);
-        case "dot":         return new DotFilter(...filter.params);
-        case "crt":         return new CRTFilter(...filter.params);
-        case "emboss":      return new EmbossFilter(...filter.params);
-        case "bulge":       return new BulgePinchFilter(...filter.params);
-        case "glitch":      return new GlitchFilter(...filter.params);
-        case "zoomblur":    return new ZoomBlurFilter(...filter.params);
-        case "twist":       return new TwistFilter(...filter.params);
-    }
+  switch (filter.type) {
+    case "blur":        return new PIXI.BlurFilter(...filter.params);
+    case "noise":       return new PIXI.NoiseFilter(...filter.params);
+    case "bloom":       return new BloomFilter(...filter.params);
+    case "grayscale":   return new GrayscaleFilter();
+    case "bevel":       return new BevelFilter(...filter.params);
+    case "outline":     return new OutlineFilter(...filter.params);
+    case "dot":         return new DotFilter(...filter.params);
+    case "crt":         return new CRTFilter(...filter.params);
+    case "emboss":      return new EmbossFilter(...filter.params);
+    case "bulge":       return new BulgePinchFilter(...filter.params);
+    case "glitch":      return new GlitchFilter(...filter.params);
+    case "zoomblur":    return new ZoomBlurFilter(...filter.params);
+    case "twist":       return new TwistFilter(...filter.params);
+  }
 }
 
 // A single indivisible unit of a clump (E.g. image, shape, text etc.)
-export type Atom = { class: "atom" } & (ImageAtom | ShapeAtom | TextAtom | PaintAtom);
+export type Atom = { class: "atom", nodeUUID: string } & (ImageAtom | ShapeAtom | TextAtom | PaintAtom);
 type ImageAtom = {
   type: "image";
   assetId: string;
@@ -115,7 +115,7 @@ export const canvas1: BlinkCanvas = {
   content: {
     class: "clump",
     name: "root",
-    nodeUUID: "",
+    nodeUUID: "a",
     transform: { position: { x: 0, y: 0 }, rotation: 0, scale: { x: 1, y: 1 } },
     filters: [
       { class: "filter", type: "blur", params: [100, 25] },
@@ -127,6 +127,7 @@ export const canvas1: BlinkCanvas = {
         class: "atom",
         type: "image",
         assetId: "1",
+        nodeUUID: "b",
       },
       {
         class: "clump",
@@ -138,6 +139,7 @@ export const canvas1: BlinkCanvas = {
             class: "atom",
             type: "shape",
             shape: "rectangle",
+            nodeUUID: "c",
 
             bounds: { w: 100, h: 100 },
             fill: 0xff0000,
@@ -148,6 +150,7 @@ export const canvas1: BlinkCanvas = {
             class: "atom",
             type: "text",
             text: "Hello World",
+            nodeUUID: "d",
 
             fill: 0x0000ff,
             stroke: 0x00ff00,
@@ -163,6 +166,7 @@ export const canvas1: BlinkCanvas = {
             class: "atom",
             type: "image",
             assetId: "2",
+            nodeUUID: "e",
           },
         ],
       },
