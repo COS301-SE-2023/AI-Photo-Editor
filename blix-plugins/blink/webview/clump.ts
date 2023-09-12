@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import { Matrix } from "pixi.js";
 import {
+  KawaseBlurFilter,
   BloomFilter,
   GrayscaleFilter,
   BevelFilter,
@@ -54,10 +55,31 @@ export function getPixiFilter(filter: Filter) {
         case "noise":       return new PIXI.NoiseFilter(...filter.params);
         case "bloom":       return new BloomFilter(...filter.params);
         case "grayscale":   return new GrayscaleFilter();
-        case "bevel":       return new BevelFilter(...filter.params);
+        case "bevel":       return new BevelFilter(
+          {
+            rotation: filter.params[0], 
+            thickness: filter.params[1],
+            lightColor: filter.params[2],
+            lightAlpha: filter.params[3],
+            shadowColor: filter.params[4],
+            shadowAlpha: filter.params[5],
+          }
+        );
         case "outline":     return new OutlineFilter(...filter.params);
         case "dot":         return new DotFilter(...filter.params);
-        case "crt":         return new CRTFilter(...filter.params);
+        case "crt":         return new CRTFilter(
+          {
+            curvature: filter.params[0],
+            lineWidth: filter.params[1],
+            lineContrast: filter.params[2],
+            noise: filter.params[3],
+            noiseSize: filter.params[4],
+            vignetting: filter.params[5],
+            vignettingAlpha: filter.params[6],
+            vignettingBlur: filter.params[7],
+            seed: filter.params[8],
+          }
+        );
         case "emboss":      return new EmbossFilter(...filter.params);
         case "bulge":       return new BulgePinchFilter(...filter.params);
         case "glitch":      return new GlitchFilter(...filter.params);
