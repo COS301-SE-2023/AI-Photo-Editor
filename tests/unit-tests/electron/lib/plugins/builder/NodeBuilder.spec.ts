@@ -157,7 +157,7 @@ describe("Test NodeUIBuilder", () => {
       const uiComponentConfig : UIComponentConfig = {
             label: "slider",
             componentId: "shrek",
-            defaultValue: 50,
+            defaultValue: "#beef69",
             triggerUpdate: true
       }     
       nodeUIBuilder.addColorPicker(uiComponentConfig,{set : "ayo"});

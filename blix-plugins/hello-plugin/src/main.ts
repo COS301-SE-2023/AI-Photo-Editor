@@ -61,7 +61,7 @@ const nodes = {
         .addColorPicker({
             componentId: "incarnadine",
             label: "Multitudinous seas incarnadine",
-            defaultValue: 0,
+            defaultValue: "#ff000088",
             triggerUpdate: true,
         }, {})
 

@@ -182,7 +182,7 @@ export class NodeUIBuilder {
     this.uiConfigs[componentId] = {
       componentId,
       label: config.label,
-      defaultValue: config.defaultValue ?? 0,
+      defaultValue: config.defaultValue ?? "",
       triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;
@@ -396,7 +396,7 @@ export class NodeUIBuilder {
     this.uiConfigs[componentId] = {
       componentId,
       label: config.label,
-      defaultValue: config.defaultValue ?? "#000000",
+      defaultValue: config.defaultValue ?? "#000000ff",
       triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;

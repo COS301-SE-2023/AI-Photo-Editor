@@ -5,6 +5,7 @@
   import NodeUiFragment from "./NodeUIFragment.svelte";
   import { createEventDispatcher } from "svelte";
   import { graphMall } from "lib/stores/GraphStore";
+  import { colord } from "colord";
 
   const dispatch = createEventDispatcher();
 
@@ -44,28 +45,29 @@
     return colour as CSSColorString;
   }
 
-  function changeBrightness(color: CSSColorString, percent: number): CSSColorString {
-    var R = parseInt(color.substring(1, 3), 16);
-    var G = parseInt(color.substring(3, 5), 16);
-    var B = parseInt(color.substring(5, 7), 16);
+  function changeBrightness(color: CSSColorString, percent: number) {
+    return colord(color).lighten(percent).toRgbString();
+    // var R = parseInt(color.substring(1, 3), 16);
+    // var G = parseInt(color.substring(3, 5), 16);
+    // var B = parseInt(color.substring(5, 7), 16);
 
-    R = parseInt(`${(R * (100 + percent)) / 100}`);
-    G = parseInt(`${(G * (100 + percent)) / 100}`);
-    B = parseInt(`${(B * (100 + percent)) / 100}`);
+    // R = parseInt(`${(R * (100 + percent)) / 100}`);
+    // G = parseInt(`${(G * (100 + percent)) / 100}`);
+    // B = parseInt(`${(B * (100 + percent)) / 100}`);
 
-    R = R < 255 ? R : 255;
-    G = G < 255 ? G : 255;
-    B = B < 255 ? B : 255;
+    // R = R < 255 ? R : 255;
+    // G = G < 255 ? G : 255;
+    // B = B < 255 ? B : 255;
 
-    R = Math.round(R);
-    G = Math.round(G);
-    B = Math.round(B);
+    // R = Math.round(R);
+    // G = Math.round(G);
+    // B = Math.round(B);
 
-    var RR = R.toString(16).length == 1 ? "0" + R.toString(16) : R.toString(16);
-    var GG = G.toString(16).length == 1 ? "0" + G.toString(16) : G.toString(16);
-    var BB = B.toString(16).length == 1 ? "0" + B.toString(16) : B.toString(16);
+    // var RR = R.toString(16).length == 1 ? "0" + R.toString(16) : R.toString(16);
+    // var GG = G.toString(16).length == 1 ? "0" + G.toString(16) : G.toString(16);
+    // var BB = B.toString(16).length == 1 ? "0" + B.toString(16) : B.toString(16);
 
-    return ("#" + RR + GG + BB) as CSSColorString;
+    // return ("#" + RR + GG + BB) as CSSColorString;
   }
 
   async function nodeClicked(e: CustomEvent) {
@@ -144,7 +146,7 @@ height="{graphNode.dims.h}" -->
                   {#if input.displayName}
                     {input.displayName}<br />
                   {/if}
-                  &lt;<span style:color="{changeBrightness(color, 120)}">{input.type || "any"}</span
+                  &lt;<span style:color="{changeBrightness(color, 0.3)}">{input.type || "any"}</span
                   >&gt;
                 </div>
               {/if}
@@ -180,7 +182,7 @@ height="{graphNode.dims.h}" -->
                     {output.displayName}<br />
                   {/if}
                   <!-- &lt;{output.type || "any"}&gt; -->
-                  &lt;<span style:color="{changeBrightness(color, 120)}"
+                  &lt;<span style:color="{changeBrightness(color, 0.3)}"
                     >{output.type || "any"}</span
                   >&gt;
                 </div>
