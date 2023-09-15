@@ -4,7 +4,7 @@
     import { onDestroy, onMount, tick } from "svelte";
     import { type Writable } from "svelte/store";
     import { renderApp } from "./render";
-    import { type BlinkCanvas, canvas1 } from "./clump";
+    import { type BlinkCanvas } from "./types";
 
     export let media: Writable<BlinkCanvas>;
     export let send: (msg: string, data: any) => void;
@@ -28,6 +28,8 @@
             // autoStart: false,
             // resizeTo: window,
         });
+
+        globalThis.__PIXI_APP__ = blink;
 
         window.addEventListener("resize", () => {
             blink.renderer.resize(window.innerWidth, window.innerHeight);
@@ -80,6 +82,7 @@
         const imgCanvasBlockH = 1080;
 
         let imgCanvas = new PIXI.Container();
+        imgCanvas.name = "imgCanvas";
 
         let imgCanvasBlock = new PIXI.Graphics();
         imgCanvasBlock.beginFill(0xffffff, 0.9);

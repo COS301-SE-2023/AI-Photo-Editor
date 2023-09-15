@@ -1,21 +1,41 @@
 import * as PIXI from "pixi.js";
-import { getPixiFilter, type Atom, type Clump, type BlinkCanvas, type Asset } from "./clump";
+import {
+  getPixiFilter,
+  type Atom,
+  type Clump,
+  type BlinkCanvas,
+  type Asset,
+  Filter,
+  Transform,
+} from "./types";
 import { Viewport } from "pixi-viewport";
 import { createBoundingBox } from "./select";
+import { renderAtom } from "./atom";
+import { applyFilters } from "./filter";
+import { diffAtom, diffClump } from "./diff";
 
 // let prevMedia = null; // TODO: Replace with DiffDial
 
-type Scene = { [key: string]: PIXI.Container };
+// Utility type to override properties of T with properties of R
+type Override<T, R> = { [P in Exclude<keyof T, keyof R>]: T[P] } & R;
+
+type HierarchyData = { container: PIXI.Container; containerIndex: number };
+
+export type HierarchyCanvas = Override<BlinkCanvas, { content: HierarchyClump | null }>;
+export type HierarchyClump = Override<Clump, { elements: (HierarchyClump | HierarchyAtom)[] }> &
+  HierarchyData;
+export type HierarchyAtom = Atom & HierarchyData;
+// type Clumps = { [key: string]: PIXI.Container };
 
 let selected: string = ""; // NodeUUID of selected clump
 
 let oldSceneStructure = "";
 let sceneStructure = "_";
-let oldScene: Scene = {};
-let clumps: Scene = {};
 
-let boundingBox: PIXI.Container;
+let boundingBox: PIXI.Container = null;
 let scene: PIXI.Container;
+
+let hierarchy: HierarchyCanvas | undefined = undefined;
 
 export function renderApp(
   blink: PIXI.Application,
@@ -24,21 +44,25 @@ export function renderApp(
   send: (message: string, data: any) => void
 ): boolean {
   if (!canvas || !canvas.content) return false;
-  if (!scene) scene = viewport.addChild(new PIXI.Container());
-
-  oldSceneStructure = sceneStructure;
-  sceneStructure = getSceneStructure(canvas.content);
-
-  if (oldSceneStructure === sceneStructure) return;
+  if (!scene) {
+    scene = new PIXI.Container();
+    scene.name = "Blink Scene";
+    viewport.addChild(scene);
+  }
 
   // Destroy previous viewport contents
-  scene.removeChildren();
-  oldScene = clumps;
-  clumps = {};
+  // scene.removeChildren();
+  // if (boundingBox) {
+  //   boundingBox.removeChildren();
+  // }
 
   //===== CREATE BOUNDING BOX =====//
-  boundingBox = new PIXI.Container();
-  blink.stage.addChild(boundingBox);
+  // TODO
+  if (boundingBox == null) {
+    boundingBox = new PIXI.Container();
+    boundingBox.name = "boundingBox";
+    blink.stage.addChild(boundingBox);
+  }
 
   //===== PRELOAD IMAGE ASSETS =====//
   const imgPromises = [];
@@ -53,10 +77,28 @@ export function renderApp(
   // Construct clump hierarchy
   const loaded = Promise.all(imgPromises);
   loaded.then(() => {
+    const { pixiClump, changed } = renderClump(
+      blink,
+      canvas.content,
+      hierarchy?.content,
+      canvas,
+      hierarchy,
+      viewport,
+      send
+    );
 
-    const child = renderClump(blink, canvas.content, canvas, viewport, send);
-    if (child != null) {
-      scene.addChild(child);
+    // Update hierarchy
+    hierarchy = {
+      assets: canvas.assets,
+      content: {
+        ...canvas.content,
+        container: pixiClump,
+        containerIndex: 0,
+      } as HierarchyClump,
+    };
+
+    if (hierarchy.content.container != null && changed) {
+      scene.addChild(hierarchy.content.container);
     }
 
     //===============// DELETE DEAD CLUMPS //==============//
@@ -67,29 +109,12 @@ export function renderApp(
     //     oldScene[nodeUUID].destroy(); // PIXI.js cleanup
     //   }
     // }
-    console.log("CLUMPS", clumps);
-    console.log("SCENE", scene);
+    // console.log("CLUMPS", clumps);
+    // console.log("SCENE", scene);
+    console.log("====================================");
   });
 
   return true;
-}
-
-function getSceneStructure(clump: Clump) {
-  if (!clump) return "";
-  let res = clump.nodeUUID;
-
-  if (clump.elements) {
-    let counter = clump.elements.length;
-    for (let child of clump.elements) {
-      if (child.class === "clump") {
-        res += ">" + getSceneStructure(child);
-      } else if (child.class === "atom") {
-        // res += ">" + child.nodeUUID;
-      }
-    }
-  }
-
-  return res;
 }
 
 export function renderCanvas(blink: PIXI.Application, root: Clump) {}
@@ -97,91 +122,148 @@ export function renderCanvas(blink: PIXI.Application, root: Clump) {}
 function renderClump(
   blink: PIXI.Application,
   clump: Clump,
+  prevClump: HierarchyClump | undefined,
   canvas: BlinkCanvas,
+  prevCanvas: BlinkCanvas,
   viewport: Viewport,
   send: (message: string, data: any) => void
-) {
-  if (!clump) return null;
+): {
+  pixiClump: PIXI.Container;
+  changed: boolean; // Whether the pixiClump is a different PIXI object than before
+} {
+  if (!clump) return { pixiClump: null, changed: prevClump != null };
 
-  // //===============// RESURRECT OLD CLUMPS //==============//
-  // if (clump.nodeUUID in oldScene) {
-  //   // Clump already exists, resurrect and update it
-  //   scene[clump.nodeUUID] = oldScene[clump.nodeUUID];
-  // }
-  // //===============// ADD NEW CLUMPS //==============//
-  // else {
-  // }
-
-  //========== CREATE CONTAINER ==========//
-  const content = new PIXI.Container();
-  content.sortableChildren = true;
+  //========== DIFF CLUMP VS HIERARCHY ==========//
+  const diffs = diffClump(clump, prevClump);
+  // console.log("DIFFS", diffs);
 
   //========== CREATE CHILD ELEMENTS ==========//
-  if (clump.elements) {
-    let counter = clump.elements.length;
-    for (let child of clump.elements) {
-      if (child.class === "clump") {
-        const pixiClump = renderClump(blink, child, canvas, viewport, send);
+  let childChanged = false;
+  const children: PIXI.Container[] = [];
 
-        if (pixiClump != null) {
-          pixiClump.zIndex = counter--;
-          content.addChild(pixiClump);
+  if (clump.elements) {
+    for (let i = 0; i < clump.elements.length; i++) {
+      const child = clump.elements[i];
+      const prevChild = prevClump?.elements != null && prevClump.elements[i];
+
+      if (child.class === "clump") {
+        //===== CHILD CLUMP =====//
+        const { pixiClump, changed } = renderClump(
+          blink,
+          child as HierarchyClump,
+          (prevChild?.class === "clump" ? prevChild : undefined) as HierarchyClump,
+          canvas,
+          prevCanvas,
+          viewport,
+          send
+        );
+
+        if (changed) {
+          childChanged = true;
+          // console.log("CREATE CLUMP", pixiClump);
+          if (pixiClump != null) {
+            children.push(pixiClump);
+            // content.addChild(pixiClump);
+          }
+
+          // Destroy previous contents
+          // console.log("DESTROY CLUMP", prevChild?.container);
+          prevChild?.container?.destroy();
         }
       } else if (child.class === "atom") {
-        const pixiAtom = renderAtom(canvas.assets, child);
+        //===== CHILD ATOM =====//
+        const { pixiAtom, changed } = renderAtom(
+          canvas.assets,
+          prevCanvas?.assets,
+          child,
+          (prevChild?.class === "atom" ? prevChild : undefined) as HierarchyAtom
+        );
 
-        if (pixiAtom != null) {
-          pixiAtom.zIndex = counter--;
-          content.addChild(pixiAtom);
+        // Construct hierarchy atom
+        // const hierarchyAtom = child as HierarchyAtom;
+        // hierarchyAtom.container = pixiAtom;
+        // hierarchyAtom.containerIndex = i;
+        // hierarchy.elements.push(hierarchyAtom);
+
+        // console.log("PIXI ATOM", hierarchyAtom);
+
+        if (changed) {
+          childChanged = true;
+          // console.log("CREATE ATOM", pixiAtom);
+          // content.removeChild(pixiAtom);
+          if (pixiAtom != null) {
+            children.push(pixiAtom);
+            // content.addChild(pixiAtom);
+          }
+
+          // Destroy previous contents
+          // console.log("DESTROY ATOM", prevChild?.container);
+          prevChild?.container?.destroy();
+        }
+      }
+    }
+
+    // Remove previous surplus children
+    if (prevClump?.elements) {
+      for (let i = clump.elements.length + 1; i < prevClump.elements.length; i++) {
+        if (prevClump.elements[i].class === "clump") {
+          const pClump = prevClump.elements[i] as HierarchyClump;
+          // console.log("REMOVE CLUMP CHILD");
+          prevClump.container.removeChild(pClump.container);
+        } else if (prevClump.elements[i].class === "atom") {
+          const pAtom = prevClump.elements[i] as HierarchyAtom;
+          // console.log("REMOVE ATOM CHILD");
+          prevClump.container.removeChild(pAtom.container);
         }
       }
     }
   }
 
-  //========== CREATE INTERACTION BOX ==========//
-  // Create interaction box once sprite has loaded
-  content.sortChildren();
-
-  const resClump = new PIXI.Container();
-  const resClumpContent = new PIXI.Container();
-  resClump.sortableChildren = true;
-
-  if (clump.filters && clump.filters.length > 0) {
-    //===== FLATTEN CLUMP =====//
-    // Clump uses filters, we must flatten it to a texture
-    // so that the filters are applied evenly regardless of scaling
-
-    // `renderPadding` is necessary for filters like
-    // blur that spread beyond the bounds of the sprite
-    const renderPadding = 100;
-
-    // Apply filters
-    content.filters = clump.filters.map(getPixiFilter);
-
-    // Normalize offset to fit within renderTexture
-    const { x: bx, y: by, width: bw, height: bh } = content.getBounds();
-    content.transform.position.x = -bx + renderPadding;
-    content.transform.position.y = -by + renderPadding;
-
-    // Render to texture
-    const renderTexture = PIXI.RenderTexture.create({
-      width: bw + 2 * renderPadding,
-      height: bh + 2 * renderPadding,
-    });
-    blink.renderer.render(content, { renderTexture: renderTexture });
-
-    // Create flattened sprite and add to clump
-    const renderSprite = new PIXI.Sprite(renderTexture);
-    renderSprite.setTransform(bx - renderPadding, by - renderPadding);
-
-    resClumpContent.addChild(renderSprite);
+  //========== OBTAIN CLUMP CONTAINER ==========//
+  let resClump: PIXI.Container;
+  if (prevClump?.container) {
+    resClump = prevClump.container;
+    // TODO: Destroy previous contents
   } else {
-    //===== ADD CONTENT WITHOUT FLATTENING =====//
-    resClumpContent.addChild(content);
+    resClump = new PIXI.Container();
+    resClump.name = "Clump";
+    resClump.sortableChildren = true;
+
+    addInteractivity(resClump, clump, viewport, send);
+  }
+
+  if (childChanged || diffs.has("filters")) {
+    //========== RECREATE CONTENT ==========//
+    let content = new PIXI.Container();
+    content = new PIXI.Container();
+    content.name = "content";
+    content.sortableChildren = true;
+
+    // TODO: Only add children that have changed
+    // Also remove redundant children
+
+    //Add children to content
+    for (let i = 0; i < children.length; i++) {
+      children[i].zIndex = children.length - i;
+      content.addChild(children[i]);
+    }
+
+    content.sortChildren();
+
+    //========== APPLY FILTERS ==========//
+    if (clump.filters && clump.filters.length > 0) {
+      resClump.addChild(applyFilters(blink, content, clump.filters));
+    } else {
+      //===== ADD CONTENT WITHOUT FLATTENING =====//
+      if (childChanged) {
+        // resClump.removeChildren();
+        resClump.addChild(content);
+      }
+    }
   }
 
   // Get bounds before applying transform
-  const clumpBounds = resClumpContent.getBounds();
+  const clumpBounds = resClump.getBounds();
 
   //========== APPLY CLUMP PROPERTIES ==========//
   let transMatrix = PIXI.Matrix.IDENTITY;
@@ -197,106 +279,73 @@ function renderClump(
   // const matTransform = resClumpContent.transform.worldTransform;
 
   if (clump.opacity) {
-    resClumpContent.alpha = Math.min(100, Math.max(0, clump.opacity));
+    resClump.alpha = Math.min(1, Math.max(0, clump.opacity / 100.0));
   }
-
-  resClump.addChild(resClumpContent);
-
-  const box = createBoundingBox(transMatrix, clumpBounds, viewport);
-
-  boundingBox.removeChildren();
-  boundingBox.addChild(box);
 
   resClump.sortChildren();
 
-  //========== HANDLE EVENTS ==========//
+  // boundingBox.addChild(createBoundingBox(transMatrix, resClump.getBounds(), viewport));
+
+  // hierarchy.container = resClump;
+  return {
+    pixiClump: resClump,
+    changed: true,
+  };
+}
+
+
+function addInteractivity(container: PIXI.Container, clump: Clump, viewport: Viewport, send: (message: string, data: any) => void) {
   let dragging = false;
   var prevMousePos = new PIXI.Point();
 
-  resClump.eventMode = "dynamic";
+  container.eventMode = "dynamic";
   // resClump.on("click", () => {
   // });
 
-  resClump.on("mousedown", (event) => {
+  container.on("mousedown", (event) => {
     event.stopPropagation();
     selected = clump.nodeUUID;
     dragging = true;
     prevMousePos = viewport.toWorld(event.global);
   });
   viewport.on("mouseup", (event) => {
+    if (selected === clump.nodeUUID && dragging) {
+      send("tweak", {
+        nodeUUID: clump.nodeUUID,
+        inputs: {
+          positionX: container.transform.position.x,
+          positionY: container.transform.position.y
+        },
+      });
+    }
+
     dragging = false;
   });
 
   viewport.on("mousemove", (event) => {
     if (selected === clump.nodeUUID && dragging) {
+      // boundingBox.removeChildren();
+      // boundingBox.addChild(createBoundingBox(container.transform.worldTransform, container.getBounds(), viewport));
+
       const pos = viewport.toWorld(event.global);
       const shift = new PIXI.Point(pos.x - prevMousePos.x, pos.y - prevMousePos.y);
       prevMousePos = pos;
 
-      resClump.transform.position.x += shift.x;
-      resClump.transform.position.y += shift.y;
+      container.transform.position.x += shift.x;
+      container.transform.position.y += shift.y;
 
-      send("tweak", {
-        nodeUUID: clump.nodeUUID,
-        inputs: {
-          positionX: resClump.transform.position.x,
-          positionY: resClump.transform.position.y,
-        },
-      });
+      // send("tweak", {
+      //   nodeUUID: clump.nodeUUID,
+      //   inputs: {
+      //     // positionX: container.transform.position.x + shift.x,
+      //     // positionY: container.transform.position.y + shift.y
+      //     positionX: container.transform.position.x,
+      //     positionY: container.transform.position.y
+      //   },
+      // });
     }
   });
 
   // To get global mouse position at any point:
   // console.log("MOUSE", blink.renderer.plugins.interaction.pointer.global);
-
-  clumps[clump.nodeUUID] = resClump;
-  return resClump;
-}
-
-
-
-function renderAtom(assets: { [key: string]: Asset }, atom: Atom) {
-  switch (atom.type) {
-    case "image":
-      if (assets[atom.assetId] && assets[atom.assetId].type === "image") {
-        const sprite = PIXI.Sprite.from(assets[atom.assetId].data);
-
-        sprite.anchor.x = 0.5;
-        sprite.anchor.y = 0.5;
-
-        return sprite;
-      }
-
-      return null;
-
-    case "shape":
-      const shapeContainer = new PIXI.Container();
-      const shape = new PIXI.Graphics();
-      // shape.lineStyle(1, 0xf43e5c, 0.5);
-      shape.beginFill(atom.fill, 1);
-      shape.lineStyle(atom.strokeWidth, atom.stroke, 1);
-
-      switch (atom.shape) {
-        case "rectangle":
-          shape.drawRect(0, 0, atom.bounds.w, atom.bounds.h);
-          break;
-        case "ellipse":
-          shape.drawEllipse(0, 0, atom.bounds.w, atom.bounds.h);
-          break;
-        case "triangle":
-          shape.drawPolygon([0, 0, atom.bounds.w, 0, atom.bounds.w / 2, atom.bounds.h]);
-          break;
-      }
-      shape.endFill();
-
-      shapeContainer.addChild(shape);
-
-      return shapeContainer;
-
-    case "text":
-      break;
-
-    case "paint":
-      break;
-  }
 }

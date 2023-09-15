@@ -4,19 +4,29 @@ function getUUID() {
     return crypto.randomBytes(16).toString("base64url");
 }
 
+function colorHexToNumber(str) {
+    return parseInt(str.slice(0, 7).replace("#", "0x"));
+}
+
 function chooseInput(input, uiInput, inputKey) {
-    if (input[inputKey] ?? false) {
+    if (input[inputKey] != null) {
         return input[inputKey];
     }
-    return uiInput[inputKey];
+    return inputKey.includes("color") ? colorHexToNumber(uiInput[inputKey]) : uiInput[inputKey];
 }
 
 function toTitleCase(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function addTransformInput(ui) {
-    for (let numInp of ["position X", "position Y", "rotation", "scale X", "scale Y"]) {
+function addTransformInput(ui, props = ["position", "rotation", "scale"]) {
+    const propInputs = [
+        ...(props.includes("position") ? ["position X", "position Y"] : []),
+        ...(props.includes("rotation") ? ["rotation"] : []),
+        ...(props.includes("scale")    ? ["scale X", "scale Y"] : [])
+    ];
+    for (let numInp of propInputs) {
+    // for (let numInp of ["position X", "position Y", "rotation", "scale X", "scale Y"]) {
         ui.addNumberInput(
             {
                 componentId: numInp.replace(" ", ""),
@@ -30,9 +40,9 @@ function addTransformInput(ui) {
         );
     }
     return (uiInput) => ({
-        position: { x: uiInput?.positionX, y: uiInput?.positionY },
-        rotation: uiInput?.rotation,
-        scale: { x: uiInput?.scaleX, y: uiInput?.scaleY },
+        ...(props.includes("position") ? { position: { x: uiInput?.positionX, y: uiInput?.positionY } } : {}),
+        ...(props.includes("rotation") ? { rotation: uiInput?.rotation } : {}),
+        ...(props.includes("scale")    ? { scale:    { x: uiInput?.scaleX, y: uiInput?.scaleY }, } : {})
     });
 }
 
@@ -62,8 +72,8 @@ function createBlinkNode(type, title, desc, params) {
             if(param.id.includes("color") || param.id.includes("Color")) {
                 ui.addColorPicker({
                     componentId: param.id,
-                    label: "Multitudinous seas incarnadine",
-                    defaultValue: 0,
+                    label: toTitleCase(param.id),
+                    defaultValue: "#000000",
                     triggerUpdate: true,
                 }, {})
                 
@@ -129,10 +139,10 @@ const blinkNodes = {
         "Bevel Filter",
         [
             { id: "rotation", min: 0, max: 360, step: 1.0 },
-            { id: "thickness", min: 0, max: 10, step: 0.01 },
-            { id: "lightColor", min: 0, max: 360, step: 1.0 },
+            { id: "thickness", min: 0, max: 100, step: 0.1 },
+            { id: "lightColor" },
             { id: "lightAlpha", min: 0, max: 1, step: 0.01 },
-            { id: "shadowColor", min: 0, max: 360, step: 1.0 },
+            { id: "shadowColor" },
             { id: "shadowAlpha", min: 0, max: 1, step: 0.01 },
         ]
     ],
@@ -140,8 +150,8 @@ const blinkNodes = {
         "Outline",
         "Applies an outline filter to the image",
         [
-            { id: "thickness", min: 0, max: 10, step: 0.1 }, 
-            { id: "color", min: 0, max: 5, step: 0.05 },
+            { id: "thickness", min: 0, max: 100, step: 0.1 }, 
+            { id: "color" },
             { id: "alpha", min: 0, max: 1, step: 0.01 },
         ]
     ],
@@ -181,18 +191,18 @@ const nodes = {
         nodeBuilder.setDescription("Input a Blink Sprite Image");
 
         const ui = nodeBuilder.createUIBuilder();
-        // ui.addFilePicker({
-        //     componentId: "imagePicker",
-        //     label: "Pick an image",
-        //     defaultValue: "",
-        //     triggerUpdate: true,
-        // }, {});
-        ui.addCachePicker({
-            componentId: "cachePicker",
-            label: "Pick an cache item",
+        ui.addFilePicker({
+            componentId: "imagePicker",
+            label: "Pick an image",
             defaultValue: "",
             triggerUpdate: true,
         }, {});
+        // ui.addCachePicker({
+        //     componentId: "cachePicker",
+        //     label: "Pick an cache item",
+        //     defaultValue: "",
+        //     triggerUpdate: true,
+        // }, {});
         addTransformInput(ui);
         addState(ui);
         addTweakability(ui);
@@ -206,16 +216,17 @@ const nodes = {
         });
 
         nodeBuilder.define(async (input, uiInput, from) => {
-            // let src = uiInput["cachePicker"].split("/");
-            // src = src.splice(-2);
-            // src = src.join("/");
+            let src = uiInput["imagePicker"].split("/");
+            src = src.splice(-2);
+            src = src.join("/");
 
             const canvas = {
                 assets: {
                     [uiInput["state"]["id"]]: {
                         class: "asset",
                         type: "image",
-                        data: uiInput["cachePicker"],
+                        data: uiInput["imagePicker"].split("/").splice(-2).join("/"),
+                        // data: uiInput["cachePicker"],
                     }
                 },
                 content: {
@@ -273,7 +284,7 @@ const nodes = {
                 {}
             );
         }
-        const getTransform = addTransformInput(ui);
+        const getTransform = addTransformInput(ui, ["position", "rotation"]);
         addTweakability(ui);
 
         nodeBuilder.define(async (input, uiInput, from) => {
@@ -288,6 +299,7 @@ const nodes = {
                 content: {
                     class: "clump",
                     nodeUUID: uiInput["tweaks"].nodeUUID,
+                    changes: uiInput["diffs"]?.uiInputs ?? [],
                     transform: getTransform(uiInput),
                     elements: [
                         {
