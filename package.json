@@ -1,7 +1,7 @@
 {
   "name": "blix",
   "description": "Blix - A cross-platform AI-assisted graph photo editor",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor"
@@ -62,7 +62,10 @@
     "preversion": "npm-run-all -s lint format",
     "prepare": "husky install",
     "llm": "cross-env NODE_ENV=development npm run build:electron:dev && node build/electron/lib/ai/ai-profiler-v2.js",
-    "cli": "cross-env NODE_ENV=development npm run build:electron:dev && node build/electron/lib/ai/cli.js"
+    "cli": "cross-env NODE_ENV=development npm run build:electron:dev && node build/electron/lib/ai/cli.js",
+    "predeploy": "npm run build",
+    "deploy": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false GH_TOKEN=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 electron-builder --win --publish always",
+    "postdeploy": "node scripts/cleanBuilds.js"
   },
   "lint-staged": {
     "src/electron/**/*.{js,ts}": "eslint -c eslint.electron.json",
@@ -165,19 +168,24 @@
   "build": {
     "productName": "Blix",
     "appId": "com.the-spanish-inquisition.blix",
-    "copyright": "Copyright© 2023 Blix",
+    "copyright": "Copyright © 2023 The Spanish Inquisition",
     "win": {
-      "target": "nsis"
-      
+      "target": [
+        "nsis"
+      ]
     },
     "mac": {
-      "target": "dmg",
+      "target": [
+        "dmg"
+      ],
       "category": "productivity",
       "type": "distribution",
       "hardenedRuntime": "true"
     },
     "linux": {
-      "target": "AppImage",
+      "target": [
+        "AppImage"
+      ],
       "category": "productivity"
     },
     "files": [
@@ -196,10 +204,12 @@
         ]
       }
     ],
-    "publish": {
+    "publish": [
+      {
         "provider": "github",
         "owner": "ArmandKrynauw",
         "repo": "Blix"
       }
+    ]
   }
 }
