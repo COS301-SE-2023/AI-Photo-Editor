@@ -64,7 +64,7 @@
     "llm": "cross-env NODE_ENV=development npm run build:electron:dev && node build/electron/lib/ai/ai-profiler-v2.js",
     "cli": "cross-env NODE_ENV=development npm run build:electron:dev && node build/electron/lib/ai/cli.js",
     "predeploy": "npm run build",
-    "deploy": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false GH_TOKEN=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 electron-builder --win --publish always",
+    "deploy": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false on-builder --publish always",
     "postdeploy": "node scripts/cleanBuilds.js"
   },
   "lint-staged": {
