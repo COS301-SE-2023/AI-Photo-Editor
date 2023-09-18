@@ -25,7 +25,7 @@ jobs:
       - name: Build & Release Blix
         run: npm run dist
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TEST_TOKEN }}
 
       # - name: Build/release Electron app
       #   uses: samuelmeuli/action-electron-builder@v1
