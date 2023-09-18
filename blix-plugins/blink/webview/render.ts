@@ -12,7 +12,7 @@ import { Viewport } from "pixi-viewport";
 import { createBoundingBox } from "./select";
 import { renderAtom } from "./atom";
 import { applyFilters } from "./filter";
-import { diffAtom, diffClump } from "./diff";
+import { diffClump } from "./diff";
 
 export function randomId() {
   return Math.random().toString(36).slice(2, 6);
@@ -105,17 +105,6 @@ export function renderApp(
     if (hierarchy.content.container != null && changed) {
       scene.addChild(hierarchy.content.container);
     }
-
-    //===============// DELETE DEAD CLUMPS //==============//
-    // const newClumps = new Set(Object.keys(scene));
-
-    // for (let nodeUUID in oldScene) {
-    //   if (!newClumps.has(nodeUUID)) {
-    //     oldScene[nodeUUID].destroy(); // PIXI.js cleanup
-    //   }
-    // }
-    // console.log("CLUMPS", clumps);
-    // console.log("SCENE", scene);
   });
 
   return true;
@@ -233,41 +222,35 @@ function renderClump(
     //========== BUILD CONTENT ==========//
 
     //Add children to content
-    if (newContainer) {
+    if (true || newContainer) {
+      content.removeChildren();
       for (let i = 0; i < children.length; i++) {
         children[i].child.zIndex = children.length - i;
         console.log("=====> ADD CHILD", i, children[i].child.name);
         content.addChild(children[i].child);
       }
     } else {
+      // TODO: Fix this so it only replaces changed children / removes excess
+      // Above is a temp fix that removes all children and adds everything back
+
       for (let i = 0; i < children.length; i++) {
         children[i].child.zIndex = children.length - i;
         // Only update if child changed
         if (children[i].changed) {
           console.log("=====> UPDATE CHILD", i, children[i].child.name);
-          // const prevChild = content.removeChildAt(i) as PIXI.Container;
-          // console.log("OLD CHILD", prevChild.name, "NEW CHILD", children[i].child.name)
-          // content.addChildAt(children[i].child, i);
-          // children[i].child.addChild(prevChild.getChildAt(prevChild.children.length - 1));
+          // content.children[i] = children[i].child;
+          content.removeChildAt(i);
+          content.addChildAt(children[i].child, i);
+          // content.addChild(children[i].child);
         }
       }
-    }
 
-    if (false && !newContainer) {
       // Remove redundant surplus children
-      if (prevClump?.elements) {
-        for (let i = clump.elements.length + 1; i < prevClump.elements.length; i++) {
-          if (prevClump.elements[i].class === "clump") {
-            const pClump = prevClump.elements[i] as HierarchyClump;
-            console.log("REMOVE CLUMP CHILD");
-            prevClump.container.removeChild(pClump.container);
-          } else if (prevClump.elements[i].class === "atom") {
-            const pAtom = prevClump.elements[i] as HierarchyAtom;
-            console.log("REMOVE ATOM CHILD");
-            prevClump.container.removeChild(pAtom.container);
-          }
-        }
-      }
+      // content.children.splice(children.length, content.children.length - children.length);
+      // for (let i = content.children.length-1; i >= children.length; i--) {
+      //   console.log("=====> REMOVE CHILD", i, content.children[i].name);
+      //   content.removeChildAt(i);
+      // }
     }
 
     content.sortChildren();
@@ -332,7 +315,6 @@ function renderClump(
   if (prevClump != null) {
     prevClump.container = resClump;
   }
-  // console.log("--> RESULT", resClump, "\n\n--> CHILD CHANGED", childChanged, "\n\n--> DIFFS", diffs);
 
   console.log("------------------------------------");
   return {

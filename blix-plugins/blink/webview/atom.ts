@@ -35,13 +35,15 @@ export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key:
 
     case "shape":
       const shapeDiff = atomsDiffer || diffShapeAtom(atom, prevAtom as ShapeAtom);
-      if (!shapeDiff) return { pixiAtom: prevAtom.container, changed: false };
+      if (!shapeDiff) {
+        return { pixiAtom: prevAtom.container, changed: false };
+      }
 
       const shapeContainer = new PIXI.Container();
       const shape = new PIXI.Graphics();
       // shape.lineStyle(1, 0xf43e5c, 0.5);
-      shape.beginFill(atom.fill, 1);
-      shape.lineStyle(atom.strokeWidth, atom.stroke, 1);
+      shape.beginFill(atom.fill, atom.fillAlpha);
+      shape.lineStyle(atom.strokeWidth, atom.stroke, atom.strokeAlpha);
       const halfBounds = { w: atom.bounds.w / 2, h: atom.bounds.h / 2 };
 
       switch (atom.shape) {
@@ -49,10 +51,10 @@ export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key:
           shape.drawRect(-halfBounds.w, -halfBounds.h, atom.bounds.w, atom.bounds.h);
           break;
         case "ellipse":
-          shape.drawEllipse(-halfBounds.w, -halfBounds.h, atom.bounds.w, atom.bounds.h);
+          shape.drawEllipse(0, 0, halfBounds.w, halfBounds.h);
           break;
         case "triangle":
-          shape.drawPolygon([0, 0, atom.bounds.w, 0, atom.bounds.w / 2, atom.bounds.h]);
+          shape.drawPolygon([-halfBounds.w, halfBounds.h, halfBounds.w, halfBounds.h, 0, -halfBounds.h]);
           break;
       }
       shape.endFill();

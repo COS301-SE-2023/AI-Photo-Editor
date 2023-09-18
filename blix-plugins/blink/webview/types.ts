@@ -49,6 +49,7 @@ export type Filter = {
 };
 
 export function getPixiFilter(filter: Filter) {
+  try {
     switch (filter.type) {
         case "blur":        return new PIXI.BlurFilter(...filter.params);
         case "noise":       return new PIXI.NoiseFilter(...filter.params);
@@ -85,6 +86,9 @@ export function getPixiFilter(filter: Filter) {
         case "zoomblur":    return new ZoomBlurFilter(...filter.params);
         case "twist":       return new TwistFilter(...filter.params);
     }
+  } catch {
+    return new PIXI.Filter();
+  }
 }
 
 // A single indivisible unit of a clump (E.g. image, shape, text etc.)
@@ -106,7 +110,9 @@ export type ShapeAtom = {
 
   bounds: { w: number, h: number };
   fill: number;
+  fillAlpha: number;
   stroke: number;
+  strokeAlpha: number;
   strokeWidth: number;
 };
 export type TextAtom = {
@@ -114,7 +120,9 @@ export type TextAtom = {
   text: string;
 
   fill: number;
+  fillAlpha: number;
   stroke: number;
+  strokeAlpha: number;
   strokeWidth: number;
   fontSize: number;
   fontFamily: string;
@@ -172,7 +180,9 @@ export const canvas1: BlinkCanvas = {
 
             bounds: { w: 100, h: 100 },
             fill: 0xff0000,
+            fillAlpha: 1,
             stroke: 0x00ff00,
+            strokeAlpha: 1,
             strokeWidth: 5,
           },
           {
@@ -182,7 +192,9 @@ export const canvas1: BlinkCanvas = {
             nodeUUID: "d",
 
             fill: 0x0000ff,
+            fillAlpha: 1,
             stroke: 0x00ff00,
+            strokeAlpha: 1,
             strokeWidth: 5,
             fontSize: 20,
             fontFamily: "Arial",

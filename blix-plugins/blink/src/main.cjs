@@ -4,6 +4,10 @@ function getUUID() {
     return crypto.randomBytes(16).toString("base64url");
 }
 
+function colorHexToAlpha(str) {
+    if (str.length <= 7) return 1.0;
+    return parseInt("0x" + str.slice(7, 9))/255.0;
+}
 function colorHexToNumber(str) {
     return parseInt(str.slice(0, 7).replace("#", "0x"));
 }
@@ -285,6 +289,20 @@ const nodes = {
             );
         }
         const getTransform = addTransformInput(ui, ["position", "rotation"]);
+
+        ui.addColorPicker({
+            componentId: "fill",
+            label: "Fill",
+            defaultValue: "#000000",
+            triggerUpdate: true,
+        }, {})
+        ui.addColorPicker({
+            componentId: "stroke",
+            label: "Stroke",
+            defaultValue: "#00000000",
+            triggerUpdate: true,
+        }, {})
+
         addTweakability(ui);
 
         nodeBuilder.define(async (input, uiInput, from) => {
@@ -308,8 +326,10 @@ const nodes = {
                             shape: uiInput["shape"],
                             bounds: { w: uiInput["width"], h: uiInput["height"] },
 
-                            fill: 0x0000ff,
-                            stroke: 0xff0000,
+                            fill: colorHexToNumber(uiInput["fill"]),
+                            fillAlpha: colorHexToAlpha(uiInput["fill"]),
+                            stroke: colorHexToNumber(uiInput["stroke"]),
+                            strokeAlpha: colorHexToAlpha(uiInput["stroke"]),
                             strokeWidth: 1,
                         }
                     ]

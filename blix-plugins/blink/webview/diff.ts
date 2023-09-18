@@ -109,7 +109,9 @@ export function diffShapeAtom(a1: ShapeAtom, a2: ShapeAtom) {
   if (a1.shape !== a2.shape) return true;
   if (a1.bounds?.w !== a2.bounds?.w || a1.bounds?.h !== a2.bounds?.h) return true;
   if (a1.fill !== a2.fill) return true;
+  if (a1.fillAlpha !== a2.fillAlpha) return true;
   if (a1.stroke !== a2.stroke) return true;
+  if (a1.strokeAlpha !== a2.strokeAlpha) return true;
   if (a1.strokeWidth !== a2.strokeWidth) return true;
   return false;
 }
