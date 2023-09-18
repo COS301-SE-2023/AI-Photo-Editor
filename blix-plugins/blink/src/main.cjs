@@ -295,13 +295,19 @@ const nodes = {
             label: "Fill",
             defaultValue: "#000000",
             triggerUpdate: true,
-        }, {})
+        }, {});
         ui.addColorPicker({
             componentId: "stroke",
             label: "Stroke",
             defaultValue: "#00000000",
             triggerUpdate: true,
-        }, {})
+        }, {});
+        ui.addSlider({
+            componentId: "strokeWidth",
+            label: "Stroke Width",
+            defaultValue: 0,
+            triggerUpdate: true,
+        }, { min: 0, max: 100, set: 0.1 });
 
         addTweakability(ui);
 
@@ -330,7 +336,174 @@ const nodes = {
                             fillAlpha: colorHexToAlpha(uiInput["fill"]),
                             stroke: colorHexToNumber(uiInput["stroke"]),
                             strokeAlpha: colorHexToAlpha(uiInput["stroke"]),
-                            strokeWidth: 1,
+                            strokeWidth: uiInput["strokeWidth"],
+                        }
+                    ]
+                }
+            }
+
+            return { res: canvas };
+        });
+
+        nodeBuilder.setUI(ui);
+
+        nodeBuilder.addInput("Blink matrix", "transform", "Transform");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
+    "inputText": (context) => {
+        const nodeBuilder = context.instantiate(context.pluginId, "inputText");
+        nodeBuilder.setTitle("Blink Text");
+        nodeBuilder.setDescription("Input a Blink Text element");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addTextInput({
+            componentId: "text",
+            label: "Text",
+            defaultValue: "input text",
+            triggerUpdate: true,
+        }, {});
+
+        ui.addDropdown({
+            componentId: "fontFamily",
+            label: "Family",
+            defaultValue: "Arial",
+            triggerUpdate: true,
+        }, {
+          options: {
+            "Arial": "Arial",
+            "Consolas": "Consolas",
+            "Courier New": "Courier New",
+            "Georgia": "Georgia",
+            "Helvetica": "Helvetica",
+            "Impact": "Impact",
+            "Times New Roman": "Times New Roman",
+            "Trebuchet MS": "Trebuchet MS",
+            "Verdana": "Verdana",
+          }
+        });
+
+        ui.addNumberInput({
+            componentId: "fontSize",
+            label: "Size",
+            defaultValue: 24,
+            triggerUpdate: true,
+        }, { step: 0.2, min: 0 });
+
+        ui.addDropdown({
+            componentId: "fontStyle",
+            label: "Style",
+            defaultValue: "normal",
+            triggerUpdate: true,
+        }, {
+          options: {
+            "Normal": "normal",
+            "Italic": "italic",
+          }
+        });
+        ui.addDropdown({
+            componentId: "fontWeight",
+            label: "Weight",
+            defaultValue: "normal",
+            triggerUpdate: true,
+        }, {
+          options: {
+            "Normal": "normal",
+            "Bold": "bold",
+          }
+        });
+        ui.addDropdown({
+            componentId: "textAlign",
+            label: "Align",
+            defaultValue: "center",
+            triggerUpdate: true,
+        }, {
+          options: {
+            "Left": "left",
+            "Center": "center",
+            "Right": "right"
+          }
+        });
+        ui.addDropdown({
+            componentId: "textBaseline",
+            label: "Baseline",
+            defaultValue: "top",
+            triggerUpdate: true,
+        }, {
+          options: {
+              "Top": "top",
+              "Hanging": "hanging",
+              "Middle": "middle",
+              "Alphabetic": "alphabetic",
+              "Ideographic": "ideographic",
+              "Bottom": "bottom",
+          }
+        });
+        for (let numInp of ["width", "height"]) {
+            ui.addNumberInput(
+                {
+                    componentId: numInp.replace(" ", ""),
+                    label: numInp[0].toUpperCase() + numInp.slice(1),
+                    defaultValue: 100,
+                    triggerUpdate: true,
+                },
+                {}
+            );
+        }
+        const getTransform = addTransformInput(ui, ["position", "rotation"]);
+
+        ui.addColorPicker({
+            componentId: "fill",
+            label: "Fill",
+            defaultValue: "#000000",
+            triggerUpdate: true,
+        }, {});
+        ui.addColorPicker({
+            componentId: "stroke",
+            label: "Stroke",
+            defaultValue: "#00000000",
+            triggerUpdate: true,
+        }, {});
+        ui.addSlider({
+            componentId: "strokeWidth",
+            label: "Stroke Width",
+            defaultValue: 0,
+            triggerUpdate: true,
+        }, { min: 0, max: 100, set: 0.1 });
+
+        addTweakability(ui);
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            const canvas = {
+                assets: {
+                    "1": {
+                      class: "asset",
+                      type: "image",
+                      data: "media/bird.png",
+                    },
+                },
+                content: {
+                    class: "clump",
+                    nodeUUID: uiInput["tweaks"].nodeUUID,
+                    changes: uiInput["diffs"]?.uiInputs ?? [],
+                    transform: getTransform(uiInput),
+                    elements: [
+                        {
+                            class: "atom",
+                            type: "text",
+
+                            text: uiInput["text"],
+
+                            fill: colorHexToNumber(uiInput["fill"]),
+                            stroke: colorHexToNumber(uiInput["stroke"]),
+                            strokeWidth: uiInput["strokeWidth"],
+                            alpha: colorHexToAlpha(uiInput["fill"]),
+
+                            fontSize: uiInput["fontSize"],
+                            fontFamily: uiInput["fontFamily"],
+                            fontStyle: uiInput["fontStyle"],
+                            fontWeight: uiInput["fontWeight"],
+                            textAlign: uiInput["textAlign"],
+                            textBaseline: uiInput["textBaseline"],
                         }
                     ]
                 }

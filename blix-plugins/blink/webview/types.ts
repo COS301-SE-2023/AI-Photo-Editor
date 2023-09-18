@@ -22,7 +22,7 @@ export type BlinkCanvas = {
 
 export type Asset = {
   class: "asset";
-  type: "image" | "text" | "blob";
+  type: "image" | "blob";
   data: any;
 };
 
@@ -120,9 +120,8 @@ export type TextAtom = {
   text: string;
 
   fill: number;
-  fillAlpha: number;
   stroke: number;
-  strokeAlpha: number;
+  alpha: number;
   strokeWidth: number;
   fontSize: number;
   fontFamily: string;
@@ -192,9 +191,8 @@ export const canvas1: BlinkCanvas = {
             nodeUUID: "d",
 
             fill: 0x0000ff,
-            fillAlpha: 1,
             stroke: 0x00ff00,
-            strokeAlpha: 1,
+            alpha: 1,
             strokeWidth: 5,
             fontSize: 20,
             fontFamily: "Arial",

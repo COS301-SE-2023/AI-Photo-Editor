@@ -60,19 +60,43 @@ export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key:
       shape.endFill();
 
       shapeContainer.addChild(shape);
-
       shapeContainer.name = `ShapeContainer(${randomId()})`;
+
       return { pixiAtom: shapeContainer, changed: true };
 
     case "text":
       const textDiff = atomsDiffer || diffTextAtom(atom, prevAtom as TextAtom);
-      if (!textDiff) return { pixiAtom: prevAtom.container, changed: false };
+      if (!textDiff) {
+        return { pixiAtom: prevAtom.container, changed: false };
+      }
 
-      return { pixiAtom: null, changed: true };
+      const textContainer = new PIXI.Container();
+      const text = new PIXI.Text(atom.text, {
+        fill: atom.fill,
+        stroke: atom.stroke,
+        strokeThickness: atom.strokeWidth,
+
+        fontFamily: atom.fontFamily,
+        fontSize: atom.fontSize,
+        fontStyle: atom.fontStyle,
+        fontWeight: atom.fontWeight,
+
+        align: atom.textAlign,
+        textBaseline: atom.textBaseline,
+      });
+
+      textContainer.addChild(text);
+      textContainer.name = `TextContainer(${randomId()})`;
+
+      textContainer.alpha = atom.alpha;
+
+      return { pixiAtom: textContainer, changed: true };
 
     case "paint":
       const paintDiff = atomsDiffer || diffPaintAtom(atom, prevAtom as PaintAtom);
-      if (!paintDiff) return { pixiAtom: prevAtom.container, changed: false };
+      if (!paintDiff) {
+        return { pixiAtom: prevAtom.container, changed: false };
+      }
 
       return { pixiAtom: null, changed: true };
   }
