@@ -162,5 +162,12 @@ describe("Test AI Manager", () => {
         expect(result).toBe("");
     });
 
+    // test("Test handle api error response", () => {
+
+    //     const result = aiManager["handleApiErrorResponse"]("test","OpenAI");
+    //     expect(result).toBeDefined();
+    //     expect(result).toBe("test");
+    // });
+
 
   });

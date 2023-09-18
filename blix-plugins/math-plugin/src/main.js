@@ -1,47 +1,47 @@
-const nodes ={
+const nodes = {
     "unary": (context) => {
-        nodeBuilder = context.instantiate("math-plugin","unary");
+        const nodeBuilder = context.instantiate("math-plugin","unary");
         nodeBuilder.setTitle("Unary");
         nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output,such as root, negate or square");
 
         // (anchorInputs: { [key: AnchorId]: any }, uiInputs: { [key: UIComponentId]: any }) => { [key: AnchorId]: any }
         nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {
-          const state = Math.min(uiInputs?.state ?? 0, 7);
-          switch (state) {
-            case 0: return { res: Math.pow(anchorInputs.num, 2) };
-            case 1: return { res: Math.sqrt(anchorInputs.num)   };
-            case 2: return { res: Math.abs(anchorInputs.num)    };
-            case 3: return { res: factorial(anchorInputs.num)   };
-            case 4: return { res: -anchorInputs.num             };
-            case 5: return { res: Math.sin(anchorInputs.num)    };
-            case 6: return { res: Math.cos(anchorInputs.num)    };
-            case 7: return { res: Math.tan(anchorInputs.num)    };
+          const operator = uiInputs?.operator || "square";
+          switch (operator) {
+            case "square": return { res: Math.pow(anchorInputs.num, 2)     };
+            case "square_root": return { res: Math.sqrt(anchorInputs.num)  };
+            case "absolute": return { res: Math.abs(anchorInputs.num)      };
+            case "factorial": return { res: factorial(anchorInputs.num)    };
+            case "negate": return { res: -anchorInputs.num                 };
+            case "sine": return { res: Math.sin(anchorInputs.num)          };
+            case "cosine": return { res: Math.cos(anchorInputs.num)        };
+            case "tangent": return { res: Math.tan(anchorInputs.num)       };
           }
         });
 
         const ui = nodeBuilder.createUIBuilder();
         ui.addDropdown({
-            componentId: "state",
-            label: "State",
-            defaultValue: 0,
+            componentId: "operation",
+            label: "Operation",
+            defaultValue: "square",
             updateBackend: true,
         }, {
           options: {
-            "Square": 0,
-            "Square Root": 1,
-            "Absolute": 2,
-            "Factorial": 3,
-            "Negate": 4,
-            "Sine": 5,
-            "Cosine": 6,
-            "Tangent": 7
+            "Square": "square",
+            "Square Root": "square_root",
+            "Absolute": "absolute",
+            "Factorial": "factorial",
+            "Negate": "negate",
+            "Sine": "sine",
+            "Cosine": "cosine",
+            "Tangent": "tangent"
           }
         });
 
         nodeBuilder.setUI(ui);
 
-        nodeBuilder.addInput("Number", "num","Num");
-        nodeBuilder.addOutput("Number", "res","Result");
+        nodeBuilder.addInput("number", "num","Num");
+        nodeBuilder.addOutput("number", "res","Result");
     },
     "binary": (context) => {
         const nodeBuilder = context.instantiate("math-plugin", "binary");
@@ -49,45 +49,45 @@ const nodes ={
         nodeBuilder.setDescription("Performs Binary math operations taking two number inputs and returning one number output");
       
         nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {
-          const state = Math.min(uiInputs?.state ?? 0, 7);
+          const operator = uiInputs?.operator || "add";
           const num1 = anchorInputs.num1 ?? 0;
           const num2 = anchorInputs.num2 ?? 0;
-          switch (state) {
-            case 0: return { res: num1 + num2           }
-            case 1: return { res: num1 - num2           }
-            case 2: return { res: num1 * num2           }
-            case 3: return { res: num1 / num2           }
-            case 4: return { res: Math.pow(num1, num2)  }
-            case 5: return { res: num1 % num2           }
-            case 6: return { res: Math.max(num1, num2)  }
-            case 7: return { res: Math.min(num1, num2)  }
+          switch (operator) {
+            case "add": return { res: num1 + num2             }
+            case "subtract": return { res: num1 - num2        }
+            case "multiply": return { res: num1 * num2        }
+            case "divide": return { res: num2 === 0 ? 0 : num1 / num2 }
+            case "power": return { res: Math.pow(num1, num2)  }
+            case "modulo": return { res: num1 % num2          }
+            case "max": return { res: Math.max(num1, num2)    }
+            case "min": return { res: Math.min(num1, num2)    }
           }
         });
 
         const ui = nodeBuilder.createUIBuilder();
         ui.addDropdown({
-            componentId: "state",
-            label: "State",
-            defaultValue: 0,
+            componentId: "operator",
+            label: "Operator",
+            defaultValue: "add",
             updateBackend: true,
         }, {
           options: {
-            "Add": 0,
-            "Subtract": 1,
-            "Multiply": 2,
-            "Divide": 3,
-            "Power": 4,
-            "Modulo": 5,
-            "Max": 6,
-            "Min": 7
+            "Add": "add",
+            "Subtract": "subtract",
+            "Multiply": "multiply",
+            "Divide": "divide",
+            "Power": "power",
+            "Modulo": "modulo",
+            "Max": "max",
+            "Min": "min"
           }
         });
 
         nodeBuilder.setUI(ui);
       
-        nodeBuilder.addInput("Number", "num1", "Num1");
-        nodeBuilder.addInput("Number", "num2", "Num2");
-        nodeBuilder.addOutput("Number", "res", "Result");
+        nodeBuilder.addInput("number", "num1", "Num1");
+        nodeBuilder.addInput("number", "num2", "Num2");
+        nodeBuilder.addOutput("number", "res", "Result");
       },
     // "ternary": (context) => {
     //     nodeBuilder = context.instantiate("math-plugin","ternary");
@@ -96,10 +96,10 @@ const nodes ={
     //         return { "res" : data.input[0] + data.input[1] + data.input[2] }[data.from];
     //     });
 
-    //   nodeBuilder.addInput("Number","num1", "Num");
-    //   nodeBuilder.addInput("Number","num2", "Num");
-    //   nodeBuilder.addInput("Number","num3", "Num");
-    //   nodeBuilder.addOutput("Number","res", "Num");
+    //   nodeBuilder.addInput("number","num1", "Num");
+    //   nodeBuilder.addInput("number","num2", "Num");
+    //   nodeBuilder.addInput("number","num3", "Num");
+    //   nodeBuilder.addOutput("number","res", "Num");
     // }
 }
 
@@ -107,7 +107,78 @@ const nodes ={
 const commands = {}
 
 
-const tiles = {}
+const tiles = {
+    "test": (context) => {
+
+        tileBuilder = context.instantiate("math-plugin", "Math Tile");
+        tileBuilder.setTitle("Math Tile");
+        tileBuilder.setDescription("");
+        tileBuilder.addIcon("faCode");
+
+
+        tile1 = tileBuilder.createUIBuilder();
+        tile1.addSidebar("right");
+        tile1.sidebar.addButton(
+          {
+            componentId: "export",
+            label: "Export",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        );
+
+        tile1.sidebar.addButton(
+          {
+            componentId: "test",
+            label: "Test",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        );
+        tile1.sidebar.addButton(
+          {
+            componentId: "test2",
+            label: "Stop",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        );
+
+        tile2 = tileBuilder.createUIBuilder();
+        tile2.addSidebar("left");
+        tile2.addStatusbar("top");
+        tile2.sidebar.addButton(
+          {
+            componentId: "test1",
+            label: "Test",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        );
+
+        tile3 = tileBuilder.createUIBuilder();
+        tile3.addStatusbar("bottom");
+        tile3.statusbar.addButton(
+          {
+            componentId: "test",
+            label: "Test",
+            defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+          },
+          {}
+        )
+
+        tile2.addLayout(tile3);
+        tile1.addLayout(tile2);
+
+
+        tileBuilder.setUI(tile1);
+    },
+}
 
 module.exports = {
     nodes,

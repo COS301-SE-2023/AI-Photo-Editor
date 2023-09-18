@@ -2,12 +2,12 @@
   import { NodeUILeaf, type NodeUI, type UIComponentConfig } from "@shared/ui/NodeUITypes";
   import type { UIValueStore } from "@shared/ui/UIGraph";
   import NodeUiComponent from "./NodeUIComponent.svelte";
-  // import { writable } from "svelte/store";
-  // import { ColorPicker, RadioGroup, type CSSColorString } from "blix_svelvet";
 
   export let ui: NodeUI | null = null;
   export let inputStore: UIValueStore;
   export let uiConfigs: { [key: string]: UIComponentConfig };
+  // const dispatch = createEventDispatcher();
+  // export let nodeId: UUID;
 
   // const colorPicker = writable("red" as CSSColorString);
   // const radio = writable("a");
@@ -25,7 +25,12 @@
     <ul>
       {#each ui.params as child}
         <li class="component">
-          <svelte:self inputStore="{inputStore}" ui="{child}" uiConfigs="{uiConfigs}" />
+          <svelte:self
+            on:inputInteraction
+            inputStore="{inputStore}"
+            ui="{child}"
+            uiConfigs="{uiConfigs}"
+          />
         </li>
       {/each}
     </ul>
@@ -35,6 +40,7 @@
         inputStore="{inputStore}"
         leafUI="{toLeafRepresentation(ui)}"
         uiConfigs="{uiConfigs}"
+        on:inputInteraction
       />
     </p>
   {/if}

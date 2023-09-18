@@ -1,5 +1,5 @@
 import type { Registry } from "./Registry";
-import type { ICommand } from "../../../shared/types";
+import type { ICommand, CommandResponse } from "../../../shared/types/index";
 import { Blix } from "../Blix";
 
 export type CommandContext = Blix;
@@ -10,7 +10,7 @@ export interface Command {
   description?: CommandDescription | null;
 }
 
-export type CommandHandler = (ctx: CommandContext, params?: any) => void;
+export type CommandHandler = (ctx: CommandContext, params?: any) => Promise<CommandResponse>;
 
 export interface CommandDescription {
   readonly name: string;
@@ -56,13 +56,13 @@ export class CommandRegistry implements Registry {
     return commands;
   }
 
-  async runCommand(id: string, params?: any) {
+  async runCommand(id: string, params?: any): Promise<CommandResponse> {
     const command = this.registry[id];
 
     if (!command) {
       throw Error("Invalid Command");
     }
 
-    return command.handler(this.blix, params);
+    return await command.handler(this.blix, params);
   }
 }

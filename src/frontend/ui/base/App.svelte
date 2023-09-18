@@ -12,6 +12,7 @@
   import Settings from "./Settings.svelte";
   import Shortcuts from "../../ui/utils/Shortcuts.svelte";
   import { settingsStore } from "../../lib/stores/SettingsStore";
+  import { confetti } from "@neoconfetti/svelte";
 
   const testing = false;
   let showSettings = false;
@@ -35,11 +36,13 @@
   });
 </script>
 
+<!-- <div class="fixed top-0 right-0" use:confetti={{ particleCount: 200, force: 0.6, stageHeight: window.innerHeight - 20 }} /> -->
+
 {#if $blixStore.blixReady && testing}
   <Test />
 {:else if !$blixStore.blixReady && testing}
   <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
-    <span class="text-5xl text-purple-400">Loading</span>
+    <!-- <span class="text-5xl text-purple-400">Loading</span> -->
   </div>
   <div></div>
 {:else if $blixStore.blixReady}
@@ -55,12 +58,14 @@
     <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
       <Navbar />
     </div>
-    <div class="layout"><Layout /></div>
+    <div class="layout">
+      <Layout />
+    </div>
     <Palette />
   </div>
 {:else}
   <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
-    <span class="text-5xl text-purple-400">Loading</span>
+    <!-- <span class="text-5xl text-purple-400">Loading</span> -->
   </div>
   <div></div>
 {/if}

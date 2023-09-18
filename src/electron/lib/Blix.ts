@@ -1,11 +1,13 @@
 import { CommandRegistry } from "./registries/CommandRegistry";
 import { ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
+import { TypeclassRegistry } from "./registries/TypeclassRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
 import type { MainWindow } from "./api/apis/WindowApi";
 import { CoreGraphManager } from "./core-graph/CoreGraphManager";
 import { CoreGraphInterpreter } from "./core-graph/CoreGraphInterpreter";
 import { PluginManager } from "./plugins/PluginManager";
+import { CacheManager } from "./cache/CacheManager";
 import {
   CoreGraphUpdateEvent,
   IPCGraphSubscriber,
@@ -18,7 +20,7 @@ import type { UUID } from "../../shared/utils/UniqueEntity";
 import type { GraphMetadata, UIGraph } from "../../shared/ui/UIGraph";
 import { blixCommands } from "./BlixCommands";
 import logger from "../utils/logger";
-import { AiManager } from "./ai/AiManager";
+import { AiManager } from "./ai/AiManagerv2";
 // import { testStuffies } from "./core-graph/CoreGraphTesting";
 import { NodeBuilder, NodeUIBuilder } from "./plugins/builders/NodeBuilder";
 import type { MediaOutput } from "../../shared/types/media";
@@ -26,6 +28,7 @@ import { MediaManager } from "./media/MediaManager";
 import { CoreGraph } from "./core-graph/CoreGraph";
 import { MediaSubscriber } from "./media/MediaSubscribers";
 import type { IGraphUIInputs } from "../../shared/types";
+import { CoreProject } from "./projects/CoreProject";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -33,7 +36,9 @@ export class Blix {
   private _toolboxRegistry!: ToolboxRegistry;
   private _tileRegistry: TileRegistry;
   private _commandRegistry: CommandRegistry;
+  private _typeclassRegistry: TypeclassRegistry;
   private _graphManager!: CoreGraphManager;
+  private _cacheManager!: CacheManager;
   private _projectManager!: ProjectManager;
   private _pluginManager!: PluginManager;
   private _mainWindow!: MainWindow;
@@ -51,7 +56,9 @@ export class Blix {
   constructor() {
     // this.startTime = new Date();
     this._commandRegistry = new CommandRegistry(this);
-    this._tileRegistry = new TileRegistry();
+    this._tileRegistry = new TileRegistry(this);
+    this._typeclassRegistry = new TypeclassRegistry(this);
+    this._cacheManager = new CacheManager();
   }
 
   /**
@@ -69,21 +76,21 @@ export class Blix {
     // Create Output node
     const outputNodeBuilder = new NodeBuilder("blix", "output");
     const outputUIBuilder = outputNodeBuilder.createUIBuilder();
-    outputUIBuilder.addButton(
-      {
-        componentId: "export",
-        label: "Export",
-        defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
-        updatesBackend: false,
-      },
-      {}
-    );
+    // outputUIBuilder.addButton(
+    //   {
+    //     componentId: "export",
+    //     label: "Export",
+    //     defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+    //     triggerUpdate: false,
+    //   },
+    //   {}
+    // );
     outputUIBuilder.addTextInput(
       {
         componentId: "outputId",
         label: "Export",
         defaultValue: "default", // TODO: Make this a random id to start with
-        updatesBackend: true,
+        triggerUpdate: true,
       },
       {}
     );
@@ -124,7 +131,11 @@ export class Blix {
     this._graphManager = new CoreGraphManager(this._toolboxRegistry, mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
 
-    this._mediaManager = new MediaManager(mainWindow, this._graphInterpreter, this._graphManager);
+    this._mediaManager = new MediaManager(
+      this._typeclassRegistry,
+      this._graphInterpreter,
+      this._graphManager
+    );
 
     this.initSubscribers();
     this._isReady = true;
@@ -135,14 +146,15 @@ export class Blix {
 
   private initSubscribers() {
     // ===== CORE GRAPH SUBSCRIBERS ===== //
-    // Subscribes to graph updates and alerts the frontend
+    // ----- Subscribes to graph updates and alerts the frontend -----
     const ipcGraphSubscriber = new IPCGraphSubscriber();
     ipcGraphSubscriber.listen = (graphId: UUID, newGraph: UIGraph) => {
       this.mainWindow?.apis.graphClientApi.graphChanged(graphId, newGraph);
+      this.updateProjectState(graphId, false);
     };
     this._graphManager.addAllSubscriber(ipcGraphSubscriber);
 
-    // Subscribes to backend UI input updates and alerts the frontend
+    // ----- Subscribes to backend UI input updates and alerts the frontend -----
     const ipcUIInputsSubscriber = new UIInputsGraphSubscriber();
     ipcUIInputsSubscriber.setListenEvents([CoreGraphUpdateEvent.uiInputsUpdated]);
     ipcUIInputsSubscriber.setListenParticipants([
@@ -155,7 +167,17 @@ export class Blix {
     };
     this._graphManager.addAllSubscriber(ipcUIInputsSubscriber);
 
-    // Subscribes to all updates and alerts the media manager
+    // ----- Subscribes to backend UI input updates and alerts the frontend -----
+    const ipcGravityAISubsriber = new IPCGraphSubscriber();
+    ipcGravityAISubsriber.setListenEvents([CoreGraphUpdateEvent.graphUpdated]);
+    ipcGravityAISubsriber.setListenParticipants([CoreGraphUpdateParticipant.ai]);
+
+    ipcGravityAISubsriber.listen = (graphId: UUID) => {
+      this.mainWindow?.apis.graphClientApi.aiChangedGraph(graphId);
+    };
+    this._graphManager.addAllSubscriber(ipcGravityAISubsriber);
+
+    // ----- Subscribes to all updates and alerts the media manager -----
     const mediaSubscriber = new SystemGraphSubscriber();
     mediaSubscriber.setListenEvents([
       CoreGraphUpdateEvent.graphUpdated,
@@ -164,6 +186,7 @@ export class Blix {
     mediaSubscriber.listen = (graphId: UUID, newGraph: CoreGraph) => {
       // this._graphInterpreter.run(this._graphManager.getGraph(graphId));
       this._mediaManager.onGraphUpdated(graphId);
+      this.updateProjectState(graphId, false);
     };
     this._graphManager.addAllSubscriber(mediaSubscriber);
 
@@ -186,6 +209,13 @@ export class Blix {
     //   this.mainWindow?.apis.mediaClientApi.outputChanged(media);
     // };
     // this._mediaManager.addSubscriber("default", ipcMediaSubscriber);
+  }
+
+  updateProjectState(graphUUID: UUID, newState: boolean) {
+    const project = this._projectManager.getRelatedProject(graphUUID);
+    if (project) {
+      this._projectManager.setProjectSaveState(project.uuid, newState);
+    }
   }
 
   // TODO: Move these to a Utils.ts or something like that
@@ -215,6 +245,10 @@ export class Blix {
 
   get commandRegistry(): CommandRegistry {
     return this._commandRegistry;
+  }
+
+  get typeclassRegistry(): TypeclassRegistry {
+    return this._typeclassRegistry;
   }
 
   get graphManager(): CoreGraphManager {

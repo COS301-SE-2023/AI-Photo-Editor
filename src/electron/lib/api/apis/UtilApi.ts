@@ -2,10 +2,20 @@ import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { platform, type, release } from "os";
 import logger from "../../../utils/logger";
-import settings, { getSecret } from "../../../utils/settings";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
-import { getSecrets, setSecret, clearSecret } from "../../../utils/settings";
+import {
+  getSecrets,
+  setSecret,
+  clearSecret,
+  getRecentProjects,
+  settings,
+  getSecret,
+  type Settings,
+} from "../../../utils/settings";
 import type { Setting, UserSettingsCategory, QueryResponse } from "../../../../shared/types";
+import { type ChatModel } from "../../../lib/ai/Model";
+// import dotenv from "dotenv";
+// dotenv.config();
 
 // Exposes basic system information
 export class UtilApi implements ElectronMainApi<UtilApi> {
@@ -29,12 +39,41 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     };
   }
 
-  async sendPrompt(prompt: string, id: UUID) {
-    if (this.blix.graphManager.getGraph(id)) {
-      const res = await this.blix.aiManager.sendPrompt(prompt, id);
-    } else {
-      this.blix.sendWarnMessage("No graph selected");
+  async sendPrompt(prompt: string, id: UUID): Promise<QueryResponse> {
+    if (!prompt) {
+      return {
+        status: "error",
+        message: "Prompt is empty",
+      };
     }
+
+    if (!this.blix.graphManager.getGraph(id)) {
+      return {
+        status: "error",
+        message: "No graph selected",
+      };
+    }
+
+    const response = await this.blix.aiManager.executePrompt({
+      prompt,
+      graphId: id,
+      // model: "PaLM-Chat",
+      // apiKey: process.env.PALM_API_KEY || "",
+      model: settings.get("model") as ChatModel,
+      apiKey: getSecret("OPENAI_API_KEY"),
+    });
+
+    if (!response.success) {
+      return {
+        status: "error",
+        message: response.message,
+      };
+    }
+
+    return {
+      status: "success",
+      message: response.message,
+    };
   }
 
   // Add something extra validation
@@ -42,15 +81,14 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     for (const setting of newSettings) {
       if (setting.secret) {
         setSecret(setting.id, setting.value.toString());
-      } else {
-        settings.set(setting.value.toString(), setting.value);
-      }
+      } else settings.set(setting.id, setting.value);
     }
+
     return { status: "success" };
   }
 
   // This will have to be cleaned up later. Kinda a temp implementation rn
-  async getUserSettings(): Promise<QueryResponse<UserSettingsCategory[]>> {
+  async getUserSettings() {
     // const secrets = getSecrets();
 
     const userSettings: UserSettingsCategory[] = [
@@ -66,11 +104,32 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
             secret: true,
             value: getSecret("OPENAI_API_KEY"),
           },
+          {
+            id: "model",
+            title: "Open AI Model",
+            type: "dropdown",
+            value: settings.get("model"),
+            options: ["GPT-4", "GPT-3.5"],
+          },
+        ],
+      },
+      {
+        id: "keybind_settings",
+        title: "Keybindings",
+        settings: [
+          {
+            id: "Keybindings",
+            title: "Keybindings",
+            subtitle: "Customize your keybindings",
+            type: "preferences",
+            secret: false,
+            value: settings.get("Keybindings"),
+          },
         ],
       },
     ];
 
-    return { status: "success", data: userSettings };
+    return { status: "success", data: userSettings } satisfies QueryResponse;
   }
 
   /**
@@ -103,5 +162,13 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
       logger.info(e);
       this.blix.sendErrorMessage(`There was an error removing your ${key} setting.`);
     }
+  }
+
+  async saveState<T>(key: keyof Settings, value: T) {
+    settings.set(key, value);
+  }
+
+  async getState<T>(key: string): Promise<T> {
+    return settings.get(key);
   }
 }

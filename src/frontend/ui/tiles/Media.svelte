@@ -5,11 +5,12 @@
   import { mediaStore } from "../../lib/stores/MediaStore";
   import type { GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
   import { writable, type Readable } from "svelte/store";
-  import type { MediaOutput } from "@shared/types/media";
+  import type { MediaDisplayType, DisplayableMediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
   import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
   import SelectionBox from "../utils/graph/SelectionBox.svelte";
   import { type SelectionBoxItem } from "../../types/selection-box";
+  import WebView from "./WebView.svelte";
 
   const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
 
@@ -25,25 +26,25 @@
   let oldMediaId: string | null = null;
 
   const unsubMedia = mediaId.subscribe((newMediaId) => {
-    console.log("SUBSCRIBE MEDIA ID", oldMediaId, newMediaId);
+    // console.log("SUBSCRIBE MEDIA ID", oldMediaId, newMediaId);
     connectNewMedia(oldMediaId, newMediaId);
     oldMediaId = newMediaId;
   });
 
+  // TODO: Add toggle that auto-switches media to the last selected output node
   let selectedNode: { graphUUID: GraphUUID; outNode: GraphNodeUUID } | null;
-  let media: Readable<MediaOutput | null>;
+  let media: Readable<DisplayableMediaOutput | null>;
 
   async function connectNewMedia(oldMediaId: string | null, mediaId: string) {
     if (oldMediaId !== null) {
-      console.log("STOPPING OLD", oldMediaId);
+      // console.log("STOPPING OLD", oldMediaId);
       await mediaStore.stopMediaReactive(oldMediaId);
     }
     media = await mediaStore.getMediaReactive(mediaId);
-    console.log("CONNECT NEW MEDIA", mediaId, media);
+    // console.log("CONNECT NEW MEDIA", mediaId, media);
   }
 
   onDestroy(async () => {
-    console.log("ON DESTROY");
     await mediaStore.stopMediaReactive($mediaId);
     unsubMedia();
   });
@@ -63,47 +64,38 @@
     }
   }
 
-  type MediaDisplay = {
-    component: any;
-    props: (data: any) => { [key: string]: any };
-  };
-  const dataTypeToMediaDisplay: { [key: string]: MediaDisplay } = {
-    [""]: {
-      component: TextBox,
-      props: (_data: any) => ({ content: "NO INPUT", status: "warning" }),
-    },
-    Image: {
-      component: Image,
-      props: (data: string) => ({ src: data }),
-    },
-    Number: {
-      component: TextBox,
-      props: (data: number) => ({
-        content: data?.toString() || "NULL",
-        status: data == null ? "warning" : "normal",
-        fontSize: "large",
-      }),
-    },
-    boolean: {
-      component: TextBox,
-      props: (data: number) => ({
-        content: data?.toString() || "NULL",
-        status: data == null ? "warning" : "normal",
-        fontSize: "large",
-      }),
-    },
-    string: {
-      component: TextBox,
-      props: (data: string) => ({ content: data }),
-    },
-    color: {
-      component: ColorDisplay,
-      props: (data: string) => ({ color: data }),
-    },
-    Error: {
-      component: TextBox,
-      props: (data: string) => ({ content: data, status: "error" }),
-    },
+  function getDisplayProps(media: DisplayableMediaOutput) {
+    let res = media.display.props;
+    if (media.display.contentProp !== null) res[media.display.contentProp] ??= media.content; // If content nullish, use default value
+    return res;
+  }
+
+  // async function getDisplay(id: TypeclassId) {
+  //   const value = null;
+  //   return await window.apis.typeclassApi.getMediaDisplay(id, value);
+  // }
+
+  // type MediaDisplay = {
+  //   component: any;
+  //   props: (data: any) => { [key: string]: any };
+  // };
+  // const dataTypeToMediaDisplay: { [key: string]: MediaDisplay } = {
+  //   [""]: { component: TextBox, props: (_data: any) => ({ content: "NO INPUT", status: "warning" }), },
+  //   Image: { component: Image, props: (data: string) => ({ src: data }), },
+  //   Number: { component: TextBox, props: (data: number) => ({ content: data?.toString() || "NULL", status: data == null ? "warning" : "normal", fontSize: "large", }),
+  //   }, boolean: { component: TextBox, props: (data: number) => ({ content: data?.toString() || "NULL", status: data == null ? "warning" : "normal", fontSize: "large", }), },
+  //   string: { component: TextBox, props: (data: string) => ({ content: data }), },
+  //   color: { component: ColorDisplay, props: (data: string) => ({ color: data }), },
+  //   Error: { component: TextBox, props: (data: string) => ({ content: data, status: "error" }), },
+  //   ["GLFX image"]: { component: WebView, props: (data: string) => ({ media: data }), },
+  //   ["Pixi image"]: { component: WebView, props: (data: string) => ({ media: data }), },
+  // };
+
+  const displayIdToSvelteConstructor: { [key in MediaDisplayType]: any } = {
+    image: Image,
+    textbox: TextBox,
+    colorDisplay: ColorDisplay,
+    webview: WebView,
   };
 </script>
 
@@ -144,16 +136,14 @@
 
   <div class="media">
     {#if $media}
-      {@const display = dataTypeToMediaDisplay[$media.dataType]}
-      {#if display}
-        <svelte:component this="{display.component}" {...display.props($media.content)} />
-      {:else}
-        {@const errorDisplay = dataTypeToMediaDisplay["Error"]}
-        <svelte:component
-          this="{errorDisplay.component}"
-          {...errorDisplay.props(`ERROR: Unknown data type: ${JSON.stringify($media)}`)}
-        />
-      {/if}
+      <svelte:component
+        this="{displayIdToSvelteConstructor[$media.display.displayType]}"
+        {...getDisplayProps($media)}
+      />
+      <!-- <TextBox
+          content="ERROR: Unknown data type: ${JSON.stringify($media)}"
+          status="error"
+        /> -->
       <!-- <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" /> -->
     {:else}
       <div class="placeholder">NO CONTENT</div>
@@ -171,13 +161,8 @@
   }
 
   .media {
-    position: absolute;
-    left: 50%;
-    top: 40%;
-    transform: translate(-50%, -50%);
     width: 100%;
-    margin: auto;
-    height: auto;
+    height: 100%;
     text-align: center;
   }
 

@@ -4,6 +4,7 @@
   import SecureInput from "../../ui/utils/SecureInput.svelte";
   import { toastStore } from "./../../lib/stores/ToastStore";
   import { settingsStore } from "../../lib/stores/SettingsStore";
+  import ShortcutSettings from "../../ui/tiles/ShortcutSettings.svelte";
 
   let selectedCategoryId = "";
   let selectedCategory: UserSettingsCategory | undefined;
@@ -17,9 +18,11 @@
       categories = res.data;
       selectedCategoryId = categories.length ? categories[0].id : "";
     }
+    // console.log(categories)
   });
 
   async function saveSettings(settings: Setting[]) {
+    // console.log(settings)
     const res = await window.apis.utilApi.saveUserSettings(settings);
 
     if (res.status === "success") {
@@ -84,10 +87,12 @@
           and maintained securely and solely within the confines of your own device.
         </div>
         {#each selectedCategory.settings as item (item.id)}
-          <div>
+          <div class="pb-3">
             <label for="{item.id}" class="pb-3">
               <div class="text-normal font-semibold text-zinc-300">{item.title}</div>
-              <div class="font-ligt text-sm text-zinc-500">{item.subtitle}</div>
+              {#if item.subtitle}
+                <div class="font-ligt text-sm text-zinc-500">{item.subtitle}</div>
+              {/if}
             </label>
             {#if item.type === "password"}
               <SecureInput
@@ -95,6 +100,19 @@
                 id="{item.id}"
                 placeholder="{item.placeholder}"
               />
+            {:else if item.type === "dropdown"}
+              <select
+                bind:value="{item.value}"
+                class="h-9 rounded-md border-none bg-zinc-800/70 px-2 text-zinc-400 ring-1 ring-zinc-600 focus:outline-none"
+              >
+                {#each item.options as option}
+                  {#if item.value === option}
+                    <option value="{option}" selected>{option}</option>
+                  {:else}
+                    <option value="{option}">{option}</option>
+                  {/if}
+                {/each}
+              </select>
             {/if}
           </div>
         {/each}
@@ -107,12 +125,35 @@
         >
           Save
         </div>
-        <!-- {:else}
+      {:else if selectedCategory?.id === "keybind_settings"}
+        {#each selectedCategory.settings as item (item.id)}
+          <div>
+            <label for="{item.id}" class="pb-3">
+              <div class="text-normal font-semibold text-zinc-300">{item.title}</div>
+              <div class="font-ligt text-sm text-zinc-500">{item.subtitle}</div>
+            </label>
+            {#if item.type === "preferences"}
+              <ShortcutSettings bind:settings="{item.value}" />
+            {/if}
+          </div>
+        {/each}
+        <div
+          class="mt-12 flex h-10 w-20 cursor-pointer items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/[0.7] text-gray-300 transition duration-300 ease-in-out hover:text-zinc-500"
+          on:click="{() => {
+            if (selectedCategory) {
+              saveSettings(selectedCategory?.settings);
+            }
+          }}"
+          on:keydown="{null}"
+        >
+          Save
+        </div>
+      {:else}
         <div
           class="flex h-full w-full items-center justify-center text-xl font-semibold text-zinc-400"
         >
           <div class="coming-soon flex h-48 w-64 items-center justify-center">Coming Soon</div>
-        </div> -->
+        </div>
       {/if}
     </div>
   </div>

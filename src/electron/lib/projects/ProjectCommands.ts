@@ -7,18 +7,20 @@ import {
   type GraphToJSON,
 } from "../core-graph/CoreGraphExporter";
 import logger from "../../utils/logger";
-import { readFile, writeFile } from "fs/promises";
+import { readFile, writeFile, open } from "fs/promises";
 import type { ProjectFile } from "./CoreProject";
 import type { Command, CommandContext } from "../../lib/registries/CommandRegistry";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
-import type { LayoutPanel } from "../../../shared/types";
+import type { LayoutPanel, CommandResponse } from "../../../shared/types/index";
 import { CoreGraphImporter } from "../../lib/core-graph/CoreGraphImporter";
 import {
   CoreGraphUpdateEvent,
   CoreGraphUpdateParticipant,
 } from "../core-graph/CoreGraphInteractors";
-import sharp from "sharp";
 import type { SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
+import settings from "../../utils/settings";
+import type { recentProject } from "../../../shared/types/index";
+import { getRecentProjects } from "../../utils/settings";
 
 export type SaveProjectArgs = {
   projectId: UUID;
@@ -31,15 +33,21 @@ type ExportMedia = {
   data?: string;
 };
 
-export type CommandResponse =
-  | {
-      success: true;
-      message?: string;
+export const getRecentProjectsCommand: Command = {
+  id: "blix.projects.recent",
+  description: {
+    name: "Open recent project",
+    description: "Open a recently edited project",
+  },
+  handler: async (ctx: CommandContext) => {
+    try {
+      updateRecentProjectsList();
+      return { status: "success", data: getRecentProjects() };
+    } catch (e) {
+      return { status: "error", message: "An exception occured", data: [] };
     }
-  | {
-      success: false;
-      error?: string;
-    };
+  },
+};
 
 export const saveProjectCommand: Command = {
   id: "blix.projects.save",
@@ -49,21 +57,12 @@ export const saveProjectCommand: Command = {
   },
   handler: async (ctx: CommandContext, args: SaveProjectArgs) => {
     const result: CommandResponse = await saveProject(ctx, args);
-    switch (result.success) {
-      case true: {
-        ctx.sendSuccessMessage(result?.message ?? "");
-        break;
-      }
-      case false: {
-        ctx.sendErrorMessage(result?.error ?? "");
-        break;
-      }
+    if (result.status === "success" && result.message) {
+      ctx.sendSuccessMessage(result.message);
+    } else if (result.status === "error" && result.message) {
+      ctx.sendErrorMessage(result.message);
     }
-    // if (result.success) {
-    //   ctx.sendSuccessMessage(result?.message ?? "");
-    // } else {
-    //   ctx.sendErrorMessage(result?.error ?? "");
-    // }
+    return result;
   },
 };
 
@@ -76,21 +75,12 @@ export const saveProjectAsCommand: Command = {
   },
   handler: async (ctx: CommandContext, args: SaveProjectArgs) => {
     const result: CommandResponse = await saveProjectAs(ctx, args);
-    switch (result.success) {
-      case true: {
-        ctx.sendSuccessMessage(result?.message ?? "");
-        break;
-      }
-      case false: {
-        ctx.sendErrorMessage(result?.error ?? "");
-        break;
-      }
+    if (result.status === "success" && result.message) {
+      ctx.sendSuccessMessage(result.message);
+    } else if (result.status === "error" && result.message) {
+      ctx.sendErrorMessage(result.message);
     }
-    // if (result.success) {
-    //     // ctx.sendSuccessMessage(result?.message ?? "");
-    // } else {
-    //   ctx.sendErrorMessage(result?.error ?? "");
-    // }
+    return result;
   },
 };
 
@@ -100,7 +90,9 @@ export const openProjectCommand: Command = {
     name: "Open project...",
     description: "Save project to file system",
   },
-  handler: openProject,
+  handler: async (ctx: CommandContext, params?: recentProject) => {
+    return await (params ? openProject(ctx, params.path) : openProject(ctx));
+  },
 };
 
 export const exportMediaCommand: Command = {
@@ -111,11 +103,12 @@ export const exportMediaCommand: Command = {
   },
   handler: async (ctx: CommandContext, args: ExportMedia) => {
     const result = await exportMedia(ctx, args);
-    if (result?.success && result.message) {
+    if (result.status === "success" && result.message) {
       ctx.sendSuccessMessage(result?.message);
-    } else if (result?.error && result.error) {
-      ctx.sendErrorMessage(result.error);
+    } else if (result.status === "error" && result.message) {
+      ctx.sendErrorMessage(result.message);
     }
+    return result;
   },
 };
 
@@ -124,6 +117,7 @@ export const projectCommands: Command[] = [
   saveProjectAsCommand,
   openProjectCommand,
   exportMediaCommand,
+  getRecentProjectsCommand,
 ];
 
 // =========== Command Helpers ===========
@@ -143,11 +137,11 @@ export async function saveProject(
   ctx: CommandContext,
   args: SaveProjectArgs
 ): Promise<CommandResponse> {
-  const { projectId, layout, projectPath } = args;
+  const { projectId, projectPath } = args;
   const project = ctx.projectManager.getProject(projectId);
 
   if (!project) {
-    return { success: false, error: "Project not found" };
+    return { status: "error", message: "Project not found" };
   }
 
   let path: string | undefined = "";
@@ -165,19 +159,27 @@ export async function saveProject(
     project.location = path;
   } else if (projectPath) {
     project.location = projectPath;
+  } else if (!project.location) {
+    return { status: "error", message: "No path specified" };
+  }
+
+  if (!project.location.toString().endsWith(".blix")) {
+    // Ensure file is of correct type
+    return { status: "error", message: "Invalid file extension : " + project.location.toString() };
   }
 
   // I don't really like this, but also can't really think of a nice way to change it
   // TODO: Rename sets name as path
-  project.rename((project.location as string).split("/").pop()!.split(".blix")[0]);
-  ctx.projectManager.onProjectChanged(project.uuid);
+  project.rename(project.location.toString().split("/").pop()!.split(".blix")[0]);
+  ctx.projectManager.setProjectSaveState(project.uuid, true);
+  // ctx.projectManager.onProjectChanged(project.uuid);
 
   const graphs = project.graphs.map((g) => ctx.graphManager.getGraph(g));
   const exporter = new CoreGraphExporter<GraphToJSON>(new GraphFileExportStrategy());
   const exportedGraphs = graphs.map((g) => exporter.exportGraph(g));
 
   const projectFile: ProjectFile = {
-    layout: layout!,
+    layout: project.layout,
     graphs: exportedGraphs,
   };
 
@@ -188,8 +190,9 @@ export async function saveProject(
       logger.error(err);
     }
   }
+  updateRecentProjectsList(project.location.toString());
 
-  return { success: true, message: "Project saved successfully" };
+  return { status: "success", message: "Project saved successfully" };
 }
 
 /**
@@ -200,12 +203,15 @@ export async function saveProject(
  */
 // TODO: Fix so that it works like the save with the command params system
 
-export async function saveProjectAs(ctx: CommandContext, args: SaveProjectArgs) {
-  const { projectId, layout } = args;
+export async function saveProjectAs(
+  ctx: CommandContext,
+  args: SaveProjectArgs
+): Promise<CommandResponse> {
+  const { projectId } = args;
   const project = ctx.projectManager.getProject(projectId);
 
   if (!project) {
-    return { success: false, error: "Project not found" };
+    return { status: "error", message: "Project not found" };
   }
   const path = await showSaveDialog({
     title: "Save Project as",
@@ -213,9 +219,9 @@ export async function saveProjectAs(ctx: CommandContext, args: SaveProjectArgs) 
     filters: [{ name: "Blix Project", extensions: ["blix"] }],
     properties: ["createDirectory"],
   });
-  if (!path) return { success: false, error: "No path selected" };
+  if (!path) return { status: "error", message: "No path selected" };
   project.location = path;
-  return await saveProject(ctx, { projectId, layout, projectPath: path });
+  return saveProject(ctx, { projectId, projectPath: path });
 }
 
 /**
@@ -225,22 +231,29 @@ export async function saveProjectAs(ctx: CommandContext, args: SaveProjectArgs) 
  *
  * @returns Nothing
  */
-export async function openProject(ctx: CommandContext) {
-  const paths = await showOpenDialog({
-    title: "Import Project",
-    defaultPath: app.getPath("downloads"),
-    filters: [{ name: "Blix Project", extensions: ["blix"] }],
-    properties: ["openFile", "multiSelections"],
-  });
+export async function openProject(ctx: CommandContext, path?: string): Promise<CommandResponse> {
+  let paths: string[] = [];
 
-  if (!paths) return;
+  if (!path) {
+    const result = await showOpenDialog({
+      title: "Import Project",
+      defaultPath: app.getPath("downloads"),
+      filters: [{ name: "Blix Project", extensions: ["blix"] }],
+      properties: ["openFile", "multiSelections"],
+    });
+    if (!result) return { status: "error", message: "No project chosen" };
+    paths = result;
+  } else {
+    paths = [path];
+  }
 
   for (const path of paths) {
     const project = await readFile(path, "utf-8");
     const projectFile = JSON.parse(project) as ProjectFile;
     const projectName = path.split("/").pop()?.split(".blix")[0];
     const projectId = ctx.projectManager.loadProject(projectName!, path);
-
+    ctx.projectManager.saveProjectLayout(projectId, projectFile.layout);
+    // ctx.projectManager.getProject(projectId)!.saved = true;
     const coreGraphImporter = new CoreGraphImporter(ctx.toolbox);
 
     for (const graph of projectFile.graphs) {
@@ -249,66 +262,108 @@ export async function openProject(ctx: CommandContext) {
       ctx.projectManager.addGraph(projectId, coreGraph.uuid);
       ctx.graphManager.onGraphUpdated(
         coreGraph.uuid,
-        new Set([CoreGraphUpdateEvent.graphUpdated]),
+        new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
         CoreGraphUpdateParticipant.system
       );
     }
-
     ctx.mainWindow?.apis.projectClientApi.onProjectChanged({
       id: projectId,
+      saved: true,
       layout: projectFile.layout,
     });
+    updateRecentProjectsList(path);
   }
+
+  return { status: "success", message: "Project(s) opened successfully" };
 }
 
-export async function exportMedia(ctx: CommandContext, args: ExportMedia) {
-  if (!args) {
-    return { success: false, error: "No media selected to export" };
+export async function exportMedia(
+  ctx: CommandContext,
+  args: ExportMedia
+): Promise<CommandResponse> {
+  return { status: "success", message: "Exporting currently disabled." };
+
+  // if (!args) {
+  //   return { status: "error", message: "No media selected to export" };
+  // }
+
+  // const { type, data } = args;
+
+  // if (!data) {
+  //   return { status: "error", message: "No data was provided" };
+  // }
+
+  // if (type === "image") {
+  //   const base64Data = data.split(";base64, ");
+  //   const imgBuffer = Buffer.from(base64Data[1], "base64");
+
+  //   const path = await showSaveDialog({
+  //     title: "Export media as",
+  //     defaultPath: "blix.png",
+  //     // filters: [{ name: "Images", extensions: ["png, jpg", "jpeg"] }],
+  //     properties: ["createDirectory"],
+  //   });
+
+  //   if (!path) return { status: "error", message: "No path chosen" };
+
+  //   return { status: "success", message: "Media exported successfully" };
+  // } else if (type === "Number" || type === "color" || type === "string") {
+  //   const fileData = {
+  //     OutputData: data,
+  //   };
+  //   const path = await showSaveDialog({
+  //     title: "Export media as",
+  //     defaultPath: "blix.json",
+  //     filters: [{ name: "Data", extensions: ["json"] }],
+  //     properties: ["createDirectory"],
+  //   });
+
+  //   if (!path) return { status: "error", message: "Not path chosen" };
+
+  //   try {
+  //     writeFile(path, JSON.stringify(fileData));
+  //   } catch (err) {
+  //     logger.error(err);
+  //   }
+
+  //   return { status: "success", message: "Media exported successfully" };
+  // } else {
+  //   return { status: "success", message: "Unsupported media type" };
+  // }
+}
+
+// TODO: Implement some sort of limit to how long the history of recent projects is.
+export async function updateRecentProjectsList(projectPath?: string) {
+  if (projectPath && !(await validateProjectPath(projectPath))) return; // Ensure file is of correct type
+  const currentProjects: recentProject[] = settings.get("recentProjects");
+  let validProjects: recentProject[] = [];
+
+  const results = await Promise.all(
+    currentProjects.map(async (project) => await validateProjectPath(project.path))
+  );
+  for (let i = 0; i < results.length; i++) {
+    validProjects = results[i] ? [...validProjects, currentProjects[i]] : validProjects;
   }
 
-  const { type, data } = args;
+  if (projectPath) validProjects = validProjects.filter((project) => project.path !== projectPath);
+  const str = new Date().toUTCString().split(",")[1];
+  const date = str.slice(1, str.lastIndexOf(" "));
+  if (projectPath) validProjects.unshift({ path: projectPath, lastEdited: date });
+  settings.set("recentProjects", validProjects);
+}
 
-  if (!data) {
-    return { success: false, error: "No data was provided" };
-  }
-
-  if (type === "Image") {
-    const base64Data = data.split(";base64, ");
-    const imgBuffer = Buffer.from(base64Data[1], "base64");
-
-    const path = await showSaveDialog({
-      title: "Export media as",
-      defaultPath: "blix.png",
-      // filters: [{ name: "Images", extensions: ["png, jpg", "jpeg"] }],
-      properties: ["createDirectory"],
-    });
-
-    if (!path) return;
-
-    sharp(imgBuffer).toFile(path);
-
-    return { success: true, message: "Media exported successfully" };
-  } else if (type === "Number" || type === "color" || type === "string") {
-    const fileData = {
-      OutputData: data,
-    };
-    const path = await showSaveDialog({
-      title: "Export media as",
-      defaultPath: "blix.json",
-      filters: [{ name: "Data", extensions: ["json"] }],
-      properties: ["createDirectory"],
-    });
-
-    if (!path) return;
-
-    try {
-      writeFile(path, JSON.stringify(fileData));
-    } catch (err) {
-      logger.error(err);
-    }
-
-    return { success: true, message: "Media exported successfully" };
-  } else {
-    return { success: false, error: "Unsupported media type" };
+/**
+ * This function will check if the path specified has the ability to be read
+ *
+ * @param path Path to be checked
+ * @returns A boolean response
+ */
+export async function validateProjectPath(path: string): Promise<boolean> {
+  try {
+    await (await open(path, "r")).close();
+    if (!path.endsWith(".blix")) return false; // Additional check just to be safe
+    return true;
+  } catch (e) {
+    return false;
   }
 }

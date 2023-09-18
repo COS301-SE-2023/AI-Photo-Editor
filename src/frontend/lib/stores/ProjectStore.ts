@@ -2,6 +2,7 @@ import { writable, derived, type Readable, get } from "svelte/store";
 import { type UUID } from "@shared/utils/UniqueEntity";
 import { constructLayout, layoutTemplate, type UIProject } from "../Project";
 import type { SharedProject } from "@shared/types";
+import { graphMall } from "./GraphStore";
 
 type ProjectsStoreState = {
   projects: UIProject[];
@@ -35,11 +36,12 @@ class ProjectsStore {
    * and UI has show the new state.
    */
   public handleProjectCreated(projectState: SharedProject, setAsActive = false): void {
-    const { id, name, layout, graphs } = projectState;
+    const { id, name, saved, layout, graphs } = projectState;
 
     const project: UIProject = {
       id,
       name: name ?? "Untitled",
+      saved: saved ?? false,
       layout: layout ? constructLayout(layout) : constructLayout(layoutTemplate),
       graphs: graphs ? graphs : [],
     };
@@ -66,11 +68,12 @@ class ProjectsStore {
       if (index < 0) return state;
 
       const project = state.projects[index];
-      const { id, name, layout, graphs } = changedState;
+      const { id, name, saved, layout, graphs } = changedState;
 
       const newProject: UIProject = {
         id,
         name: name ? name : project.name,
+        saved: saved ?? project.saved,
         layout: layout ? constructLayout(layout) : project.layout,
         graphs: graphs ? graphs : project.graphs,
       };
@@ -115,7 +118,9 @@ class ProjectsStore {
    * @param id ID of specific Project
    */
   public async closeProject(projectId: UUID): Promise<void> {
-    await window.apis.projectApi.closeProject(projectId);
+    const project = get(this.store).projects.find((p) => p.id === projectId);
+    // if (project) await window.apis.graphApi.deleteGraphs(project.graphs);
+    await window.apis.projectApi.closeProject(projectId, project?.graphs);
   }
 
   /**
@@ -123,15 +128,25 @@ class ProjectsStore {
    *
    * @param id ID of specific Project
    */
-  public setActiveProject(id: UUID) {
+  public setActiveProject(projectId: UUID) {
     const storeValue = get(this.store);
-
-    if (storeValue.activeProject?.id !== id) {
+    if (storeValue.activeProject?.id !== projectId) {
       this.store.update((state) => {
-        state.activeProject = state.projects.find((p) => p.id === id) || null;
+        state.activeProject = state.projects.find((p) => p.id === projectId) || null;
         return state;
       });
     }
+  }
+
+  public async handleProjectSaving(projectId: UUID) {
+    const project = get(this.store).projects.find((p) => p.id === projectId);
+    if (!project) return;
+    // Update Ui Positions
+    await Promise.all(
+      project.graphs.map(async (graph) => await graphMall.getGraph(graph).updateUIPositions())
+    );
+    // Update Project Layout
+    await window.apis.projectApi.saveLayout(projectId, project.layout.saveLayout());
   }
 
   /**

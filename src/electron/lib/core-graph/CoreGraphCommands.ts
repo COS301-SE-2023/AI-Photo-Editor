@@ -1,6 +1,6 @@
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { Command, CommandContext } from "../../lib/registries/CommandRegistry";
-import type { CommandResponse } from "../projects/ProjectCommands";
+import type { CommandResponse } from "../../../shared/types/index";
 import { CoreGraphUpdateEvent, CoreGraphUpdateParticipant } from "./CoreGraphInteractors";
 
 type CreateGraphArgs = {
@@ -16,21 +16,12 @@ export const createGraphCommand: Command = {
   },
   handler: async (ctx: CommandContext, args: CreateGraphArgs) => {
     const result = await createGraph(ctx, args);
-    switch (result.success) {
-      case true: {
-        ctx.sendSuccessMessage(result?.message ?? "");
-        break;
-      }
-      case false: {
-        ctx.sendErrorMessage(result?.error ?? "");
-        break;
-      }
+    if (result.status === "success" && result.message) {
+      ctx.sendSuccessMessage(result.message);
+    } else if (result.status === "error" && result.message) {
+      ctx.sendErrorMessage(result.message);
     }
-    // if (result.success) {
-    //   ctx.sendSuccessMessage(result?.message ?? "");
-    // } else {
-    //   ctx.sendErrorMessage(result?.error ?? "");
-    // }
+    return result;
   },
 };
 
@@ -45,6 +36,7 @@ export const deleteGraphCommand: Command = {
       ctx.projectManager.removeGraph(args.id);
       ctx.graphManager.deleteGraphs([args.id]);
     }
+    return { status: "success", message: "Graph deleted successfully" };
   },
 };
 
@@ -54,7 +46,7 @@ export async function createGraph(
 ): Promise<CommandResponse> {
   const { projectId, name } = args;
   const project = ctx.projectManager.getProject(projectId);
-  if (!project) return { success: false, error: "Project not found" };
+  if (!project) return { status: "error", message: "Project not found" };
 
   const graphId = ctx.graphManager.createGraph();
   ctx.graphManager.onGraphUpdated(
@@ -64,7 +56,7 @@ export async function createGraph(
   );
   ctx.projectManager.addGraph(projectId, graphId);
 
-  return { success: true, message: "Graph created successfully" };
+  return { status: "success", message: "Graph created successfully" };
 }
 
 export const coreGraphCommands: Command[] = [createGraphCommand, deleteGraphCommand];

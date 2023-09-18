@@ -115,7 +115,7 @@ describe("Test NodeUIBuilder", () => {
             label: "slider",
             componentId: "shrek",
             defaultValue: 50,
-            updatesBackend: true
+            triggerUpdate: true
       }     
       nodeUIBuilder.addButton(uiComponentConfig,{set : "ayo"});
 
@@ -130,7 +130,7 @@ describe("Test NodeUIBuilder", () => {
             label: "slider",
             componentId: "shrek",
             defaultValue: 50,
-            updatesBackend: true
+            triggerUpdate: true
       }     
       nodeUIBuilder.addNumberInput(uiComponentConfig,{set : "ayo"});
 
@@ -144,7 +144,7 @@ describe("Test NodeUIBuilder", () => {
             label: "slider",
             componentId: "shrek",
             defaultValue: 50,
-            updatesBackend: true
+            triggerUpdate: true
       }     
       nodeUIBuilder.addImageInput(uiComponentConfig,{set : "ayo"});
 
@@ -158,7 +158,7 @@ describe("Test NodeUIBuilder", () => {
             label: "slider",
             componentId: "shrek",
             defaultValue: 50,
-            updatesBackend: true
+            triggerUpdate: true
       }     
       nodeUIBuilder.addColorPicker(uiComponentConfig,{set : "ayo"});
 
@@ -177,7 +177,7 @@ describe("Test NodeUIBuilder", () => {
             label: "slider",
             componentId: "shrek",
             defaultValue: 50,
-            updatesBackend: true
+            triggerUpdate: true
       }     
       nodeUIBuilder.addLabel(uiComponentConfig,{shrek : "GET OUT OF MA SWAMP!"});
 

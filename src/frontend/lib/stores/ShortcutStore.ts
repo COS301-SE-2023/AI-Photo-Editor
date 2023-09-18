@@ -3,6 +3,8 @@ import { derived, writable, get } from "svelte/store";
 export type ShortcutAction = `${string}.${string}`; // Actions must be nested at least one layer deep
 export type ShortcutString = string;
 
+import type { UserSettingsCategory } from "../../../shared/types";
+
 export class ShortcutCombo {
   keyCode: string;
 
@@ -85,7 +87,20 @@ export class ShortcutCombo {
 type ShortcutsDict = { [key: ShortcutAction]: ShortcutString[] };
 
 // Maps actions to their respective shortcuts
+let categories: UserSettingsCategory[] = [];
+let selectedCategory: UserSettingsCategory | undefined;
 class ShortcutStore {
+  public refreshStore(data: UserSettingsCategory[]) {
+    if (data) {
+      categories = data;
+      selectedCategory = categories.find((c) => c.title === "Keybindings");
+
+      if (selectedCategory) {
+        const short = selectedCategory.settings[0].value as { [key: string]: string[] };
+        if (short !== undefined) this.shortcuts.set(short);
+      }
+    }
+  }
   // Fill default shortcuts here
   shortcuts = writable<ShortcutsDict>({
     "blix.palette.toggle": ["ctrl+[KeyP]", "meta+[KeyP]"],
@@ -104,6 +119,7 @@ class ShortcutStore {
     "blix.settings.toggle": ["meta+[Comma]", "ctrl+[Comma]"],
     "blix.settings.hide": ["[Escape]"],
     "blix.splash.hide": ["[Escape]"],
+    "blix.projects.save": ["ctrl+[KeyS]", "meta+[KeyS]"],
   });
 
   public addActionShortcut(action: ShortcutAction, combo: ShortcutCombo) {

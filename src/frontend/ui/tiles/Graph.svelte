@@ -1,6 +1,6 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Svelvet, type NodeKey, type AnchorKey, Node } from "blix_svelvet";
+  import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
   import { derived, type Readable } from "svelte/store";
   import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
@@ -96,8 +96,6 @@
   //     console.log(get($thisGraphStore.view));
   //   }
 
-  $: console.log($zoom);
-
   // Hooks exposed by <Svelvet />
   let connectAnchorIds: (
     sourceNode: NodeKey,
@@ -151,16 +149,16 @@
   $: updateOnGraphId(graphId);
 
   // Convert a canvas coord to a svelvet coord within the graph
-  function transformPoint(canvasX: number, canvasY: number) {
-    let x = (canvasX - $translation.x - $dimensions.width / 2) / $zoom + $dimensions.width / 2;
-    let y = (canvasY - $translation.y - $dimensions.height / 2) / $zoom + $dimensions.height / 2;
+  // function transformPoint(canvasX: number, canvasY: number) {
+  //   let x = (canvasX - $translation.x - $dimensions.width / 2) / $zoom + $dimensions.width / 2;
+  //   let y = (canvasY - $translation.y - $dimensions.height / 2) / $zoom + $dimensions.height / 2;
 
-    return { x, y };
-  }
+  //   return { x, y };
+  // }
 
-  function getGraphCenter() {
-    return transformPoint($dimensions.width / 2, $dimensions.height / 2);
-  }
+  // function getGraphCenter() {
+  //   return transformPoint($dimensions.width / 2, $dimensions.height / 2);
+  // }
 
   function handleRightClick(event: CustomEvent) {
     // TODO: Fix this at a stage, on initial load context menu does not show
@@ -229,6 +227,20 @@
   function deleteGraph(id: string) {
     commandStore.runCommand("blix.graphs.deleteGraph", { id });
   }
+
+  function triggerGravity() {
+    if (!$thisGraphStore) return;
+    $thisGraphStore.gravityDisplace(
+      $graphNodes.map((node) => node.uuid),
+      10
+    );
+  }
+
+  async function dataTypeChecker(from: string, to: string) {
+    console.log("CHECKING", from, to);
+    return await window.apis.typeclassApi.checkTypesCompatible(from, to);
+    // return new Promise((resolve) => { return resolve(true) });
+  }
 </script>
 
 <div class="absolute bottom-[15px] left-[15px] z-[100] flex h-7 items-center space-x-2">
@@ -239,6 +251,46 @@
         class="z-1000000 h-full w-full rounded-full border-[1px] border-zinc-600 bg-rose-500"
       ></div>
     {/if}
+  </div>
+  <div
+    class="flex h-7 w-7 items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md hover:bg-zinc-700"
+    title="Undo"
+    on:click="{() => $thisGraphStore?.undoChange()}"
+    on:keydown="{null}"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="h-5 w-5 stroke-zinc-400"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"></path>
+    </svg>
+  </div>
+  <div
+    class="flex h-7 w-7 items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md hover:bg-zinc-700"
+    title="Redo"
+    on:click="{() => $thisGraphStore?.redoChange()}"
+    on:keydown="{null}"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="h-5 w-5 stroke-zinc-400"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3"></path>
+    </svg>
   </div>
   <div class="self-end">
     <GraphSelectionBox
@@ -267,6 +319,17 @@
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
     </svg>
   </div>
+</div>
+<!-- <div class="hoverElements">
+  <button style:float="right" on:click="{triggerGravity}">Gravity</button>
+</div> -->
+<div
+  class="hoverElements flex h-7 select-none items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 px-1 text-zinc-400 backdrop-blur-md hover:bg-zinc-700 active:bg-zinc-800"
+  title="Enable Gravity"
+  on:click="{triggerGravity}"
+  on:keydown="{null}"
+>
+  Gravity
 </div>
 
 <!-- <div class="hoverElements">
@@ -301,7 +364,7 @@
 {#if thisGraphStore && $thisGraphStore}
   <Svelvet
     id="{panelId}-{graphId}"
-    zoom="{1}"
+    zoom="{0.6}"
     minimap
     theme="custom-dark"
     bind:graph="{graphData}"
@@ -310,6 +373,7 @@
     on:disconnection="{edgeDisconnected}"
     bind:connectAnchorIds="{connectAnchorIds}"
     bind:clearAllGraphEdges="{clearAllGraphEdges}"
+    dataTypeChecker="{dataTypeChecker}"
   >
     {#each $graphNodes || [] as node}
       {#key node.uuid}
@@ -347,14 +411,14 @@
     --theme-toggle-color: hsl(225, 20%, 27%);
   }
 
-  /* .hoverElements {
+  .hoverElements {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
+    top: 10px;
+    right: 10px;
     z-index: 100;
   }
 
-  .dropdown {
+  /* .dropdown {
     color: #11111b;
   } */
 </style>

@@ -7,14 +7,20 @@ import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
 import { readFile } from "fs/promises";
 import { z } from "zod";
+import { dialog } from "electron";
+import type { LayoutPanel } from "../../../shared/types/index";
+import { saveProjectCommand } from "./ProjectCommands";
+import { Blix } from "../Blix";
 
 export class ProjectManager {
   private _projects: { [id: string]: CoreProject };
   private _mainWindow: MainWindow;
+  private _projectsCreatedCounter: number;
 
   constructor(mainWindow: MainWindow) {
     this._mainWindow = mainWindow;
     this._projects = {};
+    this._projectsCreatedCounter = 1;
   }
 
   /**
@@ -24,7 +30,7 @@ export class ProjectManager {
    *
    *	@returns The newly created project.
    */
-  public createProject(name = "Untitled"): CoreProject {
+  public createProject(name = `Untitled-${this._projectsCreatedCounter++}`): CoreProject {
     const project = new CoreProject(name);
     this._projects[project.uuid] = project;
     this.onProjectCreated(project.uuid);
@@ -51,13 +57,75 @@ export class ProjectManager {
     return this._projects[id];
   }
 
-  public removeProject(uuid: UUID) {
-    delete this._projects[uuid];
-    this.onProjectRemoved(uuid);
+  public async removeProject(blix: Blix, uuid: UUID, forceRemove = false) {
+    const project = this._projects[uuid];
+    let remove = true;
+    let output = -1;
+    let res;
+    // console.log(forceRemove)
+    if (!project.saved && !forceRemove) {
+      res = await this.projectClosingMenu(project.name);
+      // Apis calls to frontend cant be async? await has no effect
+      if (res === 0) {
+        /**
+         * Save changes to project
+         */
+        // Potential async problems ?
+        this._mainWindow.apis.projectClientApi.handleProjectSaving(uuid);
+
+        const response = await saveProjectCommand.handler(blix, {
+          projectId: project.uuid,
+          projectPath: project.location,
+        });
+        if (response.status === "error") remove = false;
+        output = res;
+      } else if (res === 1) {
+        /**
+         * User cancelled
+         */
+        remove = false;
+        output = res;
+      }
+    }
+    if (remove) {
+      /**
+       * After Save
+       * After Discard Changes
+       */
+      delete this._projects[uuid];
+      this.onProjectRemoved(uuid);
+    }
+
+    if (Object.keys(this._projects).length === 0) this._projectsCreatedCounter = 1;
+    return output;
+  }
+
+  public async projectClosingMenu(project: string): Promise<number> {
+    return await dialog
+      .showMessageBox(this._mainWindow, {
+        type: "info",
+        buttons: ["Save Changes...", "Cancel", "Discard Changes"],
+        cancelId: 1,
+        message: `${project} currently has unsaved changes.`,
+        detail: `If you dont save the project, unsaved changes will be lost.`,
+      })
+      .then(({ response }) => {
+        return response;
+      });
   }
 
   public getOpenProjects() {
     return Object.values(this._projects);
+  }
+
+  public getTotalUnsavedProjects() {
+    return Object.values(this._projects)
+      .filter((project) => !project.saved)
+      .map((project) => ({ projectName: project.name, projectId: project.uuid }));
+  }
+
+  public async saveProjectLayout(projectId: UUID, layout: LayoutPanel) {
+    this._projects[projectId].layout = layout;
   }
 
   public renameProject(uuid: UUID, name: string): boolean {
@@ -124,6 +192,15 @@ export class ProjectManager {
         this.onProjectChanged(project.uuid);
       }
     }
+  }
+
+  public getRelatedProject(graphUUID: UUID) {
+    return Object.values(this._projects).filter((project) => project.graphs.includes(graphUUID))[0];
+  }
+
+  public setProjectSaveState(projectId: UUID, newState: boolean) {
+    this._projects[projectId].saved = newState;
+    this.onProjectChanged(projectId);
   }
 }
 

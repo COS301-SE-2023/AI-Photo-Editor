@@ -2,7 +2,7 @@ export type UIComponentConfig = {
   label: string;
   componentId: string;
   defaultValue: unknown;
-  updatesBackend: boolean;
+  triggerUpdate: boolean;
 };
 
 export type UIComponentProps = {
@@ -38,6 +38,8 @@ export class NodeUILeaf extends NodeUI {
 
 export enum NodeUIComponent {
   Button = "Button",
+  Buffer = "Buffer",
+  TweakDial = "TweakDial",
   Slider = "Slider",
   Knob = "Knob",
   Label = "Label",

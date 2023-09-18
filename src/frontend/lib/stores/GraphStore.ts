@@ -1,5 +1,5 @@
 import type { AnchorUUID } from "@electron/lib/core-graph/CoreGraph";
-import type { IGraphUIInputs, INodeUIInputs } from "@shared/types";
+import type { IGraphUIInputs, INodeUIInputs, UIInputChange } from "@shared/types/graph";
 import type { NodeSignature } from "@shared/ui/ToolboxTypes";
 import {
   UIGraph,
@@ -15,6 +15,7 @@ import { writable, get, derived, type Writable, type Readable } from "svelte/sto
 import { toolboxStore } from "./ToolboxStore";
 import type { MediaOutputId } from "@shared/types/media";
 import { tick } from "svelte";
+import type { UUID } from "@shared/utils/UniqueEntity";
 
 // When the the CoreGraphApi type has to be imported into the backend
 // (WindowApi.ts) so that the API can be bound then it tries to import the type
@@ -42,6 +43,8 @@ export class GraphStore {
   graphStore: Writable<UIGraph>;
   uiInputUnsubscribers: { [key: GraphNodeUUID]: (() => void)[] } = {};
   uiInputSubscribers: { [key: GraphNodeUUID]: () => void } = {};
+  uiPositionUnsubscribers: { [key: GraphNodeUUID]: (() => void)[] } = {};
+  uiPositionSubscribers: { [key: GraphNodeUUID]: () => void } = {};
 
   constructor(public uuid: GraphUUID) {
     // Starts with empty graph
@@ -77,6 +80,7 @@ export class GraphStore {
       graph.edges = newGraph.edges;
 
       const oldNodes = graph.nodes;
+      const oldPositions = graph.uiPositions;
       graph.nodes = newGraph.nodes;
 
       for (const node of Object.keys(graph.nodes)) {
@@ -85,11 +89,15 @@ export class GraphStore {
           graph.nodes[node].styling = oldNodes[node].styling;
           // graph.nodes[node].styling.pos =
           graph.nodes[node].inputUIValues = oldNodes[node].inputUIValues;
+          graph.uiPositions[node] = oldPositions[node];
         } else {
           // If node has a UI input, create a store and subscribe to it
           const toolboxNode = toolboxStore.getNode(graph.nodes[node].signature);
           graph.nodes[node].styling = new NodeStylingStore();
+          // console.log(newGraph.uiPositions[node])
           graph.nodes[node].styling!.pos.set(newGraph.uiPositions[node]);
+
+          graph.uiPositions[node] = newGraph.uiPositions[node];
 
           if (toolboxNode.ui) {
             graph.nodes[node].inputUIValues = constructUIValueStore(
@@ -100,21 +108,38 @@ export class GraphStore {
             const inputs = graph.nodes[node].inputUIValues.inputs;
             // TODO: Investigate this; for some reason not all the keys in `inputs`
             //       are available off the bat unless you wait for the next tick()
+            const position = graph.nodes[node].styling?.pos;
             tick()
               .then(() => {
+                this.uiPositionUnsubscribers[node] = [];
                 this.uiInputUnsubscribers[node] = [];
+
                 for (const input in inputs) {
                   if (!inputs.hasOwnProperty(input)) continue;
                   // console.log("SUB TO", node, "-->>", input)
+                  let first = true;
                   this.uiInputUnsubscribers[node].push(
                     inputs[input].subscribe(() => {
                       // console.log("UPDATE UI INPUTS", node, "->", input);
-                      this.updateUIInputs(node, input).catch((err) => {
-                        return;
-                      });
+                      // console.log("Sg", false, node)
+                      // Ensure the subscribe does not run when first created
+                      if (first) {
+                        first = false;
+                      } else {
+                        this.globalizeUIInputs(node, input).catch((err) => {
+                          return;
+                        });
+                      }
                     })
                   );
                 }
+                // Update frontend
+                if (position)
+                  this.uiPositionUnsubscribers[node].push(
+                    position.subscribe((state) => {
+                      this.updateUIPosition(node, state);
+                    })
+                  );
               })
               .catch(() => {
                 return;
@@ -133,10 +158,21 @@ export class GraphStore {
           }
           delete this.uiInputUnsubscribers[node];
         }
+        if (!graph.nodes[node] && this.uiPositionUnsubscribers[node]) {
+          delete this.uiPositionUnsubscribers[node];
+        }
       }
 
       return graph;
     });
+  }
+
+  async undoChange() {
+    const res = await window.apis.graphApi.undoChange(get(this.graphStore).uuid);
+  }
+
+  async redoChange() {
+    const res = await window.apis.graphApi.redoChange(get(this.graphStore).uuid);
   }
 
   async addNode(nodeSignature: NodeSignature, pos: SvelvetCanvasPos) {
@@ -151,6 +187,12 @@ export class GraphStore {
     return res.status;
   }
 
+  async handleNodeInputInteraction(graphUUID: UUID, nodeUUID: UUID, input: UIInputChange) {
+    // console.log("INPUT: ", input.value)
+    const res = await window.apis.graphApi.handleNodeInputInteraction(graphUUID, nodeUUID, input);
+    // console.log(res);
+  }
+
   async addEdge(anchorA: AnchorUUID, anchorB: AnchorUUID) {
     const thisUUID = get(this.graphStore).uuid;
     const res = await window.apis.graphApi.addEdge(thisUUID, anchorA, anchorB);
@@ -158,21 +200,54 @@ export class GraphStore {
     return res.status;
   }
 
-  async updateUIInputs(nodeUUID: GraphNodeUUID, inputId: string) {
+  // Linked once to each UI input as a store subscriber.
+  // Notifies the backend of the frontend store changing.
+  async globalizeUIInputs(nodeUUID: GraphNodeUUID, inputId: string) {
     const thisUUID = get(this.graphStore).uuid;
+    const res = await window.apis.graphApi.updateUIInputs(
+      thisUUID,
+      nodeUUID,
+      this.getNodeUiInputs(nodeUUID, inputId)
+    );
+    // Notify our UI subscribers
+  }
+
+  getNodeUiInputs(nodeUUID: UUID, inputId: string) {
     const node = get(this.graphStore).nodes[nodeUUID];
     const nodeInputs = node.inputUIValues;
-
-    // Extract values from stores
-    const payload: INodeUIInputs = { inputs: {}, changes: [inputId] };
+    const inputs: INodeUIInputs = { inputs: {}, changes: [inputId] };
 
     for (const input of Object.keys(nodeInputs.inputs)) {
-      payload.inputs[input] = get(nodeInputs.inputs[input]);
+      inputs.inputs[input] = get(nodeInputs.inputs[input]);
     }
+    return inputs;
+  }
 
-    const res = await window.apis.graphApi.updateUIInputs(thisUUID, nodeUUID, payload);
+  // Update the store value of a specific UI input
+  updateUIInput(nodeUUID: GraphNodeUUID, inputId: string, value: unknown) {
+    const node = this.getNode(nodeUUID);
+    node.inputUIValues.inputs[inputId].set(value);
+  }
 
-    // Notify our UI subscribers
+  updateUIPosition(nodeUUID: UUID, position: SvelvetCanvasPos) {
+    // console.log("HERE", get(this.graphStore).uiPositions)
+    this.graphStore.update((graph) => {
+      graph.uiPositions[nodeUUID] = position;
+      return graph;
+    });
+    // await window.apis.graphApi.updateUIPosition(get(this.graphStore).uuid, nodeUUID, get(get(this.graphStore).uiPositions[nodeUUID]));
+  }
+
+  /**
+   * BE CAREFUL OF THE UNAWAITED PROMISE
+   * AWAIT REMOVED FOR UP DAY AS A TEMP FIX
+   */
+  async updateUIPositions() {
+    // eslint-disable-next-line
+    await window.apis.graphApi.updateUIPositions(
+      get(this.graphStore).uuid,
+      get(this.graphStore).uiPositions
+    );
   }
 
   async removeNode(nodeUUID: GraphNodeUUID) {
@@ -204,6 +279,10 @@ export class GraphStore {
     return get(this.graphStore).nodes[nodeUUID];
   }
 
+  public getNodes() {
+    return get(this.graphStore).nodes;
+  }
+
   public getNodesReactive() {
     return derived(this.graphStore, (graph) => {
       return Object.values(graph.nodes);
@@ -224,6 +303,161 @@ export class GraphStore {
     return derived(this.graphStore, (graph) => {
       return Object.values(graph.edges);
     });
+  }
+
+  public gravityDisplace(nodes: GraphNodeUUID[], duration: number) {
+    const start = performance.now();
+
+    const nodesSet = new Set(nodes);
+    const FORCE = 3;
+    const NUDGE_DISTANCE = 10;
+
+    // ===== NUDGE NODES RANDOMLY ===== //
+    nodes.forEach((node) => {
+      const nodePos = this.getNode(node)?.styling?.pos;
+      if (!nodePos) return;
+      nodePos.update((pos) => {
+        return {
+          x: pos.x + NUDGE_DISTANCE * 2 * (Math.random() - 0.5),
+          y: pos.y + NUDGE_DISTANCE * 2 * (Math.random() - 0.5),
+        };
+      });
+    });
+
+    // Notify the system of the new node positions
+    const registerPositionUpdate = async () => {
+      await this.updateUIPositions();
+      return; // TODO
+    };
+
+    const tickGravityDisplace = () => {
+      const now = performance.now();
+      if (now - start > duration * 1000) {
+        // Animation is done
+        void registerPositionUpdate().then().catch();
+        return;
+      }
+
+      const forces: { [key: GraphNodeUUID]: { x: number; y: number } } = {};
+
+      // ===== COMPUTE CENTER OF MASS ===== //
+      const centerMass = { x: 0, y: 0 };
+      const CENTER_FORCE = 0.04;
+      let numNodes = 0;
+      nodes.forEach((node) => {
+        const nodePos = this.getNode(node)?.styling?.pos;
+        if (!nodePos) return;
+
+        const nodePosVal = get(nodePos);
+
+        centerMass.x += nodePosVal.x;
+        centerMass.y += nodePosVal.y;
+        numNodes++;
+      });
+      centerMass.x /= numNodes;
+      centerMass.y /= numNodes;
+
+      // ===== ADD EDGE DIRECTION REPULSION FORCES ===== //
+      const dirForces: { [key: GraphNodeUUID]: number } = {};
+      const DIRECTION_FORCE = 5;
+      const MAX_DIRECTION_FORCE = 800;
+
+      const edges = get(this.graphStore).edges;
+      Object.keys(edges).forEach((edge) => {
+        const edgeObj = edges[edge];
+
+        // Add leftward force
+        if (nodesSet.has(edgeObj.nodeUUIDFrom)) {
+          dirForces[edgeObj.nodeUUIDFrom] = -DIRECTION_FORCE;
+        }
+
+        // Add rightward force
+        if (nodesSet.has(edgeObj.nodeUUIDTo)) {
+          dirForces[edgeObj.nodeUUIDTo] = DIRECTION_FORCE;
+        }
+      });
+
+      let totalDirForce = 0;
+      nodes.forEach((node) => {
+        if (!forces[node]) forces[node] = { x: 0, y: 0 };
+        if (!dirForces[node]) dirForces[node] = 0;
+
+        dirForces[node] = Math.max(
+          Math.min(dirForces[node], MAX_DIRECTION_FORCE),
+          -MAX_DIRECTION_FORCE
+        );
+        totalDirForce += dirForces[node];
+
+        forces[node].x += dirForces[node];
+      });
+      totalDirForce /= numNodes;
+
+      // ===== ADD CENTER OF MASS ATTRACTION FORCE + COUNTERBALANCE DIRECTION FORCE ===== //
+      nodes.forEach((node) => {
+        const nodePos = this.getNode(node)?.styling?.pos;
+        if (!nodePos) return;
+
+        const nodePosVal = get(nodePos);
+
+        const diff = { x: centerMass.x - nodePosVal.x, y: centerMass.y - nodePosVal.y };
+        const dist = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
+        const forceMag = dist * CENTER_FORCE;
+
+        if (diff.x !== 0 || diff.y !== 0) {
+          forces[node].x += (diff.x / dist) * forceMag - totalDirForce;
+          forces[node].y += (diff.y / dist) * forceMag;
+        }
+      });
+
+      // ===== ADD INTER-NODE REPULSION FORCES ===== //
+      const NODE_FORCE = 3;
+      const VERTICAL_SQUASH = 0.75;
+      nodes.forEach((node) => {
+        const nodePos = this.getNode(node)?.styling?.pos;
+        if (!nodePos) return;
+
+        const nodePosVal = get(nodePos);
+        const nodeForce = { x: 0, y: 0 };
+
+        nodes.forEach((otherNode) => {
+          if (node === otherNode) return;
+
+          const otherNodePos = this.getNode(otherNode)?.styling?.pos;
+          if (!otherNodePos) return;
+
+          const otherNodePosVal = get(otherNodePos);
+          const diff = {
+            x: nodePosVal.x - otherNodePosVal.x,
+            y: nodePosVal.y - otherNodePosVal.y,
+          };
+          const dist = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
+
+          if (diff.x !== 0) nodeForce.x += (NODE_FORCE * diff.x) / dist;
+
+          if (diff.y !== 0) nodeForce.y += (NODE_FORCE * diff.y * VERTICAL_SQUASH) / dist;
+        });
+
+        forces[node].x += nodeForce.x;
+        forces[node].y += nodeForce.y;
+      });
+
+      // ===== APPLY FORCES ===== //
+      nodes.forEach((node) => {
+        const nodePos = this.getNode(node)?.styling?.pos;
+        if (!nodePos) return;
+
+        nodePos.update((pos) => {
+          return {
+            x: pos.x + forces[node].x * FORCE,
+            y: pos.y + forces[node].y * FORCE,
+          };
+        });
+      });
+
+      requestAnimationFrame(tickGravityDisplace);
+    };
+
+    tickGravityDisplace();
   }
 }
 

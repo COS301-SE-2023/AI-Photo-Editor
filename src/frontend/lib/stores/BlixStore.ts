@@ -1,6 +1,8 @@
 import { writable } from "svelte/store";
 import { commandStore } from "./CommandStore";
 import { toolboxStore } from "./ToolboxStore";
+import { tileStore } from "./TileStore";
+import { shortcutsRegistry } from "./ShortcutStore";
 
 interface BlixStore {
   blixReady: boolean;
@@ -36,6 +38,13 @@ export async function setInitialStores() {
   // Toolbox store
   const node = await window.apis.toolboxApi.getNodes();
   toolboxStore.refreshStore(node);
+
+  // Tile store
+  const tile = await window.apis.tileApi.getTiles();
+  tileStore.refreshStore(tile);
+
+  const shortcuts = await window.apis.utilApi.getUserSettings();
+  if (shortcuts.status === "success") shortcutsRegistry.refreshStore(shortcuts.data);
 
   // Graph store
   // const allGraphIds = await window.apis.graphApi.getAllGraphUUIDs();

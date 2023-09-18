@@ -161,7 +161,7 @@ function createToolbox() {
         continue;
       }
 
-      const ctx = new NodePluginContext();
+      const ctx = new NodePluginContext("test-plugin");
       pluginNodes[node](ctx);
       const nodeInstance = ctx.nodeBuilder.build;
       toolbox[nodeInstance.signature] = nodeInstance;

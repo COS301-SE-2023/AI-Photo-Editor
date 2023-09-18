@@ -17,16 +17,24 @@
   import Blank from "../../tiles/Blank.svelte";
   import Debug from "../../tiles/Debug.svelte";
   import WebView from "../../tiles/WebView.svelte";
+  import Plugin from "../../tiles/Plugin.svelte";
+  import Browser from "../../tiles/Browser.svelte";
+  import Assets from "../../tiles/Assets.svelte";
+  import WebCamera from "../../tiles/WebCamera.svelte";
   import ShortcutSettings from "../../tiles/ShortcutSettings.svelte";
   import { PanelGroup, PanelLeaf, type PanelNode } from "@frontend/lib/PanelNode";
   import type { PanelType } from "@shared/types";
   import { focusedPanelStore } from "../../../lib/PanelNode";
+  import { tileStore } from "../../../lib/stores/TileStore";
+  import { get } from "svelte/store";
+  import PanelBlipVane from "./PanelBlipVane.svelte";
 
   // import { scale } from "svelte/transition";
 
   const dispatch = createEventDispatcher();
 
   const minSize = 10;
+  const tiles = get(tileStore);
 
   export let horizontal: boolean = false;
   export let height: string;
@@ -102,10 +110,17 @@
     return localDir.null;
   }
 
-  function handleBlipDrag(e: any, index: number, dock: [dockV, dockH]) {
+  function slideOptions(
+    e: any,
+    index: number,
+    dock: [dockV, dockH]
+  ): { action: string | null; data: any } {
+    const NOP = { action: null, data: {} };
     if (!(layout instanceof PanelGroup)) {
-      return;
+      return NOP;
     }
+
+    blipVaneIcon = null;
 
     let dir = e.detail.dir;
 
@@ -126,42 +141,116 @@
     // Perform panel operation
     switch (slide) {
       case localDir.pl_i: // add panel at index
-        layout.addPanel(thisLeafContent, index);
-        layout = layout; // Force update
-        break;
+        return {
+          action: "addPanel",
+          data: {
+            content: thisLeafContent,
+            index,
+          },
+        };
 
       case localDir.pl_o: // remove panel at index-1 if possible
         // Check which index to remove based on index direction
         let toRem = index + (iDir == indexDir.f ? 1 : -1);
 
         if (toRem >= 0 && toRem < layout.panels.length) {
-          layout.getPanel(toRem).size = -1;
-
-          layout.removePanel(toRem);
-          // layout = layout;
-
-          bubbleToRoot();
+          return {
+            action: "removePanel",
+            data: {
+              toRem: toRem,
+              index,
+            },
+          };
         }
 
-        break;
+        return NOP;
 
       case localDir.pp_i: // encapsulate panel within panelgroup, add another panel to group
-        let group = new PanelGroup(undefined, layout.getPanel(index).id);
-
-        //Add this panel
-        group.addPanel(thisLeafContent, 0);
-        //Add new panel
-        group.addPanel(thisLeafContent, 1);
-        // Replace this panel with new group
-        layout.setPanel(group, index);
-
-        layout = layout; // Force update
-        break;
+        return {
+          action: "tunnelAndSplit",
+          data: {
+            content: thisLeafContent,
+            index,
+          },
+        };
 
       case localDir.pp_o: // invalid
 
       default:
-        return;
+        return NOP;
+    }
+  }
+
+  function handleBlipDragged(e: any, index: number, dock: [dockV, dockH]) {
+    if (!(layout instanceof PanelGroup)) {
+      return;
+    }
+
+    resetBlipVane();
+
+    const selection = slideOptions(e, index, dock);
+
+    switch (selection.action) {
+      case "addPanel":
+        layout.addPanel(selection.data.content, selection.data.index);
+        layout = layout; // Force update
+        break;
+      case "removePanel":
+        // layout.getPanel(selection.data.toRem).size = -1;
+
+        layout.removePanel(selection.data.toRem);
+
+        // layout = layout;
+        bubbleToRoot();
+        break;
+      case "tunnelAndSplit":
+        let group = new PanelGroup(undefined, layout.getPanel(selection.data.index).id);
+
+        //Add this panel
+        group.addPanel(selection.data.content, 0);
+        //Add new panel
+        group.addPanel(selection.data.content, 1);
+        // Replace this panel with new group
+        layout.setPanel(group, selection.data.index);
+
+        layout = layout; // Force update
+        break;
+      default:
+        break;
+    }
+
+    return;
+  }
+
+  let blipVaneIcon: string | null = null;
+  let blipVaneIndex: number | null = -1;
+
+  function resetBlipVane() {
+    blipVaneIcon = null;
+    blipVaneIndex = -1;
+  }
+
+  function handleBlipDragging(e: any, index: number, dock: [dockV, dockH]) {
+    const selection = slideOptions(e, index, dock);
+
+    switch (selection.action) {
+      case "addPanel":
+        // blipVaneIcon = "+";
+        blipVaneIcon = e.detail.dir;
+        blipVaneIndex = selection.data.index;
+        break;
+      case "removePanel":
+        blipVaneIcon = "x";
+        blipVaneIndex = selection.data.toRem;
+        break;
+      case "tunnelAndSplit":
+        blipVaneIcon = ["u", "d"].includes(e.detail.dir) ? "|" : "-";
+        blipVaneIndex = selection.data.index;
+        break;
+      default:
+        blipVaneIcon = null;
+        blipVaneIndex = -1;
+        break;
     }
   }
 
@@ -169,15 +258,20 @@
   const panelTypeToComponent: Record<PanelType, ConstructorOfATypedSvelteComponent> = {
     graph: Graph,
     media: Media,
+    webcamera: WebCamera,
     debug: Debug,
     webview: WebView,
+    browser: Browser,
     shortcutSettings: ShortcutSettings,
+    assets: Assets,
   };
 
   // Wraps the above dict safely
   function getComponentForPanelType(panelType: PanelType): ConstructorOfATypedSvelteComponent {
     if (panelType in panelTypeToComponent) {
       return panelTypeToComponent[panelType];
+    } else if (panelType in tiles) {
+      return Plugin;
     } else {
       console.error(`No component found for panel type '${panelType}'`);
       return Blank;
@@ -201,14 +295,42 @@
       {/key}
       <Pane minSize="{panel.size == -1 ? 0 : minSize}" bind:size="{panel.size}">
         {#if panel instanceof PanelLeaf}
-          <PanelBlip dock="tl" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.t, dockH.l])}" />
-          <PanelBlip dock="tr" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.t, dockH.r])}" />
-          <PanelBlip dock="bl" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.l])}" />
-          <PanelBlip dock="br" on:blipDragged="{(e) => handleBlipDrag(e, i, [dockV.b, dockH.r])}" />
-          <TileSelector bind:type="{panel.content}" current="{panel.content}" />
-          <!-- {:else} -->
+          <PanelBlip
+            dock="tl"
+            on:blipDragged="{(e) => handleBlipDragged(e, i, [dockV.t, dockH.l])}"
+            on:blipDragging="{(e) => handleBlipDragging(e, i, [dockV.t, dockH.l])}"
+            on:blipReleased="{resetBlipVane}"
+          />
+          <PanelBlip
+            dock="tr"
+            on:blipDragged="{(e) => handleBlipDragged(e, i, [dockV.t, dockH.r])}"
+            on:blipDragging="{(e) => handleBlipDragging(e, i, [dockV.t, dockH.r])}"
+            on:blipReleased="{resetBlipVane}"
+          />
+          <PanelBlip
+            dock="bl"
+            on:blipDragged="{(e) => handleBlipDragged(e, i, [dockV.b, dockH.l])}"
+            on:blipDragging="{(e) => handleBlipDragging(e, i, [dockV.b, dockH.l])}"
+            on:blipReleased="{resetBlipVane}"
+          />
+          <PanelBlip
+            dock="br"
+            on:blipDragged="{(e) => handleBlipDragged(e, i, [dockV.b, dockH.r])}"
+            on:blipDragging="{(e) => handleBlipDragging(e, i, [dockV.b, dockH.r])}"
+            on:blipReleased="{resetBlipVane}"
+          />
+          <TileSelector bind:type="{panel.content}" />
+          <!-- Subpanels alternate horiz/vert -->
         {/if}
-        <!-- Subpanels alternate horiz/vert -->
+
+        <!-- TODO: Fix - for some reason this occasionally causes issues with panel deletion -->
+        <!-- A temp workaround that seems to hold up better is awaiting tick() in PanelGroup removePanel() -->
+        <!-- {#if blipVaneIcon && i === blipVaneIndex}
+          {#key blipVaneIcon}
+            <PanelBlipVane icon={blipVaneIcon} />
+          {/key}
+        {/if} -->
+
         <svelte:self
           on:bubbleToRoot="{bubbleToRoot}"
           layout="{panel}"
@@ -238,7 +360,11 @@
       </div>
     {/if} -->
     <!-- {layout.content} -->
-    <svelte:component this="{getComponentForPanelType(layout.content)}" {...tileProps} />
+    <svelte:component
+      this="{getComponentForPanelType(layout.content)}"
+      signature="{layout.content}"
+      {...tileProps}
+    />
   </div>
 {/if}
 

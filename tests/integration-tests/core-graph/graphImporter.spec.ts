@@ -86,11 +86,13 @@ describe("Test graph importer", () => {
           "nodes": [
             {
               "signature" : "blix.output",
-              "styling" : null
+              "position" : { x: 0, y: 0},
+              "inputs" : {}
             },
             {
               "signature" : "blix.testNode",
-              "styling" : null
+              "position" : { x: 0, y: 0},
+              "inputs" : {}
             }
           ],
           "edges": [{

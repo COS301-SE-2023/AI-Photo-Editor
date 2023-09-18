@@ -10,7 +10,7 @@ export interface UserSetting {
   title: string;
   subtitle?: string;
   secret?: boolean;
-  type: "dropdown" | "password" | "text" | "toggle";
+  type: "dropdown" | "password" | "text" | "toggle" | "preferences";
 }
 
 export interface InputSetting extends UserSetting {
@@ -30,4 +30,9 @@ export interface ToggleSetting extends UserSetting {
   value: boolean;
 }
 
-export type Setting = DropdownSetting | InputSetting | ToggleSetting;
+export interface Preferences extends UserSetting {
+  type: "preferences";
+  value: { [key: string]: string[] };
+}
+
+export type Setting = DropdownSetting | InputSetting | ToggleSetting | Preferences;

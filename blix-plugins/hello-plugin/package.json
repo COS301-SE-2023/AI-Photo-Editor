@@ -14,24 +14,11 @@
                 "title": "Hello"
             }
         ],
-        "nodes": [
-            {
-                "id": "hello",
-                "name": "Hello",
-                "interface" : {
-                    "inputs": {
-                    "numA": "int"
-                    },
-                    "outputs": {
-                        "numOut": "int"
-                    }
-                }
-            }
-        ]
+        "nodes": []
     },
 
-    "main": "src/main.js",
-    "renderer": "src/renderer.js",
+    "main": "dist/main.js",
+    "renderers": {},
 
     "devDependencies": {
         "@types/node": "^12.0.0",

@@ -6,11 +6,13 @@ import {
   OutputAnchorInstance,
   checkEdgeDataTypesCompatible,
 } from "../registries/ToolboxRegistry";
-import type { EdgeToJSON, GraphToJSON, NodeToJSON } from "./CoreGraphExporter";
 import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
 import { type GraphMetadata, type SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 import { type MediaOutputId } from "../../../shared/types/media";
+import type { EdgeBlueprint } from "./CoreGraphEventManger";
+import logger from "../../utils/logger";
+import { populateReadonlyUIInputs } from "../ui-inputs/ReadonlyInputComponents";
 
 // =========================================
 // Explicit types for type safety
@@ -39,11 +41,10 @@ export class CoreGraphStore extends UniqueEntity {
 // Testting done in index.ts
 export class CoreGraph extends UniqueEntity {
   private nodes: { [key: UUID]: Node };
-  // private nodeList: UUID[]; // Each node when added will receive an index that is used to reference the node in an ordered fashion
   private anchors: { [key: UUID]: Anchor };
-  private edgeDest: { [key: AnchorUUID]: Edge }; // Map a destination anchor to an edge
-  private edgeSrc: { [key: AnchorUUID]: AnchorUUID[] }; // Map a source anchor to a list of destination anchors
-  // E.g. we can do (source anchor) ---[edgeSrc]--> (destination anchors) ---[edgeDest]--> (Edges)
+  private edgeDest: { [key: AnchorUUID]: Edge }; // Input Anchor -> Edge
+  private edgeSrc: { [key: AnchorUUID]: AnchorUUID[] }; // Output Anchor -> List[Connected Input Anchors]
+  // E.g. we can do (output anchor) ---[edgeSrc]--> (input anchors) ---[edgeDest]--> (Edges)
   //      to get all the edges that flow from a source anchor
   private outputNodes: { [key: UUID]: MediaOutputId };
   private metadata: GraphMetadata;
@@ -160,23 +161,20 @@ export class CoreGraph extends UniqueEntity {
     return this.uiInputs[nodeUUID]?.getInputs || null;
   }
 
-  public get getUIPositions() {
+  public getUIPositions() {
     return this.uiPositions;
   }
 
+  public set UIPositions(positions: { [key: UUID]: SvelvetCanvasPos }) {
+    this.uiPositions = positions;
+  }
+
   // We need to pass in node name and plugin name
-  public addNode(
-    node: NodeInstance,
-    pos: SvelvetCanvasPos
-  ): QueryResponse<{
-    nodeId: UUID;
-    inputs: string[];
-    outputs: string[];
-    inputValues: Record<string, unknown>;
-  }> {
+  public addNode(node: NodeInstance, pos: SvelvetCanvasPos, uiValues?: { [key: string]: UIValue }) {
     try {
       // Create New Node
       const n: Node = new Node(node.name, node.plugin, node.inputs, node.outputs);
+      n.setStyling(new NodeStyling(pos, { w: 0, h: 0 }));
       // Add Node to Graph
       this.nodes[n.uuid] = n;
       // Add Nodes's Anchors to Graph
@@ -190,39 +188,78 @@ export class CoreGraph extends UniqueEntity {
       }
 
       const inputValues: Record<string, unknown> = {};
-      Object.values(node.uiConfigs).forEach((config) => {
-        inputValues[config.componentId] = config.defaultValue;
-      });
+      let uiInputsInitialized = false;
+      // New Node with default Ui Input Values
+      if (!uiValues) {
+        const inputs: { [key: string]: unknown } = {};
+        const changes: string[] = [];
+        Object.values(node.uiConfigs).forEach((config) => {
+          inputValues[config.componentId] = config.defaultValue;
+          inputs[config.componentId] = config.defaultValue;
+        });
+        this.uiInputs[n.uuid] = new CoreNodeUIInputs({ inputs, changes });
+      } else {
+        // Loading in input values from an existing node
+        // console.log("UIVALUES: ", uiValues)
+        this.uiInputs[n.uuid] = new CoreNodeUIInputs({
+          inputs: uiValues,
+          changes: [...Object.keys(uiValues)],
+        });
+        // console.log(this.uiInputs[n.uuid].getInputs)
+        Object.values(node.uiConfigs).forEach((config) => {
+          inputValues[config.componentId] = uiValues[config.componentId];
+        });
+
+        uiInputsInitialized = true;
+      }
+
+      // Handle the UI input initializer
+      // const initializedInputs = node.uiInitializer(inputValues);
+      // const uiChanges = Object.keys(initializedInputs);
+      // if (typeof initializedInputs === "object" && uiChanges.length > 0) {
+      //   inputValues = { ...inputValues, ...initializedInputs };
+
+      //   // Update the graph's UI inputs
+      //   const uiInputsPayload: INodeUIInputs = {
+      //     inputs: inputValues,
+      //     changes: uiChanges,
+      //   };
+      //   this.uiInputs[n.uuid] = new CoreNodeUIInputs(uiInputsPayload);
+
+      // }
 
       // console.log(QueryResponseStatus.success)
       const anchors: AiAnchors = n.returnAnchors();
       // Add position of node to graph
       this.uiPositions[n.uuid] = pos;
+
       return {
         status: "success",
-        message: "Node added succesfully",
+        message: "Node added successfully",
         data: {
           nodeId: n.uuid,
           inputs: anchors.inputAnchors,
           outputs: anchors.outputAnchors,
           inputValues,
+          uiInputsInitialized,
         },
-      };
+      } satisfies QueryResponse;
     } catch (error) {
-      return { status: "error", message: error as string };
+      return { status: "error", message: error as string } satisfies QueryResponse;
     }
+
     // TODO: Add Node Styling
   }
 
-  public addEdge(anchorIdA: UUID, anchorIdB: UUID): QueryResponse<{ edgeId: UUID }> {
+  public addEdge(anchorIdA: UUID, anchorIdB: UUID) {
     const anchorA = this.anchors[anchorIdA];
     const anchorB = this.anchors[anchorIdB];
-
+    // console.log("Add Edge Anchors:", anchorIdA, anchorIdB);
     if (!(anchorA || anchorB)) {
       return {
         status: "error",
         message: `Both anchors does not exist`,
-      };
+      } satisfies QueryResponse;
     }
 
     if (!anchorA) {
@@ -230,21 +267,21 @@ export class CoreGraph extends UniqueEntity {
       return {
         status: "error",
         message: `AnchorA does not exist`,
-      };
+      } satisfies QueryResponse;
     }
 
     if (!anchorB) {
       return {
         status: "error",
         message: `AnchorB does not exist`,
-      };
+      } satisfies QueryResponse;
     }
 
     if (anchorA.ioType === AnchorIO.output && anchorB.ioType === AnchorIO.output) {
       return {
         status: "error",
         message: "Edge cannot be connected from one output to another output",
-      };
+      } satisfies QueryResponse;
     }
 
     const ancFrom = anchorA.ioType === AnchorIO.output ? anchorA : anchorB;
@@ -255,15 +292,15 @@ export class CoreGraph extends UniqueEntity {
       return {
         status: "error",
         message: "Data flowing through edge must be of same type for both anchors",
-      };
+      } satisfies QueryResponse;
     }
 
     if (this.checkForCycles(ancFrom, ancTo)) {
-      return { status: "error", message: "Edge creates a cycle" };
+      return { status: "error", message: "Edge creates a cycle" } satisfies QueryResponse;
     }
 
     if (this.checkForDuplicateEdges(ancFrom, ancTo)) {
-      return { status: "error", message: "Edge already exists" };
+      return { status: "error", message: "Edge already exists" } satisfies QueryResponse;
     }
 
     // Add edge to graph
@@ -273,10 +310,14 @@ export class CoreGraph extends UniqueEntity {
     if (!(ancFrom.uuid in this.edgeSrc)) this.edgeSrc[ancFrom.uuid] = [];
     this.edgeSrc[ancFrom.uuid].push(ancTo.uuid);
 
-    return { status: "success", message: "Edge added succesfully", data: { edgeId: edge.uuid } };
+    return {
+      status: "success",
+      message: "Edge added succesfully",
+      data: { edgeId: edge.uuid, anchorTo: edge.getAnchorTo, anchorFrom: edge.getAnchorFrom },
+    } satisfies QueryResponse;
   }
 
-  public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs): QueryResponse {
+  public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs) {
     this.uiInputs[nodeUUID] = new CoreNodeUIInputs(nodeUIInputs);
 
     // If output node, update output node id
@@ -284,7 +325,7 @@ export class CoreGraph extends UniqueEntity {
       this.outputNodes[nodeUUID] = nodeUIInputs.inputs.outputId as MediaOutputId;
     }
 
-    return { status: "success" };
+    return { status: "success" } satisfies QueryResponse;
   }
 
   public getUpdatedUIInputs(nodeUUID: UUID, changedUIInputs: Record<string, unknown>) {
@@ -351,9 +392,16 @@ export class CoreGraph extends UniqueEntity {
     return false;
   }
 
-  public removeNode(nodeToDelete: UUID): QueryResponse {
+  public removeNode(nodeToDelete: UUID) {
     const node: Node = this.nodes[nodeToDelete];
-    if (!node) return { status: "error", message: "Node to be deleted does not exist" };
+    if (!node) {
+      return {
+        status: "error",
+        message: "Node to be deleted does not exist",
+      } satisfies QueryResponse;
+    }
+
+    const edges: EdgeBlueprint[] = [];
 
     if (this.outputNodes[nodeToDelete]) {
       delete this.outputNodes[nodeToDelete];
@@ -365,6 +413,12 @@ export class CoreGraph extends UniqueEntity {
         if (!node.getAnchors.hasOwnProperty(anchor)) continue;
         // Remove all edges feeding into node
         if (this.anchors[anchor]?.ioType === AnchorIO.input) {
+          if (this.edgeDest[anchor]) {
+            // Input anchor is a anchorTo
+            const edge = this.edgeDest[anchor];
+            edges.push(this.createEdgeBlueprint(edge.getAnchorFrom, edge.getAnchorTo));
+          }
+
           this.removeEdge(anchor);
         }
         // Remove all edges feeding out of node
@@ -374,6 +428,10 @@ export class CoreGraph extends UniqueEntity {
             const length: number = anchors.length;
             // Remove all edges feeding out of current output anchor
             for (let i = 0; i < length; i++) {
+              if (this.edgeDest[anchors[0]]) {
+                const edge = this.edgeDest[anchors[0]]; // Anchors array of anchorTo
+                edges.push(this.createEdgeBlueprint(edge.getAnchorFrom, edge.getAnchorTo));
+              }
               this.removeEdge(anchors[0]);
             }
           }
@@ -383,23 +441,29 @@ export class CoreGraph extends UniqueEntity {
       }
       // Remove node
       delete this.nodes[node.uuid];
-      return { status: "success" };
+      return {
+        status: "success",
+        data: { edges, uiInputs: this.uiInputs },
+      } satisfies QueryResponse;
     } catch (error) {
-      return { status: "error", message: error as string };
+      return { status: "error", message: error as string } satisfies QueryResponse;
     }
   }
 
-  public removeEdge(anchorTo: AnchorUUID): QueryResponse {
+  public removeEdge(anchorTo: AnchorUUID) {
     // Check if Anchor doesnt have a connecting edge
+    // console.log("RemoveEdge")
+    // console.log(anchorTo)
     if (!(anchorTo in this.edgeDest)) {
       return {
         status: "error",
         message: "Anchor does not have a connecting edge",
-      };
+      } satisfies QueryResponse;
     }
 
     try {
       const edge: Edge = this.edgeDest[anchorTo];
+      const res = { edgeId: edge.uuid, anchorTo: edge.getAnchorTo, anchorFrom: edge.getAnchorFrom };
       // Find index of destination anchor in source anchor's list of destination anchors
       const index: number = this.edgeSrc[edge.getAnchorFrom].indexOf(anchorTo);
       // Remove destination anchor from source anchor's list of destination anchors
@@ -412,16 +476,19 @@ export class CoreGraph extends UniqueEntity {
       // Remove connectiong edge correlating to anchor
       delete this.edgeDest[anchorTo];
 
-      return { status: "success" };
+      return { status: "success", data: res } satisfies QueryResponse;
     } catch (error) {
-      return { status: "error", message: error as string };
+      return { status: "error", message: error as string } satisfies QueryResponse;
     }
   }
 
-  public setNodePos(node: UUID, pos: { x: number; y: number }): QueryResponse {
-    if (!(node in this.nodes)) return { status: "error", message: "Node does not exist" };
+  public setNodePos(node: UUID, pos: { x: number; y: number }) {
+    if (!(node in this.nodes)) {
+      return { status: "error", message: "Node does not exist" } satisfies QueryResponse;
+    }
+
     this.nodes[node].setStyling(new NodeStyling(pos, { w: 0, h: 0 })); // TODO w/h
-    return { status: "success" };
+    return { status: "success" } satisfies QueryResponse;
   }
 
   public updateMetadata(updatedMetadata: Partial<GraphMetadata>) {
@@ -450,6 +517,22 @@ export class CoreGraph extends UniqueEntity {
     // TODO
   }
 
+  /**
+   * This function will find an anchor UUID in a node that has the provided node UUID. The anchor UUID of an anchor
+   * with the same anchor id as provided will be returned.
+   *
+   * @param node UUID of node
+   * @param anchorId Local anchor id
+   * @returns UUID of anchor
+   */
+  public getNodeAnchor(node: UUID, anchorId: string): QueryResponse<{ anchorUUID: AnchorUUID }> {
+    return this.nodes[node].findAnchorUUID(anchorId);
+  }
+
+  public debug() {
+    logger.info(JSON.stringify(this.uiInputs));
+  }
+
   // public printGraph() {
   //   for (const edge in this.edgeDest) {
   //     if (!this.edgeDest.hasOwnProperty(edge)) continue;
@@ -466,35 +549,35 @@ export class CoreGraph extends UniqueEntity {
   //   }
   // }
 
-  // public nodesToJSONObject(): NodeToJSON[] {
-  //   const json: NodeToJSON[] = [];
-  //   for (const node in this.nodes) {
-  //     if (!this.nodes.hasOwnProperty(node)) continue;
-  //     json.push(this.nodes[node].exportJSON());
-  //   }
-  //   return json;
-  // }
+  /**
+   * This function will return the node that owns the anchor which as the provided UUID.
+   *
+   * @param anchorUUID UUID of an Anchor
+   * @returns Parent Node of Anchor
+   */
+  public getAnchorParent(anchorUUID: UUID): Node {
+    return this.anchors[anchorUUID].parent;
+  }
 
-  // public edgesToJSONObject(): EdgeToJSON[] {
-  //   const json: EdgeToJSON[] = [];
-  //   for (const anchorFrom in this.edgeSrc) {
-  //     if (!this.edgeSrc.hasOwnProperty(anchorFrom)) continue;
-  //     const anchorTos: AnchorUUID[] = this.edgeSrc[anchorFrom];
-  //     for (const anchorTo of anchorTos) {
-  //       json.push({
-  //         anchorFrom: {
-  //           parent: this.anchors[anchorFrom].parent.uuid,
-  //           id: anchorFrom,
-  //         },
-  //         anchorTo: {
-  //           parent: this.anchors[anchorTo].parent.uuid,
-  //           id: anchorTo,
-  //         },
-  //       });
-  //     }
-  //   }
-  //   return json;
-  // }
+  /**
+   * This function will create an EdgeBluepint object using two provided anchor UUIDs.
+   *
+   * @param anchorAUUID UUID of an Anchor
+   * @param anchorBUUID UUID of an Anchor
+   * @returns An edge blueprint to be used in graph events
+   */
+  public createEdgeBlueprint(anchorAUUID: UUID, anchorBUUID: UUID): EdgeBlueprint {
+    const input = this.anchors[anchorAUUID].ioType === AnchorIO.input ? anchorAUUID : anchorBUUID;
+    const output = this.anchors[anchorAUUID].ioType === AnchorIO.output ? anchorAUUID : anchorBUUID;
+    return {
+      graphUUID: this.uuid,
+      nodeFrom: {
+        nodeUUID: this.anchors[output].parent.uuid,
+        anchorId: this.anchors[output].anchorId,
+      },
+      nodeTo: { nodeUUID: this.anchors[input].parent.uuid, anchorId: this.anchors[input].anchorId },
+    };
+  }
 }
 
 interface AiAnchors {
@@ -572,11 +655,23 @@ export class Node extends UniqueEntity {
     return this.styling;
   }
 
-  public exportJSON(): NodeToJSON {
-    return {
-      signature: `${this.plugin}.${this.name}`,
-      styling: this.styling!,
-    };
+  /**
+   * This function is used to find the anchor UUID of an anchor with the provided anchor id.
+   *
+   * @param anchorId Local Id of anchor in node
+   * @returns UUID of anchor
+   */
+  public findAnchorUUID(anchorId: string): QueryResponse<{ anchorUUID: AnchorUUID }> {
+    const ids = Object.values(this.anchors).filter((anchor) => anchor.anchorId === anchorId);
+    if (ids.length === 0) {
+      return { status: "error", message: `Anchor with id, ${anchorId} does not exist.` };
+    } else if (ids.length > 1) {
+      return {
+        status: "error",
+        message: `Duplicate anchors exist in a plugin with the local id, ${anchorId}`,
+      };
+    }
+    return { status: "success", data: { anchorUUID: ids[0].uuid } };
   }
 }
 
@@ -631,8 +726,8 @@ export class NodeStyling {
 
 export class CoreNodeUIInputs {
   private readonly inputs: { [key: string]: UIValue };
-  constructor(nodeUIInpust: INodeUIInputs) {
-    this.inputs = nodeUIInpust.inputs;
+  constructor(nodeUIInputs: INodeUIInputs) {
+    this.inputs = nodeUIInputs.inputs;
   }
 
   public get getInputs() {

@@ -5,17 +5,29 @@ import { Blix } from "../Blix";
 import type { Command } from "../registries/CommandRegistry";
 import { TileInstance } from "../registries/TileRegistry";
 import { NodeBuilder } from "./builders/NodeBuilder";
+import { TileBuilder } from "./builders/TileBuilder";
+import { join } from "path";
+import { MediaDisplayType } from "../../../shared/types/media";
+import { TypeclassBuilder } from "./builders/TypeclassBuilder";
 export type PluginSignature = string;
 
 export class Plugin {
   private hasRequiredSelf: boolean;
+  private main: PathLike;
+  private renderers: { [key: string]: PathLike };
 
-  constructor(
-    private packageData: PackageData,
-    private pluginDir: PathLike,
-    private main: PathLike
-  ) {
+  constructor(private packageData: PackageData, private pluginDir: PathLike) {
     this.hasRequiredSelf = false;
+    this.main = join(pluginDir.toString(), packageData.main.toString());
+
+    this.renderers = {};
+    if (typeof packageData.renderers === "object") {
+      Object.keys(packageData.renderers).forEach((key) => {
+        this.renderers[key] = join(pluginDir.toString(), packageData.renderers[key].toString());
+      });
+    } else {
+      logger.warn("Invalid renderers in plugin: " + this.name);
+    }
   }
 
   get name() {
@@ -36,8 +48,7 @@ export class Plugin {
 
   // Load this plugin into a local Node module
   // See: [https://rollupjs.org/es-module-syntax/#dynamic-import]
-  requireSelf(blix: Blix): void {
-    // console.log("Armand")
+  requireSelf(blix: Blix, force = false): void {
     try {
       // This uses Node.js require() to load the plugin as a module
       // TODO: ISOLATION + LIMITED API
@@ -47,12 +58,18 @@ export class Plugin {
       delete require.cache[require.resolve(this.mainPath)];
       const pluginModule = require(this.mainPath);
 
+      // ========== RENDERERS ========== //
+      Object.keys(this.renderers).forEach((key) => {
+        blix.typeclassRegistry.addRenderer(`${this.name}/${key}`, this.renderers[key].toString());
+      });
+
+      // ========== NODES ========== //
       if ("nodes" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to toolbox
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          const ctx = new NodePluginContext();
+          const ctx = new NodePluginContext(this.name);
 
           try {
             pluginModule.nodes[node](ctx); // Execute node builder
@@ -60,11 +77,10 @@ export class Plugin {
           } catch (err) {
             logger.warn(err);
           }
-          // console.log(blix.toolbox.getRegistry()[nodeInstance.getSignature])
         }
-        // blix.aiManager.instantiate(blix.toolbox);
       }
 
+      // ========== COMMANDS ========== //
       if ("commands" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to command registry
         for (const cmd in pluginModule.commands) {
@@ -78,15 +94,35 @@ export class Plugin {
         }
       }
 
+      // ========== TILES ========== //
       if ("tiles" in pluginModule && typeof pluginModule.nodes === "object") {
         // Add to tile registry
 
         for (const tile in pluginModule.tiles) {
           if (!pluginModule.tiles.hasOwnProperty(tile)) continue;
-          blix.tileRegistry.addInstance(
-            pluginModule.tiles[tile](new TilePluginContext()) as TileInstance
-          );
+
+          const ctx = new TilePluginContext(this.name);
+
+          // try {
+          //   pluginModule.tiles[tile](ctx); // Execute tile builder
+          //   blix.tileRegistry.addInstance(ctx.tileBuilder.build); // Add to registry
+          // } catch (err) {
+          //   logger.warn(err);
+          // }
         }
+      }
+
+      // ========== INIT ========== //
+      if ("init" in pluginModule && typeof pluginModule.init === "function") {
+        const ctx = new InitPluginContext(this.name);
+        pluginModule.init(ctx);
+
+        // Obtain typeclasses
+        ctx.typeclassBuilders.forEach((builder) => {
+          const [typeclass, converters] = builder.build;
+          blix.typeclassRegistry.addInstance(typeclass, force);
+          converters.forEach((converter) => blix.typeclassRegistry.addConverter(...converter));
+        });
       }
 
       this.hasRequiredSelf = true;
@@ -98,16 +134,22 @@ export class Plugin {
 }
 
 export class PluginContext {
+  constructor(private plugin: string) {}
+
   // TODO: Add more stuff here
   get blixVersion() {
     return "0.0.1";
+  }
+
+  get pluginId() {
+    return this.plugin;
   }
 }
 
 export class NodePluginContext extends PluginContext {
   private _nodeBuilder!: NodeBuilder;
-  constructor() {
-    super();
+  constructor(plugin: string) {
+    super(plugin);
   }
 
   public get nodeBuilder() {
@@ -125,7 +167,6 @@ export class NodePluginContext extends PluginContext {
 }
 
 export class CommandPluginContext extends PluginContext {
-  private plugin: string;
   private name: string;
   private displayName: string;
   private description: string;
@@ -134,8 +175,7 @@ export class CommandPluginContext extends PluginContext {
   private blix: Blix;
 
   constructor(name: string, plugin: string, blix: Blix) {
-    super();
-    this.plugin = plugin;
+    super(plugin);
     this.name = name;
     this.description = "";
     this.icon = "";
@@ -168,7 +208,7 @@ export class CommandPluginContext extends PluginContext {
 
   public create(): Command {
     return {
-      id: `${this.plugin}.${this.name}`,
+      id: `${this.pluginId}.${this.name}`,
       handler: this.command,
       description: {
         name: this.displayName,
@@ -179,4 +219,37 @@ export class CommandPluginContext extends PluginContext {
   }
 }
 
-class TilePluginContext extends PluginContext {}
+class TilePluginContext extends PluginContext {
+  private _tileBuilder!: TileBuilder;
+  constructor(plugin: string) {
+    super(plugin);
+  }
+
+  public get tileBuilder() {
+    return this._tileBuilder;
+  }
+
+  public instantiate(plugin: string, name: string): TileBuilder {
+    this._tileBuilder = new TileBuilder(plugin, name);
+    return this.tileBuilder;
+  }
+}
+
+class InitPluginContext extends PluginContext {
+  private _typeclassBuilders: TypeclassBuilder[];
+
+  constructor(plugin: string) {
+    super(plugin);
+    this._typeclassBuilders = [];
+  }
+
+  public createTypeclassBuilder(typeclassId: string) {
+    const builder = new TypeclassBuilder(this.pluginId, typeclassId);
+    this._typeclassBuilders.push(builder);
+    return builder;
+  }
+
+  public get typeclassBuilders() {
+    return this._typeclassBuilders;
+  }
+}

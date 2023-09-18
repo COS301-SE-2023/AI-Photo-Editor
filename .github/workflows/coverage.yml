@@ -5,7 +5,7 @@ on:
     branches: [ master, dev ]
     types: [opened, synchronize, reopened, ready_for_review]
   push:
-    branches: [ feature/tests ]
+    branches: [ feature/projects ]
 permissions:
   contents: read
 
@@ -51,7 +51,6 @@ jobs:
         with:
           files: coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
-
   end:
     name: End State ✅✅✅
     runs-on: ubuntu-latest

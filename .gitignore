@@ -1,6 +1,9 @@
 build
 .DS_Store
 
+src/electron/**/*.png
+src/electron/**/*.md
+
 .vscode
 
 # Logs

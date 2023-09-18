@@ -25,7 +25,8 @@ const mainWindow: MainWindow = {
       },
       graphClientApi: {
           graphChanged: jest.fn(),
-          graphRemoved: jest.fn()
+          graphRemoved: jest.fn(),
+          uiInputsChanged: jest.fn()
       },
       utilClientApi: {
           showToast: jest.fn()

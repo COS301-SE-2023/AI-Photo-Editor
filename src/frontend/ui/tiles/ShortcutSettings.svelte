@@ -4,8 +4,18 @@
     type ShortcutAction,
     ShortcutCombo,
   } from "@frontend/lib/stores/ShortcutStore";
+  import { get } from "svelte/store";
 
-  function updateShortcut(action: string, index: number, event: KeyboardEvent) {
+  export let settings: { [key: string]: string[] } = {};
+  let shortcuts: { [key: string]: string[] } = get(shortcutsRegistry.shortcuts);
+
+  $: {
+    if (Object.keys(settings).length === 0) {
+      settings = shortcuts;
+    } else shortcutsRegistry.shortcuts.set(settings);
+  }
+
+  export function updateShortcut(action: string, index: number, event: KeyboardEvent) {
     console.log(action, event);
     const combo: ShortcutCombo | null = ShortcutCombo.fromEvent(event);
     if (!combo) return;
@@ -13,7 +23,7 @@
     shortcutsRegistry.updateActionShortcut(action as ShortcutAction, index, combo);
   }
 
-  function addShortcut(action: string, event: KeyboardEvent) {
+  export function addShortcut(action: string, event: KeyboardEvent) {
     const combo: ShortcutCombo | null = ShortcutCombo.fromEvent(event);
     if (!combo) return;
 
@@ -24,8 +34,8 @@
 </script>
 
 <div class="content">
-  <b>Keyboard Shortcuts Settings</b>
-  <h6>Configure your shortcut preferences here</h6>
+  <b style="color: aliceblue;">Keyboard Shortcuts Settings</b>
+  <h6 style="color: aliceblue">Configure your shortcut preferences here</h6>
   <table class="shortcutsTable">
     {#each Object.entries($shortcutsRegistry) as [action, shortcuts]}
       <tr>
@@ -58,18 +68,24 @@
 <style>
   .content {
     width: 100%;
-    height: 100%;
+    height: 75%;
     padding: 1em;
   }
   .shortcutsTable {
     margin-top: 2em;
+    background-color: rgba(82, 82, 91, 0.705);
+    opacity: 0.8;
+    border-spacing: 10px;
   }
   .shortcutsTable tr {
-    border: 1px solid #32324b;
+    border: 2px solid #32324b;
+    border-radius: 1px;
+    border-spacing: 5px;
   }
   .shortcutsTable td {
     padding-right: 0.5em;
     text-align: center;
+    color: rgba(240, 248, 255, 0.952);
   }
   .shortcutsTable button {
     border: none;

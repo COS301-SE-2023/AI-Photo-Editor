@@ -47,6 +47,10 @@
   //     projectsStore.updateLayout($projectsStore.activeProject.id);
   //   }
   // }
+
+  // projectsStore.subscribe((state) => {
+  //   console.log(state.activeProject?.id);
+  // });
 </script>
 
 <!-- {#if activeLayout && activeProjectStore}
