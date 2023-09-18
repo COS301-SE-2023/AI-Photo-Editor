@@ -1,12 +1,13 @@
 import * as PIXI from 'pixi.js';
 import { Asset, Atom, ImageAtom, PaintAtom, ShapeAtom, TextAtom } from "./types";
 import { diffAtom, diffImageAtom, diffPaintAtom, diffShapeAtom, diffTextAtom } from './diff';
-import { HierarchyAtom } from './render';
+import { HierarchyAtom, randomId } from './render';
 
 export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key: string]: Asset } | undefined, atom: Atom, prevAtom: HierarchyAtom | undefined): {
   pixiAtom: PIXI.Container,
   changed: boolean // Whether the pixiClump is a different PIXI object than before
 } {
+  console.log(">>>---------------------------------");
   if (!atom) return null;
 
   const atomsDiffer = diffAtom(atom, prevAtom);
@@ -24,7 +25,8 @@ export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key:
         sprite.anchor.x = 0.5;
         sprite.anchor.y = 0.5;
 
-        sprite.name = "ImageSprite";
+        sprite.name = `ImageSprite(${randomId()})`;
+        // console.log("DESTROY PREV ATOM");
         prevAtom?.container?.destroy();
         return { pixiAtom: sprite, changed: true };
       }
@@ -57,7 +59,7 @@ export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key:
 
       shapeContainer.addChild(shape);
 
-      shapeContainer.name = "ShapeContainer";
+      shapeContainer.name = `ShapeContainer(${randomId()})`;
       return { pixiAtom: shapeContainer, changed: true };
 
     case "text":
