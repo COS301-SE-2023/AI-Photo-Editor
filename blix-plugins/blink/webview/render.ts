@@ -225,10 +225,11 @@ function renderClump(
 
     resClump.addChild(content);
   } else { content = resClump.getChildAt(0) as PIXI.Container; }
+  content.visible = true;
 
   console.log(`==> ${newContainer ? "" : "NO "}NEW RESCLUMP (${resClump.name.split("(")[1].slice(0, 4)})`);
 
-  if (childChanged || diffs.has("filters")) {
+  if (childChanged || newContainer || diffs.has("filters")) {
     //========== BUILD CONTENT ==========//
 
     //Add children to content
@@ -271,25 +272,36 @@ function renderClump(
 
     content.sortChildren();
 
-    if (clump.filters && clump.filters.length > 0)
+    if ((diffs.has("filters") || childChanged) && clump.filters && clump.filters.length > 0)
     {
       //===== FILTERS =====//
-      resClump.addChild(applyFilters(blink, content, clump.filters));
+      console.log("APPLY FILTER", content.name);
+      const filterSprite = applyFilters(blink, content, clump.filters);
+      // resClump.addChildAt(content, 0);
+      if (resClump.children.length > 1) {
+        resClump.removeChildAt(1);
+      }
+      resClump.addChildAt(filterSprite, 1);
     }
     else
     {
       //===== ADD CONTENT WITHOUT FLATTENING =====//
       if (childChanged) {
         console.log("RESCLUMP CHILDREN", resClump.children);
-        // if (newContainer) {
-        //   resClump.addChild(content);
-        // }
       }
     }
   }
 
+  if (resClump.children.length > 1) {
+    // If we've applied a filter, hide the content
+    content.visible = false;
+  }
+
   // Get bounds before applying transform
   const clumpBounds = resClump.getBounds();
+  // TODO: Optimize with resClump._bounds.getRectangle() on children,
+  // to avoid recalculating all the way down the hierarchy
+  // Also: Look into .getLocalBounds() instead
 
   //========== APPLY CLUMP PROPERTIES ==========//
   if (diffs.has("transform")) {
