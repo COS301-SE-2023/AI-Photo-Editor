@@ -44,6 +44,10 @@ class CacheStore {
     });
   }
 
+  public addCacheObject(Blob: Blob) {
+    this.ws.send(Blob);
+  }
+
   public get subscribe() {
     return this.cacheStore.subscribe;
   }

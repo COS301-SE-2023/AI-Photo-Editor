@@ -13,6 +13,7 @@ import WebSocket from "ws";
 import { randomBytes } from "crypto";
 import logger from "../../utils/logger";
 import { ipcMain } from "electron";
+import { showOpenDialog } from "../../utils/dialog";
 
 // The main interface which this manager must expose is:
 //  - get(cacheUUID: CacheUUID): CacheObject
@@ -75,7 +76,6 @@ export class CacheManager {
                   JSON.stringify({ type: "cache-update", cache: Object.keys(this.cache) })
                 );
               }
-
               break;
             case "cache-subscribe":
               this.listeners.add(socket);
