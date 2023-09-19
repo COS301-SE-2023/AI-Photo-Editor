@@ -284,13 +284,7 @@ autoUpdater.on("update-available", () => {
 });
 
 autoUpdater.on("update-not-available", () => {
-  notification = new Notification({
-    title: "Blix",
-    body: "Your software is up to date.",
-    silent: true,
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
-  });
-  notification.show();
+  blix?.sendInformationMessage("You are up to date!");
 });
 
 autoUpdater.on("update-downloaded", () => {
@@ -307,12 +301,8 @@ autoUpdater.on("update-downloaded", () => {
 });
 
 autoUpdater.on("error", (err) => {
-  notification = new Notification({
-    title: "Blix",
-    body: JSON.stringify(err),
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
-  });
-  notification.show();
+  blix?.sendErrorMessage("Error checking for updates.");
+  logger.error(JSON.stringify(err));
 });
 
 // Menu

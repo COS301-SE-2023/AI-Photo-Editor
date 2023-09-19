@@ -1,10 +1,10 @@
 {
   "name": "blix",
   "description": "Blix - A cross-platform AI-assisted graph photo editor",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "repository": {
     "type": "git",
-    "url": "https://github.com/COS301-SE-2023/AI-Photo-Editor"
+    "url": "https://github.com/ArmandKrynauw/Blix"
   },
   "author": {
     "name": "The Spanish Inquisition",
