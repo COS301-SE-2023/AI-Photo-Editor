@@ -22,9 +22,9 @@
   $: valStore = inputStore.inputs[config.componentId];
 
   onMount(() => {
-    valStore.subscribe((v) => {
-      console.log("DIAL", v);
-    });
+    // valStore.subscribe((v) => {
+    //   console.log("DIAL", v);
+    // });
   });
 
   let mouseover = false;

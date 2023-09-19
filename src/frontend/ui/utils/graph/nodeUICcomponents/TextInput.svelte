@@ -15,13 +15,22 @@
   $: valStore = inputStore.inputs[config.componentId];
 </script>
 
-<input type="text" bind:value="{$valStore}" />
+<label>{config.label} <input type="text" bind:value="{$valStore}" /></label>
 
 <style>
+  label {
+    color: #cdd6f4;
+    /* background-color: #1f1f28; */
+    border: none;
+    padding: 0.1em;
+  }
+
   input {
     color: #cdd6f4;
     background-color: #1f1f28;
     border: none;
     padding: 0.1em;
+
+    float: right;
   }
 </style>

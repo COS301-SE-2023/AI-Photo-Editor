@@ -206,7 +206,7 @@ height="{graphNode.dims.h}" -->
 
   .node {
     box-sizing: border-box;
-    width: fit-content;
+    min-width: max-content;
     border-radius: 8px;
     height: fit-content;
     position: relative;

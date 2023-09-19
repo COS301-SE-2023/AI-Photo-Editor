@@ -7,6 +7,8 @@
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
 
+  let filePicker: HTMLInputElement;
+
   if (!inputStore.inputs[config.componentId]) inputStore.inputs[config.componentId] = writable("");
 
   $: valStore = inputStore.inputs[config.componentId];
@@ -14,19 +16,38 @@
   let files: FileList | undefined;
 
   $: if (files) {
-    valStore.set(files[0]?.path ?? "");
+    valStore.set(files[0]?.path ?? $valStore);
   } else {
-    valStore.set("");
+    // valStore.set("");
   }
 </script>
 
-<input type="file" bind:files="{files}" />
+<input type="file" class="filePicker" bind:files="{files}" bind:this="{filePicker}" />
+<label
+  ><input
+    type="button"
+    value="Browse..."
+    on:click="{() => {
+      filePicker.click();
+    }}"
+  />
+  {$valStore}</label
+>
 
 <style>
+  .filePicker {
+    display: none;
+  }
+
   input {
-    color: #cdd6f4;
-    background-color: #1f1f28;
-    border: none;
-    padding: 0.1em;
+    padding: 0.2em;
+  }
+
+  label {
+    max-width: 20em;
+    padding: 0.2em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>

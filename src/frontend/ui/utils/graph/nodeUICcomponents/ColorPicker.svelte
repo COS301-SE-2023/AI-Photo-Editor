@@ -13,17 +13,7 @@
   if (!inputStore.inputs[config.componentId])
     inputStore.inputs[config.componentId] = writable("#f43e5cff");
 
-  console.log("CONFIG", config);
-  console.log("INPUTS", inputStore.inputs);
-
   $: valStore = inputStore.inputs[config.componentId];
-
-  setTimeout(() => {
-    // valStore = inputStore.inputs[config.componentId];
-    console.log("VALSTORE", valStore, $valStore);
-  }, 200);
-
-  console.log("VALSTORE", valStore, $valStore);
 </script>
 
 <div class="picker">
@@ -31,9 +21,10 @@
   <!-- <ColorPicker parameterStore="{inputStore.inputs[config.componentId]}" /> -->
 
   {#if typeof $valStore === "string"}
+    <!-- label="{config.label}" -->
     <ColorPicker
       bind:hex="{$valStore}"
-      label="{config.label}"
+      label=""
       components="{{
         wrapper: ColorPickerWrapper,
         textInput: ColorPickerTextInput,

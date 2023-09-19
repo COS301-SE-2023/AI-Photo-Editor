@@ -5,6 +5,7 @@
     import { type Writable } from "svelte/store";
     import { renderApp } from "./render";
     import { type BlinkCanvas } from "./types";
+    import Debug from "./Debug.svelte";
 
     export let media: Writable<BlinkCanvas>;
     export let send: (msg: string, data: any) => void;
@@ -84,10 +85,24 @@
         let imgCanvas = new PIXI.Container();
         imgCanvas.name = "imgCanvas";
 
+        // canvas
         let imgCanvasBlock = new PIXI.Graphics();
         imgCanvasBlock.beginFill(0xffffff, 0.9);
         imgCanvasBlock.drawRect(0, 0, imgCanvasBlockW, imgCanvasBlockH);
 
+        // x-axis
+        imgCanvasBlock.lineStyle();
+        imgCanvasBlock.moveTo(0, imgCanvasBlockH/2);
+        imgCanvasBlock.lineStyle(1, 0xff0000);
+        imgCanvasBlock.lineTo(imgCanvasBlockW, imgCanvasBlockH/2);
+
+        // y-axis
+        imgCanvasBlock.lineStyle();
+        imgCanvasBlock.moveTo(imgCanvasBlockW/2, 0);
+        imgCanvasBlock.lineStyle(1, 0x00ff00);
+        imgCanvasBlock.lineTo(imgCanvasBlockW/2, imgCanvasBlockH);
+
+        imgCanvasBlock.position.set(-imgCanvasBlockW/2, -imgCanvasBlockH/2);
         imgCanvas.addChild(imgCanvasBlock);
 
         viewport.addChild(imgCanvas);
@@ -110,7 +125,7 @@
                     const viewportFitX = imgCanvasBlockW + 2 * imgCanvasInitialPadding;
                     const viewportFitY = imgCanvasBlockH + 2 * imgCanvasInitialPadding;
                     viewport.fit(true, viewportFitX, viewportFitY);
-                    viewport.moveCenter(imgCanvasBlockW/2, imgCanvasBlockH/2);
+                    viewport.moveCenter(0, 0);
 
                     hasCentered = true;
                 }
@@ -147,7 +162,8 @@
 </div>
 
 <div class="fullScreen">
-    {JSON.stringify($media, null, 2)}
+    <Debug data={$media} />
+    <!-- {JSON.stringify($media, null, 2)} -->
 </div>
 
 <style>
@@ -178,7 +194,7 @@
         white-space: break-spaces;
         pointer-events: none;
         z-index: 10;
-        font-size: 0.6em;
+        font-size: 0.2em;
         color: white;
         height: 100%;
     }

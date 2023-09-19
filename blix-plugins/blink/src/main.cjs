@@ -313,13 +313,7 @@ const nodes = {
 
         nodeBuilder.define(async (input, uiInput, from) => {
             const canvas = {
-                assets: {
-                    "1": {
-                      class: "asset",
-                      type: "image",
-                      data: "media/bird.png",
-                    },
-                },
+                assets: {},
                 content: {
                     class: "clump",
                     nodeUUID: uiInput["tweaks"].nodeUUID,
@@ -423,32 +417,6 @@ const nodes = {
             "Right": "right"
           }
         });
-        ui.addDropdown({
-            componentId: "textBaseline",
-            label: "Baseline",
-            defaultValue: "top",
-            triggerUpdate: true,
-        }, {
-          options: {
-              "Top": "top",
-              "Hanging": "hanging",
-              "Middle": "middle",
-              "Alphabetic": "alphabetic",
-              "Ideographic": "ideographic",
-              "Bottom": "bottom",
-          }
-        });
-        for (let numInp of ["width", "height"]) {
-            ui.addNumberInput(
-                {
-                    componentId: numInp.replace(" ", ""),
-                    label: numInp[0].toUpperCase() + numInp.slice(1),
-                    defaultValue: 100,
-                    triggerUpdate: true,
-                },
-                {}
-            );
-        }
         const getTransform = addTransformInput(ui, ["position", "rotation"]);
 
         ui.addColorPicker({
@@ -474,13 +442,7 @@ const nodes = {
 
         nodeBuilder.define(async (input, uiInput, from) => {
             const canvas = {
-                assets: {
-                    "1": {
-                      class: "asset",
-                      type: "image",
-                      data: "media/bird.png",
-                    },
-                },
+                assets: {},
                 content: {
                     class: "clump",
                     nodeUUID: uiInput["tweaks"].nodeUUID,
@@ -503,7 +465,7 @@ const nodes = {
                             fontStyle: uiInput["fontStyle"],
                             fontWeight: uiInput["fontWeight"],
                             textAlign: uiInput["textAlign"],
-                            textBaseline: uiInput["textBaseline"],
+                            textBaseline: "alphabetic"
                         }
                     ]
                 }

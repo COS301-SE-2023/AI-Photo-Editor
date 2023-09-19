@@ -13,13 +13,14 @@
 
   $: webviewUpdated(webview);
 
+  let webviewReady = false;
+
   // Called when the webview is created/recreated
   function webviewUpdated(webview: Electron.WebviewTag | null) {
     if (!webview) return;
 
     // To receive a message from the webview, add an event listener for the ipc-message event:
     webview?.addEventListener("ipc-message", (event) => {
-      // console.log("Message received from webview:", event.channel, event.args);
       switch (event.channel) {
         case "tweak":
           const data = event.args[0];
@@ -38,6 +39,7 @@
   $: updateMedia(media);
 
   function updateMedia(media: unknown) {
+    if (!webviewReady) return;
     // To manually execute a javascript function within the webview:
     // const res = await webview?.executeJavaScript("app.dispatchMessage('hi there!')");
 
@@ -49,19 +51,21 @@
   $: initWebviewMedia(webview);
 
   function initWebviewMedia(webview: Electron.WebviewTag | null) {
-    if (webview) {
-      console.log("WEBVIEW");
-      webview.addEventListener("dom-ready", () => {
-        updateMedia(media);
-      });
+    webviewReady = false;
+    if (!webview) return;
 
-      // Force focus the webview when the mouse is over it.
-      // This is necessary to prevent the user having to
-      // click into it every time before it can receive input
-      webview.addEventListener("mouseover", () => {
-        webview.focus();
-      });
-    }
+    // console.log("WEBVIEW");
+    webview.addEventListener("dom-ready", () => {
+      webviewReady = true;
+      updateMedia(media);
+    });
+
+    // Force focus the webview when the mouse is over it.
+    // This is necessary to prevent the user having to
+    // click into it every time before it can receive input
+    webview.addEventListener("mouseover", () => {
+      webview.focus();
+    });
   }
 
   function reload() {
