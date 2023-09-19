@@ -13,6 +13,7 @@ import type { MediaOutput } from "../../../src/shared/types/media";
 import { CoreGraphUpdateParticipant } from "../../../src/electron/lib/core-graph/CoreGraphInteractors";
 import { MediaSubscriber } from "../../../src/electron/lib/media/MediaSubscribers";
 import { measureMemory } from "vm";
+import { TypeclassRegistry } from "../../../src/electron/lib/registries/TypeclassRegistry";
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
 
@@ -92,11 +93,13 @@ describe("Test graph importer", () => {
 
     let mediaManager: MediaManager;
     let blix: Blix;
+    let typeRegistry: TypeclassRegistry
 
     beforeEach(async() => {
         blix = new Blix();
         await blix.init(mainWindow);
-        mediaManager = new MediaManager(mainWindow, blix.graphInterpreter, blix.graphManager);
+        typeRegistry = new TypeclassRegistry(blix);
+        mediaManager = new MediaManager(typeRegistry, blix.graphInterpreter, blix.graphManager);
     });
 
     test("Media manager should be defined", () => {
