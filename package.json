@@ -1,7 +1,7 @@
 {
   "name": "blix",
   "description": "Blix - A cross-platform AI-assisted graph photo editor",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "repository": {
     "type": "git",
     "url": "https://github.com/ArmandKrynauw/Blix.git"

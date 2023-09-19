@@ -31,7 +31,7 @@ jobs:
             npm run dist -- --linux deb
           elif [ "${{ matrix.os }}" = "windows-latest" ]; then
             npm run dist -- --windows nsis
-          elif [ "${{ matrix.os }}" = "macos-latest' ]; then
+          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
             echo "macOS build not supported yet"
           fi
         env:
