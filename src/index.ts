@@ -260,10 +260,11 @@ app.on("web-contents-created", (e, contents) => {
 
 // ========== AUTO UPDATER ==========//
 
-if (isProd)
+if (isProd) {
   autoUpdater.checkForUpdates().catch((err) => {
     logger.error(JSON.stringify(err));
   });
+}
 
 autoUpdater.logger = logger;
 
