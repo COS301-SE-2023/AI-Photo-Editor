@@ -17,8 +17,9 @@ const checkForUpdatesCommand: Command = {
       if (response) {
         return { status: "success" };
       } else {
-        ctx.sendInformationMessage("You are up to date!");
-        return { status: "success", message: "No updates available" };
+        const version = JSON.stringify(autoUpdater.currentVersion);
+        ctx.sendInformationMessage(`You are up to date! Blix ${version} is the latest version.`);
+        return { status: "success" };
       }
     } catch (error) {
       logger.error(JSON.stringify(error));
