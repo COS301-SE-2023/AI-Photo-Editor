@@ -5,12 +5,13 @@
   import { mediaStore } from "../../lib/stores/MediaStore";
   import type { GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
   import { writable, type Readable } from "svelte/store";
-  import type { MediaDisplayType, DisplayableMediaOutput } from "@shared/types/media";
+  import { MediaDisplayType, type DisplayableMediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
   import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
   import SelectionBox from "../utils/graph/SelectionBox.svelte";
   import { type SelectionBoxItem } from "../../types/selection-box";
   import WebView from "./WebView.svelte";
+  import { TweakApi } from "lib/webview/TweakApi";
 
   const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
 
@@ -22,7 +23,7 @@
       .map((id) => ({ id, title: id }));
   }
 
-  let mediaId = writable("default");
+  let mediaId = writable("");
   let oldMediaId: string | null = null;
 
   const unsubMedia = mediaId.subscribe((newMediaId) => {
@@ -67,6 +68,10 @@
   function getDisplayProps(media: DisplayableMediaOutput) {
     let res = media.display.props;
     if (media.display.contentProp !== null) res[media.display.contentProp] ??= media.content; // If content nullish, use default value
+    if (media.display.displayType === MediaDisplayType.Webview) {
+      // Provide Tweak API access
+      res["tweakApi"] = new TweakApi(media.graphUUID);
+    }
     return res;
   }
 

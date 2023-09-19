@@ -58,7 +58,7 @@ const nodes = {
         ui.addColorPicker({
             componentId: "colorPicker",
             label: "Pick a color",
-            defaultValue: "red",
+            defaultValue: "#ff0000ff",
             triggerUpdate: true,
         }, {})
         nodeBuilder.setUI(ui);

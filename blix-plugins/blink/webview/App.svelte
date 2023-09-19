@@ -2,9 +2,9 @@
     import * as PIXI from "pixi.js";
     import { Viewport } from "pixi-viewport";
     import { onDestroy, onMount, tick } from "svelte";
-    import { Writable } from "svelte/store";
+    import { type Writable } from "svelte/store";
     import { renderApp } from "./render";
-    import { BlinkCanvas, canvas1 } from "./clump";
+    import { type BlinkCanvas, canvas1 } from "./clump";
 
     export let media: Writable<BlinkCanvas>;
     export let send: (msg: string, data: any) => void;
@@ -87,10 +87,7 @@
 
         imgCanvas.addChild(imgCanvasBlock);
 
-        const hierarchy = new PIXI.Container();
         viewport.addChild(imgCanvas);
-        viewport.addChild(hierarchy);
-
 
         const viewportFitX = imgCanvasBlockW + 2 * imgCanvasInitialPadding;
         const viewportFitY = imgCanvasBlockH + 2 * imgCanvasInitialPadding;
@@ -100,7 +97,7 @@
         //===== RENDER Blink =====//
         let hasCentered = false;
             media.subscribe(async (media) => {
-                const success = renderApp(blink, hierarchy, media, send);
+                const success = renderApp(blink, media, viewport, send);
 
                 // Necessary to fix an occasional race condition with PIXI failing to load
                 // Something seems to go wrong due to the canvas having to resize to the window

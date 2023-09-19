@@ -6,13 +6,14 @@ import {
   OutputAnchorInstance,
   checkEdgeDataTypesCompatible,
 } from "../registries/ToolboxRegistry";
-import { type NodeSignature } from "../../../shared/ui/ToolboxTypes";
+import { INode, type NodeSignature } from "../../../shared/ui/ToolboxTypes";
 import type { INodeUIInputs, QueryResponse, UIValue } from "../../../shared/types";
 import { type GraphMetadata, type SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 import { type MediaOutputId } from "../../../shared/types/media";
 import type { EdgeBlueprint } from "./CoreGraphEventManger";
 import logger from "../../utils/logger";
-import { populateReadonlyUIInputs } from "../ui-inputs/ReadonlyInputComponents";
+import { populateDials, getDialUpdatesOnUIInputsChanged } from "../ui-inputs/DialComposers";
+import { NodeUIComponent } from "@shared/ui/NodeUITypes";
 
 // =========================================
 // Explicit types for type safety
@@ -187,8 +188,8 @@ export class CoreGraph extends UniqueEntity {
         this.outputNodes[n.uuid] = "default"; // TODO: set this to a unique id and propagate to the frontend
       }
 
-      const inputValues: Record<string, unknown> = {};
-      let uiInputsInitialized = false;
+      let inputValues: Record<string, unknown> = {};
+      // let uiInputsInitialized = false;
       // New Node with default Ui Input Values
       if (!uiValues) {
         const inputs: { [key: string]: unknown } = {};
@@ -197,36 +198,48 @@ export class CoreGraph extends UniqueEntity {
           inputValues[config.componentId] = config.defaultValue;
           inputs[config.componentId] = config.defaultValue;
         });
-        this.uiInputs[n.uuid] = new CoreNodeUIInputs({ inputs, changes });
+        this.uiInputs[n.uuid] = new CoreNodeUIInputs({ inputs, changes }, {});
       } else {
         // Loading in input values from an existing node
         // console.log("UIVALUES: ", uiValues)
-        this.uiInputs[n.uuid] = new CoreNodeUIInputs({
-          inputs: uiValues,
-          changes: [...Object.keys(uiValues)],
-        });
+        this.uiInputs[n.uuid] = new CoreNodeUIInputs(
+          {
+            inputs: uiValues,
+            changes: [...Object.keys(uiValues)],
+          },
+          {}
+        );
         // console.log(this.uiInputs[n.uuid].getInputs)
         Object.values(node.uiConfigs).forEach((config) => {
           inputValues[config.componentId] = uiValues[config.componentId];
         });
+        // console.log(inputValues);
+      }
+
+      // Handle special readonly UI component types (e.g. TweakDial)
+      const { dials: dialInputs, filledInputs: filledDialInputs } = populateDials(node.ui, {
+        nodeUUID: n.uuid,
+        uiInputs: Object.keys(inputValues),
+        uiInputChanges: Object.keys(inputValues), // When node is created, all inputs have 'changed'
+      });
+      inputValues = { ...inputValues, ...filledDialInputs };
+
+      // Handle the UI input initializer
+      const initializedInputs = node.uiInitializer(inputValues);
+      let uiInputsInitialized = false;
+      const uiChanges = Object.keys(initializedInputs);
+      if (typeof initializedInputs === "object" && uiChanges.length > 0) {
+        inputValues = { ...inputValues, ...initializedInputs };
+
+        // Update the graph's UI inputs
+        const uiInputsPayload: INodeUIInputs = {
+          inputs: inputValues,
+          changes: uiChanges,
+        };
+        this.uiInputs[n.uuid] = new CoreNodeUIInputs(uiInputsPayload, dialInputs);
 
         uiInputsInitialized = true;
       }
-
-      // Handle the UI input initializer
-      // const initializedInputs = node.uiInitializer(inputValues);
-      // const uiChanges = Object.keys(initializedInputs);
-      // if (typeof initializedInputs === "object" && uiChanges.length > 0) {
-      //   inputValues = { ...inputValues, ...initializedInputs };
-
-      //   // Update the graph's UI inputs
-      //   const uiInputsPayload: INodeUIInputs = {
-      //     inputs: inputValues,
-      //     changes: uiChanges,
-      //   };
-      //   this.uiInputs[n.uuid] = new CoreNodeUIInputs(uiInputsPayload);
-
-      // }
 
       // console.log(QueryResponseStatus.success)
       const anchors: AiAnchors = n.returnAnchors();
@@ -318,7 +331,21 @@ export class CoreGraph extends UniqueEntity {
   }
 
   public updateUIInputs(nodeUUID: UUID, nodeUIInputs: INodeUIInputs) {
-    this.uiInputs[nodeUUID] = new CoreNodeUIInputs(nodeUIInputs);
+    // Update any DiffDials for changes
+    const dialUpdates = getDialUpdatesOnUIInputsChanged(
+      nodeUIInputs,
+      this.uiInputs[nodeUUID].dials
+    );
+
+    const dialUpdatedInputs: INodeUIInputs = {
+      inputs: { ...nodeUIInputs.inputs, ...dialUpdates },
+      changes: nodeUIInputs.changes,
+    };
+
+    this.uiInputs[nodeUUID] = new CoreNodeUIInputs(
+      dialUpdatedInputs,
+      this.uiInputs[nodeUUID].dials
+    );
 
     // If output node, update output node id
     if (this.outputNodes[nodeUUID]) {
@@ -726,8 +753,11 @@ export class NodeStyling {
 
 export class CoreNodeUIInputs {
   private readonly inputs: { [key: string]: UIValue };
-  constructor(nodeUIInputs: INodeUIInputs) {
+  readonly dials: { [key: string]: NodeUIComponent };
+
+  constructor(nodeUIInputs: INodeUIInputs, dials: { [key: string]: NodeUIComponent }) {
     this.inputs = nodeUIInputs.inputs;
+    this.dials = dials;
   }
 
   public get getInputs() {
