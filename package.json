@@ -1,7 +1,7 @@
 {
   "name": "blix",
-  "description": "Blix - A cross-platform AI-assisted graph photo editor",
-  "version": "1.0.9",
+  "description": "Blix - An AI-assisted graph photo editor",
+  "version": "1.0.10",
   "repository": {
     "type": "git",
     "url": "https://github.com/ArmandKrynauw/Blix.git"
@@ -168,7 +168,7 @@
   "build": {
     "productName": "Blix",
     "appId": "com.the-spanish-inquisition.blix",
-    "copyright": "Copyright © 2023 The Spanish Inquisition",
+    "copyright": "Copyright © 2023 Blix",
     "win": {
       "target": [
         "nsis"
@@ -195,14 +195,7 @@
     ],
     "extraResources": [
       "assets/**",
-      "blix-plugins/**",
-      {
-        "from": "src/electron/lib/ai/python",
-        "to": "python",
-        "filter": [
-          "**/*.py"
-        ]
-      }
+      "blix-plugins/**"
     ],
     "publish": [
       {
