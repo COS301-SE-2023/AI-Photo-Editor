@@ -21,7 +21,7 @@
   import Browser from "../../tiles/Browser.svelte";
   import Assets from "../../tiles/Assets.svelte";
   import WebCamera from "../../tiles/WebCamera.svelte";
-  import ShortcutSettings from "../../tiles/ShortcutSettings.svelte";
+  import ShortcutSettings from "../settings/Hotkeys.svelte";
   import { PanelGroup, PanelLeaf, type PanelNode } from "@frontend/lib/PanelNode";
   import type { PanelType } from "@shared/types";
   import { focusedPanelStore } from "../../../lib/PanelNode";
