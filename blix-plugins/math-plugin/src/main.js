@@ -179,7 +179,12 @@ const tiles = {
             max: 100,
             step: 1,
             value: 50
-        });
+        }).addKnob({
+          componentId: "knob1",
+          label: "Hue",
+          defaultValue: "", // SUGGESTION: Use the default value to indicate the command to run?
+          updatesBackend: false,
+        }, {})
 
         tile2.statusbar.addSlider({
             componentId: "slider2",
@@ -191,7 +196,12 @@ const tiles = {
             max: 100,
             step: 1,
             value: 50
-        });
+        }).addKnob({
+          componentId: "knob2",
+          label: "Hue",
+          defaultValue: "", // SUGGESTION: Use the default value to indicate the command to run?
+          updatesBackend: false,
+        }, {})
 
         tile3 = tileBuilder.createUIBuilder();
         tile3.addStatusbar("bottom");

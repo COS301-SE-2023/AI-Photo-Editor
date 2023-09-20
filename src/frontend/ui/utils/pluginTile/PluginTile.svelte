@@ -77,17 +77,17 @@
         />
       {:else}
         <!-- <WebView media="" /> -->
-        <Media />
+        <Browser />
       {/if}
     </div>
   {/if}
   {#if componentUI["sidebar"]}
-    <div class="sidebar border border-zinc-500">
+    <div class="sidebar overflow-auto border border-zinc-500">
       <TileUiFragment ui="{componentUI['sidebar']}" uiConfigs="{uiConfigs}" />
     </div>
   {/if}
   {#if componentUI["statusbar"]}
-    <div class="statusbar overflow-clip border border-zinc-500">
+    <div class="statusbar overflow-auto border border-zinc-500">
       <TileUiFragment ui="{componentUI['statusbar']}" uiConfigs="{uiConfigs}" />
     </div>
   {/if}
@@ -100,6 +100,18 @@
     display: grid;
     grid-template-columns: auto;
     grid-template-rows: auto;
+  }
+  .container::-webkit-scrollbar {
+    width: 1em;
+  }
+
+  .container::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .container::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    outline: 1px solid slategrey;
   }
 
   .main {

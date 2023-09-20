@@ -49,9 +49,9 @@
 
 <style>
   .wrapperh {
-    /* position: relative; */
+    position: relative;
     height: 60px;
-    width: 20rem;
+    width: 10rem;
 
     &::before,
     &::after {
@@ -122,7 +122,7 @@
     margin: 0;
     cursor: ew-resize;
     padding: 0;
-    width: 100%;
+    width: 10rem;
     height: 3.5rem;
     border-radius: 1rem;
     overflow: hidden;
