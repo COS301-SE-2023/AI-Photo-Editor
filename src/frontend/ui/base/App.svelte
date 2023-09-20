@@ -55,7 +55,7 @@
       />
     {/if}
 
-    <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
+    <div class="navbar {$blixStore.system.platform === 'darwin' ? 'pl-20' : ''}">
       <Navbar />
     </div>
     <div class="layout">

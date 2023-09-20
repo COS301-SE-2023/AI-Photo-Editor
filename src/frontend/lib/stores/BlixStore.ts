@@ -5,32 +5,43 @@ import { tileStore } from "./TileStore";
 import { shortcutsRegistry } from "./ShortcutStore";
 import type { KeyboardShortcut } from "@shared/types";
 
-interface BlixStore {
-  blixReady: boolean;
-  systemInfo: {
-    nodeVersion: string;
-    systemPlatform: string;
-    systemType: string;
-    systemVersion: string;
-  };
+const blixStoreDefaults = {
+  blixReady: false,
+  system: {
+    nodeVersion: "",
+    platform: "",
+    type: "",
+    version: "",
+  },
+  blix: {
+    version: "",
+  },
+};
+
+type BlixStoreState = typeof blixStoreDefaults;
+
+export class BlixStore {
+  store = writable<BlixStoreState>(blixStoreDefaults);
+
+  public async checkForUpdates() {
+    return await window.apis.utilApi.checkForUpdates();
+  }
+
+  public get subscribe() {
+    return this.store.subscribe;
+  }
+
+  public update(fn: (state: BlixStoreState) => BlixStoreState) {
+    this.store.update(fn);
+  }
 }
 
-// Currently used to store some startup config. Can potentially be used to store
-// some other global state in the future.
-export const blixStore = writable<BlixStore>({
-  blixReady: false,
-  systemInfo: {
-    nodeVersion: "",
-    systemPlatform: "",
-    systemType: "",
-    systemVersion: "",
-  },
-});
+export const blixStore = new BlixStore();
 
 export async function setInitialStores() {
   // BLix store
-  const res = await window.apis.utilApi.getSystemInfo();
-  blixStore.update((state) => ({ ...state, systemInfo: res }));
+  const res = await window.apis.utilApi.getInfo();
+  blixStore.update((state) => ({ ...state, ...res }));
 
   // Command store
   const command = await window.apis.commandApi.getCommands();
@@ -49,27 +60,4 @@ export async function setInitialStores() {
     // TODO: Add some sort of schema check
     shortcutsRegistry.refreshStore(shortcuts.data as KeyboardShortcut[]);
   }
-
-  // Graph store
-  // const allGraphIds = await window.apis.graphApi.getAllGraphUUIDs();
-  // console.log("ALL GRAPHS", allGraphIds);
-
-  // for (const graphId of allGraphIds) {
-  //   const graph = await window.apis.graphApi.getGraph(graphId);
-  // console.log("BACKEND GRAPH", graph.getNodes);
-
-  // TODO: REMOVE; This is just for testing
-  // const uiGraph = new UIGraph(graphId);
-  // const node1 = new GraphNode("1");
-  // const node2 = new GraphNode("2");
-  // const node3 = new GraphNode("a");
-  // uiGraph.nodes[node1.uuid] = node1;
-  // uiGraph.nodes[node2.uuid] = node2;
-  // uiGraph.nodes[node3.uuid] = node3;
-  // node1.pos.x = 100;
-  // node1.pos.y = 100;
-
-  // graphMall.refreshGraph(uiGraph.uuid, uiGraph);
-  // }
-  // exportLayout()
 }

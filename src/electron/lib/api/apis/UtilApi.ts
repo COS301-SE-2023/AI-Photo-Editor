@@ -14,6 +14,7 @@ import {
 } from "../../../utils/settings";
 import type { Setting, QueryResponse } from "../../../../shared/types";
 import { type ChatModel } from "../../../lib/ai/Model";
+import { autoUpdater } from "electron-updater";
 // import dotenv from "dotenv";
 // dotenv.config();
 
@@ -25,18 +26,22 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     this.blix = blix;
   }
 
-  async getSystemInfo() {
-    const nodeVersion = process.version;
-    const systemPlatform = platform().toString();
-    const systemType = type();
-    const systemVersion = release();
-
+  async getInfo() {
     return {
-      nodeVersion,
-      systemPlatform,
-      systemType,
-      systemVersion,
+      system: {
+        nodeVersion: process.version,
+        platform: platform().toString(),
+        type: type(),
+        version: release(),
+      },
+      blix: {
+        version: autoUpdater.currentVersion.version,
+      },
     };
+  }
+
+  async checkForUpdates() {
+    return await autoUpdater.checkForUpdates();
   }
 
   async sendPrompt(prompt: string, id: UUID): Promise<QueryResponse> {
