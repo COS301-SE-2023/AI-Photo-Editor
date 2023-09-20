@@ -8,7 +8,6 @@
   let shortcuts = shortcutsRegistry.getFormattedShortcutsReactive();
 
   export function updateShortcut(action: string, index: number, event: KeyboardEvent) {
-    console.log(action, event);
     const combo: ShortcutCombo | null = ShortcutCombo.fromEvent(event);
     if (!combo) return;
 
@@ -25,6 +24,11 @@
     (event.target as HTMLButtonElement).blur();
     shortcutsRegistry.persistShortcuts();
   }
+
+  function removeShortcutHotkey(action: ShortcutAction, index: number) {
+    shortcutsRegistry.removeShortcutHotkey(action, index);
+    shortcutsRegistry.persistShortcuts();
+  }
 </script>
 
 <!---------------------- Settings Container ---------------------->
@@ -33,7 +37,7 @@
     <div class="flex items-center border-b border-zinc-600 pb-3">
       <span class="text-normal text-zinc-300">{title}</span>
       <div class="ml-auto flex items-center space-x-2">
-        {#each value as hotkey, i (hotkey)}
+        {#each value as hotkey, index (hotkey)}
           <span
             class="flex flex-nowrap items-center rounded-md bg-zinc-700 px-2 text-sm text-zinc-300 shadow-inner"
           >
@@ -41,7 +45,7 @@
             <span
               class="group ml-1 rounded-full hover:bg-red-400"
               title="Delete hotkey"
-              on:click="{() => shortcutsRegistry.removeShortcutHotkey(id, i)}"
+              on:click="{() => removeShortcutHotkey(id, index)}"
               on:keydown="{null}"
             >
               <svg
@@ -60,10 +64,11 @@
         {:else}
           <span class="text-sm text-zinc-300 bg-zinc-700 px-1 rounded-sm shadow-inner">Blank</span>
         {/each}
-        <div
-          class="group flex h-6 w-6 items-center justify-center rounded-md transition duration-500 ease-in-out hover:bg-rose-500"
+        <button
+          class="group flex h-6 w-6 items-center justify-center rounded-md border-none outline-none transition duration-500 ease-in-out hover:bg-rose-500 focus:outline-none"
           title="Add hotkey"
           aria-label="Add hotkey"
+          on:keydown|stopPropagation|preventDefault="{(event) => addShortcut(id, event)}"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -78,7 +83,7 @@
               stroke-linejoin="round"
               d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-        </div>
+        </button>
       </div>
     </div>
   {/each}

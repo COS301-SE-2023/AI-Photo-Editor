@@ -279,14 +279,34 @@ class ShortcutStore {
 
       shortcuts.forEach((shortcut) => {
         shortcut.value = shortcut.value.map((combo) => {
-          combo = combo.replace("Comma", ",");
-          combo = combo.replace("meta", "⌘");
-          combo = combo.replace("ctrl", "⌃");
-          combo = combo.replace("shift", "⇧");
-          combo = combo.replace("Key", "");
-          combo = combo.replace("[", "");
-          combo = combo.replace("]", "");
-          combo = combo.replace("+", " ");
+          const map = new Map<string | RegExp, string>([
+            ["Comma", ","],
+            ["Equal", "="],
+            ["Minus", "-"],
+            ["Period", "."],
+            ["Backslash", "\\"],
+            ["Backspace", "⌫"],
+            ["meta", "⌘"],
+            ["alt", "⌥"],
+            ["ctrl", "⌃"],
+            ["shift", "⇧"],
+            ["ArrowDown", "↓"],
+            ["ArrowUp", "↑"],
+            ["ArrowLeft", "←"],
+            ["ArrowRight", "→"],
+            ["BracketRight", "]"],
+            ["BracketLeft", "["],
+            ["Digit", ""],
+            ["Key", ""],
+            ["[", ""],
+            ["]", ""],
+            [/\+/g, " "],
+          ]);
+
+          for (const [key, value] of map.entries()) {
+            combo = combo.replace(key, value);
+          }
+
           return combo;
         });
 
