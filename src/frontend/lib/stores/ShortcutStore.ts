@@ -179,6 +179,7 @@ class ShortcutStore {
     this.shortcuts.set(new Map(keyboardShortcuts.map((shortcut) => [shortcut.id, shortcut])));
   }
 
+  /** Saves user shortcuts to ElectronStore. */
   public async persistShortcuts() {
     const $shortcuts = get(this.shortcuts);
     const shortcutsList = Array.from($shortcuts.values());
@@ -206,6 +207,7 @@ class ShortcutStore {
     });
   }
 
+  /** Removes a specific keybind from an action/command. */
   public removeShortcutHotkey(action: ShortcutAction, index: number) {
     this.shortcuts.update((shortcuts) => {
       const shortcut = shortcuts.get(action);

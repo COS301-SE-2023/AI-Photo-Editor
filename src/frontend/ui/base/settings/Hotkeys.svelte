@@ -32,10 +32,11 @@
 </script>
 
 <!---------------------- Settings Container ---------------------->
-<div class="container flex flex-col space-y-3">
+<div class="container flex flex-col space-y-3 overflow-y-auto p-10">
   {#each $shortcuts as { id, title, value } (id)}
     <div class="flex items-center border-b border-zinc-600 pb-3">
       <span class="text-normal text-zinc-300">{title}</span>
+
       <div class="ml-auto flex items-center space-x-2">
         {#each value as hotkey, index (hotkey)}
           <span
@@ -64,6 +65,7 @@
         {:else}
           <span class="text-sm text-zinc-300 bg-zinc-700 px-1 rounded-sm shadow-inner">Blank</span>
         {/each}
+
         <button
           class="group flex h-6 w-6 items-center justify-center rounded-md border-none outline-none transition duration-500 ease-in-out hover:bg-rose-500 focus:outline-none"
           title="Add hotkey"
@@ -89,65 +91,17 @@
   {/each}
 </div>
 
-<!-- <table class="shortcutsTable">
-  {#each Object.entries($shortcutsRegistry) as [action, shortcuts]}
-    <tr>
-      <td>
-        {action}
-      </td>
-      {#each shortcuts as shortcut, index}
-        <td>
-          <button
-            on:keydown|stopPropagation|preventDefault="{(event) =>
-              updateShortcut(action, index, event)}"
-          >
-            {shortcut}
-          </button>
-        </td>
-      {/each}
-      <td>
-        <button
-          class="addShortcut"
-          on:keydown|stopPropagation|preventDefault="{(event) => addShortcut(action, event)}"
-        >
-          +
-        </button>
-      </td>
-    </tr>
-  {/each}
-</table> -->
+<style lang="postcss">
+  /* Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 14px;
+    margin: 0;
+  }
 
-<style>
-  .content {
-    width: 100%;
-    height: 75%;
-    padding: 1em;
-  }
-  .shortcutsTable {
-    margin-top: 2em;
-    background-color: rgba(82, 82, 91, 0.705);
-    opacity: 0.8;
-    border-spacing: 10px;
-  }
-  .shortcutsTable tr {
-    border: 2px solid #32324b;
-    border-radius: 1px;
-    border-spacing: 5px;
-  }
-  .shortcutsTable td {
-    padding-right: 0.5em;
-    text-align: center;
-    color: rgba(240, 248, 255, 0.952);
-  }
-  .shortcutsTable button {
-    border: none;
-    width: 10em;
-    background: #11111b;
-  }
-  .addShortcut {
-    max-width: 2em;
-  }
-  .shortcutsTable button:hover {
-    background-color: #1c1c2c;
+  *::-webkit-scrollbar-thumb {
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    border-radius: 9999px;
+    background-color: #52525b;
   }
 </style>

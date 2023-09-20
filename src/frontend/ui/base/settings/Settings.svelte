@@ -65,8 +65,8 @@
   <div
     class="fixed inset-0 m-auto flex h-[75%] w-[60%] select-none overflow-hidden rounded-lg border border-zinc-600 bg-zinc-800"
   >
-    <div
-      class="group absolute right-2 top-2 flex items-center justify-center rounded-md hover:bg-zinc-700"
+    <!-- <div
+      class="group absolute right-3 top-3 flex items-center justify-center rounded-md hover:bg-zinc-700"
       on:click="{() => settingsStore.hideSettings()}"
       on:keydown="{null}"
     >
@@ -80,7 +80,7 @@
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
-    </div>
+    </div> -->
 
     <!---------------------- Sections ---------------------->
     <section class="flex h-full w-52 flex-col border-r border-r-zinc-600 bg-zinc-900 p-3">
@@ -103,7 +103,7 @@
     </section>
 
     <!---------------------- Content ---------------------->
-    <section class="h-full w-full p-10">
+    <section class="h-full w-full">
       {#if selectedCategoryId in userSettingsComponentMap}
         {#key selectedCategoryId}
           <svelte:component this="{userSettingsComponentMap[selectedCategoryId]}" />
