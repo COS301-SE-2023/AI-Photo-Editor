@@ -6,6 +6,7 @@
   } from "@frontend/lib/stores/ShortcutStore";
 
   let shortcuts = shortcutsRegistry.getFormattedShortcutsReactive();
+  let focusedShortcutId = "";
 
   export function updateShortcut(action: string, index: number, event: KeyboardEvent) {
     const combo: ShortcutCombo | null = ShortcutCombo.fromEvent(event);
@@ -62,8 +63,20 @@
               </svg>
             </span>
           </span>
+          {#if focusedShortcutId === id}
+            <span class="rounded-md bg-rose-500 px-2 text-sm text-zinc-900 shadow-inner"
+              >Press hotkey...</span
+            >
+          {/if}
         {:else}
-          <span class="text-sm text-zinc-300 bg-zinc-700 px-1 rounded-sm shadow-inner">Blank</span>
+          {#if focusedShortcutId === id}
+            <span class="px-2 bg-rose-500 text-zinc-900 rounded-md shadow-inner text-sm"
+              >Press hotkey...</span
+            >
+          {:else}
+            <span class="text-sm text-zinc-300 bg-zinc-700 px-1 rounded-sm shadow-inner">Blank</span
+            >
+          {/if}
         {/each}
 
         <button
@@ -71,6 +84,8 @@
           title="Add hotkey"
           aria-label="Add hotkey"
           on:keydown|stopPropagation|preventDefault="{(event) => addShortcut(id, event)}"
+          on:focusin="{() => (focusedShortcutId = id)}"
+          on:focusout="{() => (focusedShortcutId = '')}"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

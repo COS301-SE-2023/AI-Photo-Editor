@@ -200,7 +200,9 @@ class ShortcutStore {
       if (!shortcut) {
         shortcuts.set(action, { id: action, title: "", value: [], type: "keyboardShortcut" });
       } else {
-        shortcuts.set(action, { ...shortcut, value: [...shortcut.value, combo.getString] });
+        if (!shortcut.value.includes(combo.getString)) {
+          shortcuts.set(action, { ...shortcut, value: [...shortcut.value, combo.getString] });
+        }
       }
 
       return shortcuts;
