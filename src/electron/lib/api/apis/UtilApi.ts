@@ -92,51 +92,6 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     return { status: "success" };
   }
 
-  // This will have to be cleaned up later. Kinda a temp implementation rn
-  async getUserSettings() {
-    // const secrets = getSecrets();
-
-    const userSettings = [
-      {
-        id: "ai_settings",
-        title: "AI Settings",
-        settings: [
-          {
-            id: "OPENAI_API_KEY",
-            title: "Open AI Key",
-            subtitle: "Required to use Open AI models such as GPT-3.5",
-            type: "password",
-            secret: true,
-            value: getSecret("OPENAI_API_KEY"),
-          },
-          {
-            id: "model",
-            title: "Open AI Model",
-            type: "dropdown",
-            value: settings.get("model"),
-            options: ["GPT-4", "GPT-3.5"],
-          },
-        ],
-      },
-      {
-        id: "keybind_settings",
-        title: "Keybindings",
-        settings: [
-          {
-            id: "Keybindings",
-            title: "Keybindings",
-            subtitle: "Customize your keybindings",
-            type: "preferences",
-            secret: false,
-            value: settings.get("Keybindings"),
-          },
-        ],
-      },
-    ];
-
-    return { status: "success", data: userSettings } satisfies QueryResponse;
-  }
-
   /** Retrieve a user setting from the ElectronStore. */
   async getUserSetting(setting: Setting | string) {
     let key = "";
