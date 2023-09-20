@@ -119,9 +119,7 @@ export class GraphStore {
                   // console.log("SUB TO", node, "-->>", input)
                   let first = true;
                   this.uiInputUnsubscribers[node].push(
-                    inputs[input].subscribe(() => {
-                      // console.log("UPDATE UI INPUTS", node, "->", input);
-                      // console.log("Sg", false, node)
+                    inputs[input].subscribe((state) => {
                       // Ensure the subscribe does not run when first created
                       if (first) {
                         first = false;
