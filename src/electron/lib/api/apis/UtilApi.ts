@@ -12,7 +12,7 @@ import {
   getSecret,
   type Settings,
 } from "../../../utils/settings";
-import type { Setting, UserSettingsCategory, QueryResponse } from "../../../../shared/types";
+import type { Setting, QueryResponse } from "../../../../shared/types";
 import { type ChatModel } from "../../../lib/ai/Model";
 // import dotenv from "dotenv";
 // dotenv.config();
@@ -77,6 +77,11 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
   }
 
   // Add something extra validation
+
+  async saveUserSetting(setting: Setting) {
+    return await this.saveUserSettings([setting]);
+  }
+
   async saveUserSettings(newSettings: Setting[]): Promise<QueryResponse> {
     for (const setting of newSettings) {
       if (setting.secret) {
@@ -91,7 +96,7 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
   async getUserSettings() {
     // const secrets = getSecrets();
 
-    const userSettings: UserSettingsCategory[] = [
+    const userSettings = [
       {
         id: "ai_settings",
         title: "AI Settings",
@@ -130,6 +135,29 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     ];
 
     return { status: "success", data: userSettings } satisfies QueryResponse;
+  }
+
+  /** Retrieve a user setting from the ElectronStore. */
+  async getUserSetting(key: string) {
+    if (settings.has(key)) {
+      let data: unknown;
+
+      if (key.startsWith("secrets.")) {
+        data = getSecret(key);
+      } else {
+        data = settings.get(key);
+      }
+
+      return {
+        status: "success",
+        data,
+      } satisfies QueryResponse;
+    } else {
+      return {
+        status: "error",
+        message: "Setting not found",
+      } satisfies QueryResponse;
+    }
   }
 
   /**

@@ -1,0 +1,148 @@
+<script lang="ts">
+  import {
+    shortcutsRegistry,
+    type ShortcutAction,
+    ShortcutCombo,
+  } from "@frontend/lib/stores/ShortcutStore";
+
+  let shortcuts = shortcutsRegistry.getFormattedShortcutsReactive();
+
+  export function updateShortcut(action: string, index: number, event: KeyboardEvent) {
+    console.log(action, event);
+    const combo: ShortcutCombo | null = ShortcutCombo.fromEvent(event);
+    if (!combo) return;
+
+    shortcutsRegistry.updateActionShortcut(action as ShortcutAction, index, combo);
+    shortcutsRegistry.persistShortcuts();
+  }
+
+  export function addShortcut(action: string, event: KeyboardEvent) {
+    const combo: ShortcutCombo | null = ShortcutCombo.fromEvent(event);
+    if (!combo) return;
+
+    shortcutsRegistry.addActionShortcut(action as ShortcutAction, combo);
+    // Defocus the button
+    (event.target as HTMLButtonElement).blur();
+    shortcutsRegistry.persistShortcuts();
+  }
+</script>
+
+<!---------------------- Settings Container ---------------------->
+<div class="container flex flex-col space-y-3">
+  {#each $shortcuts as { id, title, value } (id)}
+    <div class="flex items-center border-b border-zinc-600 pb-3">
+      <span class="text-normal text-zinc-300">{title}</span>
+      <div class="ml-auto flex items-center space-x-2">
+        {#each value as hotkey, i (hotkey)}
+          <span
+            class="flex flex-nowrap items-center rounded-md bg-zinc-700 px-2 text-sm text-zinc-300 shadow-inner"
+          >
+            {hotkey}
+            <span
+              class="group ml-1 rounded-full hover:bg-red-400"
+              title="Delete hotkey"
+              on:click="{() => shortcutsRegistry.removeShortcutHotkey(id, i)}"
+              on:keydown="{null}"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="h-4 w-4 stroke-zinc-500 group-hover:stroke-zinc-900"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </span>
+          </span>
+        {:else}
+          <span class="text-sm text-zinc-300 bg-zinc-700 px-1 rounded-sm shadow-inner">Blank</span>
+        {/each}
+        <div
+          class="group flex h-6 w-6 items-center justify-center rounded-md transition duration-500 ease-in-out hover:bg-rose-500"
+          title="Add hotkey"
+          aria-label="Add hotkey"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="h-5 w-5 stroke-zinc-400 transition duration-500 ease-in-out group-hover:stroke-zinc-900"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  {/each}
+</div>
+
+<!-- <table class="shortcutsTable">
+  {#each Object.entries($shortcutsRegistry) as [action, shortcuts]}
+    <tr>
+      <td>
+        {action}
+      </td>
+      {#each shortcuts as shortcut, index}
+        <td>
+          <button
+            on:keydown|stopPropagation|preventDefault="{(event) =>
+              updateShortcut(action, index, event)}"
+          >
+            {shortcut}
+          </button>
+        </td>
+      {/each}
+      <td>
+        <button
+          class="addShortcut"
+          on:keydown|stopPropagation|preventDefault="{(event) => addShortcut(action, event)}"
+        >
+          +
+        </button>
+      </td>
+    </tr>
+  {/each}
+</table> -->
+
+<style>
+  .content {
+    width: 100%;
+    height: 75%;
+    padding: 1em;
+  }
+  .shortcutsTable {
+    margin-top: 2em;
+    background-color: rgba(82, 82, 91, 0.705);
+    opacity: 0.8;
+    border-spacing: 10px;
+  }
+  .shortcutsTable tr {
+    border: 2px solid #32324b;
+    border-radius: 1px;
+    border-spacing: 5px;
+  }
+  .shortcutsTable td {
+    padding-right: 0.5em;
+    text-align: center;
+    color: rgba(240, 248, 255, 0.952);
+  }
+  .shortcutsTable button {
+    border: none;
+    width: 10em;
+    background: #11111b;
+  }
+  .addShortcut {
+    max-width: 2em;
+  }
+  .shortcutsTable button:hover {
+    background-color: #1c1c2c;
+  }
+</style>

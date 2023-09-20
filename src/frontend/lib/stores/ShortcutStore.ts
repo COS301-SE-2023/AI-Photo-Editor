@@ -1,9 +1,86 @@
-import { derived, writable, get } from "svelte/store";
+import type { KeyboardShortcut, KeyboardShortcuts } from "../../../shared/types";
+import { derived, writable, get, type Readable } from "svelte/store";
+
+const defaultShortcuts: Omit<KeyboardShortcut, "type">[] = [
+  {
+    id: "blix.palette.toggle",
+    title: "Toggle Command Palette",
+    value: ["ctrl+[KeyP]", "meta+[KeyP]"],
+  },
+  {
+    id: "blix.palette.hide",
+    title: "Hide Command Palette",
+    value: ["[Escape]"],
+  },
+  {
+    id: "blix.palette.scrollDown",
+    title: "Scroll Down Command Palette",
+    value: ["[ArrowDown]", "ctrl+[KeyJ]"],
+  },
+  {
+    id: "blix.palette.scrollUp",
+    title: "Scroll Up Command Palette",
+    value: ["[ArrowUp]", "ctrl+[KeyK]"],
+  },
+  {
+    id: "blix.palette.selectItem",
+    title: "Select Command Palette Item",
+    value: ["[Enter]"],
+  },
+  {
+    id: "blix.palette.prompt",
+    title: "Submit Prompt Command Palette",
+    value: ["[Tab]"],
+  },
+  {
+    id: "blix.contextMenu.hide",
+    title: "Hide Context Menu",
+    value: ["[Escape]"],
+  },
+  {
+    id: "blix.contextMenu.scrollDown",
+    title: "Scroll Down Context Menu",
+    value: ["ctrl+[KeyJ]"],
+  },
+  {
+    id: "blix.contextMenu.scrollUp",
+    title: "Scroll Up Context Menu",
+    value: ["ctrl+[KeyK]"],
+  },
+  {
+    id: "blix.contextMenu.selectItem",
+    title: "Select Context Menu Item",
+    value: ["[Enter]"],
+  },
+  {
+    id: "blix.projects.newProject",
+    title: "Create New Project",
+    value: ["meta+[KeyN]", "ctrl+[KeyN]"],
+  },
+  {
+    id: "blix.settings.toggle",
+    title: "Toggle Settings",
+    value: ["meta+[Comma]", "ctrl+[Comma]"],
+  },
+  {
+    id: "blix.settings.hide",
+    title: "Hide Settings",
+    value: ["[Escape]"],
+  },
+  {
+    id: "blix.splash.hide",
+    title: "Hide Splash Screen",
+    value: ["[Escape]"],
+  },
+  {
+    id: "blix.projects.save",
+    title: "Save Project",
+    value: ["ctrl+[KeyS]", "meta+[KeyS]"],
+  },
+];
 
 export type ShortcutAction = `${string}.${string}`; // Actions must be nested at least one layer deep
 export type ShortcutString = string;
-
-import type { UserSettingsCategory } from "../../../shared/types";
 
 export class ShortcutCombo {
   keyCode: string;
@@ -84,87 +161,139 @@ export class ShortcutCombo {
   }
 }
 
-type ShortcutsDict = { [key: ShortcutAction]: ShortcutString[] };
-
-// Maps actions to their respective shortcuts
-let categories: UserSettingsCategory[] = [];
-let selectedCategory: UserSettingsCategory | undefined;
 class ShortcutStore {
-  public refreshStore(data: UserSettingsCategory[]) {
-    if (data) {
-      categories = data;
-      selectedCategory = categories.find((c) => c.title === "Keybindings");
+  // Gets filled with default shortcuts
+  shortcuts = writable<Map<ShortcutAction, KeyboardShortcut>>();
 
-      if (selectedCategory) {
-        const short = selectedCategory.settings[0].value as { [key: string]: string[] };
-        if (short !== undefined) this.shortcuts.set(short);
-      }
-    }
+  constructor() {
+    this.refreshStore(
+      defaultShortcuts.map((shortcut) => ({ ...shortcut, type: "keyboardShortcut" }))
+    );
   }
-  // Fill default shortcuts here
-  shortcuts = writable<ShortcutsDict>({
-    "blix.palette.toggle": ["ctrl+[KeyP]", "meta+[KeyP]"],
-    "blix.palette.show": [],
-    "blix.palette.hide": ["[Escape]"],
-    "blix.palette.scrollDown": ["[ArrowDown]", "ctrl+[KeyJ]"],
-    "blix.palette.scrollUp": ["[ArrowUp]", "ctrl+[KeyK]"],
-    "blix.palette.selectItem": ["[Enter]"],
-    "blix.palette.prompt": ["[Tab]"],
-    "blix.contextMenu.hide": ["[Escape]"],
-    "blix.contextMenu.show": [],
-    "blix.contextMenu.scrollDown": ["ctrl+[KeyJ]"],
-    "blix.contextMenu.scrollUp": ["ctrl+[KeyK]"],
-    "blix.contextMenu.selectItem": ["[Enter]"],
-    "blix.projects.newProject": ["meta+[KeyN]", "ctrl+[KeyN]"],
-    "blix.settings.toggle": ["meta+[Comma]", "ctrl+[Comma]"],
-    "blix.settings.hide": ["[Escape]"],
-    "blix.splash.hide": ["[Escape]"],
-    "blix.projects.save": ["ctrl+[KeyS]", "meta+[KeyS]"],
-  });
+
+  public refreshStore(keyboardShortcuts: KeyboardShortcut[]) {
+    if (keyboardShortcuts.length === 0) {
+      return;
+    }
+
+    this.shortcuts.set(new Map(keyboardShortcuts.map((shortcut) => [shortcut.id, shortcut])));
+  }
+
+  public async persistShortcuts() {
+    const $shortcuts = get(this.shortcuts);
+    const shortcutsList = Array.from($shortcuts.values());
+    const keyboardShortcuts: KeyboardShortcuts = {
+      id: "keyboardShortcuts",
+      type: "keyboardShortcuts",
+      title: "Keyboard Shortcuts",
+      value: shortcutsList,
+    };
+
+    return await window.apis.utilApi.saveUserSetting(keyboardShortcuts);
+  }
 
   public addActionShortcut(action: ShortcutAction, combo: ShortcutCombo) {
     this.shortcuts.update((shortcuts) => {
-      if (shortcuts[action] === undefined) {
-        shortcuts[action] = [];
+      const shortcut = shortcuts.get(action);
+
+      if (!shortcut) {
+        shortcuts.set(action, { id: action, title: "", value: [], type: "keyboardShortcut" });
+      } else {
+        shortcuts.set(action, { ...shortcut, value: [...shortcut.value, combo.getString] });
       }
-      shortcuts[action].push(combo.getString);
+
+      return shortcuts;
+    });
+  }
+
+  public removeShortcutHotkey(action: ShortcutAction, index: number) {
+    this.shortcuts.update((shortcuts) => {
+      const shortcut = shortcuts.get(action);
+
+      if (!shortcut) {
+        return shortcuts;
+      }
+
+      const keys = [...shortcut.value];
+      keys.splice(index, 1);
+      shortcuts.set(action, { ...shortcut, value: keys });
+
       return shortcuts;
     });
   }
 
   public updateActionShortcut(action: ShortcutAction, index: number, combo: ShortcutCombo) {
     this.shortcuts.update((shortcuts) => {
-      if (shortcuts[action] === undefined) {
-        shortcuts[action] = [];
-      }
-      if (shortcuts[action].length <= index) {
-        shortcuts[action].push(combo.getString);
+      const shortcut = shortcuts.get(action);
+
+      if (!shortcut) {
+        shortcuts.set(action, { id: action, title: "", value: [], type: "keyboardShortcut" });
         return shortcuts;
       }
-      shortcuts[action][index] = combo.getString;
+
+      if (shortcut.value.length <= index) {
+        shortcuts.set(action, { ...shortcut, value: [...shortcut.value, combo.getString] });
+      } else {
+        const keys = [...shortcut.value];
+        keys[index] = combo.getString;
+        shortcuts.set(action, { ...shortcut, value: keys });
+      }
+
       return shortcuts;
     });
   }
 
-  public get subscribe() {
-    return this.shortcuts.subscribe;
-  }
-
   public getShortcutsForAction(action: ShortcutAction): ShortcutString[] {
-    const sc = get(this.shortcuts);
-    if (sc[action] === undefined) {
+    const $shortcuts = get(this.shortcuts);
+    const shortcut = $shortcuts.get(action);
+
+    if (!shortcut) {
       return [];
     }
-    return sc[action];
+
+    return shortcut.value;
   }
 
-  // Returns a derived store that only listens for the specified action
-  public getShortcutsForActionReactive(action: ShortcutAction) {
+  /** Returns a derived store that only listens for a specified action */
+  public getShortcutsForActionReactive(action: ShortcutAction): Readable<ShortcutString[]> {
     return derived(this.shortcuts, ($shortcuts) => {
-      if ($shortcuts[action] === undefined) {
+      const shortcut = $shortcuts.get(action);
+
+      if (!shortcut) {
         return [];
       }
-      return $shortcuts[action];
+
+      return shortcut.value;
+    });
+  }
+
+  public getShortcutsReactive(): Readable<KeyboardShortcut[]> {
+    return derived(this.shortcuts, ($shortcuts) => {
+      return Array.from($shortcuts.values());
+    });
+  }
+
+  public getFormattedShortcutsReactive(): Readable<KeyboardShortcut[]> {
+    return derived(this.shortcuts, ($shortcuts) => {
+      const shortcuts = Array.from($shortcuts.values()).map((shortcut) => ({ ...shortcut }));
+
+      shortcuts.forEach((shortcut) => {
+        shortcut.value = shortcut.value.map((combo) => {
+          combo = combo.replace("Comma", ",");
+          combo = combo.replace("meta", "⌘");
+          combo = combo.replace("ctrl", "⌃");
+          combo = combo.replace("shift", "⇧");
+          combo = combo.replace("Key", "");
+          combo = combo.replace("[", "");
+          combo = combo.replace("]", "");
+          combo = combo.replace("+", " ");
+          return combo;
+        });
+
+        return shortcut;
+      });
+
+      return shortcuts;
     });
   }
 
@@ -173,7 +302,10 @@ class ShortcutStore {
 
     return this.getShortcutsForAction(action).includes(combo.getString);
   }
+
+  public get subscribe() {
+    return this.shortcuts.subscribe;
+  }
 }
 
-// export const shortcutsRegistry = writable<ShortcutStore>(new ShortcutStore());
 export const shortcutsRegistry = new ShortcutStore();
