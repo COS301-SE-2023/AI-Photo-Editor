@@ -117,7 +117,8 @@ const tiles = {
 
 
         tile1 = tileBuilder.createUIBuilder();
-        tile1.addSidebar("right");
+        tile1.addSidebar("right")
+
         tile1.sidebar.addButton(
           {
             componentId: "export",
@@ -145,7 +146,17 @@ const tiles = {
             updatesBackend: false,
           },
           {}
-        );
+        ).addSlider({
+            componentId: "test",
+            label: "Hue",
+            defaultValue: "", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+        }, {
+            min: 0,
+            max: 100,
+            step: 1,
+            value: 50
+        });
 
         tile2 = tileBuilder.createUIBuilder();
         tile2.addSidebar("left");
@@ -158,7 +169,29 @@ const tiles = {
             updatesBackend: false,
           },
           {}
-        );
+        ).addSlider({
+            componentId: "slider1",
+            label: "Hue",
+            defaultValue: "", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+        }, {
+            min: 0,
+            max: 100,
+            step: 1,
+            value: 50
+        });
+
+        tile2.statusbar.addSlider({
+            componentId: "slider2",
+            label: "Hue",
+            defaultValue: "", // SUGGESTION: Use the default value to indicate the command to run?
+            updatesBackend: false,
+        }, {
+            min: 0,
+            max: 100,
+            step: 1,
+            value: 50
+        });
 
         tile3 = tileBuilder.createUIBuilder();
         tile3.addStatusbar("bottom");
@@ -170,7 +203,7 @@ const tiles = {
             updatesBackend: false,
           },
           {}
-        )
+        );
 
         tile2.addLayout(tile3);
         tile1.addLayout(tile2);

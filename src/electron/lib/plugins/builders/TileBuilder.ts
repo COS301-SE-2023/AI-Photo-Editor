@@ -114,12 +114,12 @@ export class TileUIBuilder {
   }
 
   public addSidebar(location: string): TileUIBuilder {
-    this._sidebar = new tileUIComponentBuilder("", location);
+    this._sidebar = new tileUIComponentBuilder("", location, "sidebar");
     return this;
   }
 
   public addStatusbar(location: string): TileUIBuilder {
-    this._statusbar = new tileUIComponentBuilder("", location);
+    this._statusbar = new tileUIComponentBuilder("", location, "statusbar");
     return this;
   }
 
@@ -147,6 +147,7 @@ export class TileUIBuilder {
 class tileUIComponentBuilder {
   private _component: TileUIParent;
   private _uiConfigs: { [key: string]: UIComponentConfig };
+  private _type: string;
 
   get component() {
     return this._component;
@@ -156,14 +157,19 @@ class tileUIComponentBuilder {
     return this._uiConfigs;
   }
 
-  constructor(label: string, location: string) {
+  get type() {
+    return this._type;
+  }
+
+  constructor(label: string, location: string, type: string) {
     this._component = new TileUIParent(label, location, null);
     this._uiConfigs = {};
+    this._type = type;
   }
 
   public addButton(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
     const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Button);
-    this._component?.params.push(
+    this._component.params.push(
       new TileUILeaf(this._component, TileUIComponent.Button, componentId, [props])
     );
     this.uiConfigs[componentId] = {
@@ -171,33 +177,40 @@ class tileUIComponentBuilder {
       label: config.label,
       defaultValue: config.defaultValue ?? "",
       updatesBackend: config.updatesBackend ?? false,
+      type: this.type,
     };
     return this;
   }
 
-  // public addKnob(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
-  //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Knob);
-  //   this.node.params.push(new TileUILeaf(this.node, TileUIComponent.Knob, componentId, [props]));
-  //   this.uiConfigs[componentId] = {
-  //     componentId,
-  //     label: config.label,
-  //     defaultValue: config.defaultValue ?? 0,
-  //     updatesBackend: config.updatesBackend ?? true,
-  //   };
-  //   return this;
-  // }
+  public addKnob(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Knob);
+    this._component.params.push(
+      new TileUILeaf(this._component, TileUIComponent.Knob, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? 0,
+      updatesBackend: config.updatesBackend ?? true,
+      type: this.type,
+    };
+    return this;
+  }
 
-  // public addRadio(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
-  //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Radio);
-  //   this.node.params.push(new TileUILeaf(this.node, TileUIComponent.Radio, componentId, [props]));
-  //   this.uiConfigs[componentId] = {
-  //     componentId,
-  //     label: config.label,
-  //     defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
-  //     updatesBackend: config.updatesBackend ?? true,
-  //   };
-  //   return this;
-  // }
+  public addRadio(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Radio);
+    this._component.params.push(
+      new TileUILeaf(this._component, TileUIComponent.Radio, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
+      updatesBackend: config.updatesBackend ?? true,
+      type: this.type,
+    };
+    return this;
+  }
 
   // public addListBox(): void {
   //   return;
@@ -213,6 +226,7 @@ class tileUIComponentBuilder {
       label: config.label,
       defaultValue: config.defaultValue ?? 0,
       updatesBackend: config.updatesBackend ?? true,
+      type: this.type,
     };
     return this;
   }
@@ -235,19 +249,23 @@ class tileUIComponentBuilder {
   //   return this;
   // }
 
-  // public addColorPicker(config: UIComponentConfig, props: UIComponentProps): TileUIBuilder {
-  //   const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.ColorPicker);
-  //   this.node.params.push(
-  //     new TileUILeaf(this.node, TileUIComponent.ColorPicker, componentId, [props])
-  //   );
-  //   this.uiConfigs[componentId] = {
-  //     componentId,
-  //     label: config.label,
-  //     defaultValue: config.defaultValue ?? "#000000",
-  //     updatesBackend: config.updatesBackend ?? true,
-  //   };
-  //   return this;
-  // }
+  public addColorPicker(
+    config: UIComponentConfig,
+    props: UIComponentProps
+  ): tileUIComponentBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.ColorPicker);
+    this._component.params.push(
+      new TileUILeaf(this._component, TileUIComponent.ColorPicker, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "#000000",
+      updatesBackend: config.updatesBackend ?? true,
+      type: this.type,
+    };
+    return this;
+  }
 
   public addDropdown(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
     const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Dropdown);
@@ -259,6 +277,7 @@ class tileUIComponentBuilder {
       label: config.label,
       defaultValue: config.defaultValue ?? (props.options ? Object.keys(props.options)[0] : "null"),
       updatesBackend: config.updatesBackend ?? true,
+      type: this.type,
     };
     return this;
   }
@@ -287,6 +306,7 @@ class tileUIComponentBuilder {
       label: config.label,
       defaultValue: config.defaultValue ?? "empty",
       updatesBackend: config.updatesBackend ?? true,
+      type: this.type,
     };
     return this;
   }

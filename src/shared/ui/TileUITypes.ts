@@ -7,6 +7,7 @@ export type UIComponentConfig = {
   componentId: string;
   defaultValue: unknown;
   updatesBackend: boolean;
+  type: string;
 };
 
 export type ITile = {

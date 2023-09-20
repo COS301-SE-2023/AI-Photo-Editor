@@ -2,6 +2,8 @@
   import type { TileUIParent, UIComponentConfig } from "../../../../shared/ui/TileUITypes";
   import TileUiFragment from "./TileUIFragment.svelte";
   import WebView from "../../tiles/WebView.svelte";
+  import Browser from "../../tiles/Browser.svelte";
+  import Media from "../../tiles/Media.svelte";
 
   // export let type: string = "";
   export let componentUI: { [key: string]: TileUIParent | null } = {};
@@ -11,12 +13,12 @@
     "1": '[row1-start] "main" [row1-end] ',
     "2": '[row1-start] "main sidebar" [row1-end] / 1fr 80px',
     "3": '[row1-start] "sidebar main" [row1-end] / 80px 1fr',
-    "4": '[row1-start] "main" 1fr [row1-end] [row2-start] "statusbar" 150px [row2-end]',
-    "5": '[row1-start] "statusbar" 150px [row1-end] [row2-start] "main" 1fr [row2-end]',
-    "6": '[row1-start] "main sidebar" 1fr [row1-end] [row2-start] "statusbar statusbar" 150px [row2-end] / 1fr 80px',
-    "7": '[row1-start] "sidebar main" 1fr [row1-end] [row2-start] "statusbar statusbar" 150px [row2-end] / 80px 1fr',
-    "8": '[row1-start] "statusbar statusbar" 150px [row1-end] [row2-start]  "main sidebar" 1fr [row2-end] / 1fr 80px',
-    "9": '[row1-start] "statusbar statusbar" 150px [row1-end] [row2-start] "sidebar main" 1fr [row2-end] / 80px 1fr',
+    "4": '[row1-start] "main" 1fr [row1-end] [row2-start] "statusbar" 160px [row2-end]',
+    "5": '[row1-start] "statusbar" 160px [row1-end] [row2-start] "main" 1fr [row2-end]',
+    "6": '[row1-start] "main sidebar" 1fr [row1-end] [row2-start] "statusbar statusbar" 160px [row2-end] / 1fr 80px',
+    "7": '[row1-start] "sidebar main" 1fr [row1-end] [row2-start] "statusbar statusbar" 160px [row2-end] / 80px 1fr',
+    "8": '[row1-start] "statusbar statusbar" 160px [row1-end] [row2-start]  "main sidebar" 1fr [row2-end] / 1fr 80px',
+    "9": '[row1-start] "statusbar statusbar" 160px [row1-end] [row2-start] "sidebar main" 1fr [row2-end] / 80px 1fr',
   };
 
   function getLayout(ui: { [key: string]: TileUIParent | null }): string {
@@ -74,7 +76,8 @@
           uiConfigs="{componentUI['main'].childUis.uiConfigs}"
         />
       {:else}
-        <WebView media="" />
+        <!-- <WebView media="" /> -->
+        <Media />
       {/if}
     </div>
   {/if}

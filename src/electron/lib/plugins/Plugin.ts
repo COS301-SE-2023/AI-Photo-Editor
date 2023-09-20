@@ -103,12 +103,12 @@ export class Plugin {
 
           const ctx = new TilePluginContext(this.name);
 
-          // try {
-          //   pluginModule.tiles[tile](ctx); // Execute tile builder
-          //   blix.tileRegistry.addInstance(ctx.tileBuilder.build); // Add to registry
-          // } catch (err) {
-          //   logger.warn(err);
-          // }
+          try {
+            pluginModule.tiles[tile](ctx); // Execute tile builder
+            blix.tileRegistry.addInstance(ctx.tileBuilder.build); // Add to registry
+          } catch (err) {
+            logger.warn(err);
+          }
         }
       }
 
