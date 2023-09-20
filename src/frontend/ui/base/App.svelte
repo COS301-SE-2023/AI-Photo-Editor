@@ -70,9 +70,9 @@
   <div></div>
 {/if}
 
-{#if $settingsStore.showing}
+<div class="{$settingsStore.showing ? '' : 'hidden'}">
   <Settings />
-{/if}
+</div>
 
 <Toasts />
 <ContextMenu />

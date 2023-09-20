@@ -138,12 +138,20 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
   }
 
   /** Retrieve a user setting from the ElectronStore. */
-  async getUserSetting(key: string) {
+  async getUserSetting(setting: Setting | string) {
+    let key = "";
+
+    if (typeof setting === "string") {
+      key = setting;
+    } else {
+      key = setting.secret ? `secrets.${setting.id}` : setting.id;
+    }
+
     if (settings.has(key)) {
       let data: unknown;
 
       if (key.startsWith("secrets.")) {
-        data = getSecret(key);
+        data = getSecret(key.replace("secrets.", ""));
       } else {
         data = settings.get(key);
       }

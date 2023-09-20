@@ -1,7 +1,7 @@
 <script context="module" lang="ts">
   export type SettingsContext = {
     saveSettings: (settings: Setting[]) => Promise<void>;
-    getSetting: (key: string) => Promise<QueryResponse>;
+    getSetting: (setting: Setting) => Promise<QueryResponse>;
   };
 </script>
 
@@ -12,8 +12,8 @@
   import { settingsStore } from "../../../lib/stores/SettingsStore";
   import { userSettingSections, type UserSettingsCategoryId } from "../../../../shared/types";
 
-  import About from "./AiSettings.svelte";
-  import AiSettings from "./About.svelte";
+  import About from "./About.svelte";
+  import AiSettings from "./AiSettings.svelte";
   import Hotkeys from "./Hotkeys.svelte";
 
   let selectedCategoryId: UserSettingsCategoryId = "about";
@@ -39,8 +39,8 @@
     }
   }
 
-  async function getSetting(key: string) {
-    return await window.apis.utilApi.getUserSetting(key);
+  async function getSetting(setting: Setting) {
+    return await window.apis.utilApi.getUserSetting(setting);
   }
 
   const userSettingsComponentMap: Record<
