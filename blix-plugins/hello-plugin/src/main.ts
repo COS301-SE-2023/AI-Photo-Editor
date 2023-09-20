@@ -13,7 +13,7 @@ import { NodeBuilder } from "electron/lib/plugins/builders/NodeBuilder";
 const nodes = {
     "hello": (context: NodePluginContext) => {
         // Use context.nodeBuilder to construct the node UI
-        const nodeBuilder: NodeBuilder = context.instantiate("hello-plugin", "hello");
+        const nodeBuilder: NodeBuilder = context.instantiate("Dev", "hello");
         nodeBuilder.setTitle("Gloria");
         nodeBuilder.setDescription("Provides a test slider and button and label for testing purposes, taking two string inputs and returning one string output");
 
@@ -128,7 +128,7 @@ const nodes = {
         nodeBuilder.addOutput("string", "outFilePicker", "");
     }
     , "Jake": (context: any) => {
-        const nodeBuilder = context.instantiate("hello-plugin", "Jake");
+        const nodeBuilder = context.instantiate("Dev", "Jake");
         nodeBuilder.setTitle("Jake");
         nodeBuilder.setDescription("This is currently a useless node that does nothing.");
 

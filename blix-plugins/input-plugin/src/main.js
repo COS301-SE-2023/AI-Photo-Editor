@@ -1,6 +1,6 @@
 const nodes = {
     "inputNumber": (context) => {
-        const nodeBuilder = context.instantiate("input-plugin", "inputNumber");
+        const nodeBuilder = context.instantiate("Input", "inputNumber");
         nodeBuilder.setTitle("Input number");
         nodeBuilder.setDescription("Provides a number input and returns a single number output");
 
@@ -24,7 +24,7 @@ const nodes = {
         nodeBuilder.addOutput("number", "res", "Result");
     },
     "inputImage": (context) => {
-        const nodeBuilder = context.instantiate("input-plugin", "inputImage");
+        const nodeBuilder = context.instantiate("Input", "inputImage");
         nodeBuilder.setTitle("Input image");
         nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
@@ -46,7 +46,7 @@ const nodes = {
     },
     // Will we define a color type? or just a vector4/string 
     "inputColor": (context) => {
-        const nodeBuilder = context.instantiate("input-plugin", "inputColor");
+        const nodeBuilder = context.instantiate("Input", "inputColor");
         nodeBuilder.setTitle("Input color");
         nodeBuilder.setDescription("Provides a color input and returns a single color output");
 
@@ -67,7 +67,7 @@ const nodes = {
     },
     // Will we define a color type? or just a vector4/string 
     "inputBoolean": (context) => {
-        const nodeBuilder = context.instantiate("input-plugin", "inputBoolean");
+        const nodeBuilder = context.instantiate("Input", "inputBoolean");
         nodeBuilder.setTitle("Input Boolean");
         nodeBuilder.setDescription("Provides a radio box to select a single true/false value");
 

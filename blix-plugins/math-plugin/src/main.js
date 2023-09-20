@@ -1,6 +1,6 @@
 const nodes = {
     "unary": (context) => {
-        const nodeBuilder = context.instantiate("math-plugin","unary");
+        const nodeBuilder = context.instantiate("Math","unary");
         nodeBuilder.setTitle("Unary");
         nodeBuilder.setDescription("Performs Unary math operations taking one number input and returning one number output,such as root, negate or square");
 
@@ -44,7 +44,7 @@ const nodes = {
         nodeBuilder.addOutput("number", "res","Result");
     },
     "binary": (context) => {
-        const nodeBuilder = context.instantiate("math-plugin", "binary");
+        const nodeBuilder = context.instantiate("Math", "binary");
         nodeBuilder.setTitle("Binary");
         nodeBuilder.setDescription("Performs Binary math operations taking two number inputs and returning one number output");
       

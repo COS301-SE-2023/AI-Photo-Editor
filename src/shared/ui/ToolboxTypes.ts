@@ -17,6 +17,7 @@ export class INode {
   constructor(
     readonly signature: NodeSignature,
     readonly title: string,
+    readonly folder: string,
     readonly description: string,
     readonly icon: string,
     readonly inputs: IAnchor[],

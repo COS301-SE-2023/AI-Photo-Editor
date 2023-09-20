@@ -67,7 +67,7 @@ function addTweakability(ui) {
 
 function createBlinkNode(type, title, desc, params) {
     return (context) => {
-        const nodeBuilder = context.instantiate(context.pluginId, type);
+        const nodeBuilder = context.instantiate("Blink/Filters", type);
         nodeBuilder.setTitle(title);
         nodeBuilder.setDescription(desc);
 
@@ -190,7 +190,7 @@ const nodes = {
     ...blinkNodes,
 
     "inputImage": (context) => {
-        const nodeBuilder = context.instantiate(context.pluginId, "inputImage");
+        const nodeBuilder = context.instantiate(String.raw`Blink/Input`, "inputImage");
         nodeBuilder.setTitle("Blink Image");
         nodeBuilder.setDescription("Input a Blink Sprite Image");
 
@@ -260,7 +260,7 @@ const nodes = {
         nodeBuilder.addOutput("Blink clump", "res", "Result");
     },
     "inputShape": (context) => {
-        const nodeBuilder = context.instantiate(context.pluginId, "inputShape");
+        const nodeBuilder = context.instantiate("Blink/Input", "inputShape");
         nodeBuilder.setTitle("Blink Shape");
         nodeBuilder.setDescription("Input a Blink Shape");
 
@@ -345,7 +345,7 @@ const nodes = {
         nodeBuilder.addOutput("Blink clump", "res", "Result");
     },
     "inputText": (context) => {
-        const nodeBuilder = context.instantiate(context.pluginId, "inputText");
+        const nodeBuilder = context.instantiate("Blink/Input", "inputText");
         nodeBuilder.setTitle("Blink Text");
         nodeBuilder.setDescription("Input a Blink Text element");
 
@@ -480,7 +480,7 @@ const nodes = {
         nodeBuilder.addOutput("Blink clump", "res", "Result");
     },
     "matrix": (context) => {
-        const nodeBuilder = context.instantiate(context.pluginId, "matrix");
+        const nodeBuilder = context.instantiate("Blink/Input", "matrix");
         nodeBuilder.setTitle("Matrix");
         nodeBuilder.setDescription("Construct a Blink matrix");
 
@@ -508,7 +508,7 @@ const nodes = {
         nodeBuilder.addOutput("Blink matrix", "res", "Result");
     },
     "layer": (context) => {
-        const nodeBuilder = context.instantiate(context.pluginId, "layer");
+        const nodeBuilder = context.instantiate("Blink/Utils", "layer");
         nodeBuilder.setTitle("Layer");
         nodeBuilder.setDescription("Layer two or more Blink clumps");
 
@@ -559,7 +559,7 @@ const nodes = {
         nodeBuilder.addOutput("Blink clump", "res", "Result");
     },
     "filter": (context) => {
-        const nodeBuilder = context.instantiate(context.pluginId, "filter");
+        const nodeBuilder = context.instantiate("Blink/Utils", "filter");
         nodeBuilder.setTitle("Filter");
         nodeBuilder.setDescription("Construct a Blink matrix");
 

@@ -17,6 +17,7 @@ import { type NodeTweakData } from "../../../../shared/types";
 type PartialNode = {
   name: string;
   plugin: string;
+  folder: string;
   displayName: string;
   description: string;
   icon: string;
@@ -34,10 +35,11 @@ type PartialNode = {
 export class NodeBuilder implements PluginContextBuilder {
   private partialNode: PartialNode;
 
-  constructor(plugin: string, name: string) {
+  constructor(plugin: string, folder: string, name: string) {
     this.partialNode = {
       name,
       plugin,
+      folder,
       displayName: name,
       description: "",
       icon: "",
@@ -54,6 +56,7 @@ export class NodeBuilder implements PluginContextBuilder {
     return new NodeInstance(
       this.partialNode.name,
       this.partialNode.plugin,
+      this.partialNode.folder,
       this.partialNode.displayName,
       this.partialNode.description,
       this.partialNode.icon,

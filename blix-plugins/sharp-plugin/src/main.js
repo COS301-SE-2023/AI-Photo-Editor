@@ -3,7 +3,7 @@ const sharp = require(isProd ? "../../../app.asar/node_modules/sharp" : "sharp")
 
 const nodes = {
     "brightness": (context) => {
-        nodeBuilder = context.instantiate("sharp-plugin", "brightness");
+        nodeBuilder = context.instantiate("Sharp", "brightness");
         nodeBuilder.setTitle("Brightness");
         nodeBuilder.setDescription("Adjusts the brighness of an image taking one image as input and returning one image as output");
 
@@ -35,7 +35,7 @@ const nodes = {
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
     "saturation": (context) => {
-        const nodeBuilder = context.instantiate("sharp-plugin", "saturation");
+        const nodeBuilder = context.instantiate("Sharp", "saturation");
         nodeBuilder.setTitle("Saturation");
         nodeBuilder.setDescription("Adjusts the saturation of an image taking one image as input and returning one image as output");
 
@@ -66,7 +66,7 @@ const nodes = {
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
     "hue": (context) => {
-        const nodeBuilder = context.instantiate("sharp-plugin", "hue");
+        const nodeBuilder = context.instantiate("Sharp", "hue");
         nodeBuilder.setTitle("Hue");
         nodeBuilder.setDescription("Adjusts the hue of an image taking one image as input and returning one image as output");
         const ui = nodeBuilder.createUIBuilder();
@@ -95,7 +95,7 @@ const nodes = {
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
     "rotate": (context) => {
-        const nodeBuilder = context.instantiate("sharp-plugin", "rotate");
+        const nodeBuilder = context.instantiate("Sharp", "rotate");
         nodeBuilder.setTitle("Rotate");
         nodeBuilder.setDescription("Rotates an image by an explicit angle taking one image as input and returning one image as output");
         const ui = nodeBuilder.createUIBuilder();
@@ -122,7 +122,7 @@ const nodes = {
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
     "sharpen": (context) => {
-        const nodeBuilder = context.instantiate("sharp-plugin", "sharpen");
+        const nodeBuilder = context.instantiate("Sharp", "sharpen");
         nodeBuilder.setTitle("Sharpen");
         nodeBuilder.setDescription("Sharpens an image taking one image as input and returning one image as output");
         const ui = nodeBuilder.createUIBuilder();
@@ -160,7 +160,7 @@ const nodes = {
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
     "normalise": (context) => {
-        const nodeBuilder = context.instantiate("sharp-plugin", "normalise");
+        const nodeBuilder = context.instantiate("Sharp", "normalise");
         nodeBuilder.setTitle("Normalise");
         nodeBuilder.setDescription("Enhance image contrast by stretching its luminance to cover a full dynamic range taking one image as input and returning one image as output");
 
@@ -175,7 +175,7 @@ const nodes = {
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
     "toImage": (context) => {
-        const nodeBuilder = context.instantiate("sharp-plugin", "toImage");
+        const nodeBuilder = context.instantiate("Sharp", "toImage");
         nodeBuilder.setTitle("To Image");
         nodeBuilder.setDescription("Converts the sharp object to an image");
 
@@ -189,7 +189,7 @@ const nodes = {
         nodeBuilder.addOutput("image", "res", "Result");
     },
     "toSharp": (context) => {
-        const nodeBuilder = context.instantiate("sharp-plugin", "toSharp");
+        const nodeBuilder = context.instantiate("Sharp", "toSharp");
         nodeBuilder.setTitle("To Sharp");
         nodeBuilder.setDescription("Converts an image path to a sharp object");
 
@@ -202,7 +202,7 @@ const nodes = {
         nodeBuilder.addOutput("Sharp", "res", "Result");
     },
     "inputSharpImage": (context) => {
-        nodeBuilder = context.instantiate("input-plugin", "inputImage");
+        nodeBuilder = context.instantiate("Input", "inputImage");
         nodeBuilder.setTitle("Input image");
         nodeBuilder.setDescription("Provides an image input and returns a single image output");
 

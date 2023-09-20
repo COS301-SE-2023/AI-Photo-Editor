@@ -10,9 +10,9 @@ function toTitleCase(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function createGLFXNode(type, title, desc, params) {
+function createThrelteNode(type, title, desc, params) {
     return (context) => {
-        const nodeBuilder = context.instantiate("glfx-plugin", type);
+        const nodeBuilder = context.instantiate("Threlte", type);
         nodeBuilder.setTitle(title);
         nodeBuilder.setDescription(desc);
 
@@ -54,45 +54,10 @@ function createGLFXNode(type, title, desc, params) {
 }
 
 const glfxNodes = {
-    "brightnessContrast": [ 
-        "Brightness/Contrast",
-        "Adjust the brightness and contrast of the image",
-        [{ id: "brightness" }, { id: "contrast" }]
-    ],
-    "hueSaturation": [ 
-        "Hue / Saturation",
-        "Adjust the hue and saturation of the image",
-        [{ id: "hue" }, { id: "saturation" }]
-    ],
-    "noise": [ 
-        "Noise",
-        "Add black and white noise to the image",
-        [{ id: "amount", min: 0, max: 1, step: 0.01 }]
-    ],
-    "denoise": [ 
-        "Denoise",
-        "Smooth over grainy noise in dark images",
-        [{ id: "exponent", min: 0, max: 50, step: 0.1 }]
-    ],
-    "sepia": [ 
-        "Sepia",
-        "Add a reddish-brown monochrome tint to the image",
-        [{ id: "amount", min: 0, max: 1, step: 0.01 }]
-    ],
-    "unsharpMask": [ 
-        "Unsharp Mask",
-        "Image sharpening that amplifies high-frequency detail in the image",
-        [{ id: "radius", min: 0, max: 200, step: 1 }, { id: "strength", min: 0, max: 5, step: 0.05 }]
-    ],
-    "vibrance": [
-        "Vibrance",
-        "Adjust saturation of desaturated colors, leaving saturated colors unmodified",
-        [{ id: "amount" }]
-    ],
-    "vignette": [
-        "Vignette",
-        "Add a vignette effect to the image",
-        [{ id: "size", min: 0, max: 1, step: 0.01 }, { id: "amount", min: 0, max: 1, step: 0.01 }]
+    "addPrimitive": [ 
+        "Add Primitive",
+        "Add a 3D primitive",
+        []
     ],
 };
 
@@ -104,7 +69,7 @@ const nodes = {
     ...glfxNodes,
 
     "inputGLFXImage": (context) => {
-        const nodeBuilder = context.instantiate("input-plugin", "inputGLFXImage");
+        const nodeBuilder = context.instantiate("Input/Other", "inputGLFXImage");
         nodeBuilder.setTitle("Input GLFX image");
         nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
@@ -131,7 +96,7 @@ const nodes = {
         nodeBuilder.addOutput("GLFX image", "res", "Result");
     },
     "inputGLFXCache": (context) => {
-        const nodeBuilder = context.instantiate("input-plugin", "inputGLFXCache");
+        const nodeBuilder = context.instantiate("Input/Other", "inputGLFXCache");
         nodeBuilder.setTitle("Input GLFX cache");
         nodeBuilder.setDescription("Provides an cache input and returns a single image output");
 

@@ -75,7 +75,7 @@ export class Blix {
     this._graphInterpreter = new CoreGraphInterpreter(this._toolboxRegistry);
 
     // Create Output node
-    const outputNodeBuilder = new NodeBuilder("blix", "output");
+    const outputNodeBuilder = new NodeBuilder("blix", "Blix", "output");
     const outputUIBuilder = outputNodeBuilder.createUIBuilder();
     outputUIBuilder.addButton(
       {
@@ -189,7 +189,7 @@ export class Blix {
     const ipcGravityAISubsriber = new IPCGraphSubscriber();
     ipcGravityAISubsriber.setListenEvents([CoreGraphUpdateEvent.graphUpdated]);
     ipcGravityAISubsriber.setListenParticipants([
-      CoreGraphUpdateParticipant.system,
+      // CoreGraphUpdateParticipant.system,
       CoreGraphUpdateParticipant.ai,
     ]);
 
