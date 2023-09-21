@@ -70,6 +70,18 @@ jest.mock("electron", () => ({
     on: jest.fn()
   }
 }));
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
+
+jest.mock('../../../src/electron/lib/plugins/PluginManager')
 
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),

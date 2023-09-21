@@ -63,6 +63,19 @@ jest.mock("fs/promises", () => ({
     })
 }));
 
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
+jest.mock('../../../src/electron/lib/plugins/PluginManager')
+
+
 
 // ===================================================
 // TESTS

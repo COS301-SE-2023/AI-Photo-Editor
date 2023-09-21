@@ -3,6 +3,7 @@ import { Command, type CommandContext, type CommandHandler } from "../../../src/
 import { MainWindow } from "../../../src/electron/lib/api/apis/WindowApi";
 import { Blix } from "../../../src/electron/lib/Blix";
 import { showOpenDialog, showSaveDialog } from "../../../src/electron/utils/dialog";
+import { WebSocketServer } from "ws";
 // import { showSaveDialog } from "../../../src/electron/utils/dialog";
 
 // ====================================================
@@ -120,9 +121,19 @@ jest.mock("electron", () => ({
 //     },
 //   };
 // });
+jest.mock('../../../src/electron/lib/plugins/PluginManager')
 
 
-
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
 
 jest.mock("fs/promises", () => ({
     readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),

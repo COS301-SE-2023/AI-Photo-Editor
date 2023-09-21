@@ -74,6 +74,20 @@ jest.mock("electron-store", () => ({
     })
 }));
 
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
+
+jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
+
+
 
   describe("Test CoreGraphManager", () => {
    let graphs       : { [id: UUID]: CoreGraph };
@@ -92,9 +106,6 @@ jest.mock("electron-store", () => ({
         graph = new CoreGraph();
     });
 
-    afterEach(() => {
-      blix.clearCache();
-    });
 
     test("Test constructor", () => {
       expect(graphManager).toBeDefined();

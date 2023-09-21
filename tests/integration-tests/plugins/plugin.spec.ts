@@ -61,6 +61,9 @@ jest.mock("electron", () => ({
   }
 }));
 
+jest.mock('../../../src/electron/lib/plugins/PluginManager')
+
+
 
 
 jest.mock("fs", () => ({
@@ -77,6 +80,17 @@ jest.mock("electron-store", () => ({
       return {}
     })
 }));
+
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
 describe("Test builder propagations", () => {
 
     let nodeBuilder : NodeBuilder;
@@ -194,7 +208,7 @@ describe("Test plugin integrations", () => {
         plugin.requireSelf(blix);
         // Call the function being tested
         const paths = blix.pluginManager.pluginPaths;
-        console.log(paths)
+        // console.log(paths)
 
         // Expect the result to match the expected production path
         paths.forEach((path) => {
