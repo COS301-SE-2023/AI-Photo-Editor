@@ -66,7 +66,19 @@ export class CacheManager {
               break;
             case "cache-get":
               // TODO: check if exist
-              socket.send(this.cache[data.id].data);
+              const messageId = data.messageId;
+              if (messageId != null) {
+                // Send payload on this message id
+                socket.send(
+                  Buffer.concat([
+                    Buffer.from(messageId),
+                    this.cache[data.id]?.data ?? Buffer.from([]),
+                  ])
+                );
+              } else {
+                // Send anonymous payload
+                socket.send(this.cache[data.id]?.data ?? null);
+              }
               break;
             case "cache-delete":
               this.delete(data.id);
@@ -77,6 +89,7 @@ export class CacheManager {
               break;
             case "cache-subscribe":
               this.listeners.add(socket);
+              socket.send(JSON.stringify(this.cacheUpdateNotification)); // Send initial cache update
               break;
             default:
               logger.info("Unknown cache message type", data.type);
@@ -92,21 +105,30 @@ export class CacheManager {
         }
       };
 
-      this.server.on("error", (err) => {
-        logger.error("Cache System error", err);
-      });
+      // If socket loses connection, remove it from listeners
+      socket.onclose = () => {
+        this.listeners.delete(socket);
+      };
+    });
+
+    this.server.on("error", (err) => {
+      logger.error("Cache System error", err);
     });
   }
 
   private notifyListeners() {
-    const notification: CacheUpdateNotification = {
-      type: "cache-update",
-      cache: Object.keys(this.cache).map((uuid) => ({ uuid, metadata: this.cache[uuid].metadata })),
-    };
+    const notification = this.cacheUpdateNotification;
 
     for (const listener of this.listeners) {
       listener.send(JSON.stringify(notification));
     }
+  }
+
+  private get cacheUpdateNotification(): CacheUpdateNotification {
+    return {
+      type: "cache-update",
+      cache: Object.keys(this.cache).map((uuid) => ({ uuid, metadata: this.cache[uuid].metadata })),
+    };
   }
 
   // TODO

@@ -26,6 +26,7 @@ export type CacheObject = {
 export type CacheRequest = {
   type: string;
   id: string;
+  messageId?: string;
   metadata?: CacheMetadata;
 };
 

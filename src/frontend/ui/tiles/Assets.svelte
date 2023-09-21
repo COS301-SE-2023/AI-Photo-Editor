@@ -19,8 +19,11 @@
 
   const blobs: { [key: CacheUUID]: { blob: Blob; url: string } } = {};
 
+  // let barrier = 0;
   async function getBlobURL(uuid: CacheUUID, type: string): Promise<string> {
     if (blobs[uuid]) return blobs[uuid].url;
+
+    // await new Promise((res) => { setTimeout(res, 100*barrier++) });
 
     const blob = new Blob([await cacheStore.get(uuid)], { type });
     const url = URL.createObjectURL(blob);
@@ -32,30 +35,29 @@
 
 <div class="fullPane">
   <div>
-    <table>
-      <tr>
-        <th>Cache Id</th>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Content</th>
-      </tr>
+    <div class="itemsBox">
       {#each Object.keys($cacheStore) as uuid}
-        <tr>
-          <td>{uuid.slice(0, 8)}</td>
-          <td>{$cacheStore[uuid].name ?? "-"}</td>
-          <td>{$cacheStore[uuid].contentType}</td>
-          {#if ["image/png", "image/jpeg"].includes($cacheStore[uuid].contentType)}
+        {#if ["image/png", "image/jpeg"].includes($cacheStore[uuid].contentType)}
+          <div class="item thumbItem">
             {#await getBlobURL(uuid, $cacheStore[uuid].contentType) then src}
-              <td>
+              <div class="thumbnail">
                 <img src="{src}" alt="Cached Image {uuid.slice(0, 8)}" width="50px" />
-              </td>
+              </div>
             {:catch error}
-              <td>error: {error.message}</td>
+              <div class="thumbErr">error: {error.message}</div>
             {/await}
-          {/if}
-        </tr>
+            <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
+            <div class="itemType">{$cacheStore[uuid].contentType}</div>
+          </div>
+        {:else}
+          <div class="item">
+            <div>{uuid.slice(0, 8)}</div>
+            <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
+            <div class="itemType">{$cacheStore[uuid].contentType}</div>
+          </div>
+        {/if}
       {/each}
-    </table>
+    </div>
   </div>
 
   <div class="hover flex items-center space-x-2">
@@ -84,16 +86,54 @@
     z-index: 100;
   }
 
-  table {
-    width: calc(100% - 8em);
-    margin: 4em auto;
+  .itemsBox {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    width: calc(100% - 4em);
+    margin: auto;
+    margin-top: 2em;
+    overflow: auto;
   }
 
-  table,
-  td,
-  th {
-    border: 1px solid white;
-    border-collapse: collapse;
-    padding: 0.4em;
+  .item {
+    display: grid;
+    grid-template-rows: 70% 15% 15%;
+    width: 100px;
+    height: 100px;
+    min-width: 100px;
+    min-height: 100px;
+    border: 1px solid #2a2a3f;
+    overflow: hidden;
+    margin: 0.4em;
+    padding: 0.2em;
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  .item:hover {
+    background-color: #2a2a3f88;
+  }
+
+  .thumbnail {
+    text-align: center;
+  }
+
+  .thumbnail img {
+    height: 100%;
+    width: auto;
+    margin: auto;
+    border-radius: 2px;
+  }
+
+  .itemTitle,
+  .itemType {
+    font-size: 0.6em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-wrap: break-word;
+    text-wrap: nowrap;
+    white-space: nowrap;
   }
 </style>
