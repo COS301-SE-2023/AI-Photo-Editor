@@ -14,6 +14,7 @@ import { CoreGraphUpdateParticipant } from "../../../src/electron/lib/core-graph
 import { MediaSubscriber } from "../../../src/electron/lib/media/MediaSubscribers";
 import { measureMemory } from "vm";
 import { TypeclassRegistry } from "../../../src/electron/lib/registries/TypeclassRegistry";
+import type { DisplayableMediaOutput } from "../../../src/shared/types/media";
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
 
@@ -38,6 +39,9 @@ const mainWindow: MainWindow = {
     },
     utilClientApi: {
         showToast: jest.fn()
+    },
+    mediaClientApi: {
+      onMediaOutputIdsChanged: jest.fn(),
     }
     
   }
@@ -162,10 +166,20 @@ describe("Test graph importer", () => {
 
         const data: MediaOutput = {
             content: 123,
+
             dataType: "test",
             graphUUID: "test1233",
             outputId: "test123",
             outputNodeUUID: "test123",
+        };
+
+        const display = {
+          contentProp: null,
+          displayType : "textbox",
+          props : {
+            content : "INVALID TYPE: test\nCONTENT: 123",
+            status : "error",
+          },
         };
 
 
@@ -176,7 +190,12 @@ describe("Test graph importer", () => {
         mediaManager.addSubscriber("test123", subscriber);
         mediaManager.updateMedia(data);
 
-        expect(MediaSubscriber.prototype.onMediaChanged).toBeCalledWith(data);
+        const output = {
+          ...data,
+          display,
+        } as DisplayableMediaOutput;
+
+        expect(MediaSubscriber.prototype.onMediaChanged).toBeCalledWith(output);
 
     });
 
@@ -197,7 +216,7 @@ describe("Test graph importer", () => {
         mediaManager.addSubscriber("test123", subscriber);
         mediaManager.removeSubscriber("test123", subscriber.uuid);
 
-        expect(mediaManager.getMedia("test123")).toBe(undefined);
+        expect(mediaManager.getMedia("test123")).toBe(null);
 
     });
 

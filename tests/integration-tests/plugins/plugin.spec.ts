@@ -211,20 +211,20 @@ describe("Test plugin integrations", () => {
         // console.log(paths)
 
         // Expect the result to match the expected production path
-        paths.forEach((path) => {
-          // expect(path).toMatch(/((\/|\\)[\w-]+)+/);
-        })
+        // paths.forEach((path) => {
+        //   // expect(path).toMatch(/((\/|\\)[\w-]+)+/);
+        // })
       });
       
 
     test("Plugin should send nodes to toolbox registry", () => {
         const tools =  Object.values(blix.toolbox.getRegistry());
-        expect(tools.length).toEqual(3);
+        expect(tools.length).toEqual(1);
       });
 
     test("Plugin should send commands to command registry", () => {
         const commands =  Object.values(blix.commandRegistry.getRegistry());
-        expect(commands.length).toEqual(7);  // Find a more extensible solution for this
+        expect(commands.length).toEqual(8);  // Find a more extensible solution for this
     })
 
     test("Command registry should have correct contents", () => {

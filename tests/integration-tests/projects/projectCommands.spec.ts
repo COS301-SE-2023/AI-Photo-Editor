@@ -30,7 +30,9 @@ const mainWindow: MainWindow = {
           uiInputsChanged: jest.fn()
       },
       utilClientApi: {
-          showToast: jest.fn()
+          showToast: jest.fn((message) => {
+              console.log(message);
+              }),
       }
       
     }
@@ -67,10 +69,10 @@ jest.mock("electron", () => ({
     },
     dialog: {
         showSaveDialog: jest.fn(() => {
-            return { filePath: "path" };
+            return { filePath: "path.blix" };
         }),
         showOpenDialog: jest.fn(() => {
-            return { filePaths: ["path1", "path2"] };
+            return { filePaths: ["path1.blix", "path2.blix"] };
         })
     },
     ipcMain: {
@@ -121,7 +123,6 @@ jest.mock("electron", () => ({
 //     },
 //   };
 // });
-jest.mock('../../../src/electron/lib/plugins/PluginManager')
 
 
 jest.mock('ws', () => {
@@ -169,15 +170,15 @@ describe("Testing project commands", () => {
         // Valid Case
         const project = blix.projectManager.createProject();
         let args: SaveProjectArgs = { projectId: project.uuid };
-        jest.spyOn(blix, "sendSuccessMessage");
+        jest.spyOn(ctx, "sendSuccessMessage");
         await handler(ctx, args);
-        expect(blix.sendSuccessMessage).toHaveBeenCalledWith("Project saved successfully");
+        expect(ctx.sendSuccessMessage).toHaveBeenCalledWith("Project saved successfully");
 
         // Invalid Case
         args = { projectId: "SOME_RANDOM_UUID" };
-        jest.spyOn(blix, "sendErrorMessage");
+        jest.spyOn(ctx, "sendErrorMessage");
         await handler(ctx, args);
-        expect(blix.sendErrorMessage).toHaveBeenCalledWith("Project not found"); 
+        expect(ctx.sendErrorMessage).toHaveBeenCalledWith("Project not found"); 
     });
     
     
@@ -193,16 +194,16 @@ describe("Testing project commands", () => {
 
         // Valid Case
         const project = blix.projectManager.createProject();
-        let args: SaveProjectArgs = { projectId: project.uuid };
-        jest.spyOn(blix, "sendSuccessMessage");
+        let args: SaveProjectArgs = { projectId: project.uuid};
+        jest.spyOn(ctx, "sendSuccessMessage");
         await handler(ctx, args);
-        expect(blix.sendSuccessMessage).toHaveBeenCalledWith("Project saved successfully");
+        expect(ctx.sendSuccessMessage).toHaveBeenCalledWith("Project saved successfully");
 
         // Invalid Case
         args = { projectId: "SOME_RANDOM_UUID" };
-        jest.spyOn(blix, "sendErrorMessage");
+        jest.spyOn(ctx, "sendErrorMessage");
         await handler(ctx, args);
-        expect(blix.sendErrorMessage).toHaveBeenCalledWith("Project not found");
+        expect(ctx.sendErrorMessage).toHaveBeenCalledWith("Project not found");
     });
 
     test("Create and run a openProjectCommand", async () => {
