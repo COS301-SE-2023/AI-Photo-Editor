@@ -20,21 +20,27 @@ export type CacheSubsidiary = {
 export type CacheObject = {
   uuid: CacheUUID;
   data: Buffer;
-  metadata: any;
+  metadata: CacheMetadata;
 };
 
 export type CacheRequest = {
   type: string;
   id: string;
-  metadata?: any;
+  metadata?: CacheMetadata;
 };
 
-export type CacheResponse =
-  | {
-      success: true;
-      data?: string;
-    }
-  | {
-      success: false;
-      message?: string;
-    };
+export type CacheWriteResponse = {
+  success: boolean;
+  id: CacheUUID;
+};
+
+export type CacheMetadata = {
+  contentType: string;
+  name?: string;
+  other?: any;
+};
+
+export type CacheUpdateNotification = {
+  type: string;
+  cache: { uuid: string; metadata: CacheMetadata }[];
+};

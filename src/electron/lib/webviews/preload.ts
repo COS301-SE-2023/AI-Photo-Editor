@@ -1,16 +1,21 @@
 // This is the preload script for the webviews.
+
+import { CacheMetadata, CacheWriteResponse } from "@shared/types/cache";
+
 // It exposes some IPC functions so the webview can communicate with its parent renderer.
 const { ipcRenderer, contextBridge } = require("electron");
 
 const ws = new WebSocket("ws://localhost:60606");
 ws.binaryType = "blob";
 
-function sendAndRecieveData(data: string | Blob): Promise<any> {
+function sendAndRecieveData(payload: string | Blob): Promise<any> {
   return new Promise((resolve, reject) => {
-    ws.send(data);
-    ws.addEventListener("message", (event) => {
+    ws.send(payload);
+    const recv = (event: MessageEvent<any>) => {
+      ws.removeEventListener("message", recv); // Remove this listener
       resolve(event.data);
-    });
+    };
+    ws.addEventListener("message", recv);
   });
 }
 
@@ -24,9 +29,9 @@ contextBridge.exposeInMainWorld("api", {
 });
 
 contextBridge.exposeInMainWorld("cache", {
-  write: async (content: Blob, metadata: any) => {
+  write: async (content: Blob, metadata: CacheMetadata) => {
     const response: string = await sendAndRecieveData(new Blob([content]));
-    const data = JSON.parse(response);
+    const data = JSON.parse(response) as CacheWriteResponse;
     ws.send(JSON.stringify({ type: "cache-write-metadata", id: data.id, metadata }));
     return data;
   },

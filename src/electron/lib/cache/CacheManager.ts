@@ -5,7 +5,8 @@ import type {
   CacheSubsidiary,
   CacheObject,
   CacheRequest,
-  CacheResponse,
+  CacheUpdateNotification,
+  CacheWriteResponse,
 } from "../../../shared/types/cache";
 
 import WebSocket from "ws";
@@ -61,6 +62,7 @@ export class CacheManager {
           switch (data.type) {
             case "cache-write-metadata":
               this.writeMetadata(data.id, data.metadata);
+              this.notifyListeners();
               break;
             case "cache-get":
               // TODO: check if exist
@@ -71,11 +73,7 @@ export class CacheManager {
               // TODO: check if exist
               socket.send(JSON.stringify({ success: true }));
 
-              for (const listener of this.listeners) {
-                listener.send(
-                  JSON.stringify({ type: "cache-update", cache: Object.keys(this.cache) })
-                );
-              }
+              this.notifyListeners();
               break;
             case "cache-subscribe":
               this.listeners.add(socket);
@@ -85,11 +83,10 @@ export class CacheManager {
           }
         } else if (event.data instanceof Buffer) {
           const id = this.writeContent(event.data);
-          socket.send(JSON.stringify({ success: true, id }));
+          socket.send(JSON.stringify({ success: true, id } as CacheWriteResponse));
+
           // Send cache update to all listeners
-          for (const listener of this.listeners) {
-            listener.send(JSON.stringify({ type: "cache-update", cache: Object.keys(this.cache) }));
-          }
+          this.notifyListeners();
         } else {
           logger.info("unknown", event.data);
         }
@@ -99,6 +96,17 @@ export class CacheManager {
         logger.error("Cache System error", err);
       });
     });
+  }
+
+  private notifyListeners() {
+    const notification: CacheUpdateNotification = {
+      type: "cache-update",
+      cache: Object.keys(this.cache).map((uuid) => ({ uuid, metadata: this.cache[uuid].metadata })),
+    };
+
+    for (const listener of this.listeners) {
+      listener.send(JSON.stringify(notification));
+    }
   }
 
   // TODO
@@ -113,11 +121,19 @@ export class CacheManager {
 
   writeContent(content: Buffer): CacheUUID {
     const cacheUUID = randomBytes(32).toString("base64url");
-    this.cache[cacheUUID] = { uuid: cacheUUID, data: content, metadata: {} };
+    this.cache[cacheUUID] = {
+      uuid: cacheUUID,
+      data: content,
+      metadata: { contentType: "unknown" },
+    }; // TODO: Add content type
     return cacheUUID;
   }
 
   writeMetadata(cacheUUID: CacheUUID, metadata: any) {
+    if (this.cache[cacheUUID] == null) {
+      logger.warn("Tried writing metadata to non-existent cache object: ", cacheUUID);
+      return;
+    }
     this.cache[cacheUUID].metadata = metadata;
   }
 

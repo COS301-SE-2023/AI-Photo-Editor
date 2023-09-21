@@ -1,27 +1,61 @@
 <script lang="ts">
+  import type { CacheUUID } from "@shared/types/cache";
   import { cacheStore } from "../../lib/stores/CacheStore";
+
   async function requestFileAccess() {
     try {
       const handle = await window.showOpenFilePicker();
       const file = await handle[0].getFile();
       const blob = await file.arrayBuffer();
 
-      cacheStore.addCacheObject(new Blob([blob], { type: file.type }));
+      cacheStore.addCacheObject(new Blob([blob], { type: file.type }), {
+        name: file.name,
+        contentType: file.type,
+      });
     } catch (error) {
       console.error(error);
     }
+  }
+
+  const blobs: { [key: CacheUUID]: { blob: Blob; url: string } } = {};
+
+  async function getBlobURL(uuid: CacheUUID, type: string): Promise<string> {
+    if (blobs[uuid]) return blobs[uuid].url;
+
+    const blob = new Blob([await cacheStore.get(uuid)], { type });
+    const url = URL.createObjectURL(blob);
+    blobs[uuid] = { blob, url }; // Memoize
+
+    return url;
   }
 </script>
 
 <div class="fullPane">
   <div>
-    <ul>
-      {#each $cacheStore as id}
-        <li>
-          <span>{id}</span>
-        </li>
+    <table>
+      <tr>
+        <th>Cache Id</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Content</th>
+      </tr>
+      {#each Object.keys($cacheStore) as uuid}
+        <tr>
+          <td>{uuid.slice(0, 8)}</td>
+          <td>{$cacheStore[uuid].name ?? "-"}</td>
+          <td>{$cacheStore[uuid].contentType}</td>
+          {#if ["image/png", "image/jpeg"].includes($cacheStore[uuid].contentType)}
+            {#await getBlobURL(uuid, $cacheStore[uuid].contentType) then src}
+              <td>
+                <img src="{src}" alt="Cached Image {uuid.slice(0, 8)}" width="50px" />
+              </td>
+            {:catch error}
+              <td>error: {error.message}</td>
+            {/await}
+          {/if}
+        </tr>
       {/each}
-    </ul>
+    </table>
   </div>
 
   <div class="hover flex items-center space-x-2">
@@ -48,5 +82,18 @@
     left: 1em;
     color: black;
     z-index: 100;
+  }
+
+  table {
+    width: calc(100% - 8em);
+    margin: 4em auto;
+  }
+
+  table,
+  td,
+  th {
+    border: 1px solid white;
+    border-collapse: collapse;
+    padding: 0.4em;
   }
 </style>
