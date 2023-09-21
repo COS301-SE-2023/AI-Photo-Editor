@@ -63,21 +63,18 @@
               </svg>
             </span>
           </span>
-          {#if focusedShortcutId === id}
-            <span class="rounded-md bg-rose-500 px-2 text-sm text-zinc-900 shadow-inner"
-              >Press hotkey...</span
-            >
-          {/if}
         {:else}
-          {#if focusedShortcutId === id}
-            <span class="px-2 bg-rose-500 text-zinc-900 rounded-md shadow-inner text-sm"
-              >Press hotkey...</span
-            >
-          {:else}
+          {#if focusedShortcutId !== id}
             <span class="text-sm text-zinc-300 bg-zinc-700 px-1 rounded-sm shadow-inner">Blank</span
             >
           {/if}
         {/each}
+
+        {#if focusedShortcutId === id}
+          <span class="rounded-md bg-rose-500 px-2 text-sm text-zinc-900 shadow-inner"
+            >Press hotkey...</span
+          >
+        {/if}
 
         <button
           class="group flex h-6 w-6 items-center justify-center rounded-md border-none outline-none transition duration-500 ease-in-out hover:bg-rose-500 focus:outline-none"

@@ -1,3 +1,4 @@
+import { shell } from "electron";
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { platform, type, release } from "os";
@@ -12,8 +13,9 @@ import {
   getSecret,
   type Settings,
 } from "../../../utils/settings";
-import type { Setting, QueryResponse } from "../../../../shared/types";
+import type { QueryResponse, SettingComponent } from "../../../../shared/types";
 import { type ChatModel } from "../../../lib/ai/Model";
+import { autoUpdater } from "electron-updater";
 // import dotenv from "dotenv";
 // dotenv.config();
 
@@ -25,18 +27,40 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     this.blix = blix;
   }
 
-  async getSystemInfo() {
-    const nodeVersion = process.version;
-    const systemPlatform = platform().toString();
-    const systemType = type();
-    const systemVersion = release();
-
+  async getInfo() {
     return {
-      nodeVersion,
-      systemPlatform,
-      systemType,
-      systemVersion,
+      system: {
+        nodeVersion: process.version,
+        platform: platform().toString(),
+        type: type(),
+        version: release(),
+      },
+      blix: {
+        version: autoUpdater.currentVersion.version,
+      },
     };
+  }
+
+  // ========== Update events are handled in index.ts ========== //
+
+  async checkForUpdates() {
+    try {
+      await autoUpdater.checkForUpdates();
+    } catch (error) {
+      logger.error(JSON.stringify(error));
+    }
+  }
+
+  async quitAndInstallUpdate() {
+    autoUpdater.quitAndInstall();
+  }
+
+  async downloadUpdate() {
+    try {
+      autoUpdater.downloadUpdate();
+    } catch (error) {
+      logger.error(JSON.stringify(error));
+    }
   }
 
   async sendPrompt(prompt: string, id: UUID): Promise<QueryResponse> {
@@ -78,22 +102,24 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
 
   // Add something extra validation
 
-  async saveUserSetting(setting: Setting) {
+  async saveUserSetting(setting: SettingComponent) {
     return await this.saveUserSettings([setting]);
   }
 
-  async saveUserSettings(newSettings: Setting[]): Promise<QueryResponse> {
+  async saveUserSettings(newSettings: SettingComponent[]): Promise<QueryResponse> {
     for (const setting of newSettings) {
       if (setting.secret) {
         setSecret(setting.id, setting.value.toString());
-      } else settings.set(setting.id, setting.value);
+      } else {
+        settings.set(setting.id, setting.value);
+      }
     }
 
     return { status: "success" };
   }
 
   /** Retrieve a user setting from the ElectronStore. */
-  async getUserSetting(setting: Setting | string) {
+  async getUserSetting(setting: SettingComponent | string) {
     let key = "";
 
     if (typeof setting === "string") {
@@ -161,5 +187,9 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
 
   async getState<T>(key: string): Promise<T> {
     return settings.get(key);
+  }
+
+  async openLinkInBrowser(url: string) {
+    shell.openExternal(url);
   }
 }

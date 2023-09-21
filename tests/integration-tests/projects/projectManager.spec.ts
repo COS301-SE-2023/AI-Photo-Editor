@@ -51,6 +51,9 @@ jest.mock("electron", () => ({
     },
     dialog: {
       showMessageBox: jest.fn().mockImplementation(() => Promise.resolve(0))
+    },
+    ipcMain: {
+      on: jest.fn()
     }
 }));
 
@@ -59,6 +62,19 @@ jest.mock("fs/promises", () => ({
         return "{}";
     })
 }));
+
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
+jest.mock('../../../src/electron/lib/plugins/PluginManager')
+
 
 
 // ===================================================
