@@ -19,6 +19,13 @@ jobs:
         with:
           node-version: 18
 
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+
       - name: Install dependencies
         run: npm ci
 
@@ -28,13 +35,11 @@ jobs:
       - name: Build/Release Blix
         run: |
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            # npm run dist -- --linux deb AppImage --x64 --arm64
-            npm run dist -- --linux deb AppImage --x64
+            npm run dist -- --linux deb AppImage --x64 --arm64
           elif [ "${{ matrix.os }}" = "windows-latest" ]; then
             npm run dist -- --windows nsis
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            # npm run dist -- --mac dmg --x64 --arm64
-            npm run dist -- --mac dmg --arm64
+            npm run dist -- --mac dmg --x64 --arm64
           fi
         env:
           GH_TOKEN: ${{ secrets.TEST_TOKEN }}
