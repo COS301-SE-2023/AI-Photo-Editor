@@ -46,7 +46,7 @@
               id: "quit-and-install",
               value: "Quit and install update",
               type: "button",
-              onClick: window.apis.utilApi.quitAndInstallUpdate,
+              onClick: () => window.apis.utilApi.quitAndInstallUpdate(),
             },
           ];
         } else {
@@ -55,7 +55,7 @@
               id: "download-update",
               value: "Download update",
               type: "button",
-              onClick: window.apis.utilApi.downloadUpdate,
+              onClick: () => window.apis.utilApi.downloadUpdate(),
             },
           ];
         }
