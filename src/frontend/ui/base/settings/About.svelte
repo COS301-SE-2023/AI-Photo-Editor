@@ -49,7 +49,7 @@
               onClick: () => window.apis.utilApi.quitAndInstallUpdate(),
             },
           ];
-        } else {
+        } else if (!state.update.isDownloading) {
           versionItem.components = [
             {
               id: "download-update",
@@ -58,6 +58,8 @@
               onClick: () => window.apis.utilApi.downloadUpdate(),
             },
           ];
+        } else {
+          versionItem.components = [];
         }
       } else {
         versionItem.components = [
