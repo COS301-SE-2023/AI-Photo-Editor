@@ -1,13 +1,13 @@
 <script context="module" lang="ts">
   export type SettingsContext = {
-    saveSettings: (settings: Setting[]) => Promise<void>;
-    getSetting: (setting: Setting) => Promise<QueryResponse>;
+    saveSettings: (settings: SettingComponent[]) => Promise<void>;
+    getSettingValue: (setting: SettingComponent) => Promise<QueryResponse>;
   };
 </script>
 
 <script lang="ts">
   import { setContext } from "svelte";
-  import type { Setting, QueryResponse } from "../../../../shared/types";
+  import type { QueryResponse, SettingComponent } from "../../../../shared/types";
   import { toastStore } from "../../../lib/stores/ToastStore";
   import { settingsStore } from "../../../lib/stores/SettingsStore";
   import { userSettingSections, type UserSettingsCategoryId } from "../../../../shared/types";
@@ -20,18 +20,16 @@
 
   setContext<SettingsContext>("settings", {
     saveSettings,
-    getSetting,
+    getSettingValue,
   });
 
-  async function saveSettings(settings: Setting[]) {
-    const res = await window.apis.utilApi.saveUserSettings(settings);
+  /** State of buttons don't get saved */
+  async function saveSettings(settings: SettingComponent[]) {
+    const filteredSettings = settings.filter((setting) => setting.type !== "button");
 
-    if (res.status === "success") {
-      toastStore.trigger({
-        message: "Your preferences have been updated successfully",
-        type: "success",
-      });
-    } else {
+    const res = await window.apis.utilApi.saveUserSettings(filteredSettings);
+
+    if (res.status === "error") {
       toastStore.trigger({
         message: "Something went wrong while updating your preferences",
         type: "error",
@@ -39,7 +37,7 @@
     }
   }
 
-  async function getSetting(setting: Setting) {
+  async function getSettingValue(setting: SettingComponent) {
     return await window.apis.utilApi.getUserSetting(setting);
   }
 

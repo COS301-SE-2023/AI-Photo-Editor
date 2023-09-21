@@ -258,60 +258,87 @@ app.on("web-contents-created", (e, contents) => {
   });
 });
 
-// ========== AUTO UPDATER ==========//
+// ==================================================================
+// AUTO UPDATER
+// ==================================================================
 
-if (isProd)
+let newVersion = "";
+
+if (isProd) {
   autoUpdater.checkForUpdates().catch((err) => {
     logger.error(JSON.stringify(err));
   });
+}
 
 autoUpdater.logger = logger;
 
-autoUpdater.on("update-available", () => {
-  notification = new Notification({
-    title: "BLix",
-    body: "Updates are available. Click to download.",
-    silent: true,
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
-  });
-  notification.show();
-  notification.on("click", () => {
-    autoUpdater.downloadUpdate().catch((err) => {
-      logger.error(JSON.stringify(err));
-    });
+autoUpdater.on("update-available", (updateInfo) => {
+  newVersion = updateInfo.version;
+
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: true,
+      isDownloaded: false,
+      isDownloading: false,
+      percentDownloaded: 0,
+      version: newVersion,
+    },
   });
 });
 
-autoUpdater.on("update-not-available", () => {
-  notification = new Notification({
-    title: "Blix",
-    body: "Your software is up to date.",
-    silent: true,
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
+autoUpdater.on("update-not-available", (updateInfo) => {
+  newVersion = "";
+
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: false,
+      isDownloaded: false,
+      isDownloading: false,
+      percentDownloaded: 0,
+      version: newVersion,
+    },
   });
-  notification.show();
 });
 
-autoUpdater.on("update-downloaded", () => {
-  notification = new Notification({
-    title: "Blix",
-    body: "The updates are ready. Click to quit and install.",
-    silent: true,
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
+autoUpdater.on("update-downloaded", (updateInfo) => {
+  newVersion = updateInfo.version;
+
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: true,
+      isDownloaded: true,
+      isDownloading: false,
+      percentDownloaded: 100,
+      version: newVersion,
+    },
   });
-  notification.show();
-  notification.on("click", () => {
-    autoUpdater.quitAndInstall();
+});
+
+autoUpdater.on("download-progress", (progress) => {
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: true,
+      isDownloaded: false,
+      isDownloading: true,
+      percentDownloaded: progress.percent,
+      version: newVersion,
+    },
   });
 });
 
 autoUpdater.on("error", (err) => {
-  notification = new Notification({
-    title: "Blix",
-    body: JSON.stringify(err),
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
+  // Clear Blix update state
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: false,
+      isDownloaded: false,
+      isDownloading: false,
+      percentDownloaded: 0,
+      version: "",
+    },
   });
-  notification.show();
+
+  logger.error(JSON.stringify(err));
 });
 
 // Menu
