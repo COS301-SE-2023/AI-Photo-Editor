@@ -134,6 +134,26 @@ const glfxNodes = {
             { id: "strength", min: -1, max: 1, step: 0.1 }
         ]
     ],
+    "ink": [ 
+        "Ink",
+        "Simulates outlining the image in ink by darkening edges stronger than a certain threshold.",
+        [{ id: "strength", min: 0, max: 1, step: 0.01 }]
+    ],
+    "edgeWork": [ 
+        "Edge Work",
+        "Picks out different frequencies in the image by subtracting two copies of the image blurred with different radii.",
+        [{ id: "radius", min: 0, max: 100, step: 0.1 }]
+    ],
+    "hexagonalPixelate": [
+        "Hexagonal Pixelate",
+        "Renders the image using a pattern of hexagonal tiles. Tile colors are nearest-neighbor sampled from the centers of the tiles.",
+        [
+            { id: "x", min: 0, max: 500, step: 1.0 }, 
+            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "scale", min: 1, max: 100, step: 1.0 }, 
+        ]
+    ],
+
 };
 
 Object.keys(glfxNodes).forEach((key) => {
