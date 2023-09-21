@@ -93,6 +93,67 @@ const glfxNodes = {
         "Add a vignette effect to the image",
         [{ id: "size", min: 0, max: 1, step: 0.01 }, { id: "amount", min: 0, max: 1, step: 0.01 }]
     ],
+    "swirl": [
+        "Swirl",
+        "Add Swirl effect to the image",
+        [
+            { id: "x", min: 0, max: 500, step: 1.0 }, 
+            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "radius", min: 0, max: 600, step: 1.0 }, 
+            { id: "angle", min: -25, max: 25, step: 1.0 }
+        ]
+    ],
+    "zoomBlur": [
+        "Zoom Blur",
+        "Blurs the image away from a certain point, which looks like radial motion blur.",
+        [
+            { id: "x", min: 0, max: 500, step: 1.0 }, 
+            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "strength", min: 0, max: 1, step: 0.1 }
+        ]
+    ],
+    "tiltShift": [
+        "Tilt Shift",
+        "Simulates the shallow depth of field normally encountered in close-up photography, which makes the scene seem much smaller than it actually is.",
+        [
+            { id: "x1", min: 0, max: 500, step: 1.0 }, 
+            { id: "y1", min: 0, max: 500, step: 1.0 }, 
+            { id: "x2", min: 0, max: 500, step: 1.0 }, 
+            { id: "y2", min: 0, max: 500, step: 1.0 }, 
+            { id: "blurRadius", min: 0, max: 50, step: 1.0 }, 
+            { id: "gradientRadius", min: 0, max: 400, step: 1.0 }
+        ]
+    ],
+    "bulgePinch": [
+        "Bulge / Pinch",
+        "Bulges or pinches the image in a circle.",
+        [
+            { id: "x", min: 0, max: 500, step: 1.0 }, 
+            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "radius", min: 0, max: 600, step: 1.0 }, 
+            { id: "strength", min: -1, max: 1, step: 0.1 }
+        ]
+    ],
+    "ink": [ 
+        "Ink",
+        "Simulates outlining the image in ink by darkening edges stronger than a certain threshold.",
+        [{ id: "strength", min: 0, max: 1, step: 0.01 }]
+    ],
+    "edgeWork": [ 
+        "Edge Work",
+        "Picks out different frequencies in the image by subtracting two copies of the image blurred with different radii.",
+        [{ id: "radius", min: 0, max: 100, step: 0.1 }]
+    ],
+    "hexagonalPixelate": [
+        "Hexagonal Pixelate",
+        "Renders the image using a pattern of hexagonal tiles. Tile colors are nearest-neighbor sampled from the centers of the tiles.",
+        [
+            { id: "x", min: 0, max: 500, step: 1.0 }, 
+            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "scale", min: 1, max: 100, step: 1.0 }, 
+        ]
+    ],
+
 };
 
 Object.keys(glfxNodes).forEach((key) => {
