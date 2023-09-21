@@ -12,6 +12,7 @@ export const userSettingSections = [
 
 export type UserSettingsCategoryId =
   (typeof userSettingSections)[number]["categories"][number]["id"];
+
 export type UserSettingsCategoryTitle =
   (typeof userSettingSections)[number]["categories"][number]["title"];
 
@@ -49,6 +50,11 @@ export interface ToggleSetting extends UserSetting {
   type: "toggle";
   value: boolean;
 }
+export interface ButtonSetting extends UserSetting {
+  type: "button";
+  value: string;
+  onClick: (item: Setting) => void;
+}
 
 export interface KeyboardShortcuts extends UserSetting {
   id: "keyboardShortcuts";
@@ -61,7 +67,12 @@ export interface KeyboardShortcut extends UserSetting {
   value: string[];
 }
 
-export type Setting = DropdownSetting | InputSetting | ToggleSetting | KeyboardShortcuts;
+export type Setting =
+  | DropdownSetting
+  | InputSetting
+  | ToggleSetting
+  | KeyboardShortcuts
+  | ButtonSetting;
 
 type Prettify<T> = T extends object ? { [K in keyof T]: T[K] } : never;
 

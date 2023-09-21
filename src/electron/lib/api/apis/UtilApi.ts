@@ -12,7 +12,7 @@ import {
   getSecret,
   type Settings,
 } from "../../../utils/settings";
-import type { Setting, QueryResponse } from "../../../../shared/types";
+import type { Setting, QueryResponse, ButtonSetting } from "../../../../shared/types";
 import { type ChatModel } from "../../../lib/ai/Model";
 import { autoUpdater } from "electron-updater";
 // import dotenv from "dotenv";
@@ -83,7 +83,7 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
 
   // Add something extra validation
 
-  async saveUserSetting(setting: Setting) {
+  async saveUserSetting(setting: Exclude<Setting, ButtonSetting>) {
     return await this.saveUserSettings([setting]);
   }
 
@@ -91,7 +91,9 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     for (const setting of newSettings) {
       if (setting.secret) {
         setSecret(setting.id, setting.value.toString());
-      } else settings.set(setting.id, setting.value);
+      } else {
+        settings.set(setting.id, setting.value);
+      }
     }
 
     return { status: "success" };

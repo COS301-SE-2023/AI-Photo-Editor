@@ -23,15 +23,13 @@
     getSetting,
   });
 
+  /** State of buttons don't get saved */
   async function saveSettings(settings: Setting[]) {
-    const res = await window.apis.utilApi.saveUserSettings(settings);
+    const filteredSettings = settings.filter((setting) => setting.type !== "button");
 
-    if (res.status === "success") {
-      toastStore.trigger({
-        message: "Your preferences have been updated successfully",
-        type: "success",
-      });
-    } else {
+    const res = await window.apis.utilApi.saveUserSettings(filteredSettings);
+
+    if (res.status === "error") {
       toastStore.trigger({
         message: "Something went wrong while updating your preferences",
         type: "error",
