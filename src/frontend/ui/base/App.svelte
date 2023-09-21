@@ -9,7 +9,7 @@
   import { initAPIs } from "../../lib/api/apiInitializer";
   import ContextMenu from "../../ui/utils/ContextMenu.svelte";
   import Test from "./Test.svelte";
-  import Settings from "./Settings.svelte";
+  import Settings from "./settings/Settings.svelte";
   import Shortcuts from "../../ui/utils/Shortcuts.svelte";
   import { settingsStore } from "../../lib/stores/SettingsStore";
   import { confetti } from "@neoconfetti/svelte";
@@ -70,9 +70,9 @@
   <div></div>
 {/if}
 
-{#if $settingsStore.showing}
+<div class="{$settingsStore.showing ? '' : 'hidden'}">
   <Settings />
-{/if}
+</div>
 
 <Toasts />
 <ContextMenu />

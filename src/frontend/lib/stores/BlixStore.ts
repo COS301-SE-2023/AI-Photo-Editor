@@ -3,6 +3,7 @@ import { commandStore } from "./CommandStore";
 import { toolboxStore } from "./ToolboxStore";
 import { tileStore } from "./TileStore";
 import { shortcutsRegistry } from "./ShortcutStore";
+import type { KeyboardShortcut } from "@shared/types";
 
 interface BlixStore {
   blixReady: boolean;
@@ -43,8 +44,11 @@ export async function setInitialStores() {
   const tile = await window.apis.tileApi.getTiles();
   tileStore.refreshStore(tile);
 
-  const shortcuts = await window.apis.utilApi.getUserSettings();
-  if (shortcuts.status === "success") shortcutsRegistry.refreshStore(shortcuts.data);
+  const shortcuts = await window.apis.utilApi.getUserSetting("keyboardShortcuts");
+  if (shortcuts.status === "success") {
+    // TODO: Add some sort of schema check
+    shortcutsRegistry.refreshStore(shortcuts.data as KeyboardShortcut[]);
+  }
 
   // Graph store
   // const allGraphIds = await window.apis.graphApi.getAllGraphUUIDs();

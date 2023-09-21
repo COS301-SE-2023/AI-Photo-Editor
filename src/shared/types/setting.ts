@@ -1,16 +1,37 @@
-export interface UserSettingsCategory {
+export const userSettingSections = [
+  {
+    id: "general",
+    title: "General",
+    categories: [
+      { id: "about", title: "About" },
+      { id: "ai", title: "AI Settings" },
+      { id: "hotkeys", title: "Hotkeys" },
+    ],
+  },
+] as const satisfies readonly UserSettingsSection[];
+
+export type UserSettingsCategoryId =
+  (typeof userSettingSections)[number]["categories"][number]["id"];
+export type UserSettingsCategoryTitle =
+  (typeof userSettingSections)[number]["categories"][number]["title"];
+
+export type UserSettingsSection = {
+  id: string;
+  title: string;
+  categories: ReadonlyArray<UserSettingCategory>;
+};
+
+export type UserSettingCategory = {
   id: string;
   title: string;
   subtitle?: string;
-  settings: Setting[];
-}
+};
 
 export interface UserSetting {
   id: string;
   title: string;
   subtitle?: string;
   secret?: boolean;
-  type: "dropdown" | "password" | "text" | "toggle" | "preferences";
 }
 
 export interface InputSetting extends UserSetting {
@@ -24,15 +45,24 @@ export interface DropdownSetting extends UserSetting {
   options: string[];
   value: string;
 }
-
 export interface ToggleSetting extends UserSetting {
   type: "toggle";
   value: boolean;
 }
 
-export interface Preferences extends UserSetting {
-  type: "preferences";
-  value: { [key: string]: string[] };
+export interface KeyboardShortcuts extends UserSetting {
+  id: "keyboardShortcuts";
+  type: "keyboardShortcuts";
+  value: KeyboardShortcut[];
+}
+export interface KeyboardShortcut extends UserSetting {
+  id: `${string}.${string}`;
+  type: "keyboardShortcut";
+  value: string[];
 }
 
-export type Setting = DropdownSetting | InputSetting | ToggleSetting | Preferences;
+export type Setting = DropdownSetting | InputSetting | ToggleSetting | KeyboardShortcuts;
+
+type Prettify<T> = T extends object ? { [K in keyof T]: T[K] } : never;
+
+type t = Prettify<KeyboardShortcut>;
