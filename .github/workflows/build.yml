@@ -29,7 +29,7 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
             # npm run dist -- --linux deb AppImage --x64 --arm64
-            npm run dist -- --linux deb AppImage --x86
+            npm run dist -- --linux deb AppImage --x64
           elif [ "${{ matrix.os }}" = "windows-latest" ]; then
             npm run dist -- --windows nsis
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
