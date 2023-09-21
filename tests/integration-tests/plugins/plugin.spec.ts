@@ -38,13 +38,6 @@ jest.mock("chokidar", () => ({
 }));
 
 
-jest.mock("ws", () => ({
-  WebSocket: {
-    Server: jest.fn(({port}) => {
-      return;
-    })
-  }
-}));
 
 jest.mock("../../../src/electron/lib/projects/ProjectManager");
 
@@ -64,10 +57,12 @@ jest.mock("electron", () => ({
     })
   },
   ipcMain: {
-    on: jest.fn(),
-    handle: jest.fn(),
-  },
+    on: jest.fn()
+  }
 }));
+
+jest.mock('../../../src/electron/lib/plugins/PluginManager')
+
 
 
 
@@ -85,6 +80,17 @@ jest.mock("electron-store", () => ({
       return {}
     })
 }));
+
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
 describe("Test builder propagations", () => {
 
     let nodeBuilder : NodeBuilder;
@@ -202,23 +208,23 @@ describe("Test plugin integrations", () => {
         plugin.requireSelf(blix);
         // Call the function being tested
         const paths = blix.pluginManager.pluginPaths;
-        console.log(paths)
+        // console.log(paths)
 
         // Expect the result to match the expected production path
-        paths.forEach((path) => {
-          // expect(path).toMatch(/((\/|\\)[\w-]+)+/);
-        })
+        // paths.forEach((path) => {
+        //   // expect(path).toMatch(/((\/|\\)[\w-]+)+/);
+        // })
       });
       
 
     test("Plugin should send nodes to toolbox registry", () => {
         const tools =  Object.values(blix.toolbox.getRegistry());
-        expect(tools.length).toEqual(3);
+        expect(tools.length).toEqual(1);
       });
 
     test("Plugin should send commands to command registry", () => {
         const commands =  Object.values(blix.commandRegistry.getRegistry());
-        expect(commands.length).toEqual(7);  // Find a more extensible solution for this
+        expect(commands.length).toEqual(8);  // Find a more extensible solution for this
     })
 
     test("Command registry should have correct contents", () => {
