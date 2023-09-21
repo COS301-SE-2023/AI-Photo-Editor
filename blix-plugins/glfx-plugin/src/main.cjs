@@ -104,14 +104,36 @@ const glfxNodes = {
         ]
     ],
     "zoomBlur": [
-        "zoomBlur",
+        "Zoom Blur",
         "Blurs the image away from a certain point, which looks like radial motion blur.",
         [
             { id: "x", min: 0, max: 500, step: 1.0 }, 
             { id: "y", min: 0, max: 500, step: 1.0 }, 
             { id: "strength", min: 0, max: 1, step: 0.1 }
         ]
-    ]
+    ],
+    "tiltShift": [
+        "Tilt Shift",
+        "Simulates the shallow depth of field normally encountered in close-up photography, which makes the scene seem much smaller than it actually is.",
+        [
+            { id: "x1", min: 0, max: 500, step: 1.0 }, 
+            { id: "y1", min: 0, max: 500, step: 1.0 }, 
+            { id: "x2", min: 0, max: 500, step: 1.0 }, 
+            { id: "y2", min: 0, max: 500, step: 1.0 }, 
+            { id: "blurRadius", min: 0, max: 50, step: 1.0 }, 
+            { id: "gradientRadius", min: 0, max: 400, step: 1.0 }
+        ]
+    ],
+    "bulgePinch": [
+        "Bulge / Pinch",
+        "Bulges or pinches the image in a circle.",
+        [
+            { id: "x", min: 0, max: 500, step: 1.0 }, 
+            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "radius", min: 0, max: 600, step: 1.0 }, 
+            { id: "strength", min: -1, max: 1, step: 0.1 }
+        ]
+    ],
 };
 
 Object.keys(glfxNodes).forEach((key) => {
