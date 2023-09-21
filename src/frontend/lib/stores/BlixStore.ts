@@ -16,15 +16,24 @@ const blixStoreDefaults = {
   blix: {
     version: "",
   },
+  update: {
+    isAvailable: false,
+    isDownloaded: false,
+    version: "",
+  },
 };
 
-type BlixStoreState = typeof blixStoreDefaults;
+export type BlixStoreState = typeof blixStoreDefaults;
 
 export class BlixStore {
   store = writable<BlixStoreState>(blixStoreDefaults);
 
   public async checkForUpdates() {
     return await window.apis.utilApi.checkForUpdates();
+  }
+
+  public refreshStore(state: Partial<BlixStoreState>) {
+    this.store.update((s) => ({ ...s, ...state }));
   }
 
   public get subscribe() {
@@ -41,7 +50,7 @@ export const blixStore = new BlixStore();
 export async function setInitialStores() {
   // BLix store
   const res = await window.apis.utilApi.getInfo();
-  blixStore.update((state) => ({ ...state, ...res }));
+  blixStore.refreshStore(res);
 
   // Command store
   const command = await window.apis.commandApi.getCommands();

@@ -8,7 +8,7 @@
 
   async function checkForUpdates() {
     checkingForUpdates = true;
-    await blixStore.checkForUpdates();
+    console.log(JSON.stringify(await blixStore.checkForUpdates()));
     await sleep(400);
     checkingForUpdates = false;
   }
@@ -23,10 +23,12 @@
     item="{{
       id: 'version',
       title: `Current Version: ${$blixStore.blix.version}`,
-      subtitle: 'Blix is up-to-date!',
+      subtitle: $blixStore.update.isAvailable
+        ? `Update is available: ${$blixStore.update.version}`
+        : 'Blix is up to date',
       value: 'Check for updates',
       type: 'button',
-      onClick: () => checkForUpdates(),
+      onClick: checkForUpdates,
     }}"
   >
     {#if checkingForUpdates}
