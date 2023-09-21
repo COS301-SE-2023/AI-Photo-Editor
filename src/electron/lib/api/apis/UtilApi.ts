@@ -76,6 +76,11 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
 
     const userSettings: UserSettingsCategory[] = [
       {
+        id: "plugin_browser",
+        title: "Plugin Browser",
+        settings: [],
+      },
+      {
         id: "ai_settings",
         title: "AI Settings",
         settings: [

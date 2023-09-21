@@ -120,6 +120,7 @@ class ShortcutStore {
     "blix.settings.hide": ["[Escape]"],
     "blix.splash.hide": ["[Escape]"],
     "blix.projects.save": ["ctrl+[KeyS]", "meta+[KeyS]"],
+    "blix.pluginBrowser.deselectPlugin": ["[Escape]"],
   });
 
   public addActionShortcut(action: ShortcutAction, combo: ShortcutCombo) {

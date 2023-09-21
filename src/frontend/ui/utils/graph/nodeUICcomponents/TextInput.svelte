@@ -30,7 +30,7 @@
     background-color: #1f1f28;
     border: none;
     padding: 0.1em;
-
-    float: right;
+    padding-right: 0.8em;
+    margin: 0.2em;
   }
 </style>
