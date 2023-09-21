@@ -154,10 +154,22 @@
             mouseCursor = "";
         }
     }
+
+    // function exportCanvas() {
+    //     const data = blink.renderer.extract.canvas(blink.stage);
+    //     console.log(data);
+    //     const link = document.createElement("a");
+    //     link.download = "export.png";
+    //     link.href = data.toDataURL("image/png", 1.0);
+    //     link.click();
+    //     link.remove();
+    // }
+
 </script>
 
 <svelte:window on:keydown={keydown} on:keyup={keyup} />
 <div class="{mouseCursor}">
+    <!-- <button on:click="{exportCanvas}" >Test</button> -->
     <canvas id="pixiCanvas" bind:this={pixiCanvas} />
 </div>
 
@@ -171,6 +183,15 @@
         position: absolute;
         margin: 0px;
         padding: 0px;
+    }
+
+    button {
+        position: absolute;
+        z-index: 10;
+        top: 10px;
+        right: 0px;
+        width: 60px;
+        height: 30px;
     }
 
     .cursorPointer {
