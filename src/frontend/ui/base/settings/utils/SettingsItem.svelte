@@ -18,12 +18,18 @@
   </div>
 
   <div class="ml-auto flex items-center space-x-2">
-    {#if item.type === "text" && item.secret}
-      <SecureInput bind:value="{item.value}" id="{item.id}" placeholder="{item.placeholder}" />
-    {:else if item.type === "dropdown"}
-      <Dropdown bind:item="{item}" />
-    {:else if item.type === "button"}
-      <Button item="{item}" />
-    {/if}
+    {#each item.components as component (component.id)}
+      {#if component.type === "text" && component.secret}
+        <SecureInput
+          bind:value="{component.value}"
+          id="{item.id}"
+          placeholder="{component.placeholder}"
+        />
+      {:else if component.type === "dropdown"}
+        <Dropdown bind:item="{component}" />
+      {:else if component.type === "button"}
+        <Button item="{component}" />
+      {/if}
+    {/each}
   </div>
 </div>

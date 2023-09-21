@@ -1,13 +1,13 @@
 <script context="module" lang="ts">
   export type SettingsContext = {
-    saveSettings: (settings: Setting[]) => Promise<void>;
-    getSetting: (setting: Setting) => Promise<QueryResponse>;
+    saveSettings: (settings: SettingComponent[]) => Promise<void>;
+    getSettingValue: (setting: SettingComponent) => Promise<QueryResponse>;
   };
 </script>
 
 <script lang="ts">
   import { setContext } from "svelte";
-  import type { Setting, QueryResponse } from "../../../../shared/types";
+  import type { QueryResponse, SettingComponent } from "../../../../shared/types";
   import { toastStore } from "../../../lib/stores/ToastStore";
   import { settingsStore } from "../../../lib/stores/SettingsStore";
   import { userSettingSections, type UserSettingsCategoryId } from "../../../../shared/types";
@@ -20,11 +20,11 @@
 
   setContext<SettingsContext>("settings", {
     saveSettings,
-    getSetting,
+    getSettingValue,
   });
 
   /** State of buttons don't get saved */
-  async function saveSettings(settings: Setting[]) {
+  async function saveSettings(settings: SettingComponent[]) {
     const filteredSettings = settings.filter((setting) => setting.type !== "button");
 
     const res = await window.apis.utilApi.saveUserSettings(filteredSettings);
@@ -37,7 +37,7 @@
     }
   }
 
-  async function getSetting(setting: Setting) {
+  async function getSettingValue(setting: SettingComponent) {
     return await window.apis.utilApi.getUserSetting(setting);
   }
 

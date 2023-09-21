@@ -4,45 +4,57 @@
   import type { SettingsContext } from "./Settings.svelte";
   import SettingsItem from "./utils/SettingsItem.svelte";
 
-  const { getSetting, saveSettings } = getContext<SettingsContext>("settings");
+  const { getSettingValue, saveSettings } = getContext<SettingsContext>("settings");
+
+  let initializedSettings = false;
 
   let settings: Setting[] = [
     {
-      id: "OPENAI_API_KEY",
+      id: "OpenAiKey",
       title: "Open AI Key",
       subtitle: "Required to use Open AI models",
-      type: "text",
-      secret: true,
-      value: "",
+      components: [
+        {
+          id: "OPENAI_API_KEY",
+          type: "text",
+          secret: true,
+          value: "",
+        },
+      ],
     },
     {
-      id: "model",
+      id: "OpenAiModel",
       title: "Open AI Model",
-      type: "dropdown",
-      value: "",
-      options: ["GPT-3.5", "GPT-4"],
+      components: [
+        {
+          id: "model",
+          type: "dropdown",
+          value: "",
+          options: ["GPT-3.5", "GPT-4"],
+        },
+      ],
     },
   ];
-  let initializedSettings = false;
 
   onMount(async () => {
-    const updatedSettings = await Promise.all(
-      settings.map(async (setting) => {
-        const res = await getSetting(setting);
+    for (const setting of settings) {
+      for (const component of setting.components) {
+        const res = await getSettingValue(component);
+        console.log(res);
 
         if (res.status === "success" && res.data) {
-          return { ...setting, value: res.data as any };
+          component.value = res.data as any;
         }
+      }
 
-        return setting;
-      })
-    );
+      console.log(settings);
+    }
 
-    settings = updatedSettings;
+    settings = [...settings];
     initializedSettings = true;
   });
 
-  $: if (initializedSettings) saveSettings(settings);
+  $: if (initializedSettings) saveSettings(settings.flatMap((setting) => setting.components));
 </script>
 
 <div class="h-full w-full p-10">

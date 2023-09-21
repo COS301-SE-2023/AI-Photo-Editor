@@ -29,7 +29,7 @@ export class BlixStore {
   store = writable<BlixStoreState>(blixStoreDefaults);
 
   public async checkForUpdates() {
-    return await window.apis.utilApi.checkForUpdates();
+    await window.apis.utilApi.checkForUpdates();
   }
 
   public refreshStore(state: Partial<BlixStoreState>) {

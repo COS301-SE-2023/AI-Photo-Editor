@@ -1,16 +1,93 @@
 <script lang="ts">
-  // import type { Setting } from "../../../../shared/types";
+  import { onMount } from "svelte";
+  import type { Setting } from "../../../../shared/types";
   import { blixStore } from "../../../lib/stores/BlixStore";
   import SettingsItem from "./utils/SettingsItem.svelte";
 
-  // let settings: Setting[] = [];
   let checkingForUpdates = false;
+
+  let versionItem: Setting = {
+    id: "version",
+    title: "Current Version: ",
+    subtitle: "",
+    components: [
+      {
+        id: "check-for-updates",
+        value: "Check for updates",
+        type: "button",
+        onClick: checkForUpdates,
+      },
+    ],
+  };
+
+  let helpItem: Setting = {
+    id: "help",
+    title: "Get help",
+    subtitle: "Get help on using Blix.",
+    components: [
+      {
+        id: "open-help",
+        value: "Open",
+        type: "button",
+        onClick: () => ({}),
+      },
+    ],
+  };
+
+  onMount(() => {
+    return blixStore.subscribe((state) => {
+      versionItem.title = `Current Version: ${state.blix.version}`;
+
+      versionItem.subtitle = state.update.isAvailable
+        ? `Update is available: ${state.update.version}`
+        : "Blix is up to date";
+
+      if (state.update.isAvailable) {
+        if (state.update.isDownloaded) {
+          versionItem.components = [
+            {
+              id: "quit-and-install",
+              value: "Quit and Install Update",
+              type: "button",
+              onClick: quitAndInstallUpdate,
+            },
+          ];
+        } else {
+          versionItem.components = [
+            {
+              id: "download-update",
+              value: "Download Update",
+              type: "button",
+              onClick: downloadUpdate,
+            },
+          ];
+        }
+      } else {
+        versionItem.components = [
+          {
+            id: "check-for-updates",
+            value: "Check for updates",
+            type: "button",
+            onClick: checkForUpdates,
+          },
+        ];
+      }
+    });
+  });
 
   async function checkForUpdates() {
     checkingForUpdates = true;
-    console.log(JSON.stringify(await blixStore.checkForUpdates()));
+    await blixStore.checkForUpdates();
     await sleep(400);
     checkingForUpdates = false;
+  }
+
+  async function downloadUpdate() {
+    // await blixStore.downloadUpdate();
+  }
+
+  async function quitAndInstallUpdate() {
+    // await blixStore.downloadUpdate();
   }
 
   function sleep(milliseconds: number) {
@@ -19,33 +96,11 @@
 </script>
 
 <div class="h-full w-full p-10">
-  <SettingsItem
-    item="{{
-      id: 'version',
-      title: `Current Version: ${$blixStore.blix.version}`,
-      subtitle: $blixStore.update.isAvailable
-        ? `Update is available: ${$blixStore.update.version}`
-        : 'Blix is up to date',
-      value: 'Check for updates',
-      type: 'button',
-      onClick: checkForUpdates,
-    }}"
-  >
+  <SettingsItem item="{versionItem}">
     {#if checkingForUpdates}
       <div class="text-sm font-light text-zinc-500">Checking for updates...</div>
     {/if}
   </SettingsItem>
 
-  <SettingsItem
-    item="{{
-      id: 'help',
-      title: 'Get help',
-      subtitle: 'Get help on using Blix.',
-      value: 'Open',
-      type: 'button',
-      onClick: () => ({}),
-    }}"
-  />
-
-  <div>Hello World</div>
+  <SettingsItem item="{helpItem}" />
 </div>

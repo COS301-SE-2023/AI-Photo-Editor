@@ -186,7 +186,6 @@ class ShortcutStore {
     const keyboardShortcuts: KeyboardShortcuts = {
       id: "keyboardShortcuts",
       type: "keyboardShortcuts",
-      title: "Keyboard Shortcuts",
       value: shortcutsList,
     };
 

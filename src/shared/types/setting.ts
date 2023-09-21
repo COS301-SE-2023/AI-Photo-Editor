@@ -28,51 +28,53 @@ export type UserSettingCategory = {
   subtitle?: string;
 };
 
-export interface UserSetting {
+export type Setting = {
   id: string;
   title: string;
   subtitle?: string;
+  description?: string[];
+  components: SettingComponent[];
+};
+
+interface SettingComponentBase {
+  id: string;
   secret?: boolean;
 }
 
-export interface InputSetting extends UserSetting {
-  type: "password" | "text";
+export interface Input extends SettingComponentBase {
+  type: "secret" | "text";
   placeholder?: string;
   value: string;
 }
 
-export interface DropdownSetting extends UserSetting {
+export interface Dropdown extends SettingComponentBase {
   type: "dropdown";
   options: string[];
   value: string;
 }
-export interface ToggleSetting extends UserSetting {
+export interface Toggle extends SettingComponentBase {
   type: "toggle";
   value: boolean;
 }
-export interface ButtonSetting extends UserSetting {
+export interface Button extends SettingComponentBase {
   type: "button";
   value: string;
-  onClick: (item: Setting) => void;
+  onClick: (item: Button) => void;
 }
 
-export interface KeyboardShortcuts extends UserSetting {
+export interface KeyboardShortcuts extends SettingComponentBase {
   id: "keyboardShortcuts";
   type: "keyboardShortcuts";
   value: KeyboardShortcut[];
 }
-export interface KeyboardShortcut extends UserSetting {
+export interface KeyboardShortcut extends SettingComponentBase {
   id: `${string}.${string}`;
+  title: string;
   type: "keyboardShortcut";
   value: string[];
 }
 
-export type Setting =
-  | DropdownSetting
-  | InputSetting
-  | ToggleSetting
-  | KeyboardShortcuts
-  | ButtonSetting;
+export type SettingComponent = Dropdown | Input | Toggle | KeyboardShortcuts | Button;
 
 type Prettify<T> = T extends object ? { [K in keyof T]: T[K] } : never;
 
