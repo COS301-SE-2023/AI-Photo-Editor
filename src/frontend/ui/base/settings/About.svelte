@@ -10,14 +10,7 @@
     id: "version",
     title: "Current Version: ",
     subtitle: "",
-    components: [
-      {
-        id: "check-for-updates",
-        value: "Check for updates",
-        type: "button",
-        onClick: checkForUpdates,
-      },
-    ],
+    components: [],
   };
 
   let helpItem: Setting = {
@@ -36,18 +29,18 @@
 
   onMount(() => {
     return blixStore.subscribe((state) => {
-      versionItem.title = `Current Version: ${state.blix.version}`;
+      versionItem.title = `Current Version: v${state.blix.version}`;
 
       versionItem.subtitle = state.update.isAvailable
-        ? `Update is available: ${state.update.version}`
-        : "Blix is up to date";
+        ? `Update is available: v${state.update.version}`
+        : "Blix is up to date!";
 
       if (state.update.isAvailable) {
         if (state.update.isDownloaded) {
           versionItem.components = [
             {
               id: "quit-and-install",
-              value: "Quit and Install Update",
+              value: "Quit and install update",
               type: "button",
               onClick: quitAndInstallUpdate,
             },
@@ -56,7 +49,7 @@
           versionItem.components = [
             {
               id: "download-update",
-              value: "Download Update",
+              value: "Download update",
               type: "button",
               onClick: downloadUpdate,
             },
@@ -87,7 +80,7 @@
   }
 
   async function quitAndInstallUpdate() {
-    // await blixStore.downloadUpdate();
+    await window.apis.utilApi.quitAndInstallUpdates();
   }
 
   function sleep(milliseconds: number) {

@@ -40,8 +40,26 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
     };
   }
 
+  // ========== Update events are handled in index.ts ========== //
+
   async checkForUpdates() {
-    await autoUpdater.checkForUpdates();
+    try {
+      await autoUpdater.checkForUpdates();
+    } catch (error) {
+      logger.error(JSON.stringify(error));
+    }
+  }
+
+  async quitAndInstallUpdates() {
+    autoUpdater.quitAndInstall();
+  }
+
+  async downloadUpdate() {
+    try {
+      autoUpdater.downloadUpdate();
+    } catch (error) {
+      logger.error(JSON.stringify(error));
+    }
   }
 
   async sendPrompt(prompt: string, id: UUID): Promise<QueryResponse> {
