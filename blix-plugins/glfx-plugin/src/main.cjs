@@ -93,6 +93,25 @@ const glfxNodes = {
         "Add a vignette effect to the image",
         [{ id: "size", min: 0, max: 1, step: 0.01 }, { id: "amount", min: 0, max: 1, step: 0.01 }]
     ],
+    "swirl": [
+        "Swirl",
+        "Add Swirl effect to the image",
+        [
+            { id: "x", min: 0, max: 500, step: 1.0 }, 
+            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "radius", min: 0, max: 600, step: 1.0 }, 
+            { id: "angle", min: -25, max: 25, step: 1.0 }
+        ]
+    ],
+    "zoomBlur": [
+        "zoomBlur",
+        "Blurs the image away from a certain point, which looks like radial motion blur.",
+        [
+            { id: "x", min: 0, max: 500, step: 1.0 }, 
+            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "strength", min: 0, max: 1, step: 0.1 }
+        ]
+    ]
 };
 
 Object.keys(glfxNodes).forEach((key) => {
