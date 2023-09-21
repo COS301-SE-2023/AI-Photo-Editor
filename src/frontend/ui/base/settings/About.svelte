@@ -91,7 +91,7 @@
     {/if}
     {#if $blixStore.update.isDownloading}
       <div class="text-sm font-light text-zinc-500">
-        Downloading update ({Math.round($blixStore.update.percentDownloaded)}%)...
+        Downloading update {Math.round($blixStore.update.percentDownloaded)}%...
       </div>
     {/if}
   </SettingsItem>

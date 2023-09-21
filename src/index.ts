@@ -308,7 +308,7 @@ autoUpdater.on("update-downloaded", (updateInfo) => {
       isAvailable: true,
       isDownloaded: true,
       isDownloading: false,
-      percentDownloaded: 0,
+      percentDownloaded: 100,
       version: newVersion,
     },
   });
