@@ -23,7 +23,7 @@
         id: "open-help",
         value: "Open",
         type: "button",
-        // TODO: Add proper link to help
+        // TODO: Add proper link to help page
         onClick: () => {
           window.apis.utilApi.openLinkInBrowser("https://www.youtube.com/watch?v=o-YBDTqX_ZU");
         },
