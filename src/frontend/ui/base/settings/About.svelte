@@ -97,6 +97,4 @@
   </SettingsItem>
 
   <SettingsItem item="{helpItem}" />
-
-  <span class="text-lg text-zinc-400">ඞඞඞඞඞඞඞඞඞඞඞ</span>
 </div>

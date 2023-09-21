@@ -52,7 +52,6 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
   }
 
   async quitAndInstallUpdate() {
-    logger.info("Quitting and installing update");
     autoUpdater.quitAndInstall();
   }
 
