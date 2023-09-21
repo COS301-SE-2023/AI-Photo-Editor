@@ -247,7 +247,7 @@
   <div class="flex h-[10px] w-[10px] items-center">
     {#if panelId === $focusedGraphStore.panelId}
       <div
-        transition:fade="{{ duration: 300 }}"
+        transition:fade|local="{{ duration: 300 }}"
         class="z-1000000 h-full w-full rounded-full border-[1px] border-zinc-600 bg-rose-500"
       ></div>
     {/if}
