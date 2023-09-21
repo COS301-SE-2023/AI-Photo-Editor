@@ -47,7 +47,7 @@ function createGLFXNode(type, title, desc, params) {
         nodeBuilder.setUI(ui);
         nodeBuilder.addInput("GLFX image", "img", "GLFX image");
         for (let param of params) {
-            nodeBuilder.addInput("number", type, toTitleCase(param.id));
+            nodeBuilder.addOutput("number", type, toTitleCase(param.id));
         }
         nodeBuilder.addOutput("GLFX image", "res", "Result");
     };
@@ -57,7 +57,7 @@ const glfxNodes = {
     "brightnessContrast": [ 
         "Brightness/Contrast",
         "Adjust the brightness and contrast of the image",
-        [{ id: "brightness" }, { id: "contrast" }]
+        [{ id: "brightness", min: 0, max: 1, step: 0.1 }, { id: "contrast", min: 0, max: 1, step: 0.1 }]
     ],
     "hueSaturation": [ 
         "Hue / Saturation",
@@ -96,12 +96,12 @@ const glfxNodes = {
     ],
 };
 
-Object.keys(glfxNodes).forEach((key) => {
-    glfxNodes[key] = createGLFXNode(key, ...glfxNodes[key]);
-});
+// Object.keys(glfxNodes).forEach((key) => {
+//     glfxNodes[key] = createGLFXNode(key, ...glfxNodes[key]);
+// });
 
 const nodes = {
-    ...glfxNodes,
+    // ...glfxNodes,
 
     "inputGLFXImage": (context) => {
         const nodeBuilder = context.instantiate("input-plugin", "inputGLFXImage");

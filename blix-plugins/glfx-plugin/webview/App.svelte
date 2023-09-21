@@ -30,7 +30,10 @@
     }
 
     async function canvasUpdate(canvasWidth) {
-        await updateImage("./image.png");
+        // await updateImage("./image.png");
+        if(Object.keys($media).length === 0) {
+            return;
+        }
         reloadTexture();
         redraw($media);
     }
@@ -64,6 +67,14 @@
             // .swirl(canvas.width / 2, canvas.height / 2, 400, -10*media)
 
             buffer.update();
+        }
+        else{
+            if(media.src){
+                console.log("here");
+                await updateImage(media.src);
+                reloadTexture();
+                redraw(media);
+            }
         }
 
         // To obtain previous render + reuse:
