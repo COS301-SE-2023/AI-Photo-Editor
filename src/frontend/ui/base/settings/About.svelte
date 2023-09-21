@@ -1,4 +1,5 @@
 <script lang="ts">
+  // import { shell } from "@electron/remote"
   import { onMount } from "svelte";
   import type { Setting } from "../../../../shared/types";
   import { blixStore } from "../../../lib/stores/BlixStore";
@@ -23,7 +24,9 @@
         value: "Open",
         type: "button",
         // TODO: Add proper link to help
-        onClick: () => window.open("https://www.youtube.com/watch?v=o-YBDTqX_ZU", "_blank"),
+        onClick: () => {
+          window.apis.utilApi.openLinkInBrowser("https://www.youtube.com/watch?v=o-YBDTqX_ZU");
+        },
       },
     ],
   };

@@ -1,3 +1,4 @@
+import { shell } from "electron";
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { platform, type, release } from "os";
@@ -186,5 +187,9 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
 
   async getState<T>(key: string): Promise<T> {
     return settings.get(key);
+  }
+
+  async openLinkInBrowser(url: string) {
+    shell.openExternal(url);
   }
 }
