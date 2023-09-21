@@ -71,8 +71,58 @@ jest.mock("electron", () => ({
         showOpenDialog: jest.fn(() => {
             return { filePaths: ["path1", "path2"] };
         })
+    },
+    ipcMain: {
+      on: jest.fn()
     }
 }));
+
+
+// jest.mock("ws", () => ({
+//   WebSocket: {
+//     Server : {
+//       on: jest.fn()
+//     }
+//   }
+// }));
+// import * as WS from 'ws';
+// import WebSocket from "ws";
+
+//   class MockYourClass extends WS.Server {
+//     constructor() {
+//       super();
+//     }
+//     on = jest.fn();
+//   }
+
+
+
+// jest.mock('ws', () => {
+//   return {
+//     ...jest.requireActual('ws'),
+//     Server: jest.fn().mockImplementation(() => MockYourClass),
+//   };
+// });
+
+// jest.mock('ws',() => jest.requireActual('../../../__mocks__/SocketMock'));
+
+// jest.mock('ws', () => {
+//   const OriginalWebSocket = jest.requireActual('ws');
+//   return {
+//     ...OriginalWebSocket,
+//     Server: class MockedServer extends OriginalWebSocket.Server {
+//       constructor() {
+//         super();
+//       }
+
+//       on = jest.fn();
+//       // Add any mock implementations or methods as needed
+//     },
+//   };
+// });
+
+
+
 
 jest.mock("fs/promises", () => ({
     readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
@@ -88,6 +138,7 @@ describe("Testing project commands", () => {
     let blix: Blix;
 
     beforeEach(() => {
+
         jest.clearAllMocks();
         blix = new Blix();
         blix.init(mainWindow);
@@ -154,4 +205,6 @@ describe("Testing project commands", () => {
         const ctx: CommandContext = blix;
         await handler(ctx);
     })
+
+
 })

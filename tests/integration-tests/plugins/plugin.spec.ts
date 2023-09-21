@@ -38,13 +38,6 @@ jest.mock("chokidar", () => ({
 }));
 
 
-jest.mock("ws", () => ({
-  WebSocket: {
-    Server: jest.fn(({port}) => {
-      return;
-    })
-  }
-}));
 
 jest.mock("../../../src/electron/lib/projects/ProjectManager");
 
@@ -64,9 +57,8 @@ jest.mock("electron", () => ({
     })
   },
   ipcMain: {
-    on: jest.fn(),
-    handle: jest.fn(),
-  },
+    on: jest.fn()
+  }
 }));
 
 

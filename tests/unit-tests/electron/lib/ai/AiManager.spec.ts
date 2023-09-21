@@ -54,6 +54,9 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
 
 jest.mock("fs", () => ({
@@ -100,6 +103,11 @@ describe("Test AI Manager", () => {
         blix.init(mainWindow);
         aiManager = new AiManager(blix.toolbox,blix.graphManager,mainWindow);
     });
+    
+    afterEach(() => {
+      blix.clearCache();
+    });
+
 
     test("Test constructor", () => {
         expect(aiManager).toBeDefined();

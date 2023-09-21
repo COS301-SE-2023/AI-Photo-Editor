@@ -50,6 +50,9 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
 
 jest.mock("fs", () => ({
@@ -89,6 +92,7 @@ describe("Test CommandRegistry", () => {
         description: description,
       }
     });
+    
 
     test("Test constructor", () => {
       expect(commandRegistry).toBeDefined();

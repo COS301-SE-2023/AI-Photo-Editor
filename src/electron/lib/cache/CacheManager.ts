@@ -8,7 +8,7 @@ import type {
   CacheResponse,
 } from "../../../shared/types/cache";
 
-import WebSocket from "ws";
+import WebSocket, { WebSocketServer } from "ws";
 // import { Server } from "socket.io";
 import { randomBytes } from "crypto";
 import logger from "../../utils/logger";
@@ -48,7 +48,7 @@ export class CacheManager {
     // this.subsidiaries = {};
     // this.globalCache = {};
 
-    this.server = new WebSocket.Server({ port: 60606 });
+    this.server = new WebSocketServer({ port: 60606 });
 
     this.server.on("connection", (socket) => {
       const subUUID = randomBytes(32).toString("base64url");

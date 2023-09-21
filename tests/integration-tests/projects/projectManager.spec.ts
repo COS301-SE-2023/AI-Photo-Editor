@@ -51,6 +51,9 @@ jest.mock("electron", () => ({
     },
     dialog: {
       showMessageBox: jest.fn().mockImplementation(() => Promise.resolve(0))
+    },
+    ipcMain: {
+      on: jest.fn()
     }
 }));
 

@@ -54,6 +54,9 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
 
 jest.mock("fs", () => ({

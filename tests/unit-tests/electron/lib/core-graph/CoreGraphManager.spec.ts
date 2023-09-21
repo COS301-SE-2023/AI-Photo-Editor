@@ -54,6 +54,9 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
 
 jest.mock("fs", () => ({
@@ -87,6 +90,10 @@ jest.mock("electron-store", () => ({
 
         graphManager = new CoreGraphManager(blix.toolbox,mainWindow);
         graph = new CoreGraph();
+    });
+
+    afterEach(() => {
+      blix.clearCache();
     });
 
     test("Test constructor", () => {
