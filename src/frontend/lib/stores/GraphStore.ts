@@ -116,17 +116,21 @@ export class GraphStore {
 
                 for (const input in inputs) {
                   if (!inputs.hasOwnProperty(input)) continue;
-                  // console.log("SUB TO", node, "-->>", input)
                   let first = true;
+                  let oldState: unknown;
                   this.uiInputUnsubscribers[node].push(
                     inputs[input].subscribe((state) => {
                       // Ensure the subscribe does not run when first created
                       if (first) {
                         first = false;
-                      } else {
+                        oldState = state;
+                      } else if (state !== oldState) {
+                        // Prevent unnecessary updates when the value is the exact same as the prior
+                        // Only would then update if maybe the set function is used but old state === new state
                         this.globalizeUIInputs(node, input).catch((err) => {
                           return;
                         });
+                        oldState = state;
                       }
                     })
                   );

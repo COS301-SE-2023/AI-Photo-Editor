@@ -25,6 +25,7 @@ class MediaStore {
     // Wont set store and notfiy subscribers if the value allOutputIds have remained the same.
     // This is the case where the undo/redo system willchange something and then the stores see a change and do their
     // own update but their update wont matter.
+
     if (oldIds && ids && !equivSets<MediaOutputId>(oldIds, ids)) {
       this.outputIds.set(ids);
     }
@@ -39,10 +40,11 @@ class MediaStore {
   }
 
   public async getMediaReactive(mediaId: MediaOutputId) {
-    await window.apis.mediaApi.subscribeToMedia(mediaId).catch((err) => {
-      return;
-    });
-
+    if (mediaId) {
+      await window.apis.mediaApi.subscribeToMedia(mediaId).catch((err) => {
+        return;
+      });
+    }
     // If we do not have a frontend copy of the media, fetch it
     if (!get(this.store)[mediaId]) {
       const media = await window.apis.mediaApi.getDisplayableMedia(mediaId);
