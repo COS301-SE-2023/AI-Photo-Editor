@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { DropdownSetting } from "@shared/types";
+  import type { Dropdown } from "@shared/types";
 
-  export let item: DropdownSetting;
+  export let item: Dropdown;
 </script>
 
 <select
