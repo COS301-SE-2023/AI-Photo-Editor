@@ -27,8 +27,7 @@
   import { focusedPanelStore } from "../../../lib/PanelNode";
   import { tileStore } from "../../../lib/stores/TileStore";
   import { get } from "svelte/store";
-  import PanelBlipVane from "./PanelBlipVane.svelte";
-
+  // import PanelBlipVane from "./PanelBlipVane.svelte";
   // import { scale } from "svelte/transition";
 
   const dispatch = createEventDispatcher();
@@ -290,9 +289,9 @@
   >
     {#each layout.panels as panel, i (panel.id)}
       <!-- TODO: Fix; look into using svelte animations -->
-      {#key layout}
-        <!-- Look into using #key instead of bubbleToRoot + transition: scale -->
-      {/key}
+      <!-- {#key layout} -->
+      <!-- Look into using #key instead of bubbleToRoot + transition: scale -->
+      <!-- {/key} -->
       <Pane minSize="{panel.size == -1 ? 0 : minSize}" bind:size="{panel.size}">
         {#if panel instanceof PanelLeaf}
           <PanelBlip
