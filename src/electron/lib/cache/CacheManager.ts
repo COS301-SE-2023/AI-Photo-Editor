@@ -1,12 +1,14 @@
 // Blix caching system primarily for large binary objects
-import type {
-  SubsidiaryUUID,
-  CacheUUID,
-  CacheSubsidiary,
-  CacheObject,
-  CacheRequest,
-  CacheUpdateNotification,
-  CacheWriteResponse,
+import {
+  type SubsidiaryUUID,
+  type CacheUUID,
+  type CacheSubsidiary,
+  type CacheObject,
+  type CacheRequest,
+  type CacheUpdateNotification,
+  type CacheWriteResponse,
+  type CacheResponse,
+  CACHE_MESSAGE_ID_SIZE,
 } from "../../../shared/types/cache";
 
 import WebSocket from "ws";
@@ -63,27 +65,26 @@ export class CacheManager {
             case "cache-write-metadata":
               this.writeMetadata(data.id, data.metadata);
               this.notifyListeners();
+
+              socket.send(
+                JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
+              );
               break;
             case "cache-get":
-              // TODO: check if exist
               const messageId = data.messageId;
-              if (messageId != null) {
-                // Send payload on this message id
-                socket.send(
-                  Buffer.concat([
-                    Buffer.from(messageId),
-                    this.cache[data.id]?.data ?? Buffer.from([]),
-                  ])
-                );
-              } else {
-                // Send anonymous payload
-                socket.send(this.cache[data.id]?.data ?? null);
-              }
+              socket.send(
+                Buffer.concat([
+                  Buffer.from(messageId),
+                  this.cache[data.id]?.data ?? Buffer.from([]),
+                ])
+              );
               break;
             case "cache-delete":
               this.delete(data.id);
               // TODO: check if exist
-              socket.send(JSON.stringify({ success: true }));
+              socket.send(
+                JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
+              );
 
               this.notifyListeners();
               break;
@@ -95,8 +96,11 @@ export class CacheManager {
               logger.info("Unknown cache message type", data.type);
           }
         } else if (event.data instanceof Buffer) {
-          const id = this.writeContent(event.data);
-          socket.send(JSON.stringify({ success: true, id } as CacheWriteResponse));
+          const messageId = event.data.subarray(0, CACHE_MESSAGE_ID_SIZE).toString("ascii");
+          const data = event.data.subarray(CACHE_MESSAGE_ID_SIZE);
+
+          const id = this.writeContent(data);
+          socket.send(JSON.stringify({ success: true, id, messageId } as CacheWriteResponse));
 
           // Send cache update to all listeners
           this.notifyListeners();
