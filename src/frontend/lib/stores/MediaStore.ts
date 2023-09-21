@@ -83,6 +83,7 @@ class MediaStore {
 }
 
 function equivSets<T>(s1: Set<T>, s2: Set<T>): boolean {
+  if (s1.size !== s2.size) return false;
   for (const element of s1) {
     if (!s2.has(element)) {
       return false;
