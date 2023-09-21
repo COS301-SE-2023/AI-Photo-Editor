@@ -19,6 +19,8 @@ const blixStoreDefaults = {
   update: {
     isAvailable: false,
     isDownloaded: false,
+    isDownloading: false,
+    percentDownloaded: 0,
     version: "",
   },
 };
@@ -27,10 +29,6 @@ export type BlixStoreState = typeof blixStoreDefaults;
 
 export class BlixStore {
   store = writable<BlixStoreState>(blixStoreDefaults);
-
-  public async checkForUpdates() {
-    await window.apis.utilApi.checkForUpdates();
-  }
 
   public refreshStore(state: Partial<BlixStoreState>) {
     this.store.update((s) => ({ ...s, ...state }));

@@ -272,41 +272,63 @@ autoUpdater.logger = logger;
 
 autoUpdater.on("update-available", (updateInfo) => {
   mainWindow?.apis.utilClientApi.refreshBlixStore({
-    update: { isAvailable: true, isDownloaded: false, version: updateInfo.version },
+    update: {
+      isAvailable: true,
+      isDownloaded: false,
+      isDownloading: false,
+      percentDownloaded: 0,
+      version: updateInfo.version,
+    },
   });
-
-  // notification.on("click", () => {
-  //   autoUpdater.downloadUpdate().catch((err) => {
-  //     logger.error(JSON.stringify(err));
-  //   });
-  // });
 });
 
 autoUpdater.on("update-not-available", (updateInfo) => {
   mainWindow?.apis.utilClientApi.refreshBlixStore({
-    update: { isAvailable: false, isDownloaded: false, version: updateInfo.version },
+    update: {
+      isAvailable: false,
+      isDownloaded: false,
+      isDownloading: false,
+      percentDownloaded: 0,
+      version: updateInfo.version,
+    },
   });
 });
 
 autoUpdater.on("update-downloaded", (updateInfo) => {
   mainWindow?.apis.utilClientApi.refreshBlixStore({
-    update: { isAvailable: true, isDownloaded: true, version: updateInfo.version },
+    update: {
+      isAvailable: true,
+      isDownloaded: true,
+      isDownloading: false,
+      percentDownloaded: 0,
+      version: updateInfo.version,
+    },
   });
+});
 
-  notification = new Notification({
-    title: "Blix",
-    body: "The updates are ready. Click to quit and install.",
-    silent: true,
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
-  });
-  notification.show();
-  notification.on("click", () => {
-    autoUpdater.quitAndInstall();
+autoUpdater.on("download-progress", (progress) => {
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: true,
+      isDownloaded: false,
+      isDownloading: true,
+      percentDownloaded: progress.percent,
+    },
   });
 });
 
 autoUpdater.on("error", (err) => {
-  blix?.sendErrorMessage("Error checking for updates.");
+  // Clear Blix update state
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: false,
+      isDownloaded: false,
+      isDownloading: false,
+      percentDownloaded: 0,
+      version: "",
+    },
+  });
+
   logger.error(JSON.stringify(err));
 });
 

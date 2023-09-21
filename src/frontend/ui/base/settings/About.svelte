@@ -22,6 +22,7 @@
         id: "open-help",
         value: "Open",
         type: "button",
+        // TODO: Add proper link to help
         onClick: () => ({}),
       },
     ],
@@ -42,7 +43,7 @@
               id: "quit-and-install",
               value: "Quit and install update",
               type: "button",
-              onClick: quitAndInstallUpdate,
+              onClick: window.apis.utilApi.quitAndInstallUpdate,
             },
           ];
         } else {
@@ -51,7 +52,7 @@
               id: "download-update",
               value: "Download update",
               type: "button",
-              onClick: downloadUpdate,
+              onClick: window.apis.utilApi.downloadUpdate,
             },
           ];
         }
@@ -70,17 +71,9 @@
 
   async function checkForUpdates() {
     checkingForUpdates = true;
-    await blixStore.checkForUpdates();
+    await window.apis.utilApi.checkForUpdates();
     await sleep(400);
     checkingForUpdates = false;
-  }
-
-  async function downloadUpdate() {
-    // await blixStore.downloadUpdate();
-  }
-
-  async function quitAndInstallUpdate() {
-    await window.apis.utilApi.quitAndInstallUpdates();
   }
 
   function sleep(milliseconds: number) {
@@ -92,6 +85,11 @@
   <SettingsItem item="{versionItem}">
     {#if checkingForUpdates}
       <div class="text-sm font-light text-zinc-500">Checking for updates...</div>
+    {/if}
+    {#if $blixStore.update.isDownloading}
+      <div class="text-sm font-light text-zinc-500">
+        Downloading updated ({$blixStore.update.percentDownloaded}%)...
+      </div>
     {/if}
   </SettingsItem>
 
