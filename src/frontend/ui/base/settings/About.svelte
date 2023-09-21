@@ -23,7 +23,7 @@
         value: "Open",
         type: "button",
         // TODO: Add proper link to help
-        onClick: () => ({}),
+        onClick: () => window.open("https://www.youtube.com/watch?v=o-YBDTqX_ZU", "_blank"),
       },
     ],
   };

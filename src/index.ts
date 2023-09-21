@@ -262,6 +262,8 @@ app.on("web-contents-created", (e, contents) => {
 // AUTO UPDATER
 // ==================================================================
 
+let newVersion = "";
+
 if (isProd) {
   autoUpdater.checkForUpdates().catch((err) => {
     logger.error(JSON.stringify(err));
@@ -271,37 +273,43 @@ if (isProd) {
 autoUpdater.logger = logger;
 
 autoUpdater.on("update-available", (updateInfo) => {
+  newVersion = updateInfo.version;
+
   mainWindow?.apis.utilClientApi.refreshBlixStore({
     update: {
       isAvailable: true,
       isDownloaded: false,
       isDownloading: false,
       percentDownloaded: 0,
-      version: updateInfo.version,
+      version: newVersion,
     },
   });
 });
 
 autoUpdater.on("update-not-available", (updateInfo) => {
+  newVersion = "";
+
   mainWindow?.apis.utilClientApi.refreshBlixStore({
     update: {
       isAvailable: false,
       isDownloaded: false,
       isDownloading: false,
       percentDownloaded: 0,
-      version: updateInfo.version,
+      version: newVersion,
     },
   });
 });
 
 autoUpdater.on("update-downloaded", (updateInfo) => {
+  newVersion = updateInfo.version;
+
   mainWindow?.apis.utilClientApi.refreshBlixStore({
     update: {
       isAvailable: true,
       isDownloaded: true,
       isDownloading: false,
       percentDownloaded: 0,
-      version: updateInfo.version,
+      version: newVersion,
     },
   });
 });
@@ -313,6 +321,7 @@ autoUpdater.on("download-progress", (progress) => {
       isDownloaded: false,
       isDownloading: true,
       percentDownloaded: progress.percent,
+      version: newVersion,
     },
   });
 });
