@@ -12,6 +12,36 @@
   import { type SelectionBoxItem } from "../../types/selection-box";
   import WebView from "./WebView.svelte";
   import { TweakApi } from "lib/webview/TweakApi";
+  import {
+    faBacon,
+    faBowlRice,
+    faBurger,
+    faCandyCane,
+    faCarrot,
+    faCoffee,
+    faCookieBite,
+    faFish,
+    faHotdog,
+    faIceCream,
+    faLemon,
+    faPizzaSlice,
+  } from "@fortawesome/free-solid-svg-icons";
+  import Fa from "svelte-fa";
+
+  const noContentIcons = [
+    faBacon,
+    faBowlRice,
+    faBurger,
+    faCandyCane,
+    faCarrot,
+    faCoffee,
+    faCookieBite,
+    faFish,
+    faHotdog,
+    faIceCream,
+    faLemon,
+    faPizzaSlice,
+  ];
 
   const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
 
@@ -50,15 +80,6 @@
     unsubMedia();
   });
 
-  // function handleSelect(e: Event) {
-  //   return;
-  //   const value = (e.target as HTMLSelectElement).value;
-  //   if (!value) return;
-
-  //   const [graphUUID, nodeUUID] = value.split("/");
-  //   selectedNode = { graphUUID, outNode: nodeUUID };
-  // }
-
   async function exportMedia(e: Event) {
     if ($media?.dataType && $media?.content) {
       await mediaStore.exportMedia($media);
@@ -75,26 +96,9 @@
     return res;
   }
 
-  // async function getDisplay(id: TypeclassId) {
-  //   const value = null;
-  //   return await window.apis.typeclassApi.getMediaDisplay(id, value);
-  // }
-
-  // type MediaDisplay = {
-  //   component: any;
-  //   props: (data: any) => { [key: string]: any };
-  // };
-  // const dataTypeToMediaDisplay: { [key: string]: MediaDisplay } = {
-  //   [""]: { component: TextBox, props: (_data: any) => ({ content: "NO INPUT", status: "warning" }), },
-  //   Image: { component: Image, props: (data: string) => ({ src: data }), },
-  //   Number: { component: TextBox, props: (data: number) => ({ content: data?.toString() || "NULL", status: data == null ? "warning" : "normal", fontSize: "large", }),
-  //   }, boolean: { component: TextBox, props: (data: number) => ({ content: data?.toString() || "NULL", status: data == null ? "warning" : "normal", fontSize: "large", }), },
-  //   string: { component: TextBox, props: (data: string) => ({ content: data }), },
-  //   color: { component: ColorDisplay, props: (data: string) => ({ color: data }), },
-  //   Error: { component: TextBox, props: (data: string) => ({ content: data, status: "error" }), },
-  //   ["GLFX image"]: { component: WebView, props: (data: string) => ({ media: data }), },
-  //   ["Pixi image"]: { component: WebView, props: (data: string) => ({ media: data }), },
-  // };
+  function getNoContentIcon() {
+    return noContentIcons[Math.floor(Math.random() * noContentIcons.length)];
+  }
 
   const displayIdToSvelteConstructor: { [key in MediaDisplayType]: any } = {
     image: Image,
@@ -151,13 +155,17 @@
         /> -->
       <!-- <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" /> -->
     {:else}
-      <div class="placeholder">NO CONTENT</div>
+      <div class="placeholder">
+        <div class="icon"><Fa icon="{getNoContentIcon()}" style="display: inline-block" /></div>
+        <h1>No content!</h1>
+        <h2>Add an Output node to the graph to create a media output</h2>
+      </div>
     {/if}
     <!-- <button on:click="{compute}">Testing</button> -->
   </div>
 </div>
 
-<style>
+<style lang="scss">
   /* Scale the pane to full available space */
   .fullPane {
     margin: 0px;
@@ -183,14 +191,27 @@
     padding-top: 140px;
     text-align: center;
     display: inline-block;
-    width: 300px;
-    height: 300px;
-    border: 2px solid grey;
-    border-radius: 0.4em;
+    width: 100%;
+    height: 100%;
     margin-top: 1em;
-  }
-  .placeholder:hover {
-    background-color: #1e1e2e;
-    cursor: pointer;
+
+    h1 {
+      font-size: 1.5em;
+      color: #a8a8be;
+      margin-bottom: 0.2em;
+    }
+
+    .icon {
+      width: 100%;
+      color: #9090a4;
+      font-size: 5em;
+      line-height: 1em;
+      margin-bottom: 0.1em;
+    }
+
+    h2 {
+      font-size: 0.8em;
+      color: #9090a4;
+    }
   }
 </style>

@@ -1,19 +1,19 @@
 <script lang="ts">
   import { NodeUIComponent, type NodeUILeaf, type UIComponentConfig } from "@shared/ui/NodeUITypes";
-  import Button from "./nodeUICcomponents/Button.svelte";
-  import Buffer from "./nodeUICcomponents/Buffer.svelte";
-  import Slider from "./nodeUICcomponents/Slider.svelte";
-  import ColorPicker from "./nodeUICcomponents/ColorPicker.svelte";
-  import Knob from "./nodeUICcomponents/Knob.svelte";
+  import Button from "./nodeUIComponents/Button.svelte";
+  import Buffer from "./nodeUIComponents/Buffer.svelte";
+  import Slider from "./nodeUIComponents/Slider.svelte";
+  import ColorPicker from "./nodeUIComponents/ColorPicker.svelte";
+  import Knob from "./nodeUIComponents/Knob.svelte";
   import type { UIValueStore } from "@shared/ui/UIGraph";
-  import CachePicker from "./nodeUICcomponents/CachePicker.svelte";
-  import Dropdown from "./nodeUICcomponents/Dropdown.svelte";
-  import TextInput from "./nodeUICcomponents/TextInput.svelte";
-  import FilePicker from "./nodeUICcomponents/FilePicker.svelte";
-  import Radio from "./nodeUICcomponents/Radio.svelte";
-  import NumberInput from "./nodeUICcomponents/NumberInput.svelte";
-  import TweakDial from "./nodeUICcomponents/dials/TweakDial.svelte";
-  import DiffDial from "./nodeUICcomponents/dials/DiffDial.svelte";
+  import CachePicker from "./nodeUIComponents/CachePicker.svelte";
+  import Dropdown from "./nodeUIComponents/Dropdown.svelte";
+  import TextInput from "./nodeUIComponents/TextInput.svelte";
+  import FilePicker from "./nodeUIComponents/FilePicker.svelte";
+  import Radio from "./nodeUIComponents/Radio.svelte";
+  import NumberInput from "./nodeUIComponents/NumberInput.svelte";
+  import TweakDial from "./nodeUIComponents/dials/TweakDial.svelte";
+  import DiffDial from "./nodeUIComponents/dials/DiffDial.svelte";
 
   export let leafUI: NodeUILeaf | null = null;
   export let inputStore: UIValueStore;

@@ -51,7 +51,7 @@ export class Plugin {
   requireSelf(blix: Blix, force = false): void {
     try {
       // This uses Node.js require() to load the plugin as a module
-      // TODO: ISOLATION + LIMITED API
+      // TODO: ISOLATION
       // @ts-ignore: no-var-requires
 
       // We need to clear the local node cache so that the plugin can be reloaded
