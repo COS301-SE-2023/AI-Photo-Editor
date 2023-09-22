@@ -2,7 +2,7 @@
 
 import type { LayoutPanel, PanelType } from "../../shared/types/index";
 import { writable } from "svelte/store";
-
+/* eslint-disable no-console */
 export abstract class PanelNode {
   static panelCounter = 0;
 
@@ -43,8 +43,15 @@ export class PanelGroup extends PanelNode {
   name: string;
   panels: PanelNode[] = [];
 
+  /**
+   * Removes a panel to from the panelgroup at index i. Existing panelGroup will be pruned if only one panel exists.
+   * @param i The index to remove the panel from
+   * @returns void
+   * */
+
   // Nukes the current panelgroup and replaces it with its first child if possible
   removePanel(i: number) {
+    if (i > this.panels.length) console.warn("PanelGroup.removePanel: Index out of bounds : ", i);
     this.panels.splice(i, 1);
 
     // If length 1, dissolve and replace with child
@@ -61,21 +68,43 @@ export class PanelGroup extends PanelNode {
     }
     this.updateParent(this);
   }
+
+  /**
+   * Replaces a panel at the designated index in the panelgroup.
+   * @param panel The panel to be used to replace the existing panel
+   * @param i The index of the panel to be replaced
+   * @returns void
+   * */
+
   setPanel(panel: PanelNode, i: number) {
+    if (i > this.panels.length) {
+      console.warn("PanelGroup.setPanel: Index out of bounds : ", i);
+      return;
+    }
     const tempId = this.panels[i].id;
     this.panels[i] = panel;
     panel.parent = this;
     panel.index = i;
     panel.id = tempId;
   }
+
+  /**
+   * Inserts a panel to the panelgroup at index i
+   * @param content The type of the panel to be added
+   * @param i The index to place the panel at
+   * @returns void
+   * */
+
   addPanel(content: PanelType, i: number) {
     const newLeaf = new PanelLeaf(content);
+    if (i > this.panels.length) console.warn("PanelGroup.addPanel: Index out of bounds : ", i);
     this.panels.splice(i, 0, newLeaf);
     newLeaf.parent = this;
     newLeaf.index = i;
 
     this.updateParent(this);
   }
+
   addPanelGroup(panelGroup: PanelGroup, i: number) {
     this.panels.splice(i, 0, panelGroup);
     panelGroup.parent = this;
@@ -165,3 +194,5 @@ class FocusedPanelStore {
 }
 
 export const focusedPanelStore = new FocusedPanelStore();
+
+/* eslint-enable no-console */
