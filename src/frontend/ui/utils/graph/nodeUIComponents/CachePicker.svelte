@@ -20,12 +20,14 @@
   $: valStore = inputStore.inputs[config.componentId];
 </script>
 
-{#if items.length > 0}
+{#if Object.keys(items).length > 0}
   {#key inputStore.inputs[config.componentId]}
     <!-- <select bind:value={inputStore.inputs["dropdown"]}> -->
     <select bind:value="{$valStore}">
-      {#each items as itemKey}
-        <option value="{itemKey}">{itemKey}</option>
+      {#each Object.keys(items) as itemKey}
+        <option value="{itemKey}"
+          >{items[itemKey].name} [{itemKey}] ({items[itemKey].contentType})</option
+        >
       {/each}
     </select>
   {/key}
