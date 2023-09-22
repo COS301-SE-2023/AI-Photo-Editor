@@ -164,7 +164,7 @@
     async function exportImage() {
         if (!currScene || !canvasBlock) return;
 
-        const exportCanvas = blink.renderer.extract.canvas(currScene, canvasBlock.getBounds());
+        const exportCanvas = blink.renderer.extract.canvas(currScene, canvasBlock.getLocalBounds());
         exportCanvas.toBlob((blob) => {
             const metadata = {
                 contentType: "image/png",
