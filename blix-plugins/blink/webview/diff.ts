@@ -1,5 +1,5 @@
-import { HierarchyAtom, HierarchyClump } from "./render";
-import {
+import type { HierarchyAtom, HierarchyClump } from "./render";
+import type {
   Asset,
   Atom,
   BlobAtom,

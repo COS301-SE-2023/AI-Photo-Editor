@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import { Matrix } from "pixi.js";
 import {
   KawaseBlurFilter,
   BloomFilter,

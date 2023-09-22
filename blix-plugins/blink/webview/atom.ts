@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
-import { Asset, Atom, ImageAtom, PaintAtom, ShapeAtom, TextAtom } from "./types";
+import type { Asset, Atom, ImageAtom, PaintAtom, ShapeAtom, TextAtom } from "./types";
 import { diffAtom, diffImageAtom, diffPaintAtom, diffShapeAtom, diffTextAtom } from './diff';
-import { HierarchyAtom, randomId } from './render';
+import { type HierarchyAtom, randomId } from './render';
 
 export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key: string]: Asset } | undefined, atom: Atom, prevAtom: HierarchyAtom | undefined): {
   pixiAtom: PIXI.Container,

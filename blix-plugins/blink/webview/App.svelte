@@ -14,6 +14,9 @@
     let pixiCanvas: HTMLCanvasElement;
     let mouseCursor = "cursorDefault";
 
+    let canvasBlock: PIXI.Graphics;
+    let currScene: PIXI.Container;
+
     onMount(async () => {
     // window.addEventListener("DOMContentLoaded", async () => {
         //====== INITIALIZE PIXI ======//
@@ -105,6 +108,8 @@
         imgCanvasBlock.position.set(-imgCanvasBlockW/2, -imgCanvasBlockH/2);
         imgCanvas.addChild(imgCanvasBlock);
 
+        canvasBlock = imgCanvasBlock;
+
         viewport.addChild(imgCanvas);
 
         const viewportFitX = imgCanvasBlockW + 2 * imgCanvasInitialPadding;
@@ -115,7 +120,8 @@
         //===== RENDER Blink =====//
         let hasCentered = false;
             media.subscribe(async (media) => {
-                const success = renderApp(blink, media, viewport, send);
+                const { success, scene } = renderApp(blink, media, viewport, send);
+                currScene = scene;
 
                 // Necessary to fix an occasional race condition with PIXI failing to load
                 // Something seems to go wrong due to the canvas having to resize to the window
@@ -155,21 +161,28 @@
         }
     }
 
-    // function exportCanvas() {
-    //     const data = blink.renderer.extract.canvas(blink.stage);
-    //     console.log(data);
-    //     const link = document.createElement("a");
-    //     link.download = "export.png";
-    //     link.href = data.toDataURL("image/png", 1.0);
-    //     link.click();
-    //     link.remove();
-    // }
+    async function exportImage() {
+        if (!currScene || !canvasBlock) return;
 
+        const exportCanvas = blink.renderer.extract.canvas(currScene, canvasBlock.getBounds());
+        exportCanvas.toBlob((blob) => {
+            const metadata = {
+                contentType: "image/png",
+                name: `Blink Export ${Math.floor(100000 * Math.random())}`
+            };
+            window.cache.write(blob, metadata);
+        }, "image/png");
+        // const link = document.createElement("a");
+        // link.download = "export.png";
+        // link.href = exportCanvas.toDataURL("image/png", 1.0);
+        // link.click();
+        // link.remove();
+    }
 </script>
 
 <svelte:window on:keydown={keydown} on:keyup={keyup} />
 <div class="{mouseCursor}">
-    <!-- <button on:click="{exportCanvas}" >Test</button> -->
+    <button on:click="{exportImage}">Export</button>
     <canvas id="pixiCanvas" bind:this={pixiCanvas} />
 </div>
 

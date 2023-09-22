@@ -1,4 +1,4 @@
-import { Viewport } from "pixi-viewport";
+import { type Viewport } from "pixi-viewport";
 import * as PIXI from "pixi.js";
 
 const BOX_CORNER_DOT_SIZE = 5;

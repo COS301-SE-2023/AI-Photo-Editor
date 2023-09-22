@@ -12,19 +12,19 @@ export class PluginApi implements ElectronMainApi<PluginApi> {
     this.blix = blix;
   }
 
-  async enablePlugin(plugin: PluginSignature) {
-    // this.blix.commandRegistry.addInstance(instance);
-  }
-  async disablePlugin(plugin: PluginSignature) {
-    // this.blix.commandRegistry.addInstance(instance);
-  }
-
   async installPlugin(url: URL) {
     // return await this.blix.commandRegistry.runCommand(id, params);
   }
 
   async uninstallPlugin(url: URL) {
     // return await this.blix.commandRegistry.runCommand(id, params);
+  }
+
+  async enablePlugin(plugin: PluginSignature) {
+    // this.blix.commandRegistry.addInstance(instance);
+  }
+  async disablePlugin(plugin: PluginSignature) {
+    // this.blix.commandRegistry.addInstance(instance);
   }
 
   async getInstalledPlugins() {

@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 import App from './App.svelte';
-import { BlinkCanvas } from './types';
+import { type BlinkCanvas } from './types';
 
 const media = writable<BlinkCanvas>({
 	assets: {},

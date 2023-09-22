@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Filter, getPixiFilter } from './types';
+import { type Filter, getPixiFilter } from './types';
 import { randomId } from './render';
 
 // Apply a series of filters and flatten the result to a sprite.

@@ -4,9 +4,6 @@ import {
   type Atom,
   type Clump,
   type BlinkCanvas,
-  type Asset,
-  Filter,
-  Transform,
 } from "./types";
 import { Viewport } from "pixi-viewport";
 import { createBoundingBox } from "./select";
@@ -46,10 +43,10 @@ export function renderApp(
   canvas: BlinkCanvas,
   viewport: Viewport,
   send: (message: string, data: any) => void
-): boolean {
+): { success: boolean; scene: PIXI.Container } {
   console.log("====================================");
 
-  if (!canvas || !canvas.content) return false;
+  if (!canvas || !canvas.content) return { success: false, scene: null };
   if (!scene) {
     scene = new PIXI.Container();
     scene.name = "Blink Scene";
@@ -107,7 +104,7 @@ export function renderApp(
     }
   });
 
-  return true;
+  return { success: true, scene };
 }
 
 export function renderCanvas(blink: PIXI.Application, root: Clump) {}
