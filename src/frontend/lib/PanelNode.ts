@@ -57,7 +57,7 @@ export class PanelGroup extends PanelNode {
     // If length 1, dissolve and replace with child
     if (this.panels.length === 1) {
       if (this.parent != null) {
-        this.parent.setPanel(this.panels[0], this.index);
+        this.parent.setPanel(this.panels[0], this.index); // Replaces
       }
     }
     // If empty, dissolve (Shouldn't ever happen anyway)
@@ -105,14 +105,33 @@ export class PanelGroup extends PanelNode {
     this.updateParent(this);
   }
 
+  /**
+   * Inserts a panelgroup to the current panelgroup at index i
+   * @param panelGroup The panelgroup to be added
+   * @param i The index to place the panelgroup at
+   * @returns void
+   * */
+
   addPanelGroup(panelGroup: PanelGroup, i: number) {
     this.panels.splice(i, 0, panelGroup);
     panelGroup.parent = this;
     panelGroup.index = i;
   }
+
+  /**
+   * Returns the panel at the designated index
+   * @param i The index of the panel to be returned
+   * @returns PanelNode
+   * */
   getPanel(i: number): PanelNode {
     return this.panels[i];
   }
+
+  /**
+   * Updates the parent of the current panelgroup
+   * @param _current The current panel group to be used
+   * @returns void
+   * */
 
   updateParent(_current: PanelGroup) {
     let current = _current;
