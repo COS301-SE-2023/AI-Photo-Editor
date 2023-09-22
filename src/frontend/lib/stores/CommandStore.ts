@@ -18,7 +18,7 @@ function createCommandStore() {
   }
 
   async function addCommands(cmds: any[]) {
-    // window.apis.pluginApi.addCommand(cmds);
+    // window.apis.commandApi.addCommand(cmds);
   }
 
   async function runCommand(id: string, args?: Record<string, any>) {

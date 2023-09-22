@@ -9,6 +9,7 @@ import { ToolboxApi } from "./apis/ToolboxApi";
 import { MediaApi } from "./apis/MediaApi";
 import { TileApi } from "./apis/TileApi";
 import { TypeclassApi } from "./apis/TypeclassApi";
+import { PluginApi } from "./apis/PluginApi";
 
 /**
  * Expose all main process APIs to the renderer. This method will be called on
@@ -23,7 +24,8 @@ export function exposeMainApis(blix: Blix) {
   const apis = {
     utilApi: new UtilApi(blix),
     projectApi: new ProjectApi(blix),
-    pluginApi: new CommandApi(blix),
+    commandApi: new CommandApi(blix),
+    pluginApi: new PluginApi(blix),
     graphApi: new GraphApi(blix),
     typeclassApi: new TypeclassApi(blix),
     mediaApi: new MediaApi(blix),
