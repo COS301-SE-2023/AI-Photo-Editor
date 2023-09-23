@@ -38,7 +38,9 @@ let scene: PIXI.Container;
 
 let hierarchy: HierarchyCanvas | undefined = undefined;
 
-export function renderApp(
+const textures: { [key: string]: PIXI.Texture } = {}
+
+export function renderScene(
   blink: PIXI.Application,
   canvas: BlinkCanvas,
   viewport: Viewport,
@@ -71,7 +73,21 @@ export function renderApp(
   const imgPromises = [];
   for (let assetId in canvas.assets) {
     if (canvas.assets[assetId].type === "image") {
-      imgPromises.push(PIXI.Assets.load(canvas.assets[assetId].data));
+      const cacheId = canvas.assets[assetId].data;
+      if (textures[cacheId] != null) continue;
+
+      // Get cache object
+      imgPromises.push(new Promise(async (resolve, reject) => {
+        const blob: Blob = await window.cache.get(cacheId);
+        console.log("BLOB", blob);
+        const url = window.URL.createObjectURL(blob);
+        console.log("URL", url);
+        textures[cacheId] = PIXI.Texture.from(url);
+        // const asset = await PIXI.Assets.load(url);
+        // console.log("ASSET", asset);
+        resolve(null);
+        // resolve(asset);
+      }))
       // TODO: Use bundles instead (e.g. PIXI.Assets.addBundle())
       // See: [https://pixijs.io/guides/basics/assets.html]
     }
@@ -170,7 +186,8 @@ function renderClump(
           canvas.assets,
           prevCanvas?.assets,
           child,
-          (prevChild?.class === "atom" ? prevChild : undefined) as HierarchyAtom
+          (prevChild?.class === "atom" ? prevChild : undefined) as HierarchyAtom,
+          textures
         );
 
         // Construct hierarchy atom

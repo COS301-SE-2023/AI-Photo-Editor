@@ -3,7 +3,7 @@ import type { Asset, Atom, ImageAtom, PaintAtom, ShapeAtom, TextAtom } from "./t
 import { diffAtom, diffImageAtom, diffPaintAtom, diffShapeAtom, diffTextAtom } from './diff';
 import { type HierarchyAtom, randomId } from './render';
 
-export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key: string]: Asset } | undefined, atom: Atom, prevAtom: HierarchyAtom | undefined): {
+export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key: string]: Asset } | undefined, atom: Atom, prevAtom: HierarchyAtom | undefined, textures: { [key: string]: PIXI.Texture }): {
   pixiAtom: PIXI.Container,
   changed: boolean // Whether the pixiClump is a different PIXI object than before
 } {
@@ -20,7 +20,7 @@ export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key:
       }
 
       if (assets[atom.assetId] && assets[atom.assetId].type === "image") {
-        const sprite = PIXI.Sprite.from(assets[atom.assetId].data);
+        const sprite = PIXI.Sprite.from(textures[assets[atom.assetId].data]);
 
         sprite.anchor.x = 0.5;
         sprite.anchor.y = 0.5;

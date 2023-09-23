@@ -32,7 +32,14 @@ export function constructLayout(layout: LayoutPanel): PanelGroup {
 export const layoutTemplate: LayoutPanel = {
   panels: [
     {
-      content: "assets",
+      panels: [
+        {
+          content: "media",
+        },
+        {
+          content: "assets",
+        },
+      ],
     },
     {
       content: "graph",

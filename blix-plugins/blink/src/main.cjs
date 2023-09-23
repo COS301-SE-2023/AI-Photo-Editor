@@ -195,7 +195,7 @@ const nodes = {
         nodeBuilder.setDescription("Input a Blink Sprite Image");
 
         const ui = nodeBuilder.createUIBuilder();
-        ui.addFilePicker({
+        ui.addCachePicker({
             componentId: "imagePicker",
             label: "Pick an image",
             defaultValue: "",
@@ -220,16 +220,14 @@ const nodes = {
         });
 
         nodeBuilder.define(async (input, uiInput, from) => {
-            let src = uiInput["imagePicker"].split("/");
-            src = src.splice(-2);
-            src = src.join("/");
+            let src = uiInput["imagePicker"];
 
             const canvas = {
                 assets: {
                     [uiInput["state"]["id"]]: {
                         class: "asset",
                         type: "image",
-                        data: uiInput["imagePicker"].split("/").splice(-2).join("/"),
+                        data: uiInput["imagePicker"]
                         // data: uiInput["cachePicker"],
                     }
                 },
