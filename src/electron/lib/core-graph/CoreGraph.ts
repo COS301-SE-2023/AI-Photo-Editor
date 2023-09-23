@@ -221,6 +221,9 @@ export class CoreGraph extends UniqueEntity {
       const uiChanges = Object.keys(initializedInputs);
 
       let uiInputsInitialized = false;
+
+      this.uiInputs[node.uuid] = new CoreNodeUIInputs({ inputs: inputValues, changes }, dialInputs);
+
       if (typeof initializedInputs === "object" && uiChanges.length > 0) {
         inputValues = { ...inputValues, ...initializedInputs };
         // Update the graph's UI inputs
@@ -232,6 +235,7 @@ export class CoreGraph extends UniqueEntity {
         this.uiInputs[node.uuid] = new CoreNodeUIInputs(uiInputsPayload, dialInputs);
         uiInputsInitialized = true;
       }
+
       // console.log(uiInputsInitialized)
       const anchors: AiAnchors = node.returnAnchors();
       // Add position of node to graph

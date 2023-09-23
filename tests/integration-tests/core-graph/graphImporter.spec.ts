@@ -93,7 +93,7 @@ describe("Test graph importer", () => {
         blix = new Blix();
         blix.init(mainWindow);
         importer = new CoreGraphImporter(blix.toolbox);
-        blix.toolbox.addInstance(new NodeInstance("testNode", "blix", "testNode", "This is a test node", "", [{ type: "Number", "displayName": "blix.testNode.0", "identifier": "In0" }], [{ type: "Number", "displayName": "blix.testNode.1", "identifier": "Out0" }]))
+        blix.toolbox.addInstance(new NodeInstance("testNode", "blix", "folder", "testNode", "This is a test node", "", [{ type: "Number", "displayName": "blix.testNode.0", "identifier": "In0" }], [{ type: "Number", "displayName": "blix.testNode.1", "identifier": "Out0" }]))
     });
 
     test("Test import of valid json graph", () => {
