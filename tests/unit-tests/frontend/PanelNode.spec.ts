@@ -3,6 +3,7 @@ import { PanelGroup, PanelLeaf, PanelNode, focusedPanelStore } from "../../../sr
 import { Pane } from "svelte-splitpanes";
 import { exportMedia } from "../../../src/electron/lib/projects/ProjectCommands";
 import { LayoutPanel } from "../../../src/shared/types";
+import { constructLayout } from "../../../src/frontend/lib/Project";
 
 
 
@@ -173,4 +174,48 @@ import { LayoutPanel } from "../../../src/shared/types";
 
     })
     
-    });
+});
+
+describe("Test project.ts", () => {
+
+  let panelNode : PanelGroup;
+  beforeEach(() => {
+    PanelGroup.groupCounter = 0;
+    PanelNode.panelCounter = 0;
+    panelNode = new PanelGroup("Unique id");
+  });
+  test ("Testing constructLayout", () => {
+    panelNode.addPanel("media",0);
+    panelNode.addPanel("media",1);
+    panelNode.addPanel("media",2);
+
+    const panelGroup = new PanelGroup("Unique id");
+    panelGroup.addPanel("media",0);
+
+    panelNode.addPanelGroup(panelGroup,3);
+
+    const layout : LayoutPanel = {
+      panels: [
+        {
+          content: "media",
+        },
+        {
+          content: "media",
+        },
+        {
+          content: "media",
+        },
+        {
+          panels: [
+            {
+              content: "media",
+            },
+          ]
+        }
+      ]
+    }
+
+    const group = constructLayout(layout);
+    expect(group.panels.length).toEqual(panelNode.panels.length);
+  })
+})
