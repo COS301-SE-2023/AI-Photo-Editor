@@ -1,6 +1,40 @@
 <script lang="ts">
   import type { CacheUUID } from "@shared/types/cache";
   import { cacheStore } from "../../lib/stores/CacheStore";
+  import {
+    faBacon,
+    faBowlRice,
+    faBurger,
+    faCandyCane,
+    faCarrot,
+    faCoffee,
+    faCookieBite,
+    faFish,
+    faHotdog,
+    faIceCream,
+    faLemon,
+    faPizzaSlice,
+  } from "@fortawesome/free-solid-svg-icons";
+  import Fa from "svelte-fa";
+
+  const noContentIcons = [
+    faBacon,
+    faBowlRice,
+    faBurger,
+    faCandyCane,
+    faCarrot,
+    faCoffee,
+    faCookieBite,
+    faFish,
+    faHotdog,
+    faIceCream,
+    faLemon,
+    faPizzaSlice,
+  ];
+
+  function getNoContentIcon() {
+    return noContentIcons[Math.floor(Math.random() * noContentIcons.length)];
+  }
 
   async function requestFileAccess() {
     try {
@@ -34,7 +68,7 @@
 </script>
 
 <div class="fullPane">
-  <div>
+  {#if Object.keys($cacheStore).length > 0}
     <div class="itemsBox">
       {#each Object.keys($cacheStore) as uuid}
         {#if ["image/png", "image/jpeg"].includes($cacheStore[uuid].contentType)}
@@ -58,7 +92,13 @@
         {/if}
       {/each}
     </div>
-  </div>
+  {:else}
+    <div class="placeholder">
+      <div class="icon"><Fa icon="{getNoContentIcon()}" style="display: inline-block" /></div>
+      <h1>No content!</h1>
+      <h2>Add an Asset to start start editing</h2>
+    </div>
+  {/if}
 
   <div class="hover flex items-center space-x-2">
     <div
@@ -71,7 +111,7 @@
   </div>
 </div>
 
-<style>
+<style lang="scss">
   .fullPane {
     margin: 0px;
     width: 100%;
@@ -135,5 +175,33 @@
     word-wrap: break-word;
     text-wrap: nowrap;
     white-space: nowrap;
+  }
+
+  .placeholder {
+    padding-top: 140px;
+    text-align: center;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    margin-top: 1em;
+
+    h1 {
+      font-size: 1.5em;
+      color: #a8a8be;
+      margin-bottom: 0.2em;
+    }
+
+    .icon {
+      width: 100%;
+      color: #9090a4;
+      font-size: 5em;
+      line-height: 1em;
+      margin-bottom: 0.1em;
+    }
+
+    h2 {
+      font-size: 0.8em;
+      color: #9090a4;
+    }
   }
 </style>

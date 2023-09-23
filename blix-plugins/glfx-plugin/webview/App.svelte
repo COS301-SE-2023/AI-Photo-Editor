@@ -30,7 +30,10 @@
     }
 
     async function canvasUpdate(canvasWidth) {
-        await updateImage("./image.png");
+        // await updateImage("./image.png");
+        if(Object.keys($media).length === 0) {
+            return;
+        }
         reloadTexture();
         redraw($media);
     }
@@ -65,6 +68,14 @@
 
             buffer.update();
         }
+        else{
+            if(media.src){
+                console.log("here");
+                await updateImage(media.src);
+                reloadTexture();
+                redraw(media);
+            }
+        }
 
         // To obtain previous render + reuse:
         // texture.destroy();
@@ -89,10 +100,10 @@
     bind:clientWidth="{canvasWidth}"
 />
 
-<!-- <code> -->
-    <!-- Rendering at: <b>{canvasWidth} x {canvasHeight}</b><br /> -->
-    <!-- Media: {JSON.stringify($media)} -->
-<!-- </code> -->
+<!-- <code>
+    Rendering at: <b>{canvasWidth} x {canvasHeight}</b><br />
+    Media: {JSON.stringify($media)}
+</code> -->
 
 <style>
     .canvasContainer {

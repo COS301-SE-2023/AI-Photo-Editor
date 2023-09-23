@@ -19,7 +19,16 @@ class MediaStore {
   }
 
   public updateOutputIds(ids: Set<MediaOutputId>) {
-    this.outputIds.set(ids);
+    const oldIds = get(this.outputIds);
+    if (!oldIds) this.outputIds.set(ids);
+
+    // Wont set store and notfiy subscribers if the value allOutputIds have remained the same.
+    // This is the case where the undo/redo system willchange something and then the stores see a change and do their
+    // own update but their update wont matter.
+
+    if (oldIds && ids && !equivSets<MediaOutputId>(oldIds, ids)) {
+      this.outputIds.set(ids);
+    }
   }
 
   // Stop listening for graph changes
@@ -31,9 +40,22 @@ class MediaStore {
   }
 
   public async getMediaReactive(mediaId: MediaOutputId) {
-    await window.apis.mediaApi.subscribeToMedia(mediaId).catch((err) => {
-      return;
-    });
+    if (mediaId) {
+      await window.apis.mediaApi.subscribeToMedia(mediaId).catch((err) => {
+        return;
+      });
+    }
+    // If we do not have a frontend copy of the media, fetch it
+    if (!get(this.store)[mediaId]) {
+      const media = await window.apis.mediaApi.getDisplayableMedia(mediaId);
+
+      if (media) {
+        this.store.update((mediaOutputs) => {
+          mediaOutputs[mediaId] = media;
+          return mediaOutputs;
+        });
+      }
+    }
 
     // If we do not have a frontend copy of the media, fetch it
     if (!get(this.store)[mediaId]) {
@@ -70,6 +92,18 @@ class MediaStore {
   public get subscribe() {
     return this.store.subscribe;
   }
+}
+
+function equivSets<T>(s1: Set<T>, s2: Set<T>): boolean {
+  if (s1.size !== s2.size) return false;
+  for (const element of s1) {
+    if (!s2.has(element)) {
+      return false;
+    } else {
+      s2.delete(element);
+    }
+  }
+  return true;
 }
 
 export const mediaStore = new MediaStore();

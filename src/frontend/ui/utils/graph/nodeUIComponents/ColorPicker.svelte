@@ -14,11 +14,17 @@
     inputStore.inputs[config.componentId] = writable("#f43e5cff");
 
   $: valStore = inputStore.inputs[config.componentId];
+
+  // Jakes code for undo/redo, this needs reintegrating
+  // function handleInputInteraction() {
+  //   dispatch("inputInteraction", { id: config.componentId, value: $valStore });
+  // }
 </script>
 
 <div class="picker">
   <!-- Old Svelvet ColorPicker: -->
   <!-- <ColorPicker parameterStore="{inputStore.inputs[config.componentId]}" /> -->
+  <!-- <ColorPicker parameterStore="{valStore}" on:wheelReleased="{handleInputInteraction}" /> -->
 
   {#if typeof $valStore === "string"}
     <!-- label="{config.label}" -->

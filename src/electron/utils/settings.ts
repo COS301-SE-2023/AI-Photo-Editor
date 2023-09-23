@@ -1,15 +1,18 @@
 import ElectronStore from "electron-store";
 import { safeStorage } from "electron";
 import logger from "./logger";
-import type { Preferences } from "../../shared/types";
+import type { KeyboardShortcut } from "../../shared/types";
 import type { recentProject } from "../../shared/types/index";
 
-interface Settings {
+export interface Settings {
   check: boolean;
   secrets: {
     OPENAI_API_KEY: string;
   };
   recentProjects: recentProject[];
+  prompts: string[];
+  model: string;
+  keyboardShortcuts: KeyboardShortcut[];
 }
 
 type DotUnionKeys<T, Prefix extends string = ""> = T extends object
@@ -29,13 +32,16 @@ type Secret = keyof Settings["secrets"];
 type UnencryptedSecrets = Record<string, string>;
 
 // TODO: Perhaps add a schema for validation
-const settings = new ElectronStore<Settings>({
+export const settings = new ElectronStore<Settings>({
   defaults: {
     check: false,
     secrets: {
       OPENAI_API_KEY: "",
     },
     recentProjects: [],
+    prompts: [],
+    model: "GPT-3.5",
+    keyboardShortcuts: [],
   },
 });
 

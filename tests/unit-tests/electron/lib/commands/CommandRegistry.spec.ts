@@ -50,6 +50,9 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
 
 jest.mock("fs", () => ({
@@ -60,6 +63,20 @@ jest.mock("fs", () => ({
   mkdirSync: jest.fn(),
   writeFileSync: jest.fn(),
 }));
+
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
+
+jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
+
 
 
 describe("Test CommandRegistry", () => {
@@ -89,6 +106,7 @@ describe("Test CommandRegistry", () => {
         description: description,
       }
     });
+    
 
     test("Test constructor", () => {
       expect(commandRegistry).toBeDefined();

@@ -1,38 +1,82 @@
-export interface UserSettingsCategory {
-  id: string;
-  title: string;
-  subtitle?: string;
-  settings: Setting[];
-}
+export const userSettingSections = [
+  {
+    id: "general",
+    title: "General",
+    categories: [
+      { id: "about", title: "About" },
+      { id: "ai", title: "AI Settings" },
+      { id: "hotkeys", title: "Hotkeys" },
+      { id: "plugin_browser", title: "Plugin Browser" },
+    ],
+  },
+] as const satisfies readonly UserSettingsSection[];
 
-export interface UserSetting {
+export type UserSettingsCategoryId =
+  (typeof userSettingSections)[number]["categories"][number]["id"];
+
+export type UserSettingsCategoryTitle =
+  (typeof userSettingSections)[number]["categories"][number]["title"];
+
+export type UserSettingsSection = {
+  id: string;
+  title: string;
+  categories: ReadonlyArray<UserSettingCategory>;
+};
+
+export type UserSettingCategory = {
   id: string;
   title: string;
   subtitle?: string;
+};
+
+export type Setting = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  description?: string[];
+  components: SettingComponent[];
+};
+
+interface SettingComponentBase {
+  id: string;
   secret?: boolean;
-  type: "dropdown" | "password" | "text" | "toggle" | "preferences";
 }
 
-export interface InputSetting extends UserSetting {
-  type: "password" | "text";
+export interface Input extends SettingComponentBase {
+  type: "secret" | "text";
   placeholder?: string;
   value: string;
 }
 
-export interface DropdownSetting extends UserSetting {
+export interface Dropdown extends SettingComponentBase {
   type: "dropdown";
   options: string[];
   value: string;
 }
-
-export interface ToggleSetting extends UserSetting {
+export interface Toggle extends SettingComponentBase {
   type: "toggle";
   value: boolean;
 }
-
-export interface Preferences extends UserSetting {
-  type: "preferences";
-  value: { [key: string]: string[] };
+export interface Button extends SettingComponentBase {
+  type: "button";
+  value: string;
+  onClick: (item: Button) => void;
 }
 
-export type Setting = DropdownSetting | InputSetting | ToggleSetting | Preferences;
+export interface KeyboardShortcuts extends SettingComponentBase {
+  id: "keyboardShortcuts";
+  type: "keyboardShortcuts";
+  value: KeyboardShortcut[];
+}
+export interface KeyboardShortcut extends SettingComponentBase {
+  id: `${string}.${string}`;
+  title: string;
+  type: "keyboardShortcut";
+  value: string[];
+}
+
+export type SettingComponent = Dropdown | Input | Toggle | KeyboardShortcuts | Button;
+
+type Prettify<T> = T extends object ? { [K in keyof T]: T[K] } : never;
+
+type t = Prettify<KeyboardShortcut>;

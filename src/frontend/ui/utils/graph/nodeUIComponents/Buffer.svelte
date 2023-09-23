@@ -2,6 +2,7 @@
   import { writable } from "svelte/store";
   import { UIValueStore } from "@shared/ui/UIGraph";
   import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
+  import { blixStore } from "../../../../lib/stores/BlixStore";
 
   // export let label: string;
   // export let inputStore: UIValueStore;
@@ -15,7 +16,10 @@
   $: valStore = inputStore.inputs[config.componentId];
 </script>
 
-<textarea disabled value="{JSON.stringify($valStore)}"></textarea>
+<textarea
+  disabled
+  value="{JSON.stringify($valStore)}"
+  class="{$blixStore.production ? 'hidden' : ''}"></textarea>
 
 <style>
   textarea {

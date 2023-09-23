@@ -63,7 +63,7 @@ export class PluginManager {
     this.loadedPlugins = [];
     const appPath = app.getAppPath();
     const pluginsPath = join(app.isPackaged ? process.resourcesPath : appPath, "blix-plugins");
-    const ignorePatterns = [".DS_Store"];
+    const ignorePatterns = [".DS_Store", "sharp-plugin"];
 
     // TODO: Make plugin loading async
     // See: [https://stackoverflow.com/a/52243773]
@@ -71,18 +71,15 @@ export class PluginManager {
     // Read blix-plugins/ directory
     const dirents = readdirSync(pluginsPath, { withFileTypes: true });
     // Ignore files (only directories)
-    const plugins = dirents.filter((dirent) => dirent.isDirectory()).map((dirent) => dirent.name);
+    let plugins = dirents.filter((dirent) => dirent.isDirectory()).map((dirent) => dirent.name);
 
-    plugins.filter((plugin) => {
+    plugins = plugins.filter((plugin) => {
       return !ignorePatterns.some((pattern) => plugin.includes(pattern));
     });
 
     await Promise.all(
       plugins.map(async (plugin) => {
-        // Ignore MacOS temp files
-        if (plugin !== ".DS_Store") {
-          await this.loadPlugin(plugin, pluginsPath, force);
-        }
+        await this.loadPlugin(plugin, pluginsPath);
       })
     );
     // this.blix.aiManager.instantiate(this.blix.toolbox);

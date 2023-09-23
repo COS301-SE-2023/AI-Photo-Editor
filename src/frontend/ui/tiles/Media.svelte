@@ -11,7 +11,7 @@
   import SelectionBox from "../utils/graph/SelectionBox.svelte";
   import { type SelectionBoxItem } from "../../types/selection-box";
   import WebView from "./WebView.svelte";
-  import { TweakApi } from "lib/webview/TweakApi";
+  import { TweakApi } from "../../lib/webview/TweakApi";
   import {
     faBacon,
     faBowlRice,

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { cacheStore } from "lib/stores/CacheStore";
+  import { cacheStore } from "../../lib/stores/CacheStore";
 
   const ws = new WebSocket("ws://localhost:60606");
 

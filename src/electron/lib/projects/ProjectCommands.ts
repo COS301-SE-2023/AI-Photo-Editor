@@ -17,7 +17,6 @@ import {
   CoreGraphUpdateEvent,
   CoreGraphUpdateParticipant,
 } from "../core-graph/CoreGraphInteractors";
-import sharp from "sharp";
 import type { SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 import settings from "../../utils/settings";
 import type { recentProject } from "../../../shared/types/index";
@@ -42,6 +41,7 @@ export const getRecentProjectsCommand: Command = {
   },
   handler: async (ctx: CommandContext) => {
     try {
+      updateRecentProjectsList();
       return { status: "success", data: getRecentProjects() };
     } catch (e) {
       return { status: "error", message: "An exception occured", data: [] };
@@ -163,6 +163,11 @@ export async function saveProject(
     return { status: "error", message: "No path specified" };
   }
 
+  if (!project.location.toString().endsWith(".blix")) {
+    // Ensure file is of correct type
+    return { status: "error", message: "Invalid file extension : " + project.location.toString() };
+  }
+
   // I don't really like this, but also can't really think of a nice way to change it
   // TODO: Rename sets name as path
   project.rename(project.location.toString().split("/").pop()!.split(".blix")[0]);
@@ -186,6 +191,7 @@ export async function saveProject(
     }
   }
   updateRecentProjectsList(project.location.toString());
+
   return { status: "success", message: "Project saved successfully" };
 }
 
@@ -275,75 +281,75 @@ export async function exportMedia(
   ctx: CommandContext,
   args: ExportMedia
 ): Promise<CommandResponse> {
-  if (!args) {
-    return { status: "error", message: "No media selected to export" };
-  }
+  return { status: "success", message: "Exporting currently disabled." };
 
-  const { type, data } = args;
+  // if (!args) {
+  //   return { status: "error", message: "No media selected to export" };
+  // }
 
-  if (!data) {
-    return { status: "error", message: "No data was provided" };
-  }
+  // const { type, data } = args;
 
-  if (type === "image") {
-    const base64Data = data.split(";base64, ");
-    const imgBuffer = Buffer.from(base64Data[1], "base64");
+  // if (!data) {
+  //   return { status: "error", message: "No data was provided" };
+  // }
 
-    const path = await showSaveDialog({
-      title: "Export media as",
-      defaultPath: "blix.png",
-      // filters: [{ name: "Images", extensions: ["png, jpg", "jpeg"] }],
-      properties: ["createDirectory"],
-    });
+  // if (type === "image") {
+  //   const base64Data = data.split(";base64, ");
+  //   const imgBuffer = Buffer.from(base64Data[1], "base64");
 
-    if (!path) return { status: "error", message: "No path chosen" };
+  //   const path = await showSaveDialog({
+  //     title: "Export media as",
+  //     defaultPath: "blix.png",
+  //     // filters: [{ name: "Images", extensions: ["png, jpg", "jpeg"] }],
+  //     properties: ["createDirectory"],
+  //   });
 
-    sharp(imgBuffer).toFile(path);
+  //   if (!path) return { status: "error", message: "No path chosen" };
 
-    return { status: "success", message: "Media exported successfully" };
-  } else if (type === "Number" || type === "color" || type === "string") {
-    const fileData = {
-      OutputData: data,
-    };
-    const path = await showSaveDialog({
-      title: "Export media as",
-      defaultPath: "blix.json",
-      filters: [{ name: "Data", extensions: ["json"] }],
-      properties: ["createDirectory"],
-    });
+  //   return { status: "success", message: "Media exported successfully" };
+  // } else if (type === "Number" || type === "color" || type === "string") {
+  //   const fileData = {
+  //     OutputData: data,
+  //   };
+  //   const path = await showSaveDialog({
+  //     title: "Export media as",
+  //     defaultPath: "blix.json",
+  //     filters: [{ name: "Data", extensions: ["json"] }],
+  //     properties: ["createDirectory"],
+  //   });
 
-    if (!path) return { status: "error", message: "Not path chosen" };
+  //   if (!path) return { status: "error", message: "Not path chosen" };
 
-    try {
-      writeFile(path, JSON.stringify(fileData));
-    } catch (err) {
-      logger.error(err);
-    }
+  //   try {
+  //     writeFile(path, JSON.stringify(fileData));
+  //   } catch (err) {
+  //     logger.error(err);
+  //   }
 
-    return { status: "success", message: "Media exported successfully" };
-  } else {
-    return { status: "success", message: "Unsupported media type" };
-  }
+  //   return { status: "success", message: "Media exported successfully" };
+  // } else {
+  //   return { status: "success", message: "Unsupported media type" };
+  // }
 }
 
 // TODO: Implement some sort of limit to how long the history of recent projects is.
-export async function updateRecentProjectsList(projectPath: string) {
+export async function updateRecentProjectsList(projectPath?: string) {
+  if (projectPath && !(await validateProjectPath(projectPath))) return; // Ensure file is of correct type
   const currentProjects: recentProject[] = settings.get("recentProjects");
   let validProjects: recentProject[] = [];
 
   const results = await Promise.all(
     currentProjects.map(async (project) => await validateProjectPath(project.path))
   );
-  for (let i = 0; i < currentProjects.length; i++) {
+  for (let i = 0; i < results.length; i++) {
     validProjects = results[i] ? [...validProjects, currentProjects[i]] : validProjects;
   }
 
-  validProjects = validProjects.filter((project) => project.path !== projectPath);
+  if (projectPath) validProjects = validProjects.filter((project) => project.path !== projectPath);
   const str = new Date().toUTCString().split(",")[1];
   const date = str.slice(1, str.lastIndexOf(" "));
-  validProjects.unshift({ path: projectPath, lastEdited: date });
+  if (projectPath) validProjects.unshift({ path: projectPath, lastEdited: date });
   settings.set("recentProjects", validProjects);
-  logger.info(settings.get("recentProjects"));
 }
 
 /**
@@ -355,6 +361,7 @@ export async function updateRecentProjectsList(projectPath: string) {
 export async function validateProjectPath(path: string): Promise<boolean> {
   try {
     await (await open(path, "r")).close();
+    if (!path.endsWith(".blix")) return false; // Additional check just to be safe
     return true;
   } catch (e) {
     return false;

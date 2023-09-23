@@ -1,7 +1,7 @@
 <script lang="ts">
   import { writable } from "svelte/store";
   import { UIValueStore } from "@shared/ui/UIGraph";
-  import { cacheStore } from "lib/stores/CacheStore";
+  import { cacheStore } from "../../../../lib/stores/CacheStore";
   import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
 
   export let props: UIComponentProps;

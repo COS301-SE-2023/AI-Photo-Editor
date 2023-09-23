@@ -18,6 +18,8 @@
   export let leafUI: NodeUILeaf | null = null;
   export let inputStore: UIValueStore;
   export let uiConfigs: { [key: string]: UIComponentConfig };
+  // const dispatch = createEventDispatcher();
+  // export let nodeId: UUID;
 
   const mapToSvelteComponent: { [key in NodeUIComponent]: any } = {
     Button: Button,
@@ -46,6 +48,8 @@
       inputStore="{inputStore}"
       props="{leafUI.params[0]}"
       config="{uiConfigs[leafUI.label]}"
+      on:inputInteraction
     />
   {/if}
 {/if}
+<!-- dispatch("activeInput", e.detail); -->

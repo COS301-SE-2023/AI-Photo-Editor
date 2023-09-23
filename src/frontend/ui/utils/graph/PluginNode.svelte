@@ -4,7 +4,7 @@
   import { toolboxStore } from "../../../lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";
   import { createEventDispatcher } from "svelte";
-  import { graphMall } from "lib/stores/GraphStore";
+  import { graphMall } from "../../../lib/stores/GraphStore";
   import { colord, extend } from "colord";
   import a11yPlugin from "colord/plugins/a11y";
 
@@ -15,6 +15,7 @@
   export let graphId: string;
   export let panelId: number;
   export let node: GraphNode;
+  // let activeInput = false;
 
   $: svelvetNodeId = `${panelId}_${node.uuid}`;
   $: toolboxNode = toolboxStore.getNodeReactive(node.signature);
@@ -58,6 +59,7 @@
   }
 
   async function nodeClicked(e: CustomEvent) {
+    console.log("NODE CLICKED");
     if (e.detail.e.button === 2) {
       console.log("DELETE NODE EVENT");
 
@@ -68,19 +70,15 @@
   }
 
   async function nodeDragReleased(e: CustomEvent) {
-    await window.apis.graphApi.setNodePos(
-      graphId,
-      node.uuid,
-      graphMall.getGraphState(graphId).uiPositions[node.uuid]
-    );
-    console.log("NODE POSITION UPDATED");
+    await window.apis.graphApi.setNodePos(graphId, node.uuid, { x: $nodePos.x, y: $nodePos.y });
+  }
+
+  function handleInputInteraction(e: CustomEvent) {
+    graphMall.getGraph(graphId).handleNodeInputInteraction(graphId, node.uuid, e.detail);
   }
 </script>
 
 {#if svelvetNodeId !== ""}
-  <!-- {#key nodePos} -->
-  <!-- width="{graphNode.dims.w}"
-height="{graphNode.dims.h}" -->
   <Node
     bgColor="#262630"
     textColor="#ffffff"
@@ -91,7 +89,7 @@ height="{graphNode.dims.h}" -->
     borderRadius="{10}"
     selectionColor="#f43e5c"
     on:selected="{() => console.log('selected')}"
-    on:nodeClicked="{nodeClicked}"
+    on:nodeClickReleased="{nodeClicked}"
     on:nodeDragReleased="{nodeDragReleased}"
   >
     <div class="node">
@@ -105,11 +103,11 @@ height="{graphNode.dims.h}" -->
         {JSON.stringify({ ...$toolboxNode, ui: undefined })}
       </div> -->
       <div class="node-body" style="max-width: 400px">
-        <!-- <button on:click={updateUIInputs}>SUBMIT</button> -->
         <NodeUiFragment
           inputStore="{node.inputUIValues}"
           ui="{$toolboxNode?.ui}"
           uiConfigs="{$toolboxNode?.uiConfigs}"
+          on:inputInteraction="{handleInputInteraction}"
         />
       </div>
 
@@ -150,7 +148,6 @@ height="{graphNode.dims.h}" -->
                 connected="{false}"
               />
             </Anchor>
-            <!-- bind:connections={$nodeConns} -->
           {/each}
         </div>
         <div class="anchors outputs">

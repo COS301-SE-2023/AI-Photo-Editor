@@ -54,6 +54,9 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
 
 jest.mock("fs", () => ({
@@ -65,12 +68,16 @@ jest.mock("fs", () => ({
   writeFileSync: jest.fn(),
 }));
 
+
+
 jest.mock("../../../../../src/electron/utils/settings", () => ({
     getSecret: jest.fn(() => {
         return "1234-1234-1234-1234";
         }
     )
 }));
+
+
 
 // jest.mock("path", () => ({
 //     join: jest.fn(() => {
@@ -90,6 +97,21 @@ jest.mock("path", () => ({
   }),
 }));
 
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
+
+
+jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
+
+
 describe("Test AI Manager", () => {
     let aiManager : AiManager;
     let blix : Blix;
@@ -100,6 +122,7 @@ describe("Test AI Manager", () => {
         blix.init(mainWindow);
         aiManager = new AiManager(blix.toolbox,blix.graphManager,mainWindow);
     });
+
 
     test("Test constructor", () => {
         expect(aiManager).toBeDefined();

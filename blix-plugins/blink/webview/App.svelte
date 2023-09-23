@@ -29,7 +29,7 @@
             view: pixiCanvas,
             width: 500,
             height: 500,
-            backgroundColor: 0x06060c,
+            backgroundColor: "#181925",
             // transparent: true,
             antialias: true,
             resolution: 1,

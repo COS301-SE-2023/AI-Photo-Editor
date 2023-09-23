@@ -13,6 +13,8 @@ import type { MediaOutput } from "../../../src/shared/types/media";
 import { CoreGraphUpdateParticipant } from "../../../src/electron/lib/core-graph/CoreGraphInteractors";
 import { MediaSubscriber } from "../../../src/electron/lib/media/MediaSubscribers";
 import { measureMemory } from "vm";
+import { TypeclassRegistry } from "../../../src/electron/lib/registries/TypeclassRegistry";
+import type { DisplayableMediaOutput } from "../../../src/shared/types/media";
 
 jest.mock('@electron/remote', () => ({ exec: jest.fn() }));
 
@@ -37,6 +39,9 @@ const mainWindow: MainWindow = {
     },
     utilClientApi: {
         showToast: jest.fn()
+    },
+    mediaClientApi: {
+      onMediaOutputIdsChanged: jest.fn(),
     }
     
   }
@@ -76,6 +81,9 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
 
 jest.mock("fs", () => ({
@@ -87,16 +95,32 @@ jest.mock("fs", () => ({
   writeFileSync: jest.fn(),
 }));
 
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
+
+jest.mock('../../../src/electron/lib/plugins/PluginManager')
+
+
 
 describe("Test graph importer", () => {
 
     let mediaManager: MediaManager;
     let blix: Blix;
+    let typeRegistry: TypeclassRegistry
 
     beforeEach(async() => {
         blix = new Blix();
         await blix.init(mainWindow);
-        mediaManager = new MediaManager(mainWindow, blix.graphInterpreter, blix.graphManager);
+        typeRegistry = new TypeclassRegistry(blix);
+        mediaManager = new MediaManager(typeRegistry, blix.graphInterpreter, blix.graphManager);
     });
 
     test("Media manager should be defined", () => {
@@ -142,10 +166,20 @@ describe("Test graph importer", () => {
 
         const data: MediaOutput = {
             content: 123,
+
             dataType: "test",
             graphUUID: "test1233",
             outputId: "test123",
             outputNodeUUID: "test123",
+        };
+
+        const display = {
+          contentProp: null,
+          displayType : "textbox",
+          props : {
+            content : "INVALID TYPE: test\nCONTENT: 123",
+            status : "error",
+          },
         };
 
 
@@ -156,7 +190,12 @@ describe("Test graph importer", () => {
         mediaManager.addSubscriber("test123", subscriber);
         mediaManager.updateMedia(data);
 
-        expect(MediaSubscriber.prototype.onMediaChanged).toBeCalledWith(data);
+        const output = {
+          ...data,
+          display,
+        } as DisplayableMediaOutput;
+
+        expect(MediaSubscriber.prototype.onMediaChanged).toBeCalledWith(output);
 
     });
 
@@ -177,7 +216,7 @@ describe("Test graph importer", () => {
         mediaManager.addSubscriber("test123", subscriber);
         mediaManager.removeSubscriber("test123", subscriber.uuid);
 
-        expect(mediaManager.getMedia("test123")).toBe(undefined);
+        expect(mediaManager.getMedia("test123")).toBe(null);
 
     });
 

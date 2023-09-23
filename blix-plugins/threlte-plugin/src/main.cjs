@@ -47,7 +47,7 @@ function createThrelteNode(type, title, desc, params) {
         nodeBuilder.setUI(ui);
         nodeBuilder.addInput("GLFX image", "img", "GLFX image");
         for (let param of params) {
-            nodeBuilder.addInput("number", type, toTitleCase(param.id));
+            nodeBuilder.addOutput("number", type, toTitleCase(param.id));
         }
         nodeBuilder.addOutput("GLFX image", "res", "Result");
     };
@@ -61,12 +61,12 @@ const glfxNodes = {
     ],
 };
 
-Object.keys(glfxNodes).forEach((key) => {
-    glfxNodes[key] = createGLFXNode(key, ...glfxNodes[key]);
-});
+// Object.keys(glfxNodes).forEach((key) => {
+//     glfxNodes[key] = createGLFXNode(key, ...glfxNodes[key]);
+// });
 
 const nodes = {
-    ...glfxNodes,
+    // ...glfxNodes,
 
     "inputGLFXImage": (context) => {
         const nodeBuilder = context.instantiate("Input/Other", "inputGLFXImage");

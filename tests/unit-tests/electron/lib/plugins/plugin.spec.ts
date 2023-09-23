@@ -19,6 +19,7 @@ jest.mock("electron-store", () => ({
       return {}
     })
 }));
+jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
 
 
 jest.mock("../../../../../src/electron/lib/projects/ProjectManager");
@@ -35,7 +36,21 @@ jest.mock("electron", () => ({
       return "v1.1.1";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
+
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
 
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),

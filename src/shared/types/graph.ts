@@ -42,3 +42,8 @@ export interface SharedGraph {
   uuid: GraphUUID;
   displayName: string;
 }
+
+export type UIInputChange = {
+  id: string;
+  value: UIValue;
+};

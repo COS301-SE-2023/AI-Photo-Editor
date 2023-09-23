@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Shortcuts from "../utils/Shortcuts.svelte";
-  import Markdown from "./Markdown.svelte";
+  import Shortcuts from "../../utils/Shortcuts.svelte";
+  import Markdown from "./utils/Markdown.svelte";
 
   let selectedPlugin: string | null = null;
 

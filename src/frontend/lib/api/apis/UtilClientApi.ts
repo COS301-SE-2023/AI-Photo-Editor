@@ -1,6 +1,6 @@
 import type { ElectronWindowApi } from "electron-affinity/window";
 import { toastStore, type ToastOptions } from "../../stores/ToastStore";
-import { blixStore, setInitialStores } from "../../../lib/stores/BlixStore";
+import { blixStore, setInitialStores, type BlixStoreState } from "../../../lib/stores/BlixStore";
 import { bindMainApis } from "../apiInitializer";
 
 export class UtilClientApi implements ElectronWindowApi<UtilClientApi> {
@@ -17,5 +17,9 @@ export class UtilClientApi implements ElectronWindowApi<UtilClientApi> {
     }
     await setInitialStores();
     blixStore.update((state) => ({ ...state, blixReady: true }));
+  }
+
+  refreshBlixStore(data: Partial<BlixStoreState>) {
+    blixStore.refreshStore(data);
   }
 }

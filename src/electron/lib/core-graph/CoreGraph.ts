@@ -171,62 +171,62 @@ export class CoreGraph extends UniqueEntity {
   }
 
   // We need to pass in node name and plugin name
-  public addNode(node: NodeInstance, pos: SvelvetCanvasPos, uiValues?: { [key: string]: UIValue }) {
+  public addNode(
+    nodeInstance: NodeInstance,
+    pos: SvelvetCanvasPos,
+    uiValues?: Record<string, UIValue>
+  ) {
     try {
-      // Create New Node
-      const n: Node = new Node(node.name, node.plugin, node.inputs, node.outputs);
-      n.setStyling(new NodeStyling(pos, { w: 0, h: 0 }));
-      // Add Node to Graph
-      this.nodes[n.uuid] = n;
-      // Add Nodes's Anchors to Graph
-      for (const anchor in n.getAnchors) {
-        if (!n.getAnchors.hasOwnProperty(anchor)) continue;
-        this.anchors[anchor] = n.getAnchors[anchor];
-      }
+      const node = new Node(
+        nodeInstance.name,
+        nodeInstance.plugin,
+        nodeInstance.inputs,
+        nodeInstance.outputs
+      );
+      node.setStyling(new NodeStyling(pos, { w: 0, h: 0 }));
+      this.nodes[node.uuid] = node;
 
-      if (node.signature === "blix.output") {
-        this.outputNodes[n.uuid] = "default"; // TODO: set this to a unique id and propagate to the frontend
+      // Add Nodes's Anchors to Graph
+      Object.values(node.getAnchors).forEach((anchor) => {
+        this.anchors[anchor.uuid] = anchor;
+      });
+
+      if (nodeInstance.signature === "blix.output") {
+        // TODO: set this to a unique id and propagate to the frontend
+        this.outputNodes[node.uuid] = "default";
       }
 
       let inputValues: Record<string, unknown> = {};
-      // New Node with default Ui Input Values
-      if (!uiValues) {
-        const inputs: { [key: string]: unknown } = {};
-        const changes: string[] = [];
-        Object.values(node.uiConfigs).forEach((config) => {
-          inputValues[config.componentId] = config.defaultValue;
-          inputs[config.componentId] = config.defaultValue;
-        });
-        this.uiInputs[n.uuid] = new CoreNodeUIInputs({ inputs, changes }, {});
-      } else {
-        // Loading in input values from an existing node
-        // console.log("UIVALUES: ", uiValues)
-        this.uiInputs[n.uuid] = new CoreNodeUIInputs(
-          {
-            inputs: uiValues,
-            changes: [...Object.keys(uiValues)],
-          },
-          {}
-        );
-        // console.log(this.uiInputs[n.uuid].getInputs)
-        Object.values(node.uiConfigs).forEach((config) => {
-          inputValues[config.componentId] = uiValues[config.componentId];
-        });
-        // console.log(inputValues);
-      }
+
+      // Create or restore UI inputs depending on brand new node or restored node
+
+      Object.values(nodeInstance.uiConfigs).forEach((config) => {
+        inputValues[config.componentId] = uiValues
+          ? uiValues[config.componentId]
+          : config.defaultValue;
+      });
+
+      this.uiInputs[node.uuid] = new CoreNodeUIInputs(
+        { inputs: inputValues, changes: uiValues ? Object.keys(uiValues) : [] },
+        {}
+      );
 
       // Handle special readonly UI component types (e.g. TweakDial)
-      const { dials: dialInputs, filledInputs: filledDialInputs } = populateDials(node.ui, {
-        nodeUUID: n.uuid,
+      const { dials: dialInputs, filledInputs: filledDialInputs } = populateDials(nodeInstance.ui, {
+        nodeUUID: node.uuid,
         uiInputs: Object.keys(inputValues),
         uiInputChanges: Object.keys(inputValues), // When node is created, all inputs have 'changed'
       });
+
       inputValues = { ...inputValues, ...filledDialInputs };
 
       // Handle the UI input initializer
-      const initializedInputs = node.uiInitializer(inputValues);
+      const initializedInputs = nodeInstance.uiInitializer(inputValues);
       let uiInputsInitialized = false;
       const uiChanges = Object.keys(initializedInputs);
+
+      // console.log("Initialized Inputs", initializedInputs);
+
       if (typeof initializedInputs === "object" && uiChanges.length > 0) {
         inputValues = { ...inputValues, ...initializedInputs };
 
@@ -235,21 +235,22 @@ export class CoreGraph extends UniqueEntity {
           inputs: inputValues,
           changes: uiChanges,
         };
-        this.uiInputs[n.uuid] = new CoreNodeUIInputs(uiInputsPayload, dialInputs);
+
+        this.uiInputs[node.uuid] = new CoreNodeUIInputs(uiInputsPayload, dialInputs);
 
         uiInputsInitialized = true;
       }
 
       // console.log(QueryResponseStatus.success)
-      const anchors: AiAnchors = n.returnAnchors();
+      const anchors: AiAnchors = node.returnAnchors();
       // Add position of node to graph
-      this.uiPositions[n.uuid] = pos;
+      this.uiPositions[node.uuid] = pos;
 
       return {
         status: "success",
         message: "Node added successfully",
         data: {
-          nodeId: n.uuid,
+          nodeId: node.uuid,
           inputs: anchors.inputAnchors,
           outputs: anchors.outputAnchors,
           inputValues,
@@ -261,6 +262,121 @@ export class CoreGraph extends UniqueEntity {
     }
 
     // TODO: Add Node Styling
+
+    // ===============================================================
+    // Bunch of sussy baka shit
+    // ===============================================================
+
+    // try {
+    //   // Create New Node
+    //   const n: Node = new Node(node.name, node.plugin, node.inputs, node.outputs);
+    //   n.setStyling(new NodeStyling(pos, { w: 0, h: 0 }));
+    //   // Add Node to Graph
+    //   this.nodes[n.uuid] = n;
+    //   // Add Nodes's Anchors to Graph
+    //   for (const anchor in n.getAnchors) {
+    //     if (!n.getAnchors.hasOwnProperty(anchor)) continue;
+    //     this.anchors[anchor] = n.getAnchors[anchor];
+    //   }
+
+    //   if (node.signature === "blix.output") {
+    //     this.outputNodes[n.uuid] = "default"; // TODO: set this to a unique id and propagate to the frontend
+    //   }
+
+    //   let inputValues: Record<string, unknown> = {};
+    //   let uiInputsInitialized = false;
+
+    //   // New Node with default Ui Input Values
+    //   if (!uiValues) {
+    //     const inputs: { [key: string]: unknown } = {};
+    //     const changes: string[] = [];
+    //     Object.values(node.uiConfigs).forEach((config) => {
+    //       inputValues[config.componentId] = config.defaultValue;
+    //       inputs[config.componentId] = config.defaultValue;
+    //     });
+
+    //     const { dials: dialInputs, filledInputs: filledDialInputs } = populateDials(node.ui, {
+    //       nodeUUID: n.uuid,
+    //       uiInputs: Object.keys(inputValues),
+    //       uiInputChanges: Object.keys(inputValues), // When node is created, all inputs have 'changed'
+    //     });
+
+    //     inputValues = { ...inputValues, ...filledDialInputs };
+
+    //     this.uiInputs[n.uuid] = new CoreNodeUIInputs({ inputs, changes }, dialInputs);
+    //   } else {
+    //     // Loading in input values from an existing node
+    //     // console.log("UIVALUES: ", uiValues)
+    //     const { dials: dialInputs, filledInputs: filledDialInputs } = populateDials(node.ui, {
+    //       nodeUUID: n.uuid,
+    //       uiInputs: Object.keys(inputValues),
+    //       uiInputChanges: Object.keys(inputValues), // When node is created, all inputs have 'changed'
+    //     });
+
+    //     inputValues = { ...inputValues, ...filledDialInputs };
+
+    //     this.uiInputs[n.uuid] = new CoreNodeUIInputs(
+    //       {
+    //         inputs: uiValues,
+    //         changes: [...Object.keys(uiValues)],
+    //       },
+    //       dialInputs
+    //     );
+    //     // console.log(this.uiInputs[n.uuid].getInputs)
+    //     Object.values(node.uiConfigs).forEach((config) => {
+    //       inputValues[config.componentId] = uiValues[config.componentId];
+    //     });
+    //     // }
+
+    //     // // Handle special readonly UI component types (e.g. TweakDial)
+    //     // const { dials: dialInputs, filledInputs: filledDialInputs } = populateDials(node.ui, {
+    //     //   nodeUUID: n.uuid,
+    //     //   uiInputs: Object.keys(inputValues),
+    //     //   uiInputChanges: Object.keys(inputValues), // When node is created, all inputs have 'changed'
+    //     // });
+    //     // inputValues = { ...inputValues, ...filledDialInputs };
+
+    //     // this.uiInputs[n.uuid] = new CoreNodeUIInputs(uiInputsPayload, dialInputs);
+
+    //     uiInputsInitialized = true;
+    //   }
+
+    //   // Handle the UI input initializer
+    //   // const initializedInputs = node.uiInitializer(inputValues);
+    //   // const uiChanges = Object.keys(initializedInputs);
+    //   // if (typeof initializedInputs === "object" && uiChanges.length > 0) {
+    //   //   inputValues = { ...inputValues, ...initializedInputs };
+
+    //   //   // Update the graph's UI inputs
+    //   //   const uiInputsPayload: INodeUIInputs = {
+    //   //     inputs: inputValues,
+    //   //     changes: uiChanges,
+    //   //   };
+    //   //   this.uiInputs[n.uuid] = new CoreNodeUIInputs(uiInputsPayload);
+
+    //   // }
+
+    //   // console.log(QueryResponseStatus.success)
+    //   const anchors: AiAnchors = n.returnAnchors();
+    //   // Add position of node to graph
+    //   this.uiPositions[n.uuid] = pos;
+
+    //   return {
+    //     status: "success",
+    //     message: "Node added successfully",
+    //     data: {
+    //       nodeId: n.uuid,
+    //       inputs: anchors.inputAnchors,
+    //       outputs: anchors.outputAnchors,
+    //       inputValues,
+    //       uiInputsInitialized,
+    //     },
+    //   } satisfies QueryResponse;
+    // } catch (error) {
+    //   return { status: "error", message: error as string } satisfies QueryResponse;
+    // }
+
+    // // TODO: Add Node Styling
   }
 
   public addEdge(anchorIdA: UUID, anchorIdB: UUID) {
