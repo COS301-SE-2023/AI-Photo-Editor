@@ -20,8 +20,18 @@ type PartialTile = {
   uiConfigs: { [key: string]: UIComponentConfig };
 };
 
+/**
+ * TileBuilder is a builder class for creating TileInstance objects.
+ * It is used to create a TileInstance object that can be registered with the TileRegistry.
+ */
+
 export class TileBuilder implements PluginContextBuilder {
   private partialTile: PartialTile;
+
+  /**
+   * @param plugin string
+   * @param name string
+   */
 
   constructor(plugin: string, name: string) {
     this.partialTile = {
@@ -35,6 +45,11 @@ export class TileBuilder implements PluginContextBuilder {
     };
   }
 
+  /**
+   * Returns the TileInstance object that has been built.
+   * @returns TileInstance
+   */
+
   get build(): TileInstance {
     return new TileInstance(
       this.partialTile.name,
@@ -46,24 +61,69 @@ export class TileBuilder implements PluginContextBuilder {
       this.partialTile.uiConfigs
     );
   }
+
+  /**
+   * Resets the tile builder's tile instance to its initial state
+   * @returns void
+   */
+
   public reset(): void {
+    this.partialTile = {
+      name: this.partialTile.name,
+      plugin: this.partialTile.plugin,
+      displayName: this.partialTile.displayName,
+      description: "",
+      icon: "",
+      ui: {},
+      uiConfigs: {},
+    };
+
     return;
   }
 
   // TODO: Implement all of these
+
+  /**
+   * Sets the title of the tile
+   * @param title string
+   * @returns void
+   */
   public setTitle(title: string): void {
     this.partialTile.displayName = title;
   }
+
+  /**
+   * Sets the description of the tile
+   * @param description string
+   * @returns void
+   */
   public setDescription(description: string): void {
     this.partialTile.description = description;
   }
+
+  /**
+   * Sets the icon of the tile
+   * @param icon string
+   * @returns void
+   */
   public addIcon(icon: string): void {
     this.partialTile.icon = icon;
   }
+
+  /**
+   * Sets the UI of the tile
+   * @param ui ITileUI
+   * @returns void
+   */
   public setUI(ui: TileUIBuilder): void {
     this.partialTile.ui = ui.getUI();
     this.partialTile.uiConfigs = ui.getUIConfigs();
   }
+
+  /**
+   * Creates a new TileUIBuilder object
+   * @returns TileUIBuilder
+   */
 
   public createUIBuilder(): TileUIBuilder {
     const builder = new TileUIBuilder();
@@ -71,13 +131,30 @@ export class TileBuilder implements PluginContextBuilder {
     return builder;
   }
 
+  /**
+   * adds a new UI element to the tile
+   * @todo implement this function
+   * @returns void
+   */
+
   public addUIElement(): void {
     return;
   }
 }
 
-function getRandomComponentId(type: TileUIComponent) {
+/**
+ * Returns a random component id for a given TileUIComponent
+ * @param type TileUIComponent
+ * @returns string
+ */
+
+function getRandomComponentId(type: TileUIComponent): string {
   return `${type.toString()}-${Math.floor(Math.random() * 16 ** 6).toString(16)}`;
+}
+
+export function forTesting() {
+  // to allow testing of getRandomComponentId
+  return getRandomComponentId;
 }
 
 export class TileUIBuilder {
