@@ -19,7 +19,7 @@ import { Blix } from "./electron/lib/Blix";
 import { CoreGraphInterpreter } from "./electron/lib/core-graph/CoreGraphInterpreter";
 import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
-import { platform } from "os";
+import { type } from "os";
 
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 // const isProd = true;
@@ -105,8 +105,9 @@ async function createMainWindow() {
     },
     // Set icon for Windows and Linux
     icon: isProd ? join(__dirname, "icon.png") : "public/images/icon.png",
-    titleBarStyle: "hidden",
+    titleBarStyle: type() === "Windows_NT" ? "default" : "hidden",
     trafficLightPosition: { x: 10, y: 10 },
+    title: "Blix",
     // show: false,
   }) as MainWindow;
 
