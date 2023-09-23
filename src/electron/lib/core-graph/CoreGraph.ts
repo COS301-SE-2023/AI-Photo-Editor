@@ -199,37 +199,30 @@ export class CoreGraph extends UniqueEntity {
       let inputValues: Record<string, unknown> = {};
 
       // Create or restore UI inputs depending on brand new node or restored node
-
       Object.values(nodeInstance.uiConfigs).forEach((config) => {
         inputValues[config.componentId] = uiValues
           ? uiValues[config.componentId]
           : config.defaultValue;
       });
 
-      this.uiInputs[node.uuid] = new CoreNodeUIInputs(
-        { inputs: inputValues, changes: uiValues ? Object.keys(uiValues) : [] },
-        {}
-      );
+      const changes = Object.keys(inputValues);
 
       // Handle special readonly UI component types (e.g. TweakDial)
       const { dials: dialInputs, filledInputs: filledDialInputs } = populateDials(nodeInstance.ui, {
         nodeUUID: node.uuid,
-        uiInputs: Object.keys(inputValues),
-        uiInputChanges: Object.keys(inputValues), // When node is created, all inputs have 'changed'
+        uiInputs: changes,
+        uiInputChanges: changes, // When node is created, all inputs have 'changed'
       });
 
       inputValues = { ...inputValues, ...filledDialInputs };
 
       // Handle the UI input initializer
       const initializedInputs = nodeInstance.uiInitializer(inputValues);
-      let uiInputsInitialized = false;
       const uiChanges = Object.keys(initializedInputs);
 
-      // console.log("Initialized Inputs", initializedInputs);
-
+      let uiInputsInitialized = false;
       if (typeof initializedInputs === "object" && uiChanges.length > 0) {
         inputValues = { ...inputValues, ...initializedInputs };
-
         // Update the graph's UI inputs
         const uiInputsPayload: INodeUIInputs = {
           inputs: inputValues,
@@ -237,11 +230,9 @@ export class CoreGraph extends UniqueEntity {
         };
 
         this.uiInputs[node.uuid] = new CoreNodeUIInputs(uiInputsPayload, dialInputs);
-
         uiInputsInitialized = true;
       }
-
-      // console.log(QueryResponseStatus.success)
+      // console.log(uiInputsInitialized)
       const anchors: AiAnchors = node.returnAnchors();
       // Add position of node to graph
       this.uiPositions[node.uuid] = pos;
