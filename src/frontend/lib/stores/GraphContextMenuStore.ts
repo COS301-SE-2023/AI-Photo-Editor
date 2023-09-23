@@ -26,6 +26,10 @@ export type Item = {
   action: Action;
 };
 
+function isItemGroup(item: ItemGroup | Item): item is ItemGroup {
+  return "items" in item;
+}
+
 export type Action = { type: "addNode"; signature: string };
 
 class ContextMenuStore {
@@ -123,21 +127,50 @@ class ContextMenuStore {
     });
   }
 
+  // Construct item group tree from nodes
   private groupBy(nodes: INode[]): ItemGroup[] {
-    const groups: Record<string, ItemGroup> = {};
+    const res: ItemGroup[] = [];
 
     for (const node of nodes) {
-      const parts = node.signature.split(".");
-      const plugin = parts[0];
+      // Split by non-escaped forward slashes
+      const folderParts = node.folder
+        .replace(/\\/g, "\0") // Eliminate escaped backslashes
+        .split(/(?<!\\)\//) // Split by non-escaped forward slashes
+        .map((part) =>
+          part
+            .replace(/\\\//g, "/") // Unescape remaining forward slashes
+            .replace(/\0/g, "\\") // Unescape backslashes
+            .trim()
+        );
 
-      if (!groups[plugin]) {
-        groups[plugin] = {
-          label: plugin,
+      // Construct folder hierarchy
+      let elems: (ItemGroup | Item)[] = res;
+      construct: for (const folder of folderParts) {
+        if (folder === "") continue;
+
+        // Check if folder is already in the hierarchy
+        for (const elem of elems) {
+          if (!isItemGroup(elem)) continue; // Skip non-groups
+
+          if (elem.label === folder) {
+            // Folder already exists
+            elems = elem.items;
+            continue construct;
+          }
+        }
+
+        // Folder does not exist, construct it
+        const newGroup: ItemGroup = {
+          label: folder,
           items: [],
         };
+        elems.push(newGroup);
+
+        elems = newGroup.items as ItemGroup[];
       }
 
-      groups[plugin].items.push({
+      // Add node to folder (item to group)
+      elems.push({
         label: node.title,
         icon: node.icon,
         action: {
@@ -147,7 +180,7 @@ class ContextMenuStore {
       });
     }
 
-    return Object.values(groups);
+    return res;
   }
 }
 

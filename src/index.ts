@@ -7,6 +7,7 @@ import {
   MenuItem,
   dialog,
   globalShortcut,
+  session,
 } from "electron";
 import { join } from "path";
 import { parse } from "url";
@@ -65,11 +66,19 @@ let blix: Blix | null = null;
  * process will bind to the window IPC APIs 5. The Blix state is instantiated
  * and the various managers are initialized.
  */
+// TODO: Investigate app.whenReady().then(...)
+// This may be more stable, as it guarantees the callback always fires regardless of startup time
+// See: [https://www.reddit.com/r/electronjs/comments/t151k8/what_is_the_difference_between_apponready_and/hydu5vc]
 app.on("ready", async () => {
   protocol.registerFileProtocol("blix-image", (request, callback) => {
     const url = request.url.slice("blix-image://".length);
     callback({ path: join(__dirname, "..", "..", url) });
   });
+
+  // TODO: Remove
+  // await session.defaultSession.loadExtension(
+  //   "/home/rec1dite/.config/google-chrome/Default/Extensions/aamddddknhcagpehecnhphigffljadon/2.6.1_0"
+  // );
 
   // const coreGraphInterpreter = new CoreGraphInterpreter(new ToolboxRegistry);
   // coreGraphInterpreter.run();

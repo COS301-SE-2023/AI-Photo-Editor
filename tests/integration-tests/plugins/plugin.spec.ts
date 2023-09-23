@@ -101,10 +101,10 @@ describe("Test builder propagations", () => {
     beforeEach(() => {
       jest.clearAllMocks();
 
-      const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
+      const node = new NodeInstance("Jake.Shark", "Shark", "folder", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
       const nodeUI = new NodeUIParent("Jake.Shark", null);
   
-      nodeBuilder = new NodeBuilder("testing-plugin", "My cool node");
+      nodeBuilder = new NodeBuilder("testing-plugin", "folder", "My cool node");
       nodeUIBuilder = new NodeUIBuilder();
     });
 

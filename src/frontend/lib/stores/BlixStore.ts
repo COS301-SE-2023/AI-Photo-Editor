@@ -7,6 +7,7 @@ import type { KeyboardShortcut } from "@shared/types";
 
 const blixStoreDefaults = {
   blixReady: false,
+  production: false,
   system: {
     nodeVersion: "",
     platform: "",

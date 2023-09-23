@@ -98,6 +98,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `hello-plugin.hello`,
           `input`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,
@@ -119,6 +120,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `hello-plugin.hello`,
           `flip`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,
@@ -146,6 +148,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `output`,
           `blix`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,
@@ -207,6 +210,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `hello-plugin.hello`,
           `input`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,
@@ -228,6 +232,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `hello-plugin.hello`,
           `flip`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,
@@ -255,6 +260,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `output`,
           `blix`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,

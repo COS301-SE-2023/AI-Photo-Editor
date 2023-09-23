@@ -3,7 +3,7 @@ const nodes = {
     "hello": (context) => {
         // Use context.nodeBuilder to construct the node UI
         
-        console.log("Bogus nodes");
+        // console.log("Bogus nodes");
     }
 }
 

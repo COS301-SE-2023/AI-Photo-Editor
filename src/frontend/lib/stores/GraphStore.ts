@@ -228,7 +228,9 @@ export class GraphStore {
   // Update the store value of a specific UI input
   updateUIInput(nodeUUID: GraphNodeUUID, inputId: string, value: unknown) {
     const node = this.getNode(nodeUUID);
-    node.inputUIValues.inputs[inputId].set(value);
+    if (node) {
+      node.inputUIValues.inputs[inputId].set(value);
+    }
   }
 
   updateUIPosition(nodeUUID: UUID, position: SvelvetCanvasPos) {

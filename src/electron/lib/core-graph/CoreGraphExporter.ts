@@ -43,7 +43,7 @@ export class GraphFileExportStrategy implements ExportStrategy<GraphToJSON> {
       json.push({
         signature: `${graph.getNodes[node].getPlugin}.${graph.getNodes[node].getName}`,
         position: graph.getUIPositions()[node],
-        inputs: inputs[node].getInputs,
+        inputs: inputs[node] ? inputs[node].getInputs : {},
       });
     }
 

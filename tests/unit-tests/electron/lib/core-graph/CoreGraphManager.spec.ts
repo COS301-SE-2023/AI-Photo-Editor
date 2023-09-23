@@ -122,7 +122,7 @@ jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
 
     test("Test addNode", () => {
         //Add Node to graph
-        const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
+        const node = new NodeInstance("Jake", "Shark", "folder", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
         graphManager.addGraph(graph);
         graphManager.addNode(graph.uuid,node, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
         const nodes = graphManager.getGraph(graph.uuid).getNodes;
@@ -131,8 +131,8 @@ jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
 
     test("Test addEdge", () => {
         //Add Edge to graph
-        const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
-        const node2 = new NodeInstance("Finn", "Human", "Human.Finn", "This is the Finn plugin :)", "1150", inputs, outputs);
+        const node = new NodeInstance("Jake", "Shark", "folder", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
+        const node2 = new NodeInstance("Finn", "Human", "folder", "Human.Finn", "This is the Finn plugin :)", "1150", inputs, outputs);
 
         node.inputs.push(new InputAnchorInstance("number","aaaa","aaaa.number"));
         node2.outputs.push(new OutputAnchorInstance("number","bbbb","bbbb.number"));
@@ -160,7 +160,7 @@ jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
     })
 
     test("Test removeNode", () => {
-        const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
+        const node = new NodeInstance("Jake", "Shark", "folder", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
         graphManager.addGraph(graph);
         graphManager.addNode(graph.uuid, node, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
 
@@ -175,8 +175,8 @@ jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
 
     test("Test removeEdge", () => {
         //Add Edge to graph
-        const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
-        const node2 = new NodeInstance("Finn", "Human", "Human.Finn", "This is the Finn plugin :)", "1150", inputs, outputs);
+        const node = new NodeInstance("Jake", "Shark", "folder", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
+        const node2 = new NodeInstance("Finn", "Human", "folder", "Human.Finn", "This is the Finn plugin :)", "1150", inputs, outputs);
 
         node.inputs.push(new InputAnchorInstance("number","aaaa","aaaa.number"));
         node2.outputs.push(new OutputAnchorInstance("number","bbbb","bbbb.number"));
@@ -204,7 +204,7 @@ jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
 
   test("Test setPos", () => {
 
-    const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
+    const node = new NodeInstance("Jake", "Shark", "folder", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
     graphManager.addGraph(graph);
     graphManager.addNode(graph.uuid, node, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
 
@@ -248,7 +248,7 @@ jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
         const result = graphManager.addEdge("","","",CoreGraphUpdateParticipant.system);
         expect(result.status).toBe("error");
 
-        const node = new NodeInstance("Jake", "Shark", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
+        const node = new NodeInstance("Jake", "Shark", "folder", "Shark.Jake", "This is the Jake plugin :)", "1149", inputs, outputs);
         const result2 = graphManager.addNode("", node, { x: 0, y: 0 }, CoreGraphUpdateParticipant.system);
         expect(result2.status).toBe("error");
 

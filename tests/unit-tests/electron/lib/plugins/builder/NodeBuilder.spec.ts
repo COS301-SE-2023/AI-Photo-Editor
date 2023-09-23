@@ -20,10 +20,10 @@ describe("Test NodeBuilder", () => {
     jest.clearAllMocks();
 
 
-    const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
+    const node = new NodeInstance("Jake.Shark", "Shark", "folder", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
     const nodeUI = new NodeUIParent("", null);
 
-    nodeBuilder = new NodeBuilder("testing-plugin", "cool node 1");
+    nodeBuilder = new NodeBuilder("testing-plugin", "folder", "cool node 1");
     nodeUIBuilder = new NodeUIBuilder();
   });
 
@@ -35,7 +35,7 @@ describe("Test NodeBuilder", () => {
   });
 
   test("getBuild should return NodeInstance", () => {
-    const node = new NodeInstance("cool node 1", "testing-plugin", "Jake", "The Jake plugin","", inputs, outputs);
+    const node = new NodeInstance("cool node 1", "testing-plugin", "folder", "Jake", "The Jake plugin","", inputs, outputs);
     nodeBuilder.setTitle("Jake");
     nodeBuilder.setDescription("The Jake plugin");
     nodeBuilder.define(() => {return {"res" : "Shrek"}});
@@ -43,18 +43,18 @@ describe("Test NodeBuilder", () => {
   });
 
   test("setTitle should set the title", () => {
-    nodeBuilder = new NodeBuilder("testing-plugin", "cool node 3");
+    nodeBuilder = new NodeBuilder("testing-plugin", "folder", "cool node 3");
     nodeBuilder.setTitle("Jake");
     expect(nodeBuilder["partialNode"].displayName).toEqual("Jake");  });
 
   test("setDescription should set the description", () => {
-    nodeBuilder = new NodeBuilder("testing-plugin", "cool node 3");
+    nodeBuilder = new NodeBuilder("testing-plugin", "folder", "cool node 3");
     nodeBuilder.setDescription("The Jake plugin");
     expect(nodeBuilder["partialNode"].description).toEqual("The Jake plugin");
   });
 
   test("define should set the function", () => {
-    nodeBuilder = new NodeBuilder("testing-plugin", "cool node 4");
+    nodeBuilder = new NodeBuilder("testing-plugin", "folder", "cool node 4");
     nodeBuilder.define(() => {return {"res" : "Shrek"}});
     expect(nodeBuilder["partialNode"].func({},{},[]).res).toEqual("Shrek");
   });
@@ -73,24 +73,24 @@ describe("Test NodeBuilder", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    nodeBuilder = new NodeBuilder("testing-plugin", "cool node 5");
+    nodeBuilder = new NodeBuilder("testing-plugin", "folder", "cool node 5");
     nodeUIBuilder = new NodeUIBuilder();
   });
 
   test("addIcon should add an icon", () => {
-    nodeBuilder = new NodeBuilder("testing-plugin", "cool node 6");
+    nodeBuilder = new NodeBuilder("testing-plugin", "folder", "cool node 6");
     nodeBuilder.addIcon("Shrek");
     expect(nodeBuilder["partialNode"].icon).toEqual("Shrek");
   });
 
   test("addInput should add an input", () => {
-    nodeBuilder = new NodeBuilder("testing-plugin", "cool node 7");
+    nodeBuilder = new NodeBuilder("testing-plugin", "folder", "cool node 7");
     nodeBuilder.addInput("string", "shrek", "Shrek");
     expect(nodeBuilder["partialNode"].inputs[0].displayName).toEqual("Shrek");
   });
 
   test("addOutput should add an output", () => {
-    nodeBuilder = new NodeBuilder("testing-plugin", "cool node 8");
+    nodeBuilder = new NodeBuilder("testing-plugin", "folder", "cool node 8");
     nodeBuilder.addOutput("string", "shrek2", "Shrek");
     expect(nodeBuilder["partialNode"].outputs[0].displayName).toEqual("Shrek");
   });
@@ -104,7 +104,7 @@ describe("Test NodeUIBuilder", () => {
     beforeEach(() => {
       jest.clearAllMocks();
 
-      nodeBuilder = new NodeBuilder("testing-plugin", "cool node 9");
+      nodeBuilder = new NodeBuilder("testing-plugin", "folder", "cool node 9");
       nodeUIBuilder = new NodeUIBuilder();
     });
 
@@ -157,7 +157,7 @@ describe("Test NodeUIBuilder", () => {
       const uiComponentConfig : UIComponentConfig = {
             label: "slider",
             componentId: "shrek",
-            defaultValue: 50,
+            defaultValue: "#beef69",
             triggerUpdate: true
       }     
       nodeUIBuilder.addColorPicker(uiComponentConfig,{set : "ayo"});

@@ -31,7 +31,7 @@ const mainWindow: MainWindow = {
       },
       utilClientApi: {
           showToast: jest.fn((message) => {
-              console.log(message);
+              // console.log(message);
               }),
       }
       

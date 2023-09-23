@@ -15,6 +15,7 @@
   import About from "./About.svelte";
   import AiSettings from "./AiSettings.svelte";
   import Hotkeys from "./Hotkeys.svelte";
+  import PluginBrowser from "./PluginBrowser.svelte";
 
   let selectedCategoryId: UserSettingsCategoryId = "about";
 
@@ -48,6 +49,7 @@
     about: About,
     hotkeys: Hotkeys,
     ai: AiSettings,
+    plugin_browser: PluginBrowser,
   };
 </script>
 

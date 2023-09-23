@@ -5,6 +5,10 @@
   import NodeUiFragment from "./NodeUIFragment.svelte";
   import { createEventDispatcher } from "svelte";
   import { graphMall } from "../../../lib/stores/GraphStore";
+  import { colord, extend } from "colord";
+  import a11yPlugin from "colord/plugins/a11y";
+
+  extend([a11yPlugin]);
 
   const dispatch = createEventDispatcher();
 
@@ -45,28 +49,13 @@
     return colour as CSSColorString;
   }
 
-  function changeBrightness(color: CSSColorString, percent: number): CSSColorString {
-    var R = parseInt(color.substring(1, 3), 16);
-    var G = parseInt(color.substring(3, 5), 16);
-    var B = parseInt(color.substring(5, 7), 16);
+  function changeBrightness(color: CSSColorString, percent: number) {
+    return colord(color).lighten(percent).toRgbString();
+  }
 
-    R = parseInt(`${(R * (100 + percent)) / 100}`);
-    G = parseInt(`${(G * (100 + percent)) / 100}`);
-    B = parseInt(`${(B * (100 + percent)) / 100}`);
-
-    R = R < 255 ? R : 255;
-    G = G < 255 ? G : 255;
-    B = B < 255 ? B : 255;
-
-    R = Math.round(R);
-    G = Math.round(G);
-    B = Math.round(B);
-
-    var RR = R.toString(16).length == 1 ? "0" + R.toString(16) : R.toString(16);
-    var GG = G.toString(16).length == 1 ? "0" + G.toString(16) : G.toString(16);
-    var BB = B.toString(16).length == 1 ? "0" + B.toString(16) : B.toString(16);
-
-    return ("#" + RR + GG + BB) as CSSColorString;
+  function checkShowTextOutline(color: string) {
+    const readable = colord(color).isReadable();
+    return readable;
   }
 
   async function nodeClicked(e: CustomEvent) {
@@ -138,11 +127,15 @@
               let:hovering
             >
               {#if hovering}
+                {@const typeCol = changeBrightness(color, 0.3)}
                 <div class="anchorTooltip">
                   {#if input.displayName}
                     {input.displayName}<br />
                   {/if}
-                  &lt;<span style:color="{changeBrightness(color, 120)}">{input.type || "any"}</span
+                  &lt;<span
+                    style:color="{typeCol}"
+                    class="{checkShowTextOutline(typeCol) ? 'outlineText' : ''}"
+                    >{input.type || "any"}</span
                   >&gt;
                 </div>
               {/if}
@@ -172,11 +165,15 @@
               let:hovering
             >
               {#if hovering}
+                {@const typeCol = changeBrightness(color, 0.3)}
                 <div class="anchorTooltip">
                   {#if output.displayName}
                     {output.displayName}<br />
                   {/if}
-                  &lt;<span style:color="{changeBrightness(color, 120)}"
+                  <!-- &lt;{output.type || "any"}&gt; -->
+                  &lt;<span
+                    style:color="{typeCol}"
+                    class="{checkShowTextOutline(typeCol) ? 'outlineText' : ''}"
                     >{output.type || "any"}</span
                   >&gt;
                 </div>
@@ -206,7 +203,7 @@
 
   .node {
     box-sizing: border-box;
-    width: fit-content;
+    min-width: max-content;
     border-radius: 8px;
     height: fit-content;
     position: relative;
@@ -253,6 +250,12 @@
     padding: 0.2em;
     top: -3.5em;
   }
+  .outlineText {
+    background-color: lightgrey;
+    border-radius: 0.25em;
+    padding: 0.1em;
+  }
+
   .header {
     display: flex;
     justify-content: space-between;

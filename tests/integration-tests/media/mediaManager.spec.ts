@@ -35,7 +35,8 @@ const mainWindow: MainWindow = {
     },
     graphClientApi: {
         graphChanged: jest.fn(),
-        graphRemoved: jest.fn()
+        graphRemoved: jest.fn(),
+        uiInputsChanged: jest.fn(),
     },
     utilClientApi: {
         showToast: jest.fn()
@@ -158,7 +159,7 @@ describe("Test graph importer", () => {
 
         //mediaManager.onGraphUpdated(graph.uuid);
 
-        expect(blix.graphInterpreter.run).toBeCalledTimes(1);
+        expect(blix.graphInterpreter.run).toBeCalledTimes(2);
 
     });
 

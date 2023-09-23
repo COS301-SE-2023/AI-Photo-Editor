@@ -1,32 +1,34 @@
 <script lang="ts">
   import type { CSSColorString } from "blix_svelvet";
+  import { colord } from "colord";
 
   export let color: CSSColorString = "black";
 
   // hsl(301.9, 68.9%, 65.55%)
   // 45 < h < 190 -> black
   // 85 < l -> black
-  function getFontColor(color: CSSColorString): string {
-    if (typeof color === "string" && color.startsWith("hsl")) {
-      const [h, _, l] = color
-        .split("(")[1]
-        .split(")")[0]
-        .split(",")
-        .map((v) => parseFloat(v));
-      return (45 < h && h < 190) || l > 85 ? "black" : "white";
-    }
-    return "white";
+  function getColor(rgba: string) {
+    return colord(rgba).toRgbString();
+  }
+
+  function getFontColor(rgba: string) {
+    const col = colord(rgba);
+    return col.brightness() > 0.5 || col.alpha() < 0.3 ? "black" : "white";
   }
 </script>
 
 <div class="content">
-  <div class="output" style="background-color: {color}; color: {getFontColor(color)}">
-    {color}
+  <div class="output">
+    <div class="color" style="background-color: {getColor(color)}; color: {getFontColor(color)}">
+      {color}
+    </div>
+    <div class="color checker"></div>
   </div>
 </div>
 
 <style>
   .content {
+    position: relative;
     width: 100%;
     height: 100%;
     max-height: 100%;
@@ -34,33 +36,40 @@
   }
 
   .output {
+    position: relative;
+    height: 4em;
+    color: white;
+  }
+
+  .color {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+
+    padding: 1.3em;
     font-family: monospace;
-    font-size: 0.8em;
+    font-size: 1.2em;
     vertical-align: center;
-    max-height: 100%;
+    word-break: break-all;
     overflow-y: auto;
 
-    padding: 2em;
-    word-break: break-all;
     border-radius: 0.4em;
-    color: white;
   }
 
-  .normal {
-    color: white;
-    background-color: #11111b;
-    border: none;
-  }
+  .checker {
+    z-index: 0;
 
-  .error {
-    color: red;
-    background-color: #530706;
-    border: 2px solid #6b0000;
-  }
+    background-image: linear-gradient(45deg, #ffffff 25%, transparent 25%),
+      linear-gradient(-45deg, #ffffff 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #ffffff 75%),
+      linear-gradient(-45deg, transparent 75%, #ffffff 75%);
 
-  .warning {
-    color: #ffc06e;
-    background-color: #775000;
-    border: 2px solid #623900;
+    background-color: lightgray;
+
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    background-size: 20px 20px;
   }
 </style>

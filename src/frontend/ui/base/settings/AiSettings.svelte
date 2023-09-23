@@ -60,8 +60,8 @@
 <div class="h-full w-full p-10">
   <div class="pb-2 text-3xl font-semibold text-zinc-300">API Keys</div>
   <div class="mb-10 text-justify text-sm font-medium text-zinc-500">
-    Rest assured that none of your API keys get stored remotely. Your information is encrypted and
-    maintained securely and solely within the confines of your own device.
+    None of your API keys get stored remotely. Your information is encrypted and maintained securely
+    and solely within the confines of your own device.
   </div>
 
   {#each settings as item (item.id)}
