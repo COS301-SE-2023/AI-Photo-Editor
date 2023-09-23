@@ -141,6 +141,12 @@ export class PanelGroup extends PanelNode {
     current = current;
   }
 
+  /**
+   * Prints the panelgroup and its children
+   * @param indent The indentation level to be used
+   * @returns string
+   */
+
   // Print tree for debug
   public print(indent = 0): string {
     let res;
@@ -164,6 +170,11 @@ export class PanelGroup extends PanelNode {
     return res;
   }
 
+  /**
+   * Recursively sets the parent of the panelgroup and its children
+   * @returns void
+   * */
+
   recurseParent() {
     for (let p = 0; p < this.panels.length; p++) {
       const panel = this.panels[p];
@@ -175,6 +186,11 @@ export class PanelGroup extends PanelNode {
       }
     }
   }
+
+  /**
+   * Saves the layout of the panelgroup and its children
+   * @returns LayoutPanel
+   * */
 
   public saveLayout(): LayoutPanel {
     const p: LayoutPanel = {
@@ -191,6 +207,10 @@ export class PanelGroup extends PanelNode {
   }
 }
 
+/**
+ * A leaf node that contains the type of the panel
+ * @extends PanelNode
+ */
 export class PanelLeaf extends PanelNode {
   constructor(public content: PanelType) {
     super();
