@@ -170,31 +170,67 @@ export class TileUIBuilder {
     this.uiConfigs = {};
   }
 
+  /**
+   * Returns the TileUI object that has been built.
+   * @returns any
+   * @todo implement this function
+   */
   get build(): any {
     return null;
   }
+
+  /**
+   * Returns the main TileUIParent object
+   * @returns TileUIParent
+   */
 
   get main(): TileUIParent {
     return this._main;
   }
 
+  /**
+   * Returns the sidebar TileUIParent object
+   * @returns tileUIComponentBuilder | null
+   */
   get sidebar(): tileUIComponentBuilder | null {
     return this._sidebar;
   }
+
+  /**
+   * Returns the statusbar TileUIParent object
+   * @returns tileUIComponentBuilder | null
+   */
 
   get statusbar(): tileUIComponentBuilder | null {
     return this._statusbar;
   }
 
+  /**
+   * Adds a layout to this builders main childUIs
+   * @param builder
+   * @returns void
+   */
+
   public addLayout(builder: TileUIBuilder): void {
     this.main.childUis = { ui: builder.getUI(), uiConfigs: builder.getUIConfigs() };
   }
+
+  /**
+   * Adds a sidebar to this builders sidebar
+   * @param location string
+   * @returns
+   */
 
   public addSidebar(location: string): TileUIBuilder {
     this._sidebar = new tileUIComponentBuilder("", location);
     return this;
   }
 
+  /**
+   * Adds a statusbar to this builders statusbar
+   * @param location string
+   * @returns
+   */
   public addStatusbar(location: string): TileUIBuilder {
     this._statusbar = new tileUIComponentBuilder("", location);
     return this;
@@ -208,6 +244,11 @@ export class TileUIBuilder {
   //   return;
   // }
 
+  /**
+   * Gets the UI object that has been built.
+   * @returns { [key: string]: TileUIParent | null }
+   */
+
   public getUI(): { [key: string]: TileUIParent | null } {
     return {
       main: this.main,
@@ -216,11 +257,19 @@ export class TileUIBuilder {
     };
   }
 
+  /**
+   * Gets the UI configs that have been built.
+   * @returns { [key: string]: UIComponentConfig }
+   */
+
   public getUIConfigs(): { [key: string]: UIComponentConfig } {
     return Object.assign({}, this.uiConfigs, this.sidebar?.uiConfigs, this.statusbar?.uiConfigs);
   }
 }
 
+/**
+ * TileUIComponentBuilder is a builder class for creating TileUIParent objects.
+ */
 class tileUIComponentBuilder {
   private _component: TileUIParent;
   private _uiConfigs: { [key: string]: UIComponentConfig };
@@ -237,6 +286,13 @@ class tileUIComponentBuilder {
     this._component = new TileUIParent(label, location, null);
     this._uiConfigs = {};
   }
+
+  /**
+   * Adds a button to this builders component
+   * @param config UIComponentConfig
+   * @param props UIComponentProps
+   * @returns tileUIComponentBuilder
+   */
 
   public addButton(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
     const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Button);
@@ -279,6 +335,13 @@ class tileUIComponentBuilder {
   // public addListBox(): void {
   //   return;
   // }
+
+  /**
+   * Adds a slider to this builders component
+   * @param config
+   * @param props
+   * @returns tileUIComponentBuilder
+   */
 
   public addSlider(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
     const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Slider);
@@ -326,6 +389,13 @@ class tileUIComponentBuilder {
   //   return this;
   // }
 
+  /**
+   * Adds a dropdown to this builders component
+   * @param config
+   * @param props
+   * @returns tileUIComponentBuilder
+   */
+
   public addDropdown(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
     const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.Dropdown);
     this.component.params.push(
@@ -353,6 +423,13 @@ class tileUIComponentBuilder {
   //   };
   //   return this;
   // }
+
+  /**
+   * Adds a text input to this builders component
+   * @param config
+   * @param props
+   * @returns tileUIComponentBuilder
+   */
 
   public addTextInput(config: UIComponentConfig, props: UIComponentProps): tileUIComponentBuilder {
     const componentId = config.componentId ?? getRandomComponentId(TileUIComponent.TextInput);
