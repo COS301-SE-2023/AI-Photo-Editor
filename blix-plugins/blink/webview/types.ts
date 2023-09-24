@@ -80,9 +80,21 @@ export function getPixiFilter(filter: Filter) {
           }
         );
         case "emboss":      return new EmbossFilter(...filter.params);
-        case "bulge":       return new BulgePinchFilter(...filter.params);
+        case "bulge":       return new BulgePinchFilter(
+          {
+            radius: filter.params[0],
+            strength: filter.params[1],
+            center: [filter.params[2], filter.params[3]],
+          }
+        );
         case "glitch":      return new GlitchFilter(...filter.params);
-        case "zoomblur":    return new ZoomBlurFilter(...filter.params);
+        case "zoomblur":    return new ZoomBlurFilter(
+          {
+            strength: filter.params[0],
+            innerRadius: filter.params[1],
+            center: [filter.params[2], filter.params[3]],
+          }
+        );
         case "twist":       return new TwistFilter(...filter.params);
     }
   } catch {

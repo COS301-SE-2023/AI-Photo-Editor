@@ -179,6 +179,32 @@ const blinkNodes = {
             { id: "seed", min: 0, max: 1, step: 0.01 },
         ]
     ],
+    "emboss": [
+        "Emboss",
+        "An RGB Split Filter.",
+        [{ id: "strength", min: 0, max: 20, step: 0.1 }]
+    ],
+    "bulge": [ 
+        "Bulge / Pinch",
+        "Bulges or pinches the image in a circle.",
+        [
+            { id: "radius", min: 0, max: 1000, step: 1.0 }, 
+            { id: "strenght", min: -1, max: 1, step: 0.01 },
+            { id: "center.x", min: 0, max: 1, step: 0.01 },
+            { id: "center.y", min: 0, max: 1, step: 0.01 },
+        ]
+    ],
+    "zoomblur": [ 
+        "ZoomBlur",
+        "The ZoomFilter applies a Zoom blur to an object.",
+        [
+            { id: "strenght", min: 0, max: 0.5, step: 0.01 }, 
+            { id: "innerRadius", min: 0, max: 1000, step: 1.0 },
+            { id: "center.x", min: 0, max: 2000, step: 1.0 },
+            { id: "center.y", min: 0, max: 2000, step: 1.0 },
+        ]
+    ],
+
 };
 
 Object.keys(blinkNodes).forEach((key) => {
