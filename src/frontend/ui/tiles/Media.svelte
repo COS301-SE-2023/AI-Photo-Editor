@@ -55,6 +55,7 @@
 
   let mediaId = writable("");
   let oldMediaId: string | null = null;
+  let webview: WebView;
 
   const unsubMedia = mediaId.subscribe((newMediaId) => {
     // console.log("SUBSCRIBE MEDIA ID", oldMediaId, newMediaId);
@@ -82,8 +83,16 @@
 
   async function exportMedia(e: Event) {
     if ($media?.dataType && $media?.content) {
-      await mediaStore.exportMedia($media);
+      if ($media.display.displayType === "webview") {
+        webview.exportMedia(e);
+      } else {
+        await mediaStore.exportMedia($media);
+      }
     }
+  }
+
+  async function exportCache(e: CustomEvent) {
+    console.log("export cache", e.detail);
   }
 
   function getDisplayProps(media: DisplayableMediaOutput) {
@@ -145,10 +154,19 @@
 
   <div class="media">
     {#if $media}
-      <svelte:component
-        this="{displayIdToSvelteConstructor[$media.display.displayType]}"
-        {...getDisplayProps($media)}
-      />
+      {#if $media.display.displayType === "webview"}
+        <svelte:component
+          this="{displayIdToSvelteConstructor[$media.display.displayType]}"
+          bind:this="{webview}"
+          on:exportResponse="{exportCache}"
+          {...getDisplayProps($media)}
+        />
+      {:else}
+        <svelte:component
+          this="{displayIdToSvelteConstructor[$media.display.displayType]}"
+          {...getDisplayProps($media)}
+        />
+      {/if}
       <!-- <TextBox
           content="ERROR: Unknown data type: ${JSON.stringify($media)}"
           status="error"
