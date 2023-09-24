@@ -12,7 +12,7 @@ function toTitleCase(str) {
 
 function createGLFXNode(type, title, desc, params) {
     return (context) => {
-        const nodeBuilder = context.instantiate("glfx-plugin", type);
+        const nodeBuilder = context.instantiate("GLFX", type);
         nodeBuilder.setTitle(title);
         nodeBuilder.setDescription(desc);
 
@@ -164,7 +164,7 @@ const nodes = {
     ...glfxNodes,
 
     "inputGLFXImage": (context) => {
-        const nodeBuilder = context.instantiate("input-plugin", "inputGLFXImage");
+        const nodeBuilder = context.instantiate("Input", "inputGLFXImage");
         nodeBuilder.setTitle("Input GLFX image");
         nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
@@ -179,6 +179,33 @@ const nodes = {
             defaultValue: "",
             triggerUpdate: true,
         }, {});
+
+        nodeBuilder.setUI(ui);
+
+        nodeBuilder.addOutput("GLFX image", "res", "Result");
+    },
+    "inputGLFXCache": (context) => {
+        const nodeBuilder = context.instantiate("Input/Other", "inputGLFXCache");
+        nodeBuilder.setTitle("Input GLFX cache");
+        nodeBuilder.setDescription("Provides an cache input and returns a single image output");
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            return { "res": { src: uiInput["cacheid"] } };
+        });
+
+        const ui = nodeBuilder.createUIBuilder();
+        // ui.addFilePicker({
+        //     componentId: "imagePicker",
+        //     label: "Pick an image",
+        //     defaultValue: "",
+        //     triggerUpdate: true,
+        // }, {});
+        ui.addCachePicker({
+            componentId: "cacheid",
+            label: "Pick an image",
+            defaultValue: "",
+            triggerUpdate: true,
+        }, {})
 
         nodeBuilder.setUI(ui);
 

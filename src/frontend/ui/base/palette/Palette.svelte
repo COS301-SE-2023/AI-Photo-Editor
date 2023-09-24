@@ -162,11 +162,15 @@
       closePalette();
     },
     "blix.palette.scrollDown": () => {
+      if (!showPalette) return;
+
       navigationInProcess = true;
       selectedItem++;
       repairItemIndex();
     },
     "blix.palette.scrollUp": () => {
+      if (!showPalette) return;
+
       if (promptHistory.length && !navigationInProcess) {
         // inputElement.focus();
         // inputElement.value = prompts[0];
@@ -179,6 +183,8 @@
       repairItemIndex();
     },
     "blix.palette.selectItem": () => {
+      if (!showPalette) return;
+
       // Default enter
       const item = categories[selectedCategory]?.items[selectedItem];
       if (item) {
@@ -186,6 +192,8 @@
       }
     },
     "blix.palette.prompt": async () => {
+      if (!showPalette) return;
+
       const prompt = searchTerm.trim();
 
       if (!prompt) {

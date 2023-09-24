@@ -46,6 +46,7 @@ export class ToolboxRegistry implements Registry {
         const nodeObject = new INode(
           nodeInstance.signature,
           nodeInstance.displayName,
+          nodeInstance.folder,
           nodeInstance.description,
           nodeInstance.icon,
           inputAnchors,
@@ -81,6 +82,7 @@ export class NodeInstance implements RegistryInstance {
   constructor(
     public readonly name: string, // Unique identifier for the node within the plugin
     public readonly plugin: string,
+    public readonly folder: string,
     public readonly displayName: string,
     public readonly description: string,
     public readonly icon: string,

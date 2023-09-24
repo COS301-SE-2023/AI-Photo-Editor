@@ -1,6 +1,6 @@
 const nodes ={
     "not": (context) => {
-        nodeBuilder = context.instantiate("logic-plugin","not");
+        nodeBuilder = context.instantiate("Logic","not");
         nodeBuilder.setTitle("Not");
         nodeBuilder.setDescription("Performs Boolean NOT operation on a single input and returns a single output");
 
@@ -14,7 +14,7 @@ const nodes ={
         nodeBuilder.addOutput("boolean", "res","Result");
     },
     "logic": (context) => {
-        const nodeBuilder = context.instantiate("logic-plugin", "logic");
+        const nodeBuilder = context.instantiate("Logic", "logic");
         nodeBuilder.setTitle("Logic");
         nodeBuilder.setDescription("Performs a logical operation (AND/OR/XOR) on two inputs and returns a single output");
       
@@ -50,7 +50,7 @@ const nodes ={
         nodeBuilder.addOutput("boolean", "res", "Result");
       },
     "compare": (context) => {
-        const nodeBuilder = context.instantiate("logic-plugin", "compare");
+        const nodeBuilder = context.instantiate("Logic", "compare");
         nodeBuilder.setTitle("Compare");
         nodeBuilder.setDescription("Performs a comparison operation (==/!=/>/</>=/<=) on two inputs and returns a single boolean output");
       
@@ -91,7 +91,7 @@ const nodes ={
         nodeBuilder.addOutput("boolean", "res", "Result");
       },
     "ternary": (context) => {
-        const nodeBuilder = context.instantiate("logic-plugin","ternary");
+        const nodeBuilder = context.instantiate("Logic","ternary");
         nodeBuilder.setTitle("Ternary Comp.");
 
         nodeBuilder.define((anchorInputs, uiInputs, requiredOutputs) => {

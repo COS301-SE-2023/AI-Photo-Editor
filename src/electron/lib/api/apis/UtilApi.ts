@@ -1,4 +1,4 @@
-import { shell } from "electron";
+import { shell, app } from "electron";
 import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { platform, type, release } from "os";
@@ -29,6 +29,7 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
 
   async getInfo() {
     return {
+      production: app.isPackaged,
       system: {
         nodeVersion: process.version,
         platform: platform().toString(),

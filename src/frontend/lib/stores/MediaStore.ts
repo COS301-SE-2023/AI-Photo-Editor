@@ -57,6 +57,18 @@ class MediaStore {
       }
     }
 
+    // If we do not have a frontend copy of the media, fetch it
+    if (!get(this.store)[mediaId]) {
+      const media = await window.apis.mediaApi.getDisplayableMedia(mediaId);
+
+      if (media) {
+        this.store.update((mediaOutputs) => {
+          mediaOutputs[mediaId] = media;
+          return mediaOutputs;
+        });
+      }
+    }
+
     // TODO: Optimize this with a proper subscription system
     // that only listens for updates to the requested id specifically
     return derived(this.store, (store) => {

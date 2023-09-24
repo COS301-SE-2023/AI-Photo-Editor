@@ -16,7 +16,7 @@ describe("Test toolbox", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    node = new NodeInstance("Shark", "Jake", "Shark.Jake", "The Jake plugin", "1149", inputs, outputs);
+    node = new NodeInstance("Shark", "Jake", "folder", "Shark.Jake", "The Jake plugin", "1149", inputs, outputs);
   });
 
   test("getId should be defined", () => {
@@ -52,7 +52,7 @@ describe("Test toolbox", () => {
   });
 
   test("getUI should return ui", () => {
-    const nod = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
+    const nod = new NodeInstance("Jake.Shark", "Shark", "folder", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
     expect(nod.ui).toEqual(null);
   });
 
@@ -233,7 +233,7 @@ describe("Test Toolbox registry", () => {
   });
 
   test("ToolboxRegistry should add and return registrys properly", () => {
-    const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
+    const node = new NodeInstance("Jake.Shark", "Shark", "folder", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
     box.addInstance(node);
     expect(box.getRegistry()[node.signature]).toEqual(node);
   });

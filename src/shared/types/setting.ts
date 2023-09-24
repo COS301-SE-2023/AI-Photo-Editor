@@ -6,6 +6,7 @@ export const userSettingSections = [
       { id: "about", title: "About" },
       { id: "ai", title: "AI Settings" },
       { id: "hotkeys", title: "Hotkeys" },
+      { id: "plugin_browser", title: "Plugin Browser" },
     ],
   },
 ] as const satisfies readonly UserSettingsSection[];

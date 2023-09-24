@@ -55,8 +55,8 @@ jest.mock("fs", () => ({
         { type: "string", displayName: `Test-plugin.Node-2.3`, identifier: `out1` },
         { type: "number", displayName: `Test-plugin.Node-2.4`, identifier: `out2` });
 
-        node1 = new NodeInstance("Node-1", "Test-Plugin","Node 1","This is node 1","fa-bell", inputs1, outputs1);
-        node2 = new NodeInstance("Node-2", "Test-Plugin","node 2","This is node 2","fa-bell", inputs2, outputs2);
+        node1 = new NodeInstance("Node-1", "Test-Plugin", "folder", "Node 1", "This is node 1","fa-bell", inputs1, outputs1);
+        node2 = new NodeInstance("Node-2", "Test-Plugin", "folder", "node 2", "This is node 2","fa-bell", inputs2, outputs2);
         
         let response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node1, { x: 0, y: 0 });
         const uuid1 = (response.data! as { nodeId: UUID }).nodeId;

@@ -77,6 +77,11 @@ const defaultShortcuts: Omit<KeyboardShortcut, "type">[] = [
     title: "Save Project",
     value: ["ctrl+[KeyS]", "meta+[KeyS]"],
   },
+  {
+    id: "blix.pluginBrowser.deselectPlugin",
+    title: "Deselect Plugin",
+    value: ["[Escape]"],
+  },
 ];
 
 export type ShortcutAction = `${string}.${string}`; // Actions must be nested at least one layer deep

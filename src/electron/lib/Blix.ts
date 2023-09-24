@@ -29,6 +29,7 @@ import { CoreGraph } from "./core-graph/CoreGraph";
 import { MediaSubscriber } from "./media/MediaSubscribers";
 import type { IGraphUIInputs } from "../../shared/types";
 import { CoreProject } from "./projects/CoreProject";
+import * as crypto from "crypto";
 
 // Encapsulates the backend representation for
 // the entire running Blix application
@@ -74,7 +75,7 @@ export class Blix {
     this._graphInterpreter = new CoreGraphInterpreter(this._toolboxRegistry);
 
     // Create Output node
-    const outputNodeBuilder = new NodeBuilder("blix", "output");
+    const outputNodeBuilder = new NodeBuilder("blix", "Blix", "output");
     const outputUIBuilder = outputNodeBuilder.createUIBuilder();
     // outputUIBuilder.addButton(
     //   {
@@ -88,14 +89,31 @@ export class Blix {
     outputUIBuilder.addTextInput(
       {
         componentId: "outputId",
-        label: "Export",
+        label: "Name",
         defaultValue: "default", // TODO: Make this a random id to start with
+        triggerUpdate: true,
+      },
+      {}
+    );
+    outputUIBuilder.addBuffer(
+      {
+        componentId: "id",
+        label: "ID Buffer",
+        defaultValue: { id: null },
         triggerUpdate: true,
       },
       {}
     );
     // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
     // .addLabel("Label1"));
+
+    outputNodeBuilder.setUIInitializer((x) => {
+      return {
+        id: {
+          id: crypto.randomBytes(32).toString("base64url"),
+        },
+      };
+    });
 
     outputNodeBuilder.setTitle("Output");
     outputNodeBuilder.setDescription(
@@ -170,7 +188,10 @@ export class Blix {
     // ----- Subscribes to backend UI input updates and alerts the frontend -----
     const ipcGravityAISubsriber = new IPCGraphSubscriber();
     ipcGravityAISubsriber.setListenEvents([CoreGraphUpdateEvent.graphUpdated]);
-    ipcGravityAISubsriber.setListenParticipants([CoreGraphUpdateParticipant.ai]);
+    ipcGravityAISubsriber.setListenParticipants([
+      // CoreGraphUpdateParticipant.system,
+      CoreGraphUpdateParticipant.ai,
+    ]);
 
     ipcGravityAISubsriber.listen = (graphId: UUID) => {
       this.mainWindow?.apis.graphClientApi.aiChangedGraph(graphId);

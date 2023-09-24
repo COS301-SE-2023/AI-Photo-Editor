@@ -176,7 +176,7 @@ export class Profiler {
   }
 
   private static generateBlixOutputNode(): NodeInstance {
-    const outputNodeBuilder = new NodeBuilder("blix", "output");
+    const outputNodeBuilder = new NodeBuilder("blix", "Blix", "output");
     const outputUIBuilder = outputNodeBuilder.createUIBuilder();
     outputUIBuilder.addButton(
       {

@@ -6,4 +6,4 @@ export * from "./util";
 export * from "./setting";
 export * from "./media";
 export * from "./palette";
-export * from "./tweaks";
+export * from "./dials";

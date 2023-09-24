@@ -7,6 +7,7 @@ import {
   MenuItem,
   dialog,
   globalShortcut,
+  session,
 } from "electron";
 import { join } from "path";
 import { parse } from "url";
@@ -19,7 +20,7 @@ import { Blix } from "./electron/lib/Blix";
 import { CoreGraphInterpreter } from "./electron/lib/core-graph/CoreGraphInterpreter";
 import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
-import { platform } from "os";
+import { type } from "os";
 
 const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 // const isProd = true;
@@ -65,11 +66,19 @@ let blix: Blix | null = null;
  * process will bind to the window IPC APIs 5. The Blix state is instantiated
  * and the various managers are initialized.
  */
+// TODO: Investigate app.whenReady().then(...)
+// This may be more stable, as it guarantees the callback always fires regardless of startup time
+// See: [https://www.reddit.com/r/electronjs/comments/t151k8/what_is_the_difference_between_apponready_and/hydu5vc]
 app.on("ready", async () => {
   protocol.registerFileProtocol("blix-image", (request, callback) => {
     const url = request.url.slice("blix-image://".length);
     callback({ path: join(__dirname, "..", "..", url) });
   });
+
+  // TODO: Remove
+  // await session.defaultSession.loadExtension(
+  //   "/home/rec1dite/.config/google-chrome/Default/Extensions/aamddddknhcagpehecnhphigffljadon/2.6.1_0"
+  // );
 
   // const coreGraphInterpreter = new CoreGraphInterpreter(new ToolboxRegistry);
   // coreGraphInterpreter.run();
@@ -105,8 +114,9 @@ async function createMainWindow() {
     },
     // Set icon for Windows and Linux
     icon: isProd ? join(__dirname, "icon.png") : "public/images/icon.png",
-    titleBarStyle: "hidden",
+    titleBarStyle: type() === "Windows_NT" ? "default" : "hidden",
     trafficLightPosition: { x: 10, y: 10 },
+    title: "Blix",
     // show: false,
   }) as MainWindow;
 
