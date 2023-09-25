@@ -62,12 +62,12 @@ export class CacheManager {
       socket.onmessage = (event) => {
         if (typeof event.data === "string") {
           const data: CacheRequest = JSON.parse(event.data);
+          // const data = JSON.parse(event.data);
 
           switch (data.type) {
             case "cache-write-metadata":
               this.writeMetadata(data.id, data.metadata);
               this.notifyListeners();
-
               socket.send(
                 JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
               );
@@ -82,7 +82,10 @@ export class CacheManager {
               );
               break;
             case "cache-delete":
-              this.delete(data.id);
+              if ("ids" in data && Array.isArray(data.ids)) {
+                this.delete(data.ids as CacheUUID[]);
+              }
+
               // TODO: check if exist
               socket.send(
                 JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
@@ -90,6 +93,7 @@ export class CacheManager {
 
               this.notifyListeners();
               break;
+
             case "cache-subscribe":
               this.listeners.add(socket);
               socket.send(JSON.stringify(this.cacheUpdateNotification)); // Send initial cache update
@@ -174,8 +178,10 @@ export class CacheManager {
     return this.cache[cacheUUID];
   }
 
-  delete(cacheUUID: CacheUUID) {
-    delete this.cache[cacheUUID];
+  delete(cacheUUID: CacheUUID[]) {
+    for (const uuid of cacheUUID) {
+      delete this.cache[uuid];
+    }
   }
 
   async export(ids: CacheUUID[]) {

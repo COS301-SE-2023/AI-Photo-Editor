@@ -8,6 +8,7 @@
     let canvasHeight = 500;
     const canvas = fx.canvas();
     let lastid = "";
+    let lastMediaSrc = "";
 
     let image;
     let texture;
@@ -49,14 +50,15 @@
 
     async function redraw(media) {
         if (media?.ops && canvas && texture) {
-            if (media.src) {
-                // if (media.src === "") {
-                //     image = null;
-                //     texture = null;
-                //     canvas.draw(texture).update();
-                //     return;
-                // }
-                // await updateImage(media.src);
+            if (media.src != lastMediaSrc) {
+                if (media.src === "") {
+                    console.log("here");
+                    image = null;
+                    texture = null;
+                    canvas.draw(texture).update();
+                    return;
+                }
+                await updateImage(media.src);
                 reloadTexture();
             }
 

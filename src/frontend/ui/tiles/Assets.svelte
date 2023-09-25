@@ -87,6 +87,10 @@
     await cacheStore.exportCache(selectedCacheItems);
   }
 
+  async function deleteCache(UUID: CacheUUID[]) {
+    await cacheStore.delete(UUID);
+  }
+
   // let barrier = 0;
   async function getBlobURL(uuid: CacheUUID, type: string): Promise<string> {
     if (blobs[uuid]) return blobs[uuid].url;
@@ -120,6 +124,10 @@
             {/await}
             <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
             <div class="itemType">{$cacheStore[uuid].contentType}</div>
+            <button
+              class="exportButton flex items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+              on:click="{() => deleteCache([uuid])}">Remove</button
+            >
           </div>
         {:else}
           <div class="item">
