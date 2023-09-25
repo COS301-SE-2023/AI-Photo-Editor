@@ -49,16 +49,22 @@
     $: canvasUpdate(canvasWidth);
 
     async function redraw(media) {
+        if(!media.src){
+            // image = null;
+            // texture = null;
+            // canvas.draw(texture).update();
+            var gl = canvas.getContext("webgl");
+
+            // Clear the canvas to a specified color
+            // gl.clearColor(0.0, 0.0, 0.0, 1.0); // This sets the clear color to black
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            return;
+        }
         if (media?.ops && canvas && texture) {
             if (media.src != lastMediaSrc) {
-                if (media.src === "") {
-                    console.log("here");
-                    image = null;
-                    texture = null;
-                    canvas.draw(texture).update();
-                    return;
-                }
                 await updateImage(media.src);
+                lastMediaSrc = media.src;
                 reloadTexture();
             }
 
@@ -79,6 +85,7 @@
         else{
             if(media.src){
                 await updateImage(media.src);
+                lastMediaSrc = media.src;
                 reloadTexture();
                 const dimRatio = image.height / image.width;
                 let buffer = canvas.draw(texture, canvasWidth, canvasWidth*dimRatio);
