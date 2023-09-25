@@ -46,6 +46,16 @@ export class TypeclassRegistry implements Registry {
     });
   }
 
+  /**
+   * Adds a typeclass instance to the registry.
+   * The instance will not be added if it already exists, unless `force` is true.
+   * The instance must be defined.
+   * This function will also notify the main window of the change.
+   * @param instance
+   * @param force default :  false
+   * @returns
+   */
+
   addInstance(instance: Typeclass, force = false): void {
     if (!instance) {
       logger.warn("Invalid Typeclass");
@@ -59,10 +69,20 @@ export class TypeclassRegistry implements Registry {
     this.blix.mainWindow?.apis.commandClientApi.registryChanged(this.getTypeclasses());
   }
 
+  /**
+   * @returns All typeclasses in the registry.
+   */
   getRegistry() {
     return { ...this.typeclasses };
   }
 
+  // ADD DOC
+  /**
+   * Inserts a new converter into the registry's converter array
+   * @param from input type
+   * @param to output type
+   * @param converter converter to be inserted
+   */
   addConverter(from: TypeclassId, to: TypeclassId, converter: TypeConverter): void {
     if (!this.converters[from]) {
       this.converters[from] = {};
@@ -71,6 +91,13 @@ export class TypeclassRegistry implements Registry {
   }
 
   // Returns a composite converter from `from` to `to`
+  /**
+   * Searches for a composite converter from `from` to `to`. If none is found, returns null.
+   * @param from input type
+   * @param to output type
+   * @param depth Specifies how deep the search should go. Default is 2.
+   * @returns Returns a composite converter from `from` to `to`
+   */
   resolveConversion(from: TypeclassId, to: TypeclassId, depth?: number): TypeConverter | null {
     depth = depth ?? MAX_SEARCH_DEPTH;
     if (depth <= 0) return null;
@@ -97,6 +124,11 @@ export class TypeclassRegistry implements Registry {
   }
 
   // Returns true if the `from` type is compatible with the `to` type
+  /**
+   * Returns true if the `from` type is compatible with the `to` type
+   * @param from
+   * @param to
+   */
   checkTypesCompatible(from: TypeclassId, to: TypeclassId): boolean {
     // Handle base cases
     if (from === to || from === "" || to === "") return true;
