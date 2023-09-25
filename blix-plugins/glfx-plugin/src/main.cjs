@@ -164,8 +164,8 @@ const nodes = {
     ...glfxNodes,
 
     "inputGLFXImage": (context) => {
-        const nodeBuilder = context.instantiate("Input", "inputGLFXImage");
-        nodeBuilder.setTitle("Input GLFX image");
+        const nodeBuilder = context.instantiate("Input", "GLFXImage");
+        nodeBuilder.setTitle("GLFX image");
         nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
         nodeBuilder.define(async (input, uiInput, from) => {

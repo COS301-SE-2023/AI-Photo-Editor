@@ -95,8 +95,8 @@
   {:else}
     <div class="placeholder">
       <div class="icon"><Fa icon="{getNoContentIcon()}" style="display: inline-block" /></div>
-      <h1>No content!</h1>
-      <h2>Add an Asset to start start editing</h2>
+      <h1>No assets!</h1>
+      <h2>Add an Asset to start editing</h2>
     </div>
   {/if}
 
