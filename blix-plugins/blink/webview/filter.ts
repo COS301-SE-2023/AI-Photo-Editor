@@ -22,6 +22,7 @@ export function applyFilters(blink: PIXI.Application, content: PIXI.Container, f
         width: bw + 2 * renderPadding,
         height: bh + 2 * renderPadding,
     });
+    console.log("RENDER TEXTURE", renderTexture);
     blink.renderer.render(content, { renderTexture: renderTexture });
 
     content.filters = null;

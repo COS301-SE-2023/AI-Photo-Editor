@@ -2,8 +2,8 @@ import type { HierarchyAtom, HierarchyClump } from "./render";
 import type {
   Asset,
   Atom,
-  BlobAtom,
   Clump,
+  CurveAtom,
   Filter,
   ImageAtom,
   PaintAtom,
@@ -105,8 +105,11 @@ export function diffImageAtom(a1: ImageAtom, a2: ImageAtom, assets1: { [key: str
   return false;
 }
 
-export function diffCurveAtom(a1: BlobAtom, a2: BlobAtom, assets1: { [key: string]: Asset }, assets2: { [key: string]: Asset }) {
+export function diffCurveAtom(a1: CurveAtom, a2: CurveAtom, assets1: { [key: string]: Asset }, assets2: { [key: string]: Asset }) {
   if (a1.assetId !== a2.assetId) return true;
+  if (assets1[a1.assetId].type !== assets2[a2.assetId].type) return true;
+  if (assets1[a1.assetId].data !== assets2[a2.assetId].data) return true;
+
   if (a1.fill !== a2.fill) return true;
   if (a1.fillAlpha !== a2.fillAlpha) return true;
   if (a1.stroke !== a2.stroke) return true;

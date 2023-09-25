@@ -4,13 +4,14 @@ import {
   type Atom,
   type Clump,
   type BlinkCanvas,
-  WindowWithApis,
+  type WindowWithApis,
 } from "./types";
 import { Viewport } from "pixi-viewport";
 import { createBoundingBox } from "./select";
 import { renderAtom } from "./atom";
 import { applyFilters } from "./filter";
 import { diffClump } from "./diff";
+import { tick } from "svelte";
 
 export function randomId() {
   return Math.random().toString(36).slice(2, 6);
@@ -46,14 +47,14 @@ let scene: PIXI.Container;
 
 let hierarchy: HierarchyCanvas | undefined = undefined;
 
-const textures: { [key: string]: PIXI.Texture } = {}
+const textures: { [key: string]: PIXI.Texture<PIXI.Resource> } = {}
 
-export function renderScene(
+export async function renderScene(
   blink: PIXI.Application,
   canvas: BlinkCanvas,
   viewport: Viewport,
   send: (message: string, data: any) => void
-): { success: boolean; scene: PIXI.Container } {
+): Promise<{ success: boolean; scene: PIXI.Container }> {
   console.log("====================================");
 
   if (!canvas || !canvas.content) return { success: false, scene: null };
@@ -92,52 +93,71 @@ export function renderScene(
   const imgPromises = [];
   for (let assetId in canvas.assets) {
     if (canvas.assets[assetId].type === "image") {
-      const cacheId = canvas.assets[assetId].data;
+      const cacheId = canvas.assets[assetId].data as string;
       if (textures[cacheId] != null) continue;
 
       // Get cache object
-      imgPromises.push(new Promise(async (resolve, reject) => {
+      imgPromises.push(new Promise<void>(async (resolve, reject) => {
         const blob: Blob = await (window as WindowWithApis).cache.get(cacheId);
-        console.log("BLOB", blob);
         const url = window.URL.createObjectURL(blob);
+        console.log("BLOB", blob);
         console.log("URL", url);
+
+        // To get a list of all available loadParsers:
+        // console.log("PARSERS", PIXI.Assets.loader.parsers);
+
+        // Also make note of:
+        //    PIXI.Assets.add(cacheId, url);
+        //    await PIXI.Assets.loader.load(url);
+
+        // NOTE:
+        // There is currently a bug with Pixi.js v5.2.4 where Blob URLs fail to load
+        // on the first frame, and awaiting the load() function has no effect.
+        // See: [https://github.com/pixijs/pixijs/issues/9568]
+
+        // This issue has been fixed in Pixi.js v5.3.1
+        // See: [https://github.com/pixijs/pixijs/pull/9634]
+        // However, v5.3.1 is currently incompatible with the pixi-viewport plugin,
+        // So we'll have to use the below setTimeout() temp fix until pixi-viewport is upgraded.
+
+        // PREFERABLE IMPLEMENTATION AFTER UPGRADE:
+        // const asset = await PIXI.Assets.load({ src: url });
+        // textures[cacheId] = url;
+
         textures[cacheId] = PIXI.Texture.from(url);
-        // const asset = await PIXI.Assets.load(url);
-        // console.log("ASSET", asset);
-        resolve(null);
-        // resolve(asset);
-      }))
-      // TODO: Use bundles instead (e.g. PIXI.Assets.addBundle())
-      // See: [https://pixijs.io/guides/basics/assets.html]
+        resolve();
+      }));
     }
   }
 
   // Construct clump hierarchy
-  const loaded = Promise.all(imgPromises);
-  loaded.then(() => {
-    const { pixiClump, changed } = renderClump(
-      blink,
-      canvas.content,
-      hierarchy?.content,
-      canvas,
-      hierarchy,
-      viewport,
-      send
-    );
+  await Promise.all(imgPromises);
+  if (imgPromises.length > 0) {
+    await new Promise((resolve, reject) => setTimeout(resolve, 50));
+  }
 
-    // Update hierarchy
-    hierarchy = {
-      assets: canvas.assets,
-      content: {
-        ...canvas.content,
-        container: pixiClump,
-      } as HierarchyClump,
-    };
+  const { pixiClump, changed } = renderClump(
+    blink,
+    canvas.content,
+    hierarchy?.content,
+    canvas,
+    hierarchy,
+    viewport,
+    send
+  );
 
-    if (hierarchy.content.container != null && changed) {
-      scene.addChild(hierarchy.content.container);
-    }
-  });
+  // Update hierarchy
+  hierarchy = {
+    assets: canvas.assets,
+    content: {
+      ...canvas.content,
+      container: pixiClump,
+    } as HierarchyClump,
+  };
+
+  if (hierarchy.content.container != null && changed) {
+    scene.addChild(hierarchy.content.container);
+  }
 
   return { success: true, scene };
 }
@@ -308,8 +328,15 @@ function renderClump(
     }
   }
 
-  if (resClump.children.length > 1) {
-    // If we've applied a filter, hide the content
+  let appliedFilter = false;
+  for (let i = 0; i < resClump.children.length; i++) {
+    if (resClump.children[i].name.includes("FilterSprite")) {
+      appliedFilter = true;
+      break;
+    }
+  }
+  if (appliedFilter) {
+    // If we've applied a filter (potentially in a previous step), hide the content
     content.visible = false;
   }
 

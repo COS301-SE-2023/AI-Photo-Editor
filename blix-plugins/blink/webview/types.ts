@@ -42,10 +42,7 @@ export type ImageAsset = {
 
 export type CurveAsset = {
   type: "curve"
-  data: {
-    id: string;
-    path: CurvePoint[];
-  }
+  data: CurvePoint[];
 }
 
 export type CurvePoint = {

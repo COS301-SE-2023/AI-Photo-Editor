@@ -125,7 +125,7 @@
         //===== RENDER Blink =====//
         let hasCentered = false;
             media.subscribe(async (media) => {
-                const { success, scene } = renderScene(blink, media, viewport, send);
+                const { success, scene } = await renderScene(blink, media, viewport, send);
                 currScene = scene;
 
                 // Necessary to fix an occasional race condition with PIXI failing to load

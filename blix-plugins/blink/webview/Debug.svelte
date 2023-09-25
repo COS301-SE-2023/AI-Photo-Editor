@@ -11,7 +11,7 @@
       <br />
       {#each Object.keys(data.assets) as assetId}
         {#if data.assets[assetId].type === "image"}
-          <img src="{data.assets[assetId].data}" width="20px" alt="" />
+          <!-- <img src="{data.assets[assetId].data}" width="20px" alt="" /> -->
         {/if}
       {/each}
       <br />

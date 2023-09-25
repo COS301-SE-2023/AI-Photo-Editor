@@ -1,9 +1,9 @@
 import * as PIXI from 'pixi.js';
-import type { Asset, Atom, CurveAsset, CurvePoint, ImageAtom, PaintAtom, ShapeAtom, TextAtom } from "./types";
+import type { Asset, Atom, CurveAsset, CurveAtom, CurvePoint, ImageAtom, PaintAtom, ShapeAtom, TextAtom } from "./types";
 import { diffAtom, diffCurveAtom, diffImageAtom, diffPaintAtom, diffShapeAtom, diffTextAtom } from './diff';
 import { type HierarchyAtom, randomId } from './render';
 
-export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key: string]: Asset } | undefined, atom: Atom, prevAtom: HierarchyAtom | undefined, textures: { [key: string]: PIXI.Texture }): {
+export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key: string]: Asset } | undefined, atom: Atom, prevAtom: HierarchyAtom | undefined, textures: { [key: string]: PIXI.Texture<PIXI.Resource> }): {
   pixiAtom: PIXI.Container,
   changed: boolean // Whether the pixiClump is a different PIXI object than before
 } {
@@ -102,7 +102,7 @@ export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key:
       return { pixiAtom: null, changed: true };
 
     case "curve":
-      const curveDiff = atomsDiffer || diffCurveAtom(atom, prevAtom as PaintAtom, assets, prevAssets);
+      const curveDiff = atomsDiffer || diffCurveAtom(atom, prevAtom as CurveAtom, assets, prevAssets);
       if (!curveDiff) {
         return { pixiAtom: prevAtom.container, changed: false };
       }
@@ -114,25 +114,7 @@ export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key:
       curve.lineStyle(atom.strokeWidth, atom.stroke, atom.strokeAlpha);
 
       if (assets[atom.assetId] && assets[atom.assetId].type === "curve") {
-        // const path = (assets[atom.assetId] as CurveAsset).data CurvePoint[];
-
-        const path = [
-          {
-            control1: { x: 50, y: 10 },
-            control2: { x: 10, y: 300 },
-            point: { x: 0, y: 0 },
-          },
-          {
-            control1: { x: 50, y: 10 },
-            control2: { x: 10, y: 300 },
-            point: { x: 400, y: 400 },
-          },
-          {
-            control1: { x: 400, y: 500 },
-            control2: { x: 10, y: 500 },
-            point: { x: 50, y: 10 },
-          },
-        ];
+        const path = assets[atom.assetId].data as CurvePoint[];
 
         if (path.length > 0) {
           curve.moveTo(path[0].point.x, path[0].point.y);
