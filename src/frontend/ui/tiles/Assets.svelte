@@ -110,7 +110,7 @@
   }
 </script>
 
-<div class="fullPane select-none overflow-auto">
+<div class="fullPane {Object.keys($cacheStore).length > 0 ? 'overflow-auto' : ''}">
   {#if Object.keys($cacheStore).length > 0}
     <div class="itemsBox">
       {#each Object.keys($cacheStore) as uuid}

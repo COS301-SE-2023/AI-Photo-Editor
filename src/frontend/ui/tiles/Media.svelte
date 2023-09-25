@@ -98,19 +98,6 @@
     }
   }
 
-  async function exportCache(e: CustomEvent) {
-    const blob = new Blob([await cacheStore.get(e.detail[0].cacheUUID)], {
-      type: $cacheStore[e.detail[0].cacheUUID].contentType,
-    });
-    const link = document.createElement("a");
-    link.download = $cacheStore[e.detail[0].cacheUUID].name ?? "export.png";
-    link.href = URL.createObjectURL(blob);
-    link.click();
-    link.remove();
-
-    // console.log(await cacheStore.get(e.detail.cacheUUID));
-  }
-
   function getDisplayProps(media: DisplayableMediaOutput) {
     let res = media.display.props;
     if (media.display.contentProp !== null) res[media.display.contentProp] ??= media.content; // If content nullish, use default value
@@ -155,7 +142,7 @@
     <div
       on:click="{exportMedia}"
       on:keydown="{null}"
-      class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+      class="flex h-7 min-w-max select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
     >
       Save Asset
     </div>
