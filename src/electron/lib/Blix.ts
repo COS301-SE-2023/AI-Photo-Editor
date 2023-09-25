@@ -1,5 +1,5 @@
 import { CommandRegistry } from "./registries/CommandRegistry";
-import { ToolboxRegistry } from "./registries/ToolboxRegistry";
+import { NodeInstance, ToolboxRegistry } from "./registries/ToolboxRegistry";
 import { TileRegistry } from "./registries/TileRegistry";
 import { TypeclassRegistry } from "./registries/TypeclassRegistry";
 import { ProjectManager } from "./projects/ProjectManager";
@@ -74,70 +74,6 @@ export class Blix {
     this._toolboxRegistry = new ToolboxRegistry(mainWindow);
     this._graphInterpreter = new CoreGraphInterpreter(this._toolboxRegistry);
 
-    // Create Output node
-    const outputNodeBuilder = new NodeBuilder("blix", "Blix", "output");
-    const outputUIBuilder = outputNodeBuilder.createUIBuilder();
-    // outputUIBuilder.addButton(
-    //   {
-    //     componentId: "export",
-    //     label: "Export",
-    //     defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
-    //     triggerUpdate: false,
-    //   },
-    //   {}
-    // );
-    outputUIBuilder.addTextInput(
-      {
-        componentId: "outputId",
-        label: "Name",
-        defaultValue: "default", // TODO: Make this a random id to start with
-        triggerUpdate: true,
-      },
-      {}
-    );
-    outputUIBuilder.addBuffer(
-      {
-        componentId: "id",
-        label: "ID Buffer",
-        defaultValue: { id: null },
-        triggerUpdate: true,
-      },
-      {}
-    );
-    // .addDropdown("Orphanage", tempNodeBuilder.createUIBuilder()
-    // .addLabel("Label1"));
-
-    outputNodeBuilder.setUIInitializer((x) => {
-      return {
-        id: {
-          id: crypto.randomBytes(32).toString("base64url"),
-        },
-      };
-    });
-
-    outputNodeBuilder.setTitle("Output");
-    outputNodeBuilder.setDescription(
-      "Dedicated output node which accepts data of any type, and returns the result to the system"
-    );
-    // tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
-    outputNodeBuilder.define(
-      (
-        result: { [key: string]: any },
-        inputUI: { [key: string]: any },
-        requiredOutputs: string[]
-      ) => {
-        // mainWindow.apis.mediaClientApi.outputChanged(mediaOutput as MediaOutput);
-        const mediaOutput: MediaOutput = result.mediaOutput;
-        mediaOutput.outputId = inputUI.outputId;
-        this._mediaManager.updateMedia(mediaOutput);
-        return {};
-      }
-    );
-
-    outputNodeBuilder.addInput("", "in", "In");
-    outputNodeBuilder.setUI(outputUIBuilder);
-    this._toolboxRegistry.addInstance(outputNodeBuilder.build);
-
     for (const command of blixCommands) {
       this.commandRegistry.addInstance(command);
     }
@@ -148,6 +84,7 @@ export class Blix {
 
     this._graphManager = new CoreGraphManager(this._toolboxRegistry, mainWindow);
     this._projectManager = new ProjectManager(mainWindow);
+    this._aiManager = new AiManager(this.toolbox, this._graphManager, mainWindow);
 
     this._mediaManager = new MediaManager(
       this._typeclassRegistry,
@@ -155,11 +92,10 @@ export class Blix {
       this._graphManager
     );
 
+    this.toolbox.addInstance(createOutputNode(this._mediaManager));
+
     this.initSubscribers();
     this._isReady = true;
-
-    // testStuffies(this);
-    this._aiManager = new AiManager(this.toolbox, this._graphManager, mainWindow);
   }
 
   private initSubscribers() {
@@ -303,4 +239,79 @@ export class Blix {
   get isReady() {
     return this._isReady;
   }
+}
+
+// ===================================================================
+// UTILS
+// ===================================================================
+
+/**
+ * Creates an output node. This is a util function since its needed in other
+ * parts of the system where Blix is not/cannot be instantiated.
+ *
+ * NOT BEING USED IN BLIX RN, CAUSE OF SOME SUS BINDING ISSUES
+ *
+ * @param mediaManager Pass when calling this method within Blix init
+ */
+export function createOutputNode(mediaManager?: MediaManager): NodeInstance {
+  const outputNodeBuilder = new NodeBuilder("blix", "Blix", "output");
+  const outputUIBuilder = outputNodeBuilder.createUIBuilder();
+  // outputUIBuilder.addButton(
+  //   {
+  //     componentId: "export",
+  //     label: "Export",
+  //     defaultValue: "blix.graphs.export", // SUGGESTION: Use the default value to indicate the command to run?
+  //     triggerUpdate: false,
+  //   },
+  //   {}
+  // );
+  outputUIBuilder.addTextInput(
+    {
+      componentId: "outputId",
+      label: "Name",
+      defaultValue: "default", // TODO: Make this a random id to start with
+      triggerUpdate: true,
+    },
+    {}
+  );
+  outputUIBuilder.addBuffer(
+    {
+      componentId: "id",
+      label: "ID Buffer",
+      defaultValue: { id: null },
+      triggerUpdate: true,
+    },
+    {}
+  );
+
+  outputNodeBuilder.setUIInitializer((x) => {
+    return {
+      id: {
+        id: crypto.randomBytes(32).toString("base64url"),
+      },
+    };
+  });
+
+  outputNodeBuilder.setTitle("Output");
+  outputNodeBuilder.setDescription(
+    "Node that accepts data of any type, and returns the result to the system"
+  );
+  // tempNodeBuilder.define(({ input, from }: { input: MediaOutput; from: string }) => {
+  outputNodeBuilder.define(
+    (
+      result: { [key: string]: any },
+      inputUI: { [key: string]: any },
+      requiredOutputs: string[]
+    ) => {
+      // mainWindow.apis.mediaClientApi.outputChanged(mediaOutput as MediaOutput);
+      const mediaOutput: MediaOutput = result.mediaOutput;
+      mediaOutput.outputId = inputUI.outputId;
+      mediaManager?.updateMedia(mediaOutput);
+      return {};
+    }
+  );
+
+  outputNodeBuilder.addInput("", "in", "In");
+  outputNodeBuilder.setUI(outputUIBuilder);
+  return outputNodeBuilder.build;
 }

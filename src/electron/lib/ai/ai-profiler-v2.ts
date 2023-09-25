@@ -46,11 +46,8 @@ export class Profiler {
 
     const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
 
-    if (!blypescriptToolbox.success) {
-      return;
-    }
     // const blypescriptExporter = new BlypescriptExportStrategy(this.toolboxRegistry);
-    const blypescriptExporter = new BlypescriptExportStrategyV2(blypescriptToolbox.data);
+    const blypescriptExporter = new BlypescriptExportStrategyV2(blypescriptToolbox);
     const coreGraphExporter = new CoreGraphExporter(blypescriptExporter);
     const blypescriptProgram = coreGraphExporter.exportGraph(coreGraph);
 
@@ -110,12 +107,7 @@ export class Profiler {
 
   public test() {
     const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
-    if (blypescriptToolbox.success) {
-      const str = blypescriptToolbox.data.toString();
-      return str;
-    }
-
-    return blypescriptToolbox.message;
+    return blypescriptToolbox.toString();
   }
 
   private getPrompt() {
@@ -160,7 +152,7 @@ export class Profiler {
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          const ctx = new NodePluginContext("profiler-plugin");
+          const ctx = new NodePluginContext(pluginInstance.name);
 
           try {
             pluginModule.nodes[node](ctx);
@@ -226,10 +218,8 @@ export class Profiler {
 
     const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
 
-    if (!blypescriptToolbox.success) return null;
-
     const coreGraph = this.graphManager.getGraph(graphId);
-    const blypescriptExporter = new BlypescriptExportStrategyV2(blypescriptToolbox.data);
+    const blypescriptExporter = new BlypescriptExportStrategyV2(blypescriptToolbox);
     const coreGraphExporter = new CoreGraphExporter(blypescriptExporter);
     const blypescriptProgram = coreGraphExporter.exportGraph(coreGraph);
 
