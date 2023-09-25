@@ -87,10 +87,10 @@
 <div class="content">
   {#await asyncSrc then src}
     {#if src !== null}
-      <div class="hover flex items-center space-x-2">
+      <!-- <div class="hover flex items-center space-x-2">
         <button on:click="{reload}">Reload</button>
         <button on:click="{openDevTools}">DevTools</button>
-      </div>
+      </div> -->
 
       <!-- Preload is set in "will-attach-webview" in index.ts -->
       <!-- See: src/electron/lib/webviews/preload.ts -->

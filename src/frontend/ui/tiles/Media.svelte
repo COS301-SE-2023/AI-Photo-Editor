@@ -12,6 +12,7 @@
   import { type SelectionBoxItem } from "../../types/selection-box";
   import WebView from "./WebView.svelte";
   import { TweakApi } from "../../lib/webview/TweakApi";
+  import { cacheStore } from "../../lib/stores/CacheStore";
   import {
     faBacon,
     faBowlRice,
@@ -92,7 +93,16 @@
   }
 
   async function exportCache(e: CustomEvent) {
-    console.log("export cache", e.detail);
+    const blob = new Blob([await cacheStore.get(e.detail[0].cacheUUID)], {
+      type: $cacheStore[e.detail[0].cacheUUID].contentType,
+    });
+    const link = document.createElement("a");
+    link.download = $cacheStore[e.detail[0].cacheUUID].name ?? "export.png";
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    link.remove();
+
+    // console.log(await cacheStore.get(e.detail.cacheUUID));
   }
 
   function getDisplayProps(media: DisplayableMediaOutput) {
