@@ -8,14 +8,21 @@
     let canvasHeight = 500;
     const canvas = fx.canvas();
     let lastid = "";
+    let lastMediaSrc = "";
 
     let image;
     let texture;
 
-    async function updateImage(src) {
-        return new Promise((resolve, reject) => {
+
+    const send = (message, data) => {
+    	window.api.send(message, data);
+    }
+
+    async function updateImage(uuid) {
+        return new Promise(async (resolve, reject) => {
+            const src = URL.createObjectURL(await window.cache.get(uuid));
             image = new Image();
-            image.onload = () => resolve();
+            image.onload = () => {resolve(); URL.revokeObjectURL(src);}
             image.onerror = () => reject();
             image.src = src;
         });
@@ -42,15 +49,22 @@
     $: canvasUpdate(canvasWidth);
 
     async function redraw(media) {
+        if(!media.src){
+            // image = null;
+            // texture = null;
+            // canvas.draw(texture).update();
+            var gl = canvas.getContext("webgl");
+
+            // Clear the canvas to a specified color
+            // gl.clearColor(0.0, 0.0, 0.0, 1.0); // This sets the clear color to black
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            return;
+        }
         if (media?.ops && canvas && texture) {
-            if (media.src) {
-                // if (media.src === "") {
-                //     image = null;
-                //     texture = null;
-                //     canvas.draw(texture).update();
-                //     return;
-                // }
+            if (media.src != lastMediaSrc) {
                 await updateImage(media.src);
+                lastMediaSrc = media.src;
                 reloadTexture();
             }
 
@@ -70,10 +84,12 @@
         }
         else{
             if(media.src){
-                console.log("here");
                 await updateImage(media.src);
+                lastMediaSrc = media.src;
                 reloadTexture();
-                redraw(media);
+                const dimRatio = image.height / image.width;
+                let buffer = canvas.draw(texture, canvasWidth, canvasWidth*dimRatio);
+                buffer.update();
             }
         }
 
@@ -83,8 +99,24 @@
         // canvas.draw(texture).update();
     }
 
+    function exportImage(){
+        canvas.update();
+        canvas.toBlob(async (blob) => {
+            const metadata = {
+                contentType: "image/png",
+                name: `GLFX Export ${Math.floor(100000 * Math.random())}`
+            };
+            send("exportResponse", {cacheUUID: await window.cache.write(blob, metadata)});
+        }, "image/png");
+    }
+
     onMount(async () => {
         canvasContainer.appendChild(canvas);
+
+	    window.api.on("export", async () => {
+              exportImage();
+	    	// send("exportResponse", "exported");
+	    })
     });
 
     onDestroy(() => {
@@ -110,6 +142,7 @@
         padding: 0px;
         margin: 4em;
         text-align: center;
+        overflow: none;
     }
 
     code { 

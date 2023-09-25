@@ -15,8 +15,10 @@ import WebSocket, { WebSocketServer } from "ws";
 // import { Server } from "socket.io";
 import { randomBytes } from "crypto";
 import logger from "../../utils/logger";
-import { ipcMain } from "electron";
-import { showOpenDialog } from "../../utils/dialog";
+import { app, ipcMain } from "electron";
+import { showSaveDialog } from "../../utils/dialog";
+import { join } from "path";
+import { writeFile } from "fs/promises";
 
 // The main interface which this manager must expose is:
 //  - get(cacheUUID: CacheUUID): CacheObject
@@ -60,12 +62,12 @@ export class CacheManager {
       socket.onmessage = (event) => {
         if (typeof event.data === "string") {
           const data: CacheRequest = JSON.parse(event.data);
+          // const data = JSON.parse(event.data);
 
           switch (data.type) {
             case "cache-write-metadata":
               this.writeMetadata(data.id, data.metadata);
               this.notifyListeners();
-
               socket.send(
                 JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
               );
@@ -80,7 +82,10 @@ export class CacheManager {
               );
               break;
             case "cache-delete":
-              this.delete(data.id);
+              if ("ids" in data && Array.isArray(data.ids)) {
+                this.delete(data.ids as CacheUUID[]);
+              }
+
               // TODO: check if exist
               socket.send(
                 JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
@@ -88,9 +93,15 @@ export class CacheManager {
 
               this.notifyListeners();
               break;
+
             case "cache-subscribe":
               this.listeners.add(socket);
               socket.send(JSON.stringify(this.cacheUpdateNotification)); // Send initial cache update
+              break;
+            case "export-cache":
+              if ("ids" in data && Array.isArray(data.ids)) {
+                this.export(data.ids as CacheUUID[]);
+              }
               break;
             default:
               logger.info("Unknown cache message type", data.type);
@@ -167,7 +178,31 @@ export class CacheManager {
     return this.cache[cacheUUID];
   }
 
-  delete(cacheUUID: CacheUUID) {
-    delete this.cache[cacheUUID];
+  delete(cacheUUID: CacheUUID[]) {
+    for (const uuid of cacheUUID) {
+      delete this.cache[uuid];
+    }
+  }
+
+  async export(ids: CacheUUID[]) {
+    for (const id of ids) {
+      const cacheObject = this.cache[id];
+
+      if (!cacheObject) {
+        continue;
+      }
+
+      const path = await showSaveDialog({
+        title: "Save Asset",
+        defaultPath: join(app.getPath("downloads"), cacheObject.metadata.name || "export.png"),
+        properties: ["createDirectory"],
+      });
+
+      if (!path) {
+        continue;
+      }
+
+      await writeFile(path, cacheObject.data);
+    }
   }
 }
