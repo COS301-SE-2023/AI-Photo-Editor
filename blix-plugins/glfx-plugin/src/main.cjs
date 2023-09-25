@@ -162,7 +162,6 @@ Object.keys(glfxNodes).forEach((key) => {
 
 const nodes = {
     ...glfxNodes,
-
     "inputGLFXCache": (context) => {
         const nodeBuilder = context.instantiate("Input", "inputGLFXImage");
         nodeBuilder.setTitle("GLFX Image");
