@@ -1,5 +1,6 @@
-import {setSecret,settings,getSecret,getSecrets} from "../../../../src/electron/utils/settings";
+import {setSecret,settings,getSecret,getSecrets, clearSecret, setRecentProjects, getRecentProjects, decryptWithSafeStorage} from "../../../../src/electron/utils/settings";
 import { safeStorage } from "electron";
+import { recentProject } from "../../../../src/shared/types";
 
 
 let flag = true; // Used to flip isEncryptionAvailable() return value
@@ -63,5 +64,37 @@ describe("Testing settings.ts", () => {
         expect(settings["cookedKey"]).toBe("cookedValue");
     })
 
+    it("Test remaining functions", () => {
+        const invalidTypeInput = 42 as unknown as string;
+        expect(decryptWithSafeStorage(invalidTypeInput)).toBe("");
+
+        expect(getSecret(invalidTypeInput)).toBe("");
+
+
+        setSecret("key", "value");
+        clearSecret("key");
+        expect(settings.get("secrets.key")).toBe("");
+        
+        const projects : recentProject[] = [
+            {
+                path: "path",
+                lastEdited: "lastEdited"
+            }
+        ];
+        setRecentProjects(projects);
+        expect(settings.get("recentProjects")).toEqual(projects);
+
+        expect(getRecentProjects()).toEqual(projects);
+
+        settings.set("secrets","ay");
+        expect(getSecrets()).toEqual({});
+
+
+        const nextInvalid = undefined as unknown as string;
+        expect(decryptWithSafeStorage(nextInvalid)).toBe("");
+        flag = false;
+        expect(decryptWithSafeStorage(nextInvalid)).toBe("");
+
+    })
 
 });
