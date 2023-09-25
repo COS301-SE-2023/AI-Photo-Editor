@@ -53,6 +53,17 @@
 
   const blobs: { [key: CacheUUID]: { blob: Blob; url: string } } = {};
 
+  async function exportCache(UUID: CacheUUID) {
+    const blob = new Blob([await cacheStore.get(UUID)], {
+      type: $cacheStore[UUID].contentType,
+    });
+    const link = document.createElement("a");
+    link.download = $cacheStore[UUID].name ?? "export.png";
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    link.remove();
+  }
+
   // let barrier = 0;
   async function getBlobURL(uuid: CacheUUID, type: string): Promise<string> {
     if (blobs[uuid]) return blobs[uuid].url;
@@ -82,12 +93,21 @@
             {/await}
             <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
             <div class="itemType">{$cacheStore[uuid].contentType}</div>
+            <button
+              class="exportButton flex items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+              on:click="{() => exportCache(uuid)}">Save As</button
+            >
           </div>
         {:else}
           <div class="item">
             <div>{uuid.slice(0, 8)}</div>
             <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
             <div class="itemType">{$cacheStore[uuid].contentType}</div>
+            <!-- TODO implement this -->
+            <button
+              class="exportButton items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+              >Save As</button
+            >
           </div>
         {/if}
       {/each}
@@ -126,6 +146,14 @@
     z-index: 100;
   }
 
+  .exportButton {
+    font-size: 0.6em;
+    height: 20px;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .itemsBox {
     display: flex;
     flex-wrap: wrap;
@@ -139,9 +167,9 @@
 
   .item {
     display: grid;
-    grid-template-rows: 70% 15% 15%;
-    width: 100px;
-    height: 100px;
+    grid-template-rows: 55% 15% 15% 15%;
+    width: 120px;
+    height: 130px;
     min-width: 100px;
     min-height: 100px;
     border: 1px solid #2a2a3f;

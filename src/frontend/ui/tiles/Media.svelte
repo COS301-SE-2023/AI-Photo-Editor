@@ -151,7 +151,7 @@
       on:keydown="{null}"
       class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
     >
-      Export
+      Export To Cache
     </div>
     <!-- <div class="self-end">
       <SelectionBox
@@ -168,7 +168,6 @@
         <svelte:component
           this="{displayIdToSvelteConstructor[$media.display.displayType]}"
           bind:this="{webview}"
-          on:exportResponse="{exportCache}"
           {...getDisplayProps($media)}
         />
       {:else}

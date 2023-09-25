@@ -12,6 +12,11 @@
     let image;
     let texture;
 
+
+    const send = (message, data) => {
+    	window.api.send(message, data);
+    }
+
     async function updateImage(src) {
         return new Promise((resolve, reject) => {
             image = new Image();
@@ -83,8 +88,24 @@
         // canvas.draw(texture).update();
     }
 
+    function exportImage(){
+        canvas.update();
+        canvas.toBlob(async (blob) => {
+            const metadata = {
+                contentType: "image/png",
+                name: `Blink Export ${Math.floor(100000 * Math.random())}`
+            };
+            send("exportResponse", {cacheUUID: await window.cache.write(blob, metadata)});
+        }, "image/png");
+    }
+
     onMount(async () => {
         canvasContainer.appendChild(canvas);
+
+	    window.api.on("export", async () => {
+              exportImage();
+	    	// send("exportResponse", "exported");
+	    })
     });
 
     onDestroy(() => {
@@ -110,6 +131,7 @@
         padding: 0px;
         margin: 4em;
         text-align: center;
+        overflow: none;
     }
 
     code { 
