@@ -162,8 +162,8 @@ Object.keys(glfxNodes).forEach((key) => {
 
 const nodes = {
     ...glfxNodes,
-    "inputGLFXCache": (context) => {
-        const nodeBuilder = context.instantiate("Input", "inputGLFXImage");
+    "GLFXImage": (context) => {
+        const nodeBuilder = context.instantiate("Input", "GLFXImage");
         nodeBuilder.setTitle("GLFX Image");
         nodeBuilder.setDescription("Takes a cache object as input and outputs a GLFX image");
 
