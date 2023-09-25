@@ -132,6 +132,17 @@ class CacheStore {
     });
   }
 
+  public async exportCache(ids: CacheUUID[]): Promise<void> {
+    const messageId = randomMessageId();
+
+    const payload = JSON.stringify({ type: "export-cache", ids, messageId });
+
+    return new Promise((resolve, reject) => {
+      this.lobby[messageId] = resolve;
+      this.ws.send(payload);
+    });
+  }
+
   public get subscribe() {
     return this.cacheStore.subscribe;
   }

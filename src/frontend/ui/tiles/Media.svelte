@@ -28,6 +28,7 @@
     faPizzaSlice,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
+  import { toastStore } from "lib/stores/ToastStore";
 
   const noContentIcons = [
     faBacon,
@@ -83,6 +84,11 @@
   });
 
   async function exportMedia(e: Event) {
+    if (selectedItems.length === 0) {
+      toastStore.trigger({ message: "No media selected.", type: "warn" });
+      return;
+    }
+
     if ($media?.dataType && $media?.content) {
       if ($media.display.displayType === "webview") {
         webview.exportMedia(e);
@@ -151,7 +157,7 @@
       on:keydown="{null}"
       class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
     >
-      Export To Cache
+      Save Asset
     </div>
     <!-- <div class="self-end">
       <SelectionBox

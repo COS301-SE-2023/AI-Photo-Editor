@@ -16,6 +16,11 @@
     faPizzaSlice,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
+  import { toastStore } from "lib/stores/ToastStore";
+
+  let selectedCacheItems: CacheUUID[] = [];
+  // Not used at the moment
+  let controlKeyDown = false;
 
   const noContentIcons = [
     faBacon,
@@ -36,6 +41,26 @@
     return noContentIcons[Math.floor(Math.random() * noContentIcons.length)];
   }
 
+  function handleKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey || event.metaKey) {
+      controlKeyDown = true;
+    }
+  }
+
+  function handleItemOnClick(id: CacheUUID) {
+    if (selectedCacheItems.includes(id)) {
+      selectedCacheItems = selectedCacheItems.filter((item) => item !== id);
+    } else {
+      selectedCacheItems = [...selectedCacheItems, id];
+    }
+  }
+
+  function handleKeyUp(event: KeyboardEvent) {
+    if (!event.ctrlKey || !event.metaKey) {
+      controlKeyDown = false;
+    }
+  }
+
   async function requestFileAccess() {
     try {
       const handle = await window.showOpenFilePicker();
@@ -53,15 +78,13 @@
 
   const blobs: { [key: CacheUUID]: { blob: Blob; url: string } } = {};
 
-  async function exportCache(UUID: CacheUUID) {
-    const blob = new Blob([await cacheStore.get(UUID)], {
-      type: $cacheStore[UUID].contentType,
-    });
-    const link = document.createElement("a");
-    link.download = $cacheStore[UUID].name ?? "export.png";
-    link.href = URL.createObjectURL(blob);
-    link.click();
-    link.remove();
+  async function exportAsset() {
+    if (selectedCacheItems.length === 0) {
+      toastStore.trigger({ message: "No asset selected.", type: "warn" });
+      return;
+    }
+
+    await cacheStore.exportCache(selectedCacheItems);
   }
 
   // let barrier = 0;
@@ -83,7 +106,11 @@
     <div class="itemsBox">
       {#each Object.keys($cacheStore) as uuid}
         {#if ["image/png", "image/jpeg"].includes($cacheStore[uuid].contentType)}
-          <div class="item thumbItem">
+          <div
+            class="item thumbItem {selectedCacheItems.includes(uuid) ? 'ring-2 ring-rose-500' : ''}"
+            on:click|stopPropagation="{() => handleItemOnClick(uuid)}"
+            on:keydown="{null}"
+          >
             {#await getBlobURL(uuid, $cacheStore[uuid].contentType) then src}
               <div class="thumbnail">
                 <img src="{src}" alt="Cached Image {uuid.slice(0, 8)}" width="50px" />
@@ -93,10 +120,6 @@
             {/await}
             <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
             <div class="itemType">{$cacheStore[uuid].contentType}</div>
-            <button
-              class="exportButton flex items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
-              on:click="{() => exportCache(uuid)}">Save As</button
-            >
           </div>
         {:else}
           <div class="item">
@@ -128,8 +151,27 @@
     >
       Add Asset
     </div>
+    <div
+      on:click="{exportAsset}"
+      on:keydown="{null}"
+      class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+    >
+      {#if selectedCacheItems.length > 1}
+        Export Assets
+      {:else}
+        Export Asset
+      {/if}
+    </div>
   </div>
 </div>
+
+<svelte:window
+  on:click="{() => {
+    if (!controlKeyDown) selectedCacheItems = [];
+  }}"
+  on:keydown="{handleKeyDown}"
+  on:keyup="{handleKeyUp}"
+/>
 
 <style lang="scss">
   .fullPane {
@@ -173,7 +215,7 @@
     min-width: 100px;
     min-height: 100px;
     border: 1px solid #2a2a3f;
-    overflow: hidden;
+    overflow: visible;
     margin: 0.4em;
     padding: 0.2em;
     border-radius: 10px;

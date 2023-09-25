@@ -165,8 +165,8 @@ const nodes = {
 
     "inputGLFXCache": (context) => {
         const nodeBuilder = context.instantiate("Input", "inputGLFXImage");
-        nodeBuilder.setTitle("Input GLFX image");
-        nodeBuilder.setDescription("Provides an cache input and returns a single image output");
+        nodeBuilder.setTitle("GLFX Image");
+        nodeBuilder.setDescription("Takes a cache object as input and outputs a GLFX image");
 
         nodeBuilder.define(async (input, uiInput, from) => {
             return { "res": { src: uiInput["cacheid"] } };

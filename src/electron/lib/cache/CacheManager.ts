@@ -15,8 +15,10 @@ import WebSocket, { WebSocketServer } from "ws";
 // import { Server } from "socket.io";
 import { randomBytes } from "crypto";
 import logger from "../../utils/logger";
-import { ipcMain } from "electron";
-import { showOpenDialog } from "../../utils/dialog";
+import { app, ipcMain } from "electron";
+import { showSaveDialog } from "../../utils/dialog";
+import { join } from "path";
+import { writeFile } from "fs/promises";
 
 // The main interface which this manager must expose is:
 //  - get(cacheUUID: CacheUUID): CacheObject
@@ -91,6 +93,11 @@ export class CacheManager {
             case "cache-subscribe":
               this.listeners.add(socket);
               socket.send(JSON.stringify(this.cacheUpdateNotification)); // Send initial cache update
+              break;
+            case "export-cache":
+              if ("ids" in data && Array.isArray(data.ids)) {
+                this.export(data.ids as CacheUUID[]);
+              }
               break;
             default:
               logger.info("Unknown cache message type", data.type);
@@ -169,5 +176,27 @@ export class CacheManager {
 
   delete(cacheUUID: CacheUUID) {
     delete this.cache[cacheUUID];
+  }
+
+  async export(ids: CacheUUID[]) {
+    for (const id of ids) {
+      const cacheObject = this.cache[id];
+
+      if (!cacheObject) {
+        continue;
+      }
+
+      const path = await showSaveDialog({
+        title: "Save Asset",
+        defaultPath: join(app.getPath("downloads"), cacheObject.metadata.name || "export.png"),
+        properties: ["createDirectory"],
+      });
+
+      if (!path) {
+        continue;
+      }
+
+      await writeFile(path, cacheObject.data);
+    }
   }
 }
