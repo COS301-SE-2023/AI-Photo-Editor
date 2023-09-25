@@ -248,6 +248,7 @@
     color: white;
     border-radius: 2px;
     padding: 0.2em;
+    left: 110%;
     top: -3.5em;
   }
   .outlineText {

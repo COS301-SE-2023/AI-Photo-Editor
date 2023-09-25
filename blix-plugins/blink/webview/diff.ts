@@ -105,8 +105,13 @@ export function diffImageAtom(a1: ImageAtom, a2: ImageAtom, assets1: { [key: str
   return false;
 }
 
-export function diffBlobAtom(a1: BlobAtom, a2: BlobAtom) {
+export function diffCurveAtom(a1: BlobAtom, a2: BlobAtom, assets1: { [key: string]: Asset }, assets2: { [key: string]: Asset }) {
   if (a1.assetId !== a2.assetId) return true;
+  if (a1.fill !== a2.fill) return true;
+  if (a1.fillAlpha !== a2.fillAlpha) return true;
+  if (a1.stroke !== a2.stroke) return true;
+  if (a1.strokeAlpha !== a2.strokeAlpha) return true;
+  if (a1.strokeWidth !== a2.strokeWidth) return true;
   return false;
 }
 

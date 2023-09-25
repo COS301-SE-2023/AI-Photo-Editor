@@ -62,7 +62,7 @@ function addState(ui) {
 
 function addTweakability(ui) {
     ui.addTweakDial("tweaks", {});
-    ui.addDiffDial("diffs", {});
+    // ui.addDiffDial("diffs", {});
 }
 
 function createBlinkNode(type, title, desc, params) {
@@ -323,6 +323,116 @@ const nodes = {
                             type: "shape",
                             shape: uiInput["shape"],
                             bounds: { w: uiInput["width"], h: uiInput["height"] },
+
+                            fill: colorHexToNumber(uiInput["fill"]),
+                            fillAlpha: colorHexToAlpha(uiInput["fill"]),
+                            stroke: colorHexToNumber(uiInput["stroke"]),
+                            strokeAlpha: colorHexToAlpha(uiInput["stroke"]),
+                            strokeWidth: uiInput["strokeWidth"],
+                        }
+                    ]
+                }
+            }
+
+            return { res: canvas };
+        });
+
+        nodeBuilder.setUI(ui);
+
+        nodeBuilder.addInput("Blink matrix", "transform", "Transform");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
+    "curve": (context) => {
+        const nodeBuilder = context.instantiate("Blink/Input", "curve");
+        nodeBuilder.setTitle("Blink Curve");
+        nodeBuilder.setDescription("Draw a custom curve");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addDropdown({
+            componentId: "drawMode",
+            label: "Draw Mode",
+            defaultValue: "normal",
+            triggerUpdate: true,
+        }, {
+          options: {
+            "Normal": "normal",
+          }
+        })
+        const getTransform = addTransformInput(ui, ["position", "rotation", "scale"]);
+
+        ui.addColorPicker({
+            componentId: "fill",
+            label: "Fill",
+            defaultValue: "#00000000",
+            triggerUpdate: true,
+        }, {});
+        ui.addColorPicker({
+            componentId: "stroke",
+            label: "Stroke",
+            defaultValue: "#000000",
+            triggerUpdate: true,
+        }, {});
+        ui.addSlider({
+            componentId: "strokeWidth",
+            label: "Stroke Width",
+            defaultValue: 1,
+            triggerUpdate: true,
+        }, { min: 0, max: 100, set: 0.1 });
+
+        ui.addBuffer({
+                componentId: "curve",
+                label: "Curve Buffer",
+                defaultValue: { id: "", path: [] },
+                triggerUpdate: true,
+            }, {}
+        );
+
+        addTweakability(ui);
+
+        nodeBuilder.setUIInitializer((x) => {
+            return {
+                curve: {
+                    id: getUUID(),
+                    path: [
+                        {
+                            control1: { x: 50, y: 10 },
+                            control2: { x: 10, y: 300 },
+                            point: { x: 0, y: 0 },
+                        },
+                        {
+                            control1: { x: 50, y: 10 },
+                            control2: { x: 10, y: 300 },
+                            point: { x: 400, y: 400 },
+                        },
+                        {
+                            control1: { x: 400, y: 500 },
+                            control2: { x: 10, y: 500 },
+                            point: { x: 50, y: 10 },
+                        },
+                    ]
+                }
+            };
+        });
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            const canvas = {
+                assets: {
+                    [uiInput["curve"]["id"]]: {
+                        class: "asset",
+                        type: "curve",
+                        data: uiInput["curve"].path
+                    }
+                },
+                content: {
+                    class: "clump",
+                    nodeUUID: uiInput["tweaks"].nodeUUID,
+                    changes: uiInput["diffs"]?.uiInputs ?? [],
+                    transform: getTransform(uiInput),
+                    elements: [
+                        {
+                            class: "atom",
+                            type: "curve",
+                            assetId: uiInput["curve"].id,
 
                             fill: colorHexToNumber(uiInput["fill"]),
                             fillAlpha: colorHexToAlpha(uiInput["fill"]),

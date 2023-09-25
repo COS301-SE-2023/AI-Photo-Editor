@@ -33,11 +33,28 @@ export type BlinkCanvas = {
   content: Clump | null;
 }
 
-export type Asset = {
-  class: "asset";
-  type: "image" | "blob";
-  data: any;
-};
+export type Asset = { class: "asset" } & (ImageAsset | CurveAsset);
+
+export type ImageAsset = {
+  type: "image";
+  data: string;
+}
+
+export type CurveAsset = {
+  type: "curve"
+  data: {
+    id: string;
+    path: CurvePoint[];
+  }
+}
+
+export type CurvePoint = {
+  control1: Vec2;
+  control2: Vec2;
+  point: Vec2;
+}
+
+export type Vec2 = { x: number, y: number };
 
 export type Clump = {
   class: "clump";
@@ -51,9 +68,9 @@ export type Clump = {
 };
 
 export type Transform = {
-  position: { x: number, y: number };
+  position: Vec2;
   rotation: number;
-  scale: { x: number, y: number };
+  scale: Vec2;
 }
 
 export type Filter = {
@@ -106,16 +123,20 @@ export function getPixiFilter(filter: Filter) {
 }
 
 // A single indivisible unit of a clump (E.g. image, shape, text etc.)
-export type Atom = { class: "atom", nodeUUID: string } & (ImageAtom | ShapeAtom | TextAtom | PaintAtom | BlobAtom);
+export type Atom = { class: "atom", nodeUUID: string } & (ImageAtom | ShapeAtom | TextAtom | PaintAtom | CurveAtom);
 export type ImageAtom = {
   type: "image";
   assetId: string;
 };
 
-export type BlobAtom = {
-  type: "blob";
-  blob: "image"; //TODO: Add more options
+export type CurveAtom = {
+  type: "curve";
   assetId: string;
+  fill: number;
+  fillAlpha: number;
+  stroke: number;
+  strokeAlpha: number;
+  strokeWidth: number;
 }
 
 export type ShapeAtom = {
