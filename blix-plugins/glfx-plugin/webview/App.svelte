@@ -17,10 +17,11 @@
     	window.api.send(message, data);
     }
 
-    async function updateImage(src) {
-        return new Promise((resolve, reject) => {
+    async function updateImage(uuid) {
+        return new Promise(async (resolve, reject) => {
+            const src = URL.createObjectURL(await window.cache.get(uuid));
             image = new Image();
-            image.onload = () => resolve();
+            image.onload = () => {resolve(); URL.revokeObjectURL(src);}
             image.onerror = () => reject();
             image.src = src;
         });
@@ -55,7 +56,7 @@
                 //     canvas.draw(texture).update();
                 //     return;
                 // }
-                await updateImage(media.src);
+                // await updateImage(media.src);
                 reloadTexture();
             }
 
@@ -75,10 +76,11 @@
         }
         else{
             if(media.src){
-                console.log("here");
                 await updateImage(media.src);
                 reloadTexture();
-                redraw(media);
+                const dimRatio = image.height / image.width;
+                let buffer = canvas.draw(texture, canvasWidth, canvasWidth*dimRatio);
+                buffer.update();
             }
         }
 
@@ -93,7 +95,7 @@
         canvas.toBlob(async (blob) => {
             const metadata = {
                 contentType: "image/png",
-                name: `Blink Export ${Math.floor(100000 * Math.random())}`
+                name: `GLFX Export ${Math.floor(100000 * Math.random())}`
             };
             send("exportResponse", {cacheUUID: await window.cache.write(blob, metadata)});
         }, "image/png");
