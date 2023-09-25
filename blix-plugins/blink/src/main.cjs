@@ -763,6 +763,64 @@ const nodes = {
         nodeBuilder.addInput("Blink clump", "clump", "Clump");
         nodeBuilder.addInput("Blink clump", "mask", "Mask");
         nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
+    "canvasConfig": (context) => {
+        const nodeBuilder = context.instantiate("Blink/Utils", "canvasConfig");
+        nodeBuilder.setTitle("Canvas Config");
+        nodeBuilder.setDescription("Configure the Blink canvas");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addTextInput({
+            componentId: "exportName",
+            label: "Canvas Export Name",
+            defaultValue: "Blink Export",
+            triggerUpdate: true,
+        }, {});
+
+        ui.addNumberInput(
+            {
+                componentId: "canvasW",
+                label: "Canvas Width",
+                defaultValue: 1920,
+                triggerUpdate: true,
+            },
+            { step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "canvasH",
+                label: "Canvas Height",
+                defaultValue: 1080,
+                triggerUpdate: true,
+            },
+            { step: 1 }
+        );
+        ui.addColorPicker({
+            componentId: "canvasColor",
+            label: "Canvas Background",
+            defaultValue: "#ffffffff",
+            triggerUpdate: true,
+        }, {})
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            // Apply mask to outermost clump
+            const canvas = {
+                ...input["clump"],
+                config: {
+                    canvasDims: { w: uiInput["canvasW"], h: uiInput["canvasH"] },
+                    canvasColor: colorHexToNumber(uiInput["canvasColor"]),
+                    canvasAlpha: colorHexToAlpha(uiInput["canvasColor"]),
+
+                    exportName: uiInput["exportName"]
+                }
+            }
+
+            return { "canvas": canvas };
+        });
+
+        nodeBuilder.setUI(ui);
+        nodeBuilder.addInput("Blink clump", "clump", "Clump");
+        nodeBuilder.addOutput("Blink canvas", "canvas", "Canvas");
     }
 };
 const commands = {};
@@ -770,15 +828,7 @@ const tiles = {};
 
 function init(context) {
 
-    const glfxTypeBuilder = context.createTypeclassBuilder("Blink clump");
-    // glfxTypeBuilder.setToConverters({
-    //     "image": (value) => ({})
-    // });
-    // glfxTypeBuilder.setFromConverters({
-    //     "image": (value) => ({})
-    // });
-
-    glfxTypeBuilder.setDisplayConfigurator((data) => {
+    const configurator = (data) => {
         return {
             displayType: "webview",
             props: {
@@ -787,7 +837,20 @@ function init(context) {
             },
             contentProp: "media"
         };
-    });
+    }
+
+    const clumpTypeBuilder = context.createTypeclassBuilder("Blink clump");
+    clumpTypeBuilder.setDisplayConfigurator(configurator);
+
+    // clumpTypeBuilder.setToConverters({
+    //     "image": (value) => ({})
+    // });
+    // clumpTypeBuilder.setFromConverters({
+    //     "image": (value) => ({})
+    // });
+
+    const canvasTypeBuilder = context.createTypeclassBuilder("Blink canvas");
+    canvasTypeBuilder.setDisplayConfigurator(configurator);
 }
 
 module.exports = {

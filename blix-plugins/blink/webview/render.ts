@@ -152,6 +152,7 @@ export async function renderScene(
   // Update hierarchy
   hierarchy = {
     assets: canvas.assets,
+    config: undefined,
     content: {
       ...canvas.content,
       container: pixiClump,

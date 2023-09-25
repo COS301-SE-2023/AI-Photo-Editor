@@ -4,15 +4,21 @@
     import { onDestroy, onMount, tick } from "svelte";
     import { type Writable } from "svelte/store";
     import { renderScene } from "./render";
-    import { WindowWithApis, type BlinkCanvas } from "./types";
+    import { WindowWithApis, type BlinkCanvas, BlinkCanvasConfig } from "./types";
     import Debug from "./Debug.svelte";
+    import { diffCanvasConfig } from "./diff";
 
     export let media: Writable<BlinkCanvas>;
     export let send: (msg: string, data: any) => void;
 
     let imgCanvasInitialPadding = 100;
-    let imgCanvasBlockW = 1920;
-    let imgCanvasBlockH = 1080;
+    let canvasConfig: BlinkCanvasConfig = {
+        canvasDims: { w: 1920, h: 1080 },
+        canvasColor: 0xffffff,
+        canvasAlpha: 1,
+
+        exportName: "Blink Export"
+    }
 
     let blink: PIXI.Application;
     let pixiCanvas: HTMLCanvasElement;
@@ -86,45 +92,65 @@
         });
 
         //===== CREATE BASE LAYOUT =====//
-        imgCanvasInitialPadding = 100;
-        imgCanvasBlockW = 1920;
-        imgCanvasBlockH = 1080;
-
         let imgCanvas = new PIXI.Container();
         imgCanvas.name = "imgCanvas";
 
-        // canvas
-        let imgCanvasBlock = new PIXI.Graphics();
-        imgCanvasBlock.beginFill(0xffffff, 0.9);
-        imgCanvasBlock.drawRect(0, 0, imgCanvasBlockW, imgCanvasBlockH);
+        function createImageCanvasBlock() {
+            const { w: imgCanvasBlockW, h: imgCanvasBlockH } = canvasConfig.canvasDims;
 
-        // x-axis
-        imgCanvasBlock.lineStyle();
-        imgCanvasBlock.moveTo(0, imgCanvasBlockH/2);
-        imgCanvasBlock.lineStyle(1, 0xff0000);
-        imgCanvasBlock.lineTo(imgCanvasBlockW, imgCanvasBlockH/2);
+            // canvas
+            let imgCanvasBlock = new PIXI.Graphics();
+            imgCanvasBlock.beginFill(canvasConfig.canvasColor, canvasConfig.canvasAlpha);
+            imgCanvasBlock.drawRect(0, 0, imgCanvasBlockW, imgCanvasBlockH);
 
-        // y-axis
-        imgCanvasBlock.lineStyle();
-        imgCanvasBlock.moveTo(imgCanvasBlockW/2, 0);
-        imgCanvasBlock.lineStyle(1, 0x00ff00);
-        imgCanvasBlock.lineTo(imgCanvasBlockW/2, imgCanvasBlockH);
+            // x-axis
+            imgCanvasBlock.lineStyle();
+            imgCanvasBlock.moveTo(0, imgCanvasBlockH/2);
+            imgCanvasBlock.lineStyle(1, 0xff0000);
+            imgCanvasBlock.lineTo(imgCanvasBlockW, imgCanvasBlockH/2);
 
-        imgCanvasBlock.position.set(-imgCanvasBlockW/2, -imgCanvasBlockH/2);
+            // y-axis
+            imgCanvasBlock.lineStyle();
+            imgCanvasBlock.moveTo(imgCanvasBlockW/2, 0);
+            imgCanvasBlock.lineStyle(1, 0x00ff00);
+            imgCanvasBlock.lineTo(imgCanvasBlockW/2, imgCanvasBlockH);
+
+            imgCanvasBlock.position.set(-imgCanvasBlockW/2, -imgCanvasBlockH/2);
+
+            return imgCanvasBlock;
+        }
+
+        const imgCanvasBlock = createImageCanvasBlock();
         imgCanvas.addChild(imgCanvasBlock);
-
         canvasBlock = imgCanvasBlock;
 
         viewport.addChild(imgCanvas);
 
-        const viewportFitX = imgCanvasBlockW + 2 * imgCanvasInitialPadding;
-        const viewportFitY = imgCanvasBlockH + 2 * imgCanvasInitialPadding;
+        const viewportFitX = canvasConfig.canvasDims.w + 2 * imgCanvasInitialPadding;
+        const viewportFitY = canvasConfig.canvasDims.h + 2 * imgCanvasInitialPadding;
         viewport.fit(true, viewportFitX, viewportFitY);
-        viewport.moveCenter(imgCanvasBlockW/2, imgCanvasBlockH/2);
+        viewport.moveCenter(canvasConfig.canvasDims.w/2, canvasConfig.canvasDims.h/2);
 
         //===== RENDER Blink =====//
         let hasCentered = false;
             media.subscribe(async (media) => {
+                //===== UPDATE CANVAS CONFIG =====//
+                if (media?.config != null) {
+                    const configDiffs = diffCanvasConfig(canvasConfig, media.config);
+
+                    if (configDiffs.size > 0) {
+                        canvasConfig = media.config;
+
+                        if (configDiffs.has("canvasBlock")) {
+                            imgCanvas.removeChildren();
+                            const newImgCanvasBlock = createImageCanvasBlock();
+                            imgCanvas.addChild(newImgCanvasBlock);
+                            canvasBlock = newImgCanvasBlock;
+                        }
+                    }
+                }
+
+                //===== RENDER SCENE =====//
                 const { success, scene } = await renderScene(blink, media, viewport, send);
                 currScene = scene;
 
@@ -133,8 +159,8 @@
                 window.dispatchEvent(new Event("resize"));
 
                 if (success && !hasCentered) {
-                    const viewportFitX = imgCanvasBlockW + 2 * imgCanvasInitialPadding;
-                    const viewportFitY = imgCanvasBlockH + 2 * imgCanvasInitialPadding;
+                    const viewportFitX = canvasConfig.canvasDims.w + 2 * imgCanvasInitialPadding;
+                    const viewportFitY = canvasConfig.canvasDims.h + 2 * imgCanvasInitialPadding;
                     viewport.fit(true, viewportFitX, viewportFitY);
                     viewport.moveCenter(0, 0);
 
@@ -169,6 +195,8 @@
     async function exportImage() {
         if (!currScene || !canvasBlock) return;
 
+        const { w: imgCanvasBlockW, h: imgCanvasBlockH } = canvasConfig.canvasDims;
+
         const bounds = currScene.getLocalBounds();
         const frame = new PIXI.Rectangle(-bounds.x-imgCanvasBlockW/2, -bounds.y-imgCanvasBlockH/2, imgCanvasBlockW, imgCanvasBlockH);
 
@@ -176,7 +204,7 @@
         exportCanvas.toBlob((blob) => {
             const metadata = {
                 contentType: "image/png",
-                name: `Blink Export ${Math.floor(100000 * Math.random())}`
+                name: `${canvasConfig.exportName} ${Math.floor(100000 * Math.random())}`
             };
             (window as WindowWithApis).cache.write(blob, metadata);
         }, "image/png");

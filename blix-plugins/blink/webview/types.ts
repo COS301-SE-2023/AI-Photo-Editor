@@ -30,8 +30,17 @@ export type WindowWithApis = Window & typeof globalThis & {
 
 export type BlinkCanvas = {
   assets: { [key: string]: Asset };
+  config?: BlinkCanvasConfig;
   content: Clump | null;
 }
+
+export type BlinkCanvasConfig = {
+  canvasDims: { w: number, h: number };
+  canvasColor: number;
+  canvasAlpha: number;
+
+  exportName: string;
+};
 
 export type Asset = { class: "asset" } & (ImageAsset | CurveAsset);
 

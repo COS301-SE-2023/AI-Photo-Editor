@@ -2,6 +2,7 @@ import type { HierarchyAtom, HierarchyClump } from "./render";
 import type {
   Asset,
   Atom,
+  BlinkCanvasConfig,
   Clump,
   CurveAtom,
   Filter,
@@ -146,4 +147,28 @@ export function diffTextAtom(a1: TextAtom, a2: TextAtom) {
 export function diffPaintAtom(a1: PaintAtom, a2: PaintAtom) {
   if (a1.uuid !== a2.uuid) return true;
   return false;
+}
+
+export type CanvasConfigDiff = "canvasBlock" | "exportName";
+
+export function diffCanvasConfig(c1: BlinkCanvasConfig, c2: BlinkCanvasConfig) {
+  const diffs = new Set<CanvasConfigDiff>();
+  if (c1 == null && c2 == null) return new Set<CanvasConfigDiff>([]); // Vacuous case
+  if (c1 == null || c2 == null)
+    return new Set<CanvasConfigDiff>(["canvasBlock", "exportName"]);
+
+  if (
+    c1.canvasDims.w !== c2.canvasDims.w ||
+    c1.canvasDims.h !== c2.canvasDims.h ||
+    c1.canvasColor !== c2.canvasColor ||
+    c1.canvasAlpha !== c2.canvasAlpha
+  ) {
+    diffs.add("canvasBlock");
+  }
+
+  if (c1.exportName !== c2.exportName) {
+    diffs.add("exportName");
+  }
+
+  return diffs;
 }
