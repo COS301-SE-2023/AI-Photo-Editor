@@ -78,7 +78,7 @@
 
   const blobs: { [key: CacheUUID]: { blob: Blob; url: string } } = {};
 
-  async function exportAsset() {
+  async function exportAssets() {
     if (selectedCacheItems.length === 0) {
       toastStore.trigger({ message: "No asset selected.", type: "warn" });
       return;
@@ -87,8 +87,13 @@
     await cacheStore.exportCache(selectedCacheItems);
   }
 
-  async function deleteCache(UUID: CacheUUID[]) {
-    await cacheStore.delete(UUID);
+  async function removeAssets() {
+    if (selectedCacheItems.length === 0) {
+      toastStore.trigger({ message: "No asset selected.", type: "warn" });
+      return;
+    }
+
+    await cacheStore.delete(selectedCacheItems);
   }
 
   // let barrier = 0;
@@ -105,7 +110,7 @@
   }
 </script>
 
-<div class="fullPane">
+<div class="fullPane select-none overflow-auto">
   {#if Object.keys($cacheStore).length > 0}
     <div class="itemsBox">
       {#each Object.keys($cacheStore) as uuid}
@@ -124,21 +129,16 @@
             {/await}
             <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
             <div class="itemType">{$cacheStore[uuid].contentType}</div>
-            <button
-              class="exportButton flex items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
-              on:click="{() => deleteCache([uuid])}">Remove</button
-            >
           </div>
         {:else}
-          <div class="item">
+          <div
+            class="item {selectedCacheItems.includes(uuid) ? 'ring-2 ring-rose-500' : ''}"
+            on:click|stopPropagation="{() => handleItemOnClick(uuid)}"
+            on:keydown="{null}"
+          >
             <div>{uuid.slice(0, 8)}</div>
             <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
             <div class="itemType">{$cacheStore[uuid].contentType}</div>
-            <!-- TODO implement this -->
-            <button
-              class="exportButton items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
-              >Save As</button
-            >
           </div>
         {/if}
       {/each}
@@ -155,20 +155,23 @@
     <div
       on:click="{requestFileAccess}"
       on:keydown="{null}"
-      class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+      class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
     >
-      Add Asset
+      Add
     </div>
     <div
-      on:click="{exportAsset}"
+      on:click="{exportAssets}"
       on:keydown="{null}"
-      class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+      class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
     >
-      {#if selectedCacheItems.length > 1}
-        Export Assets
-      {:else}
-        Export Asset
-      {/if}
+      Export
+    </div>
+    <div
+      on:click="{removeAssets}"
+      on:keydown="{null}"
+      class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+    >
+      Remove
     </div>
   </div>
 </div>
@@ -212,6 +215,7 @@
     width: calc(100% - 4em);
     margin: auto;
     margin-top: 2em;
+    margin-bottom: 3em;
     overflow: auto;
   }
 
@@ -281,5 +285,18 @@
       font-size: 0.8em;
       color: #9090a4;
     }
+  }
+
+  /* Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 14px;
+    margin: 0;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    border-radius: 9999px;
+    background-color: #52525b;
   }
 </style>
