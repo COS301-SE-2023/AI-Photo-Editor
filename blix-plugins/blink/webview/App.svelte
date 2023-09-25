@@ -4,7 +4,7 @@
     import { onDestroy, onMount, tick } from "svelte";
     import { type Writable } from "svelte/store";
     import { renderScene } from "./render";
-    import { type BlinkCanvas } from "./types";
+    import { WindowWithApis, type BlinkCanvas } from "./types";
     import Debug from "./Debug.svelte";
 
     export let media: Writable<BlinkCanvas>;
@@ -178,7 +178,7 @@
                 contentType: "image/png",
                 name: `Blink Export ${Math.floor(100000 * Math.random())}`
             };
-            window.cache.write(blob, metadata);
+            (window as WindowWithApis).cache.write(blob, metadata);
         }, "image/png");
         // REMOVED: Exporting straight to local file
         // const link = document.createElement("a");

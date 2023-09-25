@@ -12,13 +12,13 @@ import type {
   Transform,
 } from "./types";
 
-export type ClumpDiff = "name" | "transform" | "opacity" | "filters";
+export type ClumpDiff = "name" | "transform" | "opacity" | "filters" | "mask";
 
 export function diffClump(h1: Clump, h2: HierarchyClump) {
   const diffs = new Set<ClumpDiff>();
   if (h1 == null && h2 == null) return new Set<ClumpDiff>([]); // Vacuous case
   if (h1 == null || h2 == null)
-    return new Set<ClumpDiff>(["name", "transform", "opacity", "filters"]);
+    return new Set<ClumpDiff>(["name", "transform", "opacity", "filters", "mask"]);
 
   // Diff name
   if (h1.name !== h2.name) {
@@ -40,6 +40,11 @@ export function diffClump(h1: Clump, h2: HierarchyClump) {
   // Diff filters
   if (diffFilters(h1.filters, h2.filters)) {
     diffs.add("filters");
+  }
+
+  // Diff mask
+  if (diffClump(h1.mask, h2.mask as HierarchyClump).size > 0) {
+    diffs.add("mask");
   }
 
   return diffs;

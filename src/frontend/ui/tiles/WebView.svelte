@@ -3,6 +3,7 @@
   import TextBox from "../../ui/utils/mediaDisplays/TextBox.svelte";
   import { type RendererId } from "../../../shared/types/typeclass";
   import type { TweakApi } from "../../lib/webview/TweakApi";
+  import { onDestroy } from "svelte";
 
   let webview: Electron.WebviewTag | null = null;
 
@@ -74,15 +75,19 @@
   function openDevTools() {
     webview?.openDevTools();
   }
+
+  onDestroy(() => {
+    webview?.closeDevTools();
+  });
 </script>
 
 <div class="content">
   {#await asyncSrc then src}
     {#if src !== null}
-      <!-- <div class="hover flex items-center space-x-2">
+      <div class="hover flex items-center space-x-2">
         <button on:click="{reload}">Reload</button>
         <button on:click="{openDevTools}">DevTools</button>
-      </div> -->
+      </div>
 
       <!-- Preload is set in "will-attach-webview" in index.ts -->
       <!-- See: src/electron/lib/webviews/preload.ts -->

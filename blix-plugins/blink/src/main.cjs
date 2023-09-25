@@ -168,7 +168,7 @@ const blinkNodes = {
         "CRT",
         "Applies a CRT effect to the image",
         [
-            { id: "curvature", min: 0, max: 10, step: 0.01 }, 
+            { id: "curvature", min: 0, max: 100, step: 0.1 }, 
             { id: "lineWidth", min: 0, max: 5, step: 0.01 },
             { id: "lineContrast", min: 0, max: 1, step: 0.01 },
             { id: "noise", min: 0, max: 1, step: 0.01 },
@@ -619,6 +619,39 @@ const nodes = {
 
         nodeBuilder.setUI(ui);
         nodeBuilder.addInput("Blink clump", "clump", "Clump");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
+    "mask": (context) => {
+        const nodeBuilder = context.instantiate("Blink/Utils", "mask");
+        nodeBuilder.setTitle("Mask");
+        nodeBuilder.setDescription("Mask a Blink clump with another clump");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addRadio({
+            componentId: "maskEnabled",
+            label: "Enabled",
+            defaultValue: "enabled",
+            triggerUpdate: true,
+        }, {
+          options: {
+            "Enabled": "enabled",
+            "Disabled": "disabled",
+          }
+        })
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            // Apply mask to outermost clump
+            const canvas = input["clump"];
+            if (uiInput["maskEnabled"] === "enabled" && input["mask"] != null) {
+                canvas.content.mask = input["mask"].content;
+            }
+
+            return { "res": canvas };
+        });
+
+        nodeBuilder.setUI(ui);
+        nodeBuilder.addInput("Blink clump", "clump", "Clump");
+        nodeBuilder.addInput("Blink clump", "mask", "Mask");
         nodeBuilder.addOutput("Blink clump", "res", "Result");
     }
 };

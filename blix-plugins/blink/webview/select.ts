@@ -17,6 +17,7 @@ export function createBoundingBox(transMatrix: PIXI.Matrix, bounds: PIXI.Rectang
 
   for (let c = 0; c < 4; c++) {
     corners[c] = viewport.toScreen(corners[c]);
+    // corners[c] = viewport.toWorld(corners[c]);
   }
 
   //===== CONSTRUCT BOX LINES =====//

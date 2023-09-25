@@ -21,10 +21,12 @@
     {:else if data["class"] === "clump"}
       <span style="color: teal">CLUMP</span> [{Math.round(data.transform.position.x)}, {Math.round(
         data.transform.position.y
-      )}] <span style="color: blue">
+      )}] <span style="color: lightblue">
       {#if data?.filters}
         &lt;{#each data.filters as filter}{filter.type}{/each}&gt;
       {/if}
+      <!-- {#if data?.mask} MASK: {data.mask} {/if} -->
+      MASK: {data.mask}
       </span>
       <ul>
         {#each data.elements as element}

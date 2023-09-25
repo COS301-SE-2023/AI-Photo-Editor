@@ -4,6 +4,7 @@ import {
   type Atom,
   type Clump,
   type BlinkCanvas,
+  WindowWithApis,
 } from "./types";
 import { Viewport } from "pixi-viewport";
 import { createBoundingBox } from "./select";
@@ -28,7 +29,14 @@ export type HierarchyClump = Override<Clump, { elements: (HierarchyClump | Hiera
 export type HierarchyAtom = Atom & HierarchyData;
 // type Clumps = { [key: string]: PIXI.Container };
 
-let selected: string = ""; // NodeUUID of selected clump
+type SelectionState = {
+  uuid: string, // NodeUUID of selected clump
+  container: PIXI.Container,
+  dragging: boolean,
+  prevMousePos: PIXI.Point
+};
+
+let selection: SelectionState = null;
 
 let oldSceneStructure = "";
 let sceneStructure = "_";
@@ -55,18 +63,29 @@ export function renderScene(
     viewport.addChild(scene);
   }
 
-  // Destroy previous viewport contents
-  // scene.removeChildren();
-  // if (boundingBox) {
-  //   boundingBox.removeChildren();
-  // }
-
-  //===== CREATE BOUNDING BOX =====//
-  // TODO
-  if (boundingBox == null) {
+  if (!boundingBox) {
+    //===== CREATE BOUNDING BOX =====//
     boundingBox = new PIXI.Container();
     boundingBox.name = "boundingBox";
+
+    window.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        selection = null;
+      }
+    });
+
     blink.stage.addChild(boundingBox);
+
+    blink.ticker.add(() => {
+      if (boundingBox.children) {
+        boundingBox.removeChildren();
+      }
+
+      if (selection?.uuid) {
+        boundingBox.addChild(createBoundingBox(selection.container.transform.localTransform, selection.container.getLocalBounds(), viewport));
+        // boundingBox.addChild(createBoundingBox(selection.container.transform.worldTransform, selection.container.getBounds(), viewport));
+      }
+    });
   }
 
   //===== PRELOAD IMAGE ASSETS =====//
@@ -78,7 +97,7 @@ export function renderScene(
 
       // Get cache object
       imgPromises.push(new Promise(async (resolve, reject) => {
-        const blob: Blob = await window.cache.get(cacheId);
+        const blob: Blob = await (window as WindowWithApis).cache.get(cacheId);
         console.log("BLOB", blob);
         const url = window.URL.createObjectURL(blob);
         console.log("URL", url);
@@ -322,9 +341,47 @@ function renderClump(
     }
   }
 
-  resClump.sortChildren();
+  if (diffs.has("mask")) {
+    const mask = clump.mask != null ? renderClump(
+      blink,
+      clump.mask,
+      undefined,
+      canvas,
+      undefined,
+      viewport,
+      () => {}
+    ).pixiClump : null;
 
-  // boundingBox.addChild(createBoundingBox(transMatrix, resClump.getBounds(), viewport));
+    if (mask) {
+      const { x: bx, y: by, width: bw, height: bh } = mask.getLocalBounds();
+      const renderPadding = 0;
+      mask.transform.position.x = -bx + renderPadding;
+      mask.transform.position.y = -by + renderPadding;
+
+      // Render to texture
+      const renderTexture = PIXI.RenderTexture.create({ width: bw + 2 * renderPadding, height: bh + 2 * renderPadding, });
+      blink.renderer.render(mask, { renderTexture: renderTexture });
+
+      mask.transform.setFromMatrix(new PIXI.Matrix());
+
+      // Create flattened sprite
+      const renderSprite = new PIXI.Sprite(renderTexture);
+      renderSprite.name = `FilterSprite(${randomId()})`
+      // renderSprite.anchor.x = 0.5;
+      // renderSprite.anchor.y = 0.5;
+      renderSprite.setTransform(bx - renderPadding, by - renderPadding);
+
+      // TODO: Add a separate child container to the clump to
+      // be used specifically for masking
+      resClump.addChild(renderSprite);
+      resClump.mask = renderSprite;
+    }
+    else {
+      resClump.mask = null;
+    }
+  }
+
+  resClump.sortChildren();
 
   if (prevClump != null) {
     prevClump.container = resClump;
@@ -339,42 +396,49 @@ function renderClump(
 
 
 function addInteractivity(container: PIXI.Container, clump: Clump, viewport: Viewport, send: (message: string, data: any) => void) {
-  let dragging = false;
-  var prevMousePos = new PIXI.Point();
-
   container.eventMode = "dynamic";
-  // resClump.on("click", () => {
-  // });
 
   container.on("mousedown", (event) => {
     event.stopPropagation();
-    selected = clump.nodeUUID;
-    dragging = true;
-    prevMousePos = viewport.toWorld(event.global);
-  });
-  viewport.on("mouseup", (event) => {
-    if (selected === clump.nodeUUID && dragging) {
-      send("tweak", {
-        nodeUUID: clump.nodeUUID,
-        inputs: {
-          positionX: container.transform.position.x,
-          positionY: container.transform.position.y
-        },
-      });
-    }
 
-    dragging = false;
+    // Create new selection
+    selection = {
+      uuid: clump.nodeUUID,
+      container,
+      dragging: true,
+      prevMousePos: viewport.toWorld(event.global)
+    };
+  });
+
+  viewport.on("mouseup", (event) => {
+    if (selection?.uuid === clump.nodeUUID) {
+      event.stopPropagation();
+      if (selection.dragging) {
+        send("tweak", {
+          nodeUUID: clump.nodeUUID,
+          inputs: {
+            positionX: container.transform.position.x,
+            positionY: container.transform.position.y
+          },
+        });
+        selection.dragging = false;
+        console.log("MOUSE UP", selection);
+      }
+    }
   });
 
   viewport.on("mousemove", (event) => {
-    if (selected === clump.nodeUUID && dragging) {
+    if (selection?.uuid === clump.nodeUUID && selection?.dragging) {
       // boundingBox.removeChildren();
       // boundingBox.addChild(createBoundingBox(container.transform.worldTransform, container.getBounds(), viewport));
 
       const pos = viewport.toWorld(event.global);
       // const pos = viewport.worldTransform.apply(event.global);
-      const shift = new PIXI.Point(pos.x - prevMousePos.x, pos.y - prevMousePos.y);
-      prevMousePos = pos;
+      const shift = new PIXI.Point(
+        pos.x - selection.prevMousePos.x,
+        pos.y - selection.prevMousePos.y
+        );
+      selection.prevMousePos = pos;
 
       container.transform.position.x += shift.x;
       container.transform.position.y += shift.y;
