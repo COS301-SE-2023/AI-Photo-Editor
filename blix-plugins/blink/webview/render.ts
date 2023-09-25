@@ -37,6 +37,8 @@ type SelectionState = {
   prevMousePos: PIXI.Point
 };
 
+const MAX_CHILDREN_IN_CLUMP = 5;
+
 let selection: SelectionState = null;
 
 let oldSceneStructure = "";
@@ -138,6 +140,7 @@ export async function renderScene(
 
   const { pixiClump, changed } = renderClump(
     blink,
+    0,
     canvas.content,
     hierarchy?.content,
     canvas,
@@ -166,6 +169,7 @@ export function renderCanvas(blink: PIXI.Application, root: Clump) {}
 
 function renderClump(
   blink: PIXI.Application,
+  index: number,
   clump: Clump,
   prevClump: HierarchyClump | undefined,
   canvas: BlinkCanvas,
@@ -191,14 +195,23 @@ function renderClump(
   const hierarchyElements = [];
 
   if (clump.elements) {
-    for (let i = 0; i < clump.elements.length; i++) {
+    for (let i = 0; i < MAX_CHILDREN_IN_CLUMP; i++) {
       const child = clump.elements[i];
       const prevChild = prevClump?.elements != null && prevClump.elements[i];
 
-      if (child.class === "clump") {
+      if (child == null) {
+        //===== REMOVED CHILD =====//
+        if (prevChild) {
+          console.log("----> DELETED CHILD", i);
+          childChanged = true;
+          children.push({ changed: true, child: null });
+        }
+      }
+      else if (child.class === "clump") {
         //===== CHILD CLUMP =====//
         const { pixiClump, changed } = renderClump(
           blink,
+          i,
           child as HierarchyClump,
           (prevChild?.class === "clump" ? prevChild : undefined) as HierarchyClump,
           canvas,
@@ -253,20 +266,21 @@ function renderClump(
   // Create resClump
   if (newContainer) {
     resClump = new PIXI.Container();
-    resClump.name = `Clump(${randomId()})`;
+    resClump.name = `Clump[${index}](${randomId()})`;
     // resClump.sortableChildren = true;
     addInteractivity(resClump, clump, viewport, send);
 
   } else { resClump = prevClump.container; }
 
   // Add content
-  if (resClump.children.length === 0) {
+  const prevContent = findChild(resClump, "content");
+  if (prevContent == null) {
     content = new PIXI.Container();
     content.name = `content(${randomId()})`;
     content.sortableChildren = true;
 
     resClump.addChild(content);
-  } else { content = resClump.getChildAt(0) as PIXI.Container; }
+  } else { content = prevContent as PIXI.Container; }
   content.visible = true;
 
   console.log(`==> ${newContainer ? "" : "NO "}NEW RESCLUMP (${resClump.name.split("(")[1].slice(0, 4)})`);
@@ -278,6 +292,7 @@ function renderClump(
     if (true || newContainer) {
       content.removeChildren();
       for (let i = 0; i < children.length; i++) {
+        if (children[i].child == null) continue;
         children[i].child.zIndex = children.length - i;
         console.log("=====> ADD CHILD", i, children[i].child.name);
         content.addChild(children[i].child);
@@ -335,7 +350,7 @@ function renderClump(
       break;
     }
   }
-  if (appliedFilter) {
+  if (findChild(resClump, "FilterSprite") != null) {
     // If we've applied a filter (potentially in a previous step), hide the content
     content.visible = false;
   }
@@ -371,6 +386,7 @@ function renderClump(
   if (diffs.has("mask")) {
     const mask = clump.mask != null ? renderClump(
       blink,
+      0,
       clump.mask,
       undefined,
       canvas,
@@ -474,4 +490,13 @@ function addInteractivity(container: PIXI.Container, clump: Clump, viewport: Vie
 
   // To get global mouse position at any point:
   // console.log("MOUSE", blink.renderer.plugins.interaction.pointer.global);
+}
+
+function findChild(container: PIXI.Container, namePrefix: string): PIXI.DisplayObject | null {
+  for (let i = 0; i < container.children.length; i++) {
+    if (container.children[i].name.includes(namePrefix)) {
+      return container.children[i];
+    }
+  }
+  return null;
 }
