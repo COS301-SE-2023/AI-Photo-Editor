@@ -40,6 +40,7 @@ function buildBlink() {
     console.log(error.toString());
   }
 
+  console.log("Attempting to fix tsconfig...");
   if (existsSync(tsconfigPath)) {
     const tsconfigRaw = readFileSync(tsconfigPath, "utf8");
     const withoutSingleLineComments = tsconfigRaw.replace(
@@ -51,39 +52,24 @@ function buildBlink() {
     tsconfigJSON.compilerOptions.moduleResolution = "node";
     delete tsconfigJSON.compilerOptions.verbatimModuleSyntax;
     writeFileSync(tsconfigPath, JSON.stringify(tsconfigJSON, null, 2));
+    console.log("TSConfig fixed");
   } else {
     console.log("TSConfig not found. Building...");
   }
 
   command = "npm run build";
 
-  // console.log("Building blink...");
+  console.log("Building blink...");
 
-  // try {
-  //   const output = execSync(command, options);
-  //   console.log(output.toString());
-  // } catch (error) {
-  //   console.log(error.toString());
-  // }
-
-  // console.log("Building blink completed");
-}
-
-function helper() {
-  const directory = resolve(join(__dirname, "..", "blix-plugins/blink"));
-  const options = { cwd: directory };
-  const command = "npm run build";
-
-  console.log("Starting build...");
   try {
     const output = execSync(command, options);
     console.log(output.toString());
   } catch (error) {
     console.log(error.toString());
   }
-  console.log("Done building blink");
+
+  console.log("Building blink completed");
 }
 
-// buildGLFX();
+buildGLFX();
 buildBlink();
-helper();
