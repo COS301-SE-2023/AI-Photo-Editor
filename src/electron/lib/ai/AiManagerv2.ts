@@ -42,7 +42,7 @@ type PromptOptions = {
 export const genericErrorResponse = "Oops, that wasn't supposed to happen😅";
 
 export class AiManager {
-  private readonly graphExporter: CoreGraphExporter<BlypescriptProgram>;
+  private graphExporter: CoreGraphExporter<BlypescriptProgram>;
   private readonly chats: Chat[] = [];
   private blypescriptInterpreter: BlypescriptInterpreter;
   private blypescriptToolbox: BlypescriptToolbox;
@@ -61,8 +61,12 @@ export class AiManager {
   }
 
   async executePrompt({ prompt, graphId, model, apiKey, chatId, verbose }: PromptOptions) {
+    this.blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolbox);
+    this.graphExporter = new CoreGraphExporter(
+      new BlypescriptExportStrategyV2(this.blypescriptToolbox)
+    );
+    // console.log(this.blypescriptToolbox.toString());
     const blypescriptProgram = this.graphExporter.exportGraph(this.graphManager.getGraph(graphId));
-    const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolbox);
     this.blypescriptInterpreter = new BlypescriptInterpreter(this.toolbox, this.graphManager);
 
     let chat = this.chats.find((chat) => chat.id === chatId);
@@ -76,7 +80,7 @@ export class AiManager {
       {
         role: "system",
         content: generateGuidePrompt({
-          interfaces: blypescriptToolbox.toString(),
+          interfaces: this.blypescriptToolbox.toString(),
         }),
       },
       {
@@ -119,7 +123,7 @@ export class AiManager {
         } satisfies Result;
       }
 
-      const result = BlypescriptProgram.fromString(response.data.content, blypescriptToolbox);
+      const result = BlypescriptProgram.fromString(response.data.content, this.blypescriptToolbox);
 
       if (!result.success) {
         logger.error(result.error, result.message);
