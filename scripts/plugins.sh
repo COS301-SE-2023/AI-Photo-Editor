@@ -19,12 +19,13 @@ echo "Building glfx-plugin completed"
 # BLINK
 # ===================================================================
 
-tsconfigPath=$(realpath "$blixPluginDirectory/blink/node_modules/@tsconfig/svelte/tsconfig.json")
 blinkDirectory=$(realpath "$blixPluginDirectory/blink")
 
 echo "Installing blink node_modules..."
 cd "$blinkDirectory"
 output=$(npm ci 2>&1) && echo "$output" || echo "$output"
+
+tsconfigPath=$(realpath "$blixPluginDirectory/blink/node_modules/@tsconfig/svelte/tsconfig.json")
 
 echo "Attempting to fix tsconfig..."
 if test -f "$tsconfigPath"; then
