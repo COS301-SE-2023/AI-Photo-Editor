@@ -44,3 +44,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.TEST_TOKEN }}
         shell: bash
+
+    timeout-minutes: 30

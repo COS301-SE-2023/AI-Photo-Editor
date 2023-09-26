@@ -16,7 +16,7 @@
     faPizzaSlice,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
-  import { toastStore } from "lib/stores/ToastStore";
+  import { toastStore } from "../../lib/stores/ToastStore";
 
   let selectedCacheItems: CacheUUID[] = [];
   // Not used at the moment
