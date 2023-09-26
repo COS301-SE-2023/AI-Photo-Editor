@@ -204,7 +204,32 @@ const blinkNodes = {
             { id: "center.y", min: 0, max: 2000, step: 1.0 },
         ]
     ],
-
+    "brightnessContrast": [
+        "Brightness / Contrast",
+        "Adjusts the brightness and contrast of the image.",
+        [
+            { id: "brightness", min: 0, max: 10, step: 0.1 },
+            { id: "contrast", min: 0, max: 10, step: 0.1 },
+        ]
+    ],
+    "saturationGamma": [
+        "Saturation / Gamma",
+        "Adjusts the saturation and gamma of the image.",
+        [
+            { id: "saturation", min: 0, max: 10, step: 0.1 },
+            { id: "gamma", min: 0, max: 10, step: 0.1 },
+        ]
+    ],
+    "colorChannel": [
+        "Color-channel",
+        "Shifts the color channel and alpha of the image.",
+        [
+            { id: "red", min: 0, max: 10, step: 0.1 },
+            { id: "green", min: 0, max: 10, step: 0.1 },
+            { id: "blue", min: 0, max: 10, step: 0.1 },
+            { id: "alpha", min: 0, max: 10, step: 0.1 },
+        ]
+    ],
 };
 
 Object.keys(blinkNodes).forEach((key) => {

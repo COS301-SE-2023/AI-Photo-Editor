@@ -11,7 +11,8 @@ import {
   BulgePinchFilter,
   GlitchFilter,
   ZoomBlurFilter,
-  TwistFilter
+  TwistFilter,
+  AdjustmentFilter
 } from "pixi-filters"
 
 export type BlinkCanvas = {
@@ -43,7 +44,7 @@ export type Transform = {
 
 export type Filter = {
     class: "filter";
-    type: "blur" | "noise" | "bloom" | "grayscale" | "bevel" | "outline" | "dot" | "crt" | "emboss" | "bulge" | "glitch" | "zoomblur" | "twist";
+    type: "blur" | "noise" | "bloom" | "grayscale" | "bevel" | "outline" | "dot" | "crt" | "emboss" | "bulge" | "glitch" | "zoomblur" | "twist" | "brightnessContrast" | "saturationGamma" | "colorChannel";
     params: any[]
 };
 
@@ -84,7 +85,7 @@ export function getPixiFilter(filter: Filter) {
           {
             radius: filter.params[0],
             strength: filter.params[1],
-            center: [filter.params[2], filter.params[3]],
+            center: new PIXI.Point(filter.params[2], filter.params[3]),
           }
         );
         case "glitch":      return new GlitchFilter(...filter.params);
@@ -95,7 +96,33 @@ export function getPixiFilter(filter: Filter) {
             center: [filter.params[2], filter.params[3]],
           }
         );
-        case "twist":       return new TwistFilter(...filter.params);
+        case "twist":       return new TwistFilter(
+          {
+            angle: filter.params[0],
+            radius: filter.params[1],
+            offset: new PIXI.Point(filter.params[2], filter.params[3]),
+          }
+        );
+        case "brightnessContrast": return new AdjustmentFilter(
+          {
+            brightness: filter.params[0],
+            contrast: filter.params[1],
+          }
+        );
+        case "saturationGamma": return new AdjustmentFilter(
+          {
+            saturation: filter.params[0],
+            gamma: filter.params[1],
+          }
+        );
+        case "colorChannel": return new AdjustmentFilter(
+          {
+            red: filter.params[0],
+            green: filter.params[1],
+            blue: filter.params[2],
+            alpha: filter.params[3],
+          }
+        );
     }
   } catch {
     return new PIXI.Filter();
