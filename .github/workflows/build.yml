@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Build Blix Plugins
-        run: node scripts/plugin.js
+        run: ./scripts/plugins.sh
 
       - name: Build/Release Blix
         run: |
