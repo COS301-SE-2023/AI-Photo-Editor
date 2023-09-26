@@ -9,15 +9,14 @@ function buildGLFX() {
 
   console.log("Building glfx...");
 
-  exec(command, options, (err, stdout) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
+  try {
+    const output = execSync(command, options);
+    console.log(output.toString());
+  } catch (error) {
+    console.log(error.toString());
+  }
 
-    console.log(stdout);
-    console.log("Done building glfx.");
-  });
+  console.log("Building glfx completed");
 }
 
 function buildBlink() {
