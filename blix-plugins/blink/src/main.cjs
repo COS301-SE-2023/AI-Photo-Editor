@@ -772,7 +772,7 @@ const nodes = {
         const ui = nodeBuilder.createUIBuilder();
         ui.addTextInput({
             componentId: "exportName",
-            label: "Canvas Export Name",
+            label: "Export Name",
             defaultValue: "Blink Export",
             triggerUpdate: true,
         }, {});

@@ -36,7 +36,6 @@
             width: 500,
             height: 500,
             backgroundColor: "#181925",
-            // transparent: true,
             antialias: true,
             resolution: 1,
             autoDensity: true,
@@ -125,11 +124,6 @@
         canvasBlock = imgCanvasBlock;
 
         viewport.addChild(imgCanvas);
-
-        const viewportFitX = canvasConfig.canvasDims.w + 2 * imgCanvasInitialPadding;
-        const viewportFitY = canvasConfig.canvasDims.h + 2 * imgCanvasInitialPadding;
-        viewport.fit(true, viewportFitX, viewportFitY);
-        viewport.moveCenter(canvasConfig.canvasDims.w/2, canvasConfig.canvasDims.h/2);
 
         //===== RENDER Blink =====//
         let hasCentered = false;
