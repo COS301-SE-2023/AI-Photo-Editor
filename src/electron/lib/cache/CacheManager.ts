@@ -192,9 +192,16 @@ export class CacheManager {
         continue;
       }
 
+      const fileType = cacheObject.metadata.contentType.split("/")[1];
+      let fileName = cacheObject.metadata.name || "export";
+
+      if (!fileName.endsWith(`.${fileType}`)) {
+        fileName = `${fileName}.${fileType}`;
+      }
+
       const path = await showSaveDialog({
         title: "Save Asset",
-        defaultPath: join(app.getPath("downloads"), cacheObject.metadata.name || "export.png"),
+        defaultPath: join(app.getPath("downloads"), fileName),
         properties: ["createDirectory"],
       });
 
