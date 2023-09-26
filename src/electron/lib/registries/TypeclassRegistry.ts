@@ -138,6 +138,10 @@ export class TypeclassRegistry implements Registry {
     return res;
   }
 
+  /**
+   * This function currently returns an empty array : TODO
+   * @returns All typeclasses in the registry. Currently empty
+   */
   getTypeclasses(): ICommand[] {
     const commands: ICommand[] = [];
     // for (const key in this.registry) {
