@@ -35,11 +35,29 @@
 
   function takePicture() {
     capture
-      .takePhoto()
-      .then((blob: Blob) => {
+      .grabFrame()
+      .then((imageBitmap: ImageBitmap) => {
         // ws.send(blob);
-        pictureUrl = URL.createObjectURL(blob);
-        cacheStore.refreshStore(pictureUrl);
+        console.log(imageBitmap);
+        // cacheStore.addCacheObject(blob, {contentType: "image/png", name: `Webcam Capture ${Math.floor(100000 * Math.random())}`})
+        // pictureUrl = URL.createObjectURL(blob);
+        // cacheStore.refreshStore(pictureUrl);
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+
+        canvas.width = imageBitmap.width;
+        canvas.height = imageBitmap.height;
+
+        context?.drawImage(imageBitmap, 0, 0);
+
+        canvas.toBlob((blob) => {
+          // const blobUrl = URL.createObjectURL(blob);
+          if (blob)
+            cacheStore.addCacheObject(blob, {
+              contentType: "image/png",
+              name: `Webcam Capture ${Math.floor(100000 * Math.random())}`,
+            });
+        }, "image/png"); // You can specify the MIME type here
       })
       .catch((err: string) => console.log("Error while taking photo ", err));
   }
