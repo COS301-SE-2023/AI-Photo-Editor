@@ -51,10 +51,11 @@ class CacheStore {
           if (isUpdateNotification(payload)) {
             // Handle notification
             this.cacheStore.update((store) => {
-              for (const obj of payload.cache) {
-                store[obj.uuid] = obj.metadata;
-              }
-              return store;
+              const newState: CacheObjects = {};
+              payload.cache.forEach((obj) => {
+                newState[obj.uuid] = obj.metadata;
+              });
+              return newState;
             });
           } else {
             // Handle response
@@ -125,6 +126,28 @@ class CacheStore {
     const messageId = randomMessageId();
 
     const payload = JSON.stringify({ type: "cache-get", id: uuid, messageId } as CacheRequest);
+
+    return new Promise((resolve, reject) => {
+      this.lobby[messageId] = resolve;
+      this.ws.send(payload);
+    });
+  }
+
+  public async exportCache(ids: CacheUUID[]): Promise<void> {
+    const messageId = randomMessageId();
+
+    const payload = JSON.stringify({ type: "export-cache", ids, messageId });
+
+    return new Promise((resolve, reject) => {
+      this.lobby[messageId] = resolve;
+      this.ws.send(payload);
+    });
+  }
+
+  public async delete(ids: CacheUUID[]) {
+    const messageId = randomMessageId();
+
+    const payload = JSON.stringify({ type: "cache-delete", ids, messageId });
 
     return new Promise((resolve, reject) => {
       this.lobby[messageId] = resolve;

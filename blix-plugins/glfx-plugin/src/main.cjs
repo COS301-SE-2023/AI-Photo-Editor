@@ -162,32 +162,10 @@ Object.keys(glfxNodes).forEach((key) => {
 
 const nodes = {
     ...glfxNodes,
-
-    "inputGLFXImage": (context) => {
-        const nodeBuilder = context.instantiate("Input", "inputGLFXImage");
-        nodeBuilder.setTitle("Input GLFX image");
-        nodeBuilder.setDescription("Provides an image input and returns a single image output");
-
-        nodeBuilder.define(async (input, uiInput, from) => {
-            return { "res": { src: uiInput["imagePicker"] } };
-        });
-
-        const ui = nodeBuilder.createUIBuilder();
-        ui.addFilePicker({
-            componentId: "imagePicker",
-            label: "Pick an image",
-            defaultValue: "",
-            triggerUpdate: true,
-        }, {});
-
-        nodeBuilder.setUI(ui);
-
-        nodeBuilder.addOutput("GLFX image", "res", "Result");
-    },
-    "inputGLFXCache": (context) => {
-        const nodeBuilder = context.instantiate("Input/Other", "inputGLFXCache");
-        nodeBuilder.setTitle("Input GLFX cache");
-        nodeBuilder.setDescription("Provides an cache input and returns a single image output");
+    "GLFXImage": (context) => {
+        const nodeBuilder = context.instantiate("Input", "GLFXImage");
+        nodeBuilder.setTitle("GLFX Image");
+        nodeBuilder.setDescription("Takes a cache object as input and outputs a GLFX image");
 
         nodeBuilder.define(async (input, uiInput, from) => {
             return { "res": { src: uiInput["cacheid"] } };

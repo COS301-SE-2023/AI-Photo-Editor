@@ -1,5 +1,5 @@
 { 
-    "name": "glfx-plugin",
+    "name": "glfx",
     "displayName": "GLFX Plugin",
     "description": "Performs basic image operations using glfx.js",
     "version": "0.0.1",

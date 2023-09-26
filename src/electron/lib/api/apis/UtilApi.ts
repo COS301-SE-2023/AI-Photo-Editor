@@ -99,6 +99,15 @@ export class UtilApi implements ElectronMainApi<UtilApi> {
       status: "success",
       message: response.message,
     };
+    // try {
+    // } catch (error) {
+    //   logger.error(JSON.stringify(error));
+    // }
+
+    // return {
+    //   status: "error",
+    //   message: "Very suspicious...",
+    // };
   }
 
   // Add something extra validation

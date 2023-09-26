@@ -12,6 +12,7 @@
   import { type SelectionBoxItem } from "../../types/selection-box";
   import WebView from "./WebView.svelte";
   import { TweakApi } from "../../lib/webview/TweakApi";
+  import { cacheStore } from "../../lib/stores/CacheStore";
   import {
     faBacon,
     faBowlRice,
@@ -27,6 +28,7 @@
     faPizzaSlice,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
+  import { toastStore } from "lib/stores/ToastStore";
 
   const noContentIcons = [
     faBacon,
@@ -55,6 +57,7 @@
 
   let mediaId = writable("");
   let oldMediaId: string | null = null;
+  let webview: WebView;
 
   const unsubMedia = mediaId.subscribe((newMediaId) => {
     // console.log("SUBSCRIBE MEDIA ID", oldMediaId, newMediaId);
@@ -81,8 +84,17 @@
   });
 
   async function exportMedia(e: Event) {
+    if (selectedItems.length === 0) {
+      toastStore.trigger({ message: "No media selected.", type: "warn" });
+      return;
+    }
+
     if ($media?.dataType && $media?.content) {
-      await mediaStore.exportMedia($media);
+      if ($media.display.displayType === "webview") {
+        webview.exportMedia(e);
+      } else {
+        await mediaStore.exportMedia($media);
+      }
     }
   }
 
@@ -130,9 +142,9 @@
     <div
       on:click="{exportMedia}"
       on:keydown="{null}"
-      class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+      class="flex h-7 min-w-max select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
     >
-      Export
+      Save Asset
     </div>
     <!-- <div class="self-end">
       <SelectionBox
@@ -145,10 +157,18 @@
 
   <div class="media">
     {#if $media}
-      <svelte:component
-        this="{displayIdToSvelteConstructor[$media.display.displayType]}"
-        {...getDisplayProps($media)}
-      />
+      {#if $media.display.displayType === "webview"}
+        <svelte:component
+          this="{displayIdToSvelteConstructor[$media.display.displayType]}"
+          bind:this="{webview}"
+          {...getDisplayProps($media)}
+        />
+      {:else}
+        <svelte:component
+          this="{displayIdToSvelteConstructor[$media.display.displayType]}"
+          {...getDisplayProps($media)}
+        />
+      {/if}
       <!-- <TextBox
           content="ERROR: Unknown data type: ${JSON.stringify($media)}"
           status="error"
