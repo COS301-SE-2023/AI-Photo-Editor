@@ -147,6 +147,7 @@ export class CoreGraphInterpreter {
     }
 
     // Resolve all input values (functions)
+
     const inputs: { [key: string]: T }[] = await Promise.all(inputPromises).catch((err) => {
       throw err;
     });
