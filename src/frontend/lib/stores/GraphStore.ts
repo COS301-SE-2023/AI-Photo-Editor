@@ -124,7 +124,7 @@ export class GraphStore {
                       if (first) {
                         first = false;
                         oldState = state;
-                      } else if (state !== oldState) {
+                      } else if (state !== oldState || typeof state === "object") {
                         // Prevent unnecessary updates when the value is the exact same as the prior
                         // Only would then update if maybe the set function is used but old state === new state
                         this.globalizeUIInputs(node, input).catch((err) => {

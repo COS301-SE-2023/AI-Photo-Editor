@@ -300,6 +300,34 @@ export class NodeUIBuilder {
     return this;
   }
 
+  public addCheckbox(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Checkbox);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.Checkbox, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? false,
+      triggerUpdate: config.triggerUpdate ?? true,
+    };
+    return this;
+  }
+
+  public addOriginPicker(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.OriginPicker);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.OriginPicker, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "mm",
+      triggerUpdate: config.triggerUpdate ?? true,
+    };
+    return this;
+  }
+
   /**
    * @param label Label for the accordion
    * @param builder NodeUIBuilder for the accordion
@@ -362,6 +390,55 @@ export class NodeUIBuilder {
       componentId,
       label: config.label,
       defaultValue: config.defaultValue ?? 0,
+      triggerUpdate: config.triggerUpdate ?? true,
+    };
+    return this;
+  }
+
+  public addMatrixInput(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.MatrixInput);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.MatrixInput, componentId, [props])
+    );
+
+    function createZeroRow(cols: number) {
+      return Array.from({ length: cols }, () => 0);
+    }
+
+    function createZeroMatrix(rows: number, cols: number) {
+      return Array.from({ length: rows }, () => createZeroRow(cols));
+    }
+
+    function sanitizeMatrix(matrix: any, rows: number, cols: number): number[][] {
+      if (!Array.isArray(matrix)) return createZeroMatrix(rows, cols);
+
+      // Trim overflow
+      matrix = matrix.slice(0, rows);
+
+      // Check each row
+      for (let r = 0; r < rows; r++) {
+        if (!Array.isArray(matrix[r])) {
+          matrix[r] = createZeroRow(cols);
+          continue;
+        }
+
+        // Trim overflow
+        matrix[r] = matrix[r].slice(0, cols);
+
+        // Check each cell
+        for (let c = 0; c < cols; c++) {
+          if (typeof matrix[r][c] !== "number") {
+            matrix[r][c] = 0;
+          }
+        }
+      }
+      return matrix;
+    }
+
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: sanitizeMatrix(config.defaultValue, props.rows as number, props.cols as number),
       triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;

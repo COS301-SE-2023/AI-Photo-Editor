@@ -593,19 +593,19 @@ const nodes = {
         nodeBuilder.setDescription("Construct a Blink matrix");
 
         const ui = nodeBuilder.createUIBuilder();
-        ui.addSlider(
+        ui.addMatrixInput(
             {
-                componentId: "number",
-                label: "Input number",
-                defaultValue: 0,
+                componentId: "matrix",
+                label: "Input matrix",
+                defaultValue: [],
                 triggerUpdate: true,
             },
-            { min: 0, max: 100, set: 0.1 }
+            { rows: 3, cols: 3, step: 1 }
         );
 
         nodeBuilder.define(async (input, uiInput, from) => {
             return {
-                "res": {}
+                "res": uiInput["matrix"]
             }
         });
 
@@ -618,7 +618,7 @@ const nodes = {
     "layer": (context) => {
         const nodeBuilder = context.instantiate("Blink/Utils", "layer");
         nodeBuilder.setTitle("Layer");
-        nodeBuilder.setDescription("Layer two or more Blink clumps");
+        nodeBuilder.setDescription("Layer two or more Blink clumps. Clumps inputted at the beginning are placed on top in the canvas.");
 
         const ui = nodeBuilder.createUIBuilder();
         const getTransform = addTransformInput(ui);

@@ -95,6 +95,11 @@
     <div class="node">
       <div class="header">
         <h1>{$toolboxNode?.title || node.displayName}</h1>
+        <!-- {#if $toolboxNode?.description}
+          <div class="descriptionTooltip">
+            {$toolboxNode.description}<br />
+          </div>
+        {/if} -->
       </div>
       <!-- <div class="node-body" style="max-width: 400px">
         <h2>{Math.floor(Math.random() * 100000000)}</h2>
@@ -212,6 +217,16 @@
     flex-direction: column;
     padding: 10px;
     gap: 10px;
+  }
+
+  .descriptionTooltip {
+    display: block;
+    position: absolute;
+    background: #444444;
+    color: white;
+    border-radius: 2px;
+    padding: 0.6em;
+    bottom: 100%;
   }
 
   h1 {
