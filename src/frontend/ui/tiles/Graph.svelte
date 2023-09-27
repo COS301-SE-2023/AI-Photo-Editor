@@ -1,7 +1,7 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
   import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
-  import { derived, type Readable } from "svelte/store";
+  import { derived, writable, type Readable } from "svelte/store";
   import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
@@ -35,8 +35,8 @@
     const items: { id: string; title: string }[] = [];
     const graphIds = $projectsStore.activeProject.graphs;
 
-    for (graphId of graphIds) {
-      const graphStore = $graphMall[graphId];
+    for (const id of graphIds) {
+      const graphStore = $graphMall[id];
       if (graphStore) {
         const state = get(graphStore);
         items.push({
@@ -46,11 +46,12 @@
       }
     }
 
+    items.sort((a, b) => a.id.localeCompare(b.id));
     return items;
   });
 
   // Makes sure that the active graph id is always set correctly
-  $: focusedGraphStore.set({ panelId, graphUUID: graphId });
+  // $: focusedGraphStore.set({ panelId, graphUUID: graphId });
 
   // Sets new graph created as the active graph
   $: {
