@@ -110,7 +110,7 @@
   }
 </script>
 
-<div class="fullPane {Object.keys($cacheStore).length > 0 ? 'overflow-auto' : ''}">
+<div class="fullPane {Object.keys($cacheStore).length > 0 ? 'overflow-auto' : ''} select-none">
   {#if Object.keys($cacheStore).length > 0}
     <div class="itemsBox">
       {#each Object.keys($cacheStore) as uuid}
@@ -178,7 +178,7 @@
 
 <svelte:window
   on:click="{() => {
-    if (!controlKeyDown) selectedCacheItems = [];
+    selectedCacheItems = [];
   }}"
   on:keydown="{handleKeyDown}"
   on:keyup="{handleKeyUp}"

@@ -7,7 +7,11 @@ export class MediaClientApi implements ElectronWindowApi<MediaClientApi> {
     mediaStore.refreshStore(mediaOutput);
   }
 
-  public onMediaOutputIdsChanged(outputIds: Set<MediaOutputId>) {
-    mediaStore.updateOutputIds(outputIds);
+  // public onMediaOutputIdsChanged(outputIds: Set<MediaOutputId>) {
+  //   mediaStore.updateOutputIds(outputIds);
+  // }
+
+  public async outputNodesChanged() {
+    await mediaStore.outputNodesChanged();
   }
 }
