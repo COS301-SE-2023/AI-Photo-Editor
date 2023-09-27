@@ -15,7 +15,7 @@
     ],
     "^.+\\.js$": "babel-jest"
   },
-  "coveragePathIgnorePatterns": ["blix-plugins"],
+  "coveragePathIgnorePatterns": ["blix-plugins","node_modules","src/electron/lib/plugins/PluginManager"],
   "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node", "svelte"],
   "coverageDirectory": "coverage",
