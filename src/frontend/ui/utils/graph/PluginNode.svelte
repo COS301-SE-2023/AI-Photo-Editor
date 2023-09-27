@@ -63,6 +63,7 @@
     if (e.detail.e.button === 2) {
       const [_2, ...nodeUUIDParts] = e.detail.node.id.split("_");
       const nodeUUID = nodeUUIDParts.join("_");
+      console.log("REMOVE NODE");
       await window.apis.graphApi.removeNode(graphId, nodeUUID);
     } else {
       nodeIdLastClicked.set(node.uuid);

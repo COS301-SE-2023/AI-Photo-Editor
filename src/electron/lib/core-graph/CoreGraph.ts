@@ -548,6 +548,7 @@ export class CoreGraph extends UniqueEntity {
       // Remove all edges from node
       for (const anchor in node.getAnchors) {
         if (!node.getAnchors.hasOwnProperty(anchor)) continue;
+
         // Remove all edges feeding into node
         if (this.anchors[anchor]?.ioType === AnchorIO.input) {
           if (this.edgeDest[anchor]) {
