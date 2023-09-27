@@ -81,8 +81,6 @@ describe("Blypescript interpreter", () => {
     const program1 = exporter.exportGraph(graph);
     const program2 = result2.data as BlypescriptProgram;
 
-    console.log(program1.toString());
-    console.log(program2.toString());
     blypescriptInterpreter.run(graph.uuid, program1, program2);
   });
 });
