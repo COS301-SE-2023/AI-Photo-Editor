@@ -10,6 +10,4 @@
   export let config: UIComponentConfig;
 </script>
 
-<div class="{$blixStore.production ? 'hidden' : ''}">
-  <Dial props="{props}" inputStore="{inputStore}" config="{config}" icon="{faCogs}" />
-</div>
+<Dial props="{props}" inputStore="{inputStore}" config="{config}" icon="{faCogs}" />
