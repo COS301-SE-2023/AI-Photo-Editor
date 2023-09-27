@@ -4,6 +4,7 @@ import { constructLayout, layoutTemplate, type UIProject } from "../Project";
 import type { SharedProject } from "@shared/types";
 import { graphMall } from "./GraphStore";
 import { cacheStore } from "./CacheStore";
+import { mediaStore } from "./MediaStore";
 
 type ProjectsStoreState = {
   projects: UIProject[];
@@ -104,7 +105,10 @@ class ProjectsStore {
       state.projects = state.projects.filter((p) => p.id !== projectId);
       return state;
     });
+
+    // Clear all stores once removed
     await cacheStore.deleteAllAssets();
+    await mediaStore.clearMedia();
   }
 
   /**

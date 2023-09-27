@@ -87,6 +87,12 @@ class MediaStore {
     return get(this.outputIds).find((id) => id.nodeId === nodeId)?.mediaId || null;
   }
 
+  public async clearMedia() {
+    this.store.set({});
+    this.outputIds.set([]);
+    await mediaStore.clearMedia();
+  }
+
   public get subscribe() {
     return this.store.subscribe;
   }
