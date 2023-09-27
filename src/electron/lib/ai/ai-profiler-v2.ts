@@ -9,7 +9,6 @@ import { PackageData } from "../../lib/plugins/PluginManager";
 import { NodePluginContext, Plugin } from "../../lib/plugins/Plugin";
 import {
   BlypescriptExportStrategy,
-  BlypescriptExportStrategyV2,
   CoreGraphExporter,
 } from "../../lib/core-graph/CoreGraphExporter";
 import { BlypescriptProgram, BlypescriptToolbox, colorString } from "./AiLang";
@@ -47,7 +46,7 @@ export class Profiler {
     const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
 
     // const blypescriptExporter = new BlypescriptExportStrategy(this.toolboxRegistry);
-    const blypescriptExporter = new BlypescriptExportStrategyV2(blypescriptToolbox);
+    const blypescriptExporter = new BlypescriptExportStrategy(blypescriptToolbox);
     const coreGraphExporter = new CoreGraphExporter(blypescriptExporter);
     const blypescriptProgram = coreGraphExporter.exportGraph(coreGraph);
 
@@ -219,7 +218,7 @@ export class Profiler {
     const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
 
     const coreGraph = this.graphManager.getGraph(graphId);
-    const blypescriptExporter = new BlypescriptExportStrategyV2(blypescriptToolbox);
+    const blypescriptExporter = new BlypescriptExportStrategy(blypescriptToolbox);
     const coreGraphExporter = new CoreGraphExporter(blypescriptExporter);
     const blypescriptProgram = coreGraphExporter.exportGraph(coreGraph);
 

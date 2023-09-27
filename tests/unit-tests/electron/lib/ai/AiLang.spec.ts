@@ -1,10 +1,20 @@
-import { BlypescriptProgram, BlypescriptToolbox } from "../../../../../src/electron/lib/ai/AiLang";
+import {
+  BlypescriptInterpreter,
+  BlypescriptProgram,
+  BlypescriptToolbox,
+} from "../../../../../src/electron/lib/ai/AiLang";
 import { ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
 import { createOutputNode } from "../../../../../src/electron/lib/Blix";
 import { join } from "path";
 import { readFileSync, readdirSync } from "fs";
 import { PackageData } from "../../../../../src/electron/lib/plugins/PluginManager";
 import { Plugin, NodePluginContext } from "../../../../../src/electron/lib/plugins/Plugin";
+import {
+  BlypescriptExportStrategy,
+  CoreGraphExporter,
+} from "../../../../../src/electron/lib/core-graph/CoreGraphExporter";
+import { CoreGraph } from "../../../../../src/electron/lib/core-graph/CoreGraph";
+import { CoreGraphManager } from "../../../../../src/electron/lib/core-graph/CoreGraphManager";
 
 describe("Blypescript parser", () => {
   test("should parse an empty graph", () => {
@@ -30,6 +40,81 @@ describe("Blypescript parser", () => {
     expect(result.success).toBe(true);
     const program = result.data as BlypescriptProgram;
     expect(program.statements.length).toBe(4);
+  });
+});
+
+describe("Blypescript interpreter", () => {
+  test("add nodes to empty graph", () => {
+    const toolbox = generateToolbox(["glfx", "input", "blink"]);
+    const blypescriptToolbox = BlypescriptToolbox.fromToolbox(toolbox);
+    const graph = new CoreGraph();
+    const coreGraphManager = new CoreGraphManager(toolbox);
+    const blypescriptInterpreter = new BlypescriptInterpreter(toolbox, coreGraphManager);
+    const exporter = new CoreGraphExporter(new BlypescriptExportStrategy(blypescriptToolbox));
+
+    coreGraphManager.addGraph(graph);
+
+    let response1 = graph.addNode(toolbox.getNodeInstance("input.number"), { x: 0, y: 0 });
+    const uuid1 = response1.data!.nodeId;
+    response1 = graph.addNode(toolbox.getNodeInstance("blix.output"), { x: 0, y: 0 });
+    const uuid2 = response1.data!.nodeId;
+    response1 = graph.addNode(toolbox.getNodeInstance("blink.inputImage"), { x: 0, y: 0 });
+    const uuid3 = response1.data!.nodeId;
+
+    const node1 = graph.getNodes[uuid1];
+    const node2 = graph.getNodes[uuid2];
+    const node3 = graph.getNodes[uuid3];
+
+    const anchorFrom = Object.keys(node3.getAnchors)[1];
+    const anchorTo = Object.keys(node2.getAnchors)[0];
+    let response2 = graph.addEdge(anchorFrom, anchorTo);
+
+    const result2 = BlypescriptProgram.fromString(
+      `graph() {
+			const inputGLFXImage1 = glfx.GLFXImage();
+			const output = blix.output(inputGLFXImage1['res'], 'output');		
+		}`,
+      blypescriptToolbox
+    );
+
+    expect(result2.success).toBe(true);
+    const program1 = exporter.exportGraph(graph);
+    const program2 = result2.data as BlypescriptProgram;
+
+    blypescriptInterpreter.run(graph.uuid, program1, program2);
+  });
+});
+
+describe("BlypescriptExporter", () => {
+  let toolbox: ToolboxRegistry;
+  let blypescriptToolbox: BlypescriptToolbox;
+  let exporter: CoreGraphExporter<BlypescriptProgram>;
+  let graph: CoreGraph;
+
+  beforeEach(() => {
+    toolbox = generateToolbox(["glfx", "input"]);
+    blypescriptToolbox = BlypescriptToolbox.fromToolbox(toolbox);
+    exporter = new CoreGraphExporter(new BlypescriptExportStrategy(blypescriptToolbox));
+
+    graph = new CoreGraph();
+    let response1 = graph.addNode(toolbox.getNodeInstance("input.number"), { x: 0, y: 0 });
+    const uuid1 = response1.data!.nodeId;
+    response1 = graph.addNode(toolbox.getNodeInstance("blix.output"), { x: 0, y: 0 });
+    const uuid2 = response1.data!.nodeId;
+    response1 = graph.addNode(toolbox.getNodeInstance("glfx.brightnessContrast"), { x: 0, y: 0 });
+    const uuid3 = response1.data!.nodeId;
+
+    const node1 = graph.getNodes[uuid1];
+    const node2 = graph.getNodes[uuid2];
+
+    const anchorFrom = Object.keys(node1.getAnchors)[0];
+    const anchorTo = Object.keys(node2.getAnchors)[0];
+    let response2 = graph.addEdge(anchorFrom, anchorTo);
+  });
+
+  test("should export a graph to blypescript", () => {
+    const blypescriptProgram = exporter.exportGraph(graph);
+    expect(blypescriptProgram).toBeDefined();
   });
 });
 
