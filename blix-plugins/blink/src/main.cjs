@@ -43,6 +43,15 @@ function addTransformInput(ui, props = ["position", "rotation", "scale"]) {
             { step: 1 }
         );
     }
+    ui.addOriginPicker(
+        {
+            componentId: "origin",
+            label: "Origin",
+            defaultValue: "mm",
+            triggerUpdate: true,
+        },
+        {}
+    );
     return (uiInput) => ({
         ...(props.includes("position") ? { position: { x: uiInput?.positionX, y: uiInput?.positionY } } : {}),
         ...(props.includes("rotation") ? { rotation: uiInput?.rotation } : {}),
