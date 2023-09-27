@@ -11,7 +11,7 @@
       <br />
       {#each Object.keys(data.assets) as assetId}
         {#if data.assets[assetId].type === "image"}
-          <img src="{data.assets[assetId].data}" width="20px" alt="" />
+          <!-- <img src="{data.assets[assetId].data}" width="20px" alt="" /> -->
         {/if}
       {/each}
       <br />
@@ -21,10 +21,12 @@
     {:else if data["class"] === "clump"}
       <span style="color: teal">CLUMP</span> [{Math.round(data.transform.position.x)}, {Math.round(
         data.transform.position.y
-      )}] <span style="color: blue">
+      )}] <span style="color: lightblue">
       {#if data?.filters}
         &lt;{#each data.filters as filter}{filter.type}{/each}&gt;
       {/if}
+      <!-- {#if data?.mask} MASK: {data.mask} {/if} -->
+      MASK: {data.mask}
       </span>
       <ul>
         {#each data.elements as element}

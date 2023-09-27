@@ -20,7 +20,7 @@ import { Blix } from "./electron/lib/Blix";
 import { CoreGraphInterpreter } from "./electron/lib/core-graph/CoreGraphInterpreter";
 import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
-import { type } from "os";
+import { type, userInfo } from "os";
 
 const isProd =
   process.env.NODE_ENV === "production" || app.isPackaged || process.env.NODE_ENV === "test";
@@ -77,9 +77,11 @@ app.on("ready", async () => {
   });
 
   // TODO: Remove
-  // await session.defaultSession.loadExtension(
-  //   "/home/rec1dite/.config/google-chrome/Default/Extensions/aamddddknhcagpehecnhphigffljadon/2.6.1_0"
-  // );
+  if (userInfo().username === "rec1dite") {
+    await session.defaultSession.loadExtension(
+      "/home/rec1dite/.config/google-chrome/Default/Extensions/aamddddknhcagpehecnhphigffljadon/2.6.1_0"
+    );
+  }
 
   // const coreGraphInterpreter = new CoreGraphInterpreter(new ToolboxRegistry);
   // coreGraphInterpreter.run();

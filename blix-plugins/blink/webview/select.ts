@@ -1,11 +1,12 @@
 import { type Viewport } from "pixi-viewport";
 import * as PIXI from "pixi.js";
+import { OriginPoint } from "./types";
 
 const BOX_CORNER_DOT_SIZE = 5;
 const BOX_EDGE_DOT_SIZE = 4;
 const BOX_LINE_WIDTH = 2;
 
-export function createBoundingBox(transMatrix: PIXI.Matrix, bounds: PIXI.Rectangle, viewport: Viewport) {
+export function createBoundingBox(transMatrix: PIXI.Matrix, bounds: PIXI.Rectangle, viewport: Viewport, origin: PIXI.Point) {
 
   //===== COMPUTE CORNERS =====//
   const tl = transMatrix.apply(new PIXI.Point(bounds.x, bounds.y));
@@ -17,7 +18,11 @@ export function createBoundingBox(transMatrix: PIXI.Matrix, bounds: PIXI.Rectang
 
   for (let c = 0; c < 4; c++) {
     corners[c] = viewport.toScreen(corners[c]);
+    // corners[c] = viewport.toWorld(corners[c]);
   }
+
+  const boxWidth = corners[1].x - corners[0].x;
+  const boxHeight = corners[3].y - corners[0].y;
 
   //===== CONSTRUCT BOX LINES =====//
   const boxLines = new PIXI.Graphics();
@@ -56,12 +61,18 @@ export function createBoundingBox(transMatrix: PIXI.Matrix, bounds: PIXI.Rectang
     boxDots.push(boxDot2);
   }
 
+  const originDot = new PIXI.Graphics();
+  originDot.lineStyle(1, 0xf43e5c, 1);
+  // TODO: Swap 0.5 for origin point
+  originDot.drawCircle(corners[0].x + 0.5*boxWidth, corners[0].y + 0.5*boxHeight, 0.5 * BOX_CORNER_DOT_SIZE);
+
   //===== BUILD BOX =====//
   const box = new PIXI.Container();
   box.addChild(boxLines);
   for (const boxDot of boxDots) {
     box.addChild(boxDot);
   }
+  box.addChild(originDot);
 
   box.zIndex = 1000;
 

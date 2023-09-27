@@ -4,12 +4,14 @@ import {
   type Atom,
   type Clump,
   type BlinkCanvas,
+  type WindowWithApis,
 } from "./types";
 import { Viewport } from "pixi-viewport";
 import { createBoundingBox } from "./select";
 import { renderAtom } from "./atom";
 import { applyFilters } from "./filter";
 import { diffClump } from "./diff";
+import { tick } from "svelte";
 
 export function randomId() {
   return Math.random().toString(36).slice(2, 6);
@@ -28,7 +30,16 @@ export type HierarchyClump = Override<Clump, { elements: (HierarchyClump | Hiera
 export type HierarchyAtom = Atom & HierarchyData;
 // type Clumps = { [key: string]: PIXI.Container };
 
-let selected: string = ""; // NodeUUID of selected clump
+type SelectionState = {
+  uuid: string, // NodeUUID of selected clump
+  container: PIXI.Container,
+  dragging: boolean,
+  prevMousePos: PIXI.Point
+};
+
+const MAX_CHILDREN_IN_CLUMP = 5;
+
+let selection: SelectionState = null;
 
 let oldSceneStructure = "";
 let sceneStructure = "_";
@@ -38,14 +49,14 @@ let scene: PIXI.Container;
 
 let hierarchy: HierarchyCanvas | undefined = undefined;
 
-const textures: { [key: string]: PIXI.Texture } = {}
+const textures: { [key: string]: PIXI.Texture<PIXI.Resource> } = {}
 
-export function renderScene(
+export async function renderScene(
   blink: PIXI.Application,
   canvas: BlinkCanvas,
   viewport: Viewport,
   send: (message: string, data: any) => void
-): { success: boolean; scene: PIXI.Container } {
+): Promise<{ success: boolean; scene: PIXI.Container }> {
   console.log("====================================");
 
   if (!canvas || !canvas.content) return { success: false, scene: null };
@@ -55,70 +66,102 @@ export function renderScene(
     viewport.addChild(scene);
   }
 
-  // Destroy previous viewport contents
-  // scene.removeChildren();
-  // if (boundingBox) {
-  //   boundingBox.removeChildren();
-  // }
-
-  //===== CREATE BOUNDING BOX =====//
-  // TODO
-  if (boundingBox == null) {
+  if (!boundingBox) {
+    //===== CREATE BOUNDING BOX =====//
     boundingBox = new PIXI.Container();
     boundingBox.name = "boundingBox";
+
+    window.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        selection = null;
+      }
+    });
+
     blink.stage.addChild(boundingBox);
+
+    blink.ticker.add(() => {
+      if (boundingBox.children) {
+        boundingBox.removeChildren();
+      }
+
+      if (selection?.uuid) {
+        boundingBox.addChild(createBoundingBox(selection.container.transform.localTransform, selection.container.getLocalBounds(), viewport, selection.container.transform.pivot));
+        // boundingBox.addChild(createBoundingBox(selection.container.transform.worldTransform, selection.container.getBounds(), viewport));
+      }
+    });
   }
 
   //===== PRELOAD IMAGE ASSETS =====//
   const imgPromises = [];
   for (let assetId in canvas.assets) {
     if (canvas.assets[assetId].type === "image") {
-      const cacheId = canvas.assets[assetId].data;
+      const cacheId = canvas.assets[assetId].data as string;
       if (textures[cacheId] != null) continue;
 
       // Get cache object
-      imgPromises.push(new Promise(async (resolve, reject) => {
-        const blob: Blob = await window.cache.get(cacheId);
-        console.log("BLOB", blob);
+      imgPromises.push(new Promise<void>(async (resolve, reject) => {
+        const blob: Blob = await (window as WindowWithApis).cache.get(cacheId);
         const url = window.URL.createObjectURL(blob);
+        console.log("BLOB", blob);
         console.log("URL", url);
+
+        // To get a list of all available loadParsers:
+        // console.log("PARSERS", PIXI.Assets.loader.parsers);
+
+        // Also make note of:
+        //    PIXI.Assets.add(cacheId, url);
+        //    await PIXI.Assets.loader.load(url);
+
+        // NOTE:
+        // There is currently a bug with Pixi.js v5.2.4 where Blob URLs fail to load
+        // on the first frame, and awaiting the load() function has no effect.
+        // See: [https://github.com/pixijs/pixijs/issues/9568]
+
+        // This issue has been fixed in Pixi.js v5.3.1
+        // See: [https://github.com/pixijs/pixijs/pull/9634]
+        // However, v5.3.1 is currently incompatible with the pixi-viewport plugin,
+        // So we'll have to use the below setTimeout() temp fix until pixi-viewport is upgraded.
+
+        // PREFERABLE IMPLEMENTATION AFTER UPGRADE:
+        // const asset = await PIXI.Assets.load({ src: url });
+        // textures[cacheId] = url;
+
         textures[cacheId] = PIXI.Texture.from(url);
-        // const asset = await PIXI.Assets.load(url);
-        // console.log("ASSET", asset);
-        resolve(null);
-        // resolve(asset);
-      }))
-      // TODO: Use bundles instead (e.g. PIXI.Assets.addBundle())
-      // See: [https://pixijs.io/guides/basics/assets.html]
+        resolve();
+      }));
     }
   }
 
   // Construct clump hierarchy
-  const loaded = Promise.all(imgPromises);
-  loaded.then(() => {
-    const { pixiClump, changed } = renderClump(
-      blink,
-      canvas.content,
-      hierarchy?.content,
-      canvas,
-      hierarchy,
-      viewport,
-      send
-    );
+  await Promise.all(imgPromises);
+  if (imgPromises.length > 0) {
+    await new Promise((resolve, reject) => setTimeout(resolve, 50));
+  }
 
-    // Update hierarchy
-    hierarchy = {
-      assets: canvas.assets,
-      content: {
-        ...canvas.content,
-        container: pixiClump,
-      } as HierarchyClump,
-    };
+  const { pixiClump, changed } = renderClump(
+    blink,
+    0,
+    canvas.content,
+    hierarchy?.content,
+    canvas,
+    hierarchy,
+    viewport,
+    send
+  );
 
-    if (hierarchy.content.container != null && changed) {
-      scene.addChild(hierarchy.content.container);
-    }
-  });
+  // Update hierarchy
+  hierarchy = {
+    assets: canvas.assets,
+    config: undefined,
+    content: {
+      ...canvas.content,
+      container: pixiClump,
+    } as HierarchyClump,
+  };
+
+  if (hierarchy.content.container != null && changed) {
+    scene.addChild(hierarchy.content.container);
+  }
 
   return { success: true, scene };
 }
@@ -127,6 +170,7 @@ export function renderCanvas(blink: PIXI.Application, root: Clump) {}
 
 function renderClump(
   blink: PIXI.Application,
+  index: number,
   clump: Clump,
   prevClump: HierarchyClump | undefined,
   canvas: BlinkCanvas,
@@ -152,14 +196,23 @@ function renderClump(
   const hierarchyElements = [];
 
   if (clump.elements) {
-    for (let i = 0; i < clump.elements.length; i++) {
+    for (let i = 0; i < MAX_CHILDREN_IN_CLUMP; i++) {
       const child = clump.elements[i];
       const prevChild = prevClump?.elements != null && prevClump.elements[i];
 
-      if (child.class === "clump") {
+      if (child == null) {
+        //===== REMOVED CHILD =====//
+        if (prevChild) {
+          console.log("----> DELETED CHILD", i);
+          childChanged = true;
+          children.push({ changed: true, child: null });
+        }
+      }
+      else if (child.class === "clump") {
         //===== CHILD CLUMP =====//
         const { pixiClump, changed } = renderClump(
           blink,
+          i,
           child as HierarchyClump,
           (prevChild?.class === "clump" ? prevChild : undefined) as HierarchyClump,
           canvas,
@@ -214,20 +267,21 @@ function renderClump(
   // Create resClump
   if (newContainer) {
     resClump = new PIXI.Container();
-    resClump.name = `Clump(${randomId()})`;
+    resClump.name = `Clump[${index}](${randomId()})`;
     // resClump.sortableChildren = true;
     addInteractivity(resClump, clump, viewport, send);
 
   } else { resClump = prevClump.container; }
 
   // Add content
-  if (resClump.children.length === 0) {
+  const prevContent = findChild(resClump, "content");
+  if (prevContent == null) {
     content = new PIXI.Container();
     content.name = `content(${randomId()})`;
     content.sortableChildren = true;
 
     resClump.addChild(content);
-  } else { content = resClump.getChildAt(0) as PIXI.Container; }
+  } else { content = prevContent as PIXI.Container; }
   content.visible = true;
 
   console.log(`==> ${newContainer ? "" : "NO "}NEW RESCLUMP (${resClump.name.split("(")[1].slice(0, 4)})`);
@@ -239,6 +293,7 @@ function renderClump(
     if (true || newContainer) {
       content.removeChildren();
       for (let i = 0; i < children.length; i++) {
+        if (children[i].child == null) continue;
         children[i].child.zIndex = children.length - i;
         console.log("=====> ADD CHILD", i, children[i].child.name);
         content.addChild(children[i].child);
@@ -289,8 +344,15 @@ function renderClump(
     }
   }
 
-  if (resClump.children.length > 1) {
-    // If we've applied a filter, hide the content
+  let appliedFilter = false;
+  for (let i = 0; i < resClump.children.length; i++) {
+    if (resClump.children[i].name.includes("FilterSprite")) {
+      appliedFilter = true;
+      break;
+    }
+  }
+  if (findChild(resClump, "FilterSprite") != null) {
+    // If we've applied a filter (potentially in a previous step), hide the content
     content.visible = false;
   }
 
@@ -322,9 +384,48 @@ function renderClump(
     }
   }
 
-  resClump.sortChildren();
+  if (diffs.has("mask")) {
+    const mask = clump.mask != null ? renderClump(
+      blink,
+      0,
+      clump.mask,
+      undefined,
+      canvas,
+      undefined,
+      viewport,
+      () => {}
+    ).pixiClump : null;
 
-  // boundingBox.addChild(createBoundingBox(transMatrix, resClump.getBounds(), viewport));
+    if (mask) {
+      const { x: bx, y: by, width: bw, height: bh } = mask.getLocalBounds();
+      const renderPadding = 0;
+      mask.transform.position.x = -bx + renderPadding;
+      mask.transform.position.y = -by + renderPadding;
+
+      // Render to texture
+      const renderTexture = PIXI.RenderTexture.create({ width: bw + 2 * renderPadding, height: bh + 2 * renderPadding, });
+      blink.renderer.render(mask, { renderTexture: renderTexture });
+
+      mask.transform.setFromMatrix(new PIXI.Matrix());
+
+      // Create flattened sprite
+      const renderSprite = new PIXI.Sprite(renderTexture);
+      renderSprite.name = `FilterSprite(${randomId()})`
+      // renderSprite.anchor.x = 0.5;
+      // renderSprite.anchor.y = 0.5;
+      renderSprite.setTransform(bx - renderPadding, by - renderPadding);
+
+      // TODO: Add a separate child container to the clump to
+      // be used specifically for masking
+      resClump.addChild(renderSprite);
+      resClump.mask = renderSprite;
+    }
+    else {
+      resClump.mask = null;
+    }
+  }
+
+  resClump.sortChildren();
 
   if (prevClump != null) {
     prevClump.container = resClump;
@@ -339,42 +440,49 @@ function renderClump(
 
 
 function addInteractivity(container: PIXI.Container, clump: Clump, viewport: Viewport, send: (message: string, data: any) => void) {
-  let dragging = false;
-  var prevMousePos = new PIXI.Point();
-
   container.eventMode = "dynamic";
-  // resClump.on("click", () => {
-  // });
 
   container.on("mousedown", (event) => {
     event.stopPropagation();
-    selected = clump.nodeUUID;
-    dragging = true;
-    prevMousePos = viewport.toWorld(event.global);
-  });
-  viewport.on("mouseup", (event) => {
-    if (selected === clump.nodeUUID && dragging) {
-      send("tweak", {
-        nodeUUID: clump.nodeUUID,
-        inputs: {
-          positionX: container.transform.position.x,
-          positionY: container.transform.position.y
-        },
-      });
-    }
 
-    dragging = false;
+    // Create new selection
+    selection = {
+      uuid: clump.nodeUUID,
+      container,
+      dragging: true,
+      prevMousePos: viewport.toWorld(event.global)
+    };
+  });
+
+  viewport.on("mouseup", (event) => {
+    if (selection?.uuid === clump.nodeUUID) {
+      event.stopPropagation();
+      if (selection.dragging) {
+        send("tweak", {
+          nodeUUID: clump.nodeUUID,
+          inputs: {
+            positionX: container.transform.position.x,
+            positionY: container.transform.position.y
+          },
+        });
+        selection.dragging = false;
+        console.log("MOUSE UP", selection);
+      }
+    }
   });
 
   viewport.on("mousemove", (event) => {
-    if (selected === clump.nodeUUID && dragging) {
+    if (selection?.uuid === clump.nodeUUID && selection?.dragging) {
       // boundingBox.removeChildren();
       // boundingBox.addChild(createBoundingBox(container.transform.worldTransform, container.getBounds(), viewport));
 
       const pos = viewport.toWorld(event.global);
       // const pos = viewport.worldTransform.apply(event.global);
-      const shift = new PIXI.Point(pos.x - prevMousePos.x, pos.y - prevMousePos.y);
-      prevMousePos = pos;
+      const shift = new PIXI.Point(
+        pos.x - selection.prevMousePos.x,
+        pos.y - selection.prevMousePos.y
+        );
+      selection.prevMousePos = pos;
 
       container.transform.position.x += shift.x;
       container.transform.position.y += shift.y;
@@ -383,4 +491,13 @@ function addInteractivity(container: PIXI.Container, clump: Clump, viewport: Vie
 
   // To get global mouse position at any point:
   // console.log("MOUSE", blink.renderer.plugins.interaction.pointer.global);
+}
+
+function findChild(container: PIXI.Container, namePrefix: string): PIXI.DisplayObject | null {
+  for (let i = 0; i < container.children.length; i++) {
+    if (container.children[i].name.includes(namePrefix)) {
+      return container.children[i];
+    }
+  }
+  return null;
 }

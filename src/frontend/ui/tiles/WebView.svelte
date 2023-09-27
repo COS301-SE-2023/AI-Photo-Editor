@@ -4,6 +4,7 @@
   import TextBox from "../../ui/utils/mediaDisplays/TextBox.svelte";
   import { type RendererId } from "../../../shared/types/typeclass";
   import type { TweakApi } from "../../lib/webview/TweakApi";
+  import { onDestroy } from "svelte";
   import { blixStore } from "../../lib/stores/BlixStore";
 
   let webview: Electron.WebviewTag | null = null;
@@ -83,6 +84,10 @@
   function openDevTools() {
     webview?.openDevTools();
   }
+
+  onDestroy(() => {
+    webview?.closeDevTools();
+  });
 </script>
 
 <div class="content">

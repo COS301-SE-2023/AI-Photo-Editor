@@ -23,7 +23,7 @@ function toTitleCase(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function addTransformInput(ui, props = ["position", "rotation", "scale"]) {
+function addTransformInput(ui, props = ["position", "rotation", "scale", "origin"]) {
     const propInputs = [
         ...(props.includes("position") ? ["position X", "position Y"] : []),
         ...(props.includes("rotation") ? ["rotation"] : []),
@@ -43,10 +43,22 @@ function addTransformInput(ui, props = ["position", "rotation", "scale"]) {
             { step: 1 }
         );
     }
+    if (props.includes("origin")) {
+        ui.addOriginPicker(
+            {
+                componentId: "origin",
+                label: "",
+                defaultValue: "mm",
+                triggerUpdate: true,
+            },
+            {}
+        );
+    }
     return (uiInput) => ({
         ...(props.includes("position") ? { position: { x: uiInput?.positionX, y: uiInput?.positionY } } : {}),
         ...(props.includes("rotation") ? { rotation: uiInput?.rotation } : {}),
-        ...(props.includes("scale")    ? { scale:    { x: uiInput?.scaleX, y: uiInput?.scaleY }, } : {})
+        ...(props.includes("scale")    ? { scale:    { x: uiInput?.scaleX, y: uiInput?.scaleY }, } : {}),
+        ...(props.includes("origin")   ? { origin:   uiInput?.origin } : {}),
     });
 }
 
@@ -62,7 +74,7 @@ function addState(ui) {
 
 function addTweakability(ui) {
     ui.addTweakDial("tweaks", {});
-    ui.addDiffDial("diffs", {});
+    // ui.addDiffDial("diffs", {});
 }
 
 function createBlinkNode(type, title, desc, params) {
@@ -168,7 +180,7 @@ const blinkNodes = {
         "CRT",
         "Applies a CRT effect to the image",
         [
-            { id: "curvature", min: 0, max: 10, step: 0.01 }, 
+            { id: "curvature", min: 0, max: 100, step: 0.1 }, 
             { id: "lineWidth", min: 0, max: 5, step: 0.01 },
             { id: "lineContrast", min: 0, max: 1, step: 0.01 },
             { id: "noise", min: 0, max: 1, step: 0.01 },
@@ -393,6 +405,116 @@ const nodes = {
         nodeBuilder.addInput("Blink matrix", "transform", "Transform");
         nodeBuilder.addOutput("Blink clump", "res", "Result");
     },
+    "curve": (context) => {
+        const nodeBuilder = context.instantiate("Blink/Input", "curve");
+        nodeBuilder.setTitle("Blink Curve");
+        nodeBuilder.setDescription("Draw a custom curve");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addDropdown({
+            componentId: "drawMode",
+            label: "Draw Mode",
+            defaultValue: "normal",
+            triggerUpdate: true,
+        }, {
+          options: {
+            "Normal": "normal",
+          }
+        })
+        const getTransform = addTransformInput(ui, ["position", "rotation", "scale"]);
+
+        ui.addColorPicker({
+            componentId: "fill",
+            label: "Fill",
+            defaultValue: "#00000000",
+            triggerUpdate: true,
+        }, {});
+        ui.addColorPicker({
+            componentId: "stroke",
+            label: "Stroke",
+            defaultValue: "#000000",
+            triggerUpdate: true,
+        }, {});
+        ui.addSlider({
+            componentId: "strokeWidth",
+            label: "Stroke Width",
+            defaultValue: 1,
+            triggerUpdate: true,
+        }, { min: 0, max: 100, set: 0.1 });
+
+        ui.addBuffer({
+                componentId: "curve",
+                label: "Curve Buffer",
+                defaultValue: { id: "", path: [] },
+                triggerUpdate: true,
+            }, {}
+        );
+
+        addTweakability(ui);
+
+        nodeBuilder.setUIInitializer((x) => {
+            return {
+                curve: {
+                    id: getUUID(),
+                    path: [
+                        {
+                            control1: { x: 50, y: 10 },
+                            control2: { x: 10, y: 300 },
+                            point: { x: 0, y: 0 },
+                        },
+                        {
+                            control1: { x: 50, y: 10 },
+                            control2: { x: 10, y: 300 },
+                            point: { x: 400, y: 400 },
+                        },
+                        {
+                            control1: { x: 400, y: 500 },
+                            control2: { x: 10, y: 500 },
+                            point: { x: 50, y: 10 },
+                        },
+                    ]
+                }
+            };
+        });
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            const canvas = {
+                assets: {
+                    [uiInput["curve"]["id"]]: {
+                        class: "asset",
+                        type: "curve",
+                        data: uiInput["curve"].path
+                    }
+                },
+                content: {
+                    class: "clump",
+                    nodeUUID: uiInput["tweaks"].nodeUUID,
+                    changes: uiInput["diffs"]?.uiInputs ?? [],
+                    transform: getTransform(uiInput),
+                    elements: [
+                        {
+                            class: "atom",
+                            type: "curve",
+                            assetId: uiInput["curve"].id,
+
+                            fill: colorHexToNumber(uiInput["fill"]),
+                            fillAlpha: colorHexToAlpha(uiInput["fill"]),
+                            stroke: colorHexToNumber(uiInput["stroke"]),
+                            strokeAlpha: colorHexToAlpha(uiInput["stroke"]),
+                            strokeWidth: uiInput["strokeWidth"],
+                        }
+                    ]
+                }
+            }
+
+            return { res: canvas };
+        });
+
+        nodeBuilder.setUI(ui);
+
+        nodeBuilder.addInput("Blink matrix", "transform", "Transform");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
     "inputText": (context) => {
         const nodeBuilder = context.instantiate("Blink/Input", "inputText");
         nodeBuilder.setTitle("Blink Text");
@@ -534,19 +656,19 @@ const nodes = {
         nodeBuilder.setDescription("Construct a Blink matrix");
 
         const ui = nodeBuilder.createUIBuilder();
-        ui.addSlider(
+        ui.addMatrixInput(
             {
-                componentId: "number",
-                label: "Input number",
-                defaultValue: 0,
+                componentId: "matrix",
+                label: "Input matrix",
+                defaultValue: [],
                 triggerUpdate: true,
             },
-            { min: 0, max: 100, set: 0.1 }
+            { rows: 3, cols: 3, step: 1 }
         );
 
         nodeBuilder.define(async (input, uiInput, from) => {
             return {
-                "res": {}
+                "res": uiInput["matrix"]
             }
         });
 
@@ -559,7 +681,7 @@ const nodes = {
     "layer": (context) => {
         const nodeBuilder = context.instantiate("Blink/Utils", "layer");
         nodeBuilder.setTitle("Layer");
-        nodeBuilder.setDescription("Layer two or more Blink clumps");
+        nodeBuilder.setDescription("Layer two or more Blink clumps. Clumps inputted at the beginning are placed on top in the canvas.");
 
         const ui = nodeBuilder.createUIBuilder();
         const getTransform = addTransformInput(ui);
@@ -671,6 +793,97 @@ const nodes = {
         nodeBuilder.setUI(ui);
         nodeBuilder.addInput("Blink clump", "clump", "Clump");
         nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
+    "mask": (context) => {
+        const nodeBuilder = context.instantiate("Blink/Utils", "mask");
+        nodeBuilder.setTitle("Mask");
+        nodeBuilder.setDescription("Mask a Blink clump with another clump");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addRadio({
+            componentId: "maskEnabled",
+            label: "Enabled",
+            defaultValue: "enabled",
+            triggerUpdate: true,
+        }, {
+          options: {
+            "Enabled": "enabled",
+            "Disabled": "disabled",
+          }
+        })
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            // Apply mask to outermost clump
+            const canvas = input["clump"];
+            if (uiInput["maskEnabled"] === "enabled" && input["mask"] != null) {
+                canvas.content.mask = input["mask"].content;
+            }
+
+            return { "res": canvas };
+        });
+
+        nodeBuilder.setUI(ui);
+        nodeBuilder.addInput("Blink clump", "clump", "Clump");
+        nodeBuilder.addInput("Blink clump", "mask", "Mask");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
+    "canvasConfig": (context) => {
+        const nodeBuilder = context.instantiate("Blink/Utils", "canvasConfig");
+        nodeBuilder.setTitle("Canvas Config");
+        nodeBuilder.setDescription("Configure the Blink canvas");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addTextInput({
+            componentId: "exportName",
+            label: "Export Name",
+            defaultValue: "Blink Export",
+            triggerUpdate: true,
+        }, {});
+
+        ui.addNumberInput(
+            {
+                componentId: "canvasW",
+                label: "Canvas Width",
+                defaultValue: 1920,
+                triggerUpdate: true,
+            },
+            { step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "canvasH",
+                label: "Canvas Height",
+                defaultValue: 1080,
+                triggerUpdate: true,
+            },
+            { step: 1 }
+        );
+        ui.addColorPicker({
+            componentId: "canvasColor",
+            label: "Canvas Background",
+            defaultValue: "#ffffffff",
+            triggerUpdate: true,
+        }, {})
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            // Apply mask to outermost clump
+            const canvas = {
+                ...input["clump"],
+                config: {
+                    canvasDims: { w: uiInput["canvasW"], h: uiInput["canvasH"] },
+                    canvasColor: colorHexToNumber(uiInput["canvasColor"]),
+                    canvasAlpha: colorHexToAlpha(uiInput["canvasColor"]),
+
+                    exportName: uiInput["exportName"]
+                }
+            }
+
+            return { "canvas": canvas };
+        });
+
+        nodeBuilder.setUI(ui);
+        nodeBuilder.addInput("Blink clump", "clump", "Clump");
+        nodeBuilder.addOutput("Blink canvas", "canvas", "Canvas");
     }
 };
 const commands = {};
@@ -678,15 +891,7 @@ const tiles = {};
 
 function init(context) {
 
-    const glfxTypeBuilder = context.createTypeclassBuilder("Blink clump");
-    // glfxTypeBuilder.setToConverters({
-    //     "image": (value) => ({})
-    // });
-    // glfxTypeBuilder.setFromConverters({
-    //     "image": (value) => ({})
-    // });
-
-    glfxTypeBuilder.setDisplayConfigurator((data) => {
+    const configurator = (data) => {
         return {
             displayType: "webview",
             props: {
@@ -695,7 +900,20 @@ function init(context) {
             },
             contentProp: "media"
         };
-    });
+    }
+
+    const clumpTypeBuilder = context.createTypeclassBuilder("Blink clump");
+    clumpTypeBuilder.setDisplayConfigurator(configurator);
+
+    // clumpTypeBuilder.setToConverters({
+    //     "image": (value) => ({})
+    // });
+    // clumpTypeBuilder.setFromConverters({
+    //     "image": (value) => ({})
+    // });
+
+    const canvasTypeBuilder = context.createTypeclassBuilder("Blink canvas");
+    canvasTypeBuilder.setDisplayConfigurator(configurator);
 }
 
 module.exports = {

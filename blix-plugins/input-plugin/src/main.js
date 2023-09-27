@@ -71,21 +71,16 @@ const nodes = {
         nodeBuilder.setDescription("Provides a radio box to select a single true/false value");
 
         nodeBuilder.define((input, uiInput, from) => {
-            return { "val": uiInput["radio"] === "true" };
+            return { "val": uiInput["value"] };
         });
 
         const ui = nodeBuilder.createUIBuilder();
-        ui.addRadio({
-            componentId: "radio",
-            label: "Boolean value",
-            defaultValue: "false",
+        ui.addCheckbox({
+            componentId: "value",
+            label: "Value",
+            defaultValue: false,
             triggerUpdate: true,
-        }, {
-          options: {
-            "False": "false",
-            "True": "true",
-          }
-        });
+        }, {});
         nodeBuilder.setUI(ui);
 
         nodeBuilder.addOutput("boolean", "val", "Value");

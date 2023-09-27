@@ -48,6 +48,8 @@ export enum NodeUIComponent {
   Dropdown = "Dropdown",
   Accordion = "Accordion",
   NumberInput = "NumberInput",
+  MatrixInput = "MatrixInput",
+  OriginPicker = "OriginPicker",
   TextInput = "TextInput",
   Checkbox = "Checkbox",
   ColorPicker = "ColorPicker",

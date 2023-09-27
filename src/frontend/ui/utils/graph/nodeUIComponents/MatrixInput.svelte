@@ -2,24 +2,26 @@
   import { get, writable } from "svelte/store";
   import { UIValueStore } from "@shared/ui/UIGraph";
   import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
-  import { createEventDispatcher } from "svelte";
 
   const randomId = Math.random().toString(32);
 
   export let props: UIComponentProps;
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
-  const dispatch = createEventDispatcher();
 
   if (!inputStore.inputs[config.componentId]) inputStore.inputs[config.componentId] = writable(0);
 
-  let { sensitivity, min, max, step } = props as {
+  let { rows, cols, sensitivity, min, max, step } = props as {
+    rows: number;
+    cols: number;
     sensitivity: number;
     min: number;
     max: number;
     step: number;
   };
 
+  rows ??= 3;
+  cols ??= 3;
   sensitivity ??= 0.5;
   step ??= 1;
   min ??= -Infinity;
@@ -27,34 +29,37 @@
 
   let initialMouseX: number;
   let initialValue: number;
-  let isDragging = false;
+  let draggingIndex: { r: number; c: number } | null = null;
   let input: HTMLInputElement;
 
-  function handlePointerDown(e: PointerEvent) {
-    isDragging = true;
+  function handlePointerDown(e: PointerEvent, r: number, c: number) {
+    draggingIndex = { r, c };
     initialMouseX = e.pageX;
-    initialValue = get(valStore) as number;
+    initialValue = (get(valStore) as number[][])[r][c] as number;
   }
 
   function handlePointerUp() {
-    isDragging = false;
-    if (initialValue !== (get(valStore) as number)) handleInteraction();
+    draggingIndex = null;
   }
 
   function handlePointerMove(e: PointerEvent) {
-    if (!isDragging) return;
+    if (draggingIndex == null) return;
     input.blur();
 
     const delta = (e.pageX - initialMouseX) * sensitivity * step;
 
-    valStore.set(Math.min(max, Math.max(min, Math.floor((initialValue + delta) / step) * step)));
+    const { r, c } = draggingIndex;
+
+    valStore.update((val) => {
+      (val as number[][])[r][c] = Math.min(
+        max,
+        Math.max(min, Math.floor((initialValue + delta) / step) * step)
+      );
+      return val;
+    });
   }
 
   $: valStore = inputStore.inputs[config.componentId];
-
-  function handleInteraction() {
-    dispatch("inputInteraction", { id: config.componentId, value: $valStore });
-  }
 </script>
 
 <svelte:window
@@ -64,19 +69,30 @@
 />
 
 <div class="container">
-  <label for="{randomId}-{config.componentId}">{config.label}</label>
-  <input
-    name="{randomId}-{config.componentId}"
-    type="number"
-    bind:value="{$valStore}"
-    on:pointerdown="{handlePointerDown}"
-    bind:this="{input}"
-    on:paste="{null}"
-    on:input="{handleInteraction}"
-    min="{min}"
-    max="{max}"
-    step="{step}"
-  />
+  <span class="label">{config.label}</span>
+  <br />
+  <table>
+    {#each Array(rows) as _, r}
+      <tr>
+        {#each Array(cols) as _, c}
+          <td>
+            {#if Array.isArray($valStore) && Array.isArray($valStore[r])}
+              <input
+                name="{randomId}[{r}][{c}]-{config.componentId}"
+                type="number"
+                bind:value="{$valStore[r][c]}"
+                on:pointerdown="{(e) => handlePointerDown(e, r, c)}"
+                bind:this="{input}"
+                min="{min}"
+                max="{max}"
+                step="{step}"
+              />
+            {/if}
+          </td>
+        {/each}
+      </tr>
+    {/each}
+  </table>
 </div>
 
 <style>
@@ -89,17 +105,17 @@
     touch-action: none;
     user-select: none;
     cursor: col-resize;
+
+    width: 100%;
   }
 
   input:focus {
     outline: 1px solid #f43e5c;
   }
 
-  label {
-    text-align: right;
-    clear: both;
+  .label {
     float: left;
-    margin-right: 1em;
+    margin-left: 0.4em;
   }
 
   .container {
