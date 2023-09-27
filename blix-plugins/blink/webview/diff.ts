@@ -57,6 +57,7 @@ function diffTransform(t1: Transform, t2: Transform) {
     diffs.push("position");
   if (t1?.rotation !== t2?.rotation) diffs?.push("rotation");
   if (t1?.scale?.x !== t2?.scale?.x || t1?.scale?.y !== t2?.scale?.y) diffs?.push("scale");
+  if (t1?.origin !== t2?.origin) diffs?.push("origin");
   return diffs;
 }
 

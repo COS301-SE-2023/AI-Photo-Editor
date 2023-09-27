@@ -89,9 +89,13 @@
   }
 
   input[type="radio"] {
-    border: 0px;
-    width: 0.8em;
-    height: 0.8em;
+    border: none;
+
+    min-width: 0.8em;
+    min-height: 0.8em;
+    max-width: 0.8em;
+    max-height: 0.8em;
+    accent-color: #f43e5c;
 
     outline: none;
   }

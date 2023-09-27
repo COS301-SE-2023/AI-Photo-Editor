@@ -77,7 +77,10 @@ export type Transform = {
   position: Vec2;
   rotation: number;
   scale: Vec2;
+  origin: OriginPoint;
 }
+
+export type OriginPoint = "tl" | "tm" | "tr" | "ml" | "mm" | "mr" | "bl" | "bm" | "br";
 
 export type Filter = {
     class: "filter";

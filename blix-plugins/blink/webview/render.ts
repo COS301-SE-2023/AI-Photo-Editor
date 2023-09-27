@@ -85,7 +85,7 @@ export async function renderScene(
       }
 
       if (selection?.uuid) {
-        boundingBox.addChild(createBoundingBox(selection.container.transform.localTransform, selection.container.getLocalBounds(), viewport));
+        boundingBox.addChild(createBoundingBox(selection.container.transform.localTransform, selection.container.getLocalBounds(), viewport, selection.container.transform.pivot));
         // boundingBox.addChild(createBoundingBox(selection.container.transform.worldTransform, selection.container.getBounds(), viewport));
       }
     });

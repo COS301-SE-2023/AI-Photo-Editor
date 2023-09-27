@@ -23,7 +23,7 @@ function toTitleCase(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function addTransformInput(ui, props = ["position", "rotation", "scale"]) {
+function addTransformInput(ui, props = ["position", "rotation", "scale", "origin"]) {
     const propInputs = [
         ...(props.includes("position") ? ["position X", "position Y"] : []),
         ...(props.includes("rotation") ? ["rotation"] : []),
@@ -43,19 +43,22 @@ function addTransformInput(ui, props = ["position", "rotation", "scale"]) {
             { step: 1 }
         );
     }
-    ui.addOriginPicker(
-        {
-            componentId: "origin",
-            label: "Origin",
-            defaultValue: "mm",
-            triggerUpdate: true,
-        },
-        {}
-    );
+    if (props.includes("origin")) {
+        ui.addOriginPicker(
+            {
+                componentId: "origin",
+                label: "",
+                defaultValue: "mm",
+                triggerUpdate: true,
+            },
+            {}
+        );
+    }
     return (uiInput) => ({
         ...(props.includes("position") ? { position: { x: uiInput?.positionX, y: uiInput?.positionY } } : {}),
         ...(props.includes("rotation") ? { rotation: uiInput?.rotation } : {}),
-        ...(props.includes("scale")    ? { scale:    { x: uiInput?.scaleX, y: uiInput?.scaleY }, } : {})
+        ...(props.includes("scale")    ? { scale:    { x: uiInput?.scaleX, y: uiInput?.scaleY }, } : {}),
+        ...(props.includes("origin")   ? { origin:   uiInput?.origin } : {}),
     });
 }
 
