@@ -22,7 +22,8 @@ import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
 import { type } from "os";
 
-const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
+const isProd =
+  process.env.NODE_ENV === "production" || app.isPackaged || process.env.NODE_ENV === "test";
 // const isProd = true;
 
 if (app.isPackaged) {
