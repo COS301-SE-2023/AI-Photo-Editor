@@ -212,6 +212,10 @@ export class Blix {
     return this._graphManager;
   }
 
+  get cacheManager(): CacheManager {
+    return this._cacheManager;
+  }
+
   get pluginManager(): PluginManager {
     return this._pluginManager;
   }

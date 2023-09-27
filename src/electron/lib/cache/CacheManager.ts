@@ -28,14 +28,14 @@ export class CacheManager {
   // subsidiaries: { [key: SubsidiaryUUID]: CacheSubsidiary };
 
   // globalCache: { [key: CacheUUID]: SubsidiaryUUID };
-  cache: { [key: CacheUUID]: CacheObject };
+  _cache: { [key: CacheUUID]: CacheObject };
 
   listeners: Set<WebSocket>;
 
   server: WebSocket.Server;
 
   constructor() {
-    this.cache = {};
+    this._cache = {};
     this.listeners = new Set();
 
     ipcMain.on("cache-get", (event, id: string) => {
@@ -155,6 +155,29 @@ export class CacheManager {
   // TODO
   connect() {
     return;
+  }
+
+  get cache() {
+    return this._cache;
+  }
+
+  writeImportContent(uuid: CacheUUID, content: Buffer) {
+    if (this._cache[uuid]) {
+      this._cache[uuid].data = content;
+    } else {
+      this._cache[uuid] = { uuid, data: content, metadata: { contentType: "unknown" } };
+    }
+
+    this.notifyListeners();
+  }
+
+  writeImportMetadata(uuid: CacheUUID, metadata: any) {
+    if (this._cache[uuid]) {
+      this._cache[uuid].metadata = metadata;
+    } else {
+      this._cache[uuid] = { uuid, data: Buffer.from([]), metadata };
+    }
+    this.notifyListeners();
   }
 
   writeLocal(content: Blob): CacheUUID {
