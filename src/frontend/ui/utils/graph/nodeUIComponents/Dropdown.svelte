@@ -4,6 +4,8 @@
   import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
   import { createEventDispatcher } from "svelte";
 
+  const randomId = Math.random().toString(32); // TODO: Replace this (and others like it) with a global UUID function
+
   export let props: UIComponentProps;
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
@@ -26,7 +28,12 @@
 
 {#if Object.keys(items).length > 0}
   {#key inputStore.inputs[config.componentId]}
-    <select bind:value="{$valStore}" on:change="{handleInputInteraction}">
+    <label for="{randomId}-{config.componentId}">{config.label}</label>
+    <select
+      name="{randomId}-{config.componentId}"
+      bind:value="{$valStore}"
+      on:change="{handleInputInteraction}"
+    >
       {#each Object.keys(items) as itemKey}
         <option value="{items[itemKey]}">{itemKey}</option>
       {/each}
@@ -40,6 +47,10 @@
 {/if}
 
 <style>
+  label {
+    float: left;
+  }
+
   select {
     color: #cdd6f4;
     background-color: #1f1f28;

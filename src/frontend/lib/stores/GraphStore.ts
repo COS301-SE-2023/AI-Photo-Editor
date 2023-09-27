@@ -325,7 +325,7 @@ export class GraphStore {
 
       // ===== COMPUTE CENTER OF MASS ===== //
       const centerMass = { x: 0, y: 0 };
-      const CENTER_FORCE = 0.04;
+      const CENTER_FORCE = 0.02;
       let numNodes = 0;
       nodes.forEach((node) => {
         const nodePos = this.getNode(node)?.styling?.pos;
@@ -340,40 +340,45 @@ export class GraphStore {
       centerMass.x /= numNodes;
       centerMass.y /= numNodes;
 
-      // ===== ADD EDGE DIRECTION REPULSION FORCES ===== //
-      const dirForces: { [key: GraphNodeUUID]: number } = {};
-      const DIRECTION_FORCE = 5;
-      const MAX_DIRECTION_FORCE = 800;
-
-      const edges = get(this.graphStore).edges;
-      Object.keys(edges).forEach((edge) => {
-        const edgeObj = edges[edge];
-
-        // Add leftward force
-        if (nodesSet.has(edgeObj.nodeUUIDFrom)) {
-          dirForces[edgeObj.nodeUUIDFrom] = -DIRECTION_FORCE;
-        }
-
-        // Add rightward force
-        if (nodesSet.has(edgeObj.nodeUUIDTo)) {
-          dirForces[edgeObj.nodeUUIDTo] = DIRECTION_FORCE;
-        }
-      });
-
-      let totalDirForce = 0;
       nodes.forEach((node) => {
         if (!forces[node]) forces[node] = { x: 0, y: 0 };
-        if (!dirForces[node]) dirForces[node] = 0;
-
-        dirForces[node] = Math.max(
-          Math.min(dirForces[node], MAX_DIRECTION_FORCE),
-          -MAX_DIRECTION_FORCE
-        );
-        totalDirForce += dirForces[node];
-
-        forces[node].x += dirForces[node];
       });
-      totalDirForce /= numNodes;
+
+      // ===== ADD EDGE DIRECTION REPULSION FORCES ===== //
+
+      const totalDirForce = 0;
+      // let totalDirForce = 0;
+      // const dirForces: { [key: GraphNodeUUID]: number } = {};
+      // const DIRECTION_FORCE = 5;
+      // const MAX_DIRECTION_FORCE = 800;
+
+      // const edges = get(this.graphStore).edges;
+      // Object.keys(edges).forEach((edge) => {
+      //   const edgeObj = edges[edge];
+
+      //   // Add leftward force
+      //   if (nodesSet.has(edgeObj.nodeUUIDFrom)) {
+      //     dirForces[edgeObj.nodeUUIDFrom] = -DIRECTION_FORCE;
+      //   }
+
+      //   // Add rightward force
+      //   if (nodesSet.has(edgeObj.nodeUUIDTo)) {
+      //     dirForces[edgeObj.nodeUUIDTo] = DIRECTION_FORCE;
+      //   }
+      // });
+
+      // nodes.forEach((node) => {
+      //   if (!dirForces[node]) dirForces[node] = 0;
+
+      //   dirForces[node] = Math.max(
+      //     Math.min(dirForces[node], MAX_DIRECTION_FORCE),
+      //     -MAX_DIRECTION_FORCE
+      //   );
+      //   totalDirForce += dirForces[node];
+
+      //   forces[node].x += dirForces[node];
+      // });
+      // totalDirForce /= numNodes;
 
       // ===== ADD CENTER OF MASS ATTRACTION FORCE + COUNTERBALANCE DIRECTION FORCE ===== //
       nodes.forEach((node) => {

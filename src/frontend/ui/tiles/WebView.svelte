@@ -95,8 +95,8 @@
     {#if src !== null}
       {#if !$blixStore.production}
         <div class="hover flex items-center space-x-2">
-          <!-- <button on:click="{reload}">Reload</button>
-          <button on:click="{openDevTools}">DevTools</button> -->
+          <button on:click="{reload}">Reload</button>
+          <button on:click="{openDevTools}">DevTools</button>
         </div>
       {/if}
 
