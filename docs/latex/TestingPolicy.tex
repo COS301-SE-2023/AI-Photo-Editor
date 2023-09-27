@@ -161,6 +161,16 @@ Each subsystem in their entirety as well as the subsystems communicating with ea
 Minimal or no mocking is used for Integration testing as we want to test the actual functionality of the application such that communication and interaction between systems is tested, and
 not the atomic operations of each system. Mocks are mainly used for integration tests when testing a subsystem that uses an external resource such as an api request. 
 
+
+\subsubsection*{JEST}
+\addcontentsline{toc}{subsubsection}{JEST}
+
+The reason why we chose Jest for our unit and integration testing is because it is a very popular testing framework that has TypeScript support and meshes easily
+with the rollup of our electron app. Jest is easy to use and has a lot of functionality that makes testing easier, such as mocking and code coverage.
+
+Furthermore due to the popularity of Jest, there is a lot of documentation and support for it, which makes it easy to use and learn, which was essential considering our 
+lack of experience with testing frameworks
+
 \addcontentsline{toc}{subsection}{End to End Testing}
 \subsection*{End to End Testing}
 
@@ -170,11 +180,46 @@ Blix has multiple end to end tests that test the correct functionality of the ap
 These end to end tests either start in the backend or the frontend, and ensure that all the systems execute according to specification untill the request or result finally reaches the other end of the stack.
 End to end testing is inherently slow and all-encompasing, and therefore there are fewer tests for it. These tests are done to ensure that the application is working as a whole, and that all the systems are communicating correctly.
 
+
+\subsubsection*{Playwright}
+
+Playwright was chosen for the end-to-end tests due to its support for multiple platforms such as Windows, Linux and MacOS and has built-in 
+integrations to interact with jest, our testing framework of choice for unit and integration testing. 
+
+Furthermore playwright is relatively easy to use and has a lot of documentation and support,
+due to its popularity, which makes it easy to learn and use.
+
 \addcontentsline{toc}{subsection}{CICD}
 \subsection*{CICD}
 
+For the purposes of testing, we have made use of github workflows. Github workflows are a feature of github that allow for the automation of tasks.
+We have made use of github workflows to automate the testing process. 
 
+This is done by running the tests on every pull request, and on every push
+to the main branch. This ensures that the application is always tested before any changes are merged into the main branch.
 
+The tests that are automated for this purpose consist of : 
+\begin{itemize}
+  \item Unit tests
+  \item Integration tests
+  \item End to end tests
+  \item Building the application
+  \item Linting the application
+  \item Secret protection
+  \item Code coverage
+\end{itemize}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{../pics/cicd.png}
+  \caption{Continuous Integration and Continuous Deployment (CI/CD) Pipeline}
+\end{figure}
+
+The reason why we chose github workflows for our cicd pipeline is because it enables us to build and test our app for Windows,Linux and MacOS without having to set up a local environment for each of these operating systems.
+This is done by using the github hosted runners. These runners are virtual machines that run the github workflows. 
+
+The github hosted runners are free to use for open source projects, and therefore we can use them for our project,
+allowing us to cut costs and save time. Furthermore github workflows are easy to set up and use, and are integrated with github, allowing us to easily automate our testing process.
 
 \addcontentsline{toc}{subsection}{Software Quality Assurance}
 \subsection*{Software Quality Assurance}
