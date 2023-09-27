@@ -51,7 +51,7 @@
   });
 
   // Makes sure that the active graph id is always set correctly
-  // $: focusedGraphStore.set({ panelId, graphUUID: graphId });
+  $: focusedGraphStore.set({ panelId, graphUUID: graphId });
 
   // Sets new graph created as the active graph
   $: {
