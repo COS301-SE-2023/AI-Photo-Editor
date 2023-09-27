@@ -28,7 +28,7 @@
     faPizzaSlice,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
-  import { toastStore } from "lib/stores/ToastStore";
+  import { toastStore } from "../../lib/stores/ToastStore";
 
   const noContentIcons = [
     faBacon,
