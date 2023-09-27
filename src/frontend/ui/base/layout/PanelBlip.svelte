@@ -124,7 +124,7 @@
     height: var(--width);
 
     background-color: transparent;
-    color: #f38ba8;
+    color: rgb(244, 63, 94);
     text-align: center;
     font-size: 0.8em;
 
@@ -134,7 +134,7 @@
     z-index: 10000;
   }
   .blip:hover {
-    background-color: #f38ba8;
+    background-color: rgb(244, 63, 94);
     cursor: crosshair;
   }
 </style>

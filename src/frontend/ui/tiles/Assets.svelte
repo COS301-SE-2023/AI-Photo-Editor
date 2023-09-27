@@ -260,12 +260,13 @@
   }
 
   .placeholder {
-    padding-top: 140px;
-    text-align: center;
-    display: inline-block;
     width: 100%;
     height: 100%;
-    margin-top: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 
     h1 {
       font-size: 1.5em;
