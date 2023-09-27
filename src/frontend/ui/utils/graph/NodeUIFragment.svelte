@@ -1,7 +1,14 @@
 <script lang="ts">
-  import { NodeUILeaf, type NodeUI, type UIComponentConfig } from "@shared/ui/NodeUITypes";
+  import {
+    NodeUILeaf,
+    type NodeUI,
+    type UIComponentConfig,
+    NodeUIComponent,
+  } from "@shared/ui/NodeUITypes";
   import type { UIValueStore } from "@shared/ui/UIGraph";
   import NodeUiComponent from "./NodeUIComponent.svelte";
+  import { blixStore } from "../../../lib/stores/BlixStore";
+  import { get } from "svelte/store";
 
   export let ui: NodeUI | null = null;
   export let inputStore: UIValueStore;
@@ -17,6 +24,21 @@
       return ui as NodeUILeaf;
     }
     return null;
+  }
+
+  /** For production */
+  function shouldBeHidden(leaf: NodeUILeaf | null) {
+    if (!get(blixStore).production) return false;
+
+    if (!leaf) return false;
+
+    const hiddenCategories: NodeUIComponent[] = [
+      NodeUIComponent.Buffer,
+      NodeUIComponent.TweakDial,
+      NodeUIComponent.DiffDial,
+    ];
+
+    return hiddenCategories.includes(leaf?.category as NodeUIComponent);
   }
 </script>
 
@@ -35,7 +57,7 @@
       {/each}
     </ul>
   {:else if ui.type === "leaf"}
-    <p>
+    <p class="{shouldBeHidden(toLeafRepresentation(ui)) ? 'hidden' : ''}">
       <NodeUiComponent
         inputStore="{inputStore}"
         leafUI="{toLeafRepresentation(ui)}"

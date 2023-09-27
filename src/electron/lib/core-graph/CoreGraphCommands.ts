@@ -59,4 +59,7 @@ export async function createGraph(
   return { status: "success", message: "Graph created successfully" };
 }
 
-export const coreGraphCommands: Command[] = [createGraphCommand, deleteGraphCommand];
+export const coreGraphCommands: Command[] = [
+  createGraphCommand,
+  // deleteGraphCommand
+];

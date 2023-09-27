@@ -26,7 +26,6 @@
 
 {#if Object.keys(items).length > 0}
   {#key inputStore.inputs[config.componentId]}
-    <!-- <select bind:value={inputStore.inputs["dropdown"]}> -->
     <select bind:value="{$valStore}" on:change="{handleInputInteraction}">
       {#each Object.keys(items) as itemKey}
         <option value="{items[itemKey]}">{itemKey}</option>

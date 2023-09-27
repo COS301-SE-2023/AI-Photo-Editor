@@ -40,14 +40,11 @@
     for (const setting of settings) {
       for (const component of setting.components) {
         const res = await getSettingValue(component);
-        console.log(res);
 
         if (res.status === "success" && res.data) {
           component.value = res.data as any;
         }
       }
-
-      console.log(settings);
     }
 
     settings = [...settings];

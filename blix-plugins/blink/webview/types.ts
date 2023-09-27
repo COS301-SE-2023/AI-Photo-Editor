@@ -11,7 +11,8 @@ import {
   BulgePinchFilter,
   GlitchFilter,
   ZoomBlurFilter,
-  TwistFilter
+  TwistFilter,
+  AdjustmentFilter
 } from "pixi-filters"
 
 export type WindowWithApis = Window & typeof globalThis & {
@@ -84,7 +85,7 @@ export type OriginPoint = "tl" | "tm" | "tr" | "ml" | "mm" | "mr" | "bl" | "bm" 
 
 export type Filter = {
     class: "filter";
-    type: "blur" | "noise" | "bloom" | "grayscale" | "bevel" | "outline" | "dot" | "crt" | "emboss" | "bulge" | "glitch" | "zoomblur" | "twist";
+    type: "blur" | "noise" | "bloom" | "grayscale" | "bevel" | "outline" | "dot" | "crt" | "emboss" | "bulge" | "glitch" | "zoomblur" | "twist" | "brightnessContrast" | "saturationGamma" | "colorChannel";
     params: any[]
 };
 
@@ -121,10 +122,48 @@ export function getPixiFilter(filter: Filter) {
           }
         );
         case "emboss":      return new EmbossFilter(...filter.params);
-        case "bulge":       return new BulgePinchFilter(...filter.params);
+        case "bulge":       return new BulgePinchFilter(
+          {
+            radius: filter.params[0],
+            strength: filter.params[1],
+            center: new PIXI.Point(filter.params[2], filter.params[3]),
+          }
+        );
         case "glitch":      return new GlitchFilter(...filter.params);
-        case "zoomblur":    return new ZoomBlurFilter(...filter.params);
-        case "twist":       return new TwistFilter(...filter.params);
+        case "zoomblur":    return new ZoomBlurFilter(
+          {
+            strength: filter.params[0],
+            innerRadius: filter.params[1],
+            center: [filter.params[2], filter.params[3]],
+          }
+        );
+        case "twist":       return new TwistFilter(
+          {
+            angle: filter.params[0],
+            radius: filter.params[1],
+            offset: new PIXI.Point(filter.params[2], filter.params[3]),
+          }
+        );
+        case "brightnessContrast": return new AdjustmentFilter(
+          {
+            brightness: filter.params[0],
+            contrast: filter.params[1],
+          }
+        );
+        case "saturationGamma": return new AdjustmentFilter(
+          {
+            saturation: filter.params[0],
+            gamma: filter.params[1],
+          }
+        );
+        case "colorChannel": return new AdjustmentFilter(
+          {
+            red: filter.params[0],
+            green: filter.params[1],
+            blue: filter.params[2],
+            alpha: filter.params[3],
+          }
+        );
     }
   } catch {
     return new PIXI.Filter();

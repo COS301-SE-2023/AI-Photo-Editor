@@ -72,13 +72,6 @@ export class CoreGraphManager {
           execute: { graphUUID, node, pos },
           revert: { graphUUID, nodeUUId: res.data.nodeId },
         });
-
-        if (node.signature === "blix.output") {
-          this._outputIds[res.data.nodeId] = "default";
-          this._mainWindow?.apis.mediaClientApi.onMediaOutputIdsChanged(
-            new Set(Object.values(this._outputIds))
-          );
-        }
       } else if (eventArgs) {
         const { event } = eventArgs;
         if (event?.element === "Node" && event.operation === "Add") {
@@ -123,6 +116,7 @@ export class CoreGraphManager {
       }
 
       delete this._outputIds[nodeUUID];
+      this._mainWindow?.apis.mediaClientApi.outputNodesChanged();
     }
 
     return res;
@@ -240,7 +234,9 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse {
-    if (!this._graphs[graphUUID]) {
+    const graph = this._graphs[graphUUID];
+
+    if (!graph) {
       return { status: "error", message: "Graph does not exist" };
     }
 
@@ -257,11 +253,9 @@ export class CoreGraphManager {
       const uiConfigs = this._toolbox.getNodeInstance(signature).uiConfigs;
       const changes = nodeUIInputs.changes;
 
-      if (signature === "blix.output") {
+      if (signature === "blix.output" && changes.includes("outputId")) {
         this._outputIds[nodeUUID] = nodeUIInputs.inputs.outputId as string;
-        this._mainWindow?.apis.mediaClientApi.onMediaOutputIdsChanged(
-          new Set(Object.values(this._outputIds))
-        );
+        this._mainWindow?.apis.mediaClientApi.outputNodesChanged();
       }
 
       let shouldUpdate = false;
@@ -420,6 +414,25 @@ export class CoreGraphManager {
   // This needs to be implemented
   removeSubscriber() {
     return;
+  }
+
+  getMediaOutputs(graphIds: UUID[]) {
+    const outputs: { nodeId: string; mediaId: string }[] = [];
+
+    graphIds.forEach((graphId) => {
+      const graph = this._graphs[graphId];
+      if (graph) {
+        const outputNodes = graph.getOutputNodes;
+        Object.keys(outputNodes).forEach((outputNodeId) => {
+          const mediaOutputId = this._outputIds[outputNodeId];
+          if (mediaOutputId) {
+            outputs.push({ nodeId: outputNodeId, mediaId: mediaOutputId });
+          }
+        });
+      }
+    });
+
+    return outputs;
   }
 
   // ===============================================

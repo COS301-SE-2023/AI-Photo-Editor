@@ -3,6 +3,7 @@
   import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
   import Dial from "./Dial.svelte";
   import { faCodeCompare } from "@fortawesome/free-solid-svg-icons";
+  import { blixStore } from "../../../../../lib/stores/BlixStore";
 
   export let props: UIComponentProps;
   export let inputStore: UIValueStore;

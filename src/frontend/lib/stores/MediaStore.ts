@@ -1,6 +1,7 @@
 import type { DisplayableMediaOutput, MediaOutputId } from "@shared/types/media";
 import { derived, get, writable } from "svelte/store";
 import { commandStore } from "./CommandStore";
+import { projectsStore } from "./ProjectStore";
 
 type MediaOutputs = {
   [key: MediaOutputId]: DisplayableMediaOutput;
@@ -8,27 +9,19 @@ type MediaOutputs = {
 
 class MediaStore {
   private store = writable<MediaOutputs>({});
-  private outputIds = writable<Set<MediaOutputId>>();
+  private outputIds = writable<{ nodeId: string; mediaId: string }[]>([]);
 
   public refreshStore(media: DisplayableMediaOutput) {
-    // Refresh media store
     this.store.update((mediaOutputs) => {
       mediaOutputs[media.outputId] = media;
       return mediaOutputs;
     });
   }
 
-  public updateOutputIds(ids: Set<MediaOutputId>) {
-    const oldIds = get(this.outputIds);
-    if (!oldIds) this.outputIds.set(ids);
-
-    // Wont set store and notfiy subscribers if the value allOutputIds have remained the same.
-    // This is the case where the undo/redo system willchange something and then the stores see a change and do their
-    // own update but their update wont matter.
-
-    if (oldIds && ids && !equivSets<MediaOutputId>(oldIds, ids)) {
-      this.outputIds.set(ids);
-    }
+  public async outputNodesChanged() {
+    const projectGraphIds = get(projectsStore.activeProjectGraphIds);
+    const mediaOutputs = await window.apis.graphApi.getMediaOutputs(projectGraphIds);
+    this.outputIds.set(mediaOutputs);
   }
 
   // Stop listening for graph changes
@@ -78,7 +71,8 @@ class MediaStore {
 
   public getMediaOutputIdsReactive() {
     return derived(this.outputIds, (store) => {
-      return store;
+      const set = new Set<string>(store.map((id) => id.mediaId));
+      return Array.from(set);
     });
   }
 
@@ -89,21 +83,15 @@ class MediaStore {
     });
   }
 
+  public getMediaOutputId(nodeId: string) {
+    return get(this.outputIds).find((id) => id.nodeId === nodeId)?.mediaId || null;
+  }
+
   public get subscribe() {
     return this.store.subscribe;
   }
 }
 
-function equivSets<T>(s1: Set<T>, s2: Set<T>): boolean {
-  if (s1.size !== s2.size) return false;
-  for (const element of s1) {
-    if (!s2.has(element)) {
-      return false;
-    } else {
-      s2.delete(element);
-    }
-  }
-  return true;
-}
-
 export const mediaStore = new MediaStore();
+
+export const nodeIdLastClicked = writable<string>("");

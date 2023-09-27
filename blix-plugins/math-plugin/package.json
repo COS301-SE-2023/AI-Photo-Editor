@@ -1,5 +1,5 @@
 {
-    "name": "Math-plugin",
+    "name": "math",
     "displayName": "Math Plugin",
     "description": "Performs basic math operations through n-ary nodes.",
     "version": "0.0.1",

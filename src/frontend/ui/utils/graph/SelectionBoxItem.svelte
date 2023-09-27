@@ -84,7 +84,7 @@
       viewBox="0 0 24 24"
       stroke-width="1.2"
       stroke="currentColor"
-      class="invisible ml-auto h-4 w-4 hover:stroke-rose-500 group-hover:visible"
+      class="ml-auto h-4 w-4 hover:stroke-rose-500"
       on:click|stopPropagation="{() => dispatch('removeItem', { id: item.id })}"
       on:keydown="{null}"
     >

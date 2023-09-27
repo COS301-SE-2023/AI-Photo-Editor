@@ -191,6 +191,57 @@ const blinkNodes = {
             { id: "seed", min: 0, max: 1, step: 0.01 },
         ]
     ],
+    "emboss": [
+        "Emboss",
+        "An RGB Split Filter.",
+        [{ id: "strength", min: 0, max: 20, step: 0.1 }]
+    ],
+    "bulge": [ 
+        "Bulge / Pinch",
+        "Bulges or pinches the image in a circle.",
+        [
+            { id: "radius", min: 0, max: 1000, step: 1.0 }, 
+            { id: "strength", min: -1, max: 1, step: 0.01 },
+            { id: "center.x", min: 0, max: 1, step: 0.01 },
+            { id: "center.y", min: 0, max: 1, step: 0.01 },
+        ]
+    ],
+    "zoomblur": [ 
+        "ZoomBlur",
+        "The ZoomFilter applies a Zoom blur to an object.",
+        [
+            { id: "strength", min: 0, max: 0.5, step: 0.01 }, 
+            { id: "innerRadius", min: 0, max: 1000, step: 1.0 },
+            { id: "center.x", min: 0, max: 2000, step: 1.0 },
+            { id: "center.y", min: 0, max: 2000, step: 1.0 },
+        ]
+    ],
+    "brightnessContrast": [
+        "Brightness / Contrast",
+        "Adjusts the brightness and contrast of the image.",
+        [
+            { id: "brightness", min: 0, max: 10, step: 0.1 },
+            { id: "contrast", min: 0, max: 10, step: 0.1 },
+        ]
+    ],
+    "saturationGamma": [
+        "Saturation / Gamma",
+        "Adjusts the saturation and gamma of the image.",
+        [
+            { id: "saturation", min: 0, max: 10, step: 0.1 },
+            { id: "gamma", min: 0, max: 10, step: 0.1 },
+        ]
+    ],
+    "colorChannel": [
+        "Color-channel",
+        "Shifts the color channel and alpha of the image.",
+        [
+            { id: "red", min: 0, max: 10, step: 0.1 },
+            { id: "green", min: 0, max: 10, step: 0.1 },
+            { id: "blue", min: 0, max: 10, step: 0.1 },
+            { id: "alpha", min: 0, max: 10, step: 0.1 },
+        ]
+    ],
 };
 
 Object.keys(blinkNodes).forEach((key) => {

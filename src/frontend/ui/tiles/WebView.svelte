@@ -1,20 +1,26 @@
 <!-- Renders a custom webview defined, for instance, by a plugin -->
 <script lang="ts">
+  import { createEventDispatcher } from "svelte";
   import TextBox from "../../ui/utils/mediaDisplays/TextBox.svelte";
   import { type RendererId } from "../../../shared/types/typeclass";
   import type { TweakApi } from "../../lib/webview/TweakApi";
   import { onDestroy } from "svelte";
+  import { blixStore } from "../../lib/stores/BlixStore";
 
   let webview: Electron.WebviewTag | null = null;
 
   export let tweakApi: TweakApi;
   export let renderer: RendererId = "/";
+  export function exportMedia(event: Event) {
+    webview?.send("export");
+  }
 
   $: asyncSrc = window.apis.typeclassApi.getRendererSrc(renderer);
 
   $: webviewUpdated(webview);
 
   let webviewReady = false;
+  let dispatch = createEventDispatcher();
 
   // Called when the webview is created/recreated
   function webviewUpdated(webview: Electron.WebviewTag | null) {
@@ -30,6 +36,9 @@
               tweakApi.setUIInput(data.nodeUUID, input, data.inputs[input]);
             });
           }
+          break;
+        case "exportResponse":
+          // dispatch("exportResponse", event.args);
           break;
       }
     });
@@ -84,10 +93,12 @@
 <div class="content">
   {#await asyncSrc then src}
     {#if src !== null}
-      <div class="hover flex items-center space-x-2">
-        <button on:click="{reload}">Reload</button>
-        <button on:click="{openDevTools}">DevTools</button>
-      </div>
+      {#if !$blixStore.production}
+        <div class="hover flex items-center space-x-2">
+          <!-- <button on:click="{reload}">Reload</button>
+          <button on:click="{openDevTools}">DevTools</button> -->
+        </div>
+      {/if}
 
       <!-- Preload is set in "will-attach-webview" in index.ts -->
       <!-- See: src/electron/lib/webviews/preload.ts -->

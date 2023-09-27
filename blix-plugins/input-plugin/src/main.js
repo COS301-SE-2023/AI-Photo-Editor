@@ -1,7 +1,7 @@
 const nodes = {
-    "inputNumber": (context) => {
-        const nodeBuilder = context.instantiate("Input", "inputNumber");
-        nodeBuilder.setTitle("Input number");
+    "number": (context) => {
+        const nodeBuilder = context.instantiate("Input", "number");
+        nodeBuilder.setTitle("Number");
         nodeBuilder.setDescription("Provides a number input and returns a single number output");
 
         nodeBuilder.define((input, uiInput, from) => {
@@ -23,31 +23,31 @@ const nodes = {
 
         nodeBuilder.addOutput("number", "res", "Result");
     },
-    "inputImage": (context) => {
-        const nodeBuilder = context.instantiate("Input", "inputImage");
-        nodeBuilder.setTitle("Input image");
-        nodeBuilder.setDescription("Provides an image input and returns a single image output");
+    // "image": (context) => {
+    //     const nodeBuilder = context.instantiate("Input", "image");
+    //     nodeBuilder.setTitle("Image");
+    //     nodeBuilder.setDescription("Provides an image input and returns a single image output");
 
-        nodeBuilder.define((input, uiInput, from) => {
-            return { "res": uiInput["imagePicker"]};
-        });
+    //     nodeBuilder.define((input, uiInput, from) => {
+    //         return { "res": uiInput["imagePicker"]};
+    //     });
 
-        const ui = nodeBuilder.createUIBuilder();
-        ui.addFilePicker({
-            componentId: "imagePicker",
-            label: "Pick an image",
-            defaultValue: "",
-            triggerUpdate: true,
-        }, {});
+    //     const ui = nodeBuilder.createUIBuilder();
+    //     ui.addFilePicker({
+    //         componentId: "imagePicker",
+    //         label: "Pick an image",
+    //         defaultValue: "",
+    //         triggerUpdate: true,
+    //     }, {});
 
-        nodeBuilder.setUI(ui);
+    //     nodeBuilder.setUI(ui);
 
-        nodeBuilder.addOutput("image", "res", "Result");
-    },
+    //     nodeBuilder.addOutput("image", "res", "Result");
+    // },
     // Will we define a color type? or just a vector4/string 
-    "inputColor": (context) => {
-        const nodeBuilder = context.instantiate("Input", "inputColor");
-        nodeBuilder.setTitle("Input color");
+    "color": (context) => {
+        const nodeBuilder = context.instantiate("Input", "color");
+        nodeBuilder.setTitle("Color");
         nodeBuilder.setDescription("Provides a color input and returns a single color output");
 
         nodeBuilder.define((input, uiInput, from) => {
@@ -58,17 +58,16 @@ const nodes = {
         ui.addColorPicker({
             componentId: "colorPicker",
             label: "Pick a color",
-            defaultValue: "#ff0000ff",
+            defaultValue: "#f43e5c",
             triggerUpdate: true,
         }, {})
         nodeBuilder.setUI(ui);
 
         nodeBuilder.addOutput("color", "res", "Result");
     },
-    // Will we define a color type? or just a vector4/string 
-    "inputBoolean": (context) => {
-        const nodeBuilder = context.instantiate("Input", "inputBoolean");
-        nodeBuilder.setTitle("Input Boolean");
+    "boolean": (context) => {
+        const nodeBuilder = context.instantiate("Input", "boolean");
+        nodeBuilder.setTitle("Boolean");
         nodeBuilder.setDescription("Provides a radio box to select a single true/false value");
 
         nodeBuilder.define((input, uiInput, from) => {
@@ -87,7 +86,6 @@ const nodes = {
         nodeBuilder.addOutput("boolean", "val", "Value");
     },
 }
-
 
 const commands = {}
 

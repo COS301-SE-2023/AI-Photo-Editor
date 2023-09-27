@@ -61,7 +61,7 @@ export class BlypescriptProgram implements AiLangProgram {
   public static fromString(
     program: string,
     toolbox?: BlypescriptToolbox
-  ): Result<BlypescriptProgram> | Result<unknown> {
+  ): Result<BlypescriptProgram> {
     const nodeNameIdMap = new Map<string, UUID>();
     const match = program.match(/^^.*\s*graph\(?\)?\s*{([\s\S]*)}.*$$/s);
 
@@ -86,7 +86,6 @@ export class BlypescriptProgram implements AiLangProgram {
       if (!result.success) return result;
 
       const statement = result.data;
-      // Duplicate nodeId
 
       if (usedNodeIds.has(statement.name)) {
         return {
@@ -181,9 +180,9 @@ export class BlypescriptProgram implements AiLangProgram {
       }
 
       const repairFunctions = [
-        this.repairNestedFunctionCalls,
-        this.repairPrimitiveTypes,
-        this.repairUiInputTypes,
+        this.repairNestedFunctionCalls.bind(this),
+        this.repairPrimitiveTypes.bind(this),
+        this.repairUiInputTypes.bind(this),
       ];
 
       for (const repairFunction of repairFunctions) {
@@ -332,13 +331,10 @@ export class BlypescriptProgram implements AiLangProgram {
       let inputNode: BlypescriptNode | null = null;
 
       if (!isNaN(Number(statementNodeInput))) {
-        inputNode = toolbox.getNode("input-plugin.inputNumber");
+        inputNode = toolbox.getNode("input.number");
 
         if (!inputNode) {
-          return error(
-            "node_not_found",
-            "The `input-plugin.inputNumber` plugin node can not be found"
-          );
+          return error("node_not_found", "The `input.number` plugin node can not be found");
         }
 
         newStatement = new BlypescriptStatement(
@@ -479,7 +475,7 @@ export class BlypescriptStatement extends AiLangStatement {
     return fillTemplate(BLYPESCRIPT_STATEMENT_TEMPLATE, {
       name: this.name,
       signature: this.nodeSignature,
-      params: this.nodeInputs.join(", ") || "",
+      params: this.nodeInputs.join(", "),
     });
   }
 }
@@ -490,14 +486,7 @@ export class BlypescriptInterpreter {
     private readonly toolbox: ToolboxRegistry,
     private readonly graphManager: CoreGraphManager
   ) {
-    const result = BlypescriptToolbox.fromToolbox(this.toolbox);
-
-    if (result.success) {
-      this.blypescriptToolbox = result.data;
-    } else {
-      this.blypescriptToolbox = new BlypescriptToolbox([]);
-      logger.error("Failed to initialize BlypescriptInterpreter with error:", result.error);
-    }
+    this.blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolbox);
   }
 
   public run(
@@ -848,49 +837,25 @@ export class BlypescriptPlugin {
   public static fromPluginNodeInstances(
     pluginName: string,
     nodes: NodeInstance[]
-  ): Result<BlypescriptPlugin> {
+  ): BlypescriptPlugin {
     const blypescriptNodes = nodes.map((nodeInstance) => {
       const { name, plugin, description, signature } = nodeInstance;
       const nodeInputs = this.generateNodeInputs(nodeInstance);
-      const uiInputsResult = this.generateUiInputs(nodeInstance.ui);
+      const uiInputs = this.generateUiInputs(nodeInstance);
       const nodeOutputs = this.generateNodeOutputs(nodeInstance);
 
-      if (!uiInputsResult.success) {
-        return uiInputsResult satisfies Result;
-      }
-
-      return {
-        success: true,
-        data: new BlypescriptNode(
-          plugin,
-          name,
-          signature,
-          description,
-          nodeInputs,
-          uiInputsResult.data,
-          nodeOutputs
-        ),
-      } satisfies Result;
+      return new BlypescriptNode(
+        plugin,
+        name,
+        signature,
+        description,
+        nodeInputs,
+        uiInputs,
+        nodeOutputs
+      );
     });
 
-    const failedResults = blypescriptNodes.filter((result) => !result.success);
-
-    if (failedResults.length > 0) {
-      // Maybe improve to return list of errors
-      return {
-        success: false,
-        error: "Something went wrong when creating BlypescriptNode",
-        message: "Error when creating Blypescript Plugin",
-      };
-    }
-
-    return {
-      success: true,
-      data: new BlypescriptPlugin(
-        pluginName,
-        blypescriptNodes.map((result) => result.data as BlypescriptNode)
-      ),
-    };
+    return new BlypescriptPlugin(pluginName, blypescriptNodes);
   }
 
   public toString(): string {
@@ -922,42 +887,41 @@ export class BlypescriptPlugin {
     });
   }
 
-  private static generateUiInputs(ui: NodeUI | null): Result<BlypescriptNodeParam[]> {
+  /**
+   * Will attempt to generate as many UI Inputs as possible. If a UI Input can
+   * not be generated then it will be left out (AI can't modify) and an error
+   * will be logged. This should help to improve fault tolerance of the AI
+   * system.
+   *
+   * @param node Node instance to be converted
+   * @param ui Used for recursive case
+   */
+  private static generateUiInputs(node: NodeInstance, ui?: NodeUI): BlypescriptNodeParam[] {
+    ui = ui || node.ui || undefined;
+
     if (!ui) {
-      return { success: true, data: [] };
+      return [];
     }
 
     if (ui.type === "parent") {
-      const results = ui.params.flatMap((child) => this.generateUiInputs(child as NodeUI));
-      const failedResults = results.filter((result) => !result.success);
-
-      if (failedResults.length > 0) {
-        // Maybe improve to return list of errors
-        return failedResults[0];
-      }
-
-      return {
-        success: true,
-        data: results.flatMap((result) => result.data as BlypescriptNodeParam[]),
-      };
+      const nodeParams = ui.params.flatMap((child) => this.generateUiInputs(node, child as NodeUI));
+      return nodeParams;
     } else if (ui.type === "leaf") {
       const props = ui.params[0];
       const componentType = (ui as NodeUILeaf)?.category;
 
       if (!props) {
-        return {
-          success: false,
-          error: "Error generating UI Inputs",
-          message: "Props not available on NodeUiLeaf",
-        };
+        logger.error(
+          `Blypescript Plugin: Error generating UI Inputs for ${node.signature}, props not available on NodeUiLeaf.`
+        );
+        return [];
       }
 
       if (!componentType) {
-        return {
-          success: false,
-          error: "Error generating UI Inputs",
-          message: "Component type not available on NodeUiLeaf",
-        };
+        logger.error(
+          `Blypescript Plugin: Error generating UI Inputs for ${node.signature}, component type not available on NodeUiLeaf.`
+        );
+        return [];
       }
 
       const nodeParam: BlypescriptNodeParam = {
@@ -981,19 +945,18 @@ export class BlypescriptPlugin {
         const options = objectSchema.safeParse(props.options);
 
         if (!options.success) {
-          return {
-            success: false,
-            error: "Error generating UI Inputs",
-            message: "Options on UI Dropdown is not a Record<string, string>",
-          };
+          logger.error(
+            `Blypescript Plugin: Error generating UI Inputs for ${node.signature}, options on UI Dropdown is not type Record<string, string>`
+          );
+          return [];
         }
 
         nodeParam.types = Object.values(options.data).map((val) => `'${val}'`);
       } else if (componentType === "TextInput") {
         nodeParam.types.push("string");
       } else if (componentType === "ColorPicker") {
-        // nodeParam.types.push("\`#${string}\`");
-        nodeParam.types.push("color");
+        nodeParam.types.push("`#${string}`");
+        // nodeParam.types.push("color");
       } else if (componentType === "FilePicker") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("file");
@@ -1002,19 +965,24 @@ export class BlypescriptPlugin {
         nodeParam.types.push("buffer");
       } else if (componentType === "TweakDial") {
         nodeParam.aiCanUse = false;
-        nodeParam.types.push("dial");
+        nodeParam.types.push("tweakDial");
+      } else if (componentType === "DiffDial") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("diffDial");
+      } else if (componentType === "CachePicker") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("cache");
       } else {
-        return {
-          success: false,
-          error: "Error generating UI Inputs",
-          message: `${componentType} UI component has not been implemented yet`,
-        };
+        logger.error(
+          `Blypescript Plugin: Error generating UI Inputs for ${node.signature}, ${componentType} UI component has not been implemented yet`
+        );
+        return [];
       }
 
-      return { success: true, data: [nodeParam] };
+      return [nodeParam];
     }
 
-    return { success: true, data: [] };
+    return [];
   }
 
   private static generateNodeOutputs(node: NodeInstance): BlypescriptNodeParam[] {
@@ -1032,7 +1000,7 @@ export class BlypescriptPlugin {
 export class BlypescriptToolbox {
   constructor(public readonly plugins: BlypescriptPlugin[]) {}
 
-  public static fromToolbox(toolbox: ToolboxRegistry) {
+  public static fromToolbox(toolbox: ToolboxRegistry): BlypescriptToolbox {
     const pluginMap = new Map<string, NodeInstance[]>();
 
     // Group nodes by plugin
@@ -1044,28 +1012,13 @@ export class BlypescriptToolbox {
       }
     });
 
-    const blypescriptPluginResults: Result<BlypescriptPlugin>[] = [];
+    const blypescriptPlugins: BlypescriptPlugin[] = [];
 
     pluginMap.forEach((nodes, plugin) => {
-      blypescriptPluginResults.push(BlypescriptPlugin.fromPluginNodeInstances(plugin, nodes));
+      blypescriptPlugins.push(BlypescriptPlugin.fromPluginNodeInstances(plugin, nodes));
     });
 
-    const failedResults = blypescriptPluginResults.filter((result) => !result.success);
-
-    if (failedResults.length > 0) {
-      // Maybe improve to return list of errors
-      return {
-        success: false,
-        error: "Something went wrong when creating BlypescriptPlugin",
-        message: "Error when creating Blypescript Plugin",
-      } satisfies Result;
-    }
-
-    const blypescriptPlugins: BlypescriptPlugin[] = blypescriptPluginResults.map(
-      (result) => result.data as BlypescriptPlugin
-    );
-
-    return { success: true, data: new BlypescriptToolbox(blypescriptPlugins) } satisfies Result;
+    return new BlypescriptToolbox(blypescriptPlugins);
   }
 
   public toString(): string {
@@ -1103,7 +1056,7 @@ export class BlypescriptToolbox {
  * fillTemplate("Life is a {{description}}", { description: "dream" })
  */
 function fillTemplate(template: string, replacements: Record<string, string>) {
-  return template.replace(/\{\{(\w+)\}\}/g, (match, key) => replacements[key] || match);
+  return template.replace(/\{\{(\w+)\}\}/g, (match, key) => replacements[key] ?? match);
 }
 
 export function colorString(str: string, color: Colors) {
@@ -1122,17 +1075,15 @@ const COLORS = {
 
 export type Colors = keyof typeof COLORS;
 
-export type Result<T = unknown, E = unknown> = SuccessResponse<T> | ErrorResponse<E>;
-
-export type SuccessResponse<T = unknown> = {
-  success: true;
-  message?: string;
-  data: T;
-};
-
-export type ErrorResponse<E = unknown> = {
-  success: false;
-  error: string;
-  message: string;
-  data?: E;
-};
+export type Result<T = unknown, E = unknown> =
+  | {
+      success: true;
+      message?: string;
+      data: T;
+    }
+  | {
+      success: false;
+      error: string;
+      message: string;
+      data?: E;
+    };

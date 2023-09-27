@@ -2,12 +2,14 @@
   import { get, writable } from "svelte/store";
   import { UIValueStore } from "@shared/ui/UIGraph";
   import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
+  import { createEventDispatcher } from "svelte";
 
   const randomId = Math.random().toString(32);
 
   export let props: UIComponentProps;
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
+  const dispatch = createEventDispatcher();
 
   if (!inputStore.inputs[config.componentId]) inputStore.inputs[config.componentId] = writable(0);
 
@@ -36,6 +38,7 @@
 
   function handlePointerUp() {
     isDragging = false;
+    if (initialValue !== (get(valStore) as number)) handleInteraction();
   }
 
   function handlePointerMove(e: PointerEvent) {
@@ -48,6 +51,10 @@
   }
 
   $: valStore = inputStore.inputs[config.componentId];
+
+  function handleInteraction() {
+    dispatch("inputInteraction", { id: config.componentId, value: $valStore });
+  }
 </script>
 
 <svelte:window
@@ -64,6 +71,8 @@
     bind:value="{$valStore}"
     on:pointerdown="{handlePointerDown}"
     bind:this="{input}"
+    on:paste="{null}"
+    on:input="{handleInteraction}"
     min="{min}"
     max="{max}"
     step="{step}"

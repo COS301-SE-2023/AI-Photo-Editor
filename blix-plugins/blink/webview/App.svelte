@@ -30,6 +30,15 @@
 
     onMount(async () => {
     // window.addEventListener("DOMContentLoaded", async () => {
+
+        // Add export listener
+
+	    window.api.on("export", async () => {
+            exportImage();
+	    	// send("exportResponse", "exported");
+	    })
+
+
         //====== INITIALIZE PIXI ======//
         blink = new PIXI.Application({
             view: pixiCanvas,
@@ -195,12 +204,13 @@
         const frame = new PIXI.Rectangle(-bounds.x-imgCanvasBlockW/2, -bounds.y-imgCanvasBlockH/2, imgCanvasBlockW, imgCanvasBlockH);
 
         const exportCanvas = blink.renderer.extract.canvas(currScene, frame);
-        exportCanvas.toBlob((blob) => {
+        exportCanvas.toBlob(async (blob) => {
             const metadata = {
                 contentType: "image/png",
                 name: `${canvasConfig.exportName} ${Math.floor(100000 * Math.random())}`
             };
-            (window as WindowWithApis).cache.write(blob, metadata);
+
+            send("exportResponse", {cacheUUID: await (window as WindowWithApis).cache.write(blob, metadata)});
         }, "image/png");
         // REMOVED: Exporting straight to local file
         // const link = document.createElement("a");
@@ -213,7 +223,7 @@
 
 <svelte:window on:keydown={keydown} on:keyup={keyup} />
 <div class="{mouseCursor}">
-    <button on:click="{exportImage}">Export</button>
+    <!-- <button on:click="{exportImage}">Export</button> -->
     <canvas id="pixiCanvas" bind:this={pixiCanvas} />
 </div>
 
@@ -229,14 +239,14 @@
         padding: 0px;
     }
 
-    button {
+    /* button {
         position: absolute;
         z-index: 10;
         top: 10px;
         right: 0px;
         width: 60px;
         height: 30px;
-    }
+    } */
 
     .cursorPointer {
         cursor: pointer;

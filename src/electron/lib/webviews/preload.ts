@@ -85,10 +85,13 @@ contextBridge.exposeInMainWorld("cache", {
         messageId,
         metadata,
       } as CacheRequest);
-      const metadataResp = (await sendCachePayload(
-        metadataMessageId,
-        metadataPayload
-      )) as CacheResponse;
+      // TODO fix this
+      // const metadataResp = ( await sendCachePayload(
+      //   metadataMessageId,
+      //   metadataPayload
+      // )) as CacheResponse;
+
+      const metadataResp = sendCachePayload(metadataMessageId, metadataPayload);
     }
 
     return writeResp.id;

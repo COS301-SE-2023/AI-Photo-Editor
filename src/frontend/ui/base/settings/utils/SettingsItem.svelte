@@ -12,7 +12,7 @@
   <div>
     <div class="text-normal font-semibold text-zinc-300">{item.title}</div>
     {#if item.subtitle}
-      <div class="font-ligt text-sm text-zinc-500">{item.subtitle}</div>
+      <div class="font-ligt text-sm text-zinc-500">{@html item.subtitle}</div>
     {/if}
     <slot />
   </div>

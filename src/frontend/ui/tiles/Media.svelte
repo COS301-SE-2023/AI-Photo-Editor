@@ -3,7 +3,6 @@
   import Image from "../utils/mediaDisplays/Image.svelte";
   import TextBox from "../utils/mediaDisplays/TextBox.svelte";
   import { mediaStore } from "../../lib/stores/MediaStore";
-  import type { GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
   import { writable, type Readable } from "svelte/store";
   import { MediaDisplayType, type DisplayableMediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
@@ -27,6 +26,7 @@
     faPizzaSlice,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
+  import { toastStore } from "../../lib/stores/ToastStore";
 
   const noContentIcons = [
     faBacon,
@@ -44,8 +44,11 @@
   ];
 
   const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
-
   let selectedItems: SelectionBoxItem[] = [];
+  let selectedMediaId = writable("");
+  let oldMediaId: string | null = null;
+  let webview: WebView;
+  let media: Readable<DisplayableMediaOutput | null>;
 
   $: if ($mediaOutputIds) {
     selectedItems = Array.from($mediaOutputIds)
@@ -53,36 +56,48 @@
       .map((id) => ({ id, title: id }));
   }
 
-  let mediaId = writable("");
-  let oldMediaId: string | null = null;
+  // Changes output on output node click
+  // $: if ($nodeIdLastClicked) {
+  //   const mediaOutputId = mediaStore.getMediaOutputId($nodeIdLastClicked);
+  //   if (mediaOutputId) {
+  //     selectedMediaId.set(mediaOutputId);
+  //   }
+  // }
 
-  const unsubMedia = mediaId.subscribe((newMediaId) => {
-    // console.log("SUBSCRIBE MEDIA ID", oldMediaId, newMediaId);
+  const unsubMedia = selectedMediaId.subscribe((newMediaId) => {
     connectNewMedia(oldMediaId, newMediaId);
     oldMediaId = newMediaId;
   });
 
-  // TODO: Add toggle that auto-switches media to the last selected output node
-  let selectedNode: { graphUUID: GraphUUID; outNode: GraphNodeUUID } | null;
-  let media: Readable<DisplayableMediaOutput | null>;
-
   async function connectNewMedia(oldMediaId: string | null, mediaId: string) {
     if (oldMediaId !== null) {
-      // console.log("STOPPING OLD", oldMediaId);
       await mediaStore.stopMediaReactive(oldMediaId);
     }
-    media = await mediaStore.getMediaReactive(mediaId);
-    // console.log("CONNECT NEW MEDIA", mediaId, media);
+    if (mediaId) {
+      media = await mediaStore.getMediaReactive(mediaId);
+    } else {
+      media = writable(null);
+    }
   }
 
   onDestroy(async () => {
-    await mediaStore.stopMediaReactive($mediaId);
+    await mediaStore.stopMediaReactive($selectedMediaId);
     unsubMedia();
   });
 
   async function exportMedia(e: Event) {
+    if (selectedItems.length === 0) {
+      toastStore.trigger({ message: "No media selected.", type: "warn" });
+      return;
+    }
+
     if ($media?.dataType && $media?.content) {
-      await mediaStore.exportMedia($media);
+      if ($media.display.displayType === "webview") {
+        webview.exportMedia(e);
+      } else {
+        // await mediaStore.exportMedia($media);
+        toastStore.trigger({ message: "Unsupported media type for saving.", type: "info" });
+      }
     }
   }
 
@@ -123,16 +138,16 @@
     <div class="self-end">
       <SelectionBox
         items="{selectedItems}"
-        bind:selectedItemId="{$mediaId}"
-        missingContentLabel="No Outputs"
+        bind:selectedItemId="{$selectedMediaId}"
+        missingContentLabel="No Media"
       />
     </div>
     <div
       on:click="{exportMedia}"
       on:keydown="{null}"
-      class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+      class="flex h-7 min-w-max select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
     >
-      Export
+      Save Asset
     </div>
     <!-- <div class="self-end">
       <SelectionBox
@@ -145,17 +160,25 @@
 
   <div class="media">
     {#if $media}
-      <svelte:component
-        this="{displayIdToSvelteConstructor[$media.display.displayType]}"
-        {...getDisplayProps($media)}
-      />
+      {#if $media.display.displayType === "webview"}
+        <svelte:component
+          this="{displayIdToSvelteConstructor[$media.display.displayType]}"
+          bind:this="{webview}"
+          {...getDisplayProps($media)}
+        />
+      {:else}
+        <svelte:component
+          this="{displayIdToSvelteConstructor[$media.display.displayType]}"
+          {...getDisplayProps($media)}
+        />
+      {/if}
       <!-- <TextBox
           content="ERROR: Unknown data type: ${JSON.stringify($media)}"
           status="error"
         /> -->
       <!-- <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" /> -->
     {:else}
-      <div class="placeholder">
+      <div class="placeholder select-none">
         <div class="icon"><Fa icon="{getNoContentIcon()}" style="display: inline-block" /></div>
         <h1>No content!</h1>
         <h2>Add an Output node to the graph to create a media output</h2>
@@ -188,12 +211,13 @@
   }
 
   .placeholder {
-    padding-top: 140px;
-    text-align: center;
-    display: inline-block;
     width: 100%;
     height: 100%;
-    margin-top: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 
     h1 {
       font-size: 1.5em;

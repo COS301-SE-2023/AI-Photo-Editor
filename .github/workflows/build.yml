@@ -1,6 +1,10 @@
 name: Build/release
 
-on: push
+on:
+  push:
+    branches:
+      - dev
+      - master
 
 jobs:
   Build:
@@ -30,17 +34,21 @@ jobs:
         run: npm ci
 
       - name: Build Blix Plugins
-        run: cd ./blix-plugins/glfx-plugin && npm ci && npm run build
+        run: node ./scripts/plugins.js
 
       - name: Build/Release Blix
         run: |
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            npm run dist -- --linux deb AppImage --x64 --arm64
+            # npm run dist -- --linux deb AppImage --x64 --arm64
+            npm run dist -- --linux deb --x64 --arm64
           elif [ "${{ matrix.os }}" = "windows-latest" ]; then
             npm run dist -- --windows nsis
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            npm run dist -- --mac dmg --x64 --arm64
+            # npm run dist -- --mac dmg --x64 --arm64
+            npm run dist -- --mac dmg --arm64
           fi
         env:
           GH_TOKEN: ${{ secrets.TEST_TOKEN }}
         shell: bash
+
+    timeout-minutes: 20

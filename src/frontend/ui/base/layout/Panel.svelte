@@ -388,12 +388,12 @@
   }
 
   .splitpanes.main-theme .splitpanes__splitter:active {
-    background-color: rgb(244 63 94 / 0.7);
+    background-color: rgb(244, 63, 94);
     border: none;
   }
 
   .splitpanes.main-theme .splitpanes__splitter:hover {
-    background-color: rgb(244 63 94 / 0.7);
+    background-color: rgb(244, 63, 94);
     border: none;
   }
 

@@ -16,10 +16,7 @@
   $: valStore = inputStore.inputs[config.componentId];
 </script>
 
-<textarea
-  disabled
-  value="{JSON.stringify($valStore)}"
-  class="{$blixStore.production ? 'hidden' : ''}"></textarea>
+<textarea disabled value="{JSON.stringify($valStore)}"></textarea>
 
 <style>
   textarea {

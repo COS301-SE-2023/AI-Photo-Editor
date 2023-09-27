@@ -115,16 +115,16 @@ describe("Test core Graph Commands", () => {
         expect(blix.sendErrorMessage).toHaveBeenCalledWith("Project not found");
     });
 
-    test("Should remove graph", async () => {
+    // test("Should remove graph", async () => {
 
-        jest.spyOn(blix, "sendErrorMessage")
-        const project = blix.projectManager.createProject();
-        await coreGraphCommands[0].handler(blix, {projectId: project.uuid});
-        const graph = project.graphs[0];
-        await coreGraphCommands[1].handler(blix, {id: graph})
+    //     jest.spyOn(blix, "sendErrorMessage")
+    //     const project = blix.projectManager.createProject();
+    //     await coreGraphCommands[0].handler(blix, {projectId: project.uuid});
+    //     const graph = project.graphs[0];
+    //     await coreGraphCommands[1].handler(blix, {id: graph})
 
-        expect(project.graphs.length).toBe(0);
-    });
+    //     expect(project.graphs.length).toBe(0);
+    // });
 
 
 });

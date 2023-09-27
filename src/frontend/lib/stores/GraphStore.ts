@@ -17,18 +17,6 @@ import type { MediaOutputId } from "@shared/types/media";
 import { tick } from "svelte";
 import type { UUID } from "@shared/utils/UniqueEntity";
 
-// When the the CoreGraphApi type has to be imported into the backend
-// (WindowApi.ts) so that the API can be bound then it tries to import the type
-// below because the GraphStore gets used in the CoreGraphApi (its like one long
-// type dependency chain), this seems to cause some sort of duplicate export
-// issue originating from the svelvet node files when it tries to check the
-// types at compile time: node_modules/svelvet/dist/types/index.d.ts:4:1 - error
-// TS2308: Module './general' has already exported a member named
-// 'ActiveIntervals'. Consider explicitly re-exporting to resolve the ambiguity.
-
-// Not sure how to solve this at the moment, so had to add a temp fix below
-// unfortunately because of time constraints.
-
 // import type { Connections } from "blix_svelvet";
 // type Connections = (string | number | [string | number, string | number] | null)[];
 
@@ -116,25 +104,16 @@ export class GraphStore {
 
                 for (const input in inputs) {
                   if (!inputs.hasOwnProperty(input)) continue;
-                  let first = true;
-                  let oldState: unknown;
+
                   this.uiInputUnsubscribers[node].push(
                     inputs[input].subscribe((state) => {
-                      // Ensure the subscribe does not run when first created
-                      if (first) {
-                        first = false;
-                        oldState = state;
-                      } else if (state !== oldState || typeof state === "object") {
-                        // Prevent unnecessary updates when the value is the exact same as the prior
-                        // Only would then update if maybe the set function is used but old state === new state
-                        this.globalizeUIInputs(node, input).catch((err) => {
-                          return;
-                        });
-                        oldState = state;
-                      }
+                      this.globalizeUIInputs(node, input).catch((err) => {
+                        return;
+                      });
                     })
                   );
                 }
+
                 // Update frontend
                 if (position)
                   this.uiPositionUnsubscribers[node].push(

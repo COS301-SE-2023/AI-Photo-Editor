@@ -1,5 +1,5 @@
 {
-    "name": "input-plugin",
+    "name": "input",
     "displayName": "Input Plugin",
     "description": "Provides basic nodes for providing input to a graph.",
     "version": "0.0.1",

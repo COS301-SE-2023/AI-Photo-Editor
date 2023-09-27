@@ -18,6 +18,9 @@ type PartialTypeclass = {
   toConverters: [TypeclassId, TypeConverter][];
 };
 
+/**
+ * Builder class for creating Typeclasses through Builder pattern
+ */
 export class TypeclassBuilder implements PluginContextBuilder {
   private partial: PartialTypeclass;
 
@@ -37,26 +40,45 @@ export class TypeclassBuilder implements PluginContextBuilder {
     };
   }
 
+  /**
+   * Sets the description of the partial typeclass
+   * @param description
+   */
   setDescription(description: string) {
     this.partial.description = description;
   }
 
+  /**
+   * Sets the From converters of the partial typeclass
+   * @param converters
+   */
   setFromConverters(converters: { [key: string]: (fromType: string) => any }) {
     Object.keys(converters).forEach((fromTypeId) => {
       this.partial.fromConverters.push([fromTypeId, converters[fromTypeId]]);
     });
   }
 
+  /**
+   * Set the To converters of the partial typeclass
+   * @param converters
+   */
   setToConverters(converters: { [key: string]: (toType: string) => any }) {
     Object.keys(converters).forEach((toTypeId) => {
       this.partial.toConverters.push([toTypeId, converters[toTypeId]]);
     });
   }
 
+  /**
+   * Set the mediaDisplayConfigurator of the partial typeclass
+   * @param configurator
+   */
   setDisplayConfigurator(configurator: (data: string) => MediaDisplayConfig) {
     this.partial.mediaDisplayConfigurator = configurator;
   }
 
+  /**
+   * Returns the current build of the partial typeclass
+   */
   private get buildTypeclass(): Typeclass {
     return {
       id: this.partial.id,
@@ -66,6 +88,10 @@ export class TypeclassBuilder implements PluginContextBuilder {
     };
   }
 
+  /**
+   * Returns the from and to converters of the current partial typeclass
+   * @returns List of converter Triples
+   */
   private get buildConverters(): ConverterTriple[] {
     return [
       ...this.partial.fromConverters.map(
@@ -77,6 +103,9 @@ export class TypeclassBuilder implements PluginContextBuilder {
     ];
   }
 
+  /**
+   * @returns the current build of the partial typeclass and its converters
+   */
   get build(): [Typeclass, ConverterTriple[]] {
     return [this.buildTypeclass, this.buildConverters];
   }

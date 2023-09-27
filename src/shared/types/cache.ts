@@ -25,7 +25,12 @@ export type CacheObject = {
   metadata: CacheMetadata;
 };
 
-type CacheRequestType = "cache-subscribe" | "cache-delete" | "cache-get" | "cache-write-metadata";
+type CacheRequestType =
+  | "cache-subscribe"
+  | "cache-delete"
+  | "cache-get"
+  | "cache-write-metadata"
+  | "export-cache";
 
 export type CacheRequest = {
   type: CacheRequestType;

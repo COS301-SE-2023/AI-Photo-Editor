@@ -24,6 +24,9 @@ const mainWindow: MainWindow = {
     },
     graphClientApi: {
         graphRemoved: jest.fn(),
+    },
+    mediaClientApi: {
+      outputNodesChanged: jest.fn(),
     }
     
   }
@@ -272,5 +275,12 @@ jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
 
         graphManager.onGraphUpdated(graph.uuid,GRAPH_UPDATED_EVENT,CoreGraphUpdateParticipant.system);
         expect(subscriber.onGraphChanged).toBeCalled()
+    })
+
+    test("Update Graph metadata", () => {
+      expect(() => { const res = graphManager.addGraph(graph) }).not.toThrow("some error");
+      
+      const res = graphManager.updateGraphMetadata(graph.uuid, {}, 1);
+      expect(res.status).toBe("success");
     })
 });
