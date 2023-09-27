@@ -29,6 +29,7 @@ jobs:
     steps:
       - name: Checkout for ${{ runner.os }}
         uses: actions/checkout@v3
+
       - name: Set up Node 18
         uses: actions/setup-node@v3
         with:
@@ -43,14 +44,21 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
       - name: Run unit/integration tests and collect coverage
         run: npm run test
+        env:
+          CI: true
+
       - name: Upload coverage to Codecov
         if: ${{ runner.os == 'macOS' }}
         uses: codecov/codecov-action@v3
         with:
           files: coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
+
+    timeout-minutes: 20
+
   end:
     name: End State ✅✅✅
     runs-on: ubuntu-latest
