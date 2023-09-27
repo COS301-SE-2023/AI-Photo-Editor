@@ -16,6 +16,8 @@
   import { projectsStore } from "../../lib/stores/ProjectStore";
   import { get } from "svelte/store";
   import type { SelectionBoxItem } from "../../types/selection-box";
+  import { faDiagramProject } from "@fortawesome/free-solid-svg-icons";
+  import Fa from "svelte-fa";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
@@ -392,10 +394,14 @@
     {/key} -->
   </Svelvet>
 {:else}
-  <div class="flex h-full w-full items-center justify-center text-xl text-zinc-400">No graphs</div>
+  <div class="placeholder select-none">
+    <div class="icon"><Fa icon="{faDiagramProject}" style="display: inline-block" /></div>
+    <h1>No graphs!</h1>
+    <h2>Create a graph to start a workflow</h2>
+  </div>
 {/if}
 
-<style>
+<style lang="scss">
   :root[svelvet-theme="custom-dark"] {
     --background-color: #181825;
     --dot-color: hsl(225, 10%, 50%);
@@ -421,4 +427,32 @@
   /* .dropdown {
     color: #11111b;
   } */
+
+  .placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    h1 {
+      font-size: 1.5em;
+      color: #a8a8be;
+    }
+
+    .icon {
+      width: 100%;
+      color: #9090a4;
+      font-size: 5em;
+      line-height: 1em;
+      margin-bottom: 0.1em;
+    }
+
+    h2 {
+      font-size: 0.8em;
+      color: #9090a4;
+    }
+  }
 </style>

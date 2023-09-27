@@ -24,6 +24,9 @@ const mainWindow: MainWindow = {
     },
     graphClientApi: {
         graphRemoved: jest.fn(),
+    },
+    mediaClientApi: {
+      outputNodesChanged: jest.fn(),
     }
     
   }

@@ -7,6 +7,7 @@
   import { graphMall } from "../../../lib/stores/GraphStore";
   import { colord, extend } from "colord";
   import a11yPlugin from "colord/plugins/a11y";
+  import { nodeIdLastClicked } from "../../../lib/stores/MediaStore";
 
   extend([a11yPlugin]);
 
@@ -59,13 +60,12 @@
   }
 
   async function nodeClicked(e: CustomEvent) {
-    console.log("NODE CLICKED");
     if (e.detail.e.button === 2) {
-      console.log("DELETE NODE EVENT");
-
       const [_2, ...nodeUUIDParts] = e.detail.node.id.split("_");
       const nodeUUID = nodeUUIDParts.join("_");
       await window.apis.graphApi.removeNode(graphId, nodeUUID);
+    } else {
+      nodeIdLastClicked.set(node.uuid);
     }
   }
 

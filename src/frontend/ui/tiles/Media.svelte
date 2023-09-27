@@ -3,7 +3,6 @@
   import Image from "../utils/mediaDisplays/Image.svelte";
   import TextBox from "../utils/mediaDisplays/TextBox.svelte";
   import { mediaStore } from "../../lib/stores/MediaStore";
-  import type { GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
   import { writable, type Readable } from "svelte/store";
   import { MediaDisplayType, type DisplayableMediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
@@ -12,7 +11,6 @@
   import { type SelectionBoxItem } from "../../types/selection-box";
   import WebView from "./WebView.svelte";
   import { TweakApi } from "../../lib/webview/TweakApi";
-  import { cacheStore } from "../../lib/stores/CacheStore";
   import {
     faBacon,
     faBowlRice,
@@ -46,8 +44,11 @@
   ];
 
   const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
-
   let selectedItems: SelectionBoxItem[] = [];
+  let selectedMediaId = writable("");
+  let oldMediaId: string | null = null;
+  let webview: WebView;
+  let media: Readable<DisplayableMediaOutput | null>;
 
   $: if ($mediaOutputIds) {
     selectedItems = Array.from($mediaOutputIds)
@@ -55,31 +56,32 @@
       .map((id) => ({ id, title: id }));
   }
 
-  let mediaId = writable("");
-  let oldMediaId: string | null = null;
-  let webview: WebView;
+  // Changes output on output node click
+  // $: if ($nodeIdLastClicked) {
+  //   const mediaOutputId = mediaStore.getMediaOutputId($nodeIdLastClicked);
+  //   if (mediaOutputId) {
+  //     selectedMediaId.set(mediaOutputId);
+  //   }
+  // }
 
-  const unsubMedia = mediaId.subscribe((newMediaId) => {
-    // console.log("SUBSCRIBE MEDIA ID", oldMediaId, newMediaId);
+  const unsubMedia = selectedMediaId.subscribe((newMediaId) => {
     connectNewMedia(oldMediaId, newMediaId);
     oldMediaId = newMediaId;
   });
 
-  // TODO: Add toggle that auto-switches media to the last selected output node
-  let selectedNode: { graphUUID: GraphUUID; outNode: GraphNodeUUID } | null;
-  let media: Readable<DisplayableMediaOutput | null>;
-
   async function connectNewMedia(oldMediaId: string | null, mediaId: string) {
     if (oldMediaId !== null) {
-      // console.log("STOPPING OLD", oldMediaId);
       await mediaStore.stopMediaReactive(oldMediaId);
     }
-    media = await mediaStore.getMediaReactive(mediaId);
-    // console.log("CONNECT NEW MEDIA", mediaId, media);
+    if (mediaId) {
+      media = await mediaStore.getMediaReactive(mediaId);
+    } else {
+      media = writable(null);
+    }
   }
 
   onDestroy(async () => {
-    await mediaStore.stopMediaReactive($mediaId);
+    await mediaStore.stopMediaReactive($selectedMediaId);
     unsubMedia();
   });
 
@@ -135,8 +137,8 @@
     <div class="self-end">
       <SelectionBox
         items="{selectedItems}"
-        bind:selectedItemId="{$mediaId}"
-        missingContentLabel="No Outputs"
+        bind:selectedItemId="{$selectedMediaId}"
+        missingContentLabel="No Media"
       />
     </div>
     <div
@@ -175,7 +177,7 @@
         /> -->
       <!-- <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" /> -->
     {:else}
-      <div class="placeholder">
+      <div class="placeholder select-none">
         <div class="icon"><Fa icon="{getNoContentIcon()}" style="display: inline-block" /></div>
         <h1>No content!</h1>
         <h2>Add an Output node to the graph to create a media output</h2>
@@ -208,12 +210,13 @@
   }
 
   .placeholder {
-    padding-top: 140px;
-    text-align: center;
-    display: inline-block;
     width: 100%;
     height: 100%;
-    margin-top: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 
     h1 {
       font-size: 1.5em;
