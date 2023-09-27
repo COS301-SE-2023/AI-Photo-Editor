@@ -13,7 +13,7 @@
     padding: 1em;
     margin: 0px;
 
-    color: white;
+    color: #ffffffee;
   }
 
   /* Markdown styling */
@@ -26,6 +26,8 @@
     :global(h5),
     :global(h6) {
       font-weight: bold;
+      padding-top: 0.6em;
+      padding-bottom: 0.4em;
     }
     :global(h1) {
       font-size: 2em;
@@ -48,10 +50,12 @@
 
     :global(ul) {
       list-style: disc;
+      margin-left: 2.4em;
     }
 
     :global(ol) {
       list-style: decimal;
+      margin-left: 2.4em;
     }
 
     :global(table),
@@ -65,11 +69,17 @@
       padding: 0.2em;
     }
 
+    :global(p) {
+      padding: 0.4em;
+      font-size: 0.8em;
+    }
+
     :global(code) {
+      font-size: 0.7em;
       display: inline-block;
       background-color: #161616;
       border-radius: 0.2em;
-      padding: 0.1em;
+      padding: 0.4em;
     }
   }
 </style>

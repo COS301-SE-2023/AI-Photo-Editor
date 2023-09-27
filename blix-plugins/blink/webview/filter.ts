@@ -2,12 +2,14 @@ import * as PIXI from 'pixi.js';
 import { type Filter, getPixiFilter } from './types';
 import { randomId } from './render';
 
+const paddedFilters = new Set<string>(["blur", "outline", "twist"]);
+
 // Apply a series of filters and flatten the result to a sprite.
 // This is done so that the filters are applied evenly regardless of scaling.
 export function applyFilters(blink: PIXI.Application, content: PIXI.Container, filters: Filter[]) {
     // `renderPadding` is necessary for filters like
     // blur that spread beyond the bounds of the sprite
-    const renderPadding = 100;
+    const renderPadding = filters.some(v => paddedFilters.has(v.type)) ? 100 : 0;
 
     // Normalize offset to fit within renderTexture
     const { x: bx, y: by, width: bw, height: bh } = content.getLocalBounds();
@@ -22,6 +24,7 @@ export function applyFilters(blink: PIXI.Application, content: PIXI.Container, f
         width: bw + 2 * renderPadding,
         height: bh + 2 * renderPadding,
     });
+    console.log("RENDER TEXTURE", renderTexture);
     blink.renderer.render(content, { renderTexture: renderTexture });
 
     content.filters = null;

@@ -85,7 +85,6 @@ describe("Test TypeClassRegistry", () => {
             return data ? 1 : 0;
         });
 
-        console.log(typeclassRegistry.resolveConversion("boolean", "string")!(true))
         expect(typeclassRegistry.resolveConversion("boolean", "string")).toBeDefined(); // else returns null
 
 
@@ -102,7 +101,6 @@ describe("Test TypeClassRegistry", () => {
 
     it("Test displayable Media Output", () => {
 
-        console.log(typeclassRegistry["typeclasses"]["string"]);
        const output : MediaOutput = {
         outputId: "00000",
         outputNodeUUID: "12345",

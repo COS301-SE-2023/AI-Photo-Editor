@@ -934,6 +934,8 @@ export class BlypescriptPlugin {
       if (componentType === "Button") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("string");
+      } else if (componentType === "Checkbox") {
+        nodeParam.types.push("boolean");
       } else if (componentType === "Slider" || componentType === "NumberInput") {
         nodeParam.types.push("number");
       } else if (componentType === "Knob") {

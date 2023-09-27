@@ -1,4 +1,4 @@
-Input Plugin
+# Input Plugin
 
 The Input Plugin is a fundamental component of Blix, our AI photo editor. It provides various nodes that enable users to incorporate different types of inputs into the photo editing graph. These inputs can include integers, real numbers, images, and more.
 Features

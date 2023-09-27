@@ -41,14 +41,21 @@
 
   {#if typeof $valStore === "string"}
     <!-- label="{config.label}" -->
-    <ColorPicker
-      bind:hex="{$valStore}"
-      label=""
-      components="{{
-        wrapper: ColorPickerWrapper,
-        textInput: ColorPickerTextInput,
-      }}"
-    />
+    <div class="row">
+      <div class="text-left">
+        {config.label}
+      </div>
+      <div>
+        <ColorPicker
+          bind:hex="{$valStore}"
+          label=""
+          components="{{
+            wrapper: ColorPickerWrapper,
+            textInput: ColorPickerTextInput,
+          }}"
+        />
+      </div>
+    </div>
   {:else}
     ERR: Invaid colour: {JSON.stringify($valStore)}
   {/if}
@@ -59,6 +66,11 @@
     margin: auto;
     width: 100%;
     height: 100%;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: auto 6em;
   }
 
   /* .picker :global(label .color) {

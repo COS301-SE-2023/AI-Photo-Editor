@@ -14,6 +14,9 @@
   import NumberInput from "./nodeUIComponents/NumberInput.svelte";
   import TweakDial from "./nodeUIComponents/dials/TweakDial.svelte";
   import DiffDial from "./nodeUIComponents/dials/DiffDial.svelte";
+  import Checkbox from "./nodeUIComponents/Checkbox.svelte";
+  import OriginPicker from "./nodeUIComponents/OriginPicker.svelte";
+  import MatrixInput from "./nodeUIComponents/MatrixInput.svelte";
 
   export let leafUI: NodeUILeaf | null = null;
   export let inputStore: UIValueStore;
@@ -34,8 +37,10 @@
     Dropdown: Dropdown,
     Accordion: null,
     NumberInput: NumberInput,
+    MatrixInput: MatrixInput,
+    OriginPicker: OriginPicker,
     TextInput: TextInput,
-    Checkbox: null,
+    Checkbox: Checkbox,
     ColorPicker: ColorPicker,
     FilePicker: FilePicker,
   };

@@ -15,16 +15,53 @@ import {
   AdjustmentFilter
 } from "pixi-filters"
 
+export type WindowWithApis = Window & typeof globalThis & {
+  api: {
+    send: (channel: string, data: any) => {};
+    on: (channel: string, func: (..._: any) => any) => {};
+  };
+
+  cache: {
+    write: (content: Blob, metadata?: any) => Promise<string | null>;
+    get: (id: string) => Promise<any | null>;
+    delete: (id: string) => Promise<boolean>;
+  };
+};
+
+
 export type BlinkCanvas = {
   assets: { [key: string]: Asset };
+  config?: BlinkCanvasConfig;
   content: Clump | null;
 }
 
-export type Asset = {
-  class: "asset";
-  type: "image" | "blob";
-  data: any;
+export type BlinkCanvasConfig = {
+  canvasDims: { w: number, h: number };
+  canvasColor: number;
+  canvasAlpha: number;
+
+  exportName: string;
 };
+
+export type Asset = { class: "asset" } & (ImageAsset | CurveAsset);
+
+export type ImageAsset = {
+  type: "image";
+  data: string;
+}
+
+export type CurveAsset = {
+  type: "curve"
+  data: CurvePoint[];
+}
+
+export type CurvePoint = {
+  control1: Vec2;
+  control2: Vec2;
+  point: Vec2;
+}
+
+export type Vec2 = { x: number, y: number };
 
 export type Clump = {
   class: "clump";
@@ -34,13 +71,17 @@ export type Clump = {
   opacity?: number;
   elements: (Clump | Atom)[];
   filters?: Filter[];
+  mask?: Clump;
 };
 
 export type Transform = {
-  position: { x: number, y: number };
+  position: Vec2;
   rotation: number;
-  scale: { x: number, y: number };
+  scale: Vec2;
+  origin: OriginPoint;
 }
+
+export type OriginPoint = "tl" | "tm" | "tr" | "ml" | "mm" | "mr" | "bl" | "bm" | "br";
 
 export type Filter = {
     class: "filter";
@@ -130,16 +171,20 @@ export function getPixiFilter(filter: Filter) {
 }
 
 // A single indivisible unit of a clump (E.g. image, shape, text etc.)
-export type Atom = { class: "atom", nodeUUID: string } & (ImageAtom | ShapeAtom | TextAtom | PaintAtom | BlobAtom);
+export type Atom = { class: "atom", nodeUUID: string } & (ImageAtom | ShapeAtom | TextAtom | PaintAtom | CurveAtom);
 export type ImageAtom = {
   type: "image";
   assetId: string;
 };
 
-export type BlobAtom = {
-  type: "blob";
-  blob: "image"; //TODO: Add more options
+export type CurveAtom = {
+  type: "curve";
   assetId: string;
+  fill: number;
+  fillAlpha: number;
+  stroke: number;
+  strokeAlpha: number;
+  strokeWidth: number;
 }
 
 export type ShapeAtom = {

@@ -1,9 +1,9 @@
 import * as PIXI from 'pixi.js';
-import type { Asset, Atom, ImageAtom, PaintAtom, ShapeAtom, TextAtom } from "./types";
-import { diffAtom, diffImageAtom, diffPaintAtom, diffShapeAtom, diffTextAtom } from './diff';
+import type { Asset, Atom, CurveAsset, CurveAtom, CurvePoint, ImageAtom, PaintAtom, ShapeAtom, TextAtom } from "./types";
+import { diffAtom, diffCurveAtom, diffImageAtom, diffPaintAtom, diffShapeAtom, diffTextAtom } from './diff';
 import { type HierarchyAtom, randomId } from './render';
 
-export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key: string]: Asset } | undefined, atom: Atom, prevAtom: HierarchyAtom | undefined, textures: { [key: string]: PIXI.Texture }): {
+export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key: string]: Asset } | undefined, atom: Atom, prevAtom: HierarchyAtom | undefined, textures: { [key: string]: PIXI.Texture<PIXI.Resource> }): {
   pixiAtom: PIXI.Container,
   changed: boolean // Whether the pixiClump is a different PIXI object than before
 } {
@@ -20,7 +20,8 @@ export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key:
       }
 
       if (assets[atom.assetId] && assets[atom.assetId].type === "image") {
-        const sprite = PIXI.Sprite.from(textures[assets[atom.assetId].data]);
+        const textureId = assets[atom.assetId].data as string;
+        const sprite = PIXI.Sprite.from(textures[textureId]);
 
         sprite.anchor.x = 0.5;
         sprite.anchor.y = 0.5;
@@ -99,5 +100,43 @@ export function renderAtom(assets: { [key: string]: Asset }, prevAssets: { [key:
       }
 
       return { pixiAtom: null, changed: true };
+
+    case "curve":
+      const curveDiff = atomsDiffer || diffCurveAtom(atom, prevAtom as CurveAtom, assets, prevAssets);
+      if (!curveDiff) {
+        return { pixiAtom: prevAtom.container, changed: false };
+      }
+
+      const curveContainer = new PIXI.Container();
+      const curve = new PIXI.Graphics();
+
+      curve.beginFill(atom.fill, atom.fillAlpha);
+      curve.lineStyle(atom.strokeWidth, atom.stroke, atom.strokeAlpha);
+
+      if (assets[atom.assetId] && assets[atom.assetId].type === "curve") {
+        const path = assets[atom.assetId].data as CurvePoint[];
+
+        if (path.length > 0) {
+          curve.moveTo(path[0].point.x, path[0].point.y);
+
+          for (let i = 1; i < path.length; i++) {
+            curve.bezierCurveTo(
+              path[i].control1.x,
+              path[i].control1.y,
+              path[i].control2.x,
+              path[i].control2.y,
+              path[i].point.x,
+              path[i].point.y
+            );
+          }
+        }
+      }
+
+      curve.endFill();
+
+      curveContainer.addChild(curve);
+      curveContainer.name = `CurveContainer(${randomId()})`;
+
+      return { pixiAtom: curveContainer, changed: true };
   }
 }
