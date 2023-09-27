@@ -32,7 +32,8 @@ const electronApp = await electron.launch({ args: ['.']})
   // and return its Page object
   const window = await electronApp.firstWindow();
 
-  await window.keyboard.press('Escape', {delay: 4000});
+  // await window.keyboard.press('Escape', {delay: 4000});
+  await window.locator('.darkenBackground').click({delay: 500, position: {x: 100, y: 100}});
   // await window.locator('svg').first().click();
 
   expect((await window.getByTitle('Untitled').allInnerTexts()).at(0)).toBe("Untitled-1");
@@ -66,9 +67,9 @@ const electronApp = await electron.launch({ args: ['.']})
   await graph.click({button: 'right', position: {x: 100, y: 100}});
   await (await plugin.all()).at(2)?.click();
   await window.getByText('Output').click();
-  await graph.click({button: 'right', position: {x: 300, y: 600}});
-  await (await window.getByText('Input').all()).at(1)?.click({delay: 100});
-  await window.getByText('Input number').click();
+  await graph.click({button: 'right', position: {x: 300, y: 600}, delay: 200});
+  await (await window.getByText('Input').all()).at(1)?.click({delay: 200});
+  await window.getByText('Number').click();
 
   await window.locator('css=div.svelvet-anchor').nth(1).dragTo(window.locator('css=div.svelvet-anchor').first());
 
