@@ -56,6 +56,12 @@
     };
     console.log("Icon", tiles[tile].icon);
   }
+
+  function toTitleCase(str: string) {
+    return str.replace(/\w\S*/g, (txt) => {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+  }
 </script>
 
 <div class="tileSel" on:click="{() => (open = !open)}" on:keypress="{null}">
@@ -74,7 +80,9 @@
         on:keydown="{null}"
       >
         <div class="innerTileOption">
-          <span class="padRight"><Fa icon="{tileDict[to].icon}" /></span>{tileDict[to].displayName}
+          <span class="padRight"><Fa icon="{tileDict[to].icon}" /></span>{toTitleCase(
+            tileDict[to].displayName
+          )}
         </div>
       </div>
     {/each}

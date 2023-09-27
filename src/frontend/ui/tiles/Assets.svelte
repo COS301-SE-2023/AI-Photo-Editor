@@ -16,6 +16,11 @@
     faPizzaSlice,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
+  import { toastStore } from "../../lib/stores/ToastStore";
+
+  let selectedCacheItems: CacheUUID[] = [];
+  // Not used at the moment
+  let controlKeyDown = false;
 
   const noContentIcons = [
     faBacon,
@@ -36,6 +41,26 @@
     return noContentIcons[Math.floor(Math.random() * noContentIcons.length)];
   }
 
+  function handleKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey || event.metaKey) {
+      controlKeyDown = true;
+    }
+  }
+
+  function handleItemOnClick(id: CacheUUID) {
+    if (selectedCacheItems.includes(id)) {
+      selectedCacheItems = selectedCacheItems.filter((item) => item !== id);
+    } else {
+      selectedCacheItems = [...selectedCacheItems, id];
+    }
+  }
+
+  function handleKeyUp(event: KeyboardEvent) {
+    if (!event.ctrlKey || !event.metaKey) {
+      controlKeyDown = false;
+    }
+  }
+
   async function requestFileAccess() {
     try {
       const handle = await window.showOpenFilePicker();
@@ -53,6 +78,24 @@
 
   const blobs: { [key: CacheUUID]: { blob: Blob; url: string } } = {};
 
+  async function exportAssets() {
+    if (selectedCacheItems.length === 0) {
+      toastStore.trigger({ message: "No asset selected.", type: "warn" });
+      return;
+    }
+
+    await cacheStore.exportCache(selectedCacheItems);
+  }
+
+  async function removeAssets() {
+    if (selectedCacheItems.length === 0) {
+      toastStore.trigger({ message: "No asset selected.", type: "warn" });
+      return;
+    }
+
+    await cacheStore.delete(selectedCacheItems);
+  }
+
   // let barrier = 0;
   async function getBlobURL(uuid: CacheUUID, type: string): Promise<string> {
     if (blobs[uuid]) return blobs[uuid].url;
@@ -67,12 +110,16 @@
   }
 </script>
 
-<div class="fullPane">
+<div class="fullPane {Object.keys($cacheStore).length > 0 ? 'overflow-auto' : ''}">
   {#if Object.keys($cacheStore).length > 0}
     <div class="itemsBox">
       {#each Object.keys($cacheStore) as uuid}
         {#if ["image/png", "image/jpeg"].includes($cacheStore[uuid].contentType)}
-          <div class="item thumbItem">
+          <div
+            class="item thumbItem {selectedCacheItems.includes(uuid) ? 'ring-2 ring-rose-500' : ''}"
+            on:click|stopPropagation="{() => handleItemOnClick(uuid)}"
+            on:keydown="{null}"
+          >
             {#await getBlobURL(uuid, $cacheStore[uuid].contentType) then src}
               <div class="thumbnail">
                 <img src="{src}" alt="Cached Image {uuid.slice(0, 8)}" width="50px" />
@@ -84,7 +131,11 @@
             <div class="itemType">{$cacheStore[uuid].contentType}</div>
           </div>
         {:else}
-          <div class="item">
+          <div
+            class="item {selectedCacheItems.includes(uuid) ? 'ring-2 ring-rose-500' : ''}"
+            on:click|stopPropagation="{() => handleItemOnClick(uuid)}"
+            on:keydown="{null}"
+          >
             <div>{uuid.slice(0, 8)}</div>
             <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
             <div class="itemType">{$cacheStore[uuid].contentType}</div>
@@ -95,8 +146,8 @@
   {:else}
     <div class="placeholder">
       <div class="icon"><Fa icon="{getNoContentIcon()}" style="display: inline-block" /></div>
-      <h1>No content!</h1>
-      <h2>Add an Asset to start start editing</h2>
+      <h1>No assets!</h1>
+      <h2>Add an Asset to start editing</h2>
     </div>
   {/if}
 
@@ -104,12 +155,34 @@
     <div
       on:click="{requestFileAccess}"
       on:keydown="{null}"
-      class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+      class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
     >
-      Add Asset
+      Add
+    </div>
+    <div
+      on:click="{exportAssets}"
+      on:keydown="{null}"
+      class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+    >
+      Export
+    </div>
+    <div
+      on:click="{removeAssets}"
+      on:keydown="{null}"
+      class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+    >
+      Remove
     </div>
   </div>
 </div>
+
+<svelte:window
+  on:click="{() => {
+    if (!controlKeyDown) selectedCacheItems = [];
+  }}"
+  on:keydown="{handleKeyDown}"
+  on:keyup="{handleKeyUp}"
+/>
 
 <style lang="scss">
   .fullPane {
@@ -126,6 +199,14 @@
     z-index: 100;
   }
 
+  .exportButton {
+    font-size: 0.6em;
+    height: 20px;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .itemsBox {
     display: flex;
     flex-wrap: wrap;
@@ -134,18 +215,19 @@
     width: calc(100% - 4em);
     margin: auto;
     margin-top: 2em;
+    margin-bottom: 3em;
     overflow: auto;
   }
 
   .item {
     display: grid;
-    grid-template-rows: 70% 15% 15%;
-    width: 100px;
-    height: 100px;
+    grid-template-rows: 55% 15% 15% 15%;
+    width: 120px;
+    height: 130px;
     min-width: 100px;
     min-height: 100px;
     border: 1px solid #2a2a3f;
-    overflow: hidden;
+    overflow: visible;
     margin: 0.4em;
     padding: 0.2em;
     border-radius: 10px;
@@ -203,5 +285,18 @@
       font-size: 0.8em;
       color: #9090a4;
     }
+  }
+
+  /* Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 14px;
+    margin: 0;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    border-radius: 9999px;
+    background-color: #52525b;
   }
 </style>

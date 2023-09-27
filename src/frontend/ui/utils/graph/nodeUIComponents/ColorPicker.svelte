@@ -5,20 +5,33 @@
   import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
   import ColorPickerWrapper from "./ColorPicker/ColorPickerWrapper.svelte";
   import ColorPickerTextInput from "./ColorPicker/ColorPickerTextInput.svelte";
+  import { createEventDispatcher, onMount } from "svelte";
 
   export let props: UIComponentProps;
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
+  const dispatch = createEventDispatcher();
 
   if (!inputStore.inputs[config.componentId])
-    inputStore.inputs[config.componentId] = writable("#f43e5cff");
+    inputStore.inputs[config.componentId] = writable("#f43e5c");
 
   $: valStore = inputStore.inputs[config.componentId];
 
-  // Jakes code for undo/redo, this needs reintegrating
-  // function handleInputInteraction() {
-  //   dispatch("inputInteraction", { id: config.componentId, value: $valStore });
-  // }
+  $: if (valStore) {
+    let first = true;
+    let prev = performance.now();
+    valStore.subscribe((value) => {
+      const now = performance.now();
+      if (!first) {
+        if (now - prev >= 1000) {
+          dispatch("inputInteraction", { id: config.componentId, value });
+        }
+      } else {
+        first = false;
+      }
+      prev = now;
+    });
+  }
 </script>
 
 <div class="picker">
