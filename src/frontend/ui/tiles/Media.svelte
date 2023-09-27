@@ -95,7 +95,8 @@
       if ($media.display.displayType === "webview") {
         webview.exportMedia(e);
       } else {
-        await mediaStore.exportMedia($media);
+        // await mediaStore.exportMedia($media);
+        toastStore.trigger({ message: "Unsupported media type for saving.", type: "info" });
       }
     }
   }

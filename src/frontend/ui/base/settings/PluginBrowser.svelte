@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { blixStore } from "../../../lib/stores/BlixStore";
   import Shortcuts from "../../utils/Shortcuts.svelte";
   import Markdown from "./utils/Markdown.svelte";
 
@@ -57,59 +58,65 @@
   };
 </script>
 
-<div class="container">
-  <div class="sidebar">
-    <!-- Search box -->
-    <input type="text" class="searchBox" />
-    <div class="pluginList">
-      {#each Object.keys(plugins) as pluginId}
-        {@const plugin = plugins[pluginId]}
-        <div
-          class="pluginItem"
-          on:click|stopPropagation="{() => (selectedPlugin = pluginId)}"
-          on:keypress
-        >
-          <div class="icon"></div>
-          <div class="details">
-            <div class="title">{plugin.name}</div>
-            <div class="info">
-              {pluginId}
-              <span class="float-right italic"
-                >{plugin.installed ? (plugin.enabled ? "Installed" : "Disabled") : ""}</span
-              >
+{#if !$blixStore.production}
+  <div class="container">
+    <div class="sidebar">
+      <!-- Search box -->
+      <input type="text" class="searchBox" />
+      <div class="pluginList">
+        {#each Object.keys(plugins) as pluginId}
+          {@const plugin = plugins[pluginId]}
+          <div
+            class="pluginItem"
+            on:click|stopPropagation="{() => (selectedPlugin = pluginId)}"
+            on:keypress
+          >
+            <div class="icon"></div>
+            <div class="details">
+              <div class="title">{plugin.name}</div>
+              <div class="info">
+                {pluginId}
+                <span class="float-right italic"
+                  >{plugin.installed ? (plugin.enabled ? "Installed" : "Disabled") : ""}</span
+                >
+              </div>
             </div>
           </div>
+          <hr class="m-auto w-[97%]" />
+        {/each}
+      </div>
+    </div>
+    <div class="pluginPage">
+      {#if selectedPlugin != null}
+        {@const id = selectedPlugin}
+        {@const plugin = plugins[id]}
+        <div class="banner">
+          <div class="title">{plugin.name}</div>
+          <div class="id">{selectedPlugin}</div>
+          <div class="buttons">
+            {#if plugin.installed}
+              <button on:click="{() => uninstallPlugin(id)}">Uninstall</button>
+              {#if plugin.enabled}
+                <button on:click="{() => disablePlugin(id)}">Disable</button>
+              {:else}
+                <button on:click="{() => enablePlugin(id)}">Enable</button>
+              {/if}
+            {:else}
+              <button on:click="{() => installPlugin(id)}">Install</button>
+            {/if}
+          </div>
         </div>
-        <hr class="m-auto w-[97%]" />
-      {/each}
+        <div class="readmeBox">
+          <Markdown markdown="{plugin.md}" />
+        </div>
+      {/if}
     </div>
   </div>
-  <div class="pluginPage">
-    {#if selectedPlugin != null}
-      {@const id = selectedPlugin}
-      {@const plugin = plugins[id]}
-      <div class="banner">
-        <div class="title">{plugin.name}</div>
-        <div class="id">{selectedPlugin}</div>
-        <div class="buttons">
-          {#if plugin.installed}
-            <button on:click="{() => uninstallPlugin(id)}">Uninstall</button>
-            {#if plugin.enabled}
-              <button on:click="{() => disablePlugin(id)}">Disable</button>
-            {:else}
-              <button on:click="{() => enablePlugin(id)}">Enable</button>
-            {/if}
-          {:else}
-            <button on:click="{() => installPlugin(id)}">Install</button>
-          {/if}
-        </div>
-      </div>
-      <div class="readmeBox">
-        <Markdown markdown="{plugin.md}" />
-      </div>
-    {/if}
+{:else}
+  <div class="flex h-full w-full items-center justify-center text-xl text-zinc-400">
+    Coming soon...
   </div>
-</div>
+{/if}
 
 <Shortcuts shortcuts="{shortcuts}" />
 

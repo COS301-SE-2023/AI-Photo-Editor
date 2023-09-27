@@ -1,7 +1,7 @@
 <script lang="ts">
   import Panel from "./Panel.svelte";
   import { projectsStore } from "@frontend/lib/stores/ProjectStore";
-  import { faDiagramProject } from "@fortawesome/free-solid-svg-icons";
+  import { faFolder } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
 </script>
 
@@ -12,7 +12,7 @@
     {/key}
   {:else}
     <div class="placeholder select-none">
-      <div class="icon"><Fa icon="{faDiagramProject}" style="display: inline-block" /></div>
+      <div class="icon"><Fa icon="{faFolder}" style="display: inline-block" /></div>
       <h1>No projects!</h1>
       <h2>Create a project to begin creating</h2>
     </div>

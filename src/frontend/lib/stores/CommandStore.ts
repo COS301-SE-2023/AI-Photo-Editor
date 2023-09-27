@@ -1,6 +1,6 @@
 import { writable, get } from "svelte/store";
 import { projectsStore } from "./ProjectStore";
-import type { ICommand } from "@shared/types";
+import type { CommandResponse, ICommand } from "@shared/types";
 
 interface CommandStore {
   commands: ICommand[];
@@ -22,18 +22,25 @@ function createCommandStore() {
   }
 
   async function runCommand(id: string, args?: Record<string, any>) {
-    if (id in blixCommandParams) {
-      if (args) {
-        return await window.apis.commandApi.runCommand(id, args);
+    try {
+      if (id in blixCommandParams) {
+        if (args) {
+          return await window.apis.commandApi.runCommand(id, args);
+        } else {
+          return await window.apis.commandApi.runCommand(id, await blixCommandParams[id]());
+        }
       } else {
-        return await window.apis.commandApi.runCommand(id, await blixCommandParams[id]());
+        if (args) {
+          return await window.apis.commandApi.runCommand(id, args);
+        } else {
+          return await window.apis.commandApi.runCommand(id);
+        }
       }
-    } else {
-      if (args) {
-        return await window.apis.commandApi.runCommand(id, args);
-      } else {
-        return await window.apis.commandApi.runCommand(id);
-      }
+    } catch (e) {
+      return {
+        status: "error",
+        message: "Command not available",
+      } satisfies CommandResponse;
     }
   }
 

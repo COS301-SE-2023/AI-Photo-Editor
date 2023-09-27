@@ -116,7 +116,7 @@ export const projectCommands: Command[] = [
   saveProjectCommand,
   saveProjectAsCommand,
   openProjectCommand,
-  exportMediaCommand,
+  // exportMediaCommand,
   getRecentProjectsCommand,
 ];
 
