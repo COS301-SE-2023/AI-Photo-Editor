@@ -439,6 +439,11 @@ export class CoreGraphManager {
     this._outputIds = {};
   }
 
+  clearAllGraphs() {
+    this._graphs = {};
+    this._events = {};
+  }
+
   // ===============================================
   // Graph Events
   // ===============================================

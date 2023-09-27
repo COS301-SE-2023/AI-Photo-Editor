@@ -103,4 +103,8 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
   async clearAllMedia() {
     this._blix.graphManager.clearAllMedia();
   }
+
+  async clearAllGraphs() {
+    this._blix.graphManager.clearAllGraphs();
+  }
 }

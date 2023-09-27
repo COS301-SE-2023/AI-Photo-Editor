@@ -96,7 +96,7 @@ class ProjectsStore {
    *
    * @param id ID of specific Project
    */
-  public async handleProjectRemoved(projectId: UUID): Promise<void> {
+  public handleProjectRemoved(projectId: UUID): void {
     this.store.update((state) => {
       state.activeProject =
         state.activeProject?.id === projectId
@@ -105,10 +105,6 @@ class ProjectsStore {
       state.projects = state.projects.filter((p) => p.id !== projectId);
       return state;
     });
-
-    // Clear all stores once removed
-    await cacheStore.deleteAllAssets();
-    await mediaStore.clearMedia();
   }
 
   /**
@@ -127,6 +123,11 @@ class ProjectsStore {
     const project = get(this.store).projects.find((p) => p.id === projectId);
     // if (project) await window.apis.graphApi.deleteGraphs(project.graphs);
     await window.apis.projectApi.closeProject(projectId, project?.graphs);
+
+    // Clear all stores once removed
+    await cacheStore.deleteAllAssets();
+    await mediaStore.deleteAllMedia();
+    await graphMall.clearAllGraphs();
   }
 
   /**

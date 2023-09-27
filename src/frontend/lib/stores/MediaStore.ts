@@ -87,10 +87,10 @@ class MediaStore {
     return get(this.outputIds).find((id) => id.nodeId === nodeId)?.mediaId || null;
   }
 
-  public async clearMedia() {
+  public async deleteAllMedia() {
     this.store.set({});
     this.outputIds.set([]);
-    await mediaStore.clearMedia();
+    await window.apis.graphApi.clearAllMedia();
   }
 
   public get subscribe() {
