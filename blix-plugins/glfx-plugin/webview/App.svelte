@@ -3,10 +3,15 @@
 
     export let media;
 
+    const MAX_EDITING_RES = 1024;
+
     let canvasContainer;
     let canvasWidth = 500;
     let canvasHeight = 500;
     const canvas = fx.canvas();
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.objectFit = "contain";
     let lastid = "";
     let lastMediaSrc = "";
 
@@ -29,26 +34,22 @@
     }
 
     function reloadTexture() {
-        // const dimRatio = image.height / image.width;
-        // image.width = canvasWidth;
-        // image.height = canvasWidth * dimRatio;
-
         texture = canvas.texture(image);
     }
 
-    async function canvasUpdate(canvasWidth) {
-        // await updateImage("./image.png");
-        if(Object.keys($media).length === 0) {
-            return;
+    // Clamp image dimensions to maxRes
+    // Set maxRes to null to disable clamping
+    function clampedImageRes(image, maxRes) {
+        if (maxRes != null && image.width > maxRes && image.height > maxRes) {
+            const dimRatio = image.height / image.width;
+            return { w: maxRes, h: maxRes * dimRatio };
         }
-        reloadTexture();
-        redraw($media);
+        return { w: image.width, h: image.height };
     }
 
-    $: redraw($media);
-    $: canvasUpdate(canvasWidth);
+    $: redraw($media, MAX_EDITING_RES);
 
-    async function redraw(media) {
+    async function redraw(media, maxRes) {
         if(!media.src){
             // image = null;
             // texture = null;
@@ -68,8 +69,8 @@
                 reloadTexture();
             }
 
-            const dimRatio = image.height / image.width;
-            let buffer = canvas.draw(texture, canvasWidth, canvasWidth*dimRatio);
+            const { w, h } = clampedImageRes(image, maxRes);
+            let buffer = canvas.draw(texture, w, h);
 
             for (let op = 0; op < media.ops.length; op++) {
                 console.log(media.ops[op]);
@@ -78,7 +79,6 @@
 
                 buffer = buffer[opType](...opArgs);
             }
-            // .swirl(canvas.width / 2, canvas.height / 2, 400, -10*media)
 
             buffer.update();
         }
@@ -87,12 +87,13 @@
                 await updateImage(media.src);
                 lastMediaSrc = media.src;
                 reloadTexture();
-                const dimRatio = image.height / image.width;
-                let buffer = canvas.draw(texture, canvasWidth, canvasWidth*dimRatio);
+
+                const { w, h } = clampedImageRes(image, maxRes);
+                let buffer = canvas.draw(texture, w, h);
                 buffer.update();
+
             }
         }
-
         // To obtain previous render + reuse:
         // texture.destroy();
         // texture = canvas.contents();
@@ -100,6 +101,9 @@
     }
 
     function exportImage(){
+        // TODO: Redraw at full res, then reset to editing res after export
+        // redraw($media, null);
+
         canvas.update();
         canvas.toBlob(async (blob) => {
             const metadata = {
@@ -126,11 +130,12 @@
     });
 </script>
 
-<div
-    class="canvasContainer"
-    bind:this={canvasContainer}
-    bind:clientWidth="{canvasWidth}"
-/>
+<div class="fullScreen">
+    <div
+        class="canvasContainer"
+        bind:this={canvasContainer}
+    />
+</div>
 
 <!-- <code>
     Rendering at: <b>{canvasWidth} x {canvasHeight}</b><br />
@@ -138,11 +143,27 @@
 </code> -->
 
 <style>
-    .canvasContainer {
+    .fullScreen {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
         padding: 0px;
-        margin: 4em;
-        text-align: center;
-        overflow: none;
+        margin: 0px;
+    }
+
+    .canvasContainer {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        padding: 0px;
+        margin: 2em 1em 3em;
+
+        overflow: hidden;
+
+        height: calc(100% - 8em);
     }
 
     code { 
