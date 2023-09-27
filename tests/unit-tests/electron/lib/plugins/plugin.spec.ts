@@ -38,6 +38,11 @@ jest.mock("electron", () => ({
   },
   ipcMain: {
     on: jest.fn()
+  },
+  session: {
+    defaultSession: {
+      clearCache: jest.fn()
+    }
   }
 }));
 
