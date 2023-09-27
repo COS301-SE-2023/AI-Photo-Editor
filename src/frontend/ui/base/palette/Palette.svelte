@@ -44,6 +44,7 @@
   ];
 
   let categories = categoriesOriginals;
+  let commandFilterList = ["blix.projects.recent", "blix.graphs.deleteGraph"];
 
   const unsubscribe = commandStore.subscribe((state) => {
     categoriesOriginals = [
@@ -57,7 +58,9 @@
       },
       {
         title: "All",
-        items: state.commands,
+        items: state.commands.filter((command) => {
+          return !commandFilterList.includes(command.id);
+        }),
       },
     ];
 

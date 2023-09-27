@@ -28,14 +28,14 @@ export class CacheManager {
   // subsidiaries: { [key: SubsidiaryUUID]: CacheSubsidiary };
 
   // globalCache: { [key: CacheUUID]: SubsidiaryUUID };
-  cache: { [key: CacheUUID]: CacheObject };
+  _cache: { [key: CacheUUID]: CacheObject };
 
   listeners: Set<WebSocket>;
 
   server: WebSocket.Server;
 
   constructor() {
-    this.cache = {};
+    this._cache = {};
     this.listeners = new Set();
 
     ipcMain.on("cache-get", (event, id: string) => {
@@ -81,9 +81,9 @@ export class CacheManager {
                 ])
               );
               break;
-            case "cache-delete":
+            case "cache-delete-some":
               if ("ids" in data && Array.isArray(data.ids)) {
-                this.delete(data.ids as CacheUUID[]);
+                this.deleteAssets((data.ids as CacheUUID[]).filter((id) => this.cache[id]));
               }
 
               // TODO: check if exist
@@ -93,7 +93,13 @@ export class CacheManager {
 
               this.notifyListeners();
               break;
-
+            case "cache-delete-all":
+              this.deleteAssets(Object.keys(this.cache));
+              socket.send(
+                JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
+              );
+              this.notifyListeners();
+              break;
             case "cache-subscribe":
               this.listeners.add(socket);
               socket.send(JSON.stringify(this.cacheUpdateNotification)); // Send initial cache update
@@ -151,6 +157,29 @@ export class CacheManager {
     return;
   }
 
+  get cache() {
+    return this._cache;
+  }
+
+  writeImportContent(uuid: CacheUUID, content: Buffer) {
+    if (this._cache[uuid]) {
+      this._cache[uuid].data = content;
+    } else {
+      this._cache[uuid] = { uuid, data: content, metadata: { contentType: "unknown" } };
+    }
+
+    this.notifyListeners();
+  }
+
+  writeImportMetadata(uuid: CacheUUID, metadata: any) {
+    if (this._cache[uuid]) {
+      this._cache[uuid].metadata = metadata;
+    } else {
+      this._cache[uuid] = { uuid, data: Buffer.from([]), metadata };
+    }
+    this.notifyListeners();
+  }
+
   writeLocal(content: Blob): CacheUUID {
     const cacheUUID = randomBytes(32).toString("base64url");
     return cacheUUID;
@@ -178,7 +207,7 @@ export class CacheManager {
     return this.cache[cacheUUID];
   }
 
-  delete(cacheUUID: CacheUUID[]) {
+  deleteAssets(cacheUUID: CacheUUID[]) {
     for (const uuid of cacheUUID) {
       delete this.cache[uuid];
     }

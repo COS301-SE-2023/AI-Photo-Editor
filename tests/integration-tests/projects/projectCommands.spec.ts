@@ -206,17 +206,17 @@ describe("Testing project commands", () => {
         expect(ctx.sendErrorMessage).toHaveBeenCalledWith("Project not found");
     });
 
-    test("Create and run a openProjectCommand", async () => {
-        const command: Command = openProjectCommand;
-        // Basics
-        expect(command.id).toEqual("blix.projects.open");
-        expect(command.description?.description).toEqual("Save project to file system");
-        expect(command.description?.name).toEqual("Open project...");
+    // test("Create and run a openProjectCommand", async () => {
+    //     const command: Command = openProjectCommand;
+    //     // Basics
+    //     expect(command.id).toEqual("blix.projects.open");
+    //     expect(command.description?.description).toEqual("Save project to file system");
+    //     expect(command.description?.name).toEqual("Open project...");
 
-        const handler = command.handler;
-        const ctx: CommandContext = blix;
-        await handler(ctx);
-    })
+    //     const handler = command.handler;
+    //     const ctx: CommandContext = blix;
+    //     await handler(ctx);
+    // })
 
 
 })

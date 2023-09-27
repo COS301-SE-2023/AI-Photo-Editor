@@ -21,6 +21,10 @@ import type { SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 import settings from "../../utils/settings";
 import type { recentProject } from "../../../shared/types/index";
 import { getRecentProjects } from "../../utils/settings";
+import archiver from "archiver";
+import fs from "fs";
+import unzipper from "unzipper";
+import type { CacheMetadata, CacheUUID } from "../../../shared/types/cache";
 
 export type SaveProjectArgs = {
   projectId: UUID;
@@ -185,7 +189,37 @@ export async function saveProject(
 
   if (project.location) {
     try {
-      await writeFile(project.location, JSON.stringify(projectFile));
+      // await writeFile(project.location, JSON.stringify(projectFile));
+      const archive = archiver("zip", { zlib: { level: 9 } });
+
+      const output = fs.createWriteStream(project.location);
+
+      output.on("close", function () {
+        logger.info(`ZIP archive created successfully. Total bytes: ${archive.pointer()}`);
+      });
+
+      archive.on("error", function (err) {
+        logger.error("Error while creating ZIP archive:", err);
+      });
+
+      // Pipe the output stream to the ZIP archive
+      archive.pipe(output);
+
+      // Create a folder named "cache" within the ZIP archive
+      archive.directory("cache", "cache");
+      const cacheJSON: { [key: string]: { uuid: CacheUUID; metadata: CacheMetadata } } = {};
+
+      for (const uuid of Object.keys(ctx.cacheManager.cache)) {
+        const cacheObject = ctx.cacheManager.cache[uuid];
+        cacheJSON[uuid] = { uuid: cacheObject.uuid, metadata: cacheObject.metadata };
+        archive.append(cacheObject.data, { name: `cache/${cacheObject.uuid}.blob` });
+      }
+
+      archive.append(JSON.stringify(projectFile), { name: "project.json" });
+      archive.append(JSON.stringify(cacheJSON), { name: "cache/cache.json" });
+
+      // Finalize the ZIP archive
+      archive.finalize();
     } catch (err) {
       logger.error(err);
     }
@@ -248,30 +282,76 @@ export async function openProject(ctx: CommandContext, path?: string): Promise<C
   }
 
   for (const path of paths) {
-    const project = await readFile(path, "utf-8");
-    const projectFile = JSON.parse(project) as ProjectFile;
-    const projectName = path.split("/").pop()?.split(".blix")[0];
-    const projectId = ctx.projectManager.loadProject(projectName!, path);
-    ctx.projectManager.saveProjectLayout(projectId, projectFile.layout);
-    // ctx.projectManager.getProject(projectId)!.saved = true;
-    const coreGraphImporter = new CoreGraphImporter(ctx.toolbox);
+    // Create a readable stream from the ZIP archive
+    const readStream = fs.createReadStream(path);
 
-    for (const graph of projectFile.graphs) {
-      const coreGraph = coreGraphImporter.import("json", graph);
-      ctx.graphManager.addGraph(coreGraph);
-      ctx.projectManager.addGraph(projectId, coreGraph.uuid);
-      ctx.graphManager.onGraphUpdated(
-        coreGraph.uuid,
-        new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
-        CoreGraphUpdateParticipant.system
-      );
-    }
-    ctx.mainWindow?.apis.projectClientApi.onProjectChanged({
-      id: projectId,
-      saved: true,
-      layout: projectFile.layout,
-    });
-    updateRecentProjectsList(path);
+    // Extract the ZIP archive
+    readStream
+      .pipe(unzipper.Parse())
+      .on("entry", (entry) => {
+        const fileName = entry.path;
+        const type = entry.type; // 'Directory' or 'File'
+
+        if (type === "File") {
+          // Extract and read the file contents
+          const bufferArray: Buffer[] = [];
+
+          entry.on("data", (buffer: Buffer) => {
+            bufferArray.push(buffer);
+          });
+
+          entry.on("end", () => {
+            const data = Buffer.concat(bufferArray);
+            if (fileName === "project.json") {
+              const projectFile = JSON.parse(data.toString("utf-8")) as ProjectFile;
+              const projectName = path.split("/").pop()?.split(".blix")[0];
+              const projectId = ctx.projectManager.loadProject(projectName!, path);
+              ctx.projectManager.saveProjectLayout(projectId, projectFile.layout);
+              // ctx.projectManager.getProject(projectId)!.saved = true;
+              const coreGraphImporter = new CoreGraphImporter(ctx.toolbox);
+
+              for (const graph of projectFile.graphs) {
+                const coreGraph = coreGraphImporter.import("json", graph);
+                ctx.graphManager.addGraph(coreGraph);
+                ctx.projectManager.addGraph(projectId, coreGraph.uuid);
+                ctx.graphManager.onGraphUpdated(
+                  coreGraph.uuid,
+                  new Set([
+                    CoreGraphUpdateEvent.graphUpdated,
+                    CoreGraphUpdateEvent.uiInputsUpdated,
+                  ]),
+                  CoreGraphUpdateParticipant.system
+                );
+              }
+              ctx.mainWindow?.apis.projectClientApi.onProjectChanged({
+                id: projectId,
+                saved: true,
+                layout: projectFile.layout,
+              });
+              updateRecentProjectsList(path);
+            } else if (fileName === "cache/cache.json") {
+              const cacheJSON = JSON.parse(data.toString("utf-8")) as {
+                [key: string]: { uuid: CacheUUID; metadata: CacheMetadata };
+              };
+              for (const uuid of Object.keys(cacheJSON)) {
+                const cacheObject = cacheJSON[uuid];
+                ctx.cacheManager.writeImportMetadata(uuid, cacheObject.metadata);
+              }
+            } else if (fileName.startsWith("cache/")) {
+              const uuid: CacheUUID = fileName.split("/")[1].split(".blob")[0];
+              ctx.cacheManager.writeImportContent(uuid, data);
+            } else {
+              logger.warn("Unknown file in project: ", fileName);
+            }
+          });
+        }
+      })
+      .on("finish", () => {
+        logger.info("Extraction complete.");
+      })
+      .on("error", (err) => {
+        logger.error("Error during extraction:", err);
+      });
   }
 
   return { status: "success", message: "Project(s) opened successfully" };

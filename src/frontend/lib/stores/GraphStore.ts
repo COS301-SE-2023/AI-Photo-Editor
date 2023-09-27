@@ -551,6 +551,12 @@ class GraphMall {
       });
     }
   }
+
+  public async clearAllGraphs() {
+    this.mall.set({});
+    this.outputNodes.set({});
+    await window.apis.graphApi.clearAllGraphs();
+  }
 }
 
 // export const graphMall = writable<GraphMall>(new GraphMall());

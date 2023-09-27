@@ -103,7 +103,7 @@ contextBridge.exposeInMainWorld("cache", {
   },
   delete: async (id: string) => {
     const messageId = randomMessageId();
-    const payload = JSON.stringify({ type: "cache-delete", id, messageId } as CacheRequest);
+    const payload = JSON.stringify({ type: "cache-delete-some", id, messageId } as CacheRequest);
     return sendCachePayload(messageId, payload);
   },
 });

@@ -435,6 +435,15 @@ export class CoreGraphManager {
     return outputs;
   }
 
+  clearAllMedia() {
+    this._outputIds = {};
+  }
+
+  clearAllGraphs() {
+    this._graphs = {};
+    this._events = {};
+  }
+
   // ===============================================
   // Graph Events
   // ===============================================
