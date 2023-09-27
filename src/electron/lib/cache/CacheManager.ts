@@ -81,9 +81,9 @@ export class CacheManager {
                 ])
               );
               break;
-            case "cache-delete":
+            case "cache-delete-some":
               if ("ids" in data && Array.isArray(data.ids)) {
-                this.delete(data.ids as CacheUUID[]);
+                this.deleteAssets((data.ids as CacheUUID[]).filter((id) => this.cache[id]));
               }
 
               // TODO: check if exist
@@ -93,7 +93,13 @@ export class CacheManager {
 
               this.notifyListeners();
               break;
-
+            case "cache-delete-all":
+              this.deleteAssets(Object.keys(this.cache));
+              socket.send(
+                JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
+              );
+              this.notifyListeners();
+              break;
             case "cache-subscribe":
               this.listeners.add(socket);
               socket.send(JSON.stringify(this.cacheUpdateNotification)); // Send initial cache update
@@ -178,7 +184,7 @@ export class CacheManager {
     return this.cache[cacheUUID];
   }
 
-  delete(cacheUUID: CacheUUID[]) {
+  deleteAssets(cacheUUID: CacheUUID[]) {
     for (const uuid of cacheUUID) {
       delete this.cache[uuid];
     }

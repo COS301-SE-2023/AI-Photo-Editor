@@ -93,7 +93,7 @@
       return;
     }
 
-    await cacheStore.delete(selectedCacheItems);
+    await cacheStore.deleteSelectedAssets(selectedCacheItems);
   }
 
   // let barrier = 0;

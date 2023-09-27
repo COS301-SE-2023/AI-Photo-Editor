@@ -3,6 +3,7 @@ import { type UUID } from "@shared/utils/UniqueEntity";
 import { constructLayout, layoutTemplate, type UIProject } from "../Project";
 import type { SharedProject } from "@shared/types";
 import { graphMall } from "./GraphStore";
+import { cacheStore } from "./CacheStore";
 
 type ProjectsStoreState = {
   projects: UIProject[];
@@ -94,7 +95,7 @@ class ProjectsStore {
    *
    * @param id ID of specific Project
    */
-  public handleProjectRemoved(projectId: UUID): void {
+  public async handleProjectRemoved(projectId: UUID): Promise<void> {
     this.store.update((state) => {
       state.activeProject =
         state.activeProject?.id === projectId
@@ -103,6 +104,7 @@ class ProjectsStore {
       state.projects = state.projects.filter((p) => p.id !== projectId);
       return state;
     });
+    await cacheStore.deleteAllAssets();
   }
 
   /**
