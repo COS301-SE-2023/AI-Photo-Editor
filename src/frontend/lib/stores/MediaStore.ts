@@ -1,6 +1,7 @@
 import type { DisplayableMediaOutput, MediaOutputId } from "@shared/types/media";
-import { derived, writable } from "svelte/store";
+import { derived, get, writable } from "svelte/store";
 import { commandStore } from "./CommandStore";
+import { projectsStore } from "./ProjectStore";
 
 type MediaOutputs = {
   [key: MediaOutputId]: DisplayableMediaOutput;
@@ -8,18 +9,19 @@ type MediaOutputs = {
 
 class MediaStore {
   private store = writable<MediaOutputs>({});
-  private outputIds = writable<Set<MediaOutputId>>();
+  private outputIds = writable<{ nodeId: string; mediaId: string }[]>([]);
 
   public refreshStore(media: DisplayableMediaOutput) {
-    // Refresh media store
     this.store.update((mediaOutputs) => {
       mediaOutputs[media.outputId] = media;
       return mediaOutputs;
     });
   }
 
-  public updateOutputIds(ids: Set<MediaOutputId>) {
-    this.outputIds.set(ids);
+  public async outputNodesChanged() {
+    const projectGraphIds = get(projectsStore.activeProjectGraphIds);
+    const mediaOutputs = await window.apis.graphApi.getMediaOutputs(projectGraphIds);
+    this.outputIds.set(mediaOutputs);
   }
 
   // Stop listening for graph changes
@@ -31,9 +33,34 @@ class MediaStore {
   }
 
   public async getMediaReactive(mediaId: MediaOutputId) {
-    await window.apis.mediaApi.subscribeToMedia(mediaId).catch((err) => {
-      return;
-    });
+    if (mediaId) {
+      await window.apis.mediaApi.subscribeToMedia(mediaId).catch((err) => {
+        return;
+      });
+    }
+    // If we do not have a frontend copy of the media, fetch it
+    if (!get(this.store)[mediaId]) {
+      const media = await window.apis.mediaApi.getDisplayableMedia(mediaId);
+
+      if (media) {
+        this.store.update((mediaOutputs) => {
+          mediaOutputs[mediaId] = media;
+          return mediaOutputs;
+        });
+      }
+    }
+
+    // If we do not have a frontend copy of the media, fetch it
+    if (!get(this.store)[mediaId]) {
+      const media = await window.apis.mediaApi.getDisplayableMedia(mediaId);
+
+      if (media) {
+        this.store.update((mediaOutputs) => {
+          mediaOutputs[mediaId] = media;
+          return mediaOutputs;
+        });
+      }
+    }
 
     // TODO: Optimize this with a proper subscription system
     // that only listens for updates to the requested id specifically
@@ -44,7 +71,8 @@ class MediaStore {
 
   public getMediaOutputIdsReactive() {
     return derived(this.outputIds, (store) => {
-      return store;
+      const set = new Set<string>(store.map((id) => id.mediaId));
+      return Array.from(set);
     });
   }
 
@@ -55,9 +83,21 @@ class MediaStore {
     });
   }
 
+  public getMediaOutputId(nodeId: string) {
+    return get(this.outputIds).find((id) => id.nodeId === nodeId)?.mediaId || null;
+  }
+
+  public async deleteAllMedia() {
+    this.store.set({});
+    this.outputIds.set([]);
+    await window.apis.graphApi.clearAllMedia();
+  }
+
   public get subscribe() {
     return this.store.subscribe;
   }
 }
 
 export const mediaStore = new MediaStore();
+
+export const nodeIdLastClicked = writable<string>("");

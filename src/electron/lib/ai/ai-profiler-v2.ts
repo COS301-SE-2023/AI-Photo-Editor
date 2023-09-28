@@ -9,7 +9,6 @@ import { PackageData } from "../../lib/plugins/PluginManager";
 import { NodePluginContext, Plugin } from "../../lib/plugins/Plugin";
 import {
   BlypescriptExportStrategy,
-  BlypescriptExportStrategyV2,
   CoreGraphExporter,
 } from "../../lib/core-graph/CoreGraphExporter";
 import { BlypescriptProgram, BlypescriptToolbox, colorString } from "./AiLang";
@@ -46,11 +45,8 @@ export class Profiler {
 
     const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
 
-    if (!blypescriptToolbox.success) {
-      return;
-    }
     // const blypescriptExporter = new BlypescriptExportStrategy(this.toolboxRegistry);
-    const blypescriptExporter = new BlypescriptExportStrategyV2(blypescriptToolbox.data);
+    const blypescriptExporter = new BlypescriptExportStrategy(blypescriptToolbox);
     const coreGraphExporter = new CoreGraphExporter(blypescriptExporter);
     const blypescriptProgram = coreGraphExporter.exportGraph(coreGraph);
 
@@ -110,12 +106,7 @@ export class Profiler {
 
   public test() {
     const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
-    if (blypescriptToolbox.success) {
-      const str = blypescriptToolbox.data.toString();
-      return str;
-    }
-
-    return blypescriptToolbox.message;
+    return blypescriptToolbox.toString();
   }
 
   private getPrompt() {
@@ -160,7 +151,7 @@ export class Profiler {
         for (const node in pluginModule.nodes) {
           if (!pluginModule.nodes.hasOwnProperty(node)) continue;
 
-          const ctx = new NodePluginContext("profiler-plugin");
+          const ctx = new NodePluginContext(pluginInstance.name);
 
           try {
             pluginModule.nodes[node](ctx);
@@ -176,7 +167,7 @@ export class Profiler {
   }
 
   private static generateBlixOutputNode(): NodeInstance {
-    const outputNodeBuilder = new NodeBuilder("blix", "output");
+    const outputNodeBuilder = new NodeBuilder("blix", "Blix", "output");
     const outputUIBuilder = outputNodeBuilder.createUIBuilder();
     outputUIBuilder.addButton(
       {
@@ -226,10 +217,8 @@ export class Profiler {
 
     const blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolboxRegistry);
 
-    if (!blypescriptToolbox.success) return null;
-
     const coreGraph = this.graphManager.getGraph(graphId);
-    const blypescriptExporter = new BlypescriptExportStrategyV2(blypescriptToolbox.data);
+    const blypescriptExporter = new BlypescriptExportStrategy(blypescriptToolbox);
     const coreGraphExporter = new CoreGraphExporter(blypescriptExporter);
     const blypescriptProgram = coreGraphExporter.exportGraph(coreGraph);
 

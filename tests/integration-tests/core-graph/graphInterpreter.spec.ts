@@ -38,6 +38,8 @@ jest.mock("chokidar", () => ({
 }));
 
 jest.mock("../../../src/electron/lib/projects/ProjectManager");
+jest.mock('../../../src/electron/lib/plugins/PluginManager')
+
 
 jest.mock("electron", () => ({
   app: {
@@ -54,7 +56,22 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
+
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
+
 
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
@@ -81,6 +98,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `hello-plugin.hello`,
           `input`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,
@@ -102,6 +120,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `hello-plugin.hello`,
           `flip`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,
@@ -129,6 +148,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `output`,
           `blix`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,
@@ -190,6 +210,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `hello-plugin.hello`,
           `input`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,
@@ -211,6 +232,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `hello-plugin.hello`,
           `flip`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,
@@ -238,6 +260,7 @@ describe("Test graph interpreter", () => {
         new NodeInstance(
           `output`,
           `blix`,
+          `folder`,
           `hello-plugin`,
           `title`,
           `description`,

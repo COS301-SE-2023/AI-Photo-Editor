@@ -1,16 +1,60 @@
 // This is the preload script for the webviews.
+
+import {
+  CacheMetadata,
+  CacheRequest,
+  CacheResponse,
+  CacheWriteResponse,
+} from "@shared/types/cache";
+
 // It exposes some IPC functions so the webview can communicate with its parent renderer.
 const { ipcRenderer, contextBridge } = require("electron");
+
+const MESSAGE_ID_SIZE = 32; // bytes
+// String of MESSAGE_ID_SIZE random bytes in hex
+const randomMessageId = () => {
+  return Array.from({ length: MESSAGE_ID_SIZE / 2 }, () =>
+    Math.floor(Math.random() * 256)
+      .toString(16)
+      .padStart(2, "0")
+  ).join("");
+};
 
 const ws = new WebSocket("ws://localhost:60606");
 ws.binaryType = "blob";
 
-function sendAndRecieveData(data: string | Blob): Promise<any> {
+const lobby: { [key: string]: (value: Blob | any) => void } = {};
+
+ws.onmessage = (event) => {
+  if (typeof event.data === "string") {
+    const payload = JSON.parse(event.data) as CacheResponse;
+    const messageId = payload.messageId;
+
+    if (lobby[messageId] != null) {
+      lobby[messageId](payload);
+      delete lobby[messageId];
+    }
+  } else if (event.data instanceof Blob) {
+    // Check if there's a listener in the lobby
+    event.data
+      .slice(0, MESSAGE_ID_SIZE)
+      .text()
+      .then((messageId) => {
+        if (lobby[messageId] != null) {
+          // Listener found, resolve promise
+          const data = event.data.slice(MESSAGE_ID_SIZE);
+          lobby[messageId](data);
+          delete lobby[messageId];
+        }
+      });
+  }
+};
+
+// Low-level RPC wrapper for sending/receiving data with CacheManager
+async function sendCachePayload(messageId: string, payload: Blob | string) {
   return new Promise((resolve, reject) => {
-    ws.send(data);
-    ws.addEventListener("message", (event) => {
-      resolve(event.data);
-    });
+    lobby[messageId] = resolve;
+    ws.send(payload);
   });
 }
 
@@ -24,18 +68,42 @@ contextBridge.exposeInMainWorld("api", {
 });
 
 contextBridge.exposeInMainWorld("cache", {
-  write: async (content: Blob, metadata: any) => {
-    const response: string = await sendAndRecieveData(new Blob([content]));
-    const data = JSON.parse(response);
-    ws.send(JSON.stringify({ type: "cache-write-metadata", id: data.id, metadata }));
-    return data;
+  write: async (content: Blob, metadata?: CacheMetadata) => {
+    // Write cache object
+    const messageId = randomMessageId();
+    const payload = new Blob([messageId, content]);
+    const writeResp = (await sendCachePayload(messageId, payload)) as CacheWriteResponse;
+
+    if (!writeResp.success) return null;
+
+    if (metadata != null) {
+      // Write cache metadata
+      const metadataMessageId = randomMessageId();
+      const metadataPayload = JSON.stringify({
+        type: "cache-write-metadata",
+        id: writeResp.id,
+        messageId,
+        metadata,
+      } as CacheRequest);
+      // TODO fix this
+      // const metadataResp = ( await sendCachePayload(
+      //   metadataMessageId,
+      //   metadataPayload
+      // )) as CacheResponse;
+
+      const metadataResp = sendCachePayload(metadataMessageId, metadataPayload);
+    }
+
+    return writeResp.id;
   },
   get: async (id: string) => {
-    const results = await sendAndRecieveData(JSON.stringify({ type: "cache-get", id }));
-    return results;
+    const messageId = randomMessageId();
+    const payload = JSON.stringify({ type: "cache-get", id, messageId } as CacheRequest);
+    return sendCachePayload(messageId, payload);
   },
   delete: async (id: string) => {
-    const results: string = await sendAndRecieveData(JSON.stringify({ type: "cache-delete", id }));
-    return JSON.parse(results);
+    const messageId = randomMessageId();
+    const payload = JSON.stringify({ type: "cache-delete-some", id, messageId } as CacheRequest);
+    return sendCachePayload(messageId, payload);
   },
 });

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { type Message, Chat } from "./Chat";
-import { type ChatModel, Model } from "./Model";
+import { type ChatModel, Model, type ModelResponse } from "./Model";
 
 import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
@@ -9,8 +9,8 @@ import {
   BlypescriptExportStrategy,
   CoreGraphExporter,
 } from "../../lib/core-graph/CoreGraphExporter";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { readFileSync, writeFileSync } from "fs";
+import path, { join } from "path";
 import logger from "../../utils/logger";
 import {
   BlypescriptProgram,
@@ -26,6 +26,8 @@ import {
   CoreGraphUpdateParticipant,
 } from "../../lib/core-graph/CoreGraphInteractors";
 import { generateGuidePrompt } from "./prompt";
+import { app } from "electron";
+import fs from "fs";
 
 type PromptOptions = {
   prompt: string;
@@ -37,35 +39,35 @@ type PromptOptions = {
   verbose?: boolean;
 };
 
-export const genericErrorResponse = "Oops, that wasn't supposed to happen🫠. Try again.";
+export const genericErrorResponse = "Oops, that wasn't supposed to happen😅";
 
 export class AiManager {
-  private readonly graphExporter: CoreGraphExporter<BlypescriptProgram>;
-  private readonly blypescriptInterpreter: BlypescriptInterpreter;
+  private graphExporter: CoreGraphExporter<BlypescriptProgram>;
   private readonly chats: Chat[] = [];
-  private agentIterationLimit = 5;
+  private blypescriptInterpreter: BlypescriptInterpreter;
+  private blypescriptToolbox: BlypescriptToolbox;
+  private agentIterationLimit = 3;
 
   constructor(
     private readonly toolbox: ToolboxRegistry,
     private readonly graphManager: CoreGraphManager,
     private readonly mainWindow?: MainWindow
   ) {
-    this.graphExporter = new CoreGraphExporter(new BlypescriptExportStrategy(toolbox));
+    this.blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolbox);
+    this.graphExporter = new CoreGraphExporter(
+      new BlypescriptExportStrategy(this.blypescriptToolbox)
+    );
     this.blypescriptInterpreter = new BlypescriptInterpreter(toolbox, graphManager);
   }
 
   async executePrompt({ prompt, graphId, model, apiKey, chatId, verbose }: PromptOptions) {
+    this.blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolbox);
+    this.graphExporter = new CoreGraphExporter(
+      new BlypescriptExportStrategy(this.blypescriptToolbox)
+    );
+    // console.log(this.blypescriptToolbox.toString());
     const blypescriptProgram = this.graphExporter.exportGraph(this.graphManager.getGraph(graphId));
-    const blypescriptToolboxResult = this.getBlypescriptToolbox();
-
-    if (!blypescriptToolboxResult.success) {
-      if (verbose) this.log(blypescriptToolboxResult.message, "RED");
-      return {
-        success: false,
-        error: blypescriptToolboxResult.error,
-        message: genericErrorResponse,
-      } satisfies Result;
-    }
+    this.blypescriptInterpreter = new BlypescriptInterpreter(this.toolbox, this.graphManager);
 
     let chat = this.chats.find((chat) => chat.id === chatId);
 
@@ -78,16 +80,16 @@ export class AiManager {
       {
         role: "system",
         content: generateGuidePrompt({
-          interfaces: blypescriptToolboxResult.data.toolbox.toString(),
+          interfaces: this.blypescriptToolbox.toString(),
         }),
       },
       {
         role: "user",
-        content: `CURRENT GRAPH: \n\`\`\`ts\n${blypescriptProgram.toString()}\n\`\`\``,
+        content: `Current Graph: \n\`\`\`typescript\n${blypescriptProgram.toString()}\n\`\`\``,
       },
       {
         role: "user",
-        content: `USER's INPUT: \n${prompt}`,
+        content: `User: ${prompt}\n\nAI:`,
       },
     ];
 
@@ -98,16 +100,34 @@ export class AiManager {
     for (let i = 0; i < this.agentIterationLimit; i++) {
       const response = await llm.generate(chat);
 
-      if (!response.success) return response;
+      if (!response.success) {
+        logger.error(response.error, response.message);
+        return response;
+      }
 
       chat.addMessage({ role: "assistant", content: response.data.content });
+      // console.log(chat.getMessages())
+      // console.log(response.data.content)
 
-      const result = BlypescriptProgram.fromString(response.data.content);
+      const matchFinalAnswer = response.data.content.match(/.*Final_Answer:(.*)/);
+
+      if (matchFinalAnswer) {
+        this.writeChatToDisk(chat, model);
+        return {
+          success: true,
+          message: matchFinalAnswer[1],
+          data: {
+            chatId: chat.id,
+            lastResponse: response.data.content,
+          },
+        } satisfies Result;
+      }
+
+      const result = BlypescriptProgram.fromString(response.data.content, this.blypescriptToolbox);
 
       if (!result.success) {
-        console.log(result.message);
-        console.log(result.error);
-        chat.addMessage({ role: "blix", content: `USER'S RESPONSE: ${result.message}` });
+        logger.error(result.error, result.message);
+        chat.addMessage({ role: "blix", content: `Error: ${result.message}` });
         continue; // retry if failure
       }
 
@@ -123,28 +143,28 @@ export class AiManager {
         );
 
         if (!result.success) {
-          console.log(colorString(result.error, "RED"));
-          console.log(colorString(result.message, "RED"));
-          logger.warn(result.error);
-          chat.addMessage({ role: "blix", content: `USER'S RESPONSE:\n${result.message}` });
+          logger.error(result.error, result.message);
+          chat.addMessage({ role: "blix", content: `Error: ${result.message}` });
           continue; // retry if failure
         }
 
-        this.graphManager.onGraphUpdated(
-          graphId,
-          new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
-          CoreGraphUpdateParticipant.ai
-        );
+        // this.graphManager.onGraphUpdated(
+        //   graphId,
+        //   new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
+        //   CoreGraphUpdateParticipant.ai
+        // );
 
+        this.writeChatToDisk(chat, model);
         return {
           success: true,
+          message: "Successfully made changes to the graph.",
           data: {
             chatId: chat.id,
             lastResponse: response.data.content,
           },
         } satisfies Result;
       } catch (error) {
-        logger.warn(error);
+        logger.error(error);
 
         return {
           success: false,
@@ -154,27 +174,50 @@ export class AiManager {
       }
     }
 
+    this.writeChatToDisk(chat, model);
+
     return {
       success: false,
       error: "Chat iteration limit reached",
       message: genericErrorResponse,
+      data: {
+        chatId: chat.id,
+      },
     } satisfies Result;
   }
 
-  getBlypescriptToolbox() {
-    const { result, time } = measurePerformance(BlypescriptToolbox.fromToolbox, this.toolbox);
+  private writeChatToDisk(chat: Chat, model: string | undefined) {
+    try {
+      const filePath = path.join(app.getPath("userData"), "chats.json");
 
-    if (!result.success) {
-      return result;
+      // Check if the file exists
+      if (fs.existsSync(filePath)) {
+        // Read the existing JSON data
+        const jsonData = fs.readFileSync(filePath, "utf8");
+        const chatsData = JSON.parse(jsonData);
+
+        chatsData.chats.push({
+          timestamp: Date.now(),
+          model,
+          messages: chat.getMessages(),
+        });
+
+        // Write the updated JSON data back to file
+        fs.writeFileSync(filePath, JSON.stringify(chatsData));
+      } else {
+        const initialData = {
+          chats: [
+            {
+              timestamp: Date.now(),
+              messages: chat.getMessages(),
+            },
+          ],
+        };
+        fs.writeFileSync(filePath, JSON.stringify(initialData));
+      }
+    } catch (error) {
+      logger.warn("Something is wrong with chats file");
     }
-
-    return {
-      success: true,
-      data: {
-        toolbox: result.data,
-        time,
-      },
-    } satisfies Result;
   }
 
   private getGraphExamples() {

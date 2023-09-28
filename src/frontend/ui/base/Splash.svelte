@@ -53,15 +53,14 @@
               on:focus="{null}"
               on:mouseleave="{() => (currentProject = '')}"
             >
-              <span style="float:left">
-                <p>&nbsp;{handlePath(project.path)}</p>
+              <span style="float:left" class="w-40 truncate">
+                <!-- <p>&nbsp;{handlePath(project.path)}</p> -->
+                {handlePath(project.path)}
               </span>
               <span style="float:right">
-                {#if project.path == currentProject}
-                  <i class="text-white">{project.lastEdited}&nbsp;</i>
-                {:else}
-                  <i class="text-gray-500">{project.lastEdited}&nbsp;</i>
-                {/if}
+                <i class="{project.path == currentProject ? 'text-white' : 'text-gray-500'}">
+                  {project.lastEdited}
+                </i>
               </span>
             </li>
           {/each}

@@ -59,11 +59,11 @@ export class PluginManager {
    * Loads the base plugins that come packaged with Blix. This method may need
    * modification to also load installed plugins in the userData directory.
    */
-  public async loadBasePlugins() {
+  public async loadBasePlugins(force = false) {
     this.loadedPlugins = [];
     const appPath = app.getAppPath();
     const pluginsPath = join(app.isPackaged ? process.resourcesPath : appPath, "blix-plugins");
-    const ignorePatterns = [".DS_Store"];
+    const ignorePatterns = [".DS_Store", "sharp-plugin"];
 
     // TODO: Make plugin loading async
     // See: [https://stackoverflow.com/a/52243773]
@@ -71,24 +71,21 @@ export class PluginManager {
     // Read blix-plugins/ directory
     const dirents = readdirSync(pluginsPath, { withFileTypes: true });
     // Ignore files (only directories)
-    const plugins = dirents.filter((dirent) => dirent.isDirectory()).map((dirent) => dirent.name);
+    let plugins = dirents.filter((dirent) => dirent.isDirectory()).map((dirent) => dirent.name);
 
-    plugins.filter((plugin) => {
+    plugins = plugins.filter((plugin) => {
       return !ignorePatterns.some((pattern) => plugin.includes(pattern));
     });
 
     await Promise.all(
       plugins.map(async (plugin) => {
-        // Ignore MacOS temp files
-        if (plugin !== ".DS_Store") {
-          await this.loadPlugin(plugin, pluginsPath);
-        }
+        await this.loadPlugin(plugin, pluginsPath);
       })
     );
     // this.blix.aiManager.instantiate(this.blix.toolbox);
   }
 
-  public async loadPlugin(plugin: string, path: string): Promise<void> {
+  public async loadPlugin(plugin: string, path: string, force = false): Promise<void> {
     const readFilePromise = promisify(readFile);
 
     const pluginPath = join(path, plugin);
@@ -111,7 +108,7 @@ export class PluginManager {
       const pluginInstance: Plugin = new Plugin(packageData, pluginPath);
 
       this.loadedPlugins.push(pluginInstance);
-      pluginInstance.requireSelf(this.blix); // The plugin tries to require its corresponding npm module
+      pluginInstance.requireSelf(this.blix, force); // The plugin tries to require its corresponding npm module
     } catch (err) {
       logger.warn("Failed to load plugin: " + plugin + ", package.json failed to load");
       return;

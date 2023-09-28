@@ -1,7 +1,7 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Svelvet, type NodeKey, type AnchorKey, Node } from "blix_svelvet";
-  import { derived, type Readable } from "svelte/store";
+  import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
+  import { derived, writable, type Readable } from "svelte/store";
   import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
@@ -16,6 +16,8 @@
   import { projectsStore } from "../../lib/stores/ProjectStore";
   import { get } from "svelte/store";
   import type { SelectionBoxItem } from "../../types/selection-box";
+  import { faDiagramProject } from "@fortawesome/free-solid-svg-icons";
+  import Fa from "svelte-fa";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
@@ -33,8 +35,8 @@
     const items: { id: string; title: string }[] = [];
     const graphIds = $projectsStore.activeProject.graphs;
 
-    for (graphId of graphIds) {
-      const graphStore = $graphMall[graphId];
+    for (const id of graphIds) {
+      const graphStore = $graphMall[id];
       if (graphStore) {
         const state = get(graphStore);
         items.push({
@@ -44,6 +46,7 @@
       }
     }
 
+    items.sort((a, b) => a.id.localeCompare(b.id));
     return items;
   });
 
@@ -95,8 +98,6 @@
   // $: if($thisGraphStore?.view) {
   //     console.log(get($thisGraphStore.view));
   //   }
-
-  $: console.log($zoom);
 
   // Hooks exposed by <Svelvet />
   let connectAnchorIds: (
@@ -151,16 +152,16 @@
   $: updateOnGraphId(graphId);
 
   // Convert a canvas coord to a svelvet coord within the graph
-  function transformPoint(canvasX: number, canvasY: number) {
-    let x = (canvasX - $translation.x - $dimensions.width / 2) / $zoom + $dimensions.width / 2;
-    let y = (canvasY - $translation.y - $dimensions.height / 2) / $zoom + $dimensions.height / 2;
+  // function transformPoint(canvasX: number, canvasY: number) {
+  //   let x = (canvasX - $translation.x - $dimensions.width / 2) / $zoom + $dimensions.width / 2;
+  //   let y = (canvasY - $translation.y - $dimensions.height / 2) / $zoom + $dimensions.height / 2;
 
-    return { x, y };
-  }
+  //   return { x, y };
+  // }
 
-  function getGraphCenter() {
-    return transformPoint($dimensions.width / 2, $dimensions.height / 2);
-  }
+  // function getGraphCenter() {
+  //   return transformPoint($dimensions.width / 2, $dimensions.height / 2);
+  // }
 
   function handleRightClick(event: CustomEvent) {
     // TODO: Fix this at a stage, on initial load context menu does not show
@@ -249,7 +250,7 @@
   <div class="flex h-[10px] w-[10px] items-center">
     {#if panelId === $focusedGraphStore.panelId}
       <div
-        transition:fade="{{ duration: 300 }}"
+        transition:fade|local="{{ duration: 300 }}"
         class="z-1000000 h-full w-full rounded-full border-[1px] border-zinc-600 bg-rose-500"
       ></div>
     {/if}
@@ -266,7 +267,7 @@
       viewBox="0 0 24 24"
       stroke-width="1.5"
       stroke="currentColor"
-      class="h-6 w-6"
+      class="h-5 w-5 stroke-zinc-400"
     >
       <path
         stroke-linecap="round"
@@ -286,7 +287,7 @@
       viewBox="0 0 24 24"
       stroke-width="1.5"
       stroke="currentColor"
-      class="h-6 w-6"
+      class="h-5 w-5 stroke-zinc-400"
     >
       <path
         stroke-linecap="round"
@@ -322,8 +323,16 @@
     </svg>
   </div>
 </div>
-<div class="hoverElements">
+<!-- <div class="hoverElements">
   <button style:float="right" on:click="{triggerGravity}">Gravity</button>
+</div> -->
+<div
+  class="hoverElements flex h-7 select-none items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 px-1 text-zinc-400 backdrop-blur-md hover:bg-zinc-700 active:bg-zinc-800"
+  title="Enable Gravity"
+  on:click="{triggerGravity}"
+  on:keydown="{null}"
+>
+  Gravity
 </div>
 
 <!-- <div class="hoverElements">
@@ -358,7 +367,7 @@
 {#if thisGraphStore && $thisGraphStore}
   <Svelvet
     id="{panelId}-{graphId}"
-    zoom="{1}"
+    zoom="{0.6}"
     minimap
     theme="custom-dark"
     bind:graph="{graphData}"
@@ -386,10 +395,14 @@
     {/key} -->
   </Svelvet>
 {:else}
-  <div class="flex h-full w-full items-center justify-center text-xl text-zinc-400">No graphs</div>
+  <div class="placeholder select-none">
+    <div class="icon"><Fa icon="{faDiagramProject}" style="display: inline-block" /></div>
+    <h1>No graphs!</h1>
+    <h2>Create a graph to start a workflow</h2>
+  </div>
 {/if}
 
-<style>
+<style lang="scss">
   :root[svelvet-theme="custom-dark"] {
     --background-color: #181825;
     --dot-color: hsl(225, 10%, 50%);
@@ -415,4 +428,32 @@
   /* .dropdown {
     color: #11111b;
   } */
+
+  .placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    h1 {
+      font-size: 1.5em;
+      color: #a8a8be;
+    }
+
+    .icon {
+      width: 100%;
+      color: #9090a4;
+      font-size: 5em;
+      line-height: 1em;
+      margin-bottom: 0.1em;
+    }
+
+    h2 {
+      font-size: 0.8em;
+      color: #9090a4;
+    }
+  }
 </style>

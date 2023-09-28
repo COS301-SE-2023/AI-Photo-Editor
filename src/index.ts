@@ -7,6 +7,7 @@ import {
   MenuItem,
   dialog,
   globalShortcut,
+  session,
 } from "electron";
 import { join } from "path";
 import { parse } from "url";
@@ -19,9 +20,10 @@ import { Blix } from "./electron/lib/Blix";
 import { CoreGraphInterpreter } from "./electron/lib/core-graph/CoreGraphInterpreter";
 import { exposeMainApis } from "./electron/lib/api/MainApi";
 import { MainWindow, bindMainWindowApis } from "./electron/lib/api/apis/WindowApi";
-import { platform } from "os";
+import { type, userInfo } from "os";
 
-const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
+const isProd =
+  process.env.NODE_ENV === "production" || app.isPackaged || process.env.NODE_ENV === "test";
 // const isProd = true;
 
 if (app.isPackaged) {
@@ -65,11 +67,21 @@ let blix: Blix | null = null;
  * process will bind to the window IPC APIs 5. The Blix state is instantiated
  * and the various managers are initialized.
  */
+// TODO: Investigate app.whenReady().then(...)
+// This may be more stable, as it guarantees the callback always fires regardless of startup time
+// See: [https://www.reddit.com/r/electronjs/comments/t151k8/what_is_the_difference_between_apponready_and/hydu5vc]
 app.on("ready", async () => {
   protocol.registerFileProtocol("blix-image", (request, callback) => {
     const url = request.url.slice("blix-image://".length);
     callback({ path: join(__dirname, "..", "..", url) });
   });
+
+  // TODO: Remove
+  if (userInfo().username === "rec1dite") {
+    await session.defaultSession.loadExtension(
+      "/home/rec1dite/.config/google-chrome/Default/Extensions/aamddddknhcagpehecnhphigffljadon/2.6.1_0"
+    );
+  }
 
   // const coreGraphInterpreter = new CoreGraphInterpreter(new ToolboxRegistry);
   // coreGraphInterpreter.run();
@@ -105,8 +117,9 @@ async function createMainWindow() {
     },
     // Set icon for Windows and Linux
     icon: isProd ? join(__dirname, "icon.png") : "public/images/icon.png",
-    titleBarStyle: "hidden",
+    titleBarStyle: type() === "Windows_NT" ? "default" : "hidden",
     trafficLightPosition: { x: 10, y: 10 },
+    title: "Blix",
     // show: false,
   }) as MainWindow;
 
@@ -258,60 +271,87 @@ app.on("web-contents-created", (e, contents) => {
   });
 });
 
-// ========== AUTO UPDATER ==========//
+// ==================================================================
+// AUTO UPDATER
+// ==================================================================
 
-if (isProd)
+let newVersion = "";
+
+if (isProd) {
   autoUpdater.checkForUpdates().catch((err) => {
     logger.error(JSON.stringify(err));
   });
+}
 
 autoUpdater.logger = logger;
 
-autoUpdater.on("update-available", () => {
-  notification = new Notification({
-    title: "BLix",
-    body: "Updates are available. Click to download.",
-    silent: true,
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
-  });
-  notification.show();
-  notification.on("click", () => {
-    autoUpdater.downloadUpdate().catch((err) => {
-      logger.error(JSON.stringify(err));
-    });
+autoUpdater.on("update-available", (updateInfo) => {
+  newVersion = updateInfo.version;
+
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: true,
+      isDownloaded: false,
+      isDownloading: false,
+      percentDownloaded: 0,
+      version: newVersion,
+    },
   });
 });
 
-autoUpdater.on("update-not-available", () => {
-  notification = new Notification({
-    title: "Blix",
-    body: "Your software is up to date.",
-    silent: true,
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
+autoUpdater.on("update-not-available", (updateInfo) => {
+  newVersion = "";
+
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: false,
+      isDownloaded: false,
+      isDownloading: false,
+      percentDownloaded: 0,
+      version: newVersion,
+    },
   });
-  notification.show();
 });
 
-autoUpdater.on("update-downloaded", () => {
-  notification = new Notification({
-    title: "Blix",
-    body: "The updates are ready. Click to quit and install.",
-    silent: true,
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
+autoUpdater.on("update-downloaded", (updateInfo) => {
+  newVersion = updateInfo.version;
+
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: true,
+      isDownloaded: true,
+      isDownloading: false,
+      percentDownloaded: 100,
+      version: newVersion,
+    },
   });
-  notification.show();
-  notification.on("click", () => {
-    autoUpdater.quitAndInstall();
+});
+
+autoUpdater.on("download-progress", (progress) => {
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: true,
+      isDownloaded: false,
+      isDownloading: true,
+      percentDownloaded: progress.percent,
+      version: newVersion,
+    },
   });
 });
 
 autoUpdater.on("error", (err) => {
-  notification = new Notification({
-    title: "Blix",
-    body: JSON.stringify(err),
-    // icon: nativeImage.createFromPath(join(__dirname, "..", "assets", "icon.png"),
+  // Clear Blix update state
+  mainWindow?.apis.utilClientApi.refreshBlixStore({
+    update: {
+      isAvailable: false,
+      isDownloaded: false,
+      isDownloading: false,
+      percentDownloaded: 0,
+      version: "",
+    },
   });
-  notification.show();
+
+  logger.error(JSON.stringify(err));
 });
 
 // Menu

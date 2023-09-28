@@ -1,5 +1,7 @@
 import { type UUID } from "../../shared/utils/UniqueEntity";
 
+export const CACHE_MESSAGE_ID_SIZE = 32; // bytes
+
 export enum CacheSubsidiaryType {
   Manager,
   Frontend,
@@ -20,21 +22,38 @@ export type CacheSubsidiary = {
 export type CacheObject = {
   uuid: CacheUUID;
   data: Buffer;
-  metadata: any;
+  metadata: CacheMetadata;
 };
+
+type CacheRequestType =
+  | "cache-subscribe"
+  | "cache-delete-some"
+  | "cache-delete-all"
+  | "cache-get"
+  | "cache-write-metadata"
+  | "export-cache";
 
 export type CacheRequest = {
-  type: string;
+  type: CacheRequestType;
   id: string;
-  metadata?: any;
+  messageId: string;
+  metadata?: CacheMetadata;
 };
 
-export type CacheResponse =
-  | {
-      success: true;
-      data?: string;
-    }
-  | {
-      success: false;
-      message?: string;
-    };
+export type CacheResponse = {
+  success: boolean;
+  messageId: string;
+};
+
+export type CacheWriteResponse = CacheResponse & { id: CacheUUID };
+
+export type CacheMetadata = {
+  contentType: string;
+  name?: string;
+  other?: any;
+};
+
+export type CacheUpdateNotification = {
+  type: "cache-update";
+  cache: { uuid: string; metadata: CacheMetadata }[];
+};

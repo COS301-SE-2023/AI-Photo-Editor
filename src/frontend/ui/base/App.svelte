@@ -9,7 +9,7 @@
   import { initAPIs } from "../../lib/api/apiInitializer";
   import ContextMenu from "../../ui/utils/ContextMenu.svelte";
   import Test from "./Test.svelte";
-  import Settings from "./Settings.svelte";
+  import Settings from "./settings/Settings.svelte";
   import Shortcuts from "../../ui/utils/Shortcuts.svelte";
   import { settingsStore } from "../../lib/stores/SettingsStore";
   import { confetti } from "@neoconfetti/svelte";
@@ -42,7 +42,7 @@
   <Test />
 {:else if !$blixStore.blixReady && testing}
   <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
-    <span class="text-5xl text-purple-400">Loading</span>
+    <!-- <span class="text-5xl text-purple-400">Loading</span> -->
   </div>
   <div></div>
 {:else if $blixStore.blixReady}
@@ -55,7 +55,7 @@
       />
     {/if}
 
-    <div class="navbar {$blixStore.systemInfo.systemPlatform === 'darwin' ? 'pl-20' : ''}">
+    <div class="navbar {$blixStore.system.platform === 'darwin' ? 'pl-20' : ''}">
       <Navbar />
     </div>
     <div class="layout">
@@ -65,14 +65,14 @@
   </div>
 {:else}
   <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
-    <span class="text-5xl text-purple-400">Loading</span>
+    <!-- <span class="text-5xl text-purple-400">Loading</span> -->
   </div>
   <div></div>
 {/if}
 
-{#if $settingsStore.showing}
+<div class="{$settingsStore.showing ? '' : 'hidden'}">
   <Settings />
-{/if}
+</div>
 
 <Toasts />
 <ContextMenu />
@@ -95,7 +95,7 @@
     position: relative;
   }
   :root {
-    --navbar-height: 1.2rem;
+    --navbar-height: 2rem;
   }
 
   div.navbar {

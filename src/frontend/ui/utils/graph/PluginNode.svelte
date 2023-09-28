@@ -4,13 +4,19 @@
   import { toolboxStore } from "../../../lib/stores/ToolboxStore";
   import NodeUiFragment from "./NodeUIFragment.svelte";
   import { createEventDispatcher } from "svelte";
-  import { graphMall } from "lib/stores/GraphStore";
+  import { graphMall } from "../../../lib/stores/GraphStore";
+  import { colord, extend } from "colord";
+  import a11yPlugin from "colord/plugins/a11y";
+  import { nodeIdLastClicked } from "../../../lib/stores/MediaStore";
+
+  extend([a11yPlugin]);
 
   const dispatch = createEventDispatcher();
 
   export let graphId: string;
   export let panelId: number;
   export let node: GraphNode;
+  // let activeInput = false;
 
   $: svelvetNodeId = `${panelId}_${node.uuid}`;
   $: toolboxNode = toolboxStore.getNodeReactive(node.signature);
@@ -44,54 +50,36 @@
     return colour as CSSColorString;
   }
 
-  function changeBrightness(color: CSSColorString, percent: number): CSSColorString {
-    var R = parseInt(color.substring(1, 3), 16);
-    var G = parseInt(color.substring(3, 5), 16);
-    var B = parseInt(color.substring(5, 7), 16);
+  function changeBrightness(color: CSSColorString, percent: number) {
+    return colord(color).lighten(percent).toRgbString();
+  }
 
-    R = parseInt(`${(R * (100 + percent)) / 100}`);
-    G = parseInt(`${(G * (100 + percent)) / 100}`);
-    B = parseInt(`${(B * (100 + percent)) / 100}`);
-
-    R = R < 255 ? R : 255;
-    G = G < 255 ? G : 255;
-    B = B < 255 ? B : 255;
-
-    R = Math.round(R);
-    G = Math.round(G);
-    B = Math.round(B);
-
-    var RR = R.toString(16).length == 1 ? "0" + R.toString(16) : R.toString(16);
-    var GG = G.toString(16).length == 1 ? "0" + G.toString(16) : G.toString(16);
-    var BB = B.toString(16).length == 1 ? "0" + B.toString(16) : B.toString(16);
-
-    return ("#" + RR + GG + BB) as CSSColorString;
+  function checkShowTextOutline(color: string) {
+    const readable = colord(color).isReadable();
+    return readable;
   }
 
   async function nodeClicked(e: CustomEvent) {
     if (e.detail.e.button === 2) {
-      console.log("DELETE NODE EVENT");
-
       const [_2, ...nodeUUIDParts] = e.detail.node.id.split("_");
       const nodeUUID = nodeUUIDParts.join("_");
+      console.log("REMOVE NODE");
       await window.apis.graphApi.removeNode(graphId, nodeUUID);
+    } else {
+      nodeIdLastClicked.set(node.uuid);
     }
   }
 
   async function nodeDragReleased(e: CustomEvent) {
-    await window.apis.graphApi.setNodePos(
-      graphId,
-      node.uuid,
-      graphMall.getGraphState(graphId).uiPositions[node.uuid]
-    );
-    console.log("NODE POSITION UPDATED");
+    await window.apis.graphApi.setNodePos(graphId, node.uuid, { x: $nodePos.x, y: $nodePos.y });
+  }
+
+  function handleInputInteraction(e: CustomEvent) {
+    graphMall.getGraph(graphId).handleNodeInputInteraction(graphId, node.uuid, e.detail);
   }
 </script>
 
 {#if svelvetNodeId !== ""}
-  <!-- {#key nodePos} -->
-  <!-- width="{graphNode.dims.w}"
-height="{graphNode.dims.h}" -->
   <Node
     bgColor="#262630"
     textColor="#ffffff"
@@ -102,12 +90,17 @@ height="{graphNode.dims.h}" -->
     borderRadius="{10}"
     selectionColor="#f43e5c"
     on:selected="{() => console.log('selected')}"
-    on:nodeClicked="{nodeClicked}"
+    on:nodeClickReleased="{nodeClicked}"
     on:nodeDragReleased="{nodeDragReleased}"
   >
     <div class="node">
       <div class="header">
         <h1>{$toolboxNode?.title || node.displayName}</h1>
+        <!-- {#if $toolboxNode?.description}
+          <div class="descriptionTooltip">
+            {$toolboxNode.description}<br />
+          </div>
+        {/if} -->
       </div>
       <!-- <div class="node-body" style="max-width: 400px">
         <h2>{Math.floor(Math.random() * 100000000)}</h2>
@@ -116,11 +109,11 @@ height="{graphNode.dims.h}" -->
         {JSON.stringify({ ...$toolboxNode, ui: undefined })}
       </div> -->
       <div class="node-body" style="max-width: 400px">
-        <!-- <button on:click={updateUIInputs}>SUBMIT</button> -->
         <NodeUiFragment
           inputStore="{node.inputUIValues}"
           ui="{$toolboxNode?.ui}"
           uiConfigs="{$toolboxNode?.uiConfigs}"
+          on:inputInteraction="{handleInputInteraction}"
         />
       </div>
 
@@ -140,11 +133,15 @@ height="{graphNode.dims.h}" -->
               let:hovering
             >
               {#if hovering}
+                {@const typeCol = changeBrightness(color, 0.3)}
                 <div class="anchorTooltip">
                   {#if input.displayName}
                     {input.displayName}<br />
                   {/if}
-                  &lt;<span style:color="{changeBrightness(color, 120)}">{input.type || "any"}</span
+                  &lt;<span
+                    style:color="{typeCol}"
+                    class="{checkShowTextOutline(typeCol) ? 'outlineText' : ''}"
+                    >{input.type || "any"}</span
                   >&gt;
                 </div>
               {/if}
@@ -157,7 +154,6 @@ height="{graphNode.dims.h}" -->
                 connected="{false}"
               />
             </Anchor>
-            <!-- bind:connections={$nodeConns} -->
           {/each}
         </div>
         <div class="anchors outputs">
@@ -175,12 +171,15 @@ height="{graphNode.dims.h}" -->
               let:hovering
             >
               {#if hovering}
+                {@const typeCol = changeBrightness(color, 0.3)}
                 <div class="anchorTooltip">
                   {#if output.displayName}
                     {output.displayName}<br />
                   {/if}
                   <!-- &lt;{output.type || "any"}&gt; -->
-                  &lt;<span style:color="{changeBrightness(color, 120)}"
+                  &lt;<span
+                    style:color="{typeCol}"
+                    class="{checkShowTextOutline(typeCol) ? 'outlineText' : ''}"
                     >{output.type || "any"}</span
                   >&gt;
                 </div>
@@ -210,7 +209,7 @@ height="{graphNode.dims.h}" -->
 
   .node {
     box-sizing: border-box;
-    width: fit-content;
+    min-width: max-content;
     border-radius: 8px;
     height: fit-content;
     position: relative;
@@ -219,6 +218,16 @@ height="{graphNode.dims.h}" -->
     flex-direction: column;
     padding: 10px;
     gap: 10px;
+  }
+
+  .descriptionTooltip {
+    display: block;
+    position: absolute;
+    background: #444444;
+    color: white;
+    border-radius: 2px;
+    padding: 0.6em;
+    bottom: 100%;
   }
 
   h1 {
@@ -255,8 +264,15 @@ height="{graphNode.dims.h}" -->
     color: white;
     border-radius: 2px;
     padding: 0.2em;
+    left: 110%;
     top: -3.5em;
   }
+  .outlineText {
+    background-color: lightgrey;
+    border-radius: 0.25em;
+    padding: 0.1em;
+  }
+
   .header {
     display: flex;
     justify-content: space-between;

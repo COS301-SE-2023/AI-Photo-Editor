@@ -1,5 +1,5 @@
 import type { AnchorUUID } from "@electron/lib/core-graph/CoreGraph";
-import type { IGraphUIInputs, INodeUIInputs } from "@shared/types";
+import type { IGraphUIInputs, INodeUIInputs, UIInputChange } from "@shared/types/graph";
 import type { NodeSignature } from "@shared/ui/ToolboxTypes";
 import {
   UIGraph,
@@ -16,18 +16,6 @@ import { toolboxStore } from "./ToolboxStore";
 import type { MediaOutputId } from "@shared/types/media";
 import { tick } from "svelte";
 import type { UUID } from "@shared/utils/UniqueEntity";
-
-// When the the CoreGraphApi type has to be imported into the backend
-// (WindowApi.ts) so that the API can be bound then it tries to import the type
-// below because the GraphStore gets used in the CoreGraphApi (its like one long
-// type dependency chain), this seems to cause some sort of duplicate export
-// issue originating from the svelvet node files when it tries to check the
-// types at compile time: node_modules/svelvet/dist/types/index.d.ts:4:1 - error
-// TS2308: Module './general' has already exported a member named
-// 'ActiveIntervals'. Consider explicitly re-exporting to resolve the ambiguity.
-
-// Not sure how to solve this at the moment, so had to add a temp fix below
-// unfortunately because of time constraints.
 
 // import type { Connections } from "blix_svelvet";
 // type Connections = (string | number | [string | number, string | number] | null)[];
@@ -116,22 +104,23 @@ export class GraphStore {
 
                 for (const input in inputs) {
                   if (!inputs.hasOwnProperty(input)) continue;
-                  // console.log("SUB TO", node, "-->>", input)
+
                   this.uiInputUnsubscribers[node].push(
-                    inputs[input].subscribe(() => {
-                      // console.log("UPDATE UI INPUTS", node, "->", input);
-                      this.updateUIInputs(node, input).catch((err) => {
+                    inputs[input].subscribe((state) => {
+                      this.globalizeUIInputs(node, input).catch((err) => {
                         return;
                       });
                     })
                   );
                 }
 
-                this.uiPositionUnsubscribers[node].push(
-                  position!.subscribe(() => {
-                    this.updateUIPosition(node, get(position!));
-                  })
-                );
+                // Update frontend
+                if (position)
+                  this.uiPositionUnsubscribers[node].push(
+                    position.subscribe((state) => {
+                      this.updateUIPosition(node, state);
+                    })
+                  );
               })
               .catch(() => {
                 return;
@@ -179,6 +168,12 @@ export class GraphStore {
     return res.status;
   }
 
+  async handleNodeInputInteraction(graphUUID: UUID, nodeUUID: UUID, input: UIInputChange) {
+    // console.log("INPUT: ", input.value)
+    const res = await window.apis.graphApi.handleNodeInputInteraction(graphUUID, nodeUUID, input);
+    // console.log(res);
+  }
+
   async addEdge(anchorA: AnchorUUID, anchorB: AnchorUUID) {
     const thisUUID = get(this.graphStore).uuid;
     const res = await window.apis.graphApi.addEdge(thisUUID, anchorA, anchorB);
@@ -186,21 +181,35 @@ export class GraphStore {
     return res.status;
   }
 
-  async updateUIInputs(nodeUUID: GraphNodeUUID, inputId: string) {
+  // Linked once to each UI input as a store subscriber.
+  // Notifies the backend of the frontend store changing.
+  async globalizeUIInputs(nodeUUID: GraphNodeUUID, inputId: string) {
     const thisUUID = get(this.graphStore).uuid;
+    const res = await window.apis.graphApi.updateUIInputs(
+      thisUUID,
+      nodeUUID,
+      this.getNodeUiInputs(nodeUUID, inputId)
+    );
+    // Notify our UI subscribers
+  }
+
+  getNodeUiInputs(nodeUUID: UUID, inputId: string) {
     const node = get(this.graphStore).nodes[nodeUUID];
     const nodeInputs = node.inputUIValues;
-
-    // Extract values from stores
-    const payload: INodeUIInputs = { inputs: {}, changes: [inputId] };
+    const inputs: INodeUIInputs = { inputs: {}, changes: [inputId] };
 
     for (const input of Object.keys(nodeInputs.inputs)) {
-      payload.inputs[input] = get(nodeInputs.inputs[input]);
+      inputs.inputs[input] = get(nodeInputs.inputs[input]);
     }
+    return inputs;
+  }
 
-    const res = await window.apis.graphApi.updateUIInputs(thisUUID, nodeUUID, payload);
-
-    // Notify our UI subscribers
+  // Update the store value of a specific UI input
+  updateUIInput(nodeUUID: GraphNodeUUID, inputId: string, value: unknown) {
+    const node = this.getNode(nodeUUID);
+    if (node) {
+      node.inputUIValues.inputs[inputId].set(value);
+    }
   }
 
   updateUIPosition(nodeUUID: UUID, position: SvelvetCanvasPos) {
@@ -212,7 +221,12 @@ export class GraphStore {
     // await window.apis.graphApi.updateUIPosition(get(this.graphStore).uuid, nodeUUID, get(get(this.graphStore).uiPositions[nodeUUID]));
   }
 
+  /**
+   * BE CAREFUL OF THE UNAWAITED PROMISE
+   * AWAIT REMOVED FOR UP DAY AS A TEMP FIX
+   */
   async updateUIPositions() {
+    // eslint-disable-next-line
     await window.apis.graphApi.updateUIPositions(
       get(this.graphStore).uuid,
       get(this.graphStore).uiPositions
@@ -285,7 +299,6 @@ export class GraphStore {
     nodes.forEach((node) => {
       const nodePos = this.getNode(node)?.styling?.pos;
       if (!nodePos) return;
-
       nodePos.update((pos) => {
         return {
           x: pos.x + NUDGE_DISTANCE * 2 * (Math.random() - 0.5),
@@ -295,7 +308,8 @@ export class GraphStore {
     });
 
     // Notify the system of the new node positions
-    const registerPositionUpdate = () => {
+    const registerPositionUpdate = async () => {
+      await this.updateUIPositions();
       return; // TODO
     };
 
@@ -303,7 +317,7 @@ export class GraphStore {
       const now = performance.now();
       if (now - start > duration * 1000) {
         // Animation is done
-        registerPositionUpdate();
+        void registerPositionUpdate().then().catch();
         return;
       }
 
@@ -311,7 +325,7 @@ export class GraphStore {
 
       // ===== COMPUTE CENTER OF MASS ===== //
       const centerMass = { x: 0, y: 0 };
-      const CENTER_FORCE = 0.04;
+      const CENTER_FORCE = 0.02;
       let numNodes = 0;
       nodes.forEach((node) => {
         const nodePos = this.getNode(node)?.styling?.pos;
@@ -326,40 +340,45 @@ export class GraphStore {
       centerMass.x /= numNodes;
       centerMass.y /= numNodes;
 
-      // ===== ADD EDGE DIRECTION REPULSION FORCES ===== //
-      const dirForces: { [key: GraphNodeUUID]: number } = {};
-      const DIRECTION_FORCE = 5;
-      const MAX_DIRECTION_FORCE = 800;
-
-      const edges = get(this.graphStore).edges;
-      Object.keys(edges).forEach((edge) => {
-        const edgeObj = edges[edge];
-
-        // Add leftward force
-        if (nodesSet.has(edgeObj.nodeUUIDFrom)) {
-          dirForces[edgeObj.nodeUUIDFrom] = -DIRECTION_FORCE;
-        }
-
-        // Add rightward force
-        if (nodesSet.has(edgeObj.nodeUUIDTo)) {
-          dirForces[edgeObj.nodeUUIDTo] = DIRECTION_FORCE;
-        }
-      });
-
-      let totalDirForce = 0;
       nodes.forEach((node) => {
         if (!forces[node]) forces[node] = { x: 0, y: 0 };
-        if (!dirForces[node]) dirForces[node] = 0;
-
-        dirForces[node] = Math.max(
-          Math.min(dirForces[node], MAX_DIRECTION_FORCE),
-          -MAX_DIRECTION_FORCE
-        );
-        totalDirForce += dirForces[node];
-
-        forces[node].x += dirForces[node];
       });
-      totalDirForce /= numNodes;
+
+      // ===== ADD EDGE DIRECTION REPULSION FORCES ===== //
+
+      const totalDirForce = 0;
+      // let totalDirForce = 0;
+      // const dirForces: { [key: GraphNodeUUID]: number } = {};
+      // const DIRECTION_FORCE = 5;
+      // const MAX_DIRECTION_FORCE = 800;
+
+      // const edges = get(this.graphStore).edges;
+      // Object.keys(edges).forEach((edge) => {
+      //   const edgeObj = edges[edge];
+
+      //   // Add leftward force
+      //   if (nodesSet.has(edgeObj.nodeUUIDFrom)) {
+      //     dirForces[edgeObj.nodeUUIDFrom] = -DIRECTION_FORCE;
+      //   }
+
+      //   // Add rightward force
+      //   if (nodesSet.has(edgeObj.nodeUUIDTo)) {
+      //     dirForces[edgeObj.nodeUUIDTo] = DIRECTION_FORCE;
+      //   }
+      // });
+
+      // nodes.forEach((node) => {
+      //   if (!dirForces[node]) dirForces[node] = 0;
+
+      //   dirForces[node] = Math.max(
+      //     Math.min(dirForces[node], MAX_DIRECTION_FORCE),
+      //     -MAX_DIRECTION_FORCE
+      //   );
+      //   totalDirForce += dirForces[node];
+
+      //   forces[node].x += dirForces[node];
+      // });
+      // totalDirForce /= numNodes;
 
       // ===== ADD CENTER OF MASS ATTRACTION FORCE + COUNTERBALANCE DIRECTION FORCE ===== //
       nodes.forEach((node) => {
@@ -372,8 +391,10 @@ export class GraphStore {
         const dist = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
         const forceMag = dist * CENTER_FORCE;
 
-        forces[node].x += (diff.x / dist) * forceMag - totalDirForce;
-        forces[node].y += (diff.y / dist) * forceMag;
+        if (diff.x !== 0 || diff.y !== 0) {
+          forces[node].x += (diff.x / dist) * forceMag - totalDirForce;
+          forces[node].y += (diff.y / dist) * forceMag;
+        }
       });
 
       // ===== ADD INTER-NODE REPULSION FORCES ===== //
@@ -534,6 +555,12 @@ class GraphMall {
         return mall;
       });
     }
+  }
+
+  public async clearAllGraphs() {
+    this.mall.set({});
+    this.outputNodes.set({});
+    await window.apis.graphApi.clearAllGraphs();
   }
 }
 

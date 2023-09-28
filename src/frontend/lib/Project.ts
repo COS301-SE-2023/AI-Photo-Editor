@@ -12,6 +12,12 @@ export interface UIProject {
 
 let groupTest = 0;
 
+/**
+ * Constructs a PanelGroup from a LayoutPanel
+ * @param layout The layout to construct from
+ * @returns The constructed PanelGroup
+ */
+
 export function constructLayout(layout: LayoutPanel): PanelGroup {
   const group = new PanelGroup((groupTest++).toString());
   if (layout.panels) {
@@ -28,11 +34,21 @@ export function constructLayout(layout: LayoutPanel): PanelGroup {
   }
   return group;
 }
+/**
+ * A layout template for the UI
+ */
 
 export const layoutTemplate: LayoutPanel = {
   panels: [
     {
-      content: "media",
+      panels: [
+        {
+          content: "media",
+        },
+        {
+          content: "assets",
+        },
+      ],
     },
     {
       content: "graph",

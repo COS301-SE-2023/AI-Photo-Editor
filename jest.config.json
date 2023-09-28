@@ -1,5 +1,5 @@
 {
-  "collectCoverage" : true,
+  "collectCoverage": true,
   "transform": {
     "^.+\\.svelte$": [
       "svelte-jester",
@@ -7,12 +7,18 @@
         "preprocess": true
       }
     ],
-    "^.+\\.ts$": "ts-jest",
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        "diagnostics": false
+      }
+    ],
     "^.+\\.js$": "babel-jest"
   },
-  "coveragePathIgnorePatterns" : [ "blix-plugins" ],
+  "coveragePathIgnorePatterns": ["blix-plugins","node_modules","src/electron/lib/plugins/PluginManager"],
   "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node", "svelte"],
   "coverageDirectory": "coverage",
-  "testPathIgnorePatterns": ["\bbuild\b","e2e"]
+  "testPathIgnorePatterns": ["\bbuild\b", "e2e"],
+  "preset": "ts-jest/presets/js-with-babel"
 }

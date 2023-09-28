@@ -39,6 +39,8 @@ export class NodeUILeaf extends NodeUI {
 export enum NodeUIComponent {
   Button = "Button",
   Buffer = "Buffer",
+  TweakDial = "TweakDial",
+  DiffDial = "DiffDial",
   Slider = "Slider",
   Knob = "Knob",
   Label = "Label",
@@ -46,8 +48,11 @@ export enum NodeUIComponent {
   Dropdown = "Dropdown",
   Accordion = "Accordion",
   NumberInput = "NumberInput",
+  MatrixInput = "MatrixInput",
+  OriginPicker = "OriginPicker",
   TextInput = "TextInput",
   Checkbox = "Checkbox",
   ColorPicker = "ColorPicker",
   FilePicker = "FilePicker",
+  CachePicker = "CachePicker",
 }

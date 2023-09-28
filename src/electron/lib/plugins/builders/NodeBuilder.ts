@@ -12,10 +12,12 @@ import {
   type UIComponentProps,
   type UIComponentConfig,
 } from "../../../../shared/ui/NodeUITypes";
+import { type NodeTweakData } from "../../../../shared/types";
 
 type PartialNode = {
   name: string;
   plugin: string;
+  folder: string;
   displayName: string;
   description: string;
   icon: string;
@@ -33,10 +35,11 @@ type PartialNode = {
 export class NodeBuilder implements PluginContextBuilder {
   private partialNode: PartialNode;
 
-  constructor(plugin: string, name: string) {
+  constructor(plugin: string, folder: string, name: string) {
     this.partialNode = {
       name,
       plugin,
+      folder,
       displayName: name,
       description: "",
       icon: "",
@@ -53,6 +56,7 @@ export class NodeBuilder implements PluginContextBuilder {
     return new NodeInstance(
       this.partialNode.name,
       this.partialNode.plugin,
+      this.partialNode.folder,
       this.partialNode.displayName,
       this.partialNode.description,
       this.partialNode.icon,
@@ -173,6 +177,52 @@ export class NodeUIBuilder {
 
     return this;
   }
+  public addCachePicker(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.CachePicker);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.CachePicker, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "",
+      triggerUpdate: config.triggerUpdate ?? true,
+    };
+    return this;
+  }
+
+  // This dial enables plugins to access the current node's UUID, as well as a list of uiInputs id's.
+  // This can then be used in coordination with the webview Tweaks API to modify node UI inputs.
+  public addTweakDial(id: string, props: UIComponentProps): NodeUIBuilder {
+    const componentId = id ?? getRandomComponentId(NodeUIComponent.TweakDial);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.TweakDial, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: "TweakDial",
+      defaultValue: { nodeUUID: "", inputs: [] } as NodeTweakData,
+      triggerUpdate: true,
+    };
+
+    return this;
+  }
+
+  // This dial provides the node a list of properties that changed in the last UI update
+  public addDiffDial(id: string, props: UIComponentProps): NodeUIBuilder {
+    const componentId = id ?? getRandomComponentId(NodeUIComponent.DiffDial);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.DiffDial, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: "DiffDial",
+      defaultValue: { changes: [] as string[] },
+      triggerUpdate: true,
+    };
+
+    return this;
+  }
 
   public addKnob(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
     const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Knob);
@@ -250,6 +300,34 @@ export class NodeUIBuilder {
     return this;
   }
 
+  public addCheckbox(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.Checkbox);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.Checkbox, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? false,
+      triggerUpdate: config.triggerUpdate ?? true,
+    };
+    return this;
+  }
+
+  public addOriginPicker(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.OriginPicker);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.OriginPicker, componentId, [props])
+    );
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: config.defaultValue ?? "mm",
+      triggerUpdate: config.triggerUpdate ?? true,
+    };
+    return this;
+  }
+
   /**
    * @param label Label for the accordion
    * @param builder NodeUIBuilder for the accordion
@@ -317,6 +395,55 @@ export class NodeUIBuilder {
     return this;
   }
 
+  public addMatrixInput(config: UIComponentConfig, props: UIComponentProps): NodeUIBuilder {
+    const componentId = config.componentId ?? getRandomComponentId(NodeUIComponent.MatrixInput);
+    this.node.params.push(
+      new NodeUILeaf(this.node, NodeUIComponent.MatrixInput, componentId, [props])
+    );
+
+    function createZeroRow(cols: number) {
+      return Array.from({ length: cols }, () => 0);
+    }
+
+    function createZeroMatrix(rows: number, cols: number) {
+      return Array.from({ length: rows }, () => createZeroRow(cols));
+    }
+
+    function sanitizeMatrix(matrix: any, rows: number, cols: number): number[][] {
+      if (!Array.isArray(matrix)) return createZeroMatrix(rows, cols);
+
+      // Trim overflow
+      matrix = matrix.slice(0, rows);
+
+      // Check each row
+      for (let r = 0; r < rows; r++) {
+        if (!Array.isArray(matrix[r])) {
+          matrix[r] = createZeroRow(cols);
+          continue;
+        }
+
+        // Trim overflow
+        matrix[r] = matrix[r].slice(0, cols);
+
+        // Check each cell
+        for (let c = 0; c < cols; c++) {
+          if (typeof matrix[r][c] !== "number") {
+            matrix[r][c] = 0;
+          }
+        }
+      }
+      return matrix;
+    }
+
+    this.uiConfigs[componentId] = {
+      componentId,
+      label: config.label,
+      defaultValue: sanitizeMatrix(config.defaultValue, props.rows as number, props.cols as number),
+      triggerUpdate: config.triggerUpdate ?? true,
+    };
+    return this;
+  }
+
   /**
    * @param label Label for the text input
    * @returns callback to this NodeUIBuilder
@@ -349,7 +476,7 @@ export class NodeUIBuilder {
     this.uiConfigs[componentId] = {
       componentId,
       label: config.label,
-      defaultValue: config.defaultValue ?? "#000000",
+      defaultValue: config.defaultValue ?? "#000000ff",
       triggerUpdate: config.triggerUpdate ?? true,
     };
     return this;

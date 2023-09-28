@@ -37,6 +37,8 @@ jest.mock("chokidar", () => ({
   }
 }));
 
+
+
 jest.mock("../../../src/electron/lib/projects/ProjectManager");
 
 jest.mock("electron", () => ({
@@ -54,7 +56,15 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
+
+jest.mock('../../../src/electron/lib/plugins/PluginManager')
+
+
+
 
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
@@ -70,6 +80,17 @@ jest.mock("electron-store", () => ({
       return {}
     })
 }));
+
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
 describe("Test builder propagations", () => {
 
     let nodeBuilder : NodeBuilder;
@@ -80,10 +101,10 @@ describe("Test builder propagations", () => {
     beforeEach(() => {
       jest.clearAllMocks();
 
-      const node = new NodeInstance("Jake.Shark", "Shark", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
+      const node = new NodeInstance("Jake.Shark", "Shark", "folder", "Jake", "The Jake plugin", "This is the Jake plugin", inputs, outputs);
       const nodeUI = new NodeUIParent("Jake.Shark", null);
   
-      nodeBuilder = new NodeBuilder("testing-plugin", "My cool node");
+      nodeBuilder = new NodeBuilder("testing-plugin", "folder", "My cool node");
       nodeUIBuilder = new NodeUIBuilder();
     });
 
@@ -152,7 +173,7 @@ describe("Test plugin integrations", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      plugin = new Plugin(pack,plugDir,main);
+      plugin = new Plugin(pack,plugDir);
       blix = new Blix();
       blix.init(mainWindow);
       plugin.requireSelf(blix);
@@ -187,18 +208,18 @@ describe("Test plugin integrations", () => {
         plugin.requireSelf(blix);
         // Call the function being tested
         const paths = blix.pluginManager.pluginPaths;
-        console.log(paths)
+        // console.log(paths)
 
         // Expect the result to match the expected production path
-        paths.forEach((path) => {
-          // expect(path).toMatch(/((\/|\\)[\w-]+)+/);
-        })
+        // paths.forEach((path) => {
+        //   // expect(path).toMatch(/((\/|\\)[\w-]+)+/);
+        // })
       });
       
 
     test("Plugin should send nodes to toolbox registry", () => {
         const tools =  Object.values(blix.toolbox.getRegistry());
-        expect(tools.length).toEqual(3);
+        expect(tools.length).toEqual(1);
       });
 
     test("Plugin should send commands to command registry", () => {

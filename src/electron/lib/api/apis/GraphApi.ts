@@ -2,7 +2,7 @@ import type { ElectronMainApi } from "electron-affinity/main";
 import type { Blix } from "../../Blix";
 import { type UUID } from "../../../../shared/utils/UniqueEntity";
 import { type NodeSignature } from "../../../../shared/ui/ToolboxTypes";
-import { type INodeUIInputs } from "../../../../shared/types";
+import type { UIInputChange, INodeUIInputs } from "../../../../shared/types";
 import { CoreGraphUpdateParticipant } from "../../core-graph/CoreGraphInteractors";
 import type { GraphMetadata, SvelvetCanvasPos } from "../../../../shared/ui/UIGraph";
 
@@ -14,12 +14,16 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
     this._blix = blix;
   }
 
-  async undoChange(graph: UUID) {
-    return this._blix.graphManager.undoEvent(graph);
+  async undoChange(graphUUID: UUID) {
+    return this._blix.graphManager.undoEvent(graphUUID);
   }
 
-  async redoChange(graph: UUID) {
-    return this._blix.graphManager.redoEvent(graph);
+  async redoChange(graphUUID: UUID) {
+    return this._blix.graphManager.redoEvent(graphUUID);
+  }
+
+  async handleNodeInputInteraction(graphUUID: UUID, nodeUUID: UUID, input: UIInputChange) {
+    return this._blix.graphManager.handleNodeInputInteraction(graphUUID, nodeUUID, input);
   }
 
   async deleteGraphs(graphUUIDs: UUID[]) {
@@ -90,5 +94,17 @@ export class GraphApi implements ElectronMainApi<GraphApi> {
 
   async updateUIPositions(graphUUID: UUID, positions: { [key: UUID]: SvelvetCanvasPos }) {
     this._blix.graphManager.updateUIPositions(graphUUID, positions);
+  }
+
+  async getMediaOutputs(graphIds: UUID[]) {
+    return this._blix.graphManager.getMediaOutputs(graphIds);
+  }
+
+  async clearAllMedia() {
+    this._blix.graphManager.clearAllMedia();
+  }
+
+  async clearAllGraphs() {
+    this._blix.graphManager.clearAllGraphs();
   }
 }

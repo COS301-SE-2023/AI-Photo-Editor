@@ -48,10 +48,10 @@ export class Plugin {
 
   // Load this plugin into a local Node module
   // See: [https://rollupjs.org/es-module-syntax/#dynamic-import]
-  requireSelf(blix: Blix): void {
+  requireSelf(blix: Blix, force = false): void {
     try {
       // This uses Node.js require() to load the plugin as a module
-      // TODO: ISOLATION + LIMITED API
+      // TODO: ISOLATION
       // @ts-ignore: no-var-requires
 
       // We need to clear the local node cache so that the plugin can be reloaded
@@ -103,12 +103,12 @@ export class Plugin {
 
           const ctx = new TilePluginContext(this.name);
 
-          try {
-            pluginModule.tiles[tile](ctx); // Execute tile builder
-            blix.tileRegistry.addInstance(ctx.tileBuilder.build); // Add to registry
-          } catch (err) {
-            logger.warn(err);
-          }
+          // try {
+          //   pluginModule.tiles[tile](ctx); // Execute tile builder
+          //   blix.tileRegistry.addInstance(ctx.tileBuilder.build); // Add to registry
+          // } catch (err) {
+          //   logger.warn(err);
+          // }
         }
       }
 
@@ -120,7 +120,7 @@ export class Plugin {
         // Obtain typeclasses
         ctx.typeclassBuilders.forEach((builder) => {
           const [typeclass, converters] = builder.build;
-          blix.typeclassRegistry.addInstance(typeclass);
+          blix.typeclassRegistry.addInstance(typeclass, force);
           converters.forEach((converter) => blix.typeclassRegistry.addConverter(...converter));
         });
       }
@@ -156,12 +156,8 @@ export class NodePluginContext extends PluginContext {
     return this._nodeBuilder;
   }
 
-  // nodeBuilder = context.instantiate("hello-plugin","hello");
-  // TODO: Change this: it should not be done in the plugin,
-  // but when the plugin loads. The plugin already defines each node name as the key
-  // in the dictionary, and we already know the plugin name in the package.json
-  public instantiate(plugin: string, name: string): NodeBuilder {
-    this._nodeBuilder = new NodeBuilder(plugin, name);
+  public instantiate(folder: string, name: string): NodeBuilder {
+    this._nodeBuilder = new NodeBuilder(this.pluginId, folder, name);
     return this.nodeBuilder;
   }
 }

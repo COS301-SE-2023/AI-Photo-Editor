@@ -1,35 +1,62 @@
 <script lang="ts">
     import * as PIXI from "pixi.js";
     import { Viewport } from "pixi-viewport";
-    import { onDestroy, onMount } from "svelte";
-    import { Writable } from "svelte/store";
-    import { renderApp } from "./render";
-    import { canvas1 } from "./clump";
+    import { onDestroy, onMount, tick } from "svelte";
+    import { type Writable } from "svelte/store";
+    import { renderScene } from "./render";
+    import { WindowWithApis, type BlinkCanvas, BlinkCanvasConfig } from "./types";
+    import Debug from "./Debug.svelte";
+    import { diffCanvasConfig } from "./diff";
 
-    export let media: Writable<any>;
+    export let media: Writable<BlinkCanvas>;
+    export let send: (msg: string, data: any) => void;
+
+    let imgCanvasInitialPadding = 100;
+    let canvasConfig: BlinkCanvasConfig = {
+        canvasDims: { w: 1920, h: 1080 },
+        canvasColor: 0xffffff,
+        canvasAlpha: 1,
+
+        exportName: "Blink Export"
+    }
 
     let blink: PIXI.Application;
     let pixiCanvas: HTMLCanvasElement;
     let mouseCursor = "cursorDefault";
 
-    $: redraw($media);
-
-    async function redraw(media) {
-        // if (media?.ops && canvas && texture) {}
-    }
+    let canvasBlock: PIXI.Graphics;
+    let currScene: PIXI.Container;
+    let viewport: Viewport;
 
     onMount(async () => {
+    // window.addEventListener("DOMContentLoaded", async () => {
+
+        // Add export listener
+
+	    window.api.on("export", async () => {
+            exportImage();
+	    	// send("exportResponse", "exported");
+	    })
+
+
         //====== INITIALIZE PIXI ======//
         blink = new PIXI.Application({
             view: pixiCanvas,
             width: 500,
             height: 500,
-            backgroundColor: 0x06060c,
-            // transparent: true,
+            backgroundColor: "#181925",
             antialias: true,
             resolution: 1,
             autoDensity: true,
-            resizeTo: window,
+            // autoStart: false,
+            // resizeTo: window,
+        });
+
+        globalThis.__PIXI_APP__ = blink;
+
+        window.addEventListener("resize", () => {
+            blink.renderer.resize(window.innerWidth, window.innerHeight);
+            blink.render();
         });
 
         if (blink === null) {
@@ -38,9 +65,9 @@
         }
 
         //====== CREATE VIEWPORT ======//
-        const viewport = new Viewport({
-            screenWidth: blink.renderer.width,
-            screenHeight: blink.renderer.height,
+        viewport = new Viewport({
+            screenWidth: pixiCanvas.width,
+            screenHeight: pixiCanvas.height,
             worldWidth: 100,
             worldHeight: 100,
             events: blink.renderer.events,
@@ -73,33 +100,79 @@
         });
 
         //===== CREATE BASE LAYOUT =====//
-        const imgCanvasInitialPadding = 100;
-        const imgCanvasBlockW = 1920;
-        const imgCanvasBlockH = 1080;
-
         let imgCanvas = new PIXI.Container();
+        imgCanvas.name = "imgCanvas";
 
-        let imgCanvasBlock = new PIXI.Graphics();
-        imgCanvasBlock.beginFill(0xffffff, 0.9);
-        imgCanvasBlock.drawRect(0, 0, imgCanvasBlockW, imgCanvasBlockH);
+        function createImageCanvasBlock() {
+            const { w: imgCanvasBlockW, h: imgCanvasBlockH } = canvasConfig.canvasDims;
 
+            // canvas
+            let imgCanvasBlock = new PIXI.Graphics();
+            imgCanvasBlock.beginFill(canvasConfig.canvasColor, canvasConfig.canvasAlpha);
+            imgCanvasBlock.drawRect(0, 0, imgCanvasBlockW, imgCanvasBlockH);
+
+            // x-axis
+            imgCanvasBlock.lineStyle();
+            imgCanvasBlock.moveTo(0, imgCanvasBlockH/2);
+            imgCanvasBlock.lineStyle(1, 0xff0000);
+            imgCanvasBlock.lineTo(imgCanvasBlockW, imgCanvasBlockH/2);
+
+            // y-axis
+            imgCanvasBlock.lineStyle();
+            imgCanvasBlock.moveTo(imgCanvasBlockW/2, 0);
+            imgCanvasBlock.lineStyle(1, 0x00ff00);
+            imgCanvasBlock.lineTo(imgCanvasBlockW/2, imgCanvasBlockH);
+
+            imgCanvasBlock.position.set(-imgCanvasBlockW/2, -imgCanvasBlockH/2);
+
+            return imgCanvasBlock;
+        }
+
+        const imgCanvasBlock = createImageCanvasBlock();
         imgCanvas.addChild(imgCanvasBlock);
+        canvasBlock = imgCanvasBlock;
 
-        const hierarchy = new PIXI.Container();
         viewport.addChild(imgCanvas);
-        viewport.addChild(hierarchy);
-
-        // Place viewport such that imgCanvas is centered with padding
-        const viewportFitX = imgCanvasBlockW + 2 * imgCanvasInitialPadding;
-        const viewportFitY = imgCanvasBlockH + 2 * imgCanvasInitialPadding;
-        viewport.fit(true, viewportFitX, viewportFitY);
-        viewport.moveCenter(imgCanvasBlockW/2, imgCanvasBlockH/2);
 
         //===== RENDER Blink =====//
-        renderApp(blink, hierarchy, $media);
-        media.subscribe((media) => {
-            renderApp(blink, hierarchy, media);
-        });
+        let hasCentered = false;
+            media.subscribe(async (media) => {
+                //===== UPDATE CANVAS CONFIG =====//
+                if (media?.config != null) {
+                    const configDiffs = diffCanvasConfig(canvasConfig, media.config);
+
+                    if (configDiffs.size > 0) {
+                        canvasConfig = media.config;
+
+                        if (configDiffs.has("canvasBlock")) {
+                            imgCanvas.removeChildren();
+                            const newImgCanvasBlock = createImageCanvasBlock();
+                            imgCanvas.addChild(newImgCanvasBlock);
+                            canvasBlock = newImgCanvasBlock;
+                        }
+                    }
+                }
+
+                //===== RENDER SCENE =====//
+                const { success, scene } = await renderScene(blink, media, viewport, send);
+                currScene = scene;
+
+                // Necessary to fix an occasional race condition with PIXI failing to load
+                // Something seems to go wrong due to the canvas having to resize to the window
+                window.dispatchEvent(new Event("resize"));
+
+                if (success && !hasCentered) {
+                    const viewportFitX = canvasConfig.canvasDims.w + 2 * imgCanvasInitialPadding;
+                    const viewportFitY = canvasConfig.canvasDims.h + 2 * imgCanvasInitialPadding;
+                    viewport.fit(true, viewportFitX, viewportFitY);
+                    viewport.moveCenter(0, 0);
+
+                    hasCentered = true;
+                }
+            });
+
+        //===== CENTER VIEWPORT =====//
+        // Only do this the very first time we receive valid media
 
         //===== MAIN LOOP =====//
         let elapsed = 0;
@@ -121,23 +194,76 @@
             mouseCursor = "";
         }
     }
+
+    async function exportImage() {
+        if (!currScene || !canvasBlock) return;
+
+        const { w: imgCanvasBlockW, h: imgCanvasBlockH } = canvasConfig.canvasDims;
+
+        const bounds = currScene.getLocalBounds();
+        const frame = new PIXI.Rectangle(-bounds.x-imgCanvasBlockW/2, -bounds.y-imgCanvasBlockH/2, imgCanvasBlockW, imgCanvasBlockH);
+
+        const exportCanvas = blink.renderer.extract.canvas(currScene, frame);
+        exportCanvas.toBlob(async (blob) => {
+            const metadata = {
+                contentType: "image/png",
+                name: `${canvasConfig.exportName} ${Math.floor(100000 * Math.random())}`
+            };
+
+            send("exportResponse", {cacheUUID: await (window as WindowWithApis).cache.write(blob, metadata)});
+        }, "image/png");
+        // REMOVED: Exporting straight to local file
+        // const link = document.createElement("a");
+        // link.download = "export.png";
+        // link.href = exportCanvas.toDataURL("image/png", 1.0);
+        // link.click();
+        // link.remove();
+    }
+
+    let showDebug = false;
 </script>
 
 <svelte:window on:keydown={keydown} on:keyup={keyup} />
 <div class="{mouseCursor}">
+    <!-- <button on:click="{exportImage}">Export</button> -->
     <canvas id="pixiCanvas" bind:this={pixiCanvas} />
 </div>
 
-<code>
-    <!-- {JSON.stringify($media, null, 2)} -->
-</code>
+<div class="fullScreen">
+    {#if showDebug}
+    <Debug data={$media} />
+    {/if}
+
+    <div class="hover">
+        <input type="checkbox" bind:checked="{showDebug}" />
+    </div>
+</div>
 
 <style>
+    .hover {
+        position: absolute;
+        top: 0.4em;
+        right: 0.4em;
+
+        accent-color: #f43e5c;
+        outline: none;
+        pointer-events: all;
+    }
+
     canvas {
         position: absolute;
         margin: 0px;
         padding: 0px;
     }
+
+    /* button {
+        position: absolute;
+        z-index: 10;
+        top: 10px;
+        right: 0px;
+        width: 60px;
+        height: 30px;
+    } */
 
     .cursorPointer {
         cursor: pointer;
@@ -149,11 +275,16 @@
         cursor: grabbing;
     }
 
-    code {
+    .fullScreen {
+        overflow: hidden;
         position: absolute;
+        width: 100%;
+        height: 100%;
+        padding: 0px;
+        margin: 0px;
+
         white-space: break-spaces;
         pointer-events: none;
-        top: 1.2em;
         z-index: 10;
         font-size: 0.2em;
         color: white;

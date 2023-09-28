@@ -3,18 +3,52 @@
   import Image from "../utils/mediaDisplays/Image.svelte";
   import TextBox from "../utils/mediaDisplays/TextBox.svelte";
   import { mediaStore } from "../../lib/stores/MediaStore";
-  import type { GraphNodeUUID, GraphUUID } from "@shared/ui/UIGraph";
   import { writable, type Readable } from "svelte/store";
-  import type { MediaDisplayType, DisplayableMediaOutput } from "@shared/types/media";
+  import { MediaDisplayType, type DisplayableMediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
   import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
   import SelectionBox from "../utils/graph/SelectionBox.svelte";
   import { type SelectionBoxItem } from "../../types/selection-box";
   import WebView from "./WebView.svelte";
+  import { TweakApi } from "../../lib/webview/TweakApi";
+  import {
+    faBacon,
+    faBowlRice,
+    faBurger,
+    faCandyCane,
+    faCarrot,
+    faCoffee,
+    faCookieBite,
+    faFish,
+    faHotdog,
+    faIceCream,
+    faLemon,
+    faPizzaSlice,
+  } from "@fortawesome/free-solid-svg-icons";
+  import Fa from "svelte-fa";
+  import { toastStore } from "../../lib/stores/ToastStore";
+
+  const noContentIcons = [
+    faBacon,
+    faBowlRice,
+    faBurger,
+    faCandyCane,
+    faCarrot,
+    faCoffee,
+    faCookieBite,
+    faFish,
+    faHotdog,
+    faIceCream,
+    faLemon,
+    faPizzaSlice,
+  ];
 
   const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
-
   let selectedItems: SelectionBoxItem[] = [];
+  let selectedMediaId = writable("");
+  let oldMediaId: string | null = null;
+  let webview: WebView;
+  let media: Readable<DisplayableMediaOutput | null>;
 
   $: if ($mediaOutputIds) {
     selectedItems = Array.from($mediaOutputIds)
@@ -22,74 +56,64 @@
       .map((id) => ({ id, title: id }));
   }
 
-  let mediaId = writable("default");
-  let oldMediaId: string | null = null;
+  // Changes output on output node click
+  // $: if ($nodeIdLastClicked) {
+  //   const mediaOutputId = mediaStore.getMediaOutputId($nodeIdLastClicked);
+  //   if (mediaOutputId) {
+  //     selectedMediaId.set(mediaOutputId);
+  //   }
+  // }
 
-  const unsubMedia = mediaId.subscribe((newMediaId) => {
-    console.log("SUBSCRIBE MEDIA ID", oldMediaId, newMediaId);
+  const unsubMedia = selectedMediaId.subscribe((newMediaId) => {
     connectNewMedia(oldMediaId, newMediaId);
     oldMediaId = newMediaId;
   });
 
-  let selectedNode: { graphUUID: GraphUUID; outNode: GraphNodeUUID } | null;
-  let media: Readable<DisplayableMediaOutput | null>;
-
   async function connectNewMedia(oldMediaId: string | null, mediaId: string) {
     if (oldMediaId !== null) {
-      console.log("STOPPING OLD", oldMediaId);
       await mediaStore.stopMediaReactive(oldMediaId);
     }
-    media = await mediaStore.getMediaReactive(mediaId);
-    console.log("CONNECT NEW MEDIA", mediaId, media);
+    if (mediaId) {
+      media = await mediaStore.getMediaReactive(mediaId);
+    } else {
+      media = writable(null);
+    }
   }
 
   onDestroy(async () => {
-    console.log("ON DESTROY");
-    await mediaStore.stopMediaReactive($mediaId);
+    await mediaStore.stopMediaReactive($selectedMediaId);
     unsubMedia();
   });
 
-  // function handleSelect(e: Event) {
-  //   return;
-  //   const value = (e.target as HTMLSelectElement).value;
-  //   if (!value) return;
-
-  //   const [graphUUID, nodeUUID] = value.split("/");
-  //   selectedNode = { graphUUID, outNode: nodeUUID };
-  // }
-
   async function exportMedia(e: Event) {
+    if (selectedItems.length === 0) {
+      toastStore.trigger({ message: "No media selected.", type: "warn" });
+      return;
+    }
+
     if ($media?.dataType && $media?.content) {
-      await mediaStore.exportMedia($media);
+      if ($media.display.displayType === "webview") {
+        webview.exportMedia(e);
+      } else {
+        // await mediaStore.exportMedia($media);
+        toastStore.trigger({ message: "Unsupported media type for saving.", type: "info" });
+      }
     }
   }
 
   function getDisplayProps(media: DisplayableMediaOutput) {
     let res = media.display.props;
     if (media.display.contentProp !== null) res[media.display.contentProp] ??= media.content; // If content nullish, use default value
+    if (media.display.displayType === MediaDisplayType.Webview) {
+      // Provide Tweak API access
+      res["tweakApi"] = new TweakApi(media.graphUUID);
+    }
     return res;
   }
 
-  // async function getDisplay(id: TypeclassId) {
-  //   const value = null;
-  //   return await window.apis.typeclassApi.getMediaDisplay(id, value);
-  // }
-
-  // type MediaDisplay = {
-  //   component: any;
-  //   props: (data: any) => { [key: string]: any };
-  // };
-  // const dataTypeToMediaDisplay: { [key: string]: MediaDisplay } = {
-  //   [""]: { component: TextBox, props: (_data: any) => ({ content: "NO INPUT", status: "warning" }), },
-  //   Image: { component: Image, props: (data: string) => ({ src: data }), },
-  //   Number: { component: TextBox, props: (data: number) => ({ content: data?.toString() || "NULL", status: data == null ? "warning" : "normal", fontSize: "large", }),
-  //   }, boolean: { component: TextBox, props: (data: number) => ({ content: data?.toString() || "NULL", status: data == null ? "warning" : "normal", fontSize: "large", }), },
-  //   string: { component: TextBox, props: (data: string) => ({ content: data }), },
-  //   color: { component: ColorDisplay, props: (data: string) => ({ color: data }), },
-  //   Error: { component: TextBox, props: (data: string) => ({ content: data, status: "error" }), },
-  //   ["GLFX image"]: { component: WebView, props: (data: string) => ({ media: data }), },
-  //   ["Pixi image"]: { component: WebView, props: (data: string) => ({ media: data }), },
-  // };
+  function getNoContentIcon() {
+    return noContentIcons[Math.floor(Math.random() * noContentIcons.length)];
+  }
 
   const displayIdToSvelteConstructor: { [key in MediaDisplayType]: any } = {
     image: Image,
@@ -114,16 +138,16 @@
     <div class="self-end">
       <SelectionBox
         items="{selectedItems}"
-        bind:selectedItemId="{$mediaId}"
-        missingContentLabel="No Outputs"
+        bind:selectedItemId="{$selectedMediaId}"
+        missingContentLabel="No Media"
       />
     </div>
     <div
       on:click="{exportMedia}"
       on:keydown="{null}"
-      class="flex h-7 select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+      class="flex h-7 min-w-max select-none items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
     >
-      Export
+      Save Asset
     </div>
     <!-- <div class="self-end">
       <SelectionBox
@@ -136,23 +160,35 @@
 
   <div class="media">
     {#if $media}
-      <svelte:component
-        this="{displayIdToSvelteConstructor[$media.display.displayType]}"
-        {...getDisplayProps($media)}
-      />
+      {#if $media.display.displayType === "webview"}
+        <svelte:component
+          this="{displayIdToSvelteConstructor[$media.display.displayType]}"
+          bind:this="{webview}"
+          {...getDisplayProps($media)}
+        />
+      {:else}
+        <svelte:component
+          this="{displayIdToSvelteConstructor[$media.display.displayType]}"
+          {...getDisplayProps($media)}
+        />
+      {/if}
       <!-- <TextBox
           content="ERROR: Unknown data type: ${JSON.stringify($media)}"
           status="error"
         /> -->
       <!-- <Image src="https://media.tenor.com/1wZ88hrB5SwAAAAd/subway-surfer.gif" /> -->
     {:else}
-      <div class="placeholder">NO CONTENT</div>
+      <div class="placeholder select-none">
+        <div class="icon"><Fa icon="{getNoContentIcon()}" style="display: inline-block" /></div>
+        <h1>No content!</h1>
+        <h2>Add an Output node to the graph to create a media output</h2>
+      </div>
     {/if}
     <!-- <button on:click="{compute}">Testing</button> -->
   </div>
 </div>
 
-<style>
+<style lang="scss">
   /* Scale the pane to full available space */
   .fullPane {
     margin: 0px;
@@ -175,17 +211,31 @@
   }
 
   .placeholder {
-    padding-top: 140px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    display: inline-block;
-    width: 300px;
-    height: 300px;
-    border: 2px solid grey;
-    border-radius: 0.4em;
-    margin-top: 1em;
-  }
-  .placeholder:hover {
-    background-color: #1e1e2e;
-    cursor: pointer;
+
+    h1 {
+      font-size: 1.5em;
+      color: #a8a8be;
+      margin-bottom: 0.2em;
+    }
+
+    .icon {
+      width: 100%;
+      color: #9090a4;
+      font-size: 5em;
+      line-height: 1em;
+      margin-bottom: 0.1em;
+    }
+
+    h2 {
+      font-size: 0.8em;
+      color: #9090a4;
+    }
   }
 </style>

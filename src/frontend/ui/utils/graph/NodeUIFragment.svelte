@@ -1,13 +1,20 @@
 <script lang="ts">
-  import { NodeUILeaf, type NodeUI, type UIComponentConfig } from "@shared/ui/NodeUITypes";
+  import {
+    NodeUILeaf,
+    type NodeUI,
+    type UIComponentConfig,
+    NodeUIComponent,
+  } from "@shared/ui/NodeUITypes";
   import type { UIValueStore } from "@shared/ui/UIGraph";
   import NodeUiComponent from "./NodeUIComponent.svelte";
-  // import { writable } from "svelte/store";
-  // import { ColorPicker, RadioGroup, type CSSColorString } from "blix_svelvet";
+  import { blixStore } from "../../../lib/stores/BlixStore";
+  import { get } from "svelte/store";
 
   export let ui: NodeUI | null = null;
   export let inputStore: UIValueStore;
   export let uiConfigs: { [key: string]: UIComponentConfig };
+  // const dispatch = createEventDispatcher();
+  // export let nodeId: UUID;
 
   // const colorPicker = writable("red" as CSSColorString);
   // const radio = writable("a");
@@ -18,6 +25,21 @@
     }
     return null;
   }
+
+  /** For production */
+  function shouldBeHidden(leaf: NodeUILeaf | null) {
+    if (!get(blixStore).production) return false;
+
+    if (!leaf) return false;
+
+    const hiddenCategories: NodeUIComponent[] = [
+      NodeUIComponent.Buffer,
+      NodeUIComponent.TweakDial,
+      NodeUIComponent.DiffDial,
+    ];
+
+    return hiddenCategories.includes(leaf?.category as NodeUIComponent);
+  }
 </script>
 
 {#if ui}
@@ -25,16 +47,22 @@
     <ul>
       {#each ui.params as child}
         <li class="component">
-          <svelte:self inputStore="{inputStore}" ui="{child}" uiConfigs="{uiConfigs}" />
+          <svelte:self
+            on:inputInteraction
+            inputStore="{inputStore}"
+            ui="{child}"
+            uiConfigs="{uiConfigs}"
+          />
         </li>
       {/each}
     </ul>
   {:else if ui.type === "leaf"}
-    <p>
+    <p class="{shouldBeHidden(toLeafRepresentation(ui)) ? 'hidden' : ''}">
       <NodeUiComponent
         inputStore="{inputStore}"
         leafUI="{toLeafRepresentation(ui)}"
         uiConfigs="{uiConfigs}"
+        on:inputInteraction
       />
     </p>
   {/if}

@@ -1,41 +1,30 @@
-name: Build Codebase
+name: Build/release
 
 on:
   push:
-    branches: [ master, dev ]
-  pull_request:
-    branches: [ master, dev ]
-    types: [opened, synchronize, reopened, ready_for_review]
-permissions:
-  contents: read
+    branches:
+      - dev
+      - master
 
 jobs:
-  start:
-    name: Start State 🚀🚀🚀
-    runs-on: ubuntu-latest
-    steps:
-    - name: Starting 
-      id: init
-      run: |
-        echo "Starting building of ${{ github.repository }}"
-
-  build_project:
-    name: Build on all platforms
+  Build:
     runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-    needs: start
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
     steps:
-      - name: Checkout for ${{ runner.os }}
+      - name: Check out Git repository
         uses: actions/checkout@v3
-      - name: Set up Node 18
+
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: npm-${{ hashFiles('package-lock.json') }}
@@ -43,17 +32,23 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-      - name: Run tests and collect coverage
-        run: npm run test
-      - name: Build Project for ${{ runner.os }}
-        run: npm run build
 
-  end:
-    name: End State ✅✅✅
-    runs-on: ubuntu-latest
-    needs: build_project
-    steps:
-    - name: Ending 
-      id: init
-      run: |
-        echo "Ending building of ${{ github.repository }}"
+      - name: Build Blix Plugins
+        run: node ./scripts/plugins.js
+
+      - name: Build/Release Blix
+        run: |
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            npm run dist -- --linux deb AppImage --x64 --arm64
+            # npm run dist -- --linux deb --x64 --arm64
+          elif [ "${{ matrix.os }}" = "windows-latest" ]; then
+            npm run dist -- --windows nsis
+          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+            # npm run dist -- --mac dmg --x64 --arm64
+            npm run dist -- --mac dmg --arm64
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.TEST_TOKEN }}
+        shell: bash
+
+    timeout-minutes: 30

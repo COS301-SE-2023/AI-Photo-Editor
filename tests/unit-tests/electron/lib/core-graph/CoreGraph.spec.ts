@@ -19,7 +19,7 @@ describe("Test backend graph", () => {
     graph = new CoreGraph();
 
     for(let i = 0; i < 10; i++){
-      const node = new NodeInstance(`Node-${i}`, "Test-plugin", `Node-${i}`, `This is node ${i}`, `fa-duotone fa-bell`, inputs, outputs);
+      const node = new NodeInstance(`Node-${i}`, "Test-plugin", "folder", `Node-${i}`, `This is node ${i}`, `fa-duotone fa-bell`, inputs, outputs);
       nodes.push(node);
       graph.addNode(node, { x: 0, y: 0 });
      }
@@ -39,7 +39,7 @@ describe("Test backend graph", () => {
     for(let i = 0; i < 10; i++){
       const input: MinAnchor = { type: "string", displayName: `Test-plugin.Node-${i}.0`, identifier: `in${i}` };
       const output: MinAnchor = { type: "string", displayName: `Test-plugin.Node-${i}.1`, identifier: `out${i}` };
-      const node = new NodeInstance(`Node-${i}`, `Test-plugin`, `Node-${i}`, `This is node ${i}`, `fa-duotone fa-bell`, [input], [output]);
+      const node = new NodeInstance(`Node-${i}`, `Test-plugin`, "folder", `Node-${i}`, `This is node ${i}`, `fa-duotone fa-bell`, [input], [output]);
       graph.addNode(node, { x: 0, y: 0 });
       names.push(input.displayName, output.displayName);
      }
@@ -64,7 +64,7 @@ describe("Test backend graph", () => {
   })
 
   test("Setting a node's position", () => {
-    const node = new NodeInstance("Test-plugin",`Node-1`, `Node-1`, `This is node 1`, `fa-duotone fa-bell`, inputs, outputs);
+    const node = new NodeInstance("Test-plugin",`Node-1`, "folder", `Node-1`, `This is node 1`, `fa-duotone fa-bell`, inputs, outputs);
     const response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node, { x: 0, y: 0});
     const uuid = (response.data! as { nodeId: UUID }).nodeId;
     const response2: QueryResponse = graph.setNodePos(uuid, { x: 6, y: 9});
@@ -114,7 +114,7 @@ describe("Test CoreGraph Class", () => {
   });
 
 test("Adding a node to a graph", () => {
-    const node = new NodeInstance("Node-1",`Test-Plugin`, `Node-1`, `This is node 1`, `fa-duotone fa-bell`, inputs, outputs);
+    const node = new NodeInstance("Node-1",`Test-Plugin`, "folder", `Node-1`, `This is node 1`, `fa-duotone fa-bell`, inputs, outputs);
     const response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node, { x: 0, y: 0 });
     const uuid = (response.data! as { nodeId: UUID }).nodeId;
     expect(uuid).toBe(graph.getNodes[uuid].uuid);
@@ -126,7 +126,7 @@ test("Adding a node to a graph", () => {
 
 
   test("Removing a node from a graph", () => {
-    const node = new NodeInstance("Test-plugin",`Node-1`, `Node-1`, `This is node 1`, `fa-duotone fa-bell`, inputs, outputs);
+    const node = new NodeInstance("Test-plugin",`Node-1`, "folder", `Node-1`, `This is node 1`, `fa-duotone fa-bell`, inputs, outputs);
     const response: QueryResponse<{ nodeId: UUID }> = graph.addNode(node, { x: 0, y: 0 });
     const uuid = (response.data! as { nodeId: UUID }).nodeId;
     graph.removeNode(uuid);
@@ -162,8 +162,8 @@ test("Adding a node to a graph", () => {
     { type: "string", displayName: `Test-plugin.Node-2.3`, identifier: `out1` },
     { type: "number", displayName: `Test-plugin.Node-2.4`, identifier: `out2` }); 
 
-    const node1Instance = new NodeInstance(`${bestNode}-${1}`, `${plugin}`, `${bestNode}-1`, description, icon, inputs1, outputs1);
-    const node2Instance = new NodeInstance(`${bestNode}-${2}`, `${plugin}`, `${bestNode}-2`, description, icon, inputs2, outputs2);
+    const node1Instance = new NodeInstance(`${bestNode}-${1}`, `${plugin}`, "folder", `${bestNode}-1`, description, icon, inputs1, outputs1);
+    const node2Instance = new NodeInstance(`${bestNode}-${2}`, `${plugin}`, "folder", `${bestNode}-2`, description, icon, inputs2, outputs2);
    
     const pos = { x: 0, y: 0 };
     graph.addNode(node1Instance, pos);
@@ -260,8 +260,8 @@ test("Adding a node to a graph", () => {
     { type: "string", displayName: `Test-plugin.Node-2.3`, identifier: `out1` },
     { type: "number", displayName: `Test-plugin.Node-2.4`, identifier: `out2` }); 
   
-    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
-    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
+    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, "folder", `${node}-1`, description, icon, inputs1, outputs1);
+    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, "folder", `${node}-2`, description, icon, inputs2, outputs2);
     
     const pos = { x: 0, y: 0 };
     graph.addNode(node1Instance, pos);
@@ -331,10 +331,10 @@ test("Adding a node to a graph", () => {
     { type: "string", displayName: `Test-plugin.Node-4.3`, identifier: `out1` },
     { type: "number", displayName: `Test-plugin.Node-4.4`, identifier: `out2` }); 
   
-    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
-    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
-    const node3Instance = new NodeInstance(`${node}-${3}`, `${plugin}`, `${node}-3`, description, icon, inputs3, outputs3);
-    const node4Instance = new NodeInstance(`${node}-${4}`, `${plugin}`, `${node}-4`, description, icon, inputs4, outputs4);
+    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, "folder", `${node}-1`, description, icon, inputs1, outputs1);
+    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, "folder", `${node}-2`, description, icon, inputs2, outputs2);
+    const node3Instance = new NodeInstance(`${node}-${3}`, `${plugin}`, "folder", `${node}-3`, description, icon, inputs3, outputs3);
+    const node4Instance = new NodeInstance(`${node}-${4}`, `${plugin}`, "folder", `${node}-4`, description, icon, inputs4, outputs4);
 
     const pos = { x: 0, y: 0 };
     graph.addNode(node1Instance, pos);
@@ -396,8 +396,8 @@ test("Adding a node to a graph", () => {
     { type: "string", displayName: `Test-plugin.Node-2.3`, identifier: `out1` },
     { type: "number", displayName: `Test-plugin.Node-2.4`, identifier: `out2` }); 
   
-    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
-    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
+    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, "folder", `${node}-1`, description, icon, inputs1, outputs1);
+    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, "folder", `${node}-2`, description, icon, inputs2, outputs2);
     
     const pos = { x: 0, y: 0 };
     graph.addNode(node1Instance, pos);
@@ -468,10 +468,10 @@ test("Adding a node to a graph", () => {
     { type: "string", displayName: `Test-plugin.Node-4.3`, identifier: `out1` },
     { type: "number", displayName: `Test-plugin.Node-4.4`, identifier: `out2` }); 
   
-    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
-    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
-    const node3Instance = new NodeInstance(`${node}-${3}`, `${plugin}`, `${node}-3`, description, icon, inputs3, outputs3);
-    const node4Instance = new NodeInstance(`${node}-${4}`, `${plugin}`, `${node}-4`, description, icon, inputs4, outputs4);
+    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, "folder", `${node}-1`, description, icon, inputs1, outputs1);
+    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, "folder", `${node}-2`, description, icon, inputs2, outputs2);
+    const node3Instance = new NodeInstance(`${node}-${3}`, `${plugin}`, "folder", `${node}-3`, description, icon, inputs3, outputs3);
+    const node4Instance = new NodeInstance(`${node}-${4}`, `${plugin}`, "folder", `${node}-4`, description, icon, inputs4, outputs4);
 
     const pos = { x: 0, y: 0 };
     graph.addNode(node1Instance, pos);
@@ -722,8 +722,8 @@ describe("Test NodesAndEdgesGraph Class ", () => {
     { type: "string", displayName: `Test-plugin.Node-2.3`, identifier: `out1` },
     { type: "number", displayName: `Test-plugin.Node-2.4`, identifier: `out2` }); 
   
-    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, `${node}-1`, description, icon, inputs1, outputs1);
-    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, `${node}-2`, description, icon, inputs2, outputs2);
+    const node1Instance = new NodeInstance(`${node}-${1}`, `${plugin}`, "folder", `${node}-1`, description, icon, inputs1, outputs1);
+    const node2Instance = new NodeInstance(`${node}-${2}`, `${plugin}`, "folder", `${node}-2`, description, icon, inputs2, outputs2);
 
     const pos = { x: 0, y: 0 };
     g.addNode(node1Instance, pos);

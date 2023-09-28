@@ -45,8 +45,8 @@
     >
       {#if !project.saved}
         <div
-          transition:fade="{{ duration: 150 }}"
-          class="z-1000000 mr-2 h-[10px] w-[10px] rounded-full border-[1px] border-zinc-600 bg-white"
+          transition:fade|local="{{ duration: 150 }}"
+          class="z-1000000 mr-2 h-[10px] w-[10px] rounded-full border-[1px] border-zinc-600 bg-rose-400"
         ></div>
       {/if}
 
@@ -64,18 +64,20 @@
       </svg>
     </div>
   {/each}
-  <div on:click="{createProject}" on:keypress="{createProject}" class="no-drag flex-none pl-2">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.8"
-      stroke="currentColor"
-      class="h-4 w-4 rounded-md stroke-zinc-400 hover:bg-zinc-700"
-    >
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
-    </svg>
-  </div>
+  {#if $projectsStore.projects.length === 0}
+    <div on:click="{createProject}" on:keypress="{createProject}" class="no-drag flex-none pl-2">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.8"
+        stroke="currentColor"
+        class="h-4 w-4 rounded-md stroke-zinc-400 hover:bg-zinc-700"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+      </svg>
+    </div>
+  {/if}
 </div>
 
 <Shortcuts shortcuts="{shortcuts}" />

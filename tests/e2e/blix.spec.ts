@@ -4,9 +4,9 @@ import { join } from "path";
 import { waitForDebugger } from "inspector";
 import exp from "constants";
 
-test('E2E testing blix', async () => {
 
-  const electronApp = await electron.launch({ args: ['.']})
+test('E2E testing blix', async () => {
+const electronApp = await electron.launch({ args: ['.']})
   const isPackaged = await electronApp.evaluate(async ({ app }) => {
     // This runs in Electron's main process, parameter here is always
     // the result of the require('electron') in the main app script.
@@ -32,45 +32,48 @@ test('E2E testing blix', async () => {
   // and return its Page object
   const window = await electronApp.firstWindow();
 
-  await window.locator('svg').first().click();
+  // await window.keyboard.press('Escape', {delay: 4000});
+  await window.locator('.darkenBackground').click({delay: 500, position: {x: 100, y: 100}});
+  // await window.locator('svg').first().click();
 
-  expect((await window.getByTitle('Untitled').allInnerTexts()).at(0)).toBe("Untitled");
+  expect((await window.getByTitle('Untitled').allInnerTexts()).at(0)).toBe("Untitled-1");
 
   const graph = window.locator('section').first();
   await graph.click({button: 'right'});
 
   // Check plugin menu
   const plugin = window.getByText('blix');
-  expect((await plugin.allInnerTexts()).at(0)).toBe("blix");
-  expect((await window.getByText('hello-plugin').allInnerTexts()).at(0)).toBe("hello-plugin");
-  expect((await window.getByText('math-plugin').allInnerTexts()).at(0)).toBe("math-plugin");
-  expect((await window.getByText('input-plugin').allInnerTexts()).at(0)).toBe("input-plugin");
-  expect((await window.getByText('sharp-plugin').allInnerTexts()).at(0)).toBe("sharp-plugin");
+  expect(((await plugin.allInnerTexts()).at(2))).toBe("Blix");
+  expect((await window.getByText('Blink').allInnerTexts()).at(0)).toBe("Blink");
+  expect((await window.getByText('GLFX').allInnerTexts()).at(0)).toBe("GLFX");
+  expect((await window.getByText('Input').allInnerTexts()).at(0)).toBe("Input");
+  expect((await window.getByText('Logic').allInnerTexts()).at(0)).toBe("Logic");
+  expect((await window.getByText('Math').allInnerTexts()).at(0)).toBe("Math");
 
   // Check add node to graph
-  await plugin.click();
-  await window.getByText('Output').click();
+  await (await plugin.all()).at(2)?.click();
+  await (await window.getByText('Output').all()).at(2)?.click();
   await window.getByText('Output').first().click({button: 'right'});
 
   expect((await window.locator('Output').allInnerTexts()).at(0)).toBe(undefined);
 
   // Check add graph
   await window.getByText('Graph').click();
-  expect((await window.getByText('Graph', { exact: true }).allInnerTexts()).length).toBe(4);
+  expect((await window.getByText('Graph', { exact: true }).allInnerTexts()).length).toBe(2);
   await window.getByTitle('Add Graph').getByRole('img').click();
-  expect((await window.getByText('Graph', { exact: true }).allInnerTexts()).length).toBe(4);
+  expect((await window.getByText('Graph', { exact: true }).allInnerTexts()).length).toBe(2);
 
   // Connect edges
-  await graph.click({button: 'right'});
-  await plugin.click();
+  await graph.click({button: 'right', position: {x: 100, y: 100}});
+  await (await plugin.all()).at(2)?.click();
   await window.getByText('Output').click();
-  await graph.click({button: 'right'});
-  await window.getByText('input-plugin').first().click();
-  await window.getByText('Input number').click();
+  await graph.click({button: 'right', position: {x: 300, y: 600}, delay: 200});
+  await (await window.getByText('Input').all()).at(1)?.click({delay: 200});
+  await window.getByText('Number').click();
 
   await window.locator('css=div.svelvet-anchor').nth(1).dragTo(window.locator('css=div.svelvet-anchor').first());
 
-  expect((await window.locator('css=div.output.normal').allInnerTexts()).at(0)).toBe("3");
+  expect((await window.locator('css=div.output.normal').allInnerTexts()).at(0)).toBe("0");
 
   // close app
   await electronApp.close()

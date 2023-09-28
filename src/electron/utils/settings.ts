@@ -1,15 +1,18 @@
 import ElectronStore from "electron-store";
 import { safeStorage } from "electron";
 import logger from "./logger";
-import type { Preferences } from "../../shared/types";
+import type { KeyboardShortcut } from "../../shared/types";
 import type { recentProject } from "../../shared/types/index";
 
-interface Settings {
+export interface Settings {
   check: boolean;
   secrets: {
     OPENAI_API_KEY: string;
   };
   recentProjects: recentProject[];
+  prompts: string[];
+  model: string;
+  keyboardShortcuts: KeyboardShortcut[];
 }
 
 type DotUnionKeys<T, Prefix extends string = ""> = T extends object
@@ -29,13 +32,16 @@ type Secret = keyof Settings["secrets"];
 type UnencryptedSecrets = Record<string, string>;
 
 // TODO: Perhaps add a schema for validation
-const settings = new ElectronStore<Settings>({
+export const settings = new ElectronStore<Settings>({
   defaults: {
     check: false,
     secrets: {
       OPENAI_API_KEY: "",
     },
     recentProjects: [],
+    prompts: [],
+    model: "GPT-3.5",
+    keyboardShortcuts: [],
   },
 });
 
@@ -43,6 +49,14 @@ const settings = new ElectronStore<Settings>({
 // On Linux, returns true if the app has emitted the ready event and the secret key is available.
 // On MacOS, returns true if Keychain is available.
 // On Windows, returns true once the app has emitted the ready event.
+
+/**
+ * Stores a secret in the local settings store.
+ * If encryption is available, the secret is encrypted before being stored.
+ * @param key Identifier used to retrieve the secret
+ * @param value Value to be stored for the secret
+ * @returns void
+ */
 
 export function setSecret(key: string, value: string): void {
   if (safeStorage.isEncryptionAvailable()) {
@@ -52,6 +66,13 @@ export function setSecret(key: string, value: string): void {
   }
 }
 
+/**
+ * Retrieves a secret from the local settings store.
+ * The secret is automically decrypted if encryption was used.
+ * @param key Identifier used to retrieve the secret
+ * @returns Secret value
+ */
+
 export function getSecret(key: string): string {
   const value = settings.get(`secrets.${key}`);
   if (!(typeof value === "string")) return "";
@@ -60,7 +81,6 @@ export function getSecret(key: string): string {
 
 /**
  * Decrypts all the secrets
- *
  * @returns Decrypted secrets
  */
 export function getSecrets(): UnencryptedSecrets {
@@ -82,7 +102,7 @@ export function getSecrets(): UnencryptedSecrets {
 }
 
 /**
- *
+ * Decrypts a string using the safeStorage module
  * @param value Base64 encrypted string
  * @returns Unencrypted string
  */
@@ -99,14 +119,27 @@ export function decryptWithSafeStorage(value: string) {
   }
 }
 
+/**
+ * Clears a secret from the local settings store.
+ * @param key Identifier used to retrieve the secret
+ * @returns void
+ */
 export function clearSecret(key: string): void {
   settings.set(`secrets.${key}`, "");
 }
 
+/**
+ * Set the recent projects secret in the local settings store.
+ * @param projects The recent projects to be stored
+ * @returns void
+ */
 export function setRecentProjects(projects: recentProject[]) {
   settings.set("recentProjects", projects);
 }
 
+/**
+ * Gets the recent projects from the local settings store.
+ */
 export function getRecentProjects() {
   return settings.get("recentProjects");
 }

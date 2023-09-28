@@ -1,10 +1,11 @@
+/* eslint-disable no-console */
 import { CoreGraphManager } from "../../lib/core-graph/CoreGraphManager";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import { NodeInstance, ToolboxRegistry } from "../../lib/registries/ToolboxRegistry";
 import { CoreGraphUpdateParticipant } from "../../lib/core-graph/CoreGraphInteractors";
 import { type CoreGraph, CoreNodeUIInputs, type Node } from "../../lib/core-graph/CoreGraph";
 import type { INodeUIInputs } from "../../../shared/types";
-import { NodeUI, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
+import { NodeUI, NodeUIComponent, NodeUILeaf } from "../../../shared/ui/NodeUITypes";
 import { z } from "zod";
 import logger from "../../utils/logger";
 
@@ -44,22 +45,32 @@ export class BlypescriptProgram implements AiLangProgram {
   constructor(
     public readonly statements: BlypescriptStatement[],
     public nodeNameIdMap: Map<string, UUID>
-  ) {}
+  ) {
+    this.repairLineNumbers();
+  }
 
-  public static fromString(program: string): Result<BlypescriptProgram> {
+  /**
+   * Parses a Blypescript program string. If a BlypescriptToolbox is provided
+   * then additional syntax and semantic analysis will be done in order to try
+   * to validate and fix parts of the program.
+   *
+   * @param program Blypescript program to parse
+   * @param toolbox Blypescript toolbox
+   * @returns Blypescript program
+   */
+  public static fromString(
+    program: string,
+    toolbox?: BlypescriptToolbox
+  ): Result<BlypescriptProgram> {
     const nodeNameIdMap = new Map<string, UUID>();
-    // const match = program.match(/^.*(?:function)?\s*graph\(\)\s*{([\s\S]*)}.*$/s);
-    const match = program.match(/^.*\s*graph\(\)\s*{([\s\S]*)}.*$/s);
+    const match = program.match(/^^.*\s*graph\(?\)?\s*{([\s\S]*)}.*$$/s);
 
-    // Does not conform to syntax
-    if (!match)
-      return {
-        success: false,
-        error: "Program does not conform to syntax",
-        message: "Incorrect syntax provided for Blypescript program",
-      };
+    if (!match) {
+      return error("invalid_syntax", "Function should be in the form `graph() { // statements }`");
+    }
 
     const extractedProgram = match[1];
+
     const statements = extractedProgram
       .split("\n")
       .map((s) => s.trim())
@@ -75,7 +86,6 @@ export class BlypescriptProgram implements AiLangProgram {
       if (!result.success) return result;
 
       const statement = result.data;
-      // Duplicate nodeId
 
       if (usedNodeIds.has(statement.name)) {
         return {
@@ -92,6 +102,11 @@ export class BlypescriptProgram implements AiLangProgram {
     }
 
     const prog = new BlypescriptProgram(resStatements, nodeNameIdMap);
+
+    if (toolbox) {
+      const result = prog.repair(toolbox);
+      if (!result.success) return result;
+    }
 
     return { success: true, data: prog };
   }
@@ -132,19 +147,307 @@ export class BlypescriptProgram implements AiLangProgram {
       }
     });
   }
+
+  /**
+   * Makes a second pass over the program to check the semantics of the
+   * statements to 1. Attempt to fix nested function calls or primitive types
+   * substituted for edge types 2. Raise an error if a syntax/semantic error
+   * can't be fixed.
+   *
+   * This function does NOT do semantic analysis on all parameters. If there are
+   * errors then it needs to be detected by the interpreter.
+   *
+   * @param toolbox
+   */
+  public repair(toolbox: BlypescriptToolbox) {
+    for (const statement of this.statements) {
+      const node = toolbox.getNode(statement.nodeSignature);
+
+      if (!node) {
+        return error(
+          "node_not_valid",
+          `Invalid function \`${statement.nodeSignature}\` used at line: ${statement.toString()}`
+        );
+      }
+
+      if (statement.nodeInputs.length !== node.getNodeParameters().length) {
+        return error(
+          "parameter_count_mismatch",
+          `Received ${statement.nodeInputs.length} parameters, but expected ${
+            node.getNodeParameters().length
+          } at line: ${statement.toString()}`
+        );
+      }
+
+      const repairFunctions = [
+        this.repairNestedFunctionCalls.bind(this),
+        this.repairPrimitiveTypes.bind(this),
+        this.repairUiInputTypes.bind(this),
+      ];
+
+      for (const repairFunction of repairFunctions) {
+        const result = repairFunction(statement, node, toolbox);
+
+        if (!result.success) return result;
+      }
+    }
+
+    return {
+      success: true,
+      data: true as const,
+    } satisfies Result;
+  }
+
+  /**
+   * Adds a statement to the Blypescript program.
+   *
+   * @param statement Blypescript statement
+   * @param append Whether to append or prepend to program if no line number
+   * @param line Indexing starts at 1
+   * @returns Whether statement was added or not
+   */
+  public addStatement(statement: BlypescriptStatement, append = true, line?: number): boolean {
+    let flag = true;
+    line = line ? line - 1 : line;
+
+    if (!line) {
+      if (append) {
+        this.statements.push(statement);
+      } else {
+        this.statements.unshift(statement);
+      }
+    } else if (line >= 0 && line < this.statements.length) {
+      this.statements.splice(line, 0, statement);
+    } else {
+      flag = false;
+    }
+
+    this.repairLineNumbers();
+    return flag;
+  }
+
+  private repairLineNumbers() {
+    this.statements.forEach((s, index) => (s.lineNumber = index + 1));
+  }
+
+  /**
+   * Fixes nested function call in Blypescript statements.
+   *
+   * ```javascript
+   * const num1 = input-plugin.inputNumber(5);
+   * const binary1 = math-plugin. binary(num1['res'], input-plugin.inputNumber(8)['res'], 'add');
+   * ```
+   * is converted to
+   * ```javascript
+   * const num1 = input-plugin.inputNumber(5);
+   * const num2 = input-plugin.inputNumber(8);
+   * const binary1 = math-plugin. binary(num1['res'], num2['res'], 'add');
+   * ```
+   *
+   * @param statement
+   * @param node
+   */
+  private repairNestedFunctionCalls(statement: BlypescriptStatement, node: BlypescriptNode) {
+    const statementNodeInputs = statement.nodeInputs.slice(0, node.nodeInputs.length);
+
+    for (let i = 0; i < statementNodeInputs.length; i++) {
+      const statementNodeInput = statementNodeInputs[i];
+      // TODO: Use to check types perhaps
+      const nodeInput = node.nodeInputs[i];
+
+      if (statementNodeInput.match(BLYPESCRIPT_FUNCTION_CALL_REGEX)) {
+        const match = statementNodeInput.match(BLYPESCRIPT_NESTED_FUNCTION_CALL_REGEX);
+
+        if (!match) {
+          return error(
+            "invalid_nested_function_call",
+            `Nested function call \`${statementNodeInput}\` syntax is invalid on line: ${statement.toString()}`
+          );
+        }
+
+        const [_, nodeSignature, params, subscript] = match;
+
+        const newStatement = new BlypescriptStatement(
+          this.generateUniqueVarName(nodeSignature),
+          nodeSignature as `${string}.${string}`,
+          params
+            .split(",")
+            .map((p) => p.trim())
+            .filter((p) => p !== "")
+        );
+
+        this.addStatement(newStatement, false, statement.lineNumber);
+
+        statement.nodeInputs.splice(
+          statement.nodeInputs.indexOf(statementNodeInput),
+          1,
+          `${newStatement.name}${subscript}`
+        );
+      }
+    }
+
+    return {
+      success: true,
+      data: true as const,
+    } satisfies Result;
+  }
+
+  /**
+   * Fixes primitives passed as edges types in Blypescript statements.
+   *
+   * ```javascript
+   * const num1 = input-plugin.inputNumber(5);
+   * const binary1 = math-plugin. binary(num1['res'], 8, 'add');
+   * ```
+   * is converted to
+   * ```javascript
+   * const num1 = input-plugin.inputNumber(5);
+   * const num2 = input-plugin.inputNumber(8);
+   * const binary1 = math-plugin. binary(num1['res'], num2['res'], 'add');
+   * ```
+   *
+   * @param statement
+   * @param node
+   */
+  private repairPrimitiveTypes(
+    statement: BlypescriptStatement,
+    node: BlypescriptNode,
+    toolbox: BlypescriptToolbox
+  ) {
+    const statementNodeInputs = statement.nodeInputs.slice(0, node.nodeInputs.length);
+
+    for (let i = 0; i < statementNodeInputs.length; i++) {
+      const statementNodeInput = statementNodeInputs[i];
+      // TODO: Use to check types perhaps
+      const nodeInput = node.nodeInputs[i];
+
+      // Assumes parameter valid when of form: nodeName['res']
+      // Does not do comprehensive typechecking here
+      if (statementNodeInput.match(/^\s*(.*)\s*(\['([\w.-]+)'\])\s*|null$/)) {
+        continue;
+      }
+
+      let newStatement: BlypescriptStatement | null = null;
+      let inputNode: BlypescriptNode | null = null;
+
+      if (!isNaN(Number(statementNodeInput))) {
+        inputNode = toolbox.getNode("input.number");
+
+        if (!inputNode) {
+          return error("node_not_found", "The `input.number` plugin node can not be found");
+        }
+
+        newStatement = new BlypescriptStatement(
+          this.generateUniqueVarName(inputNode.signature),
+          inputNode.signature as `${string}.${string}`,
+          [statementNodeInput]
+        );
+      } else if (statementNodeInput === "true" || statementNodeInput === "false") {
+        // TODO: Add add a inputBoolean statement
+      } else {
+        // TODO: Add add a inputString statement
+      }
+
+      // TODO: Should be able to remove this if all cases of if statements are implemented
+      if (!newStatement || !inputNode) {
+        return error(
+          "invalid_blypescript_statement",
+          "Blypescript statement was not created, check if string or boolean input nodes are available"
+        );
+      }
+
+      if (inputNode.nodeOutputs.length !== 1) {
+        return error(
+          "invalid_blypescript_input_node",
+          `Blypescript statement was not created due to ambiguity. The ${inputNode.signature} node does not have exactly one output`
+        );
+      }
+
+      this.addStatement(newStatement, false, statement.lineNumber);
+
+      statement.nodeInputs.splice(
+        statement.nodeInputs.indexOf(statementNodeInput),
+        1,
+        `${newStatement.name}['${inputNode.nodeOutputs[0].name}']`
+      );
+    }
+
+    return {
+      success: true,
+      data: true as const,
+    } satisfies Result;
+  }
+
+  private repairUiInputTypes(statement: BlypescriptStatement, node: BlypescriptNode) {
+    const statementUiInputs = statement.nodeInputs.slice(node.nodeInputs.length);
+
+    for (let i = 0; i < statementUiInputs.length; i++) {
+      const statementUiInput = statementUiInputs[i];
+      const nodeUiInput = node.uiInputs[i];
+
+      if (nodeUiInput.types.length === 1 && nodeUiInput.types[0].toLowerCase() === "number") {
+        if (statementUiInput === "null") {
+          statement.nodeInputs[node.nodeInputs.length + i] = "0";
+        } else if (isNaN(Number(statementUiInput))) {
+          return {
+            success: false,
+            error: "ui_input_type_error",
+            message: `Type error: '${statementUiInput}' is not of type \`number\` on the following line: ${statement.toString()}`,
+          } satisfies Result;
+        }
+      }
+
+      // TODO: Add other type checks here
+    }
+
+    return {
+      success: true,
+      data: true as const,
+    } satisfies Result;
+  }
+
+  private generateUniqueVarName(nodeSignature?: string) {
+    const varPrefix = nodeSignature ? nodeSignature.split(".").slice(1).join(".") : "var";
+    let count = 1;
+    let varName = `${varPrefix}${count}`;
+
+    while (this.statements.some((s) => s.name === varName)) {
+      varName = `${varPrefix}${++count}`;
+    }
+
+    return varName;
+  }
+}
+
+function error<T>(error: string, message: string, data?: T) {
+  return {
+    success: false,
+    error,
+    message,
+    data,
+  } satisfies Result;
 }
 
 // const 139dfjslaf = hello-plugin.gloria(10, "The quick brown fox jumps over the lazy dog");
 // const 12u394238x = hello-plugin.hello(139dfjslaf["output1"]);
 // const afhuoewnc2 = math-plugin.add(139dfjslaf["output2"], 12u394238x["out"]);
-const BlypescriptStatementRegex = /\s*const \s*(\w+)\s*=\s*([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\)\s*;/;
 
-// A single line in a BlypescriptProgram
+/**
+ * const num1 = input-plugin.inputNumber(69);
+ * const binary1 = math-plugin.input(num1['res'], num1['res'], 'multiply');
+ */
+const BLYPESCRIPT_STATEMENT_TEMPLATE = "const {{name}} = {{signature}}({{params}});";
+const BLYPESCRIPT_STATEMENT_REGEX =
+  /\s*const \s*(\w+)\s*=\s*([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\)\s*;/;
+const BLYPESCRIPT_FUNCTION_CALL_REGEX = /^([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\).*$/;
+const BLYPESCRIPT_NESTED_FUNCTION_CALL_REGEX = /^([\w\.-]+)\s*\((.*)\)\s*(\['([\w]+)'\]).*$/;
+
+/** Represents a single line in a Blypescript. */
 export class BlypescriptStatement extends AiLangStatement {
   public lineNumber?: number;
 
   public static fromString(statement: string): Result<BlypescriptStatement> {
-    const match = statement.match(BlypescriptStatementRegex);
+    const match = statement.match(BLYPESCRIPT_STATEMENT_REGEX);
 
     if (!match) {
       return {
@@ -154,29 +457,26 @@ export class BlypescriptStatement extends AiLangStatement {
       };
     }
 
-    const parameters = match[4].split(",").map((s) => s.trim());
-
-    const regex = /^([\w-]+)\s*\.\s*([\w-]+)\s*\((.*)\).*$/;
-    if (parameters.some((param) => param.match(regex))) {
-      return {
-        success: false,
-        error: "syntax_error",
-        message: `Invalid syntax for statement: ${statement}\nNested function calls not allowed!`,
-      };
-    }
+    const [_, name, pluginName, nodeName, params] = match;
 
     const blypescriptStatement = new BlypescriptStatement(
-      match[1],
-      `${match[2]}.${match[3]}`,
-      // TODO: Look into being a bit smarter about checking/storing input 'arguments'
-      parameters
+      name,
+      `${pluginName}.${nodeName}`,
+      params
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p !== "")
     );
 
     return { success: true, data: blypescriptStatement };
   }
 
   public toString(): string {
-    return `const ${this.name} = ${this.nodeSignature}(${this.nodeInputs.join(", ")});`;
+    return fillTemplate(BLYPESCRIPT_STATEMENT_TEMPLATE, {
+      name: this.name,
+      signature: this.nodeSignature,
+      params: this.nodeInputs.join(", "),
+    });
   }
 }
 export class BlypescriptInterpreter {
@@ -186,12 +486,7 @@ export class BlypescriptInterpreter {
     private readonly toolbox: ToolboxRegistry,
     private readonly graphManager: CoreGraphManager
   ) {
-    const result = BlypescriptToolbox.fromToolbox(this.toolbox);
-    if (!result.success) {
-      throw result.error;
-    }
-
-    this.blypescriptToolbox = result.data;
+    this.blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolbox);
   }
 
   public run(
@@ -205,19 +500,19 @@ export class BlypescriptInterpreter {
     newProgram.addNodeIds(oldProgram);
 
     if (verbose) {
-      logger.warn(colorString("//==========Old Program==========//", "ORANGE"));
-      logger.warn(oldProgram.toString());
-      logger.warn(colorString("//==========New Program==========//", "GREEN"));
-      logger.warn(newProgram.toString());
-      logger.warn(colorString("//==========Diff==========//", "LIGHT_BLUE"));
-      logger.warn(JSON.stringify({ added, removed, changed }, null, 2));
+      console.log(colorString("//==========Old Program==========//", "ORANGE"));
+      console.log(oldProgram.toString());
+      console.log(colorString("//==========New Program==========//", "GREEN"));
+      console.log(newProgram.toString());
+      console.log(colorString("//==========Diff==========//", "LIGHT_BLUE"));
+      console.log(JSON.stringify({ added, removed, changed }, null, 2));
     }
 
     // Remove nodes
     removed.forEach((statement) => {
       const nodeId = oldProgram.nodeNameIdMap.get(statement.name);
-      // this.graphManager.removeNode(graphId, nodeId!, CoreGraphUpdateParticipant.ai);
-      graph.removeNode(nodeId!);
+      this.graphManager.removeNode(graphId, nodeId!, CoreGraphUpdateParticipant.ai);
+      // graph.removeNode(nodeId!);
     });
 
     let result: Result<null, null>;
@@ -225,24 +520,26 @@ export class BlypescriptInterpreter {
     // Add nodes
     added.forEach((statement) => {
       const nodeInstance = this.toolbox.getNodeInstance(statement.nodeSignature);
-      // const response = this.graphManager.addNode(
-      //   graphId,
-      //   nodeInstance,
-      //   { x: 0, y: 0 },
-      //   CoreGraphUpdateParticipant.ai
-      // );
-      const response = graph.addNode(nodeInstance, { x: 0, y: 0 });
+      const response = this.graphManager.addNode(
+        graphId,
+        nodeInstance,
+        { x: 0, y: 0 },
+        CoreGraphUpdateParticipant.ai
+      );
+      // const response = graph.addNode(nodeInstance, { x: 0, y: 0 });
 
       if (response.status === "error" || !response.data) {
-        result = {
+        return {
           success: false,
           error: "Error while adding node to graph",
-          message: response.message,
-        };
-        return;
+          message: response.message || "",
+        } satisfies Result;
       }
 
       newProgram.nodeNameIdMap.set(statement.name, response.data.nodeId);
+      return {
+        success: true,
+      };
     });
 
     if (!result.success) return result;
@@ -301,12 +598,12 @@ export class BlypescriptInterpreter {
       const anchorInput = statement.nodeInputs[i];
 
       if (edge) {
-        // const response = this.graphManager.removeEdge(
-        //   graph.uuid,
-        //   edge.getAnchorTo,
-        //   CoreGraphUpdateParticipant.ai
-        // );
-        const response = graph.removeEdge(edge.getAnchorTo);
+        const response = this.graphManager.removeEdge(
+          graph.uuid,
+          edge.getAnchorTo,
+          CoreGraphUpdateParticipant.ai
+        );
+        // const response = graph.removeEdge(edge.getAnchorTo);
         // TODO: Handle response
         // Not sure if should end function here or continue
         if (response.status === "error") {
@@ -361,13 +658,13 @@ export class BlypescriptInterpreter {
       const fromNodeAnchors = this.mapAnchorIdsToUuids(fromNode);
       const outputAnchorUuid = fromNodeAnchors[outputNodeAnchorId];
       const inputAnchorUuid = anchorsIdToUuid[anchorId];
-      // this.graphManager.addEdge(
-      //   graph.uuid,
-      //   outputAnchorUuid,
-      //   inputAnchorUuid,
-      //   CoreGraphUpdateParticipant.ai
-      // );
-      graph.addEdge(outputAnchorUuid, inputAnchorUuid);
+      this.graphManager.addEdge(
+        graph.uuid,
+        outputAnchorUuid,
+        inputAnchorUuid,
+        CoreGraphUpdateParticipant.ai
+      );
+      // graph.addEdge(outputAnchorUuid, inputAnchorUuid);
     });
 
     // const uiInputs = graph.getUIInputs(node.uuid);
@@ -417,6 +714,14 @@ export class BlypescriptInterpreter {
     const uiInputValues = statement.nodeInputs.slice(-uiInputIds.length);
     const newNodeUiInputs: INodeUIInputs = { inputs: { ...uiInputs }, changes: [] };
 
+    if (uiInputIds.length !== uiInputValues.length) {
+      return {
+        success: false,
+        error: "ui_inputs_syntax_error",
+        message: `UI Input parameters don't match`,
+      };
+    }
+
     uiInputIds.forEach((uiInputId, i) => {
       const uiInputValue = uiInputValues[i];
 
@@ -430,13 +735,19 @@ export class BlypescriptInterpreter {
       newNodeUiInputs.changes.push(uiInputId);
     });
 
-    // this.graphManager.updateUIInputs(
-    //   graph.uuid,
-    //   node.uuid,
-    //   newNodeUiInputs,
-    //   CoreGraphUpdateParticipant.ai
-    // );
-    graph.updateUIInputs(node.uuid, newNodeUiInputs);
+    this.graphManager.updateUIInputs(
+      graph.uuid,
+      node.uuid,
+      newNodeUiInputs,
+      CoreGraphUpdateParticipant.ai
+    );
+
+    for (const input of Object.keys(newNodeUiInputs.inputs)) {
+      this.graphManager.handleNodeInputInteraction(graph.uuid, node.uuid, {
+        id: input,
+        value: newNodeUiInputs.inputs[input],
+      });
+    }
     return { success: true, data: null };
   }
 
@@ -452,6 +763,7 @@ export class BlypescriptInterpreter {
 
 export type BlypescriptNodeParam = {
   name: string;
+  type: "input" | "output" | "ui";
   aiCanUse: boolean;
   types: string[];
 };
@@ -471,7 +783,7 @@ export class BlypescriptNode {
     const nodeInputStrings = this.nodeInputs.map((input) => {
       const types = input.types
         .map((type) => {
-          return `N<${type}>`;
+          return `E<${type}>`;
         })
         .join("| ");
       return `${input.name}: ${types}`;
@@ -489,7 +801,7 @@ export class BlypescriptNode {
     const nodeOutputStrings = this.nodeOutputs.map((output) => {
       const types = output.types
         .map((type) => {
-          return `N<${type}>`;
+          return `E<${type}>`;
         })
         .join(" | ");
       return `${output.name}: ${types}`;
@@ -504,6 +816,19 @@ export class BlypescriptNode {
 
     return str;
   }
+
+  /**
+   *
+   * Returns only the parameters that the AI can use if flag is true else
+   * returns all the parameters.
+   *
+   * @param aiCanUse
+   * @returns List of parameters
+   */
+  public getNodeParameters(aiCanUse = true) {
+    const params = [...this.nodeInputs, ...this.uiInputs];
+    return aiCanUse ? params.filter((param) => param.aiCanUse) : params;
+  }
 }
 
 export class BlypescriptPlugin {
@@ -512,49 +837,25 @@ export class BlypescriptPlugin {
   public static fromPluginNodeInstances(
     pluginName: string,
     nodes: NodeInstance[]
-  ): Result<BlypescriptPlugin> {
+  ): BlypescriptPlugin {
     const blypescriptNodes = nodes.map((nodeInstance) => {
       const { name, plugin, description, signature } = nodeInstance;
       const nodeInputs = this.generateNodeInputs(nodeInstance);
-      const uiInputsResult = this.generateUiInputs(nodeInstance.ui);
+      const uiInputs = this.generateUiInputs(nodeInstance);
       const nodeOutputs = this.generateNodeOutputs(nodeInstance);
 
-      if (!uiInputsResult.success) {
-        return uiInputsResult satisfies Result;
-      }
-
-      return {
-        success: true,
-        data: new BlypescriptNode(
-          plugin,
-          name,
-          signature,
-          description,
-          nodeInputs,
-          uiInputsResult.data,
-          nodeOutputs
-        ),
-      } satisfies Result;
+      return new BlypescriptNode(
+        plugin,
+        name,
+        signature,
+        description,
+        nodeInputs,
+        uiInputs,
+        nodeOutputs
+      );
     });
 
-    const failedResults = blypescriptNodes.filter((result) => !result.success);
-
-    if (failedResults.length > 0) {
-      // Maybe improve to return list of errors
-      return {
-        success: false,
-        error: "Something went wrong when creating BlypescriptNode",
-        message: "Error when creating Blypescript Plugin",
-      };
-    }
-
-    return {
-      success: true,
-      data: new BlypescriptPlugin(
-        pluginName,
-        blypescriptNodes.map((result) => result.data as BlypescriptNode)
-      ),
-    };
+    return new BlypescriptPlugin(pluginName, blypescriptNodes);
   }
 
   public toString(): string {
@@ -579,52 +880,53 @@ export class BlypescriptPlugin {
     return node.inputs.map((input) => {
       return {
         name: input.id,
+        type: "input",
         aiCanUse: true,
         types: [input.type ? input.type : "any"],
       };
     });
   }
 
-  private static generateUiInputs(ui: NodeUI | null): Result<BlypescriptNodeParam[]> {
+  /**
+   * Will attempt to generate as many UI Inputs as possible. If a UI Input can
+   * not be generated then it will be left out (AI can't modify) and an error
+   * will be logged. This should help to improve fault tolerance of the AI
+   * system.
+   *
+   * @param node Node instance to be converted
+   * @param ui Used for recursive case
+   */
+  private static generateUiInputs(node: NodeInstance, ui?: NodeUI): BlypescriptNodeParam[] {
+    ui = ui || node.ui || undefined;
+
     if (!ui) {
-      return { success: true, data: [] };
+      return [];
     }
 
     if (ui.type === "parent") {
-      const results = ui.params.flatMap((child) => this.generateUiInputs(child as NodeUI));
-      const failedResults = results.filter((result) => !result.success);
-
-      if (failedResults.length > 0) {
-        // Maybe improve to return list of errors
-        return failedResults[0];
-      }
-
-      return {
-        success: true,
-        data: results.flatMap((result) => result.data as BlypescriptNodeParam[]),
-      };
+      const nodeParams = ui.params.flatMap((child) => this.generateUiInputs(node, child as NodeUI));
+      return nodeParams;
     } else if (ui.type === "leaf") {
       const props = ui.params[0];
       const componentType = (ui as NodeUILeaf)?.category;
 
       if (!props) {
-        return {
-          success: false,
-          error: "Error generating UI Inputs",
-          message: "Props not available on NodeUiLeaf",
-        };
+        logger.error(
+          `Blypescript Plugin: Error generating UI Inputs for ${node.signature}, props not available on NodeUiLeaf.`
+        );
+        return [];
       }
 
       if (!componentType) {
-        return {
-          success: false,
-          error: "Error generating UI Inputs",
-          message: "Component type not available on NodeUiLeaf",
-        };
+        logger.error(
+          `Blypescript Plugin: Error generating UI Inputs for ${node.signature}, component type not available on NodeUiLeaf.`
+        );
+        return [];
       }
 
       const nodeParam: BlypescriptNodeParam = {
         name: ui.label,
+        type: "ui",
         aiCanUse: true,
         types: [],
       };
@@ -632,52 +934,62 @@ export class BlypescriptPlugin {
       if (componentType === "Button") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("string");
-      } else if (componentType === "Slider") {
+      } else if (componentType === "Checkbox") {
+        nodeParam.types.push("boolean");
+      } else if (componentType === "Slider" || componentType === "NumberInput") {
         nodeParam.types.push("number");
       } else if (componentType === "Knob") {
         nodeParam.types.push("number");
-      } else if (componentType === "Dropdown") {
+      } else if (componentType === "Dropdown" || componentType === "Radio") {
         const objectSchema = z.record(z.string(), z.string());
         const options = objectSchema.safeParse(props.options);
 
         if (!options.success) {
-          return {
-            success: false,
-            error: "Error generating UI Inputs",
-            message: "Options on UI Dropdown is not a Record<string, string>",
-          };
+          logger.error(
+            `Blypescript Plugin: Error generating UI Inputs for ${node.signature}, options on UI Dropdown is not type Record<string, string>`
+          );
+          return [];
         }
 
         nodeParam.types = Object.values(options.data).map((val) => `'${val}'`);
       } else if (componentType === "TextInput") {
         nodeParam.types.push("string");
       } else if (componentType === "ColorPicker") {
-        // nodeParam.types.push("\`#${string}\`");
-        nodeParam.types.push("color");
+        nodeParam.types.push("`#${string}`");
+        // nodeParam.types.push("color");
       } else if (componentType === "FilePicker") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("file");
       } else if (componentType === "Buffer") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("buffer");
+      } else if (componentType === "TweakDial") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("tweakDial");
+      } else if (componentType === "DiffDial") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("diffDial");
+      } else if (componentType === "CachePicker") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("cache");
       } else {
-        return {
-          success: false,
-          error: "Error generating UI Inputs",
-          message: `${componentType} UI component has not been implemented yet`,
-        };
+        logger.error(
+          `Blypescript Plugin: Error generating UI Inputs for ${node.signature}, ${componentType} UI component has not been implemented yet`
+        );
+        return [];
       }
 
-      return { success: true, data: [nodeParam] };
+      return [nodeParam];
     }
 
-    return { success: true, data: [] };
+    return [];
   }
 
   private static generateNodeOutputs(node: NodeInstance): BlypescriptNodeParam[] {
     return node.outputs.map((output) => {
       return {
         name: output.id,
+        type: "output",
         aiCanUse: true,
         types: [output.type ? output.type : "any"],
       };
@@ -688,7 +1000,7 @@ export class BlypescriptPlugin {
 export class BlypescriptToolbox {
   constructor(public readonly plugins: BlypescriptPlugin[]) {}
 
-  public static fromToolbox(toolbox: ToolboxRegistry) {
+  public static fromToolbox(toolbox: ToolboxRegistry): BlypescriptToolbox {
     const pluginMap = new Map<string, NodeInstance[]>();
 
     // Group nodes by plugin
@@ -700,33 +1012,18 @@ export class BlypescriptToolbox {
       }
     });
 
-    const blypescriptPluginResults: Result<BlypescriptPlugin>[] = [];
+    const blypescriptPlugins: BlypescriptPlugin[] = [];
 
     pluginMap.forEach((nodes, plugin) => {
-      blypescriptPluginResults.push(BlypescriptPlugin.fromPluginNodeInstances(plugin, nodes));
+      blypescriptPlugins.push(BlypescriptPlugin.fromPluginNodeInstances(plugin, nodes));
     });
 
-    const failedResults = blypescriptPluginResults.filter((result) => !result.success);
-
-    if (failedResults.length > 0) {
-      // Maybe improve to return list of errors
-      return {
-        success: false,
-        error: "Something went wrong when creating BlypescriptPlugin",
-        message: "Error when creating Blypescript Plugin",
-      } satisfies Result;
-    }
-
-    const blypescriptPlugins: BlypescriptPlugin[] = blypescriptPluginResults.map(
-      (result) => result.data as BlypescriptPlugin
-    );
-
-    return { success: true, data: new BlypescriptToolbox(blypescriptPlugins) } satisfies Result;
+    return new BlypescriptToolbox(blypescriptPlugins);
   }
 
   public toString(): string {
     const pluginStrings = this.plugins.map((plugin) => plugin.toString());
-    let str = "// Node output wrapper type\ntype N<T> = { value: T } | null;\n\n";
+    let str = "// Graph edge connection wrapper type\nE<T> = { value: T } | null;\n\n";
     str += pluginStrings.join("\n\n");
     return str;
   }
@@ -748,6 +1045,20 @@ export class BlypescriptToolbox {
 // HELPERS
 // ==================================================================
 
+/**
+ * Formats a template string by replacing placeholders with values.
+ *
+ * @param template - The string template to fill.
+ * @param replacements - The replacements to fill the template with.
+ * @returns The formatted template.
+ *
+ * @example
+ * fillTemplate("Life is a {{description}}", { description: "dream" })
+ */
+function fillTemplate(template: string, replacements: Record<string, string>) {
+  return template.replace(/\{\{(\w+)\}\}/g, (match, key) => replacements[key] ?? match);
+}
+
 export function colorString(str: string, color: Colors) {
   return `${COLORS[color]}${str}${COLORS.RESET}`;
 }
@@ -765,5 +1076,14 @@ const COLORS = {
 export type Colors = keyof typeof COLORS;
 
 export type Result<T = unknown, E = unknown> =
-  | { success: true; message?: string; data: T }
-  | { success: false; error: string; message: string; data?: E };
+  | {
+      success: true;
+      message?: string;
+      data: T;
+    }
+  | {
+      success: false;
+      error: string;
+      message: string;
+      data?: E;
+    };

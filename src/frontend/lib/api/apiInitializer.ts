@@ -5,6 +5,7 @@ import type { AwaitedType } from "electron-affinity/window";
 import type { UtilApi } from "@electron/lib/api/apis/UtilApi";
 import type { ProjectApi } from "@electron/lib/api/apis/ProjectApi";
 import type { CommandApi } from "@electron/lib/api/apis/CommandApi";
+import type { PluginApi } from "@electron/lib/api/apis/PluginApi";
 import type { GraphApi } from "@electron/lib/api/apis/GraphApi";
 import type { TypeclassApi } from "@electron/lib/api/apis/TypeclassApi";
 import type { ToolboxApi } from "@electron/lib/api/apis/ToolboxApi";
@@ -36,6 +37,7 @@ export async function bindMainApis() {
     utilApi: await bindMainApi<UtilApi>("UtilApi"),
     projectApi: await bindMainApi<ProjectApi>("ProjectApi"),
     commandApi: await bindMainApi<CommandApi>("CommandApi"),
+    pluginApi: await bindMainApi<PluginApi>("PluginApi"),
     graphApi: await bindMainApi<GraphApi>("GraphApi"),
     typeclassApi: await bindMainApi<TypeclassApi>("TypeclassApi"),
     toolboxApi: await bindMainApi<ToolboxApi>("ToolboxApi"),

@@ -140,11 +140,14 @@ export class CoreGraphInterpreter {
               graph.getAnchors[graph.getEdgeDest[anchor].getAnchorFrom]
             )
           );
+        } else {
+          inputPromises.push(Promise.resolve({}));
         }
       }
     }
 
     // Resolve all input values (functions)
+
     const inputs: { [key: string]: T }[] = await Promise.all(inputPromises).catch((err) => {
       throw err;
     });
@@ -173,7 +176,6 @@ export class CoreGraphInterpreter {
       return output;
     } else {
       const inputDict: { [key: string]: any } = {};
-
       Object.values(curr.getAnchors).forEach((anchor, index) => {
         if (index < inputs.length) {
           inputDict[anchor.anchorId] = graph.getEdgeDest[anchor.uuid]

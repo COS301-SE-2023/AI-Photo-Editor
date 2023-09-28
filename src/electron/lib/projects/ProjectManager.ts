@@ -59,6 +59,7 @@ export class ProjectManager {
 
   public async removeProject(blix: Blix, uuid: UUID, forceRemove = false) {
     const project = this._projects[uuid];
+    if (!project) forceRemove = true; // Project does not exist, just obliterate the tab
     let remove = true;
     let output = -1;
     let res;
@@ -95,6 +96,8 @@ export class ProjectManager {
       delete this._projects[uuid];
       this.onProjectRemoved(uuid);
     }
+
+    if (Object.keys(this._projects).length === 0) this._projectsCreatedCounter = 1;
     return output;
   }
 

@@ -8,7 +8,7 @@ import {
 } from "./CoreGraphInteractors";
 import { ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { NodeInstance } from "../registries/ToolboxRegistry";
-import type { INodeUIInputs, QueryResponse } from "../../../shared/types";
+import type { INodeUIInputs, QueryResponse, UIInputChange } from "../../../shared/types";
 import type { MediaOutputId } from "../../../shared/types/media";
 import type { GraphMetadata, SvelvetCanvasPos, GraphUUID } from "../../../shared/ui/UIGraph";
 import { type CoreGraphEvent, CoreGraphEventManager, type EventArgs } from "./CoreGraphEventManger";
@@ -52,20 +52,20 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse<{ nodeId: UUID; inputs: string[]; outputs: string[] }> {
-    if (this._graphs[graphUUID] === undefined)
+    if (!this._graphs[graphUUID]) {
       return { status: "error", message: "Graph does not exist" };
+    }
+
     const res = this._graphs[graphUUID].addNode(node, pos);
 
     if (res.status === "success") {
-      // console.log("Node added: ", res.data!.nodeId);
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
 
-      // If node had a UI inputs initializer function
       if (res.data?.uiInputsInitialized) {
         this.onGraphUpdated(graphUUID, UIINPUTS_UPDATED_EVENT, CoreGraphUpdateParticipant.system);
       }
 
-      if (participant === CoreGraphUpdateParticipant.user) {
+      if (participant !== CoreGraphUpdateParticipant.system) {
         this._events[graphUUID].addEvent({
           element: "Node",
           operation: "Add",
@@ -77,11 +77,10 @@ export class CoreGraphManager {
         if (event?.element === "Node" && event.operation === "Add") {
           const old = event.revert.nodeUUId; // Old uuid currently in the event
           this._events[graphUUID].onAddNode(old, res.data.nodeId); // Update uuid of node throughout all events
-          // console.log("Old UUID: ", old);
-          // console.log("NEW UUID: ", res.data!.nodeId);
         }
       }
     }
+
     return res;
   }
 
@@ -91,14 +90,18 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse {
-    if (this._graphs[graphUUID] === undefined)
+    if (!this._graphs[graphUUID]) {
       return { status: "error", message: "Graph does not exist" };
+    }
+
     const signature = this._graphs[graphUUID].getNodes[nodeUUID].getSignature;
     const pos = this._graphs[graphUUID].getNodes[nodeUUID].getStyling!.getPosition;
     const res = this._graphs[graphUUID].removeNode(nodeUUID);
+
     if (res.status === "success") {
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
-      if (participant === CoreGraphUpdateParticipant.user) {
+
+      if (participant !== CoreGraphUpdateParticipant.system) {
         const node = this._toolbox.getNodeInstance(signature);
         this._events[graphUUID].addEvent({
           element: "Node",
@@ -111,8 +114,11 @@ export class CoreGraphManager {
           },
         });
       }
+
       delete this._outputIds[nodeUUID];
+      this._mainWindow?.apis.mediaClientApi.outputNodesChanged();
     }
+
     return res;
   }
 
@@ -123,14 +129,16 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse<{ edgeId: UUID }> {
-    if (this._graphs[graphUUID] === undefined)
+    if (!this._graphs[graphUUID]) {
       return { status: "error", message: "Graph does not exist" };
+    }
 
     const res = this._graphs[graphUUID].addEdge(anchorA, anchorB);
 
     if (res.status === "success") {
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
-      if (participant === CoreGraphUpdateParticipant.user) {
+
+      if (participant !== CoreGraphUpdateParticipant.system) {
         const edge = this._graphs[graphUUID].createEdgeBlueprint(anchorA, anchorB);
         this._events[graphUUID].addEvent({
           element: "Edge",
@@ -140,6 +148,7 @@ export class CoreGraphManager {
         });
       }
     }
+
     return res;
   }
 
@@ -149,12 +158,16 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse {
-    if (this._graphs[graphUUID] === undefined)
+    if (!this._graphs[graphUUID]) {
       return { status: "error", message: "Graph does not exist" };
+    }
+
     const res = this._graphs[graphUUID].removeEdge(anchorTo);
+
     if (res.status === "success") {
       this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
-      if (participant === CoreGraphUpdateParticipant.user) {
+
+      if (participant !== CoreGraphUpdateParticipant.system) {
         const edge = this._graphs[graphUUID].createEdgeBlueprint(
           res.data.anchorFrom,
           res.data.anchorTo
@@ -167,7 +180,51 @@ export class CoreGraphManager {
         });
       }
     }
+
     return res;
+  }
+
+  handleNodeInputInteraction(graphUUID: UUID, nodeUUID: UUID, input: UIInputChange): QueryResponse {
+    if (!this._graphs[graphUUID]) {
+      return { status: "error", message: "Graph does not exist" };
+    }
+
+    const inputs = this._graphs[graphUUID].getUIInputs(nodeUUID);
+
+    if (!inputs) {
+      return { status: "error", message: "No node UI inputs provided" };
+    }
+
+    const nodeUIInputs = { inputs, changes: [input.id] };
+    nodeUIInputs.inputs[input.id] = input.value;
+    // Get last saved Input
+    let old = this._events[graphUUID].findPreviousInputs(nodeUUID);
+
+    if (!old) {
+      // If no prior inputs for the node were changed, construct the default inputs
+      old = { inputs: {}, changes: [] };
+      const node = this._toolbox.getNodeInstance(
+        this._graphs[graphUUID].getNodes[nodeUUID].getSignature
+      );
+      Object.values(node.uiConfigs).forEach((config) => {
+        old!.inputs[config.componentId] = config.defaultValue;
+      });
+      old.changes = [input.id];
+    }
+
+    // Add Event only if new value is not the same as old value
+    if (old.inputs[input.id] !== input.value)
+      this._events[graphUUID].addEvent({
+        element: "UiInput",
+        operation: "Change",
+        execute: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs },
+        revert: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs: old },
+      });
+
+    // console.log("OLD: ", old);
+    // console.log("NEW: ", nodeUIInputs);
+
+    return { status: "success", message: "Saved UI Input changed event" };
   }
 
   updateUIInputs(
@@ -177,54 +234,28 @@ export class CoreGraphManager {
     participant: CoreGraphUpdateParticipant,
     eventArgs?: EventArgs
   ): QueryResponse {
-    if (this._graphs[graphUUID] === undefined)
+    const graph = this._graphs[graphUUID];
+
+    if (!graph) {
       return { status: "error", message: "Graph does not exist" };
+    }
 
-    if (!nodeUIInputs) return { status: "error", message: "No node UI inputs provided" };
+    if (!nodeUIInputs) {
+      return { status: "error", message: "No node UI inputs provided" };
+    }
 
-    // console.log("Update node -> ", nodeUUID);
-
-    let oldInputs = this._graphs[graphUUID].getUIInputs(nodeUUID);
-
-    oldInputs = oldInputs ? oldInputs : {};
-    // define the old state
-    const old = { inputs: oldInputs, changes: nodeUIInputs.changes } as INodeUIInputs;
     const res = this._graphs[graphUUID].updateUIInputs(nodeUUID, nodeUIInputs);
 
     const signature = this._graphs[graphUUID].getNodes[nodeUUID].getSignature;
 
     if (res.status === "success") {
-      // console.log("Old: ", old);
-      // console.log("New: ", nodeUIInputs);
-      // console.log("P:", participant);
-
-      // TODO: Fix so that updating of ouput node ids works
-      // Problem: frontend is seeing change and calling function which in turn is making new events which throws off the event order
-      // You will need to just try it and see what happens
-      // if(nodeUIInputs.inputs.outputId && old.inputs.outputId && (nodeUIInputs.inputs.outputId !== old.inputs.outputId || nodeUIInputs.changes !== old.changes)) //  Used to not check for output node changes
-      if (!nodeUIInputs.inputs.outputId)
-        if (
-          participant === CoreGraphUpdateParticipant.user &&
-          !(JSON.stringify(old) === JSON.stringify(nodeUIInputs))
-        ) {
-          // Trying to not add events where frontend has sent it where it is exactly the same
-          // console.log("Not the same inputs");
-          this._events[graphUUID].addEvent({
-            element: "UiInput",
-            operation: "Change",
-            execute: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs },
-            revert: { graphUUID, nodeUUId: nodeUUID, nodeUIInputs: old },
-          });
-        }
       // Determine whether the update should trigger the graph to recompute
       const uiConfigs = this._toolbox.getNodeInstance(signature).uiConfigs;
       const changes = nodeUIInputs.changes;
 
-      if (signature === "blix.output") {
+      if (signature === "blix.output" && changes.includes("outputId")) {
         this._outputIds[nodeUUID] = nodeUIInputs.inputs.outputId as string;
-        this._mainWindow?.apis.mediaClientApi.onMediaOutputIdsChanged(
-          new Set(Object.values(this._outputIds))
-        );
+        this._mainWindow?.apis.mediaClientApi.outputNodesChanged();
       }
 
       let shouldUpdate = false;
@@ -243,7 +274,12 @@ export class CoreGraphManager {
   }
 
   updateUIPositions(graphUUID: UUID, positions: { [key: UUID]: SvelvetCanvasPos }) {
-    this._graphs[graphUUID].UIPositions = positions;
+    if (this._graphs[graphUUID]) {
+      this._graphs[graphUUID].UIPositions = positions;
+      for (const node of Object.keys(positions)) {
+        this._graphs[graphUUID].setNodePos(node, positions[node]);
+      }
+    }
   }
 
   setPos(
@@ -259,6 +295,7 @@ export class CoreGraphManager {
     // if (res) this.onGraphUpdated(graphUUID);
     // Style changes shouldn't update the subscribers
     // We only need this state when reloading the graph
+    // this.onGraphUpdated(graphUUID, GRAPH_UPDATED_EVENT, participant);
     return res;
   }
 
@@ -379,6 +416,34 @@ export class CoreGraphManager {
     return;
   }
 
+  getMediaOutputs(graphIds: UUID[]) {
+    const outputs: { nodeId: string; mediaId: string }[] = [];
+
+    graphIds.forEach((graphId) => {
+      const graph = this._graphs[graphId];
+      if (graph) {
+        const outputNodes = graph.getOutputNodes;
+        Object.keys(outputNodes).forEach((outputNodeId) => {
+          const mediaOutputId = this._outputIds[outputNodeId];
+          if (mediaOutputId) {
+            outputs.push({ nodeId: outputNodeId, mediaId: mediaOutputId });
+          }
+        });
+      }
+    });
+
+    return outputs;
+  }
+
+  clearAllMedia() {
+    this._outputIds = {};
+  }
+
+  clearAllGraphs() {
+    this._graphs = {};
+    this._events = {};
+  }
+
   // ===============================================
   // Graph Events
   // ===============================================
@@ -459,7 +524,6 @@ export class CoreGraphManager {
           const graph = this._graphs[node.graphUUID];
           const nodeRes = graph.addNode(node.node, node.pos, uiInputs);
           if (nodeRes.status === "success") {
-            // Get old uuid used to execute removing the node
             const { nodeUUId } = event.execute;
             this._events[node.graphUUID].onAddNode(nodeUUId, nodeRes.data.nodeId);
 
@@ -488,7 +552,7 @@ export class CoreGraphManager {
 
             this.onGraphUpdated(
               node.graphUUID,
-              new Set([...GRAPH_UPDATED_EVENT, CoreGraphUpdateEvent.uiInputsUpdated]),
+              new Set([...GRAPH_UPDATED_EVENT, ...UIINPUTS_UPDATED_EVENT]),
               CoreGraphUpdateParticipant.system
             );
 
@@ -598,3 +662,11 @@ function checkForCommonElement<T>(setA: Set<T>, setB: Set<T>) {
   }
   return false;
 }
+
+/**
+ * Changing dictionary which pairs uuid of node ot its ui inputs and whether is changing
+ * componnents can then issue an update indicating they are changing which will then set their value for that
+ * input in the dictionary to true. All events will be disregarded.
+ *
+ * Need to take in value of that input aswell when the start and stop events are sent
+ */

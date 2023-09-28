@@ -41,6 +41,9 @@ jest.mock("chokidar", () => ({
 
 jest.mock("../../../src/electron/lib/projects/ProjectManager");
 
+jest.mock('../../../src/electron/lib/plugins/PluginManager')
+
+
 jest.mock("electron", () => ({
   app: {
     getPath: jest.fn((path) => {
@@ -56,7 +59,21 @@ jest.mock("electron", () => ({
       return "test/electron";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  }
 }));
+
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
 
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
@@ -76,7 +93,7 @@ describe("Test graph importer", () => {
         blix = new Blix();
         blix.init(mainWindow);
         importer = new CoreGraphImporter(blix.toolbox);
-        blix.toolbox.addInstance(new NodeInstance("testNode", "blix", "testNode", "This is a test node", "", [{ type: "Number", "displayName": "blix.testNode.0", "identifier": "In0" }], [{ type: "Number", "displayName": "blix.testNode.1", "identifier": "Out0" }]))
+        blix.toolbox.addInstance(new NodeInstance("testNode", "blix", "folder", "testNode", "This is a test node", "", [{ type: "Number", "displayName": "blix.testNode.0", "identifier": "In0" }], [{ type: "Number", "displayName": "blix.testNode.1", "identifier": "Out0" }]))
     });
 
     test("Test import of valid json graph", () => {

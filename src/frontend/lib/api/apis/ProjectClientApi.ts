@@ -17,7 +17,7 @@ export class ProjectClientApi implements ElectronWindowApi<ProjectClientApi> {
     projectsStore.handleProjectRemoved(projectId);
   }
 
-  public async handleProjectSaving(projectId: string) {
+  public async handleProjectSaving(projectId: string): Promise<void> {
     await projectsStore.handleProjectSaving(projectId);
   }
 

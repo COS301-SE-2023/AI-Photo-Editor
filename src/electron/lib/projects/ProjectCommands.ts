@@ -17,11 +17,14 @@ import {
   CoreGraphUpdateEvent,
   CoreGraphUpdateParticipant,
 } from "../core-graph/CoreGraphInteractors";
-import sharp from "sharp";
 import type { SvelvetCanvasPos } from "../../../shared/ui/UIGraph";
 import settings from "../../utils/settings";
 import type { recentProject } from "../../../shared/types/index";
 import { getRecentProjects } from "../../utils/settings";
+import archiver from "archiver";
+import fs from "fs";
+import unzipper from "unzipper";
+import type { CacheMetadata, CacheUUID } from "../../../shared/types/cache";
 
 export type SaveProjectArgs = {
   projectId: UUID;
@@ -42,6 +45,7 @@ export const getRecentProjectsCommand: Command = {
   },
   handler: async (ctx: CommandContext) => {
     try {
+      updateRecentProjectsList();
       return { status: "success", data: getRecentProjects() };
     } catch (e) {
       return { status: "error", message: "An exception occured", data: [] };
@@ -116,7 +120,7 @@ export const projectCommands: Command[] = [
   saveProjectCommand,
   saveProjectAsCommand,
   openProjectCommand,
-  exportMediaCommand,
+  // exportMediaCommand,
   getRecentProjectsCommand,
 ];
 
@@ -163,6 +167,11 @@ export async function saveProject(
     return { status: "error", message: "No path specified" };
   }
 
+  if (!project.location.toString().endsWith(".blix")) {
+    // Ensure file is of correct type
+    return { status: "error", message: "Invalid file extension : " + project.location.toString() };
+  }
+
   // I don't really like this, but also can't really think of a nice way to change it
   // TODO: Rename sets name as path
   project.rename(project.location.toString().split("/").pop()!.split(".blix")[0]);
@@ -180,12 +189,43 @@ export async function saveProject(
 
   if (project.location) {
     try {
-      await writeFile(project.location, JSON.stringify(projectFile));
+      // await writeFile(project.location, JSON.stringify(projectFile));
+      const archive = archiver("zip", { zlib: { level: 9 } });
+
+      const output = fs.createWriteStream(project.location);
+
+      output.on("close", function () {
+        logger.info(`ZIP archive created successfully. Total bytes: ${archive.pointer()}`);
+      });
+
+      archive.on("error", function (err) {
+        logger.error("Error while creating ZIP archive:", err);
+      });
+
+      // Pipe the output stream to the ZIP archive
+      archive.pipe(output);
+
+      // Create a folder named "cache" within the ZIP archive
+      archive.directory("cache", "cache");
+      const cacheJSON: { [key: string]: { uuid: CacheUUID; metadata: CacheMetadata } } = {};
+
+      for (const uuid of Object.keys(ctx.cacheManager.cache)) {
+        const cacheObject = ctx.cacheManager.cache[uuid];
+        cacheJSON[uuid] = { uuid: cacheObject.uuid, metadata: cacheObject.metadata };
+        archive.append(cacheObject.data, { name: `cache/${cacheObject.uuid}.blob` });
+      }
+
+      archive.append(JSON.stringify(projectFile), { name: "project.json" });
+      archive.append(JSON.stringify(cacheJSON), { name: "cache/cache.json" });
+
+      // Finalize the ZIP archive
+      archive.finalize();
     } catch (err) {
       logger.error(err);
     }
   }
   updateRecentProjectsList(project.location.toString());
+
   return { status: "success", message: "Project saved successfully" };
 }
 
@@ -242,30 +282,76 @@ export async function openProject(ctx: CommandContext, path?: string): Promise<C
   }
 
   for (const path of paths) {
-    const project = await readFile(path, "utf-8");
-    const projectFile = JSON.parse(project) as ProjectFile;
-    const projectName = path.split("/").pop()?.split(".blix")[0];
-    const projectId = ctx.projectManager.loadProject(projectName!, path);
-    ctx.projectManager.saveProjectLayout(projectId, projectFile.layout);
-    // ctx.projectManager.getProject(projectId)!.saved = true;
-    const coreGraphImporter = new CoreGraphImporter(ctx.toolbox);
+    // Create a readable stream from the ZIP archive
+    const readStream = fs.createReadStream(path);
 
-    for (const graph of projectFile.graphs) {
-      const coreGraph = coreGraphImporter.import("json", graph);
-      ctx.graphManager.addGraph(coreGraph);
-      ctx.projectManager.addGraph(projectId, coreGraph.uuid);
-      ctx.graphManager.onGraphUpdated(
-        coreGraph.uuid,
-        new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
-        CoreGraphUpdateParticipant.system
-      );
-    }
-    ctx.mainWindow?.apis.projectClientApi.onProjectChanged({
-      id: projectId,
-      saved: true,
-      layout: projectFile.layout,
-    });
-    updateRecentProjectsList(path);
+    // Extract the ZIP archive
+    readStream
+      .pipe(unzipper.Parse())
+      .on("entry", (entry) => {
+        const fileName = entry.path;
+        const type = entry.type; // 'Directory' or 'File'
+
+        if (type === "File") {
+          // Extract and read the file contents
+          const bufferArray: Buffer[] = [];
+
+          entry.on("data", (buffer: Buffer) => {
+            bufferArray.push(buffer);
+          });
+
+          entry.on("end", () => {
+            const data = Buffer.concat(bufferArray);
+            if (fileName === "project.json") {
+              const projectFile = JSON.parse(data.toString("utf-8")) as ProjectFile;
+              const projectName = path.split("/").pop()?.split(".blix")[0];
+              const projectId = ctx.projectManager.loadProject(projectName!, path);
+              ctx.projectManager.saveProjectLayout(projectId, projectFile.layout);
+              // ctx.projectManager.getProject(projectId)!.saved = true;
+              const coreGraphImporter = new CoreGraphImporter(ctx.toolbox);
+
+              for (const graph of projectFile.graphs) {
+                const coreGraph = coreGraphImporter.import("json", graph);
+                ctx.graphManager.addGraph(coreGraph);
+                ctx.projectManager.addGraph(projectId, coreGraph.uuid);
+                ctx.graphManager.onGraphUpdated(
+                  coreGraph.uuid,
+                  new Set([
+                    CoreGraphUpdateEvent.graphUpdated,
+                    CoreGraphUpdateEvent.uiInputsUpdated,
+                  ]),
+                  CoreGraphUpdateParticipant.system
+                );
+              }
+              ctx.mainWindow?.apis.projectClientApi.onProjectChanged({
+                id: projectId,
+                saved: true,
+                layout: projectFile.layout,
+              });
+              updateRecentProjectsList(path);
+            } else if (fileName === "cache/cache.json") {
+              const cacheJSON = JSON.parse(data.toString("utf-8")) as {
+                [key: string]: { uuid: CacheUUID; metadata: CacheMetadata };
+              };
+              for (const uuid of Object.keys(cacheJSON)) {
+                const cacheObject = cacheJSON[uuid];
+                ctx.cacheManager.writeImportMetadata(uuid, cacheObject.metadata);
+              }
+            } else if (fileName.startsWith("cache/")) {
+              const uuid: CacheUUID = fileName.split("/")[1].split(".blob")[0];
+              ctx.cacheManager.writeImportContent(uuid, data);
+            } else {
+              logger.warn("Unknown file in project: ", fileName);
+            }
+          });
+        }
+      })
+      .on("finish", () => {
+        logger.info("Extraction complete.");
+      })
+      .on("error", (err) => {
+        logger.error("Error during extraction:", err);
+      });
   }
 
   return { status: "success", message: "Project(s) opened successfully" };
@@ -275,75 +361,75 @@ export async function exportMedia(
   ctx: CommandContext,
   args: ExportMedia
 ): Promise<CommandResponse> {
-  if (!args) {
-    return { status: "error", message: "No media selected to export" };
-  }
+  return { status: "success", message: "Exporting currently disabled." };
 
-  const { type, data } = args;
+  // if (!args) {
+  //   return { status: "error", message: "No media selected to export" };
+  // }
 
-  if (!data) {
-    return { status: "error", message: "No data was provided" };
-  }
+  // const { type, data } = args;
 
-  if (type === "image") {
-    const base64Data = data.split(";base64, ");
-    const imgBuffer = Buffer.from(base64Data[1], "base64");
+  // if (!data) {
+  //   return { status: "error", message: "No data was provided" };
+  // }
 
-    const path = await showSaveDialog({
-      title: "Export media as",
-      defaultPath: "blix.png",
-      // filters: [{ name: "Images", extensions: ["png, jpg", "jpeg"] }],
-      properties: ["createDirectory"],
-    });
+  // if (type === "image") {
+  //   const base64Data = data.split(";base64, ");
+  //   const imgBuffer = Buffer.from(base64Data[1], "base64");
 
-    if (!path) return { status: "error", message: "No path chosen" };
+  //   const path = await showSaveDialog({
+  //     title: "Export media as",
+  //     defaultPath: "blix.png",
+  //     // filters: [{ name: "Images", extensions: ["png, jpg", "jpeg"] }],
+  //     properties: ["createDirectory"],
+  //   });
 
-    sharp(imgBuffer).toFile(path);
+  //   if (!path) return { status: "error", message: "No path chosen" };
 
-    return { status: "success", message: "Media exported successfully" };
-  } else if (type === "Number" || type === "color" || type === "string") {
-    const fileData = {
-      OutputData: data,
-    };
-    const path = await showSaveDialog({
-      title: "Export media as",
-      defaultPath: "blix.json",
-      filters: [{ name: "Data", extensions: ["json"] }],
-      properties: ["createDirectory"],
-    });
+  //   return { status: "success", message: "Media exported successfully" };
+  // } else if (type === "Number" || type === "color" || type === "string") {
+  //   const fileData = {
+  //     OutputData: data,
+  //   };
+  //   const path = await showSaveDialog({
+  //     title: "Export media as",
+  //     defaultPath: "blix.json",
+  //     filters: [{ name: "Data", extensions: ["json"] }],
+  //     properties: ["createDirectory"],
+  //   });
 
-    if (!path) return { status: "error", message: "Not path chosen" };
+  //   if (!path) return { status: "error", message: "Not path chosen" };
 
-    try {
-      writeFile(path, JSON.stringify(fileData));
-    } catch (err) {
-      logger.error(err);
-    }
+  //   try {
+  //     writeFile(path, JSON.stringify(fileData));
+  //   } catch (err) {
+  //     logger.error(err);
+  //   }
 
-    return { status: "success", message: "Media exported successfully" };
-  } else {
-    return { status: "success", message: "Unsupported media type" };
-  }
+  //   return { status: "success", message: "Media exported successfully" };
+  // } else {
+  //   return { status: "success", message: "Unsupported media type" };
+  // }
 }
 
 // TODO: Implement some sort of limit to how long the history of recent projects is.
-export async function updateRecentProjectsList(projectPath: string) {
+export async function updateRecentProjectsList(projectPath?: string) {
+  if (projectPath && !(await validateProjectPath(projectPath))) return; // Ensure file is of correct type
   const currentProjects: recentProject[] = settings.get("recentProjects");
   let validProjects: recentProject[] = [];
 
   const results = await Promise.all(
     currentProjects.map(async (project) => await validateProjectPath(project.path))
   );
-  for (let i = 0; i < currentProjects.length; i++) {
+  for (let i = 0; i < results.length; i++) {
     validProjects = results[i] ? [...validProjects, currentProjects[i]] : validProjects;
   }
 
-  validProjects = validProjects.filter((project) => project.path !== projectPath);
+  if (projectPath) validProjects = validProjects.filter((project) => project.path !== projectPath);
   const str = new Date().toUTCString().split(",")[1];
   const date = str.slice(1, str.lastIndexOf(" "));
-  validProjects.unshift({ path: projectPath, lastEdited: date });
+  if (projectPath) validProjects.unshift({ path: projectPath, lastEdited: date });
   settings.set("recentProjects", validProjects);
-  logger.info(settings.get("recentProjects"));
 }
 
 /**
@@ -355,6 +441,7 @@ export async function updateRecentProjectsList(projectPath: string) {
 export async function validateProjectPath(path: string): Promise<boolean> {
   try {
     await (await open(path, "r")).close();
+    if (!path.endsWith(".blix")) return false; // Additional check just to be safe
     return true;
   } catch (e) {
     return false;

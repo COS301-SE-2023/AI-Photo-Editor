@@ -19,6 +19,7 @@ jest.mock("electron-store", () => ({
       return {}
     })
 }));
+jest.mock('../../../../../src/electron/lib/plugins/PluginManager')
 
 
 jest.mock("../../../../../src/electron/lib/projects/ProjectManager");
@@ -35,7 +36,26 @@ jest.mock("electron", () => ({
       return "v1.1.1";
     })
   },
+  ipcMain: {
+    on: jest.fn()
+  },
+  session: {
+    defaultSession: {
+      clearCache: jest.fn()
+    }
+  }
 }));
+
+jest.mock('ws', () => {
+  return {
+    WebSocketServer:  jest.fn().mockImplementation(() => {
+      return {
+        on: jest.fn()
+      }
+    }
+    )
+  }
+});
 
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mocked_base64_string"),
@@ -103,7 +123,7 @@ describe("Test plugin integrations", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      plugin = new Plugin(pack,plugDir,main);
+      plugin = new Plugin(pack,plugDir);
       blix = new Blix();
       plugin.requireSelf(blix);
     });
@@ -123,18 +143,18 @@ describe("Test plugin integrations", () => {
 
     test("Logger should warn for invalid node", () => {
 
-      plugin = new Plugin(badPlug.pack,badPlug.plugDir,badPlug.main);
+      plugin = new Plugin(badPlug.pack,badPlug.plugDir);
       expect(plugin.requireSelf(blix)).toReturn;
     });
 
     test("Logger should warn for invalid file", () => {
 
-      plugin = new Plugin(badPlug.pack,badPlug.plugDir,badPlug.main+"\fake");
+      plugin = new Plugin(badPlug.pack,badPlug.plugDir);
       expect(plugin.requireSelf(blix)).toReturn;
     });
 
     test("Plugin context should return the correct version",() => {
-      const ctx  = new PluginContext();
+      const ctx  = new PluginContext("");
 
       expect(ctx.blixVersion).toBe("0.0.1");
     });
