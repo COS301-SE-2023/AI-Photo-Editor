@@ -27,7 +27,8 @@ export type CacheObject = {
 
 type CacheRequestType =
   | "cache-subscribe"
-  | "cache-delete"
+  | "cache-delete-some"
+  | "cache-delete-all"
   | "cache-get"
   | "cache-write-metadata"
   | "export-cache";

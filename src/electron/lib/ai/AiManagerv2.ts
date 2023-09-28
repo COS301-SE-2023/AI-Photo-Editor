@@ -6,7 +6,7 @@ import { NodeInstance, ToolboxRegistry } from "../registries/ToolboxRegistry";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
 import type { MainWindow } from "../api/apis/WindowApi";
 import {
-  BlypescriptExportStrategyV2,
+  BlypescriptExportStrategy,
   CoreGraphExporter,
 } from "../../lib/core-graph/CoreGraphExporter";
 import { readFileSync, writeFileSync } from "fs";
@@ -55,7 +55,7 @@ export class AiManager {
   ) {
     this.blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolbox);
     this.graphExporter = new CoreGraphExporter(
-      new BlypescriptExportStrategyV2(this.blypescriptToolbox)
+      new BlypescriptExportStrategy(this.blypescriptToolbox)
     );
     this.blypescriptInterpreter = new BlypescriptInterpreter(toolbox, graphManager);
   }
@@ -63,7 +63,7 @@ export class AiManager {
   async executePrompt({ prompt, graphId, model, apiKey, chatId, verbose }: PromptOptions) {
     this.blypescriptToolbox = BlypescriptToolbox.fromToolbox(this.toolbox);
     this.graphExporter = new CoreGraphExporter(
-      new BlypescriptExportStrategyV2(this.blypescriptToolbox)
+      new BlypescriptExportStrategy(this.blypescriptToolbox)
     );
     // console.log(this.blypescriptToolbox.toString());
     const blypescriptProgram = this.graphExporter.exportGraph(this.graphManager.getGraph(graphId));

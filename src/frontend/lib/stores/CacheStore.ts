@@ -144,14 +144,19 @@ class CacheStore {
     });
   }
 
-  public async delete(ids: CacheUUID[]) {
+  public async deleteSelectedAssets(ids: CacheUUID[]) {
     const messageId = randomMessageId();
-
-    const payload = JSON.stringify({ type: "cache-delete", ids, messageId });
-
     return new Promise((resolve, reject) => {
       this.lobby[messageId] = resolve;
-      this.ws.send(payload);
+      this.ws.send(JSON.stringify({ type: "cache-delete-some", ids, messageId }));
+    });
+  }
+
+  public async deleteAllAssets() {
+    const messageId = randomMessageId();
+    return new Promise((resolve, reject) => {
+      this.lobby[messageId] = resolve;
+      this.ws.send(JSON.stringify({ type: "cache-delete-all", messageId }));
     });
   }
 

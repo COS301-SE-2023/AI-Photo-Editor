@@ -262,7 +262,7 @@ const nodes = {
             componentId: "imagePicker",
             label: "Pick an image",
             defaultValue: "",
-            triggerUpdate: true,
+        triggerUpdate: true,
         }, {});
         // ui.addCachePicker({
         //     componentId: "cachePicker",

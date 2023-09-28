@@ -3,6 +3,8 @@ import { type UUID } from "@shared/utils/UniqueEntity";
 import { constructLayout, layoutTemplate, type UIProject } from "../Project";
 import type { SharedProject } from "@shared/types";
 import { graphMall } from "./GraphStore";
+import { cacheStore } from "./CacheStore";
+import { mediaStore } from "./MediaStore";
 
 type ProjectsStoreState = {
   projects: UIProject[];
@@ -121,6 +123,11 @@ class ProjectsStore {
     const project = get(this.store).projects.find((p) => p.id === projectId);
     // if (project) await window.apis.graphApi.deleteGraphs(project.graphs);
     await window.apis.projectApi.closeProject(projectId, project?.graphs);
+
+    // Clear all stores once removed
+    await cacheStore.deleteAllAssets();
+    await mediaStore.deleteAllMedia();
+    await graphMall.clearAllGraphs();
   }
 
   /**
