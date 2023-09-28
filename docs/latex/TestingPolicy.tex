@@ -300,7 +300,6 @@ criteria are summarized briefly here and elaborated upon in dedicated sections.
   \item Customizability \& Extensibility
   \item Compatibility
   \item Performance
-  \item Usability
   \item Security
 \end{enumerate}
 
@@ -428,9 +427,42 @@ performance and user experience, regardless of the platform in use.
 
 \addcontentsline{toc}{subsection}{Performance}
 \subsection*{Performance}
+The system needs to guarantee that users can upload images to the application within a reasonable timeframe. It should also provide the capability for users to edit images with responsive latency and avoid consuming an excessive amount of computer resources. 
 
-\addcontentsline{toc}{subsection}{Usability}
-\subsection*{Usability}
+\subsubsection*{Quantification}
+
+Our application provides a cache system where the user can upload assets to the application that allows the user to access assets more efficiently. We also enabled the integration of WebViews within the plugin system. This integration would empower the plugin to leverage canvases and other functionalities, enabling users to edit images more efficiently. 
+
+\subsubsection*{Testing Environment}
+CPU: Inter Code i7-8565U
+
+Memory: 16GB
+
+Tested: 
+\begin{itemize}
+    \item CPU utilization
+    \item Memory Usage
+\end{itemize}
+
+\subsubsection*{Adding 5, 10MB images to the cache system.}
+
+\includegraphics[width=0.7\textwidth]{../pics/addImage.png}
+
+\newpage
+
+\subsubsection*{Removing all 5 images from the cache system at once.}
+
+\includegraphics[width=0.7\textwidth]{../pics/removeAllImages.png}
+
+\subsubsection*{Changing input in a small graph, consisting of 1 node, in quick succession using the GLFX plugin.}
+
+\includegraphics[width=0.7\textwidth]{../pics/smallImageSmallGraph.png}
+
+\newpage
+
+\subsubsection*{Changing input in a Big graph, consisting of 15 nodes, in quick succession using the GLFX plugin.}
+
+\includegraphics[width=0.7\textwidth]{../pics/smallImageBigGraph.png}
 
 
 \addcontentsline{toc}{subsection}{Security}
