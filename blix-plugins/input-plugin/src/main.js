@@ -10,14 +10,14 @@ const nodes = {
 
         const ui = nodeBuilder.createUIBuilder();
         ui
-        .addSlider(
+        .addNumberInput(
             {
                 componentId: "value",
                 label: "Input number",
                 defaultValue: 0,
                 triggerUpdate: true,
             },
-            { min: 0, max: 100, set: 0.1 }
+            { set: 0.1 }
         );
         nodeBuilder.setUI(ui);
 

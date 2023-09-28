@@ -37,7 +37,7 @@ type SelectionState = {
   prevMousePos: PIXI.Point
 };
 
-const MAX_CHILDREN_IN_CLUMP = 5;
+const MAX_CHILDREN_IN_CLUMP = 50;
 
 let selection: SelectionState = null;
 
@@ -137,6 +137,9 @@ export async function renderScene(
   if (imgPromises.length > 0) {
     await new Promise((resolve, reject) => setTimeout(resolve, 50));
   }
+
+  // Reset selection
+  // selection = null;
 
   const { pixiClump, changed } = renderClump(
     blink,
@@ -380,7 +383,7 @@ function renderClump(
 
   if (diffs.has("opacity")) {
     if (clump.opacity) {
-      resClump.alpha = Math.min(1, Math.max(0, clump.opacity / 100.0));
+      resClump.alpha = Math.min(1, Math.max(0, clump.opacity));
     }
   }
 

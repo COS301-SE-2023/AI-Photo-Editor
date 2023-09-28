@@ -346,7 +346,7 @@ const nodes = {
                     defaultValue: 100,
                     triggerUpdate: true,
                 },
-                {}
+                { min: 0 }
             );
         }
         const getTransform = addTransformInput(ui, ["position", "rotation"]);
@@ -526,7 +526,7 @@ const nodes = {
             label: "Text",
             defaultValue: "input text",
             triggerUpdate: true,
-        }, {});
+        }, { multiline: true });
 
         ui.addDropdown({
             componentId: "fontFamily",
@@ -689,16 +689,16 @@ const nodes = {
             {
                 componentId: "opacity",
                 label: "Opacity",
-                defaultValue: 100,
+                defaultValue: 1,
                 triggerUpdate: true,
             },
-            { min: 0, max: 100, set: 0.1 }
+            { min: 0, max: 1, step: 0.01 }
         );
         addTweakability(ui);
 
         nodeBuilder.define(async (input, uiInput, from) => {
             // Apply filter to outermost clump
-            const clumps = [1, 2, 3, 4, 5].map(n => input[`clump${n}`]).filter(c => c != null);
+            const clumps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => input[`clump${n}`]).filter(c => c != null);
 
             // Construct assets union
             const assets = {};
@@ -727,6 +727,192 @@ const nodes = {
         nodeBuilder.addInput("Blink clump", "clump3", "Clump 3");
         nodeBuilder.addInput("Blink clump", "clump4", "Clump 4");
         nodeBuilder.addInput("Blink clump", "clump5", "Clump 5");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
+    "repeat": (context) => {
+        const nodeBuilder = context.instantiate("Blink/Utils", "repeat");
+        nodeBuilder.setTitle("Repeat");
+        nodeBuilder.setDescription("Repeat a clump element multiple times with an offset");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addSlider(
+            {
+                componentId: "repeat",
+                label: "Repeat",
+                defaultValue: 1,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 50, step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "offsetX",
+                label: "Offset X",
+                defaultValue: 0,
+                triggerUpdate: true,
+            }, { step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "offsetY",
+                label: "Offset Y",
+                defaultValue: 0,
+                triggerUpdate: true,
+            }, { step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "offsetRot",
+                label: "Rotation Offset",
+                defaultValue: 0,
+                triggerUpdate: true,
+            }, { step: 1 }
+        );
+        const getTransform = addTransformInput(ui, ["position"]);
+        ui.addSlider(
+            {
+                componentId: "opacity",
+                label: "Opacity",
+                defaultValue: 1,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 1, step: 0.01 }
+        );
+        addTweakability(ui);
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            const clump = input["clump"];
+
+            if (clump == null) return { "res": null };
+
+            const assets = clump.assets;
+
+            // Construct parent clump
+            const parent = {
+                class: "clump",
+                nodeUUID: uiInput["tweaks"].nodeUUID,
+                changes: uiInput["diffs"]?.uiInputs ?? [],
+                transform: getTransform(uiInput),
+                opacity: uiInput["opacity"],
+                elements: Array.from({ length: uiInput["repeat"] }, (_, i) => ({
+                    ...clump.content,
+                    transform: {
+                        ...clump.content.transform,
+                        position: {
+                            x: clump.content.transform.position.x + i * uiInput["offsetX"],
+                            y: clump.content.transform.position.y + i * uiInput["offsetY"],
+                        },
+                        rotation: clump.content.transform.rotation + i * uiInput["offsetRot"],
+                    }
+                })),
+            }
+
+            return { "res": { assets, content: parent } };
+        });
+
+        nodeBuilder.setUI(ui);
+        nodeBuilder.addInput("Blink clump", "clump", "Clump");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
+    "particle": (context) => {
+        const nodeBuilder = context.instantiate("Blink/Utils", "particle");
+        nodeBuilder.setTitle("Particle");
+        nodeBuilder.setDescription("Scatter a clump randomly within a fixed region");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addSlider(
+            {
+                componentId: "count",
+                label: "Count",
+                defaultValue: 1,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 50, step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "boundW",
+                label: "Bounds W",
+                defaultValue: 400,
+                triggerUpdate: true,
+            }, { min: 0, step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "boundH",
+                label: "Bounds H",
+                defaultValue: 400,
+                triggerUpdate: true,
+            }, { min: 0, step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "boundRot",
+                label: "Rotation Bound",
+                defaultValue: 0,
+                triggerUpdate: true,
+            }, { step: 1 }
+        );
+        const getTransform = addTransformInput(ui, ["position", "rotation", "scale"]);
+        ui.addSlider(
+            {
+                componentId: "opacity",
+                label: "Opacity",
+                defaultValue: 1,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 1, step: 0.01 }
+        );
+        ui.addSlider(
+            {
+                componentId: "seed",
+                label: "Seed",
+                defaultValue: 1,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 1000, step: 1 }
+        );
+        addTweakability(ui);
+
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            const clump = input["clump"];
+
+            if (clump == null) return { "res": null };
+
+            const assets = clump.assets;
+
+            let seed = uiInput["seed"];
+            function random() {
+                var x = Math.sin(seed++) * 10000;
+                return x - Math.floor(x);
+            }
+
+            // Construct parent clump
+            const parent = {
+                class: "clump",
+                nodeUUID: uiInput["tweaks"].nodeUUID,
+                changes: uiInput["diffs"]?.uiInputs ?? [],
+                transform: getTransform(uiInput),
+                opacity: uiInput["opacity"],
+                elements: Array.from({ length: uiInput["count"] }, (_, i) => ({
+                    ...clump.content,
+                    transform: {
+                        ...clump.content.transform,
+                        position: {
+                            x: clump.content.transform.position.x + (2*random()-1) * uiInput["boundW"],
+                            y: clump.content.transform.position.y + (2*random()-1) * uiInput["boundH"],
+                        },
+                        rotation: clump.content.transform.rotation + (2*random()-1) * uiInput["boundRot"],
+                    }
+                })),
+            }
+
+            return { "res": { assets, content: parent } };
+        });
+
+        nodeBuilder.setUI(ui);
+        nodeBuilder.addInput("Blink clump", "clump", "Clump");
         nodeBuilder.addOutput("Blink clump", "res", "Result");
     },
     "filter": (context) => {
@@ -847,7 +1033,7 @@ const nodes = {
                 defaultValue: 1920,
                 triggerUpdate: true,
             },
-            { step: 1 }
+            { min: 0, step: 1 }
         );
         ui.addNumberInput(
             {
@@ -856,7 +1042,7 @@ const nodes = {
                 defaultValue: 1080,
                 triggerUpdate: true,
             },
-            { step: 1 }
+            { min: 0, step: 1 }
         );
         ui.addColorPicker({
             componentId: "canvasColor",

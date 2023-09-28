@@ -219,6 +219,8 @@
         // link.click();
         // link.remove();
     }
+
+    let showDebug = false;
 </script>
 
 <svelte:window on:keydown={keydown} on:keyup={keyup} />
@@ -228,11 +230,26 @@
 </div>
 
 <div class="fullScreen">
+    {#if showDebug}
     <Debug data={$media} />
-    <!-- {JSON.stringify($media, null, 2)} -->
+    {/if}
+
+    <div class="hover">
+        <input type="checkbox" bind:checked="{showDebug}" />
+    </div>
 </div>
 
 <style>
+    .hover {
+        position: absolute;
+        top: 0.4em;
+        right: 0.4em;
+
+        accent-color: #f43e5c;
+        outline: none;
+        pointer-events: all;
+    }
+
     canvas {
         position: absolute;
         margin: 0px;
