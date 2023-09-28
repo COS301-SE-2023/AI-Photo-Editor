@@ -87,7 +87,7 @@ tabsize=2,
 \begin{titlepage}
 	\centering
     % \includegraphics[width=0.5\textwidth]{your_logo.png}\par\vspace{1cm}
-    {\scshape\LARGE User Manual Specification V1\par}
+    {\scshape\LARGE User Manual Specification V2\par}
     \vspace{1.5cm}
     {\huge\bfseries Blix - AI Photo Editor\par}
     \vspace{2.5cm}
@@ -119,7 +119,7 @@ intuitive interface, reminiscent of a digital blender. This user manual will gui
 this cutting-edge editing tool.
 
 Blix caters to users of all levels, from amateur photographers to seasoned professionals, by streamlining the editing process and eliminating the need 
-for extensive knowledge of complex editing software. By presenting a visual graph-based interface, akin to a blender, Blix enables effortless mixing and matching of diverse editing effects.
+for extensive knowledge of complex editing software. By presenting a visual graph-based interface, akin to Blender, Blix enables effortless mixing and matching of diverse editing effects.
 
 As a user, you gain access to a vast array of editing possibilities. Whether you wish to apply filters, fine-tune brightness and contrast, or add artistic effects such as vignettes or vintage tones, Blix provides an extensive selection of editing options. Each editing choice is represented as a node within the graph, allowing for seamless connectivity and the creation of custom editing flows tailored to your preferences.
 
@@ -164,12 +164,18 @@ Blix is compatible with the following operating systems:
   \item[\textbullet] Command palette : \textbf{Ctrl + P}
   \item[\textbullet] Delete Node : \textbf{Ctrl + del}
   \item[\textbullet] Add Node : \textbf{Ctrl + A}
+  \item[\textbullet] New Project : \textbf{Ctrl + N}
+  \item[\textbullet] Settings : \textbf{Ctrl + comma}
+
 \end{itemize}
+
+At the heart of Blix is the goal to create an extremely extensible and customizable system ,thus for your convenience, Blix provides you with custom keybindings to streamline your editing experience and enchane your productivity.
+These keybinding are provided in a dedicated tile which holds all the keybindings. To change a keybinding, simply select its key in the tile and press the new key you wish to bind it to.
 
 \begin{figure}[H]
   \centering
-  {\includegraphics[width=0.5\textwidth]{../pics/palette.png}}
-  \caption{Command Palette}
+  {\includegraphics[width=1.0\textwidth]{../pics/tutorial-keybindings.png}}
+  \caption{Keybindings tile}
 \end{figure}
 
 
@@ -205,14 +211,20 @@ Projects can be permanently removed from your workspace as follows :
   \item[\textbullet] Select the project you wish to delete.
 \end{itemize}
 
-\addcontentsline{toc}{subsection}{Photo editing}
+\begin{figure}[H]
+  \centering
+  {\includegraphics[width=1.0\textwidth]{../pics/tutorial-Projects.png}}
+  \caption{Saving projects from the command palette}
+\end{figure}
+
 \subsection*{Photo editing}
+\addcontentsline{toc}{subsection}{Photo Editing}
 
 \textbf{Importing a Photo}
 
 Images can be added to the graph as input. This can be done using the input plugin : 
 \begin{itemize}
-  \item[\textbullet] Select the Image input node.
+  \item[\textbullet] Select the Image input node using the toolbox or the command palette.
   \item[\textbullet] Place the node in the tile you wish to add the image to.
   \item[\textbullet] Use the interface provided to import the image to the node.
   \item[\textbullet] Connect the image to the graph.
@@ -222,9 +234,9 @@ Images can be added to the graph as input. This can be done using the input plug
 
 There are a wide array of nodes that can be added to the workspace area.
 \begin{itemize}
-  \item[\textbullet] Select the node from either the command palette or the nodes pane.
-  \item[\textbullet] Place the node in the tile you wish to add the image to.
-  \item[\textbullet] Connect the node to the graph.
+  \item[\textbullet] Select the node from either the command palette or by the rightclick menu
+  \item[\textbullet] The node will be added to the currently selected workspace area.
+  \item[\textbullet] Connect the node to the graph by dragging the anchors.
 \end{itemize}
 
 \begin{figure}[H]
@@ -250,6 +262,35 @@ Photos can be exported to a format of your choice. This can be done as follows :
   \item[\textbullet] The image of your currently active workspace will be exported to the directory of your choice.
 \end{itemize}
 
+
+\textbf{Viewing modified outputs}
+
+Output can be viewed in the workspace area. This can be done as follows :
+
+\begin{itemize}
+  \item[\textbullet] Create a tile you wish to view the output in.
+  \item[\textbullet] Select the media tile from the layout selection.
+  \item[\textbullet] Select the output node to view from the dropdown menu.
+\end{itemize}
+
+\textbf{Graph Manipulation}
+
+Graphs can be added, removed or selected from the dropdown in the graph tile :
+
+\begin{itemize}
+  \item[\textbullet] Select the desired graph from the dropdown menu.
+  \item[\textbullet] Create a new graph by selecting the + icon next to the dropdown.
+  \item[\textbullet] Delete a graph by selecting the trashbin icon next to the graph name.
+  \item[\textbullet] Rename a graph by double clicking a graph.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  {\includegraphics[width=1.0\textwidth]{../pics/tutorial-Graphs.png}}
+  \caption{Graph Selection and Manipulation}
+\end{figure}
+
+
 \addcontentsline{toc}{subsection}{Layout Customization}
 \subsection*{Layout Customization}
 
@@ -257,7 +298,8 @@ Blix prides itself on its intuitive and user-friendly interface. The layout of t
 
 \textbf{Changing the panels layout}
 
-Blix allows a wide array of customizablity for the panels layout. You can customize the panel layout as follows :
+Blix allows a wide array of customizablity for the panels layout. Blix contains a blip in the corners of the tiles to allow you to modify the layout according to your liking. 
+You can customize the panel layout as follows :
 
 \begin{itemize}
   \item[\textbullet] Panel borders can be changed by dragging the borders of the panels.
@@ -266,6 +308,11 @@ Blix allows a wide array of customizablity for the panels layout. You can custom
   \item[\textbullet] Panels can be duplicated by dragging the blip downwards or sideways.
 \end{itemize}
 
+\begin{figure}[H]
+  \centering
+  {\includegraphics[width=1.0\textwidth]{../pics/tutorial-Layout.png}}
+  \caption{Using multiple tiles to create a custom layout}
+\end{figure}
 
 \addcontentsline{toc}{subsection}{Plugins}
 \subsection*{Plugins}
@@ -281,6 +328,7 @@ Blix ensures that every node in the graph is a plugin. This means that all node 
   \item[\textbullet] Plugin files are stored in the blix-plugins folder.
   \item[\textbullet] Users can create their own plugins and share them with other users.
   \item[\textbullet] Every property of the node is defined in the plugin file.
+  \item[\textbullet] The ai system uses all plugins, including your own!
 \end{itemize}
 
 \textbf{Creating plugins}
@@ -293,5 +341,49 @@ Blix allows users to create and customize their own plugins with an elegant and 
   \item[\textbullet] Tiles are created using the dedicated tileBuilders provided in our docs.
 \end{itemize}
 
+\begin{figure}[H]
+  \centering
+  {\includegraphics[width=1.0\textwidth]{../pics/tutorial-Plugins.png}}
+  \caption{Example of a node defined in a plugin}
+\end{figure}
+
+
+\textbf{Using the Artificial Intelligence}
+
+Blix allows users to communicate with an LLM that is fine-tuned to our system. 
+The AI can be used to perform a wide array of tasks and provide the user with a more intuitive and easy to use experience.
+you will receive a response from the AI in the information panel in the bottom right corner of the screen.
+
+\textbf{Use Cases}
+
+\begin{itemize}
+  \item[\textbullet] Create a graph to perform  specific tasks based on the user's prompt.
+  \item[\textbullet] Modify an existing graph by adding or removing nodes or editing their connections and properties.
+  \item[\textbullet] Provide the user with valuable information about the graph.
+\end{itemize}
+
+\textbf{How to use}
+
+\begin{itemize}
+  \item[\textbullet] A prompt can be sent to the AI by using the command palette. Pressing TAB after typing a prompt in the command palette will send the prompt to the AI.
+  \item[\textbullet] The AI will then proceed to process the command and perform the neccesary actions based on the user prompt
+  \item[\textbullet] The AI will then return a response to the user, which will be displayed through the information panel in the bottom right corner of the screen.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  {\includegraphics[width=0.7 \textwidth]{../pics/tutorial-AI.png}}
+  \caption{Response from the AI}
+\end{figure}
+
+
+\textbf{General prompt guidelines}
+
+\begin{itemize}
+  \item[\textbullet] Try to be as specific as possible when sending a prompt to the AI.
+  \item[\textbullet] Shorter/smaller tasks are more likely to be performed correctly.
+  \item[\textbullet] Look at the AI's response in the information panel.
+\end{itemize}
+ 
 
 \end{document}
