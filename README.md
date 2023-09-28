@@ -50,14 +50,15 @@
 <a href="https://drive.google.com/file/d/1PUAM4CS4qMLwbHv37kl86bTaVbaIDlLZ/view?usp=sharing">SRSv2</a>
 </br>
 <a href="https://drive.google.com/file/d/1XgHfZQaj9rpDhAZWE6s_zF1wM1EhKIRY/view?usp=sharing">SRSv3</a>
-
-
+</br>
+<a href="https://drive.google.com/drive/u/2/folders/18d_4VQgzyG3-gYgU5O3tA1pw60jYj9QH">SRSv4</a>
 
 <h3>Software Architecture</h3>
 <a href="https://drive.google.com/file/d/1vXylz_2AGhIbI3x6IT7RJHlcIxV7ydWe/view?usp=sharing">Software Architecture v1</a>
-
+</br>
 <a href="https://drive.google.com/file/d/1ux78JlX2uZjZg3gL4HwTCUpflXp9-cwP/view?usp=sharing">Software Architecture v2</a>
-
+</br>
+<a href="https://drive.google.com/drive/u/2/folders/18d_4VQgzyG3-gYgU5O3tA1pw60jYj9QH">Software Architecture v3</a>
 
 
 <h3>Extras</h3>
@@ -68,8 +69,13 @@
 </br>
 <a href="https://drive.google.com/file/d/1sLkLUSyI9LsDfnfzGExk_df6zPMu-HNL/view?usp=sharing">User Manual v2</a>
 </br>
+<a href="https://drive.google.com/drive/u/2/folders/18d_4VQgzyG3-gYgU5O3tA1pw60jYj9QH">User Manual v3</a>
+</br>
 <a href="https://drive.google.com/file/d/1bwBXHYIPah-2zh5x2d9cTLVaji_K4UI2/view?usp=sharing">Installation Manual v1</a>
-
+</br>
+<a href="https://drive.google.com/drive/u/2/folders/18d_4VQgzyG3-gYgU5O3tA1pw60jYj9QH">Testing Policy</a>
+</br>
+<a href="https://drive.google.com/drive/u/2/folders/18d_4VQgzyG3-gYgU5O3tA1pw60jYj9QH">Deployment Diagram</a>
 <h3>Contributions</h3>
 <a href="https://drive.google.com/file/d/1ewItSWd0Ag0mQbVnYTd4y8H6PclSpRNi/view?usp=sharing">Documentation Contributions</a>
 
