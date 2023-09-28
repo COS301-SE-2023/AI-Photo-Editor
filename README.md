@@ -51,14 +51,14 @@
 </br>
 <a href="https://drive.google.com/file/d/1XgHfZQaj9rpDhAZWE6s_zF1wM1EhKIRY/view?usp=sharing">SRSv3</a>
 </br>
-<a href="https://drive.google.com/drive/u/2/folders/18d_4VQgzyG3-gYgU5O3tA1pw60jYj9QH">SRSv4</a>
+<a href="https://drive.google.com/file/d/1J6kcDWjVuH58iiQxCd1sIRy1-3EqaHW-/view?usp=sharing">SRSv4</a>
 
 <h3>Software Architecture</h3>
 <a href="https://drive.google.com/file/d/1vXylz_2AGhIbI3x6IT7RJHlcIxV7ydWe/view?usp=sharing">Software Architecture v1</a>
 </br>
 <a href="https://drive.google.com/file/d/1ux78JlX2uZjZg3gL4HwTCUpflXp9-cwP/view?usp=sharing">Software Architecture v2</a>
 </br>
-<a href="https://drive.google.com/drive/u/2/folders/18d_4VQgzyG3-gYgU5O3tA1pw60jYj9QH">Software Architecture v3</a>
+<a href="https://drive.google.com/file/d/1QXn4w6krnWsm9v4x9fqjG16s2dhk_QZ0/view?usp=sharing">Software Architecture v3</a>
 
 
 <h3>Extras</h3>
@@ -69,13 +69,13 @@
 </br>
 <a href="https://drive.google.com/file/d/1sLkLUSyI9LsDfnfzGExk_df6zPMu-HNL/view?usp=sharing">User Manual v2</a>
 </br>
-<a href="https://drive.google.com/drive/u/2/folders/18d_4VQgzyG3-gYgU5O3tA1pw60jYj9QH">User Manual v3</a>
+<a href="https://drive.google.com/file/d/110ZWV1qh3gcXGk4hVldn95QhyN6GbzLH/view?usp=sharing">User Manual v3</a>
 </br>
-<a href="https://drive.google.com/file/d/1bwBXHYIPah-2zh5x2d9cTLVaji_K4UI2/view?usp=sharing">Installation Manual v1</a>
+<a href="https://drive.google.com/file/d/1Rmy0YbLDfM-8XI6rwFb3PWAoF2UFYfOH/view?usp=sharing">Installation Manual v1</a>
 </br>
-<a href="https://drive.google.com/drive/u/2/folders/18d_4VQgzyG3-gYgU5O3tA1pw60jYj9QH">Testing Policy</a>
+<a href="https://drive.google.com/file/d/1sDJw5e2MZYsqqW8XbH74iX4YiP-tuk1d/view?usp=sharing">Testing Policy</a>
 </br>
-<a href="https://drive.google.com/drive/u/2/folders/18d_4VQgzyG3-gYgU5O3tA1pw60jYj9QH">Deployment Diagram</a>
+<a href="https://drive.google.com/file/d/11AeERkEWYtxJHes-1va_YyJVb93pd7MM/view?usp=sharing">Deployment Diagram</a>
 <h3>Contributions</h3>
 <a href="https://drive.google.com/file/d/1ewItSWd0Ag0mQbVnYTd4y8H6PclSpRNi/view?usp=sharing">Documentation Contributions</a>
 
