@@ -436,7 +436,54 @@ performance and user experience, regardless of the platform in use.
 \addcontentsline{toc}{subsection}{Security}
 \subsection*{Security}
 
+Security focuses on safeguarding Blix, its data, and its users from potential
+threats. In the digital era, where cyber threats are continually evolving, a
+robust security approach is indispensable to maintain user trust and protect
+valuable data.
 
+\subsubsection*{Quantification}
 
+Blix has been engineered with an emphasis on offline usage, providing user
+convenience while additionally enhancing its security posture. However, our
+commitment to security extends beyond this design consideration. We have
+integrated several security measures and best practices aimed at achieving
+optimal security standards. These include:
+
+\textbf{Sandboxing of renderers and webviews}
+
+A core security feature of our application is the sandboxing of renderers and
+webviews. This mechanism isolates these components into a separate process. This
+segregation restricts their capabilities and limits their access to sensitive
+data or system resources, effectively thwarting potential security breaches.
+This practice aligns with OWASP's recommendation of implementing secure
+defaults.
+
+\textbf{Context isolation}
+
+We have further fortified our application's security by implementing context
+isolation. This security measure delineates the Electron runtime's context from
+the application's context, thereby shielding powerful internal Electron APIs
+from malicious scripts. This practice is consistent with OWASP's principle of
+least privilege.
+
+\textbf{Disabling of Node integration in renderers}
+
+To safeguard our application from remote code execution attacks, Node.js
+integration within our renderers has been disabled. This strategy obstructs
+malicious scripts from obtaining direct access to low-level system resources,
+significantly enhancing overall security.
+
+\textbf{Open-source Plugin code}
+
+In our pursuit of transparency and collaborative security improvement, the code
+for our plugins is open-source. This allows for community-driven security audits
+and contributes to the overall hardening of our application's security.
+
+In conclusion, these security measures - sandboxing, context isolation,
+disabling of Node integration - along with our open-source plugin code, work in
+tandem to create a robust security environment for our application. In alignment
+with OWASP guidelines, these strategies ensure our application is resilient
+against a plethora of security threats, thereby safeguarding our users and their
+data.
 
 \end{document}
