@@ -17,16 +17,21 @@ let groupTest = 0;
  * @param layout The layout to construct from
  * @returns The constructed PanelGroup
  */
-
-export function constructLayout(layout: LayoutPanel): PanelGroup {
-  const group = new PanelGroup((groupTest++).toString());
-  if (layout.panels) {
-    for (const panel of layout.panels) {
-      if (panel.panels) {
-        group.addPanelGroup(constructLayout(panel), panel.panels.length);
+const defaultSize = 0;
+export function constructLayout(layout: LayoutPanel, splits: number[]): PanelGroup {
+  const group = new PanelGroup(
+    (groupTest++).toString(),
+    undefined,
+    "split" in layout ? layout.split[0] : defaultSize
+  );
+  if ("panels" in layout) {
+    for (let i = 0; i < layout.panels.length; ++i) {
+      const panel = layout.panels[i];
+      if ("panels" in panel) {
+        group.addPanelGroup(constructLayout(panel, panel.split.slice(1)), panel.panels.length);
       } else {
-        if (panel.content) {
-          group.addPanel(panel.content, layout.panels.length);
+        if ("content" in panel) {
+          group.addPanel(panel.content, layout.panels.length, splits[i]);
         }
       }
     }
@@ -34,10 +39,10 @@ export function constructLayout(layout: LayoutPanel): PanelGroup {
   }
   return group;
 }
+
 /**
  * A layout template for the UI
  */
-
 export const layoutTemplate: LayoutPanel = {
   panels: [
     {
@@ -49,9 +54,11 @@ export const layoutTemplate: LayoutPanel = {
           content: "assets",
         },
       ],
+      split: [50, 50, 50],
     },
     {
       content: "graph",
     },
   ],
+  split: [50, 50],
 };

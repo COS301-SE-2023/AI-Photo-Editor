@@ -286,6 +286,7 @@
     style="{height == '' ? '' : 'height: {height}'}"
     dblClickSplitter="{false}"
     on:pane-remove="{(e) => e.stopPropagation()}"
+    on:resized="{(e) => console.log(e.detail)}"
   >
     {#each layout.panels as panel, i (panel.id)}
       <!-- TODO: Fix; look into using svelte animations -->

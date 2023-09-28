@@ -6,7 +6,7 @@ import { writable } from "svelte/store";
 export abstract class PanelNode {
   static panelCounter = 0;
 
-  constructor(id = -1) {
+  constructor(id = -1, size?: number) {
     this.parent = null;
     this.index = -1;
     if (id !== -1) {
@@ -14,6 +14,10 @@ export abstract class PanelNode {
     } else {
       this.id = PanelNode.panelCounter++;
     }
+    console.log("Passed: ", size);
+    // Only set size when loading in.
+    // Newly added panels must have dynamic size which is calculated by svelvet
+    if (size) this.size = size;
   }
 
   parent: PanelGroup | null;
@@ -22,7 +26,7 @@ export abstract class PanelNode {
   // IMPORTANT: If id is replaced with a string at some point,
   //            that string _cannot_ contain the "_" character because
   //            we use that to do string splitting in Graph.svelte
-  size?: number;
+  size: number | null = null;
 }
 
 // Always has a minimum of two children, or self-destructs
@@ -30,8 +34,8 @@ export class PanelGroup extends PanelNode {
   static groupCounter = 0;
 
   // A custom name can optionally be provided
-  constructor(name = "", id = -1) {
-    super(id);
+  constructor(name = "", id = -1, size?: number) {
+    super(id, size);
     this.parent = null;
     if (name !== "") {
       this.name = name;
@@ -95,8 +99,8 @@ export class PanelGroup extends PanelNode {
    * @returns void
    * */
 
-  addPanel(content: PanelType, i: number) {
-    const newLeaf = new PanelLeaf(content);
+  addPanel(content: PanelType, i: number, size?: number) {
+    const newLeaf = new PanelLeaf(content, size);
     if (i > this.panels.length) console.warn("PanelGroup.addPanel: Index out of bounds : ", i);
     this.panels.splice(i, 0, newLeaf);
     newLeaf.parent = this;
@@ -193,17 +197,21 @@ export class PanelGroup extends PanelNode {
    * */
 
   public saveLayout(): LayoutPanel {
-    const p: LayoutPanel = {
+    const group: LayoutPanel = {
       panels: [],
+      split: [],
     };
+
+    if (typeof this.size === "number") group.split?.push(this.size);
     for (const panel of this.panels) {
       if (panel instanceof PanelGroup) {
-        p.panels?.push(panel.saveLayout());
+        group.panels?.push(panel.saveLayout());
       } else if (panel instanceof PanelLeaf) {
-        p.panels?.push({ content: panel.content });
+        group.panels?.push({ content: panel.content });
+        group.split?.push(panel.size!);
       }
     }
-    return p;
+    return group;
   }
 }
 
@@ -212,8 +220,8 @@ export class PanelGroup extends PanelNode {
  * @extends PanelNode
  */
 export class PanelLeaf extends PanelNode {
-  constructor(public content: PanelType) {
-    super();
+  constructor(public content: PanelType, size?: number) {
+    super(undefined, size);
     this.parent = null;
   }
 }

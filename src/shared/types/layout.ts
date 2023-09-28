@@ -1,7 +1,11 @@
-export interface LayoutPanel {
-  panels?: LayoutPanel[];
-  content?: PanelType;
-}
+export type LayoutPanel =
+  | {
+      panels: LayoutPanel[];
+      split: number[];
+    }
+  | {
+      content: PanelType;
+    };
 
 export type PanelType =
   | "graph"

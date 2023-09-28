@@ -44,7 +44,9 @@ class ProjectsStore {
       id,
       name: name ?? "Untitled",
       saved: saved ?? false,
-      layout: layout ? constructLayout(layout) : constructLayout(layoutTemplate),
+      layout: layout
+        ? constructLayout(layout, "split" in layout ? layout.split : [])
+        : constructLayout(layoutTemplate, "split" in layoutTemplate ? layoutTemplate.split : []),
       graphs: graphs ? graphs : [],
     };
 
@@ -72,11 +74,16 @@ class ProjectsStore {
       const project = state.projects[index];
       const { id, name, saved, layout, graphs } = changedState;
 
+      // let split: number[] = [];
+      // if(layout) split = 'split' in layout ? layout.split : [];
+
       const newProject: UIProject = {
         id,
         name: name ? name : project.name,
         saved: saved ?? project.saved,
-        layout: layout ? constructLayout(layout) : project.layout,
+        layout: layout
+          ? constructLayout(layout, "split" in layout ? layout.split : [])
+          : project.layout,
         graphs: graphs ? graphs : project.graphs,
       };
 
@@ -153,7 +160,8 @@ class ProjectsStore {
       project.graphs.map(async (graph) => await graphMall.getGraph(graph).updateUIPositions())
     );
     // Update Project Layout
-    await window.apis.projectApi.saveLayout(projectId, project.layout.saveLayout());
+    const layout = project.layout.saveLayout();
+    await window.apis.projectApi.saveLayout(projectId, layout);
   }
 
   /**
