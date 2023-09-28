@@ -1,6 +1,7 @@
 import { writable, get } from "svelte/store";
 import { projectsStore } from "./ProjectStore";
 import type { CommandResponse, ICommand } from "@shared/types";
+import { focusedGraphStore, graphMall } from "./GraphStore";
 
 interface CommandStore {
   commands: ICommand[];
@@ -86,6 +87,15 @@ const blixCommandParams: Record<string, () => any> = {
     return {
       projectId: project?.id,
     };
+  },
+  "blix.graphs.import": () => {
+    const project = get(projectsStore).activeProject;
+    return { projectId: project?.id };
+  },
+  "blix.graphs.export": () => {
+    const graph = get(focusedGraphStore).graphUUID;
+
+    return { graph };
   },
 };
 

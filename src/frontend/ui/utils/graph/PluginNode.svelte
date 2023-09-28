@@ -8,6 +8,7 @@
   import { colord, extend } from "colord";
   import a11yPlugin from "colord/plugins/a11y";
   import { nodeIdLastClicked } from "../../../lib/stores/MediaStore";
+  import { get } from "svelte/store";
 
   extend([a11yPlugin]);
 
@@ -33,6 +34,8 @@
   // node.inputUIValues = new AnchorValueStore();
 
   const nodePos = node.styling.pos;
+
+  console.log("pos: ", get(nodePos));
 
   function stringToColor(str: string): CSSColorString {
     let hash = 0;

@@ -32,6 +32,14 @@ export type SaveProjectArgs = {
   projectPath?: string;
 };
 
+export type ImportGraphArgs = {
+  projectId: UUID;
+};
+
+export type ExportGraphArgs = {
+  graph: UUID;
+};
+
 type ExportMedia = {
   type: string;
   data?: string;
@@ -116,12 +124,48 @@ export const exportMediaCommand: Command = {
   },
 };
 
+export const importGraphCommand: Command = {
+  id: "blix.graphs.import",
+  description: {
+    name: "Import graph...",
+    description: "Import a saved graph into project",
+  },
+  handler: async (ctx: CommandContext, args: ImportGraphArgs) => {
+    const result = await importGraph(ctx, args);
+    if (result.status === "success" && result.message) {
+      ctx.sendSuccessMessage(result?.message);
+    } else if (result.status === "error" && result.message) {
+      ctx.sendErrorMessage(result.message);
+    }
+    return result;
+  },
+};
+
+export const exportGraphCommand: Command = {
+  id: "blix.graphs.export",
+  description: {
+    name: "Export active graph...",
+    description: "Export the active graph to file",
+  },
+  handler: async (ctx: CommandContext, args: ExportGraphArgs) => {
+    const result = await exportGraph(ctx, args);
+    if (result.status === "success" && result.message) {
+      ctx.sendSuccessMessage(result?.message);
+    } else if (result.status === "error" && result.message) {
+      ctx.sendErrorMessage(result.message);
+    }
+    return result;
+  },
+};
+
 export const projectCommands: Command[] = [
   saveProjectCommand,
   saveProjectAsCommand,
   openProjectCommand,
   // exportMediaCommand,
   getRecentProjectsCommand,
+  importGraphCommand,
+  exportGraphCommand,
 ];
 
 // =========== Command Helpers ===========
@@ -355,6 +399,73 @@ export async function openProject(ctx: CommandContext, path?: string): Promise<C
   }
 
   return { status: "success", message: "Project(s) opened successfully" };
+}
+
+export async function importGraph(
+  ctx: CommandContext,
+  args: ImportGraphArgs
+): Promise<CommandResponse> {
+  const project = ctx.projectManager.getProject(args.projectId);
+
+  if (!project) return { status: "error", message: "Invalid project Id" };
+
+  const paths = await showOpenDialog({
+    title: "Import Graph",
+    defaultPath: app.getPath("downloads"),
+    filters: [{ name: "Blix Graph", extensions: ["json"] }],
+    properties: ["openFile", "multiSelections"],
+  });
+
+  if (!paths) return { status: "error", message: "No file chosen" };
+  const coreGraphImporter = new CoreGraphImporter(ctx.toolbox);
+  for (const path of paths) {
+    const graph = await readFile(path, "utf-8");
+    const graphFile = JSON.parse(graph) as GraphToJSON;
+    const coreGraph = coreGraphImporter.import("json", graphFile);
+
+    ctx.graphManager.addGraph(coreGraph);
+    ctx.projectManager.addGraph(args.projectId, coreGraph.uuid);
+    ctx.graphManager.onGraphUpdated(
+      coreGraph.uuid,
+      new Set([CoreGraphUpdateEvent.graphUpdated, CoreGraphUpdateEvent.uiInputsUpdated]),
+      CoreGraphUpdateParticipant.system
+    );
+  }
+  ctx.mainWindow?.apis.projectClientApi.onProjectChanged({
+    id: args.projectId,
+    graphs: project.graphs,
+  });
+
+  return { status: "success", message: "Graphs(s) imported successfully" };
+}
+
+export async function exportGraph(
+  ctx: CommandContext,
+  args: ExportGraphArgs
+): Promise<CommandResponse> {
+  const graph = ctx.graphManager.getGraph(args.graph);
+
+  if (!graph) return { status: "error", message: "Graph does not exist." };
+
+  const path = await showSaveDialog({
+    title: "Save Project as",
+    defaultPath: join(app.getPath("downloads"), graph.uuid),
+    filters: [{ name: "Blix Project", extensions: ["json"] }],
+    properties: ["createDirectory"],
+  });
+
+  if (!path) return { status: "error", message: "No path specified." };
+
+  const exporter = new CoreGraphExporter<GraphToJSON>(new GraphFileExportStrategy());
+  const exportedGraph = exporter.exportGraph(graph);
+
+  try {
+    await writeFile(path, JSON.stringify(exportedGraph));
+  } catch (err) {
+    logger.error(err);
+    return { status: "error", message: "An error occurred while exporting." };
+  }
+  return { status: "success", message: "Graph exported successfully." };
 }
 
 export async function exportMedia(
