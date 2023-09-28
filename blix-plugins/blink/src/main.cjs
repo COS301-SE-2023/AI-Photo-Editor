@@ -742,7 +742,7 @@ const nodes = {
                 defaultValue: 1,
                 triggerUpdate: true,
             },
-            { min: 0, max: 10, step: 1 }
+            { min: 0, max: 50, step: 1 }
         );
         ui.addNumberInput(
             {
@@ -803,6 +803,107 @@ const nodes = {
                             y: clump.content.transform.position.y + i * uiInput["offsetY"],
                         },
                         rotation: clump.content.transform.rotation + i * uiInput["offsetRot"],
+                    }
+                })),
+            }
+
+            return { "res": { assets, content: parent } };
+        });
+
+        nodeBuilder.setUI(ui);
+        nodeBuilder.addInput("Blink clump", "clump", "Clump");
+        nodeBuilder.addOutput("Blink clump", "res", "Result");
+    },
+    "particle": (context) => {
+        const nodeBuilder = context.instantiate("Blink/Utils", "particle");
+        nodeBuilder.setTitle("Particle");
+        nodeBuilder.setDescription("Scatter a clump randomly within a fixed region");
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui.addSlider(
+            {
+                componentId: "count",
+                label: "Count",
+                defaultValue: 1,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 50, step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "boundW",
+                label: "Bounds W",
+                defaultValue: 400,
+                triggerUpdate: true,
+            }, { min: 0, step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "boundH",
+                label: "Bounds H",
+                defaultValue: 400,
+                triggerUpdate: true,
+            }, { min: 0, step: 1 }
+        );
+        ui.addNumberInput(
+            {
+                componentId: "boundRot",
+                label: "Rotation Bound",
+                defaultValue: 0,
+                triggerUpdate: true,
+            }, { step: 1 }
+        );
+        const getTransform = addTransformInput(ui, ["position", "rotation", "scale"]);
+        ui.addSlider(
+            {
+                componentId: "opacity",
+                label: "Opacity",
+                defaultValue: 1,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 1, step: 0.01 }
+        );
+        ui.addSlider(
+            {
+                componentId: "seed",
+                label: "Seed",
+                defaultValue: 1,
+                triggerUpdate: true,
+            },
+            { min: 0, max: 1000, step: 1 }
+        );
+        addTweakability(ui);
+
+
+        nodeBuilder.define(async (input, uiInput, from) => {
+            const clump = input["clump"];
+
+            if (clump == null) return { "res": null };
+
+            const assets = clump.assets;
+
+            let seed = uiInput["seed"];
+            function random() {
+                var x = Math.sin(seed++) * 10000;
+                return x - Math.floor(x);
+            }
+
+            // Construct parent clump
+            const parent = {
+                class: "clump",
+                nodeUUID: uiInput["tweaks"].nodeUUID,
+                changes: uiInput["diffs"]?.uiInputs ?? [],
+                transform: getTransform(uiInput),
+                opacity: uiInput["opacity"],
+                elements: Array.from({ length: uiInput["count"] }, (_, i) => ({
+                    ...clump.content,
+                    transform: {
+                        ...clump.content.transform,
+                        position: {
+                            x: clump.content.transform.position.x + (2*random()-1) * uiInput["boundW"],
+                            y: clump.content.transform.position.y + (2*random()-1) * uiInput["boundH"],
+                        },
+                        rotation: clump.content.transform.rotation + (2*random()-1) * uiInput["boundRot"],
                     }
                 })),
             }

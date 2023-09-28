@@ -37,7 +37,7 @@ type SelectionState = {
   prevMousePos: PIXI.Point
 };
 
-const MAX_CHILDREN_IN_CLUMP = 10;
+const MAX_CHILDREN_IN_CLUMP = 50;
 
 let selection: SelectionState = null;
 
