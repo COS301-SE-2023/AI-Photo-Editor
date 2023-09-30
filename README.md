@@ -31,8 +31,8 @@
 <p>
   Blix is a cross-platform desktop application designed to give users a
   powerful and intuitive photo editing experience. It provides a composable
-  node-based system that provides a common ground to facilitate a collaborative
-  human/AI photo editing workflow.
+  node-based system that establishes a common ground to facilitate collaborative
+  human/AI photo editing workflows.
 <p>
 
 <p align="center">
@@ -89,7 +89,10 @@
 
 [![Graph Demo 2](https://img.youtube.com/vi/7y2TohRtZDU/0.jpg)](https://youtu.be/7y2TohRtZDU)
 
-<a href="https://docs.google.com/presentation/d/1Msz-CQ9KcR42K1iKLYVXL1sr01fHjMhBYeAO6cgmMoE/edit?usp=sharing">Demo 1 Presentation</a>
+<a href="https://docs.google.com/presentation/d/1Msz-CQ9KcR42K1iKLYVXL1sr01fHjMhBYeAO6cgmMoE">Demo 1 Presentation</a><br />
+<a href="https://docs.google.com/presentation/d/1AawSOhr4sDlQ19_thKIT_t2PFonQ_1_7PLFZFwUKAuA">Demo 2 Presentation</a><br />
+<a href="https://docs.google.com/presentation/d/11gU2uEkftBe5ghPGTcINDxVaNbRN63g9U7boCBgwabY">Demo 3 Presentation</a><br />
+<a href="https://docs.google.com/presentation/d/1JbrP1Jc7_6CnNJGvRCqoi5Mzjl-gZG4MHgXXkKlLtto">Demo 4 Presentation</a><br />
 
 <img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
