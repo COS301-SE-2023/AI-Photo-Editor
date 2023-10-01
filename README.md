@@ -1,13 +1,23 @@
-<img width="939" alt="AI-Photo-Editor: Blix is a cross-platform AI-assisted graph photo editor  2023-10-01 20-18-09" src="https://github.com/COS301-SE-2023/AI-Photo-Editor/assets/54016109/e64ef90f-1bc5-4404-8f82-ef6d74331f51"><p align="center">
+<p align="center">
 <img alt="" src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/blix.svg" width="180px">
 <br />
 <i>(AKA. AI Photo Editor)</i>
 </p>
 
-[![codecov](https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor/branch/master/graph/badge.svg?token=7T6WCYXEIO)](https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor)
-[![Build Codebase](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/build.yml/badge.svg)](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/build.yml)
-[![Lint Codebase](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/lint.yml/badge.svg)](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/lint.yml)
-[![Test Codebase](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/coverage.yml/badge.svg)](https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/coverage.yml)
+<p align="center">
+<a href="https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor">
+    <img alt="Coverage" src="https://codecov.io/gh/COS301-SE-2023/AI-Photo-Editor/branch/master/graph/badge.svg?token=7T6WCYXEIO">
+</a>
+<a href="https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/build.yml">
+    <img alt="Build" src="https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/build.yml/badge.svg">
+</a>
+<a href="https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/lint.yml">
+    <img alt="Lint" src="https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/lint.yml/badge.svg">
+</a>
+<a href="https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/coverage.yml">
+    <img alt="Test" src="https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/coverage.yml/badge.svg">
+</a>
+</p>
 
 <!---------------------------------- TABLE OF CONTENTS ---------------------------------->
 <h2 id="table-of-contents"> :book: Table of Contents</h2>
