@@ -46,7 +46,7 @@
       {#if !project.saved}
         <div
           transition:fade|local="{{ duration: 150 }}"
-          class="z-1000000 mr-2 h-[10px] w-[10px] rounded-full border-[1px] border-zinc-600 bg-rose-400"
+          class="z-1000000 mr-2 h-[10px] w-[10px] rounded-full border-[1px] border-zinc-600 bg-primary-500"
         ></div>
       {/if}
 
@@ -58,7 +58,7 @@
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="ml-auto h-4 w-4 shrink-0 rounded-md stroke-zinc-500 p-[0.1em] hover:bg-zinc-600 hover:stroke-rose-500/70"
+        class="ml-auto h-4 w-4 shrink-0 rounded-md stroke-zinc-500 p-[0.1em] hover:bg-zinc-600 hover:stroke-primary-500/70"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
       </svg>

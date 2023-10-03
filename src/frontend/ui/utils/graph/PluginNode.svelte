@@ -8,6 +8,7 @@
   import { colord, extend } from "colord";
   import a11yPlugin from "colord/plugins/a11y";
   import { nodeIdLastClicked } from "../../../lib/stores/MediaStore";
+  import { blixStore } from "../../../lib/stores/BlixStore";
 
   extend([a11yPlugin]);
 
@@ -17,6 +18,7 @@
   export let panelId: string;
   export let node: GraphNode;
   // let activeInput = false;
+  let primaryColor = blixStore.primaryColor();
 
   $: svelvetNodeId = `${panelId}_${node.uuid}`;
   $: toolboxNode = toolboxStore.getNodeReactive(node.signature);
@@ -90,8 +92,8 @@
     borderColor="transparent"
     borderWidth="1px"
     borderRadius="{10}"
-    selectionColor="#f43e5c"
-    on:selected="{() => console.log('selected')}"
+    selectionColor="{$primaryColor}"
+    on:selected="{() => {}}"
     on:nodeClickReleased="{nodeClicked}"
     on:nodeDragReleased="{nodeDragReleased}"
   >

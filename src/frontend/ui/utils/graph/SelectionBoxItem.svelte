@@ -56,9 +56,9 @@
 </script>
 
 <li
-  class="flex w-full cursor-pointer items-center rounded-md p-1 text-zinc-400 active:bg-rose-400/5 {selected
-    ? 'bg-rose-300/[0.08]'
-    : ''} group hover:bg-rose-300/5"
+  class="flex w-full cursor-pointer items-center rounded-md p-1 text-zinc-400 active:bg-primary-500/5 {selected
+    ? 'bg-primary-300/[0.08]'
+    : ''} group hover:bg-primary-300/5"
   on:click="{() => dispatch('selectItem', { id: item.id })}"
   on:dblclick="{toggleEdit}"
   on:keydown="{null}"
@@ -67,7 +67,7 @@
     <input
       on:keydown="{(event) => handleEdit(event, { ...item })}"
       on:blur="{(event) => handleBlur(event, { ...item })}"
-      class="mr-1 w-full border-none bg-transparent text-sm caret-rose-400 outline-none"
+      class="mr-1 w-full border-none bg-transparent text-sm caret-primary-500 outline-none"
       type="text"
       value="{item.title}"
       autofocus
@@ -84,7 +84,7 @@
       viewBox="0 0 24 24"
       stroke-width="1.2"
       stroke="currentColor"
-      class="ml-auto h-4 w-4 hover:stroke-rose-500"
+      class="ml-auto h-4 w-4 hover:stroke-primary-500"
       on:click|stopPropagation="{() => dispatch('removeItem', { id: item.id })}"
       on:keydown="{null}"
     >

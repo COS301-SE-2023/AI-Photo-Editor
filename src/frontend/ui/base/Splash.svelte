@@ -46,7 +46,7 @@
           {#each projects as project (project.path)}
             <!-- Styling might need a little touching up -->
             <li
-              class="mb-1 flex items-center overflow-hidden rounded px-1 hover:bg-rose-500"
+              class="mb-1 flex items-center overflow-hidden rounded px-1 hover:cursor-pointer hover:bg-primary-500"
               on:click="{() => commandStore.runCommand('blix.projects.open', project)}"
               on:keydown="{null}"
               on:mouseover="{() => (currentProject = project.path)}"

@@ -9,7 +9,7 @@
 
   let versionItem: Setting = {
     id: "version",
-    title: "Current Version: ",
+    title: "Current version: ",
     subtitle: "",
     components: [],
   };
@@ -29,6 +29,20 @@
             "https://armandkrynauw.notion.site/Blix-Manual-84ea5cf8f52149319bd0b43786ef2ef0?pvs=4"
           );
         },
+      },
+    ],
+  };
+
+  let colorAccentItem: Setting = {
+    id: "accent-color",
+    title: "Accent color",
+    subtitle: "Choose the accent color used throughout Blix.",
+    components: [
+      {
+        id: "accent-color",
+        type: "colorPicker",
+        value: "#f43e5c",
+        onChange: blixStore.setPrimaryColor.bind(blixStore),
       },
     ],
   };
@@ -101,4 +115,6 @@
   </SettingsItem>
 
   <SettingsItem item="{helpItem}" />
+
+  <SettingsItem bind:item="{colorAccentItem}" />
 </div>

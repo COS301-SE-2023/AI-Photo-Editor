@@ -139,7 +139,9 @@
           {#if $cacheStore[cacheId] && ["image/png", "image/jpeg"].includes($cacheStore[cacheId].contentType)}
             <div
               class="item thumbItem {selectedCacheItems.includes(cacheId)
-                ? 'ring-2 ring-rose-500'
+               
+              ? 'ring-2 ring-primary-500'
+             
                 : ''}"
               on:click|stopPropagation="{() => handleItemOnClick(cacheId)}"
               on:keydown="{null}"
@@ -156,7 +158,7 @@
             </div>
           {:else}
             <div
-              class="item {selectedCacheItems.includes(cacheId) ? 'ring-2 ring-rose-500' : ''}"
+              class="item {selectedCacheItems.includes(cacheId) ? 'ring-2 ring-primary-500' : ''}"
               on:click|stopPropagation="{() => handleItemOnClick(cacheId)}"
               on:keydown="{null}"
             >

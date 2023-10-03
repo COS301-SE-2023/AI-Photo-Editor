@@ -63,6 +63,12 @@ export interface Button extends SettingComponentBase {
   onClick: (item: Button) => void;
 }
 
+export interface ColorPicker extends SettingComponentBase {
+  type: "colorPicker";
+  value: `#${string}`;
+  onChange?: (hex: `#${string}`) => void;
+}
+
 export interface KeyboardShortcuts extends SettingComponentBase {
   id: "keyboardShortcuts";
   type: "keyboardShortcuts";
@@ -75,7 +81,7 @@ export interface KeyboardShortcut extends SettingComponentBase {
   value: string[];
 }
 
-export type SettingComponent = Dropdown | Input | Toggle | KeyboardShortcuts | Button;
+export type SettingComponent = Dropdown | Input | Toggle | KeyboardShortcuts | Button | ColorPicker;
 
 type Prettify<T> = T extends object ? { [K in keyof T]: T[K] } : never;
 

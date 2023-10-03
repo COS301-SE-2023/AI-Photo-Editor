@@ -289,7 +289,7 @@
     {#if active}
       <div
         transition:fade|local="{{ duration: 300 }}"
-        class="z-1000000 h-full w-full rounded-full border-[1px] border-zinc-600 bg-rose-500"
+        class="z-1000000 h-full w-full rounded-full border-[1px] border-zinc-600 bg-primary-500"
       ></div>
     {/if}
   </div>
@@ -379,7 +379,7 @@
     {#if panelId === $focusedGraphStore.panelId}
       <div
         transition:fade="{{ duration: 300 }}"
-        class="z-1000000 h-full w-full rounded-full border-[1px] border-rose-700 bg-rose-500"
+        class="z-1000000 h-full w-full rounded-full border-[1px] border-primary-700 bg-primary-500"
       ></div>
     {/if}
   </div>
