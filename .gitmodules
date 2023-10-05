@@ -1,3 +1,6 @@
 [submodule "blix-plugins/ripple"]
 	path = blix-plugins/ripple
 	url = https://github.com/BlixEditor/ripple
+[submodule "blix-plugins/blink"]
+	path = blix-plugins/blink
+	url = https://github.com/BlixEditor/blink
