@@ -217,8 +217,14 @@ export class CoreGraph extends UniqueEntity {
       inputValues = { ...inputValues, ...filledDialInputs };
 
       // Handle the UI input initializer
-      const initializedInputs = nodeInstance.uiInitializer(inputValues);
-      const uiChanges = Object.keys(initializedInputs);
+      let initializedInputs = {};
+      let uiChanges: string[] = [];
+      try {
+        initializedInputs = nodeInstance.uiInitializer(inputValues);
+        uiChanges = Object.keys(initializedInputs);
+      } catch (error) {
+        logger.error("Failed to execute UI initializer: ", error);
+      }
 
       let uiInputsInitialized = false;
 
@@ -236,7 +242,6 @@ export class CoreGraph extends UniqueEntity {
         uiInputsInitialized = true;
       }
 
-      // console.log(uiInputsInitialized)
       const anchors: AiAnchors = node.returnAnchors();
       // Add position of node to graph
       this.uiPositions[node.uuid] = pos;
@@ -253,6 +258,7 @@ export class CoreGraph extends UniqueEntity {
         },
       } satisfies QueryResponse;
     } catch (error) {
+      logger.error("Error initializing node: ", error);
       return { status: "error", message: error as string } satisfies QueryResponse;
     }
 
