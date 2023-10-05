@@ -1,0 +1,3 @@
+[submodule "blix-plugins/ripple"]
+	path = blix-plugins/ripple
+	url = https://github.com/BlixEditor/ripple
