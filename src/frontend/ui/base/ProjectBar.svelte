@@ -64,20 +64,18 @@
       </svg>
     </div>
   {/each}
-  {#if $projectsStore.projects.length === 0}
-    <div on:click="{createProject}" on:keypress="{createProject}" class="no-drag flex-none pl-2">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.8"
-        stroke="currentColor"
-        class="h-4 w-4 rounded-md stroke-zinc-400 hover:bg-zinc-700"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
-      </svg>
-    </div>
-  {/if}
+  <div on:click="{createProject}" on:keypress="{createProject}" class="no-drag flex-none pl-2">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.8"
+      stroke="currentColor"
+      class="h-4 w-4 rounded-md stroke-zinc-400 hover:bg-zinc-700"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"></path>
+    </svg>
+  </div>
 </div>
 
 <Shortcuts shortcuts="{shortcuts}" />

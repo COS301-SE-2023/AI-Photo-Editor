@@ -24,7 +24,7 @@
   import ShortcutSettings from "../settings/Hotkeys.svelte";
   import { PanelGroup, PanelLeaf, type PanelNode } from "@frontend/lib/PanelNode";
   import type { PanelType } from "@shared/types";
-  import { focusedPanelStore } from "../../../lib/PanelNode";
+  import { projectsStore } from "../../../lib/stores/ProjectStore";
   import { tileStore } from "../../../lib/stores/TileStore";
   import { get } from "svelte/store";
   // import PanelBlipVane from "./PanelBlipVane.svelte";
@@ -347,7 +347,7 @@
   <div
     class="fullPanel"
     on:click="{() => {
-      focusedPanelStore.focusOnPanel(layout.id);
+      if ($projectsStore.activeProject) $projectsStore.activeProject.focusedPanel.set(layout.id);
     }}"
     on:keydown="{null}"
   >

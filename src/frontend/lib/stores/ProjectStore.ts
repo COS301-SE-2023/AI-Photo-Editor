@@ -5,6 +5,7 @@ import type { SharedProject } from "@shared/types";
 import { graphMall } from "./GraphStore";
 import { cacheStore } from "./CacheStore";
 import { mediaStore } from "./MediaStore";
+import type { GraphUUID } from "@shared/ui/UIGraph";
 
 type ProjectsStoreState = {
   projects: UIProject[];
@@ -46,6 +47,8 @@ class ProjectsStore {
       saved: saved ?? false,
       layout: layout ? constructLayout(layout) : constructLayout(layoutTemplate),
       graphs: graphs ? graphs : [],
+      focusedGraph: writable<GraphUUID>(""),
+      focusedPanel: writable<number>(-1),
     };
 
     this.store.update((state) => {
@@ -78,6 +81,8 @@ class ProjectsStore {
         saved: saved ?? project.saved,
         layout: layout ? constructLayout(layout) : project.layout,
         graphs: graphs ? graphs : project.graphs,
+        focusedGraph: project.focusedGraph,
+        focusedPanel: project.focusedPanel,
       };
 
       state.projects[index] = newProject;
@@ -125,9 +130,10 @@ class ProjectsStore {
     await window.apis.projectApi.closeProject(projectId, project?.graphs);
 
     // Clear all stores once removed
-    await cacheStore.deleteAllAssets();
-    await mediaStore.deleteAllMedia();
-    await graphMall.clearAllGraphs();
+    // TODO: make this happen per project
+    // await cacheStore.deleteAllAssets();
+    // await mediaStore.deleteAllMedia();
+    // await graphMall.clearAllGraphs();
   }
 
   /**

@@ -1,15 +1,14 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
   import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
-  import { derived, writable, type Readable } from "svelte/store";
-  import { GraphStore, graphMall, focusedGraphStore } from "../../lib/stores/GraphStore";
+  import { derived, type Readable, type Unsubscriber } from "svelte/store";
+  import { GraphStore, graphMall } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import type { UUID } from "@shared/utils/UniqueEntity";
   import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
-  import { tick } from "svelte";
-  import { focusedPanelStore } from "../../lib/PanelNode";
-  import { onDestroy } from "svelte";
+  import { onMount, tick } from "svelte";
+  // import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";
   import { commandStore } from "../../lib/stores/CommandStore";
   import GraphSelectionBox from "../utils/graph/SelectionBox.svelte";
@@ -18,6 +17,8 @@
   import type { SelectionBoxItem } from "../../types/selection-box";
   import { faDiagramProject } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
+  import { onDestroy } from "svelte";
+  import type { UIProject } from "../../lib/Project";
   // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
 
   // TODO: Abstract panelId to use a generic UUID
@@ -26,6 +27,36 @@
 
   let graphId = "";
   let lastGraphsAmount = 0;
+  let active = false;
+  let project: UIProject | null = null; // Ensure Graph Component only watches project that created it.
+  let unsubscribe: Unsubscriber;
+  /**
+   * When component is created, set to active panel
+   */
+  onMount(() => {
+    if ($projectsStore.activeProject) {
+      $projectsStore.activeProject.focusedPanel.set(panelId);
+      project = $projectsStore.activeProject;
+      // The project that owns the panel will never changes as layouts are created and destroyed
+      // TODO: Change this to work with potential future non-destroying layouts
+      unsubscribe = project.focusedGraph.subscribe((graph) => {
+        active = graph === graphId && graph !== "";
+        // console.log(active, panelId)
+      });
+    }
+  });
+  /**
+   * Ensure if graph being displayed chnages but active graph doesnt change, we enforce a check
+   */
+  $: if (graphId) {
+    if (project && get(project.focusedGraph) === graphId) {
+      active = true;
+    }
+  }
+
+  onDestroy(() => {
+    unsubscribe();
+  });
 
   const projectGraphItems = derived([projectsStore, graphMall], ([$projectsStore, $graphMall]) => {
     if (!$projectsStore.activeProject) {
@@ -50,35 +81,24 @@
     return items;
   });
 
-  // Makes sure that the active graph id is always set correctly
-  $: focusedGraphStore.set({ panelId, graphUUID: graphId });
+  /**
+   * Order is a bit off due to sorting by UUID of graphs
+   * Maybe try timestamps?
+   */
 
   // Sets new graph created as the active graph
   $: {
     const items = $projectGraphItems;
-    if (items.length > lastGraphsAmount && $focusedPanelStore === panelId) {
-      graphId = items[items.length - 1].id;
+    if (
+      items.length !== lastGraphsAmount /* && project &&  get(project.focusedPanel) === panelId */
+    ) {
+      graphId = items && items.length > 0 ? items[items.length - 1].id : "";
+      if (project) {
+        project.focusedGraph.set(graphId);
+      }
     }
     lastGraphsAmount = items.length;
   }
-
-  /**
-   * When a new panel is focussed on (the panel is clicked),
-   * the focusedPanelStore is updated through Panel.svelte. If the panel clicked is the panel
-   * that houses the current graph, the store holidng the last graph is set to the current graph.
-   *
-   * If a user clicks off onto a panel that does not house a graph, the last focussed graph will retain its
-   * indicator as the indicator subscribes to the value of the focusedGraphStore, no the focusedPanelStore.
-   */
-  const unsubscribe = focusedPanelStore.subscribe((state) => {
-    if (panelId === state) {
-      focusedGraphStore.set({ panelId: panelId, graphUUID: graphId });
-    }
-  });
-
-  onDestroy(() => {
-    unsubscribe();
-  });
 
   let thisGraphStore: Readable<GraphStore | null>;
   let graphNodes: Readable<GraphNode[]>;
@@ -163,13 +183,39 @@
   //   return transformPoint($dimensions.width / 2, $dimensions.height / 2);
   // }
 
+  /**
+   * When clicking on a graph, set current grapg to be the active graph
+   * We dont set the panel aswell, this is set in Panel.svelte where the click event is found
+   * @param event
+   */
+  function handleLeftClick(event: CustomEvent) {
+    if (project && get(project.focusedGraph) !== graphId) project.focusedGraph.set(graphId);
+  }
+
   function handleRightClick(event: CustomEvent) {
+    if (project && get(project.focusedGraph) !== graphId) project.focusedGraph.set(graphId);
     // TODO: Fix this at a stage, on initial load context menu does not show
     // unless resize event trigged
     window.dispatchEvent(new Event("resize"));
     // TODO: Add typing to Svelvet for this custom event
     const { cursorPos, canvasPos } = event.detail;
     graphMenuStore.showMenu(cursorPos, canvasPos, graphId);
+  }
+  /**
+   * When a graph is selected in the selection box, make it the active graph
+   * to reactively update all other graph tiles
+   * @param event
+   */
+  function handleGraphItemSelection(event: CustomEvent) {
+    if (project) project.focusedGraph.set(event.detail.id);
+  }
+
+  /**
+   * Set the graph to be the active panel before adding the graph.
+   */
+  function handleAddGraph() {
+    if (project) project.focusedPanel.set(panelId);
+    commandStore.runCommand("blix.graphs.create");
   }
 
   // $: console.log("GRAPH MALL UPDATED", $graphMall);
@@ -248,7 +294,7 @@
 
 <div class="absolute bottom-[15px] left-[15px] z-[100] flex h-7 items-center space-x-2">
   <div class="flex h-[10px] w-[10px] items-center">
-    {#if panelId === $focusedGraphStore.panelId}
+    {#if active}
       <div
         transition:fade|local="{{ duration: 300 }}"
         class="z-1000000 h-full w-full rounded-full border-[1px] border-zinc-600 bg-rose-500"
@@ -301,6 +347,7 @@
       items="{$projectGraphItems}"
       on:editItem="{(event) => updateGraphName(event.detail.newItem)}"
       on:removeItem="{(event) => deleteGraph(event.detail.id)}"
+      on:selectItem="{handleGraphItemSelection}"
       missingContentLabel="{'No Graphs'}"
       itemsRemovable="{true}"
     />
@@ -308,7 +355,7 @@
   <div
     class="flex h-7 w-7 items-center justify-center rounded-md border-[1px] border-zinc-600 bg-zinc-800/80 backdrop-blur-md hover:bg-zinc-700"
     title="Add Graph"
-    on:click="{() => commandStore.runCommand('blix.graphs.create')}"
+    on:click="{handleAddGraph}"
     on:keydown="{null}"
   >
     <svg
@@ -372,6 +419,7 @@
     theme="custom-dark"
     bind:graph="{graphData}"
     on:rightClick="{handleRightClick}"
+    on:leftClick="{handleLeftClick}"
     on:connection="{edgeConnected}"
     on:disconnection="{edgeDisconnected}"
     bind:connectAnchorIds="{connectAnchorIds}"
