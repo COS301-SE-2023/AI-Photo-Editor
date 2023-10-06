@@ -12,12 +12,15 @@
 </script>
 
 <div class="content">
-  <div
-    class="output {status || 'normal'}"
-    style="font-size: {fontSizeCSS || '1em'}; text-align: {align || 'none'}"
-  >
-    {content}
-  </div>
+  {#key [status, fontSize, align]}
+    <!-- Prevent lingering styles -->
+    <div
+      class="output {status || 'normal'}"
+      style="font-size: {fontSizeCSS || '1em'}; text-align: {align || 'none'}"
+    >
+      {content}
+    </div>
+  {/key}
 </div>
 
 <style>
