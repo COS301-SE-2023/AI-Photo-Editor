@@ -2,6 +2,7 @@
   export let content = "";
   export let status: "normal" | "error" | "warning" = "normal";
   export let fontSize: "small" | "medium" | "large" = "medium";
+  export let align: "left" | "none" | "right" = "none";
 
   $: fontSizeCSS = {
     small: "0.8em",
@@ -11,9 +12,15 @@
 </script>
 
 <div class="content">
-  <div class="output {status}" style="font-size: {fontSizeCSS}">
-    {content}
-  </div>
+  {#key [status, fontSize, align]}
+    <!-- Prevent lingering styles -->
+    <div
+      class="output {status || 'normal'}"
+      style="font-size: {fontSizeCSS || '1em'}; text-align: {align || 'none'}"
+    >
+      {content}
+    </div>
+  {/key}
 </div>
 
 <style>
@@ -30,10 +37,9 @@
     vertical-align: center;
     max-height: 100%;
     overflow-y: auto;
-    white-space: pre-line; /* Preserve whitespace in output */
+    white-space: pre-wrap; /* Preserve whitespace in output */
 
     padding: 2em;
-    word-break: break-all;
     border-radius: 0.4em;
   }
 

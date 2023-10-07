@@ -78,9 +78,9 @@ app.on("ready", async () => {
 
   // TODO: Remove
   if (userInfo().username === "rec1dite") {
-    await session.defaultSession.loadExtension(
-      "/home/rec1dite/.config/google-chrome/Default/Extensions/aamddddknhcagpehecnhphigffljadon/2.6.1_0"
-    );
+    // await session.defaultSession.loadExtension(
+    //   "/home/rec1dite/.config/google-chrome/Default/Extensions/aamddddknhcagpehecnhphigffljadon/2.6.1_0"
+    // );
   }
 
   // const coreGraphInterpreter = new CoreGraphInterpreter(new ToolboxRegistry);
