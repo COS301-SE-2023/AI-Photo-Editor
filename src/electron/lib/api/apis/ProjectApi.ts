@@ -60,4 +60,12 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
     const res = await this.blix.projectManager.removeProject(this.blix, uuid);
     if (res === -1 && graphs) this.blix.graphManager.deleteGraphs(graphs);
   }
+
+  async addCacheObjects(projectUUID: UUID, cacheUUIDs: UUID[]) {
+    this.blix.projectManager.addCacheObjects(projectUUID, cacheUUIDs);
+  }
+
+  async removeCacheObjects(projectUUID: UUID, cacheUUIDs: UUID[]) {
+    this.blix.projectManager.removeCacheObjects(projectUUID, cacheUUIDs);
+  }
 }

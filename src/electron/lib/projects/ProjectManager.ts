@@ -203,6 +203,16 @@ export class ProjectManager {
     this._projects[projectId].saved = newState;
     this.onProjectChanged(projectId);
   }
+
+  public addCacheObjects(projectUUID: UUID, cacheUUIDs: UUID[]) {
+    this._projects[projectUUID].addCacheObjects(cacheUUIDs);
+    this.onProjectChanged(projectUUID);
+  }
+
+  public removeCacheObjects(projectUUID: UUID, cacheUUIDs: UUID[]) {
+    this._projects[projectUUID].removeCacheObjects(cacheUUIDs);
+    this.onProjectChanged(projectUUID);
+  }
 }
 
 const recentProjectsSchema = z.object({

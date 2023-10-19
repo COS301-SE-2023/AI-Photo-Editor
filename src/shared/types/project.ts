@@ -7,6 +7,7 @@ export interface SharedProject {
   name?: string;
   layout?: LayoutPanel;
   graphs?: UUID[];
+  cache?: UUID[];
 }
 
 export interface recentProject {

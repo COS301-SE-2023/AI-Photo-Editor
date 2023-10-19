@@ -8,6 +8,7 @@ export interface UIProject {
   readonly saved: boolean;
   readonly layout: PanelGroup;
   readonly graphs: UUID[];
+  readonly cache: UUID[];
 }
 
 let groupTest = 0;

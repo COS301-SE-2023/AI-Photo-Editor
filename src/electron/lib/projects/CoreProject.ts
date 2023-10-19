@@ -15,6 +15,7 @@ export class CoreProject extends UniqueEntity {
   private _location: PathLike; // Location in user local storage to sync to
   private _saved: boolean; // Flag used to check if project has been saved since last changes
   private _layout: LayoutPanel;
+  private _cache: UUID[];
 
   constructor(name: string) {
     super();
@@ -23,6 +24,7 @@ export class CoreProject extends UniqueEntity {
     this._location = "" as PathLike;
     this._saved = false;
     this._layout = layoutTemplate;
+    this._cache = [];
   }
 
   public rename(name: string): boolean {
@@ -94,6 +96,7 @@ export class CoreProject extends UniqueEntity {
       id: this.uuid,
       saved: this._saved,
       graphs: [...this._graphs],
+      cache: [...this._cache],
     };
 
     return project;
@@ -105,6 +108,14 @@ export class CoreProject extends UniqueEntity {
 
   public set saved(flag: boolean) {
     this._saved = flag;
+  }
+
+  public addCacheObjects(cacheUUIDs: UUID[]) {
+    this._cache = [...this._cache, ...cacheUUIDs];
+  }
+
+  public removeCacheObjects(cacheUUIDs: UUID[]) {
+    this._cache = this._cache.filter((id) => !cacheUUIDs.includes(id));
   }
 }
 
