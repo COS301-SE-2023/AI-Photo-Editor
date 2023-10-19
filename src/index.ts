@@ -99,8 +99,14 @@ app.on("ready", async () => {
     app.quit();
   }
 
-  // TODO: Check for compatability for Linux and Windows
-  globalShortcut.register("CommandOrControl+Q", () => shutdownMenu());
+  // TODO: Support custom binds for other platforms
+  if (mainWindow)
+    mainWindow.webContents.on("before-input-event", (event, input) => {
+      if (input.meta && input.key.toUpperCase() === "Q") {
+        event.preventDefault();
+        shutdownMenu();
+      }
+    });
 });
 
 async function createMainWindow() {
@@ -165,13 +171,17 @@ async function createMainWindow() {
 // after the user close the last window, instead wait for Command + Q (or equivalent).
 // Noted. Will look into this later.
 app.on("window-all-closed", () => {
-  // blix.projectManager.saveAllProjects();
-  if (process.platform !== "darwin") app.quit();
+  /**
+   * We only need this if we wanted the user to manualy close the app on macOS
+   * but we want to do this manually
+   */
+  // if (process.platform !== "darwin")
+  app.quit();
 });
 
-app.on("will-quit", (e) => {
-  // blix.projectManager.saveAllProjects();
-});
+// app.on("will-quit", (e) => {
+// blix.projectManager.saveAllProjects();
+// });
 
 async function shutdownMenu() {
   if (!mainWindow) return;
@@ -179,7 +189,7 @@ async function shutdownMenu() {
 
   const unsaved = blix.projectManager.getTotalUnsavedProjects();
   if (unsaved.length === 0) {
-    closeApp();
+    closeWindow();
     return;
   }
   dialog
@@ -218,17 +228,15 @@ async function shutdownMenu() {
               async (project) => await blix?.projectManager.removeProject(blix, project.uuid, true)
             )
         );
-        closeApp();
+        closeWindow();
       } else if (response === 1) {
         // Cancel quitting app
       }
     });
 }
 
-function closeApp() {
-  // TODO: Is this a clean quit?
+function closeWindow() {
   mainWindow?.destroy();
-  if (process.platform !== "darwin") app.quit();
 }
 
 app.on("activate", () => {
