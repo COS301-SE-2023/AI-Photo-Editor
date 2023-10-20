@@ -4,6 +4,7 @@ import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { PathLike } from "fs";
 import type { GraphToJSON } from "../../lib/core-graph/CoreGraphExporter";
 import { layoutTemplate } from "../../../frontend/lib/Project";
+import { IpcResponse } from "../../lib/api/MainApi";
 // Encapsulates the backend state for one of the open Blix projects
 export class CoreProject extends UniqueEntity {
   private _name: string;
@@ -110,12 +111,22 @@ export class CoreProject extends UniqueEntity {
     this._saved = flag;
   }
 
-  public addCacheObjects(cacheUUIDs: UUID[]) {
-    this._cache = [...this._cache, ...cacheUUIDs];
+  public addCacheObjects(cacheUUIDs: UUID[]): IpcResponse<string> {
+    try {
+      this._cache = [...this._cache, ...cacheUUIDs];
+      return { success: true, data: "Asset successfully added" };
+    } catch (e: any) {
+      return { success: false, data: e };
+    }
   }
 
-  public removeCacheObjects(cacheUUIDs: UUID[]) {
-    this._cache = this._cache.filter((id) => !cacheUUIDs.includes(id));
+  public removeCacheObjects(cacheUUIDs: UUID[]): IpcResponse<string> {
+    try {
+      this._cache = this._cache.filter((id) => !cacheUUIDs.includes(id));
+      return { success: true, data: "Asset successfully removed" };
+    } catch (e: any) {
+      return { success: false, data: e };
+    }
   }
 }
 

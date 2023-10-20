@@ -18,7 +18,6 @@
   import Fa from "svelte-fa";
   import { toastStore } from "../../lib/stores/ToastStore";
   import { projectsStore } from "../../lib/stores/ProjectStore";
-  import { readable } from "svelte/store";
 
   let selectedCacheItems: CacheUUID[] = [];
   // Not used at the moment
@@ -73,8 +72,12 @@
         name: file.name,
         contentType: file.type,
       });
-      if ($projectsStore.activeProject && cacheId)
-        await window.apis.projectApi.addCacheObjects($projectsStore.activeProject.id, [cacheId]);
+      if ($projectsStore.activeProject && cacheId) {
+        const res = await window.apis.projectApi.addCacheObjects($projectsStore.activeProject.id, [
+          cacheId,
+        ]);
+        toastStore.trigger({ message: res.data, type: res.success ? "success" : "error" });
+      }
     } catch (error) {
       console.error(error);
     }
@@ -96,11 +99,13 @@
       toastStore.trigger({ message: "No asset selected.", type: "warn" });
       return;
     }
-    if ($projectsStore.activeProject)
-      await window.apis.projectApi.removeCacheObjects(
+    if ($projectsStore.activeProject) {
+      const res = await window.apis.projectApi.removeCacheObjects(
         $projectsStore.activeProject.id,
         selectedCacheItems
       );
+      toastStore.trigger({ message: res.data, type: res.success ? "success" : "error" });
+    }
     await cacheStore.deleteSelectedAssets(selectedCacheItems);
   }
 
@@ -117,8 +122,7 @@
     return url;
   }
 
-  let cacheIds = readable<string[]>([]);
-  $: cacheIds = projectsStore.getReactiveActiveProjectCacheIds();
+  let cacheIds = projectsStore.getReactiveActiveProjectCacheIds();
 </script>
 
 {#if $projectsStore.activeProject}

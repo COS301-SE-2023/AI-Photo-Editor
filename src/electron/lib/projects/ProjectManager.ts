@@ -11,6 +11,7 @@ import { dialog } from "electron";
 import type { LayoutPanel } from "../../../shared/types/index";
 import { saveProjectCommand } from "./ProjectCommands";
 import { Blix } from "../Blix";
+import { IpcResponse } from "../../lib/api/MainApi";
 
 export class ProjectManager {
   private _projects: { [id: string]: CoreProject };
@@ -204,14 +205,16 @@ export class ProjectManager {
     this.onProjectChanged(projectId);
   }
 
-  public addCacheObjects(projectUUID: UUID, cacheUUIDs: UUID[]) {
-    this._projects[projectUUID].addCacheObjects(cacheUUIDs);
+  public addCacheObjects(projectUUID: UUID, cacheUUIDs: UUID[]): IpcResponse<string> {
+    const res = this._projects[projectUUID].addCacheObjects(cacheUUIDs);
     this.onProjectChanged(projectUUID);
+    return res;
   }
 
-  public removeCacheObjects(projectUUID: UUID, cacheUUIDs: UUID[]) {
-    this._projects[projectUUID].removeCacheObjects(cacheUUIDs);
+  public removeCacheObjects(projectUUID: UUID, cacheUUIDs: UUID[]): IpcResponse<string> {
+    const res = this._projects[projectUUID].removeCacheObjects(cacheUUIDs);
     this.onProjectChanged(projectUUID);
+    return res;
   }
 }
 
