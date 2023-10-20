@@ -175,8 +175,7 @@ app.on("window-all-closed", () => {
    * We only need this if we wanted the user to manualy close the app on macOS
    * but we want to do this manually
    */
-  // if (process.platform !== "darwin")
-  app.quit();
+  if (process.platform !== "darwin") app.quit();
 });
 
 // app.on("will-quit", (e) => {
@@ -189,7 +188,7 @@ async function shutdownMenu() {
 
   const unsaved = blix.projectManager.getTotalUnsavedProjects();
   if (unsaved.length === 0) {
-    closeWindow();
+    closeApp();
     return;
   }
   dialog
@@ -228,15 +227,16 @@ async function shutdownMenu() {
               async (project) => await blix?.projectManager.removeProject(blix, project.uuid, true)
             )
         );
-        closeWindow();
+        closeApp();
       } else if (response === 1) {
         // Cancel quitting app
       }
     });
 }
 
-function closeWindow() {
-  mainWindow?.destroy();
+function closeApp() {
+  // mainWindow?.destroy();
+  app.quit();
 }
 
 app.on("activate", () => {
