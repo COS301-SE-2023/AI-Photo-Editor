@@ -3,6 +3,14 @@
   import { projectsStore } from "@frontend/lib/stores/ProjectStore";
   import { faFolder } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
+  import { shortcutsRegistry } from "@frontend/lib/stores/ShortcutStore";
+
+  const openProjectHotkeys = shortcutsRegistry.getFormattedShortcutsForActionReactive(
+    "blix.projects.openProject"
+  );
+  const newProjectHotkeys = shortcutsRegistry.getFormattedShortcutsForActionReactive(
+    "blix.projects.newProject"
+  );
 </script>
 
 <div class="fullScreen">
@@ -13,8 +21,26 @@
   {:else}
     <div class="placeholder select-none">
       <div class="icon"><Fa icon="{faFolder}" style="display: inline-block" /></div>
-      <h1>No projects!</h1>
-      <h2>Create a project to begin creating</h2>
+      <div class="flex space-x-2 pb-2">
+        <h2 class="text-zinc-400">Open a project</h2>
+        {#each $openProjectHotkeys as hotkey}
+          <span
+            class="flex flex-nowrap items-center rounded-md bg-zinc-700 px-2 text-sm text-zinc-300 shadow-inner"
+          >
+            {hotkey}
+          </span>
+        {/each}
+      </div>
+      <div class="flex space-x-2">
+        <h2 class="text-zinc-400">Create a new project</h2>
+        {#each $newProjectHotkeys as hotkey}
+          <span
+            class="flex flex-nowrap items-center rounded-md bg-zinc-700 px-2 text-sm text-zinc-300 shadow-inner"
+          >
+            {hotkey}
+          </span>
+        {/each}
+      </div>
     </div>
   {/if}
 </div>
@@ -50,7 +76,7 @@
     }
 
     h2 {
-      font-size: 0.8em;
+      font-size: 1em;
       color: #9090a4;
     }
   }
