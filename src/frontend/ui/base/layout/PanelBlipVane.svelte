@@ -32,8 +32,6 @@
 
   let panelWidth: number;
   let panelHeight: number;
-
-  $: console.log(panelWidth, panelHeight);
 </script>
 
 {#if icon !== null}

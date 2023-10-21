@@ -14,29 +14,25 @@ let groupTest = 0;
 
 /**
  * Constructs a PanelGroup from a LayoutPanel
+ *
  * @param layout The layout to construct from
  * @returns The constructed PanelGroup
  */
-
 export function constructLayout(layout: LayoutPanel): PanelGroup {
   const group = new PanelGroup((groupTest++).toString());
-  if (layout.panels) {
-    for (const panel of layout.panels) {
-      if (panel.panels) {
-        group.addPanelGroup(constructLayout(panel), panel.panels.length);
-      } else {
-        if (panel.content) {
-          group.addPanel(panel.content, layout.panels.length);
-        }
+
+  layout.panels?.forEach((panel) => {
+    if (panel.panels) {
+      group.addPanelGroup(constructLayout(panel));
+    } else {
+      if (panel.content) {
+        group.addPanel(panel.content);
       }
     }
-    return group;
-  }
+  });
+
   return group;
 }
-/**
- * A layout template for the UI
- */
 
 export const layoutTemplate: LayoutPanel = {
   panels: [
