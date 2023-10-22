@@ -76,7 +76,10 @@
         const res = await window.apis.projectApi.addCacheObjects($projectsStore.activeProject.id, [
           cacheId,
         ]);
-        toastStore.trigger({ message: res.data, type: res.success ? "success" : "error" });
+
+        if (!res.success) {
+          toastStore.trigger({ message: res.data, type: "error" });
+        }
       }
     } catch (error) {
       console.error(error);
@@ -104,7 +107,10 @@
         $projectsStore.activeProject.id,
         selectedCacheItems
       );
-      toastStore.trigger({ message: res.data, type: res.success ? "success" : "error" });
+
+      if (!res.success) {
+        toastStore.trigger({ message: res.data, type: "error" });
+      }
     }
     await cacheStore.deleteSelectedAssets(selectedCacheItems);
   }

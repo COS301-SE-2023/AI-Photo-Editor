@@ -11,7 +11,7 @@ import { dialog } from "electron";
 import type { LayoutPanel } from "../../../shared/types/index";
 import { saveProjectCommand } from "./ProjectCommands";
 import { Blix } from "../Blix";
-import { IpcResponse } from "../../lib/api/MainApi";
+import { type IpcResponse } from "../../lib/api/MainApi";
 
 export class ProjectManager {
   private _projects: { [id: string]: CoreProject };
