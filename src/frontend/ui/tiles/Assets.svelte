@@ -17,6 +17,7 @@
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
   import { toastStore } from "../../lib/stores/ToastStore";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
 
   let selectedCacheItems: CacheUUID[] = [];
   // Not used at the moment
@@ -67,10 +68,19 @@
       const file = await handle[0].getFile();
       const blob = await file.arrayBuffer();
 
-      cacheStore.addCacheObject(new Blob([blob], { type: file.type }), {
+      const cacheId = await cacheStore.addCacheObject(new Blob([blob], { type: file.type }), {
         name: file.name,
         contentType: file.type,
       });
+      if ($projectsStore.activeProject && cacheId) {
+        const res = await window.apis.projectApi.addCacheObjects($projectsStore.activeProject.id, [
+          cacheId,
+        ]);
+
+        if (!res.success) {
+          toastStore.trigger({ message: res.data, type: "error" });
+        }
+      }
     } catch (error) {
       console.error(error);
     }
@@ -92,7 +102,16 @@
       toastStore.trigger({ message: "No asset selected.", type: "warn" });
       return;
     }
+    if ($projectsStore.activeProject) {
+      const res = await window.apis.projectApi.removeCacheObjects(
+        $projectsStore.activeProject.id,
+        selectedCacheItems
+      );
 
+      if (!res.success) {
+        toastStore.trigger({ message: res.data, type: "error" });
+      }
+    }
     await cacheStore.deleteSelectedAssets(selectedCacheItems);
   }
 
@@ -108,73 +127,81 @@
 
     return url;
   }
+
+  let cacheIds = projectsStore.getReactiveActiveProjectCacheIds();
 </script>
 
-<div class="fullPane {Object.keys($cacheStore).length > 0 ? 'overflow-auto' : ''} select-none">
-  {#if Object.keys($cacheStore).length > 0}
-    <div class="itemsBox">
-      {#each Object.keys($cacheStore) as uuid}
-        {#if ["image/png", "image/jpeg"].includes($cacheStore[uuid].contentType)}
-          <div
-            class="item thumbItem {selectedCacheItems.includes(uuid) ? 'ring-2 ring-rose-500' : ''}"
-            on:click|stopPropagation="{() => handleItemOnClick(uuid)}"
-            on:keydown="{null}"
-          >
-            {#await getBlobURL(uuid, $cacheStore[uuid].contentType) then src}
-              <div class="thumbnail">
-                <img src="{src}" alt="Cached Image {uuid.slice(0, 8)}" width="50px" />
+{#if $projectsStore.activeProject}
+  <div class="fullPane {$cacheIds.length > 0 ? 'overflow-auto' : ''} select-none">
+    {#if $cacheIds.length > 0}
+      <div class="itemsBox">
+        {#each $cacheIds as cacheId}
+          {#if $cacheStore[cacheId] && ["image/png", "image/jpeg"].includes($cacheStore[cacheId].contentType)}
+            <div
+              class="item thumbItem {selectedCacheItems.includes(cacheId)
+                ? 'ring-2 ring-rose-500'
+                : ''}"
+              on:click|stopPropagation="{() => handleItemOnClick(cacheId)}"
+              on:keydown="{null}"
+            >
+              {#await getBlobURL(cacheId, $cacheStore[cacheId].contentType) then src}
+                <div class="thumbnail">
+                  <img src="{src}" alt="Cached Image {cacheId.slice(0, 8)}" width="50px" />
+                </div>
+              {:catch error}
+                <div class="thumbErr">error: {error.message}</div>
+              {/await}
+              <div class="itemTitle">{$cacheStore[cacheId].name ?? "-"}</div>
+              <div class="itemType">{$cacheStore[cacheId].contentType}</div>
+            </div>
+          {:else}
+            <div
+              class="item {selectedCacheItems.includes(cacheId) ? 'ring-2 ring-rose-500' : ''}"
+              on:click|stopPropagation="{() => handleItemOnClick(cacheId)}"
+              on:keydown="{null}"
+            >
+              <div>{cacheId.slice(0, 8)}</div>
+              <div class="itemTitle">{$cacheStore[cacheId] ? $cacheStore[cacheId].name : "-"}</div>
+              <div class="itemType">
+                {$cacheStore[cacheId] ? $cacheStore[cacheId].contentType : "-"}
               </div>
-            {:catch error}
-              <div class="thumbErr">error: {error.message}</div>
-            {/await}
-            <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
-            <div class="itemType">{$cacheStore[uuid].contentType}</div>
-          </div>
-        {:else}
-          <div
-            class="item {selectedCacheItems.includes(uuid) ? 'ring-2 ring-rose-500' : ''}"
-            on:click|stopPropagation="{() => handleItemOnClick(uuid)}"
-            on:keydown="{null}"
-          >
-            <div>{uuid.slice(0, 8)}</div>
-            <div class="itemTitle">{$cacheStore[uuid].name ?? "-"}</div>
-            <div class="itemType">{$cacheStore[uuid].contentType}</div>
-          </div>
-        {/if}
-      {/each}
-    </div>
-  {:else}
-    <div class="placeholder">
-      <div class="icon"><Fa icon="{getNoContentIcon()}" style="display: inline-block" /></div>
-      <h1>No assets!</h1>
-      <h2>Add an Asset to start editing</h2>
-    </div>
-  {/if}
+            </div>
+          {/if}
+        {/each}
+      </div>
+    {:else}
+      <div class="placeholder">
+        <div class="icon"><Fa icon="{getNoContentIcon()}" style="display: inline-block" /></div>
+        <h1>No assets!</h1>
+        <h2>Add an Asset to start editing</h2>
+      </div>
+    {/if}
 
-  <div class="hover flex items-center space-x-2">
-    <div
-      on:click="{requestFileAccess}"
-      on:keydown="{null}"
-      class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
-    >
-      Add
-    </div>
-    <div
-      on:click="{exportAssets}"
-      on:keydown="{null}"
-      class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
-    >
-      Export
-    </div>
-    <div
-      on:click="{removeAssets}"
-      on:keydown="{null}"
-      class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
-    >
-      Remove
+    <div class="hover flex items-center space-x-2">
+      <div
+        on:click="{requestFileAccess}"
+        on:keydown="{null}"
+        class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+      >
+        Add
+      </div>
+      <div
+        on:click="{exportAssets}"
+        on:keydown="{null}"
+        class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+      >
+        Export
+      </div>
+      <div
+        on:click="{removeAssets}"
+        on:keydown="{null}"
+        class="flex h-7 select-none flex-nowrap items-center justify-center rounded-md border border-zinc-600 bg-zinc-800/80 p-2 text-zinc-400 hover:bg-zinc-700 active:bg-zinc-800/50"
+      >
+        Remove
+      </div>
     </div>
   </div>
-</div>
+{/if}
 
 <svelte:window
   on:click="{() => {

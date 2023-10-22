@@ -1,24 +1,22 @@
 // Blix caching system primarily for large binary objects
 import {
-  type SubsidiaryUUID,
-  type CacheUUID,
-  type CacheSubsidiary,
+  CACHE_MESSAGE_ID_SIZE,
   type CacheObject,
   type CacheRequest,
+  type CacheResponse,
+  type CacheUUID,
   type CacheUpdateNotification,
   type CacheWriteResponse,
-  type CacheResponse,
-  CACHE_MESSAGE_ID_SIZE,
 } from "../../../shared/types/cache";
 
 import WebSocket, { WebSocketServer } from "ws";
 // import { Server } from "socket.io";
 import { randomBytes } from "crypto";
-import logger from "../../utils/logger";
 import { app, ipcMain } from "electron";
-import { showSaveDialog } from "../../utils/dialog";
-import { join } from "path";
 import { writeFile } from "fs/promises";
+import { join } from "path";
+import { showSaveDialog } from "../../utils/dialog";
+import logger from "../../utils/logger";
 
 // The main interface which this manager must expose is:
 //  - get(cacheUUID: CacheUUID): CacheObject

@@ -1,15 +1,13 @@
 import {
-  type SubsidiaryUUID,
-  type CacheUUID,
-  type CacheObject,
-  type CacheUpdateNotification,
+  CACHE_MESSAGE_ID_SIZE,
   type CacheMetadata,
   type CacheRequest,
-  type CacheWriteResponse,
-  CACHE_MESSAGE_ID_SIZE,
   type CacheResponse,
+  type CacheUUID,
+  type CacheUpdateNotification,
+  type CacheWriteResponse,
 } from "@shared/types/cache";
-import { derived, get, writable, type Writable } from "svelte/store";
+import { writable } from "svelte/store";
 
 // type CacheObjects = {
 //   [key: CacheUUID]: CacheObject;
@@ -60,7 +58,6 @@ class CacheStore {
           } else {
             // Handle response
             const messageId = payload.messageId;
-
             if (this.lobby[messageId] != null) {
               this.lobby[messageId](payload);
               delete this.lobby[messageId];
@@ -113,7 +110,7 @@ class CacheStore {
       const metadataPayload = JSON.stringify({
         type: "cache-write-metadata",
         id: writeResp.id,
-        messageId,
+        messageId: metadataMessageId,
         metadata,
       } as CacheRequest);
       (await this.sendCachePayload(metadataMessageId, metadataPayload)) as CacheResponse;
