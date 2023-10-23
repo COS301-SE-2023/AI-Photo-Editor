@@ -127,18 +127,18 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/COS301
 - **Explain why this enhancement would be useful** to most Blix users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
 
 
-### Your First Code Contribution
+<!-- ### Your First Code Contribution -->
 
 
-### Improving The Documentation
+<!-- ### Improving The Documentation -->
 <!-- TODO
 -->
 
-## Styleguides
-### Commit Messages
+<!-- ## Styleguides -->
+<!-- ### Commit Messages-->
 <!-- TODO
 
 -->
 
-## Join The Project Team
+<!-- ## Join The Project Team -->
 <!-- TODO -->
