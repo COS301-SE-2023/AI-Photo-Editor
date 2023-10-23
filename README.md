@@ -55,20 +55,10 @@
 <h2 id="documentation"> :blue_book: Documentation</h2>
 
 <h3>Software Requirement Specification</h3>
-<a href="https://drive.google.com/file/d/1ATjzOak-0K-Q_kudSD9OEBIK9wS2q4Gy/view?usp=sharing">SRSv1</a>
-•
-<a href="https://drive.google.com/file/d/1PUAM4CS4qMLwbHv37kl86bTaVbaIDlLZ/view?usp=sharing">SRSv2</a>
-•
-<a href="https://drive.google.com/file/d/1XgHfZQaj9rpDhAZWE6s_zF1wM1EhKIRY/view?usp=sharing">SRSv3</a>
-•
-<a href="https://drive.google.com/file/d/1J6kcDWjVuH58iiQxCd1sIRy1-3EqaHW-/view?usp=drive_link">SRSv4</a>
+<a href="https://drive.google.com/drive/folders/1GZKHobQARi-2YzsywifolR_pFYL3Cvqb?usp=sharing">SRS Documents</a>
 
 <h3>Software Architecture</h3>
-<a href="https://drive.google.com/file/d/1vXylz_2AGhIbI3x6IT7RJHlcIxV7ydWe/view?usp=sharing">SAv1</a>
-•
-<a href="https://drive.google.com/file/d/1ux78JlX2uZjZg3gL4HwTCUpflXp9-cwP/view?usp=sharing">SAv2</a>
-•
-<a href="https://drive.google.com/file/d/1QXn4w6krnWsm9v4x9fqjG16s2dhk_QZ0/view?usp=drive_link">SAv3</a>
+<a href="https://drive.google.com/drive/folders/1SNnfC44DCIFK5kD5LkyoEbxfRvr8g_CS?usp=sharing">Software Architectures</a>
 
 <br>
 
@@ -79,9 +69,7 @@
     <li><a href="https://drive.google.com/file/d/1sDJw5e2MZYsqqW8XbH74iX4YiP-tuk1d/view?usp=drive_link">Testing Policy</a></li>
     <li><a href="https://drive.google.com/file/d/11AeERkEWYtxJHes-1va_YyJVb93pd7MM/view?usp=drive_link">Deployment Diagram</a></li>
     <li><a href="https://drive.google.com/file/d/1Rmy0YbLDfM-8XI6rwFb3PWAoF2UFYfOH/view?usp=drive_link">Installation Manual v1</a></li>
-    <li><a href="https://drive.google.com/file/d/141GD2XQz7EbAA--MKQ5w9Yfh9zRA05ss/view?usp=sharing">User Manual v1</a></li>
-    <li><a href="https://drive.google.com/file/d/1sLkLUSyI9LsDfnfzGExk_df6zPMu-HNL/view?usp=sharing">User Manual v2</a></li>
-    <li><a href="https://drive.google.com/file/d/110ZWV1qh3gcXGk4hVldn95QhyN6GbzLH/view?usp=drive_link">User Manual v3</a></li>
+    <li><a href="https://drive.google.com/drive/folders/11OvcPKfqupLnhAcZk92K7WXyILO0X1Sj?usp=share_link">User Manuals</a></li>
   </ul>
 </details>
 
@@ -92,13 +80,7 @@
 
 [![Graph Demo 2](https://img.youtube.com/vi/7y2TohRtZDU/0.jpg)](https://youtu.be/7y2TohRtZDU)
 
-<a href="https://docs.google.com/presentation/d/1Msz-CQ9KcR42K1iKLYVXL1sr01fHjMhBYeAO6cgmMoE">Demo 1</a>
-•
-<a href="https://docs.google.com/presentation/d/1AawSOhr4sDlQ19_thKIT_t2PFonQ_1_7PLFZFwUKAuA">Demo 2</a>
-•
-<a href="https://docs.google.com/presentation/d/11gU2uEkftBe5ghPGTcINDxVaNbRN63g9U7boCBgwabY">Demo 3</a>
-•
-<a href="https://docs.google.com/presentation/d/1JbrP1Jc7_6CnNJGvRCqoi5Mzjl-gZG4MHgXXkKlLtto">Demo 4</a>
+<a href="https://drive.google.com/drive/folders/1hW7HfkvV94R4TRMGSAv_glOtFP1Ww9B9?usp=sharing">Demo Slides</a>
 
 <img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
