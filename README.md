@@ -66,7 +66,7 @@
   <summary><h3>Extras</h3></summary>
   <ul style="list-style: none">
     <li><a href="https://drive.google.com/file/d/1KSBoSISRutLugk6KTDuSiBa4gBeDqJEq/view?usp=sharing">Coding Standards</a></li>
-    <li><a href="https://drive.google.com/file/d/1sDJw5e2MZYsqqW8XbH74iX4YiP-tuk1d/view?usp=drive_link">Testing Policy</a></li>
+    <li><a href="https://drive.google.com/file/d/1AKw07sTbT_UwYb3aZ7x7g0MXIf5WFRmq/view?usp=share_link">Testing Policy</a></li>
     <li><a href="https://drive.google.com/file/d/11AeERkEWYtxJHes-1va_YyJVb93pd7MM/view?usp=drive_link">Deployment Diagram</a></li>
     <li><a href="https://drive.google.com/file/d/1Rmy0YbLDfM-8XI6rwFb3PWAoF2UFYfOH/view?usp=drive_link">Installation Manual v1</a></li>
     <li><a href="https://drive.google.com/drive/folders/11OvcPKfqupLnhAcZk92K7WXyILO0X1Sj?usp=share_link">User Manuals</a></li>
@@ -94,6 +94,14 @@
 </div>
 
 <img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
+
+
+
+
+<!------------------------------------- Project Management ------------------------------------>
+
+<h2 id="project management"> 📷 Project Management</h2>
+<a href="https://github.com/orgs/COS301-SE-2023/projects/15">Project board</a>
 
 <!----------------------------------------- TEAM ---------------------------------------->
 <h2 id="team"> :handshake: Team</h2>
