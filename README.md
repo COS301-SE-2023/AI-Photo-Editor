@@ -1,7 +1,11 @@
 <p align="center">
+<br />
 <img alt="" src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/blix.svg" width="180px">
 <br />
+<br />
 <i>(AKA. AI Photo Editor)</i>
+<br />
+<br />
 </p>
 
 <p align="center">
@@ -18,23 +22,6 @@
     <img alt="Test" src="https://github.com/COS301-SE-2023/AI-Photo-Editor/actions/workflows/coverage.yml/badge.svg">
 </a>
 </p>
-
-<!---------------------------------- TABLE OF CONTENTS ---------------------------------->
-<h2 id="table-of-contents"> :book: Table of Contents</h2>
-
-<details open="open">
-  <summary>Table of Contents</summary>
-  <ol style="list-style: none">
-    <li><a href="#overview">Overview</a></li>
-    <li><a href="#documentation">Documentation</a></li>
-    <li><a href="#demos">Demos</a></li>
-    <li><a href="#technologies">Technologies</a></li>
-    <li><a href="#team">Team</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ol>
-</details>
-
-<img alt="" src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/aqua.png">
 
 <!--------------------------------------- OVERVIEW -------------------------------------->
 <h2 id="overview"> :cloud: Overview</h2>
