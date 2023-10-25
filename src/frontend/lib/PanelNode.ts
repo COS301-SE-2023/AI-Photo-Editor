@@ -5,149 +5,148 @@ import { writable } from "svelte/store";
 /* eslint-disable no-console */
 export abstract class PanelNode {
   static panelCounter = 0;
-
-  constructor(id = -1) {
-    this.parent = null;
-    this.index = -1;
-    if (id !== -1) {
-      this.id = id;
-    } else {
-      this.id = PanelNode.panelCounter++;
-    }
-  }
-
   parent: PanelGroup | null;
   index: number;
-  id: number; // Unique ID for each panel, helps Svelte with keying
-  // IMPORTANT: If id is replaced with a string at some point,
-  //            that string _cannot_ contain the "_" character because
-  //            we use that to do string splitting in Graph.svelte
+  // Helps Svelte with keying, cannot contain '_' character because it is used
+  // for string splitting in Graph.svelte
+  id: string;
   size?: number;
+
+  constructor() {
+    this.parent = null;
+    this.index = -1;
+    this.id = PanelNode.generateUniqueId();
+  }
+
+  static generateUniqueId() {
+    const timestamp = Date.now().toString(36);
+    const randomNumber = Math.random().toString(36).substring(2, 8);
+    const uniqueId = timestamp + randomNumber;
+    return uniqueId;
+  }
 }
 
 // Always has a minimum of two children, or self-destructs
 export class PanelGroup extends PanelNode {
   static groupCounter = 0;
 
+  name: string;
+  panels: PanelNode[] = [];
+
   // A custom name can optionally be provided
-  constructor(name = "", id = -1) {
-    super(id);
-    this.parent = null;
+  constructor(name = "") {
+    super();
+
     if (name !== "") {
       this.name = name;
     } else {
       this.name = `pg_${PanelGroup.groupCounter}`;
     }
+
     PanelGroup.groupCounter++;
   }
-  name: string;
-  panels: PanelNode[] = [];
 
   /**
-   * Removes a panel to from the panelgroup at index i. Existing panelGroup will be pruned if only one panel exists.
-   * @param i The index to remove the panel from
-   * @returns void
-   * */
-
-  // Nukes the current panelgroup and replaces it with its first child if possible
-  removePanel(i: number) {
-    if (i > this.panels.length) console.warn("PanelGroup.removePanel: Index out of bounds : ", i);
-    this.panels.splice(i, 1);
-
-    // If length 1, dissolve and replace with child
-    if (this.panels.length === 1) {
-      if (this.parent != null) {
-        this.parent.setPanel(this.panels[0], this.index); // Replaces
-      }
-    }
-    // If empty, dissolve (Shouldn't ever happen anyway)
-    if (this.panels.length === 0) {
-      if (this.parent != null) {
-        this.parent.removePanel(this.index);
-      }
-    }
-    this.updateParent(this);
-  }
-
-  /**
-   * Replaces a panel at the designated index in the panelgroup.
-   * @param panel The panel to be used to replace the existing panel
-   * @param i The index of the panel to be replaced
-   * @returns void
-   * */
-
-  setPanel(panel: PanelNode, i: number) {
-    if (i > this.panels.length) {
-      console.warn("PanelGroup.setPanel: Index out of bounds : ", i);
+   * Removes a panel at a designated index in the PanelGroup. If the PanelGroup
+   * has only one child, it will be replaced by the child.
+   *
+   * @param index The index of the panel to be removed
+   */
+  removePanel(index: number) {
+    if (index < 0 || index >= this.panels.length) {
       return;
     }
-    const tempId = this.panels[i].id;
-    this.panels[i] = panel;
-    panel.parent = this;
-    panel.index = i;
-    panel.id = tempId;
+
+    this.panels.splice(index, 1);
+
+    // Nukes the current PanelGroup and replaces it with its first child
+    if (this.panels.length === 1) {
+      this.parent?.setPanel(this.panels[0], this.index);
+    }
+
+    // If empty, dissolve (Shouldn't ever happen anyway)
+    if (this.panels.length === 0) {
+      this.parent?.removePanel(this.index);
+    }
+
+    this.updatePanelIndexes();
+    this.updateParent(this);
   }
 
   /**
-   * Inserts a panel to the panelgroup at index i
-   * @param content The type of the panel to be added
-   * @param i The index to place the panel at
-   * @returns void
-   * */
+   * Replaces a panel at the designated index in the PanelGroup.
+   *
+   * @param panel The panel to be used to replace the existing panel
+   * @param index The index of the panel to be replaced
+   */
+  setPanel(panel: PanelNode, index: number) {
+    if (index < 0 || index >= this.panels.length) {
+      return;
+    }
 
-  addPanel(content: PanelType, i: number) {
+    this.panels[index] = panel;
+    panel.parent = this;
+    panel.index = index;
+  }
+
+  /**
+   * Inserts a panel at the designated index in the PanelGroup. If the index is
+   * not provided, the panel will be added to the end of the PanelGroup.
+   *
+   * @param content The type of the panel to be added
+   * @param index The index to place the panel at
+   */
+  addPanel(content: PanelType, index?: number) {
+    index = index ?? this.panels.length;
+
+    if (index < 0 || index > this.panels.length) {
+      return;
+    }
+
     const newLeaf = new PanelLeaf(content);
-    if (i > this.panels.length) console.warn("PanelGroup.addPanel: Index out of bounds : ", i);
-    this.panels.splice(i, 0, newLeaf);
+
+    this.panels.splice(index, 0, newLeaf);
     newLeaf.parent = this;
-    newLeaf.index = i;
+    newLeaf.index = index;
 
     this.updateParent(this);
   }
 
   /**
-   * Inserts a panelgroup to the current panelgroup at index i
-   * @param panelGroup The panelgroup to be added
-   * @param i The index to place the panelgroup at
-   * @returns void
-   * */
+   * Inserts a PanelGroup at the designated index in the PanelGroup. If the
+   * index is not provided, thee PanelGroup will be added to the end of the
+   * PanelGroup.
+   *
+   * @param panelGroup The PanelGroup to be added
+   * @param index The index to place the PanelGroup at
+   */
+  addPanelGroup(panelGroup: PanelGroup, index?: number) {
+    index = index ?? this.panels.length;
 
-  addPanelGroup(panelGroup: PanelGroup, i: number) {
-    this.panels.splice(i, 0, panelGroup);
+    if (index < 0 || index > this.panels.length) {
+      return;
+    }
+
+    this.panels.splice(index, 0, panelGroup);
     panelGroup.parent = this;
-    panelGroup.index = i;
+    panelGroup.index = index;
   }
 
-  /**
-   * Returns the panel at the designated index
-   * @param i The index of the panel to be returned
-   * @returns PanelNode
-   * */
-  getPanel(i: number): PanelNode {
-    return this.panels[i];
+  getPanel(index: number): PanelNode {
+    return this.panels[index];
   }
-
-  /**
-   * Updates the parent of the current panelgroup
-   * @param _current The current panel group to be used
-   * @returns void
-   * */
 
   updateParent(_current: PanelGroup) {
     let current = _current;
+
     while (current.parent != null) {
       current = current.parent;
     }
+
     current = current;
   }
 
-  /**
-   * Prints the panelgroup and its children
-   * @param indent The indentation level to be used
-   * @returns string
-   */
-
-  // Print tree for debug
+  /** Print tree for debug */
   public print(indent = 0): string {
     let res;
     if (this.parent) {
@@ -170,27 +169,23 @@ export class PanelGroup extends PanelNode {
     return res;
   }
 
-  /**
-   * Recursively sets the parent of the panelgroup and its children
-   * @returns void
-   * */
+  updatePanelIndexes() {
+    this.panels.forEach((panel, index) => {
+      panel.index = index;
+    });
+  }
 
+  /** Recursively sets the parent of the PanelGroup and its children */
   recurseParent() {
-    for (let p = 0; p < this.panels.length; p++) {
-      const panel = this.panels[p];
+    this.panels.forEach((panel, index) => {
       panel.parent = this;
-      panel.index = p;
+      panel.index = index;
 
       if (panel instanceof PanelGroup) {
         panel.recurseParent();
       }
-    }
+    });
   }
-
-  /**
-   * Saves the layout of the panelgroup and its children
-   * @returns LayoutPanel
-   * */
 
   public saveLayout(): LayoutPanel {
     const p: LayoutPanel = {
@@ -217,13 +212,14 @@ export class PanelLeaf extends PanelNode {
     this.parent = null;
   }
 }
+
 /**
  * This store house the last panel clicked by the user.
  */
 class FocusedPanelStore {
-  private readonly store = writable<number>(-1);
+  private readonly store = writable<string>("");
 
-  public focusOnPanel(id: number) {
+  public focusOnPanel(id: string) {
     this.store.set(id);
   }
 

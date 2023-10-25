@@ -34,7 +34,7 @@
     </div>
     <div class="content">
       <img src="images/blix.svg" alt="Banner" class="inline-block w-20" />
-      <span class="float-right pt-6 opacity-90">AI Photo Editor</span><br />
+      <span class="float-right pt-6 opacity-90">The Anything Editor</span><br />
       <hr class="my-3 border-gray-400" />
       <br /><br />
       <h2>Recent projects</h2>
@@ -66,10 +66,10 @@
           {/each}
         {/await}
       </ul>
-      <br /><br /><br /><br />
+      <!-- <br /><br /><br /><br />
       <h2>Templates</h2>
       <hr class="my-3 border-gray-600" />
-      <i>No templates available</i>
+      <i>No templates available</i> -->
     </div>
   </div>
 </div>

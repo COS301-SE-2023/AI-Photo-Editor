@@ -39,7 +39,7 @@ class ProjectsStore {
    * and UI has show the new state.
    */
   public handleProjectCreated(projectState: SharedProject, setAsActive = false): void {
-    const { id, name, saved, layout, graphs } = projectState;
+    const { id, name, saved, layout, graphs, cache } = projectState;
 
     const project: UIProject = {
       id,
@@ -48,7 +48,8 @@ class ProjectsStore {
       layout: layout ? constructLayout(layout) : constructLayout(layoutTemplate),
       graphs: graphs ? graphs : [],
       focusedGraph: writable<GraphUUID>(""),
-      focusedPanel: writable<number>(-1),
+      focusedPanel: writable<string>(""),
+      cache: cache ? cache : [],
     };
 
     this.store.update((state) => {
@@ -73,7 +74,7 @@ class ProjectsStore {
       if (index < 0) return state;
 
       const project = state.projects[index];
-      const { id, name, saved, layout, graphs } = changedState;
+      const { id, name, saved, layout, graphs, cache } = changedState;
 
       const newProject: UIProject = {
         id,
@@ -83,8 +84,8 @@ class ProjectsStore {
         graphs: graphs ? graphs : project.graphs,
         focusedGraph: project.focusedGraph,
         focusedPanel: project.focusedPanel,
+        cache: cache ?? project.cache,
       };
-
       state.projects[index] = newProject;
 
       if (state.activeProject?.id === newProject.id) {
@@ -186,6 +187,12 @@ class ProjectsStore {
   public getReactiveActiveProjectGraphIds(): Readable<string[]> {
     return derived(this.store, ($store) => {
       return $store.activeProject?.graphs || [];
+    });
+  }
+
+  public getReactiveActiveProjectCacheIds(): Readable<string[]> {
+    return derived(this.store, ($store) => {
+      return $store.activeProject?.cache || [];
     });
   }
 

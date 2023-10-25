@@ -27,12 +27,12 @@
   import { projectsStore } from "../../../lib/stores/ProjectStore";
   import { tileStore } from "../../../lib/stores/TileStore";
   import { get } from "svelte/store";
-  // import PanelBlipVane from "./PanelBlipVane.svelte";
+  import PanelBlipVane from "./PanelBlipVane.svelte";
   // import { scale } from "svelte/transition";
 
   const dispatch = createEventDispatcher();
 
-  const minSize = 10;
+  const minSize = 0;
   const tiles = get(tileStore);
 
   export let horizontal: boolean = false;
@@ -188,10 +188,12 @@
     resetBlipVane();
 
     const selection = slideOptions(e, index, dock);
+    const dir: string = e.detail.dir;
 
     switch (selection.action) {
       case "addPanel":
-        layout.addPanel(selection.data.content, selection.data.index);
+        const index = dir === "r" || dir === "d" ? selection.data.index + 1 : selection.data.index;
+        layout.addPanel(selection.data.content, index);
         layout = layout; // Force update
         break;
       case "removePanel":
@@ -203,7 +205,7 @@
         bubbleToRoot();
         break;
       case "tunnelAndSplit":
-        let group = new PanelGroup(undefined, layout.getPanel(selection.data.index).id);
+        let group = new PanelGroup();
 
         //Add this panel
         group.addPanel(selection.data.content, 0);
@@ -324,11 +326,11 @@
 
         <!-- TODO: Fix - for some reason this occasionally causes issues with panel deletion -->
         <!-- A temp workaround that seems to hold up better is awaiting tick() in PanelGroup removePanel() -->
-        <!-- {#if blipVaneIcon && i === blipVaneIndex}
+        {#if blipVaneIcon && i === blipVaneIndex}
           {#key blipVaneIcon}
-            <PanelBlipVane icon={blipVaneIcon} />
+            <PanelBlipVane icon="{blipVaneIcon}" />
           {/key}
-        {/if} -->
+        {/if}
 
         <svelte:self
           on:bubbleToRoot="{bubbleToRoot}"
@@ -351,14 +353,6 @@
     }}"
     on:keydown="{null}"
   >
-    <!-- {#if layout.content === "graph"}
-      <Graph />
-    {:else if layout.content === "image"}
-      <div class="flex h-full w-full items-center justify-center p-5">
-        <Image />
-      </div>
-    {/if} -->
-    <!-- {layout.content} -->
     <svelte:component
       this="{getComponentForPanelType(layout.content)}"
       signature="{layout.content}"
@@ -385,6 +379,14 @@
     background-color: #11111b;
     border: none;
     transition: all 0.3s ease-in-out;
+  }
+
+  .splitpanes--horizontal > .splitpanes__splitter {
+    height: 5px !important;
+  }
+
+  .splitpanes--vertical > .splitpanes__splitter {
+    width: 5px !important;
   }
 
   .splitpanes.main-theme .splitpanes__splitter:active {
