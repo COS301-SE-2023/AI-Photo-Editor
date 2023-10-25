@@ -86,7 +86,7 @@
   }
 
   onDestroy(() => {
-    webview?.closeDevTools();
+    // webview?.closeDevTools();
   });
 </script>
 
