@@ -10,6 +10,7 @@ import {
   constructUIValueStore,
   type GraphMetadata,
   NodeStylingStore,
+  GraphEdge,
 } from "@shared/ui/UIGraph";
 import { writable, get, derived, type Writable, type Readable } from "svelte/store";
 import { toolboxStore } from "./ToolboxStore";
@@ -288,31 +289,135 @@ export class GraphStore {
     });
   }
 
+  public discernNodeLayers(nodes: GraphNodeUUID[]) {
+    // Get all edges between chosen nodes
+    const edges: GraphEdge[] = Object.values(get(this.graphStore).edges).filter(
+      (e) => nodes.includes(e.nodeUUIDFrom) && nodes.includes(e.nodeUUIDTo)
+    );
+
+    // Construct edge mapping { [toNode]: fromNode[] }
+    const edgeMap: { [key: GraphNodeUUID]: { fromNode: GraphNodeUUID; toAnchor: string }[] } = {};
+    edges.forEach((edge) => {
+      if (edgeMap[edge.nodeUUIDTo] == null) {
+        edgeMap[edge.nodeUUIDTo] = [];
+      }
+      edgeMap[edge.nodeUUIDTo].push({ fromNode: edge.nodeUUIDFrom, toAnchor: edge.anchorIdTo });
+    });
+    // Sort edgeMap according to anchor order in node
+    // TODO: OPTIMIZE THIS!
+    Object.keys(edgeMap).forEach((nodeTo) => {
+      const signature = this.getNode(nodeTo).signature;
+      edgeMap[nodeTo] = edgeMap[nodeTo].sort((a, b) => {
+        const indexA = toolboxStore.getAnchorOrderedIndex(signature, a.toAnchor);
+        const indexB = toolboxStore.getAnchorOrderedIndex(signature, b.toAnchor);
+        return indexA - indexB;
+      });
+    });
+
+    // Find output nodes
+    const fromNodes = new Set(edges.map((e) => e.nodeUUIDFrom));
+    const outputNodes = new Set(nodes.filter((n) => !fromNodes.has(n)));
+
+    // Setup for depth-first search
+    const layersByOutput: { [key: GraphNodeUUID]: { [key: GraphNodeUUID]: number } } = {}; // { [outputNode]: { [node]: layerNo } }
+
+    function dfs(node: GraphNodeUUID, layers: { [key: GraphNodeUUID]: number }, d: number) {
+      if (edgeMap[node] == null) return d;
+
+      let maxD = d;
+      edgeMap[node].forEach(({ fromNode }) => {
+        if (!layers[fromNode] || layers[fromNode] < d + 1) {
+          layers[fromNode] = d + 1;
+          maxD = Math.max(maxD, dfs(fromNode, layers, d + 1));
+        }
+      });
+
+      return maxD;
+    }
+
+    // Traverse for layers
+    const maxDs: { [key: GraphNodeUUID]: number } = {}; // { [outputNode]: maxD }
+    let maxMaxD = 0;
+
+    outputNodes.forEach((out) => {
+      layersByOutput[out] = { [out]: 0 };
+
+      maxDs[out] = dfs(out, layersByOutput[out], 0);
+      maxMaxD = Math.max(maxMaxD, maxDs[out]);
+    });
+
+    // Zip merge columns
+    const merged: { [key: number]: Set<GraphNodeUUID> } = {};
+
+    outputNodes.forEach((out) => {
+      for (const [n, l] of Object.entries(layersByOutput[out])) {
+        const i = maxMaxD - (maxDs[out] - l);
+
+        if (merged[i] == null) {
+          merged[i] = new Set();
+        }
+
+        if (!merged[i].has(n)) {
+          merged[i].add(n);
+        }
+      }
+    });
+
+    return { layers: merged, numLayers: maxMaxD + 1, edgeMap };
+  }
+
   public gravityDisplace(nodes: GraphNodeUUID[], duration: number) {
     const start = performance.now();
 
-    const nodesSet = new Set(nodes);
     const FORCE = 3;
     const NUDGE_DISTANCE = 10;
 
-    // ===== NUDGE NODES RANDOMLY ===== //
+    const X_SNAP_POS = 500;
+    const X_SNAP_FORCE = 0.2;
+    const Y_SPLAYING_FORCE = 400;
+
+    const CENTER_FORCE = 0.02;
+
+    const EDGE_TIGHTEN_FORCE = 0.1;
+
+    const NODE_FORCE = 15;
+
+    // ===== DISCERN + APPLY NODE LAYERS ===== //
+    const { layers, numLayers, edgeMap } = this.discernNodeLayers(nodes);
+
+    // Obtain center x pos
+    let centerX = 0;
+    let numNodes = 0;
     nodes.forEach((node) => {
       const nodePos = this.getNode(node)?.styling?.pos;
       if (!nodePos) return;
-      nodePos.update((pos) => {
-        return {
-          x: pos.x + NUDGE_DISTANCE * 2 * (Math.random() - 0.5),
-          y: pos.y + NUDGE_DISTANCE * 2 * (Math.random() - 0.5),
-        };
-      });
+
+      centerX += get(nodePos).x;
+      numNodes++;
     });
+    centerX /= numNodes;
+
+    // Apply initial (layered) placement
+    for (const [layer, layerNodes] of Object.entries(layers)) {
+      layerNodes.forEach((node) => {
+        const nodePos = this.getNode(node)?.styling?.pos;
+        if (!nodePos) return;
+
+        nodePos.update((pos) => {
+          return {
+            x: centerX + X_SNAP_POS * (numLayers / 2 - parseFloat(layer)),
+            y: pos.y + NUDGE_DISTANCE * 2 * (Math.random() - 0.5), // Random nudge
+          };
+        });
+      });
+    }
 
     // Notify the system of the new node positions
     const registerPositionUpdate = async () => {
       await this.updateUIPositions();
-      return; // TODO
     };
 
+    // ========== MAIN LOOP ========== //
     const tickGravityDisplace = () => {
       const now = performance.now();
       if (now - start > duration * 1000) {
@@ -321,113 +426,124 @@ export class GraphStore {
         return;
       }
 
+      // ===== INITIALIZE FORCES ===== //
       const forces: { [key: GraphNodeUUID]: { x: number; y: number } } = {};
 
-      // ===== COMPUTE CENTER OF MASS ===== //
-      const centerMass = { x: 0, y: 0 };
-      const CENTER_FORCE = 0.02;
-      let numNodes = 0;
+      nodes.forEach((node) => {
+        forces[node] = { x: 0, y: 0 };
+      });
+
+      // ===== COMPUTE VERTICAL CENTER OF MASS ===== //
+      let centerMassV = 0;
       nodes.forEach((node) => {
         const nodePos = this.getNode(node)?.styling?.pos;
         if (!nodePos) return;
 
         const nodePosVal = get(nodePos);
 
-        centerMass.x += nodePosVal.x;
-        centerMass.y += nodePosVal.y;
-        numNodes++;
+        centerMassV += nodePosVal.y;
       });
-      centerMass.x /= numNodes;
-      centerMass.y /= numNodes;
+      centerMassV /= numNodes;
 
-      nodes.forEach((node) => {
-        if (!forces[node]) forces[node] = { x: 0, y: 0 };
-      });
-
-      // ===== ADD EDGE DIRECTION REPULSION FORCES ===== //
-
-      const totalDirForce = 0;
-      // let totalDirForce = 0;
-      // const dirForces: { [key: GraphNodeUUID]: number } = {};
-      // const DIRECTION_FORCE = 5;
-      // const MAX_DIRECTION_FORCE = 800;
-
-      // const edges = get(this.graphStore).edges;
-      // Object.keys(edges).forEach((edge) => {
-      //   const edgeObj = edges[edge];
-
-      //   // Add leftward force
-      //   if (nodesSet.has(edgeObj.nodeUUIDFrom)) {
-      //     dirForces[edgeObj.nodeUUIDFrom] = -DIRECTION_FORCE;
-      //   }
-
-      //   // Add rightward force
-      //   if (nodesSet.has(edgeObj.nodeUUIDTo)) {
-      //     dirForces[edgeObj.nodeUUIDTo] = DIRECTION_FORCE;
-      //   }
-      // });
-
-      // nodes.forEach((node) => {
-      //   if (!dirForces[node]) dirForces[node] = 0;
-
-      //   dirForces[node] = Math.max(
-      //     Math.min(dirForces[node], MAX_DIRECTION_FORCE),
-      //     -MAX_DIRECTION_FORCE
-      //   );
-      //   totalDirForce += dirForces[node];
-
-      //   forces[node].x += dirForces[node];
-      // });
-      // totalDirForce /= numNodes;
-
-      // ===== ADD CENTER OF MASS ATTRACTION FORCE + COUNTERBALANCE DIRECTION FORCE ===== //
+      // ===== COMPUTE HORIZONTAL SNAPPING + APPLY CENTER OF MASS ===== //
       nodes.forEach((node) => {
         const nodePos = this.getNode(node)?.styling?.pos;
         if (!nodePos) return;
 
         const nodePosVal = get(nodePos);
+        const snapPoint = Math.round(nodePosVal.x / (0.5 * X_SNAP_POS)) * (0.5 * X_SNAP_POS);
+        const diff = snapPoint - nodePosVal.x;
 
-        const diff = { x: centerMass.x - nodePosVal.x, y: centerMass.y - nodePosVal.y };
-        const dist = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
-        const forceMag = dist * CENTER_FORCE;
+        // TODO: Check if snap point is a different layer from layerNodes
+        // then update layerNodes if necessary
 
-        if (diff.x !== 0 || diff.y !== 0) {
-          forces[node].x += (diff.x / dist) * forceMag - totalDirForce;
-          forces[node].y += (diff.y / dist) * forceMag;
-        }
+        // forces[node].x += diff * X_SNAP_FORCE;
+        forces[node].y += (centerMassV - nodePosVal.y) * CENTER_FORCE;
       });
 
-      // ===== ADD INTER-NODE REPULSION FORCES ===== //
-      const NODE_FORCE = 3;
-      const VERTICAL_SQUASH = 0.75;
-      nodes.forEach((node) => {
-        const nodePos = this.getNode(node)?.styling?.pos;
-        if (!nodePos) return;
+      // ===== ADD EDGE TIGHTENING FORCES ===== //
+      for (const layer in layers) {
+        if (!layers.hasOwnProperty(layer) || parseInt(layer, 10) === numLayers) continue;
 
-        const nodePosVal = get(nodePos);
-        const nodeForce = { x: 0, y: 0 };
+        layers[layer].forEach((node) => {
+          if (edgeMap[node] == null) return;
 
-        nodes.forEach((otherNode) => {
-          if (node === otherNode) return;
+          const nodePos = this.getNode(node)?.styling?.pos;
+          if (!nodePos) return;
 
-          const otherNodePos = this.getNode(otherNode)?.styling?.pos;
-          if (!otherNodePos) return;
+          const nodePosVal = get(nodePos);
 
-          const otherNodePosVal = get(otherNodePos);
-          const diff = {
-            x: nodePosVal.x - otherNodePosVal.x,
-            y: nodePosVal.y - otherNodePosVal.y,
-          };
-          const dist = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
+          edgeMap[node].forEach(({ fromNode }, i) => {
+            const fromNodePos = this.getNode(fromNode)?.styling?.pos;
+            if (!fromNodePos) return;
 
-          if (diff.x !== 0) nodeForce.x += (NODE_FORCE * diff.x) / dist;
+            const fromNodePosVal = get(fromNodePos);
+            const diff = {
+              x: nodePosVal.x - X_SNAP_POS - fromNodePosVal.x,
+              y:
+                nodePosVal.y + (i - edgeMap[node].length / 2) * Y_SPLAYING_FORCE - fromNodePosVal.y,
+            };
 
-          if (diff.y !== 0) nodeForce.y += (NODE_FORCE * diff.y * VERTICAL_SQUASH) / dist;
+            // forces[fromNode].x += EDGE_TIGHTEN_FORCE * diff.x;
+            forces[fromNode].y += EDGE_TIGHTEN_FORCE * diff.y; // Math.sign(diffY) * diffY;
+          });
         });
+      }
 
-        forces[node].x += nodeForce.x;
-        forces[node].y += nodeForce.y;
+      // ===== ADD INTER-NODE REPULSION FORCES WITHIN LAYER ===== //
+      for (const layerNodes of Object.values(layers)) {
+        layerNodes.forEach((node) => {
+          const nodePos = this.getNode(node)?.styling?.pos;
+          const nodeHeight = this.getNode(node)?.styling?.height;
+
+          if (!nodePos || !nodeHeight) return;
+
+          const nodePosVal = get(nodePos);
+          const nodeHeightVal = get(nodeHeight);
+
+          layerNodes.forEach((otherNode) => {
+            if (node === otherNode) return;
+
+            const otherNodePos = this.getNode(otherNode)?.styling?.pos;
+            const otherNodeHeight = this.getNode(otherNode)?.styling?.height;
+            if (!otherNodePos || !otherNodeHeight) return;
+
+            const otherNodePosVal = get(otherNodePos);
+            const otherNodeHeightVal = get(otherNodeHeight);
+            const diff = {
+              x: nodePosVal.x - otherNodePosVal.x,
+              y: nodePosVal.y - otherNodePosVal.y,
+            };
+
+            let multiplier = NODE_FORCE;
+
+            // Check nodes not overlapping
+            if (
+              nodePosVal.y > otherNodePosVal.y
+                ? nodePosVal.y < otherNodePosVal.y + nodeHeightVal
+                : nodePosVal.y + nodeHeightVal > otherNodePosVal.y
+            ) {
+              multiplier *= 4;
+            }
+
+            // const dist = diff.x * diff.x + diff.y * diff.y;
+            // forces[node].x += 1000000 * NODE_FORCE * Math.sign(diff.x) / dist;
+            // forces[node].y += 1000000 * NODE_FORCE * Math.sign(diff.y) / dist;
+
+            // Applied force is simply a linear constant to counterbalance center force
+            forces[node].y += NODE_FORCE * Math.sign(diff.y);
+          });
+        });
+      }
+
+      // ===== COMPUTE GLOBAL COUNTERBALANCE ===== //
+      const counterbalance = { x: 0, y: 0 };
+      nodes.forEach((node) => {
+        counterbalance.x += forces[node].x;
+        counterbalance.y += forces[node].y;
       });
+      counterbalance.x /= nodes.length;
+      counterbalance.y /= nodes.length;
 
       // ===== APPLY FORCES ===== //
       nodes.forEach((node) => {
@@ -436,8 +552,8 @@ export class GraphStore {
 
         nodePos.update((pos) => {
           return {
-            x: pos.x + forces[node].x * FORCE,
-            y: pos.y + forces[node].y * FORCE,
+            x: pos.x + (forces[node].x - counterbalance.x) * FORCE,
+            y: pos.y + (forces[node].y - counterbalance.y) * FORCE,
           };
         });
       });
