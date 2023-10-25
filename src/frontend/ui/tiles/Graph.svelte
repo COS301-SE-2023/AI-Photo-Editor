@@ -1,35 +1,35 @@
 <!-- The canvas which displays our beautiful Svelvet GUI graph -->
 <script lang="ts">
-  import { Svelvet, type NodeKey, type AnchorKey } from "blix_svelvet";
-  import { derived, type Readable, type Unsubscriber } from "svelte/store";
+  import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
+  import type { UUID } from "@shared/utils/UniqueEntity";
+  import { Svelvet, type AnchorKey, type NodeKey } from "blix_svelvet";
+  import { onMount, tick } from "svelte";
+  import { Writable, readable, writable, type Readable, type Unsubscriber } from "svelte/store";
+  import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import { GraphStore, graphMall } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";
-  import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
-  import type { UUID } from "@shared/utils/UniqueEntity";
-  import { GraphNode, type GraphEdge } from "@shared/ui/UIGraph";
-  import { onMount, tick } from "svelte";
   // import { onDestroy } from "svelte";
-  import { fade } from "svelte/transition";
-  import { commandStore } from "../../lib/stores/CommandStore";
-  import GraphSelectionBox from "../utils/graph/SelectionBox.svelte";
-  import { projectsStore } from "../../lib/stores/ProjectStore";
-  import { get } from "svelte/store";
-  import type { SelectionBoxItem } from "../../types/selection-box";
   import { faDiagramProject } from "@fortawesome/free-solid-svg-icons";
-  import Fa from "svelte-fa";
   import { onDestroy } from "svelte";
+  import Fa from "svelte-fa";
+  import { get } from "svelte/store";
+  import { fade } from "svelte/transition";
   import type { UIProject } from "../../lib/Project";
-  // import { type Anchor } from "blix_svelvet/dist/types"; // TODO: Use to createEdge
+  import { commandStore } from "../../lib/stores/CommandStore";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
+  import type { SelectionBoxItem } from "../../types/selection-box";
+  import GraphSelectionBox from "../utils/graph/SelectionBox.svelte";
 
   // TODO: Abstract panelId to use a generic UUID
-  // export let panelId = 0;
-  export let panelId = Math.round(10000000.0 * Math.random());
+  export let panelId = Math.round(10000000.0 * Math.random()).toString();
 
   let graphId = "";
   let lastGraphsAmount = 0;
+  let projectGraphItems: Writable<{ id: string; title: string; timestamp: number }[]> = writable(
+    []
+  );
   let active = false;
-  let projectStateReactive: Readable<UIProject | null>;
-  let projectState: UIProject | null;
+  let project: Readable<UIProject | null> = readable(null);
   let unsubscribe: Unsubscriber;
   /**
    * When component is created, set to active panel
@@ -37,40 +37,18 @@
   onMount(() => {
     if ($projectsStore.activeProject) {
       $projectsStore.activeProject.focusedPanel.set(panelId);
-      projectStateReactive = projectsStore.getProjectStore($projectsStore.activeProject.id);
-      projectState = get(projectStateReactive);
-      if (projectState)
-        unsubscribe = projectState.focusedGraph.subscribe((graph) => {
+      project = projectsStore.getProjectStore($projectsStore.activeProject.id);
+
+      if ($project)
+        unsubscribe = $project.focusedGraph.subscribe((graph) => {
           active = graph === graphId && graph !== "";
         });
     }
   });
 
-  // Update static copy reactively
-  $: projectState = get(projectStateReactive);
-
-  /**
-   * Ensure if graph being displayed chnages but active graph doesnt change, we enforce a check
-   */
-  $: if (graphId) {
-    if (projectState && get(projectState.focusedGraph) === graphId) {
-      active = true;
-    }
-  }
-
-  onDestroy(() => {
-    unsubscribe();
-  });
-
-  const projectGraphItems = derived([projectsStore, graphMall], ([$projectsStore, $graphMall]) => {
-    if (!$projectsStore.activeProject) {
-      return [];
-    }
-
+  $: if ($project) {
     const items: { id: string; title: string; timestamp: number }[] = [];
-    // Need to be altered to look at project local to graph
-    const graphIds = $projectsStore.activeProject.graphs;
-
+    const graphIds = $project.graphs;
     for (const id of graphIds) {
       const graphStore = $graphMall[id];
       if (graphStore) {
@@ -82,23 +60,33 @@
         });
       }
     }
-
     items.sort((a, b) => a.timestamp - b.timestamp);
-    return items;
+    projectGraphItems.set(items);
+  }
+
+  /**
+   * Ensure if graph being displayed chnages but active graph doesnt change, we enforce a check
+   */
+  $: if (graphId) {
+    if ($project && get($project.focusedGraph) === graphId) {
+      active = true;
+    }
+  }
+
+  onDestroy(() => {
+    unsubscribe();
   });
 
   // Sets new graph created as the active graph
   $: {
-    const items = $projectGraphItems;
-    if (
-      items.length !== lastGraphsAmount /* && project &&  get(project.focusedPanel) === panelId */
-    ) {
-      graphId = items && items.length > 0 ? items[items.length - 1].id : "";
-      if (projectState) {
-        projectState.focusedGraph.set(graphId);
+    if ($projectGraphItems.length !== lastGraphsAmount) {
+      graphId =
+        $projectGraphItems.length > 0 ? $projectGraphItems[$projectGraphItems.length - 1].id : "";
+      if ($project) {
+        $project.focusedGraph.set(graphId);
       }
     }
-    lastGraphsAmount = items.length;
+    lastGraphsAmount = $projectGraphItems.length;
   }
 
   let thisGraphStore: Readable<GraphStore | null>;
@@ -116,9 +104,6 @@
     dimensions: $dimensions,
     zoom: $zoom,
   });
-  // $: if($thisGraphStore?.view) {
-  //     console.log(get($thisGraphStore.view));
-  //   }
 
   // Hooks exposed by <Svelvet />
   let connectAnchorIds: (
@@ -190,13 +175,11 @@
    * @param event
    */
   function handleLeftClick(event: CustomEvent) {
-    if (projectState && get(projectState.focusedGraph) !== graphId)
-      projectState.focusedGraph.set(graphId);
+    if ($project && get($project.focusedGraph) !== graphId) $project.focusedGraph.set(graphId);
   }
 
   function handleRightClick(event: CustomEvent) {
-    if (projectState && get(projectState.focusedGraph) !== graphId)
-      projectState.focusedGraph.set(graphId);
+    if ($project && get($project.focusedGraph) !== graphId) $project.focusedGraph.set(graphId);
     // TODO: Fix this at a stage, on initial load context menu does not show
     // unless resize event trigged
     window.dispatchEvent(new Event("resize"));
@@ -210,14 +193,14 @@
    * @param event
    */
   function handleGraphItemSelection(event: CustomEvent) {
-    if (projectState) projectState.focusedGraph.set(event.detail.id);
+    if ($project) $project.focusedGraph.set(event.detail.id);
   }
 
   /**
    * Set the graph to be the active panel before adding the graph.
    */
   function handleAddGraph() {
-    if (projectState) projectState.focusedPanel.set(panelId);
+    if ($project) $project.focusedPanel.set(panelId);
     commandStore.runCommand("blix.graphs.create");
   }
 

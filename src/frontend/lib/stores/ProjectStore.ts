@@ -1,11 +1,9 @@
-import { writable, derived, type Readable, get } from "svelte/store";
-import { type UUID } from "@shared/utils/UniqueEntity";
-import { constructLayout, layoutTemplate, type UIProject } from "../Project";
 import type { SharedProject } from "@shared/types";
-import { graphMall } from "./GraphStore";
-import { cacheStore } from "./CacheStore";
-import { mediaStore } from "./MediaStore";
 import type { GraphUUID } from "@shared/ui/UIGraph";
+import { type UUID } from "@shared/utils/UniqueEntity";
+import { derived, get, writable, type Readable } from "svelte/store";
+import { constructLayout, layoutTemplate, type UIProject } from "../Project";
+import { graphMall } from "./GraphStore";
 
 type ProjectsStoreState = {
   projects: UIProject[];
@@ -75,7 +73,6 @@ class ProjectsStore {
 
       const project = state.projects[index];
       const { id, name, saved, layout, graphs, cache } = changedState;
-
       const newProject: UIProject = {
         id,
         name: name ? name : project.name,

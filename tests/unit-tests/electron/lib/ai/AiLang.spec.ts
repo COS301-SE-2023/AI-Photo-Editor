@@ -1,20 +1,20 @@
+import { readFileSync, readdirSync } from "fs";
+import { join } from "path";
+import { createOutputNode } from "../../../../../src/electron/lib/Blix";
 import {
   BlypescriptInterpreter,
   BlypescriptProgram,
   BlypescriptToolbox,
 } from "../../../../../src/electron/lib/ai/AiLang";
-import { ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
-import { createOutputNode } from "../../../../../src/electron/lib/Blix";
-import { join } from "path";
-import { readFileSync, readdirSync } from "fs";
-import { PackageData } from "../../../../../src/electron/lib/plugins/PluginManager";
-import { Plugin, NodePluginContext } from "../../../../../src/electron/lib/plugins/Plugin";
+import { CoreGraph } from "../../../../../src/electron/lib/core-graph/CoreGraph";
 import {
   BlypescriptExportStrategy,
   CoreGraphExporter,
 } from "../../../../../src/electron/lib/core-graph/CoreGraphExporter";
-import { CoreGraph } from "../../../../../src/electron/lib/core-graph/CoreGraph";
 import { CoreGraphManager } from "../../../../../src/electron/lib/core-graph/CoreGraphManager";
+import { NodePluginContext, Plugin } from "../../../../../src/electron/lib/plugins/Plugin";
+import { PackageData } from "../../../../../src/electron/lib/plugins/PluginManager";
+import { ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
 
 describe("Blypescript parser", () => {
   test("should parse an empty graph", () => {
@@ -58,7 +58,7 @@ describe("Blypescript interpreter", () => {
     const uuid1 = response1.data!.nodeId;
     response1 = graph.addNode(toolbox.getNodeInstance("blix.output"), { x: 0, y: 0 });
     const uuid2 = response1.data!.nodeId;
-    response1 = graph.addNode(toolbox.getNodeInstance("blink.inputImage"), { x: 0, y: 0 });
+    response1 = graph.addNode(toolbox.getNodeInstance("glfx.GLFXImage"), { x: 0, y: 0 });
     const uuid3 = response1.data!.nodeId;
 
     const node1 = graph.getNodes[uuid1];
@@ -134,7 +134,7 @@ function generateToolbox(pluginNames: PluginName[]): ToolboxRegistry {
   toolboxRegistry.addInstance(createOutputNode());
 
   const pluginsPath = join(__dirname, "../../../../../blix-plugins");
-  const ignorePatterns = [".DS_Store", "types.d.ts"];
+  const ignorePatterns = [".DS_Store", "types.d.ts", "blink", "ripple"];
   const plugins = readdirSync(pluginsPath).filter((plugin) => {
     return !ignorePatterns.some((pattern) => plugin.includes(pattern));
   });
