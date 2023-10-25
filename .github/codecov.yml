@@ -3,7 +3,7 @@ coverage:
     project:
       default:
         # basic
-        target: 0%
+        target: 10%
         threshold: 10%
         # advanced settings
         branches:
