@@ -28,7 +28,8 @@
   let graphId = "";
   let lastGraphsAmount = 0;
   let active = false;
-  let project: UIProject | null = null; // Ensure Graph Component only watches project that created it.
+  let projectStateReactive: Readable<UIProject | null>;
+  let projectState: UIProject | null;
   let unsubscribe: Unsubscriber;
   /**
    * When component is created, set to active panel
@@ -36,20 +37,23 @@
   onMount(() => {
     if ($projectsStore.activeProject) {
       $projectsStore.activeProject.focusedPanel.set(panelId);
-      project = $projectsStore.activeProject;
-      // The project that owns the panel will never changes as layouts are created and destroyed
-      // TODO: Change this to work with potential future non-destroying layouts
-      unsubscribe = project.focusedGraph.subscribe((graph) => {
-        active = graph === graphId && graph !== "";
-        // console.log(active, panelId)
-      });
+      projectStateReactive = projectsStore.getProjectStore($projectsStore.activeProject.id);
+      projectState = get(projectStateReactive);
+      if (projectState)
+        unsubscribe = projectState.focusedGraph.subscribe((graph) => {
+          active = graph === graphId && graph !== "";
+        });
     }
   });
+
+  // Update static copy reactively
+  $: projectState = get(projectStateReactive);
+
   /**
    * Ensure if graph being displayed chnages but active graph doesnt change, we enforce a check
    */
   $: if (graphId) {
-    if (project && get(project.focusedGraph) === graphId) {
+    if (projectState && get(projectState.focusedGraph) === graphId) {
       active = true;
     }
   }
@@ -63,7 +67,8 @@
       return [];
     }
 
-    const items: { id: string; title: string }[] = [];
+    const items: { id: string; title: string; timestamp: number }[] = [];
+    // Need to be altered to look at project local to graph
     const graphIds = $projectsStore.activeProject.graphs;
 
     for (const id of graphIds) {
@@ -73,18 +78,14 @@
         items.push({
           id: state.uuid,
           title: state.metadata.displayName,
+          timestamp: state.metadata.timestamp,
         });
       }
     }
 
-    items.sort((a, b) => a.id.localeCompare(b.id));
+    items.sort((a, b) => a.timestamp - b.timestamp);
     return items;
   });
-
-  /**
-   * Order is a bit off due to sorting by UUID of graphs
-   * Maybe try timestamps?
-   */
 
   // Sets new graph created as the active graph
   $: {
@@ -93,8 +94,8 @@
       items.length !== lastGraphsAmount /* && project &&  get(project.focusedPanel) === panelId */
     ) {
       graphId = items && items.length > 0 ? items[items.length - 1].id : "";
-      if (project) {
-        project.focusedGraph.set(graphId);
+      if (projectState) {
+        projectState.focusedGraph.set(graphId);
       }
     }
     lastGraphsAmount = items.length;
@@ -189,11 +190,13 @@
    * @param event
    */
   function handleLeftClick(event: CustomEvent) {
-    if (project && get(project.focusedGraph) !== graphId) project.focusedGraph.set(graphId);
+    if (projectState && get(projectState.focusedGraph) !== graphId)
+      projectState.focusedGraph.set(graphId);
   }
 
   function handleRightClick(event: CustomEvent) {
-    if (project && get(project.focusedGraph) !== graphId) project.focusedGraph.set(graphId);
+    if (projectState && get(projectState.focusedGraph) !== graphId)
+      projectState.focusedGraph.set(graphId);
     // TODO: Fix this at a stage, on initial load context menu does not show
     // unless resize event trigged
     window.dispatchEvent(new Event("resize"));
@@ -207,14 +210,14 @@
    * @param event
    */
   function handleGraphItemSelection(event: CustomEvent) {
-    if (project) project.focusedGraph.set(event.detail.id);
+    if (projectState) projectState.focusedGraph.set(event.detail.id);
   }
 
   /**
    * Set the graph to be the active panel before adding the graph.
    */
   function handleAddGraph() {
-    if (project) project.focusedPanel.set(panelId);
+    if (projectState) projectState.focusedPanel.set(panelId);
     commandStore.runCommand("blix.graphs.create");
   }
 
