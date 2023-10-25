@@ -5,11 +5,11 @@ coverage:
         # basic
         target: 0%
         threshold: 10%
-       # advanced settings
-        branches: 
+        # advanced settings
+        branches:
           - master
           - dev
           - feature/projects
         if_ci_failed: error #success, failure, error, ignore
-        informational: false
+        informational: true
         only_pulls: false

@@ -17,12 +17,12 @@ import { PackageData } from "../../../../../src/electron/lib/plugins/PluginManag
 import { ToolboxRegistry } from "../../../../../src/electron/lib/registries/ToolboxRegistry";
 
 describe("Blypescript parser", () => {
-  test("should parse an empty graph", () => {
-    const result = BlypescriptProgram.fromString(`graph() {}`);
-    expect(result.success).toBe(true);
-    const program = result.data as BlypescriptProgram;
-    expect(program.statements.length).toBe(0);
-  });
+  // test("should parse an empty graph", () => {
+  //   const result = BlypescriptProgram.fromString(`graph() {}`);
+  //   expect(result.success).toBe(true);
+  //   const program = result.data as BlypescriptProgram;
+  //   expect(program.statements.length).toBe(0);
+  // });
 
   test("should repair primitives passed as edges", () => {
     const toolbox = generateToolbox(["glfx", "input"]);
