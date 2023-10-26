@@ -1,13 +1,14 @@
 <script lang="ts">
   import { GraphNode, NodeStylingStore } from "@shared/ui/UIGraph";
-  import { Anchor, DefaultAnchor, Node, type CSSColorString } from "blix_svelvet";
-  import { toolboxStore } from "../../../lib/stores/ToolboxStore";
-  import NodeUiFragment from "./NodeUIFragment.svelte";
-  import { createEventDispatcher } from "svelte";
-  import { graphMall } from "../../../lib/stores/GraphStore";
+  import { Anchor, Node, type CSSColorString } from "blix_svelvet";
   import { colord, extend } from "colord";
   import a11yPlugin from "colord/plugins/a11y";
+  import { createEventDispatcher } from "svelte";
+  import { graphMall } from "../../../lib/stores/GraphStore";
   import { nodeIdLastClicked } from "../../../lib/stores/MediaStore";
+  import { toolboxStore } from "../../../lib/stores/ToolboxStore";
+  import NodeUiFragment from "./NodeUIFragment.svelte";
+  import PluginAnchor from "./PluginAnchor.svelte";
 
   extend([a11yPlugin]);
 
@@ -145,9 +146,10 @@
                   >&gt;
                 </div>
               {/if}
-              <DefaultAnchor
+              <PluginAnchor
                 input="{true}"
                 output="{false}"
+                icon="amogus"
                 connecting="{connecting}"
                 hovering="{false}"
                 bgColor="{color}"
@@ -184,9 +186,10 @@
                   >&gt;
                 </div>
               {/if}
-              <DefaultAnchor
+              <PluginAnchor
                 input="{true}"
                 output="{false}"
+                icon="amogus"
                 connecting="{connecting}"
                 hovering="{false}"
                 bgColor="{color}"
