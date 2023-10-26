@@ -1,16 +1,5 @@
 <!-- This pane is for showing media content large-scale -->
 <script lang="ts">
-  import Image from "../utils/mediaDisplays/Image.svelte";
-  import TextBox from "../utils/mediaDisplays/TextBox.svelte";
-  import { mediaStore } from "../../lib/stores/MediaStore";
-  import { writable, type Readable, derived, get } from "svelte/store";
-  import { MediaDisplayType, type DisplayableMediaOutput } from "@shared/types/media";
-  import { onDestroy } from "svelte";
-  import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
-  import SelectionBox from "../utils/graph/SelectionBox.svelte";
-  import { type SelectionBoxItem } from "../../types/selection-box";
-  import WebView from "./WebView.svelte";
-  import { TweakApi } from "../../lib/webview/TweakApi";
   import {
     faBacon,
     faBowlRice,
@@ -25,9 +14,20 @@
     faLemon,
     faPizzaSlice,
   } from "@fortawesome/free-solid-svg-icons";
+  import { MediaDisplayType, type DisplayableMediaOutput } from "@shared/types/media";
+  import { onDestroy } from "svelte";
   import Fa from "svelte-fa";
-  import { toastStore } from "../../lib/stores/ToastStore";
+  import { derived, writable, type Readable } from "svelte/store";
+  import { mediaStore } from "../../lib/stores/MediaStore";
   import { projectsStore } from "../../lib/stores/ProjectStore";
+  import { toastStore } from "../../lib/stores/ToastStore";
+  import { TweakApi } from "../../lib/webview/TweakApi";
+  import { type SelectionBoxItem } from "../../types/selection-box";
+  import SelectionBox from "../utils/graph/SelectionBox.svelte";
+  import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
+  import Image from "../utils/mediaDisplays/Image.svelte";
+  import TextBox from "../utils/mediaDisplays/TextBox.svelte";
+  import WebView from "./WebView.svelte";
 
   export let projectId: string;
 
@@ -61,7 +61,7 @@
     ([$projectsStore, $mediaOutputList]) => {
       const project = $projectsStore.projects.find((p) => p.id === projectId);
 
-      console.log(projectId.slice(0, 6), $mediaOutputList);
+      // console.log(projectId.slice(0, 6), $mediaOutputList);
 
       if (!project) {
         return [];
@@ -80,7 +80,7 @@
       id: media.nodeId,
       title: media.mediaId,
     }));
-    console.log(projectId.slice(0, 6), selectedItems);
+    // console.log(projectId.slice(0, 6), selectedItems);
   });
 
   $: selectedMediaId.set(selectedItems.find((item) => item.id === selectedItemId)?.title ?? "");
