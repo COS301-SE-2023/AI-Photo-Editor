@@ -1,6 +1,4 @@
 <script lang="ts">
-  import type { CacheUUID } from "@shared/types/cache";
-  import { cacheStore } from "../../lib/stores/CacheStore";
   import {
     faBacon,
     faBowlRice,
@@ -15,9 +13,11 @@
     faLemon,
     faPizzaSlice,
   } from "@fortawesome/free-solid-svg-icons";
+  import type { CacheUUID } from "@shared/types/cache";
   import Fa from "svelte-fa";
-  import { toastStore } from "../../lib/stores/ToastStore";
+  import { cacheStore } from "../../lib/stores/CacheStore";
   import { projectsStore } from "../../lib/stores/ProjectStore";
+  import { toastStore } from "../../lib/stores/ToastStore";
 
   let selectedCacheItems: CacheUUID[] = [];
   // Not used at the moment

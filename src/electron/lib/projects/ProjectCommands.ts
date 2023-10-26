@@ -329,6 +329,9 @@ export async function openProject(ctx: CommandContext, path?: string): Promise<C
                 layout: projectFile.layout,
               });
               updateRecentProjectsList(path);
+              for (const uuid of ctx.cacheManager.getUUIDs()) {
+                ctx.projectManager.addCacheObjects(projectId, [uuid]);
+              }
             } else if (fileName === "cache/cache.json") {
               const cacheJSON = JSON.parse(data.toString("utf-8")) as {
                 [key: string]: { uuid: CacheUUID; metadata: CacheMetadata };
