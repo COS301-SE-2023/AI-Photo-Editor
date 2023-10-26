@@ -205,6 +205,10 @@ export class CacheManager {
     return this.cache[cacheUUID];
   }
 
+  getUUIDs(): CacheUUID[] {
+    return Object.keys(this.cache);
+  }
+
   deleteAssets(cacheUUID: CacheUUID[]) {
     for (const uuid of cacheUUID) {
       delete this.cache[uuid];
