@@ -356,6 +356,7 @@
     <svelte:component
       this="{getComponentForPanelType(layout.content)}"
       signature="{layout.content}"
+      projectId="{projectsStore.getActiveProjectId() ?? ''}"
       {...tileProps}
     />
   </div>

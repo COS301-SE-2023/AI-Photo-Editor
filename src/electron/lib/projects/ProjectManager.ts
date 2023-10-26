@@ -1,11 +1,7 @@
 import { CoreProject } from "./CoreProject";
-import logger from "../../utils/logger";
-import { join } from "path";
-import { app } from "electron";
 import type { PathLike } from "fs";
 import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { MainWindow } from "../api/apis/WindowApi";
-import { readFile } from "fs/promises";
 import { z } from "zod";
 import { dialog } from "electron";
 import type { LayoutPanel } from "../../../shared/types/index";
@@ -73,6 +69,18 @@ export class ProjectManager {
 
   public getProject(id: UUID): CoreProject | null {
     return this._projects[id];
+  }
+
+  public getProjectIdByGraphId(graphId: UUID): UUID | null {
+    let projectId: UUID | null = null;
+
+    Object.values(this._projects).forEach((project) => {
+      if (project.graphs.includes(graphId)) {
+        projectId = project.uuid;
+      }
+    });
+
+    return projectId;
   }
 
   public async removeProject(blix: Blix, uuid: UUID, forceRemove = false) {
@@ -230,6 +238,18 @@ export class ProjectManager {
 
   public removeCacheObjects(projectUUID: UUID, cacheUUIDs: UUID[]): IpcResponse<string> {
     const res = this._projects[projectUUID].removeCacheObjects(cacheUUIDs);
+    this.onProjectChanged(projectUUID);
+    return res;
+  }
+
+  public addMediaOutputs(projectUUID: UUID, mediaOutputs: UUID[]): IpcResponse<string> {
+    const res = this._projects[projectUUID].addMediaOutputs(mediaOutputs);
+    this.onProjectChanged(projectUUID);
+    return res;
+  }
+
+  public removeMediaOutputs(projectUUID: UUID, mediaOutputs: UUID[]): IpcResponse<string> {
+    const res = this._projects[projectUUID].removeMediaOutputs(mediaOutputs);
     this.onProjectChanged(projectUUID);
     return res;
   }

@@ -8,6 +8,7 @@ export interface SharedProject {
   layout?: LayoutPanel;
   graphs?: UUID[];
   cache?: UUID[];
+  mediaOutputIds?: UUID[];
 }
 
 export interface recentProject {

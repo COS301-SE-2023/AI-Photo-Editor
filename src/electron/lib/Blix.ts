@@ -89,7 +89,8 @@ export class Blix {
     this._mediaManager = new MediaManager(
       this._typeclassRegistry,
       this._graphInterpreter,
-      this._graphManager
+      this._graphManager,
+      this.projectManager
     );
 
     this.toolbox.addInstance(createOutputNode(this._mediaManager));

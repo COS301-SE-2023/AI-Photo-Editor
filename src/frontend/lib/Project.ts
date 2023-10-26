@@ -13,6 +13,7 @@ export interface UIProject {
   readonly focusedGraph: Writable<GraphUUID>;
   readonly focusedPanel: Writable<string>;
   readonly cache: UUID[];
+  readonly mediaOutputIds: UUID[];
 }
 
 let groupTest = 0;
