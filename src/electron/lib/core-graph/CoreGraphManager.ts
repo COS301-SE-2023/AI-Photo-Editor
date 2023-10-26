@@ -325,7 +325,7 @@ export class CoreGraphManager {
 
     graphUUIDs.forEach((graphId) => {
       if (graphId in this._graphs) {
-        const outputNodes = Object.keys(this._graphs[graphId].getNodes);
+        const outputNodes = Object.keys(this._graphs[graphId].getOutputNodes);
         outputNodes.forEach((node) => {
           delete this._outputIds[node];
         });
