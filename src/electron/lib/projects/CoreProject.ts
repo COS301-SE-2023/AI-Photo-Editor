@@ -153,6 +153,10 @@ export class CoreProject extends UniqueEntity {
       return { success: false, data: e };
     }
   }
+
+  public getCacheIds() {
+    return [...this._cache];
+  }
 }
 
 export interface ProjectFile {

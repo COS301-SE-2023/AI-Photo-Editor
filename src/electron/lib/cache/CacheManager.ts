@@ -96,7 +96,6 @@ export class CacheManager {
               socket.send(
                 JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
               );
-              this.notifyListeners();
               break;
             case "cache-subscribe":
               this.listeners.add(socket);
@@ -213,6 +212,7 @@ export class CacheManager {
     for (const uuid of cacheUUID) {
       delete this.cache[uuid];
     }
+    this.notifyListeners();
   }
 
   async export(ids: CacheUUID[]) {

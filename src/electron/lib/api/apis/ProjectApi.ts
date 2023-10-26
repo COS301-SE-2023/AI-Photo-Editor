@@ -7,6 +7,7 @@ import {
   CoreGraphUpdateEvent,
   CoreGraphUpdateParticipant,
 } from "../../core-graph/CoreGraphInteractors";
+import { type CacheUUID } from "../../../../shared/types/cache";
 
 export class ProjectApi implements ElectronMainApi<ProjectApi> {
   constructor(private readonly blix: Blix) {}
@@ -57,8 +58,13 @@ export class ProjectApi implements ElectronMainApi<ProjectApi> {
   // }
 
   async closeProject(uuid: UUID, graphs?: UUID[]) {
+    const cacheUUIDs = this.blix.projectManager.getProject(uuid)?.getCacheIds || [];
     const res = await this.blix.projectManager.removeProject(this.blix, uuid);
-    if (res === -1 && graphs) this.blix.graphManager.deleteGraphs(graphs);
+
+    if (res === -1 && graphs) {
+      this.blix.cacheManager.deleteAssets(cacheUUIDs as CacheUUID[]);
+      this.blix.graphManager.deleteGraphs(graphs);
+    }
   }
 
   async addCacheObjects(projectUUID: UUID, cacheUUIDs: UUID[]): Promise<IpcResponse<string>> {
