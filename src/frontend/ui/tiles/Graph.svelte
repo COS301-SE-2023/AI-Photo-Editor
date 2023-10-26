@@ -4,7 +4,13 @@
   import type { UUID } from "@shared/utils/UniqueEntity";
   import { Svelvet, type AnchorKey, type NodeKey } from "blix_svelvet";
   import { onMount, tick } from "svelte";
-  import { Writable, readable, writable, type Readable, type Unsubscriber } from "svelte/store";
+  import {
+    type Writable,
+    readable,
+    writable,
+    type Readable,
+    type Unsubscriber,
+  } from "svelte/store";
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
   import { GraphStore, graphMall } from "../../lib/stores/GraphStore";
   import PluginNode from "../utils/graph/PluginNode.svelte";

@@ -31,7 +31,24 @@ export class ProjectManager {
    *
    *	@returns The newly created project.
    */
-  public createProject(name = `Untitled-${this._projectsCreatedCounter++}`): CoreProject {
+  public createProject(name?: string): CoreProject {
+    if (!name) {
+      const projects = Object.values(this._projects);
+      let index = 1;
+
+      projects.forEach((project) => {
+        if (project.name.includes("Untitled-")) {
+          const slice = parseInt(project.name.slice(9), 10);
+
+          if (!isNaN(slice) && slice >= index) {
+            index = slice + 1;
+          }
+        }
+      });
+
+      name = `Untitled-${index}`;
+    }
+
     const project = new CoreProject(name);
     this._projects[project.uuid] = project;
     this.onProjectCreated(project.uuid);

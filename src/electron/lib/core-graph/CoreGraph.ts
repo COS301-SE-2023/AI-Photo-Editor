@@ -68,7 +68,7 @@ export class CoreGraph extends UniqueEntity {
     this.uiInputs = {};
     this.uiPositions = {};
     this.metadata = {
-      displayName: `Graph-${this.uuid.slice(0, 4)}`,
+      displayName: `Graph`,
       timestamp: Date.now(),
     };
     // this.nodeList = [];

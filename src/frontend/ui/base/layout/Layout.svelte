@@ -15,11 +15,7 @@
 
 {#if $projectsStore.activeProject}
   {#each $projectsStore.projects || [] as project (project.id)}
-    <div
-      class="fullScreen"
-      class:visible="{$projectsStore.activeProject.id === project.id}"
-      class:hidden="{$projectsStore.activeProject.id !== project.id}"
-    >
+    <div class="fullScreen" class:hidden="{$projectsStore.activeProject.id !== project.id}">
       <Panel layout="{project.layout}" horizontal="{false}" height="100%" />
     </div>
   {/each}
@@ -57,12 +53,8 @@
     width: 100%;
   }
 
-  .visible {
-    display: visible;
-  }
-
   .hidden {
-    display: hidden;
+    display: none;
   }
   .placeholder {
     width: 100%;
