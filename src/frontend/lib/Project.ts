@@ -1,6 +1,8 @@
 import type { UUID } from "../../shared/utils/UniqueEntity";
 import { PanelGroup } from "./PanelNode";
 import type { LayoutPanel } from "../../shared/types/index";
+import type { Writable } from "svelte/store";
+import type { GraphUUID } from "../../shared/ui/UIGraph";
 
 export interface UIProject {
   readonly id: UUID;
@@ -8,7 +10,10 @@ export interface UIProject {
   readonly saved: boolean;
   readonly layout: PanelGroup;
   readonly graphs: UUID[];
+  readonly focusedGraph: Writable<GraphUUID>;
+  readonly focusedPanel: Writable<string>;
   readonly cache: UUID[];
+  readonly mediaOutputIds: UUID[];
 }
 
 let groupTest = 0;

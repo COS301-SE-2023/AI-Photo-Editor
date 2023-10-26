@@ -19,9 +19,19 @@ class MediaStore {
   }
 
   public async outputNodesChanged() {
-    const projectGraphIds = get(projectsStore.activeProjectGraphIds);
-    const mediaOutputs = await window.apis.graphApi.getMediaOutputs(projectGraphIds);
+    // const projectGraphIds = get(projectsStore.activeProjectGraphIds);
+    const $projectStore = get(projectsStore);
+    const projectsGraphIds = Object.values($projectStore.projects).flatMap(
+      (project) => project.graphs
+    );
+    const mediaOutputs = await window.apis.graphApi.getMediaOutputs(projectsGraphIds);
     this.outputIds.set(mediaOutputs);
+  }
+
+  public getMediaOutputListReactive() {
+    return derived(this.outputIds, (store) => {
+      return store;
+    });
   }
 
   // Stop listening for graph changes
@@ -99,5 +109,4 @@ class MediaStore {
 }
 
 export const mediaStore = new MediaStore();
-
 export const nodeIdLastClicked = writable<string>("");

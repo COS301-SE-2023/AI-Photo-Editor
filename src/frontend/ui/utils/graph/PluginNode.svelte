@@ -14,7 +14,7 @@
   const dispatch = createEventDispatcher();
 
   export let graphId: string;
-  export let panelId: number;
+  export let panelId: string;
   export let node: GraphNode;
   // let activeInput = false;
 

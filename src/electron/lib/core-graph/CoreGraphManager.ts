@@ -320,15 +320,20 @@ export class CoreGraphManager {
     return this._subscribers[graphUUID];
   }
 
-  deleteGraphs(uuids: UUID[]): boolean[] {
+  deleteGraphs(graphUUIDs: UUID[]): boolean[] {
     const flags: boolean[] = [];
 
-    uuids.forEach((uuid) => {
-      if (uuid in this._graphs) {
-        delete this._graphs[uuid];
-        delete this._subscribers[uuid];
-        delete this._events[uuid];
-        this._mainWindow?.apis.graphClientApi.graphRemoved(uuid);
+    graphUUIDs.forEach((graphId) => {
+      if (graphId in this._graphs) {
+        const outputNodes = Object.keys(this._graphs[graphId].getOutputNodes);
+        outputNodes.forEach((node) => {
+          delete this._outputIds[node];
+        });
+        delete this._graphs[graphId];
+        delete this._subscribers[graphId];
+        delete this._events[graphId];
+        this._mainWindow?.apis.graphClientApi.graphRemoved(graphId);
+        this._mainWindow?.apis.mediaClientApi.outputNodesChanged();
         flags.push(true);
       } else {
         flags.push(false);

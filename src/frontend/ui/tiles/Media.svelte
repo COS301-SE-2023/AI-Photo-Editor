@@ -3,7 +3,7 @@
   import Image from "../utils/mediaDisplays/Image.svelte";
   import TextBox from "../utils/mediaDisplays/TextBox.svelte";
   import { mediaStore } from "../../lib/stores/MediaStore";
-  import { writable, type Readable } from "svelte/store";
+  import { writable, type Readable, derived, get } from "svelte/store";
   import { MediaDisplayType, type DisplayableMediaOutput } from "@shared/types/media";
   import { onDestroy } from "svelte";
   import ColorDisplay from "../utils/mediaDisplays/ColorDisplay.svelte";
@@ -27,6 +27,9 @@
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
   import { toastStore } from "../../lib/stores/ToastStore";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
+
+  export let projectId: string;
 
   const noContentIcons = [
     faBacon,
@@ -42,19 +45,51 @@
     faLemon,
     faPizzaSlice,
   ];
-
-  const mediaOutputIds = mediaStore.getMediaOutputIdsReactive();
   let selectedItems: SelectionBoxItem[] = [];
+  let selectedItemId = "";
   let selectedMediaId = writable("");
   let oldMediaId: string | null = null;
   let webview: WebView;
   let media: Readable<DisplayableMediaOutput | null>;
 
-  $: if ($mediaOutputIds) {
-    selectedItems = Array.from($mediaOutputIds)
-      .sort()
-      .map((id) => ({ id, title: id }));
-  }
+  const mediaOutputList = mediaStore.getMediaOutputListReactive();
+
+  console.log("Media pane", projectId);
+
+  const mediaOutputs = derived(
+    [projectsStore, mediaOutputList],
+    ([$projectsStore, $mediaOutputList]) => {
+      const project = $projectsStore.projects.find((p) => p.id === projectId);
+
+      console.log(projectId.slice(0, 6), $mediaOutputList);
+
+      if (!project) {
+        return [];
+      }
+
+      const mediaList = $mediaOutputList.filter((media) =>
+        project.mediaOutputIds.includes(media.nodeId)
+      );
+
+      return mediaList;
+    }
+  );
+
+  mediaOutputs.subscribe((state) => {
+    selectedItems = state.map((media) => ({
+      id: media.nodeId,
+      title: media.mediaId,
+    }));
+    console.log(projectId.slice(0, 6), selectedItems);
+  });
+
+  $: selectedMediaId.set(selectedItems.find((item) => item.id === selectedItemId)?.title ?? "");
+
+  // $: if ($mediaOutputIds) {
+  //   selectedItems = Array.from($mediaOutputIds)
+  //     .sort()
+  //     .map((id) => ({ id, title: id }));
+  // }
 
   // Changes output on output node click
   // $: if ($nodeIdLastClicked) {
@@ -138,7 +173,7 @@
     <div class="self-end">
       <SelectionBox
         items="{selectedItems}"
-        bind:selectedItemId="{$selectedMediaId}"
+        bind:selectedItemId="{selectedItemId}"
         missingContentLabel="No Media"
       />
     </div>

@@ -17,6 +17,7 @@
   import Checkbox from "./nodeUIComponents/Checkbox.svelte";
   import OriginPicker from "./nodeUIComponents/OriginPicker.svelte";
   import MatrixInput from "./nodeUIComponents/MatrixInput.svelte";
+  import { projectsStore } from "@frontend/lib/stores/ProjectStore";
 
   export let leafUI: NodeUILeaf | null = null;
   export let inputStore: UIValueStore;
@@ -53,6 +54,7 @@
       inputStore="{inputStore}"
       props="{leafUI.params[0]}"
       config="{uiConfigs[leafUI.label]}"
+      projectId="{projectsStore.getActiveProjectId() ?? ''}"
       on:inputInteraction
     />
   {/if}
