@@ -89,7 +89,7 @@ export class CacheManager {
                 JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
               );
 
-              this.notifyListeners();
+              // this.notifyListeners();
               break;
             case "cache-delete-all":
               this.deleteAssets(Object.keys(this.cache));
