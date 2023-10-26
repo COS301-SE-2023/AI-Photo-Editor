@@ -324,8 +324,6 @@
           <!-- Subpanels alternate horiz/vert -->
         {/if}
 
-        <!-- TODO: Fix - for some reason this occasionally causes issues with panel deletion -->
-        <!-- A temp workaround that seems to hold up better is awaiting tick() in PanelGroup removePanel() -->
         {#if blipVaneIcon && i === blipVaneIndex}
           {#key blipVaneIcon}
             <PanelBlipVane icon="{blipVaneIcon}" />

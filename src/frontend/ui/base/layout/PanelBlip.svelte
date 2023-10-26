@@ -83,13 +83,18 @@
   export let dock = "tl";
 </script>
 
-<div
-  class="{'blip ' + (['tl', 'tr', 'bl', 'br'].includes(dock) ? dock : 'tl')}"
-  on:mousedown|stopPropagation|preventDefault="{tryStartTrack}"
->
-  {dir}
+<div class="absolute h-10 w-10 {['tl', 'tr', 'bl', 'br'].includes(dock) ? dock : 'tl'}">
+  <div
+    class="{'blip ' + (['tl', 'tr', 'bl', 'br'].includes(dock) ? dock : 'tl')}"
+    on:mousedown|stopPropagation|preventDefault="{tryStartTrack}"
+  >
+    {dir}
+  </div>
 </div>
-<svelte:window on:mouseup="{tryEndTrack}" on:mousemove="{winMouseMove}" />
+<svelte:window
+  on:mouseup|stopPropagation|preventDefault="{tryEndTrack}"
+  on:mousemove|stopPropagation|preventDefault="{winMouseMove}"
+/>
 
 <style>
   :root {
