@@ -33,6 +33,8 @@
   // node.inputUIValues = new AnchorValueStore();
 
   const nodePos = node.styling.pos;
+  const nodeWidth = node.styling.width;
+  const nodeHeight = node.styling.height;
 
   function stringToColor(str: string): CSSColorString {
     let hash = 0;
@@ -93,7 +95,7 @@
     on:nodeClickReleased="{nodeClicked}"
     on:nodeDragReleased="{nodeDragReleased}"
   >
-    <div class="node">
+    <div class="node" bind:clientWidth="{$nodeWidth}" bind:clientHeight="{$nodeHeight}">
       <div class="header">
         <h1>{$toolboxNode?.title || node.displayName}</h1>
         <!-- {#if $toolboxNode?.description}
