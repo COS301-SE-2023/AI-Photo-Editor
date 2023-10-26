@@ -249,7 +249,7 @@
         bind:value="{searchTerm}"
         on:input="{handleInput}"
         bind:this="{searchBox}"
-        class="mr-auto h-7 w-full select-none border-none bg-transparent p-2 text-sm text-zinc-200 caret-rose-400 outline-none"
+        class="mr-auto h-7 w-full select-none border-none bg-transparent p-2 text-sm text-zinc-200 caret-primary-500 outline-none"
       />
     </section>
     <section class="flex h-full w-full select-none flex-col overflow-y-auto p-1">

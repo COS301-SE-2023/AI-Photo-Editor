@@ -6,10 +6,12 @@
   // import type { UUID } from "@shared/utils/UniqueEntity";
   // import { graphMall } from "../../../../lib/stores/GraphStore";
   import { createEventDispatcher } from "svelte";
+  import { blixStore } from "../../../../lib/stores/BlixStore";
 
   export let props: UIComponentProps;
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
+  let primaryColor = blixStore.primaryColor();
   // export let nodeId: UUID;
   const dispatch = createEventDispatcher();
 
@@ -31,7 +33,7 @@
   step="{step}"
   fixed="{1}"
   bgColor="#1F1F28"
-  barColor="#f43e5c"
+  barColor="{$primaryColor}"
   label="{config.label}"
   on:sliderReleased="{handleInputInteraction}"
   on:buttonClicked="{handleInputInteraction}"

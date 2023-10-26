@@ -160,7 +160,7 @@
 
 <div class="fullPane">
   <div class="hover flex items-center space-x-2">
-    <!-- <input type="text" bind:value="{$mediaId}" class="h-7 bg-zinc-800/80 border border-zinc-600 caret-rose-500 outline-none p-2 rounded-md text-zinc-400" /> -->
+    <!-- <input type="text" bind:value="{$mediaId}" class="h-7 bg-zinc-800/80 border border-zinc-600 caret-primary-500 outline-none p-2 rounded-md text-zinc-400" /> -->
     <!-- <select bind:value="{$mediaId}">
       {#if $mediaOutputIds}
         {#each Array.from($mediaOutputIds) as id}

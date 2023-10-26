@@ -13,13 +13,13 @@
 </script>
 
 <div
-  class="flex h-9 w-fit items-center overflow-hidden rounded-md bg-zinc-800/70 ring-1 ring-zinc-600 transition duration-500 ease-in-out focus-within:ring-2 focus-within:ring-rose-400"
+  class="flex h-9 w-fit items-center overflow-hidden rounded-md bg-zinc-800/70 ring-1 ring-zinc-600 transition duration-500 ease-in-out focus-within:ring-2 focus-within:ring-primary-500"
 >
   <input
     id="{id}"
     type="password"
     placeholder="{placeholder}"
-    class="h-full border-none bg-transparent px-2 py-1 text-zinc-400 caret-rose-400 outline-none"
+    class="h-full border-none bg-transparent px-2 py-1 text-zinc-400 caret-primary-500 outline-none"
     bind:value="{value}"
     bind:this="{inputElement}"
   />

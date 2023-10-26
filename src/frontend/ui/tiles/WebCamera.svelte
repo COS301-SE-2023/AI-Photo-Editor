@@ -76,7 +76,7 @@
     <p class="text-3xl text-zinc-400">Loading...</p>
   {:else}
     <div
-      class="mt-3 flex h-14 w-14 items-center justify-center rounded-full bg-rose-500 p-2 transition-colors duration-200 ease-in-out hover:bg-rose-600"
+      class="mt-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary-500 p-2 transition-colors duration-200 ease-in-out hover:bg-primary-600"
       on:click="{takePicture}"
       on:keydown="{takePicture}"
     >

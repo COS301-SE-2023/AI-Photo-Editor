@@ -92,8 +92,8 @@
             <span
               class="rounded-md px-3 py-1 font-normal text-zinc-300 {selectedCategoryId ===
               category.id
-                ? 'bg-rose-700'
-                : 'hover:bg-rose-300/5'}"
+                ? 'bg-primary-700'
+                : 'hover:bg-primary-300/5'}"
               on:click="{() => (selectedCategoryId = category.id)}"
               on:keydown="{() => (selectedCategoryId = category.id)}">{category.title}</span
             >

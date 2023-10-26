@@ -16,7 +16,6 @@
   import { projectsStore } from "../../lib/stores/ProjectStore";
 
   const testing = false;
-  let showSettings = false;
 
   let showSplash = true;
 
@@ -68,16 +67,15 @@
     </div>
     <Palette />
   </div>
+  <div class="{$settingsStore.showing ? '' : 'hidden'}">
+    <Settings />
+  </div>
 {:else}
   <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
     <!-- <span class="text-5xl text-purple-400">Loading</span> -->
   </div>
   <div></div>
 {/if}
-
-<div class="{$settingsStore.showing ? '' : 'hidden'}">
-  <Settings />
-</div>
 
 <Toasts />
 <ContextMenu />
@@ -87,6 +85,22 @@
   @tailwind base;
   @tailwind components;
   @tailwind utilities;
+
+  :root {
+    --navbar-height: 2rem;
+
+    --color-primary-50: 255, 241, 242;
+    --color-primary-100: 255, 228, 230;
+    --color-primary-200: 254, 205, 211;
+    --color-primary-300: 253, 164, 174;
+    --color-primary-400: 251, 113, 132;
+    --color-primary-500: 244, 62, 92;
+    --color-primary-600: 225, 29, 71;
+    --color-primary-700: 190, 18, 59;
+    --color-primary-800: 159, 18, 56;
+    --color-primary-900: 136, 19, 54;
+    --color-primary-950: 76, 5, 25;
+  }
 
   body {
     padding: 0px;
@@ -98,9 +112,6 @@
     align-items: center;
     display: flex;
     position: relative;
-  }
-  :root {
-    --navbar-height: 2rem;
   }
 
   div.navbar {

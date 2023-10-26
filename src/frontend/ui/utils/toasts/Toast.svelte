@@ -61,13 +61,13 @@
     </div>
   {:else}
     <div
-      class="h-5 w-5 animate-spin rounded-full border-[3px] border-solid border-rose-500 border-t-transparent"
+      class="h-5 w-5 animate-spin rounded-full border-[3px] border-solid border-primary-500 border-t-transparent"
     ></div>
   {/if}
   <div class="pointer-events-none ml-3 select-none text-base font-normal">{message}</div>
   {#if dismissible}
     <div
-      class="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border-none bg-zinc-800 p-1.5 text-zinc-400 hover:bg-zinc-700 hover:text-rose-500/70 active:bg-zinc-600"
+      class="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border-none bg-zinc-800 p-1.5 text-zinc-400 hover:bg-zinc-700 hover:text-primary-500/70 active:bg-zinc-600"
       on:click="{() => dispatch('dismiss')}"
       on:keydown="{null}"
     >

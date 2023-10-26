@@ -127,7 +127,7 @@
           placeholder="{searchPlaceholder}"
           bind:value="{searchTerm}"
           bind:this="{searchContainer}"
-          class="mr-auto h-7 w-full select-none border-none bg-transparent p-2 text-sm text-zinc-200 caret-rose-400 outline-none"
+          class="mr-auto h-7 w-full select-none border-none bg-transparent p-2 text-sm text-zinc-200 caret-primary-500 outline-none"
         />
       </section>
 
@@ -169,7 +169,7 @@
       viewBox="0 0 24 24"
       stroke-width="1.2"
       stroke="currentColor"
-      class="pointer-events-none ml-auto h-4 w-4 stroke-rose-500"
+      class="pointer-events-none ml-auto h-4 w-4 stroke-primary-500"
     >
       <path
         stroke-linecap="round"
