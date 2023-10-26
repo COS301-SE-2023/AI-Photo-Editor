@@ -67,16 +67,15 @@
     </div>
     <Palette />
   </div>
+  <div class="{$settingsStore.showing ? '' : 'hidden'}">
+    <Settings />
+  </div>
 {:else}
   <div class="flex h-screen w-screen items-center justify-center bg-zinc-800 p-0">
     <!-- <span class="text-5xl text-purple-400">Loading</span> -->
   </div>
   <div></div>
 {/if}
-
-<div class="{$settingsStore.showing ? '' : 'hidden'}">
-  <Settings />
-</div>
 
 <Toasts />
 <ContextMenu />

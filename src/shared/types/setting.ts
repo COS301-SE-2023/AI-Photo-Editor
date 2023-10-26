@@ -66,7 +66,6 @@ export interface Button extends SettingComponentBase {
 export interface ColorPicker extends SettingComponentBase {
   type: "colorPicker";
   value: `#${string}`;
-  onChange?: (hex: `#${string}`) => void;
 }
 
 export interface KeyboardShortcuts extends SettingComponentBase {

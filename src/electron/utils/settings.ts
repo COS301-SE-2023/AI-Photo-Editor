@@ -13,6 +13,7 @@ export interface Settings {
   prompts: string[];
   model: string;
   keyboardShortcuts: KeyboardShortcut[];
+  accentColor: string;
 }
 
 type DotUnionKeys<T, Prefix extends string = ""> = T extends object
@@ -42,6 +43,7 @@ export const settings = new ElectronStore<Settings>({
     prompts: [],
     model: "GPT-3.5",
     keyboardShortcuts: [],
+    accentColor: "f43e5c",
   },
 });
 

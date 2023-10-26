@@ -4,7 +4,7 @@
   import SecureInput from "./SecureInput.svelte";
   import Dropdown from "./Dropdown.svelte";
   import Button from "./Button.svelte";
-  import ColorPicker from "./ColorPicker.svelte";
+  import ColorPicker from "./ColorPicker/ColorPicker.svelte";
 
   export let item: Setting;
 </script>
