@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import { slide } from "svelte/transition";
-  import GraphSelectionBoxItem from "./SelectionBoxItem.svelte";
-  import { createEventDispatcher } from "svelte";
   import type { SelectionBoxItem } from "../../../types/selection-box";
+  import GraphSelectionBoxItem from "./SelectionBoxItem.svelte";
 
   type SelectionBoxEvents = {
     editItem: {

@@ -18,7 +18,8 @@
 
 <script lang="ts">
   import { graphMenuStore } from "../../lib/stores/GraphContextMenuStore";
-  import { focusedGraphStore, graphMall } from "../../lib/stores/GraphStore";
+  import { graphMall } from "../../lib/stores/GraphStore";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
   import type { ItemGroup, Item, Action } from "../../lib/stores/GraphContextMenuStore";
   import ContextMenuItem from "./ContextMenuItem.svelte";
   import ContextMenuGroup from "./ContextMenuGroup.svelte";
@@ -64,7 +65,9 @@
       if (!action) return;
 
       const graphMenuState = get(graphMenuStore);
-      const graphStore = graphMall.getGraph($focusedGraphStore.graphUUID);
+      const graphStore = graphMall.getGraph(
+        $projectsStore.activeProject ? get($projectsStore.activeProject.focusedGraph) : ""
+      );
 
       if (!graphStore) return;
 

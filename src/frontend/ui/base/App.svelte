@@ -13,6 +13,7 @@
   import Shortcuts from "../../ui/utils/Shortcuts.svelte";
   import { settingsStore } from "../../lib/stores/SettingsStore";
   import { confetti } from "@neoconfetti/svelte";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
 
   const testing = false;
   let showSettings = false;
@@ -34,6 +35,10 @@
   onMount(async () => {
     await initAPIs();
   });
+
+  // projectsStore.subscribe((state) => {
+  //   console.log(state);
+  // });
 </script>
 
 <!-- <div class="fixed top-0 right-0" use:confetti={{ particleCount: 200, force: 0.6, stageHeight: window.innerHeight - 20 }} /> -->

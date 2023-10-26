@@ -1023,7 +1023,7 @@ export class BlypescriptToolbox {
 
   public toString(): string {
     const pluginStrings = this.plugins.map((plugin) => plugin.toString());
-    let str = "// Graph edge connection wrapper type\nE<T> = { value: T } | null;\n\n";
+    let str = "// Graph edge connection wrapper\ntype E<T> = { value: T } | null;\n\n";
     str += pluginStrings.join("\n\n");
     return str;
   }

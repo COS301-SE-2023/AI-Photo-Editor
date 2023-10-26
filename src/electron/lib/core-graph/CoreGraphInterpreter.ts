@@ -40,6 +40,7 @@ export class CoreGraphInterpreter {
     //   }
     // });
     try {
+      if (!graph.getNodes[node]) return;
       const res = this.traverse(
         graph,
         graph.getNodes[node],

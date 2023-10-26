@@ -1,10 +1,10 @@
 <script lang="ts">
   import PaletteItem from "./PaletteItem.svelte";
+  import { projectsStore } from "../../../lib/stores/ProjectStore";
   import { commandStore } from "../../../lib/stores/CommandStore";
-  import type { ICommand } from "../../../../shared/types/index";
+  import type { ICommand, QueryResponse } from "../../../../shared/types/index";
   import { onDestroy, onMount } from "svelte";
   import Shortcuts from "../../utils/Shortcuts.svelte";
-  import { focusedGraphStore, graphMall } from "../../../lib/stores/GraphStore";
   import { toastStore } from "../../../lib/stores/ToastStore";
   import { get } from "svelte/store";
   let showPalette = false;
@@ -208,7 +208,12 @@
       const messages = [
         "👨🏼‍🍳 Cooking...",
         "🪄 Stirring the creative cauldron...",
-        "🐉 Slaying the ender dragon...",
+        "🚀 Embarking on an adventure...",
+        "🍿 Popping ideas into action...",
+        "🎨 Painting a masterpiece...",
+        "⚡️ Igniting sparks of brilliance...",
+        "🔧 Building dreams from scratch...",
+        "🐾 Unleashing wild ideas...",
       ];
       const dismiss = toastStore.trigger({
         message: messages[Math.floor(Math.random() * messages.length)],
@@ -223,7 +228,12 @@
       await window.apis.utilApi.saveState("prompts", promptHistory);
 
       try {
-        const res = await window.apis.utilApi.sendPrompt(prompt, get(focusedGraphStore).graphUUID);
+        const graphUUID = $projectsStore.activeProject
+          ? get($projectsStore.activeProject.focusedGraph)
+          : "";
+        const res = graphUUID
+          ? await window.apis.utilApi.sendPrompt(prompt, graphUUID)
+          : { status: "error", message: "No selected graph." };
 
         toastStore.trigger({
           message: res.message,
