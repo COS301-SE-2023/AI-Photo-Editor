@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { cacheStore } from "../../lib/stores/CacheStore";
-  import { set } from "zod";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
 
   const ws = new WebSocket("ws://localhost:60606");
 
@@ -52,13 +52,16 @@
 
         context?.drawImage(imageBitmap, 0, 0);
 
-        canvas.toBlob((blob) => {
+        canvas.toBlob(async (blob) => {
           // const blobUrl = URL.createObjectURL(blob);
-          if (blob)
-            cacheStore.addCacheObject(blob, {
+          if (blob && $projectsStore.activeProject) {
+            const cacheId = await cacheStore.addCacheObject(blob, {
               contentType: "image/png",
               name: `Webcam Capture ${Math.floor(100000 * Math.random())}`,
             });
+            if (cacheId)
+              window.apis.projectApi.addCacheObjects($projectsStore.activeProject.id, [cacheId]);
+          }
         }, "image/png"); // You can specify the MIME type here
       })
       .catch((err: string) => console.log("Error while taking photo ", err));
