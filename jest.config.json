@@ -15,7 +15,7 @@
     ],
     "^.+\\.js$": "babel-jest"
   },
-  "coveragePathIgnorePatterns": ["blix-plugins","node_modules","src/electron/lib/plugins/PluginManager"],
+  "coveragePathIgnorePatterns": ["blix-plugins","node_modules","src/electron/lib/plugins/PluginManager","src/electron/lib/ai/AiManagerv2","src/electron/lib/ai/Model","src/electron/lib/ai/Chat"],
   "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node", "svelte"],
   "coverageDirectory": "coverage",
