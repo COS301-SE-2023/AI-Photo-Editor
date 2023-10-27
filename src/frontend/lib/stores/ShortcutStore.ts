@@ -58,6 +58,11 @@ const defaultShortcuts: Omit<KeyboardShortcut, "type">[] = [
     value: ["meta+[KeyN]", "ctrl+[KeyN]"],
   },
   {
+    id: "blix.projects.openProject",
+    title: "Open Project",
+    value: ["meta+[KeyO]", "ctrl+[KeyO]"],
+  },
+  {
     id: "blix.settings.toggle",
     title: "Toggle Settings",
     value: ["meta+[Comma]", "ctrl+[Comma]"],

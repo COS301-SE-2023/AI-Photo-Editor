@@ -969,6 +969,12 @@ export class BlypescriptPlugin {
       } else if (componentType === "DiffDial") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("diffDial");
+      } else if (componentType === "OriginPicker") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("originPicker");
+      } else if (componentType === "MatrixInput") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("matrixInput");
       } else if (componentType === "CachePicker") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("cache");

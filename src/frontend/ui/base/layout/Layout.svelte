@@ -4,6 +4,8 @@
   import { shortcutsRegistry } from "@frontend/lib/stores/ShortcutStore";
   import Fa from "svelte-fa";
   import Panel from "./Panel.svelte";
+  import { commandStore } from "../../../lib/stores/CommandStore";
+  import Shortcuts from "../../utils/Shortcuts.svelte";
 
   const openProjectHotkeys = shortcutsRegistry.getFormattedShortcutsForActionReactive(
     "blix.projects.openProject"
@@ -11,6 +13,12 @@
   const newProjectHotkeys = shortcutsRegistry.getFormattedShortcutsForActionReactive(
     "blix.projects.newProject"
   );
+
+  const shortcuts = {
+    "blix.projects.openProject": async () => {
+      await commandStore.runCommand("blix.projects.open");
+    },
+  };
 </script>
 
 {#if $projectsStore.activeProject}
@@ -44,6 +52,8 @@
     </div>
   </div>
 {/if}
+
+<Shortcuts shortcuts="{shortcuts}" />
 
 <style lang="scss">
   .fullScreen {

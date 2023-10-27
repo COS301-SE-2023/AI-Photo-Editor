@@ -208,12 +208,12 @@
       const messages = [
         "👨🏼‍🍳 Cooking...",
         "🪄 Stirring the creative cauldron...",
-        "🚀 Embarking on an adventure...",
-        "🍿 Popping ideas into action...",
-        "🎨 Painting a masterpiece...",
-        "⚡️ Igniting sparks of brilliance...",
-        "🔧 Building dreams from scratch...",
-        "🐾 Unleashing wild ideas...",
+        // "🚀 Embarking on an adventure...",
+        // "🍿 Popping ideas into action...",
+        // "🎨 Painting a masterpiece...",
+        // "⚡️ Igniting sparks of brilliance...",
+        // "🔧 Building dreams from scratch...",
+        // "🐾 Unleashing wild ideas...",
       ];
       const dismiss = toastStore.trigger({
         message: messages[Math.floor(Math.random() * messages.length)],

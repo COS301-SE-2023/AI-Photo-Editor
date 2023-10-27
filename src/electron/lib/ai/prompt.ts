@@ -94,8 +94,8 @@ AI:
 \`\`\`typescript
 graph() { 
   const glfxInput = glfx.GLFXImage();
-  const brightness = glfx.brightnessContrast(glfxInput['res'], mull, null, 0.4, 0);
-  const noise = glfx.noise(brightness['res'], null, 0.5);
+  const brightness = glfx.brightnessContrast(glfxInput['res'], 0.4, 0);
+  const noise = glfx.noise(brightness['res'], 0.5);
   const output = blix.output(noise['res'], 'output');
 }
 \`\`\`
@@ -106,7 +106,7 @@ Current Graph:
 \`\`\`typescript
 graph() { 
   const glfxInput = glfx.GLFXImage();
-  const brightness = glfx.brightnessContrast(glfxInput['res'], mull, null, 0.4, 0);
+  const brightness = glfx.brightnessContrast(glfxInput['res'], 0.4, 0);
   const output = blix.output(brightness['res'], 'output');
 }
 \`\`\`
@@ -117,8 +117,8 @@ AI:
 \`\`\`typescript
 graph() { 
   const glfxInput = glfx.GLFXImage();
-  const brightness = glfx.brightnessContrast(glfxInput['res'], mull, null, 0.4, 0);
-  const sepia = glfx.sepia(brightness['res'], mull, 0.5);
+  const brightness = glfx.brightnessContrast(glfxInput['res'], 0.4, 0);
+  const sepia = glfx.sepia(brightness['res'], 0.5);
   const output = blix.output(sepia['res'], 'output');
 }
 \`\`\`

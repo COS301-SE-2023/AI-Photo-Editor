@@ -34,7 +34,7 @@
     </div>
     <div class="content">
       <img src="images/blix.svg" alt="Banner" class="inline-block w-20" />
-      <span class="float-right pt-6 opacity-90">The Anything Editor</span><br />
+      <span class="float-right pt-6 opacity-90">The Everything Editor</span><br />
       <hr class="my-2 border-gray-400" />
       <br /><br />
       <h2>Recent projects</h2>
