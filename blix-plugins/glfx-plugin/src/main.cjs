@@ -97,9 +97,9 @@ const glfxNodes = {
         "Swirl",
         "Add Swirl effect to the image",
         [
-            { id: "x", min: 0, max: 500, step: 1.0 }, 
-            { id: "y", min: 0, max: 500, step: 1.0 }, 
-            { id: "radius", min: 0, max: 600, step: 1.0 }, 
+            { id: "x", min: 0, max: 4000, step: 1.0 }, 
+            { id: "y", min: 0, max: 4000, step: 1.0 }, 
+            { id: "radius", min: 0, max: 3000, step: 1.0 }, 
             { id: "angle", min: -25, max: 25, step: 1.0 }
         ]
     ],
@@ -107,8 +107,8 @@ const glfxNodes = {
         "Zoom Blur",
         "Blurs the image away from a certain point, which looks like radial motion blur.",
         [
-            { id: "x", min: 0, max: 500, step: 1.0 }, 
-            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "x", min: 0, max: 1000, step: 1.0 }, 
+            { id: "y", min: 0, max: 1000, step: 1.0 }, 
             { id: "strength", min: 0, max: 1, step: 0.1 }
         ]
     ],
@@ -116,10 +116,10 @@ const glfxNodes = {
         "Tilt Shift",
         "Simulates the shallow depth of field normally encountered in close-up photography, which makes the scene seem much smaller than it actually is.",
         [
-            { id: "x1", min: 0, max: 500, step: 1.0 }, 
-            { id: "y1", min: 0, max: 500, step: 1.0 }, 
-            { id: "x2", min: 0, max: 500, step: 1.0 }, 
-            { id: "y2", min: 0, max: 500, step: 1.0 }, 
+            { id: "x1", min: 0, max: 1000, step: 1.0 }, 
+            { id: "y1", min: 0, max: 1000, step: 1.0 }, 
+            { id: "x2", min: 0, max: 1000, step: 1.0 }, 
+            { id: "y2", min: 0, max: 1000, step: 1.0 }, 
             { id: "blurRadius", min: 0, max: 50, step: 1.0 }, 
             { id: "gradientRadius", min: 0, max: 400, step: 1.0 }
         ]
@@ -128,8 +128,8 @@ const glfxNodes = {
         "Bulge / Pinch",
         "Bulges or pinches the image in a circle.",
         [
-            { id: "x", min: 0, max: 500, step: 1.0 }, 
-            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "x", min: 0, max: 1000, step: 1.0 }, 
+            { id: "y", min: 0, max: 1000, step: 1.0 }, 
             { id: "radius", min: 0, max: 600, step: 1.0 }, 
             { id: "strength", min: -1, max: 1, step: 0.1 }
         ]
@@ -148,8 +148,8 @@ const glfxNodes = {
         "Hexagonal Pixelate",
         "Renders the image using a pattern of hexagonal tiles. Tile colors are nearest-neighbor sampled from the centers of the tiles.",
         [
-            { id: "x", min: 0, max: 500, step: 1.0 }, 
-            { id: "y", min: 0, max: 500, step: 1.0 }, 
+            { id: "x", min: 0, max: 1000, step: 1.0 }, 
+            { id: "y", min: 0, max: 1000, step: 1.0 }, 
             { id: "scale", min: 1, max: 100, step: 1.0 }, 
         ]
     ],

@@ -3,7 +3,7 @@
 
     export let media;
 
-    const MAX_EDITING_RES = 1024;
+    const MAX_EDITING_RES = 4096;
 
     let canvasContainer;
     let canvasWidth = 500;
