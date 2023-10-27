@@ -1,23 +1,59 @@
 <script lang="ts">
-  import Panel from "./Panel.svelte";
-  import { projectsStore } from "@frontend/lib/stores/ProjectStore";
   import { faFolder } from "@fortawesome/free-solid-svg-icons";
+  import { projectsStore } from "@frontend/lib/stores/ProjectStore";
+  import { shortcutsRegistry } from "@frontend/lib/stores/ShortcutStore";
   import Fa from "svelte-fa";
+  import Panel from "./Panel.svelte";
+  import { commandStore } from "../../../lib/stores/CommandStore";
+  import Shortcuts from "../../utils/Shortcuts.svelte";
+
+  const openProjectHotkeys = shortcutsRegistry.getFormattedShortcutsForActionReactive(
+    "blix.projects.openProject"
+  );
+  const newProjectHotkeys = shortcutsRegistry.getFormattedShortcutsForActionReactive(
+    "blix.projects.newProject"
+  );
+
+  const shortcuts = {
+    "blix.projects.openProject": async () => {
+      await commandStore.runCommand("blix.projects.open");
+    },
+  };
 </script>
 
-<div class="fullScreen">
-  {#if $projectsStore.activeProject}
-    {#key $projectsStore.activeProject.id}
-      <Panel layout="{$projectsStore.activeProject.layout}" horizontal="{false}" height="100%" />
-    {/key}
-  {:else}
-    <div class="placeholder select-none">
-      <div class="icon"><Fa icon="{faFolder}" style="display: inline-block" /></div>
-      <h1>No projects!</h1>
-      <h2>Create a project to begin creating</h2>
+{#if $projectsStore.activeProject}
+  {#each $projectsStore.projects || [] as project (project.id)}
+    <div class="fullScreen" class:hidden="{$projectsStore.activeProject.id !== project.id}">
+      <Panel layout="{project.layout}" horizontal="{false}" height="100%" />
     </div>
-  {/if}
-</div>
+  {/each}
+{:else}
+  <div class="placeholder select-none">
+    <div class="icon"><Fa icon="{faFolder}" style="display: inline-block" /></div>
+    <div class="flex space-x-2 pb-2">
+      <h2 class="text-zinc-400">Open a project</h2>
+      {#each $openProjectHotkeys as hotkey}
+        <span
+          class="flex flex-nowrap items-center rounded-md bg-zinc-700 px-2 text-sm text-zinc-300 shadow-inner"
+        >
+          {hotkey}
+        </span>
+      {/each}
+    </div>
+    <div class="flex space-x-2">
+      <h2 class="text-zinc-400">Create a new project</h2>
+      {#each $newProjectHotkeys as hotkey}
+        <span
+          class="flex flex-nowrap items-center rounded-md bg-zinc-700 px-2 text-sm text-zinc-300 shadow-inner"
+        >
+          {hotkey}
+        </span>
+      {/each}
+    </div>
+  </div>
+{/if}
+
+<Shortcuts shortcuts="{shortcuts}" />
 
 <style lang="scss">
   .fullScreen {
@@ -27,6 +63,9 @@
     width: 100%;
   }
 
+  .hidden {
+    display: none;
+  }
   .placeholder {
     width: 100%;
     height: 100%;
@@ -50,7 +89,7 @@
     }
 
     h2 {
-      font-size: 0.8em;
+      font-size: 1em;
       color: #9090a4;
     }
   }

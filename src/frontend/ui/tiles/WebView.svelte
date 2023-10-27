@@ -1,11 +1,11 @@
 <!-- Renders a custom webview defined, for instance, by a plugin -->
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-  import TextBox from "../../ui/utils/mediaDisplays/TextBox.svelte";
+  import { createEventDispatcher, onDestroy } from "svelte";
   import { type RendererId } from "../../../shared/types/typeclass";
-  import type { TweakApi } from "../../lib/webview/TweakApi";
-  import { onDestroy } from "svelte";
   import { blixStore } from "../../lib/stores/BlixStore";
+  import { projectsStore } from "../../lib/stores/ProjectStore";
+  import type { TweakApi } from "../../lib/webview/TweakApi";
+  import TextBox from "../../ui/utils/mediaDisplays/TextBox.svelte";
 
   let webview: Electron.WebviewTag | null = null;
 
@@ -38,7 +38,10 @@
           }
           break;
         case "exportResponse":
-          // dispatch("exportResponse", event.args);
+          const id = event.args[0] as { cacheUUID: string };
+          if ("cacheUUID" in id && $projectsStore.activeProject) {
+            window.apis.projectApi.addCacheObjects($projectsStore.activeProject.id, [id.cacheUUID]);
+          }
           break;
       }
     });
@@ -86,7 +89,7 @@
   }
 
   onDestroy(() => {
-    webview?.closeDevTools();
+    // webview?.closeDevTools();
   });
 </script>
 

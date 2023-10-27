@@ -1,10 +1,12 @@
-import { writable, derived, type Readable, get } from "svelte/store";
-import { type UUID } from "@shared/utils/UniqueEntity";
-import { constructLayout, layoutTemplate, type UIProject } from "../Project";
 import type { SharedProject } from "@shared/types";
+import type { GraphUUID } from "@shared/ui/UIGraph";
+import { type UUID } from "@shared/utils/UniqueEntity";
+import { derived, get, writable, type Readable } from "svelte/store";
+import { constructLayout, layoutTemplate, type UIProject } from "../Project";
 import { graphMall } from "./GraphStore";
 import { cacheStore } from "./CacheStore";
 import { mediaStore } from "./MediaStore";
+import { type CacheUUID, type CacheMetadata } from "@shared/types/cache";
 
 type ProjectsStoreState = {
   projects: UIProject[];
@@ -38,7 +40,7 @@ class ProjectsStore {
    * and UI has show the new state.
    */
   public handleProjectCreated(projectState: SharedProject, setAsActive = false): void {
-    const { id, name, saved, layout, graphs } = projectState;
+    const { id, name, saved, layout, graphs, cache, mediaOutputIds } = projectState;
 
     const project: UIProject = {
       id,
@@ -46,6 +48,10 @@ class ProjectsStore {
       saved: saved ?? false,
       layout: layout ? constructLayout(layout) : constructLayout(layoutTemplate),
       graphs: graphs ? graphs : [],
+      focusedGraph: writable<GraphUUID>(""),
+      focusedPanel: writable<string>(""),
+      cache: cache ? cache : [],
+      mediaOutputIds: mediaOutputIds ? mediaOutputIds : [],
     };
 
     this.store.update((state) => {
@@ -70,16 +76,18 @@ class ProjectsStore {
       if (index < 0) return state;
 
       const project = state.projects[index];
-      const { id, name, saved, layout, graphs } = changedState;
-
+      const { id, name, saved, layout, graphs, cache, mediaOutputIds } = changedState;
       const newProject: UIProject = {
         id,
         name: name ? name : project.name,
         saved: saved ?? project.saved,
         layout: layout ? constructLayout(layout) : project.layout,
         graphs: graphs ? graphs : project.graphs,
+        focusedGraph: project.focusedGraph,
+        focusedPanel: project.focusedPanel,
+        cache: cache ?? project.cache,
+        mediaOutputIds: mediaOutputIds ?? project.mediaOutputIds,
       };
-
       state.projects[index] = newProject;
 
       if (state.activeProject?.id === newProject.id) {
@@ -121,13 +129,7 @@ class ProjectsStore {
    */
   public async closeProject(projectId: UUID): Promise<void> {
     const project = get(this.store).projects.find((p) => p.id === projectId);
-    // if (project) await window.apis.graphApi.deleteGraphs(project.graphs);
     await window.apis.projectApi.closeProject(projectId, project?.graphs);
-
-    // Clear all stores once removed
-    await cacheStore.deleteAllAssets();
-    await mediaStore.deleteAllMedia();
-    await graphMall.clearAllGraphs();
   }
 
   /**
@@ -143,6 +145,10 @@ class ProjectsStore {
         return state;
       });
     }
+  }
+
+  public getActiveProjectId(): UUID | null {
+    return get(this.store).activeProject?.id || null;
   }
 
   public async handleProjectSaving(projectId: UUID) {
@@ -180,6 +186,29 @@ class ProjectsStore {
   public getReactiveActiveProjectGraphIds(): Readable<string[]> {
     return derived(this.store, ($store) => {
       return $store.activeProject?.graphs || [];
+    });
+  }
+
+  public getReactiveProjectCacheMap(projectId: UUID): Readable<Map<CacheUUID, CacheMetadata>> {
+    return derived([this.store, cacheStore], ([$projectStore, $cacheStore]) => {
+      const cacheIds = $projectStore.projects.find((p) => p.id === projectId)?.cache || [];
+      const cacheObjects = new Map<CacheUUID, CacheMetadata>();
+
+      cacheIds.forEach((id) => {
+        const cacheMetadata = $cacheStore[id];
+
+        if (cacheMetadata) {
+          cacheObjects.set(id, cacheMetadata);
+        }
+      });
+
+      return cacheObjects;
+    });
+  }
+
+  public getReactiveActiveProjectCacheIds(): Readable<string[]> {
+    return derived(this.store, ($store) => {
+      return $store.activeProject?.cache || [];
     });
   }
 

@@ -23,6 +23,30 @@ const nodes = {
 
         nodeBuilder.addOutput("number", "res", "Result");
     },
+    "string": (context) => {
+        const nodeBuilder = context.instantiate("Input", "string");
+        nodeBuilder.setTitle("String");
+        nodeBuilder.setDescription("Returns a single string output");
+
+        nodeBuilder.define((input, uiInput, from) => {
+            return { "res": uiInput["value"] };
+        });
+
+        const ui = nodeBuilder.createUIBuilder();
+        ui
+        .addTextInput(
+            {
+                componentId: "value",
+                label: "Input string",
+                defaultValue: "Hello world",
+                triggerUpdate: true,
+            },
+            { multiline: true }
+        );
+        nodeBuilder.setUI(ui);
+
+        nodeBuilder.addOutput("string", "res", "Result");
+    },
     // "image": (context) => {
     //     const nodeBuilder = context.instantiate("Input", "image");
     //     nodeBuilder.setTitle("Image");

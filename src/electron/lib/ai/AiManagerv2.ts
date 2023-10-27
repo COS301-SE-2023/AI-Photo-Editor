@@ -39,14 +39,14 @@ type PromptOptions = {
   verbose?: boolean;
 };
 
-export const genericErrorResponse = "Oops, that wasn't supposed to happen😅";
+export const genericErrorResponse = "I struggled to understand that, can you try again?";
 
 export class AiManager {
   private graphExporter: CoreGraphExporter<BlypescriptProgram>;
   private readonly chats: Chat[] = [];
   private blypescriptInterpreter: BlypescriptInterpreter;
   private blypescriptToolbox: BlypescriptToolbox;
-  private agentIterationLimit = 3;
+  private agentIterationLimit = 2;
 
   constructor(
     private readonly toolbox: ToolboxRegistry,
@@ -95,7 +95,7 @@ export class AiManager {
 
     chat.addMessages(messages);
 
-    const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0 });
+    const llm = Model.create({ model: model || "GPT-3.5", apiKey, temperature: 0.05 });
 
     for (let i = 0; i < this.agentIterationLimit; i++) {
       const response = await llm.generate(chat);

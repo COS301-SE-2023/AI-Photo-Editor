@@ -19,8 +19,8 @@
 
 <li
   class="text-md my-2 flex items-center rounded-md p-2 text-zinc-100 {selected
-    ? 'bg-rose-300/10'
-    : 'hover:bg-rose-300/5'} hover:cursor-pointer"
+    ? 'bg-primary-300/10'
+    : 'hover:bg-primary-300/5'} hover:cursor-pointer"
   bind:this="{itemRef}"
   on:click="{clicked}"
   on:keydown="{clicked}"

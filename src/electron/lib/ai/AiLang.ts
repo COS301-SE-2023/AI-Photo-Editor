@@ -969,6 +969,12 @@ export class BlypescriptPlugin {
       } else if (componentType === "DiffDial") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("diffDial");
+      } else if (componentType === "OriginPicker") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("originPicker");
+      } else if (componentType === "MatrixInput") {
+        nodeParam.aiCanUse = false;
+        nodeParam.types.push("matrixInput");
       } else if (componentType === "CachePicker") {
         nodeParam.aiCanUse = false;
         nodeParam.types.push("cache");
@@ -1023,7 +1029,7 @@ export class BlypescriptToolbox {
 
   public toString(): string {
     const pluginStrings = this.plugins.map((plugin) => plugin.toString());
-    let str = "// Graph edge connection wrapper type\nE<T> = { value: T } | null;\n\n";
+    let str = "// Graph edge connection wrapper\ntype E<T> = { value: T } | null;\n\n";
     str += pluginStrings.join("\n\n");
     return str;
   }

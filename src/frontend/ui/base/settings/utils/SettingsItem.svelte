@@ -4,6 +4,7 @@
   import SecureInput from "./SecureInput.svelte";
   import Dropdown from "./Dropdown.svelte";
   import Button from "./Button.svelte";
+  import ColorPicker from "./ColorPicker/ColorPicker.svelte";
 
   export let item: Setting;
 </script>
@@ -29,6 +30,8 @@
         <Dropdown bind:item="{component}" />
       {:else if component.type === "button"}
         <Button item="{component}" />
+      {:else if component.type === "colorPicker"}
+        <ColorPicker bind:item="{component}" />
       {/if}
     {/each}
   </div>

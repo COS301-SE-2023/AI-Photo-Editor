@@ -45,9 +45,9 @@ function createGLFXNode(type, title, desc, params) {
 
         nodeBuilder.setUI(ui);
         nodeBuilder.addInput("GLFX image", "img", "GLFX image");
-        for (let param of params) {
-            nodeBuilder.addInput("number", param.id, toTitleCase(param.id));
-        }
+        // for (let param of params) {
+        //     nodeBuilder.addInput("number", param.id, toTitleCase(param.id));
+        // }
         nodeBuilder.addOutput("GLFX image", "res", "Result");
     };
 }

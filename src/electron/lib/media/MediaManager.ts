@@ -11,12 +11,14 @@ import {
 } from "../../../shared/types/media";
 import { CoreGraphManager } from "../core-graph/CoreGraphManager";
 import { TypeclassRegistry } from "../registries/TypeclassRegistry";
+import { ProjectManager } from "../../lib/projects/ProjectManager";
 
 export class MediaManager {
   private media: { [key: MediaOutputId]: MediaOutput };
   private _typeclassRegistry: TypeclassRegistry;
   private _graphInterpreter: CoreGraphInterpreter;
   private _graphManager: CoreGraphManager;
+  private projectManager: ProjectManager;
 
   // Subscribers that are listening on the MediaManager
   private _subscribers: { [key: MediaOutputId]: { [key: UUID]: MediaSubscriber } };
@@ -24,18 +26,26 @@ export class MediaManager {
   constructor(
     typeclassRegistry: TypeclassRegistry,
     graphInterpreter: CoreGraphInterpreter,
-    graphManager: CoreGraphManager
+    graphManager: CoreGraphManager,
+    projectManager: ProjectManager
   ) {
     this._typeclassRegistry = typeclassRegistry;
     this._subscribers = {};
     this._graphInterpreter = graphInterpreter;
     this._graphManager = graphManager;
+    this.projectManager = projectManager;
 
     this.media = {};
   }
 
   updateMedia(mediaOutput: MediaOutput) {
     this.media[mediaOutput.outputId] = mediaOutput;
+    const projectId = this.projectManager.getProjectIdByGraphId(mediaOutput.graphUUID);
+
+    if (projectId) {
+      this.projectManager.addMediaOutputs(projectId, [mediaOutput.outputNodeUUID]);
+    }
+
     this.onMediaUpdated(mediaOutput.outputId);
   }
 

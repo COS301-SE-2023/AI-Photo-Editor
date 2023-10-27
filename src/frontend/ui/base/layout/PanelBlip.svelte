@@ -83,13 +83,18 @@
   export let dock = "tl";
 </script>
 
-<div
-  class="{'blip ' + (['tl', 'tr', 'bl', 'br'].includes(dock) ? dock : 'tl')}"
-  on:mousedown|stopPropagation|preventDefault="{tryStartTrack}"
->
-  {dir}
+<div class="absolute h-10 w-10 {['tl', 'tr', 'bl', 'br'].includes(dock) ? dock : 'tl'}">
+  <div
+    class="{'blip ' + (['tl', 'tr', 'bl', 'br'].includes(dock) ? dock : 'tl')}"
+    on:mousedown|stopPropagation|preventDefault="{tryStartTrack}"
+  >
+    {dir}
+  </div>
 </div>
-<svelte:window on:mouseup="{tryEndTrack}" on:mousemove="{winMouseMove}" />
+<svelte:window
+  on:mouseup|stopPropagation|preventDefault="{tryEndTrack}"
+  on:mousemove|stopPropagation|preventDefault="{winMouseMove}"
+/>
 
 <style>
   :root {
@@ -124,7 +129,7 @@
     height: var(--width);
 
     background-color: transparent;
-    color: rgb(244, 63, 94);
+    color: rgb(var(--color-primary-500));
     text-align: center;
     font-size: 0.8em;
 
@@ -134,7 +139,7 @@
     z-index: 10000;
   }
   .blip:hover {
-    background-color: rgb(244, 63, 94);
+    background-color: rgb(var(--color-primary-500));
     cursor: crosshair;
   }
 </style>

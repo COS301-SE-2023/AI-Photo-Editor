@@ -4,6 +4,7 @@ import type { UUID } from "../../../shared/utils/UniqueEntity";
 import type { PathLike } from "fs";
 import type { GraphToJSON } from "../../lib/core-graph/CoreGraphExporter";
 import { layoutTemplate } from "../../../frontend/lib/Project";
+import { type IpcResponse } from "../../lib/api/MainApi";
 // Encapsulates the backend state for one of the open Blix projects
 export class CoreProject extends UniqueEntity {
   private _name: string;
@@ -15,6 +16,8 @@ export class CoreProject extends UniqueEntity {
   private _location: PathLike; // Location in user local storage to sync to
   private _saved: boolean; // Flag used to check if project has been saved since last changes
   private _layout: LayoutPanel;
+  private _cache: UUID[];
+  private _mediaIds: UUID[];
 
   constructor(name: string) {
     super();
@@ -23,6 +26,8 @@ export class CoreProject extends UniqueEntity {
     this._location = "" as PathLike;
     this._saved = false;
     this._layout = layoutTemplate;
+    this._cache = [];
+    this._mediaIds = [];
   }
 
   public rename(name: string): boolean {
@@ -94,6 +99,8 @@ export class CoreProject extends UniqueEntity {
       id: this.uuid,
       saved: this._saved,
       graphs: [...this._graphs],
+      cache: [...this._cache],
+      mediaOutputIds: [...this._mediaIds],
     };
 
     return project;
@@ -105,6 +112,50 @@ export class CoreProject extends UniqueEntity {
 
   public set saved(flag: boolean) {
     this._saved = flag;
+  }
+
+  public addCacheObjects(cacheUUIDs: UUID[]): IpcResponse<string> {
+    try {
+      this._cache = [...this._cache, ...cacheUUIDs];
+      return { success: true, data: "Asset successfully added" };
+    } catch (e: any) {
+      return { success: false, data: e };
+    }
+  }
+
+  public removeCacheObjects(cacheUUIDs: UUID[]): IpcResponse<string> {
+    try {
+      this._cache = this._cache.filter((id) => !cacheUUIDs.includes(id));
+      return { success: true, data: "Asset successfully removed" };
+    } catch (e: any) {
+      return { success: false, data: e };
+    }
+  }
+
+  public addMediaOutputs(mediaOutputIds: UUID[]): IpcResponse<string> {
+    try {
+      mediaOutputIds.forEach((id) => {
+        if (!this._mediaIds.includes(id)) {
+          this._mediaIds.push(id);
+        }
+      });
+      return { success: true, data: "Media output successfully added" };
+    } catch (e: any) {
+      return { success: false, data: e };
+    }
+  }
+
+  public removeMediaOutputs(mediaOutputIds: UUID[]): IpcResponse<string> {
+    try {
+      this._mediaIds = this._mediaIds.filter((id) => !mediaOutputIds.includes(id));
+      return { success: true, data: "Media output successfully removed" };
+    } catch (e: any) {
+      return { success: false, data: e };
+    }
+  }
+
+  public getCacheIds() {
+    return [...this._cache];
   }
 }
 

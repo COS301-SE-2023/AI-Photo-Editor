@@ -93,9 +93,9 @@ User: Brighten up the image and add some noise
 AI: 
 \`\`\`typescript
 graph() { 
-  const glfxInput = input.GLFXImage();
-  const brightness = glfx.brightnessContrast(glfxInput['res'], mull, null, 0.4, 0);
-  const noise = glfx.noise(brightness['res'], null, 0.5);
+  const glfxInput = glfx.GLFXImage();
+  const brightness = glfx.brightnessContrast(glfxInput['res'], 0.4, 0);
+  const noise = glfx.noise(brightness['res'], 0.5);
   const output = blix.output(noise['res'], 'output');
 }
 \`\`\`
@@ -105,8 +105,8 @@ graph() {
 Current Graph: 
 \`\`\`typescript
 graph() { 
-  const glfxInput = input.GLFXImage();
-  const brightness = glfx.brightnessContrast(glfxInput['res'], mull, null, 0.4, 0);
+  const glfxInput = glfx.GLFXImage();
+  const brightness = glfx.brightnessContrast(glfxInput['res'], 0.4, 0);
   const output = blix.output(brightness['res'], 'output');
 }
 \`\`\`
@@ -116,9 +116,9 @@ User: Add a yellow tint
 AI: 
 \`\`\`typescript
 graph() { 
-  const glfxInput = input.GLFXImage();
-  const brightness = glfx.brightnessContrast(glfxInput['res'], mull, null, 0.4, 0);
-  const sepia = glfx.sepia(brightness['res'], mull, 0.5);
+  const glfxInput = glfx.GLFXImage();
+  const brightness = glfx.brightnessContrast(glfxInput['res'], 0.4, 0);
+  const sepia = glfx.sepia(brightness['res'], 0.5);
   const output = blix.output(sepia['res'], 'output');
 }
 \`\`\`

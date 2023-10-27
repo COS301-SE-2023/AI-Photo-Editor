@@ -8,15 +8,17 @@
   import { colord, extend } from "colord";
   import a11yPlugin from "colord/plugins/a11y";
   import { nodeIdLastClicked } from "../../../lib/stores/MediaStore";
+  import { blixStore } from "../../../lib/stores/BlixStore";
 
   extend([a11yPlugin]);
 
   const dispatch = createEventDispatcher();
 
   export let graphId: string;
-  export let panelId: number;
+  export let panelId: string;
   export let node: GraphNode;
   // let activeInput = false;
+  let primaryColor = blixStore.primaryColor();
 
   $: svelvetNodeId = `${panelId}_${node.uuid}`;
   $: toolboxNode = toolboxStore.getNodeReactive(node.signature);
@@ -33,6 +35,8 @@
   // node.inputUIValues = new AnchorValueStore();
 
   const nodePos = node.styling.pos;
+  const nodeWidth = node.styling.width;
+  const nodeHeight = node.styling.height;
 
   function stringToColor(str: string): CSSColorString {
     let hash = 0;
@@ -88,12 +92,12 @@
     borderColor="transparent"
     borderWidth="1px"
     borderRadius="{10}"
-    selectionColor="#f43e5c"
-    on:selected="{() => console.log('selected')}"
+    selectionColor="{$primaryColor}"
+    on:selected="{() => {}}"
     on:nodeClickReleased="{nodeClicked}"
     on:nodeDragReleased="{nodeDragReleased}"
   >
-    <div class="node">
+    <div class="node" bind:clientWidth="{$nodeWidth}" bind:clientHeight="{$nodeHeight}">
       <div class="header">
         <h1>{$toolboxNode?.title || node.displayName}</h1>
         <!-- {#if $toolboxNode?.description}

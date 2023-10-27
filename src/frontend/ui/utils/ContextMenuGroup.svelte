@@ -17,7 +17,7 @@
 <ul>
   <li>
     <div
-      class="flex cursor-pointer items-center rounded-md p-1 hover:bg-rose-300/5 active:bg-rose-400/5"
+      class="flex cursor-pointer items-center rounded-md p-1 hover:bg-primary-300/5 active:bg-primary-500/5"
       on:click="{() => {
         expanded = !expanded;
         toggleExpand(root, expanded);
@@ -31,7 +31,7 @@
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="pointer-events-none h-4 w-4 stroke-rose-500"
+          class="pointer-events-none h-4 w-4 stroke-primary-500"
         >
           <path
             stroke-linecap="round"
@@ -46,7 +46,7 @@
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="pointer-events-none h-4 w-4 stroke-rose-500"
+          class="pointer-events-none h-4 w-4 stroke-primary-500"
         >
           <path
             stroke-linecap="round"

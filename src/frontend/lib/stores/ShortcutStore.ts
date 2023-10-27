@@ -58,6 +58,11 @@ const defaultShortcuts: Omit<KeyboardShortcut, "type">[] = [
     value: ["meta+[KeyN]", "ctrl+[KeyN]"],
   },
   {
+    id: "blix.projects.openProject",
+    title: "Open Project",
+    value: ["meta+[KeyO]", "ctrl+[KeyO]"],
+  },
+  {
     id: "blix.settings.toggle",
     title: "Toggle Settings",
     value: ["meta+[Comma]", "ctrl+[Comma]"],
@@ -83,6 +88,33 @@ const defaultShortcuts: Omit<KeyboardShortcut, "type">[] = [
     value: ["[Escape]"],
   },
 ];
+
+const shortcutIconFilterMap: ReadonlyMap<string | RegExp, string> = new Map<
+  string | RegExp,
+  string
+>([
+  ["Comma", ","],
+  ["Equal", "="],
+  ["Minus", "-"],
+  ["Period", "."],
+  ["Backslash", "\\"],
+  ["Backspace", "⌫"],
+  ["meta", "⌘"],
+  ["alt", "⌥"],
+  ["ctrl", "⌃"],
+  ["shift", "⇧"],
+  ["ArrowDown", "↓"],
+  ["ArrowUp", "↑"],
+  ["ArrowLeft", "←"],
+  ["ArrowRight", "→"],
+  ["BracketRight", "]"],
+  ["BracketLeft", "["],
+  ["Digit", ""],
+  ["Key", ""],
+  ["[", ""],
+  ["]", ""],
+  [/\+/g, " "],
+]);
 
 export type ShortcutAction = `${string}.${string}`; // Actions must be nested at least one layer deep
 export type ShortcutString = string;
@@ -275,6 +307,28 @@ class ShortcutStore {
     });
   }
 
+  public getFormattedShortcutsForActionReactive(
+    action: ShortcutAction
+  ): Readable<ShortcutString[]> {
+    return derived(this.shortcuts, ($shortcuts) => {
+      const shortcut = $shortcuts.get(action);
+
+      if (!shortcut) {
+        return [];
+      }
+
+      const hotkeys = shortcut.value.map((combo) => {
+        for (const [key, value] of shortcutIconFilterMap.entries()) {
+          combo = combo.replace(key, value);
+        }
+
+        return combo;
+      });
+
+      return hotkeys;
+    });
+  }
+
   public getShortcutsReactive(): Readable<KeyboardShortcut[]> {
     return derived(this.shortcuts, ($shortcuts) => {
       return Array.from($shortcuts.values());
@@ -287,31 +341,7 @@ class ShortcutStore {
 
       shortcuts.forEach((shortcut) => {
         shortcut.value = shortcut.value.map((combo) => {
-          const map = new Map<string | RegExp, string>([
-            ["Comma", ","],
-            ["Equal", "="],
-            ["Minus", "-"],
-            ["Period", "."],
-            ["Backslash", "\\"],
-            ["Backspace", "⌫"],
-            ["meta", "⌘"],
-            ["alt", "⌥"],
-            ["ctrl", "⌃"],
-            ["shift", "⇧"],
-            ["ArrowDown", "↓"],
-            ["ArrowUp", "↑"],
-            ["ArrowLeft", "←"],
-            ["ArrowRight", "→"],
-            ["BracketRight", "]"],
-            ["BracketLeft", "["],
-            ["Digit", ""],
-            ["Key", ""],
-            ["[", ""],
-            ["]", ""],
-            [/\+/g, " "],
-          ]);
-
-          for (const [key, value] of map.entries()) {
+          for (const [key, value] of shortcutIconFilterMap.entries()) {
             combo = combo.replace(key, value);
           }
 

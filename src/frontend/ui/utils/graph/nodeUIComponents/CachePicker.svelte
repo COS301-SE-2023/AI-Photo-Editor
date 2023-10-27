@@ -1,49 +1,57 @@
 <script lang="ts">
-  import { writable } from "svelte/store";
   import { UIValueStore } from "@shared/ui/UIGraph";
-  import { cacheStore } from "../../../../lib/stores/CacheStore";
   import { blixStore } from "../../../../lib/stores/BlixStore";
   import type { UIComponentConfig, UIComponentProps } from "@shared/ui/NodeUITypes";
   import { createEventDispatcher } from "svelte";
+  import { projectsStore } from "@frontend/lib/stores/ProjectStore";
+  import { writable, type Writable } from "svelte/store";
 
   export let props: UIComponentProps;
   export let inputStore: UIValueStore;
   export let config: UIComponentConfig;
+  export let projectId: string;
+
+  let selectedCacheId = writable("");
+
+  const cacheObjects = projectsStore.getReactiveProjectCacheMap(projectId);
   const dispatch = createEventDispatcher();
 
-  $: items = $cacheStore;
-  let defaultItem = config.defaultValue as string | undefined;
-
   if (!inputStore.inputs[config.componentId]) {
-    if (!defaultItem) defaultItem = Object.keys($cacheStore)[0];
-    inputStore.inputs[config.componentId] = writable("");
+    inputStore.inputs[config.componentId] = selectedCacheId;
+  } else {
+    selectedCacheId = inputStore.inputs[config.componentId] as Writable<string>;
   }
 
-  $: valStore = inputStore.inputs[config.componentId];
+  $: if (cacheObjects && $cacheObjects.size && !$selectedCacheId) {
+    $selectedCacheId = Array.from($cacheObjects.keys())[0];
+  }
+
+  $: if (cacheObjects && !$cacheObjects.has($selectedCacheId)) {
+    $selectedCacheId = "";
+  }
 
   function handleInputInteraction() {
-    dispatch("inputInteraction", { id: config.componentId, value: $valStore });
+    dispatch("inputInteraction", { id: config.componentId, value: selectedCacheId });
   }
 </script>
 
-{#if Object.keys(items).length > 0}
+{#if $cacheObjects.size}
   {#key inputStore.inputs[config.componentId]}
-    <select bind:value="{$valStore}" on:change="{handleInputInteraction}">
-      {#each Object.keys(items) as itemKey}
+    <select bind:value="{$selectedCacheId}" on:change="{handleInputInteraction}">
+      {#each Array.from($cacheObjects) as [cacheId, cacheMetadata]}
         {#if !$blixStore.production}
-          <option value="{itemKey}"
-            >{items[itemKey].name} [{itemKey}] ({items[itemKey].contentType})</option
-          >
+          <option value="{cacheId}">
+            {cacheMetadata.name} [{cacheId}] ({cacheMetadata.contentType})
+          </option>
         {:else}
-          <option value="{itemKey}">{items[itemKey].name}</option>
+          <option value="{cacheId}">{cacheMetadata.name}</option>
         {/if}
       {/each}
     </select>
   {/key}
 {:else}
-  <!-- No items to display -->
   <select>
-    <option selected disabled>Add an asset</option>
+    <option selected disabled>Select an asset</option>
   </select>
 {/if}
 
