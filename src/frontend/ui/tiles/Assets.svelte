@@ -115,16 +115,20 @@
       return;
     }
     if ($projectsStore.activeProject) {
+      // await cacheStore.deleteSelectedAssets(selectedCacheItems);
+      const items = selectedCacheItems;
       const res = await window.apis.projectApi.removeCacheObjects(
         $projectsStore.activeProject.id,
         selectedCacheItems
       );
 
+      // console.log(items)
+      await cacheStore.deleteSelectedAssets(items);
       if (!res.success) {
         toastStore.trigger({ message: res.data, type: "error" });
       }
     }
-    await cacheStore.deleteSelectedAssets(selectedCacheItems);
+    // await cacheStore.deleteSelectedAssets(selectedCacheItems);
   }
 
   // let barrier = 0;
@@ -151,9 +155,7 @@
           {#if $cacheStore[cacheId] && ["image/png", "image/jpeg"].includes($cacheStore[cacheId].contentType)}
             <div
               class="item thumbItem {selectedCacheItems.includes(cacheId)
-               
-              ? 'ring-2 ring-primary-500'
-             
+                ? 'ring-2 ring-primary-500'
                 : ''}"
               on:click|stopPropagation="{() => handleItemOnClick(cacheId)}"
               on:keydown="{null}"
