@@ -1,15 +1,19 @@
 <script lang="ts">
   // import { shell } from "@electron/remote"
-  import { onMount } from "svelte";
+  import { onMount, getContext, onDestroy } from "svelte";
   import type { Setting } from "../../../../shared/types";
   import { blixStore } from "../../../lib/stores/BlixStore";
   import SettingsItem from "./utils/SettingsItem.svelte";
+  import type { SettingsContext } from "./Settings.svelte";
+
+  const { getSettingValue, saveSettings } = getContext<SettingsContext>("settings");
+  let initialized = false;
 
   let checkingForUpdates = false;
 
   let versionItem: Setting = {
     id: "version",
-    title: "Current Version: ",
+    title: "Current version: ",
     subtitle: "",
     components: [],
   };
@@ -33,47 +37,84 @@
     ],
   };
 
-  onMount(() => {
-    return blixStore.subscribe((state) => {
-      versionItem.title = `Current Version: v${state.blix.version}`;
+  let colorAccentItem: Setting = {
+    id: "accent-color",
+    title: "Accent color",
+    subtitle: "Choose the accent color used throughout Blix.",
+    components: [
+      {
+        id: "accent-color",
+        type: "colorPicker",
+        value: "#f43e5c",
+      },
+    ],
+  };
 
-      versionItem.subtitle = state.update.isAvailable
-        ? `Update is available: v${state.update.version}`
-        : "Blix is up to date!";
+  function saveAccentColor(item: Setting) {
+    const value: string = (item.components[0].value as string) ?? "";
+    blixStore.setPrimaryColor(value);
+    saveSettings(item.components);
+  }
 
-      if (state.update.isAvailable) {
-        if (state.update.isDownloaded) {
-          versionItem.components = [
-            {
-              id: "quit-and-install",
-              value: "Quit and install update",
-              type: "button",
-              onClick: () => window.apis.utilApi.quitAndInstallUpdate(),
-            },
-          ];
-        } else if (!state.update.isDownloading) {
-          versionItem.components = [
-            {
-              id: "download-update",
-              value: "Download update",
-              type: "button",
-              onClick: () => window.apis.utilApi.downloadUpdate(),
-            },
-          ];
-        } else {
-          versionItem.components = [];
-        }
-      } else {
+  $: if (initialized) saveAccentColor(colorAccentItem);
+
+  onMount(async () => {
+    const res = await getSettingValue(colorAccentItem.components[0]);
+
+    if (res.status === "success" && res.data) {
+      colorAccentItem.components[0].value = res.data as any;
+      colorAccentItem = colorAccentItem;
+    }
+
+    initialized = true;
+  });
+
+  const blixStoreUnsubscribe = blixStore.subscribe((state) => {
+    versionItem.title = `Current Version: v${state.blix.version}`;
+
+    versionItem.subtitle = state.update.isAvailable
+      ? `Update is available: v${state.update.version}`
+      : "Blix is up to date!";
+
+    if (state.update.isAvailable) {
+      if (state.update.isDownloaded) {
         versionItem.components = [
           {
-            id: "check-for-updates",
-            value: "Check for updates",
+            id: "quit-and-install",
+            value: "Quit and install update",
             type: "button",
-            onClick: checkForUpdates,
+            onClick: () => window.apis.utilApi.quitAndInstallUpdate(),
           },
         ];
+      } else if (!state.update.isDownloading) {
+        versionItem.components = [
+          {
+            id: "download-update",
+            value: "Download update",
+            type: "button",
+            onClick: () => window.apis.utilApi.downloadUpdate(),
+          },
+        ];
+      } else {
+        versionItem.components = [];
       }
-    });
+    } else {
+      versionItem.components = [
+        {
+          id: "check-for-updates",
+          value: "Check for updates",
+          type: "button",
+          onClick: checkForUpdates,
+        },
+      ];
+    }
+
+    // console.log(state.theme.primary)
+    // saveSettings([colorAccentItem.components]);
+  });
+
+  onDestroy(() => {
+    blixStoreUnsubscribe();
   });
 
   async function checkForUpdates() {
@@ -101,4 +142,6 @@
   </SettingsItem>
 
   <SettingsItem item="{helpItem}" />
+
+  <SettingsItem bind:item="{colorAccentItem}" />
 </div>

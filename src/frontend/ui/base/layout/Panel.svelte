@@ -24,7 +24,7 @@
   import ShortcutSettings from "../settings/Hotkeys.svelte";
   import { PanelGroup, PanelLeaf, type PanelNode } from "@frontend/lib/PanelNode";
   import type { PanelType } from "@shared/types";
-  import { focusedPanelStore } from "../../../lib/PanelNode";
+  import { projectsStore } from "../../../lib/stores/ProjectStore";
   import { tileStore } from "../../../lib/stores/TileStore";
   import { get } from "svelte/store";
   import PanelBlipVane from "./PanelBlipVane.svelte";
@@ -324,8 +324,6 @@
           <!-- Subpanels alternate horiz/vert -->
         {/if}
 
-        <!-- TODO: Fix - for some reason this occasionally causes issues with panel deletion -->
-        <!-- A temp workaround that seems to hold up better is awaiting tick() in PanelGroup removePanel() -->
         {#if blipVaneIcon && i === blipVaneIndex}
           {#key blipVaneIcon}
             <PanelBlipVane icon="{blipVaneIcon}" />
@@ -348,12 +346,15 @@
   <!-- When a panel is clicked, a store is updated to hold the focussed panel -->
   <div
     class="fullPanel"
-    on:click="{() => focusedPanelStore.focusOnPanel(layout.id)}"
+    on:click="{() => {
+      if ($projectsStore.activeProject) $projectsStore.activeProject.focusedPanel.set(layout.id);
+    }}"
     on:keydown="{null}"
   >
     <svelte:component
       this="{getComponentForPanelType(layout.content)}"
       signature="{layout.content}"
+      projectId="{projectsStore.getActiveProjectId() ?? ''}"
       {...tileProps}
     />
   </div>
@@ -388,12 +389,12 @@
   }
 
   .splitpanes.main-theme .splitpanes__splitter:active {
-    background-color: rgb(244, 63, 94);
+    background-color: rgb(var(--color-primary-500));
     border: none;
   }
 
   .splitpanes.main-theme .splitpanes__splitter:hover {
-    background-color: rgb(244, 63, 94);
+    background-color: rgb(var(--color-primary-500));
     border: none;
   }
 

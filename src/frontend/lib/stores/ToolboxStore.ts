@@ -36,6 +36,18 @@ class ToolboxStore {
   public getNode(signature: NodeSignature) {
     return get(this.store)[signature];
   }
+
+  public getAnchorOrderedIndex(signature: NodeSignature, anchorId: string) {
+    const node = this.getNode(signature);
+    if (!node) return -1;
+
+    for (let i = 0; i < node.inputs.length; i++) {
+      if (node.inputs[i].id === anchorId) {
+        return i;
+      }
+    }
+    return -1;
+  }
 }
 
 // export const graphMall = writable<GraphMall>(new GraphMall());

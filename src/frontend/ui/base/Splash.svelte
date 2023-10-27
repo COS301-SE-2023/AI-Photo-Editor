@@ -34,8 +34,8 @@
     </div>
     <div class="content">
       <img src="images/blix.svg" alt="Banner" class="inline-block w-20" />
-      <span class="float-right pt-6 opacity-90">The Anything Editor</span><br />
-      <hr class="my-3 border-gray-400" />
+      <span class="float-right pt-6 opacity-90">The Everything Editor</span><br />
+      <hr class="my-2 border-gray-400" />
       <br /><br />
       <h2>Recent projects</h2>
       <hr class="my-3 border-gray-600" />
@@ -46,20 +46,20 @@
           {#each projects as project (project.path)}
             <!-- Styling might need a little touching up -->
             <li
-              class="mb-1 overflow-hidden rounded hover:bg-dino"
+              class="mb-1 flex items-center overflow-hidden rounded px-1 hover:cursor-pointer hover:bg-primary-500"
               on:click="{() => commandStore.runCommand('blix.projects.open', project)}"
               on:keydown="{null}"
               on:mouseover="{() => (currentProject = project.path)}"
               on:focus="{null}"
               on:mouseleave="{() => (currentProject = '')}"
             >
-              <span style="float:left" class="w-40 truncate">
+              <span class="w-40 truncate">
                 <!-- <p>&nbsp;{handlePath(project.path)}</p> -->
                 {handlePath(project.path)}
               </span>
-              <span style="float:right">
+              <span class="ml-auto">
                 <i class="{project.path == currentProject ? 'text-white' : 'text-gray-500'}">
-                  {project.lastEdited}
+                  {project.lastEdited.slice(0, project.lastEdited.lastIndexOf(":"))}
                 </i>
               </span>
             </li>

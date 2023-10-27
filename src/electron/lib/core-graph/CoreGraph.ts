@@ -68,7 +68,8 @@ export class CoreGraph extends UniqueEntity {
     this.uiInputs = {};
     this.uiPositions = {};
     this.metadata = {
-      displayName: "Graph",
+      displayName: `Graph`,
+      timestamp: Date.now(),
     };
     // this.nodeList = [];
   }
@@ -643,10 +644,11 @@ export class CoreGraph extends UniqueEntity {
       } satisfies QueryResponse;
     }
 
-    const { displayName } = updatedMetadata;
+    const { displayName, timestamp } = updatedMetadata;
 
     const newMetadata: GraphMetadata = {
       displayName: displayName ? displayName : this.metadata.displayName,
+      timestamp: timestamp ? timestamp : this.metadata.timestamp,
     };
 
     this.metadata = newMetadata;

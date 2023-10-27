@@ -11,17 +11,18 @@ export type GraphEdgeUUID = UUID;
 export type GraphAnchorUUID = UUID;
 export type GraphMetadata = {
   displayName: string;
+  timestamp: number;
 };
 
 export class UIGraph {
   public nodes: { [key: GraphNodeUUID]: GraphNode } = {};
-  public edges: { [key: GraphAnchorUUID]: GraphEdge } = {};
+  public edges: { [key: GraphAnchorUUID]: GraphEdge } = {}; // input anchors to edge
   public uiPositions: { [key: GraphNodeUUID]: SvelvetCanvasPos } = {};
-  public metadata: GraphMetadata = {
-    displayName: "Graph",
-  };
+  public metadata;
 
-  constructor(public uuid: GraphUUID) {}
+  constructor(public uuid: GraphUUID) {
+    this.metadata = { displayName: "Graph", timestamp: Date.now() };
+  }
 
   public updateNodes() {}
 }

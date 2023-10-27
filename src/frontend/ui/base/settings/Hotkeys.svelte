@@ -71,13 +71,13 @@
         {/each}
 
         {#if focusedShortcutId === id}
-          <span class="rounded-md bg-rose-500 px-2 text-sm text-zinc-900 shadow-inner"
+          <span class="rounded-md bg-primary-500 px-2 text-sm text-zinc-900 shadow-inner"
             >Press hotkey...</span
           >
         {/if}
 
         <button
-          class="group flex h-6 w-6 items-center justify-center rounded-md border-none outline-none transition duration-500 ease-in-out hover:bg-rose-500 focus:outline-none"
+          class="group flex h-6 w-6 items-center justify-center rounded-md border-none outline-none transition duration-500 ease-in-out hover:bg-primary-500 focus:outline-none"
           title="Add hotkey"
           aria-label="Add hotkey"
           on:keydown|stopPropagation|preventDefault="{(event) => addShortcut(id, event)}"

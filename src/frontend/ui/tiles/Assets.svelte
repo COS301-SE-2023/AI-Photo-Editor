@@ -1,6 +1,4 @@
 <script lang="ts">
-  import type { CacheUUID } from "@shared/types/cache";
-  import { cacheStore } from "../../lib/stores/CacheStore";
   import {
     faBacon,
     faBowlRice,
@@ -15,9 +13,11 @@
     faLemon,
     faPizzaSlice,
   } from "@fortawesome/free-solid-svg-icons";
+  import type { CacheUUID } from "@shared/types/cache";
   import Fa from "svelte-fa";
-  import { toastStore } from "../../lib/stores/ToastStore";
+  import { cacheStore } from "../../lib/stores/CacheStore";
   import { projectsStore } from "../../lib/stores/ProjectStore";
+  import { toastStore } from "../../lib/stores/ToastStore";
 
   let selectedCacheItems: CacheUUID[] = [];
   // Not used at the moment
@@ -64,23 +64,35 @@
 
   async function requestFileAccess() {
     try {
-      const handle = await window.showOpenFilePicker();
-      const file = await handle[0].getFile();
-      const blob = await file.arrayBuffer();
+      const handle = await window.showOpenFilePicker({ multiple: true });
+      // let file: any[];
+      const assets: { file: any; buffer: any }[] = await Promise.all(
+        handle.map(async (asset: any) => ({
+          file: await asset.getFile(),
+          buffer: await (await asset.getFile()).arrayBuffer(),
+        }))
+      );
 
-      const cacheId = await cacheStore.addCacheObject(new Blob([blob], { type: file.type }), {
-        name: file.name,
-        contentType: file.type,
-      });
-      if ($projectsStore.activeProject && cacheId) {
-        const res = await window.apis.projectApi.addCacheObjects($projectsStore.activeProject.id, [
-          cacheId,
-        ]);
+      assets.forEach(async (asset: { file: any; buffer: any }) => {
+        const cacheId = await cacheStore.addCacheObject(
+          new Blob([asset.buffer], { type: asset.file.type }),
+          {
+            name: asset.file.name,
+            contentType: asset.file.type,
+          }
+        );
+        // console.log("id: ", cacheId)
+        if ($projectsStore.activeProject && cacheId) {
+          const res = await window.apis.projectApi.addCacheObjects(
+            $projectsStore.activeProject.id,
+            [cacheId]
+          );
 
-        if (!res.success) {
-          toastStore.trigger({ message: res.data, type: "error" });
+          if (!res.success) {
+            toastStore.trigger({ message: res.data, type: "error" });
+          }
         }
-      }
+      });
     } catch (error) {
       console.error(error);
     }
@@ -103,16 +115,20 @@
       return;
     }
     if ($projectsStore.activeProject) {
+      // await cacheStore.deleteSelectedAssets(selectedCacheItems);
+      const items = selectedCacheItems;
       const res = await window.apis.projectApi.removeCacheObjects(
         $projectsStore.activeProject.id,
         selectedCacheItems
       );
 
+      // console.log(items)
+      await cacheStore.deleteSelectedAssets(items);
       if (!res.success) {
         toastStore.trigger({ message: res.data, type: "error" });
       }
     }
-    await cacheStore.deleteSelectedAssets(selectedCacheItems);
+    // await cacheStore.deleteSelectedAssets(selectedCacheItems);
   }
 
   // let barrier = 0;
@@ -139,7 +155,7 @@
           {#if $cacheStore[cacheId] && ["image/png", "image/jpeg"].includes($cacheStore[cacheId].contentType)}
             <div
               class="item thumbItem {selectedCacheItems.includes(cacheId)
-                ? 'ring-2 ring-rose-500'
+                ? 'ring-2 ring-primary-500'
                 : ''}"
               on:click|stopPropagation="{() => handleItemOnClick(cacheId)}"
               on:keydown="{null}"
@@ -156,7 +172,7 @@
             </div>
           {:else}
             <div
-              class="item {selectedCacheItems.includes(cacheId) ? 'ring-2 ring-rose-500' : ''}"
+              class="item {selectedCacheItems.includes(cacheId) ? 'ring-2 ring-primary-500' : ''}"
               on:click|stopPropagation="{() => handleItemOnClick(cacheId)}"
               on:keydown="{null}"
             >

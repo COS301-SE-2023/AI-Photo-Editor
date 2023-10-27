@@ -17,6 +17,7 @@ export class CoreProject extends UniqueEntity {
   private _saved: boolean; // Flag used to check if project has been saved since last changes
   private _layout: LayoutPanel;
   private _cache: UUID[];
+  private _mediaIds: UUID[];
 
   constructor(name: string) {
     super();
@@ -26,6 +27,7 @@ export class CoreProject extends UniqueEntity {
     this._saved = false;
     this._layout = layoutTemplate;
     this._cache = [];
+    this._mediaIds = [];
   }
 
   public rename(name: string): boolean {
@@ -98,6 +100,7 @@ export class CoreProject extends UniqueEntity {
       saved: this._saved,
       graphs: [...this._graphs],
       cache: [...this._cache],
+      mediaOutputIds: [...this._mediaIds],
     };
 
     return project;
@@ -127,6 +130,32 @@ export class CoreProject extends UniqueEntity {
     } catch (e: any) {
       return { success: false, data: e };
     }
+  }
+
+  public addMediaOutputs(mediaOutputIds: UUID[]): IpcResponse<string> {
+    try {
+      mediaOutputIds.forEach((id) => {
+        if (!this._mediaIds.includes(id)) {
+          this._mediaIds.push(id);
+        }
+      });
+      return { success: true, data: "Media output successfully added" };
+    } catch (e: any) {
+      return { success: false, data: e };
+    }
+  }
+
+  public removeMediaOutputs(mediaOutputIds: UUID[]): IpcResponse<string> {
+    try {
+      this._mediaIds = this._mediaIds.filter((id) => !mediaOutputIds.includes(id));
+      return { success: true, data: "Media output successfully removed" };
+    } catch (e: any) {
+      return { success: false, data: e };
+    }
+  }
+
+  public getCacheIds() {
+    return [...this._cache];
   }
 }
 

@@ -88,11 +88,11 @@
 
     touch-action: none;
     user-select: none;
-    cursor: col-resize;
+    cursor: ew-resize;
   }
 
   input:focus {
-    outline: 1px solid #f43e5c;
+    outline: 1px solid rgb(var(--color-primary-500));
   }
 
   label {

@@ -89,6 +89,9 @@ export class OpenAiModel extends Model {
         } else if (error.message.toLocaleLowerCase().includes("provide your api")) {
           response.error = "invalid_api_key";
           response.message = "Open AI API key hasn't been provided.";
+        } else if (error.code === "context_length_exceeded") {
+          response.error = "context_length_exceeded";
+          response.message = "The context length has been exceeded.";
         }
 
         logger.error(error.code);

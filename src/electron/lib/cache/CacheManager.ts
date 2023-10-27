@@ -89,14 +89,13 @@ export class CacheManager {
                 JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
               );
 
-              this.notifyListeners();
+              // this.notifyListeners();
               break;
             case "cache-delete-all":
               this.deleteAssets(Object.keys(this.cache));
               socket.send(
                 JSON.stringify({ success: true, messageId: data.messageId } as CacheResponse)
               );
-              this.notifyListeners();
               break;
             case "cache-subscribe":
               this.listeners.add(socket);
@@ -205,10 +204,15 @@ export class CacheManager {
     return this.cache[cacheUUID];
   }
 
+  getUUIDs(): CacheUUID[] {
+    return Object.keys(this.cache);
+  }
+
   deleteAssets(cacheUUID: CacheUUID[]) {
     for (const uuid of cacheUUID) {
       delete this.cache[uuid];
     }
+    this.notifyListeners();
   }
 
   async export(ids: CacheUUID[]) {

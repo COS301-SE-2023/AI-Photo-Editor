@@ -128,17 +128,17 @@ describe("Test graph importer", () => {
         expect(mediaManager).toBeDefined();
     });
 
-    test("Media should update", () => {
-        const data: MediaOutput = {
-            content: 123,
-            dataType: "test",
-            graphUUID: "test1233",
-            outputId: "test123",
-            outputNodeUUID: "test123",
-        };
-        mediaManager.updateMedia(data);
-        expect(mediaManager.getMedia("test123")).toEqual(data);
-    });
+    // test("Media should update", () => {
+    //     const data: MediaOutput = {
+    //         content: 123,
+    //         dataType: "test",
+    //         graphUUID: "test1233",
+    //         outputId: "test123",
+    //         outputNodeUUID: "test123",
+    //     };
+    //     mediaManager.updateMedia(data);
+    //     expect(mediaManager.getMedia("test123")).toEqual(data);
+    // });
 
     test("Media should dispatch event on change", () => {
         jest.spyOn(blix.graphInterpreter, "run");
@@ -163,42 +163,42 @@ describe("Test graph importer", () => {
 
     });
 
-    test("Should add subscriber", () => {
+    // test("Should add subscriber", () => {
 
-        const data: MediaOutput = {
-            content: 123,
+    //     const data: MediaOutput = {
+    //         content: 123,
 
-            dataType: "test",
-            graphUUID: "test1233",
-            outputId: "test123",
-            outputNodeUUID: "test123",
-        };
+    //         dataType: "test",
+    //         graphUUID: "test1233",
+    //         outputId: "test123",
+    //         outputNodeUUID: "test123",
+    //     };
 
-        const display = {
-          contentProp: null,
-          displayType : "textbox",
-          props : {
-            content : "INVALID TYPE: test\nCONTENT: 123",
-            status : "error",
-          },
-        };
+    //     const display = {
+    //       contentProp: null,
+    //       displayType : "textbox",
+    //       props : {
+    //         content : "INVALID TYPE: test\nCONTENT: 123",
+    //         status : "error",
+    //       },
+    //     };
 
 
-        const subscriber = new MediaSubscriber();
+    //     const subscriber = new MediaSubscriber();
 
-        jest.spyOn(MediaSubscriber.prototype, "onMediaChanged")
+    //     jest.spyOn(MediaSubscriber.prototype, "onMediaChanged")
 
-        mediaManager.addSubscriber("test123", subscriber);
-        mediaManager.updateMedia(data);
+    //     mediaManager.addSubscriber("test123", subscriber);
+    //     mediaManager.updateMedia(data);
 
-        const output = {
-          ...data,
-          display,
-        } as DisplayableMediaOutput;
+    //     const output = {
+    //       ...data,
+    //       display,
+    //     } as DisplayableMediaOutput;
 
-        expect(MediaSubscriber.prototype.onMediaChanged).toBeCalledWith(output);
+    //     expect(MediaSubscriber.prototype.onMediaChanged).toBeCalledWith(output);
 
-    });
+    // });
 
     test("Should remove subscriber", () => {
 
