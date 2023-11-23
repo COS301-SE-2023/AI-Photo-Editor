@@ -1,3 +1,14 @@
+
+> **NOTE**: Blix has been moved to a new repo **[here](https://github.com/BlixEditor/blix)**.
+> 
+> All further development will take place over there. Thanks for the support!
+
+
+
+---
+
+
+
 <p align="center">
 <br />
 <img alt="" src="https://raw.githubusercontent.com/COS301-SE-2023/AI-Photo-Editor/master/docs/pics/blix.svg" width="180px">
